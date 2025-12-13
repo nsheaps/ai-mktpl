@@ -1,0 +1,216 @@
+name: cd
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'plugins/**'
+  pull_request:
+    paths:
+      - 'plugins/**'
+
+concurrency:
+  group: cd-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-version-bump:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check version bumps
+        uses: ./.github/actions/check-version-bump
+        with:
+          base-ref: ${{ github.event.pull_request.base.sha }}
+          head-ref: ${{ github.event.pull_request.head.sha }}
+
+  update-marketplace:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_PAT_TOKEN_NSHEAPS }}
+
+      - name: Update marketplace metadata
+        id: update
+        uses: ./.github/actions/update-marketplace
+
+      - name: Commit marketplace changes
+        if: steps.update.outputs.updated == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+          git add .claude-plugin/marketplace.json
+
+          CHANGED_PLUGINS="${{ steps.update.outputs.changed-plugins }}"
+
+          git commit -m "$(cat <<'EOF'
+          chore: update marketplace metadata [skip ci]
+
+          Updated marketplace.json with latest plugin versions.
+
+          Changed plugins: $CHANGED_PLUGINS
+          EOF
+          )"
+
+          echo "::group::Pushing marketplace changes"
+          set +e
+          RETRY_COUNT=0
+          MAX_RETRIES=4
+          RETRY_DELAY=2
+
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            if git push; then
+              echo "::notice::Successfully pushed marketplace update"
+              break
+            else
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                echo "::warning::Push failed, retrying in ${RETRY_DELAY}s (attempt $RETRY_COUNT/$MAX_RETRIES)"
+                sleep $RETRY_DELAY
+                RETRY_DELAY=$((RETRY_DELAY * 2))
+              else
+                echo "::error::Failed to push after $MAX_RETRIES attempts"
+                exit 1
+              fi
+            fi
+          done
+          echo "::endgroup::"
+
+      - name: Create brew formula
+        if: steps.update.outputs.updated == 'true'
+        id: brew-formula
+        run: |
+          echo "::group::Creating Homebrew formula"
+
+          FORMULA_DIR="Formula"
+          mkdir -p "$FORMULA_DIR"
+
+          REPO_URL="https://github.com/${{ github.repository }}"
+          REPO_NAME="${{ github.event.repository.name }}"
+
+          cat > "$FORMULA_DIR/claude-plugin-marketplace.rb" <<'FORMULA_EOF'
+          class ClaudePluginMarketplace < Formula
+            desc "Claude Code plugin marketplace - community-driven plugins for Claude Code"
+            homepage "https://github.com/${{ github.repository }}"
+            url "https://github.com/${{ github.repository }}/archive/refs/heads/main.tar.gz"
+            version "latest"
+            sha256 :no_check
+
+            def install
+              # This is a meta-formula that doesn't install binaries
+              # Instead, it sets up the marketplace for Claude Code
+              libexec.install Dir["*"]
+
+              # Create setup script
+              (bin/"claude-plugin-marketplace-setup").write <<~EOS
+                #!/bin/bash
+                set -e
+
+                MARKETPLACE_DIR="${HOME}/.claude-code/marketplaces/community"
+                REPO_URL="#{homepage}"
+
+                echo "Setting up Claude Code Plugin Marketplace..."
+
+                if [ -d "$MARKETPLACE_DIR" ]; then
+                  echo "Marketplace already exists at $MARKETPLACE_DIR"
+                  echo "Updating..."
+                  cd "$MARKETPLACE_DIR"
+                  git pull
+                else
+                  echo "Cloning marketplace to $MARKETPLACE_DIR"
+                  mkdir -p "$(dirname "$MARKETPLACE_DIR")"
+                  git clone "$REPO_URL" "$MARKETPLACE_DIR"
+                fi
+
+                echo "✓ Marketplace setup complete!"
+                echo ""
+                echo "Available plugins:"
+                if command -v jq &> /dev/null; then
+                  jq -r '.plugins[] | "  - \\(.name) (v\\(.version)): \\(.description)"' "$MARKETPLACE_DIR/.claude-plugin/marketplace.json"
+                else
+                  echo "  Install jq to see plugin list"
+                fi
+              EOS
+
+              chmod +x bin/"claude-plugin-marketplace-setup"
+            end
+
+            def caveats
+              <<~EOS
+                To set up the Claude Code Plugin Marketplace, run:
+                  claude-plugin-marketplace-setup
+
+                This will clone the marketplace repository to:
+                  #{ENV["HOME"]}/.claude-code/marketplaces/community
+
+                You can then install plugins using Claude Code commands.
+              EOS
+            end
+
+            test do
+              assert_predicate bin/"claude-plugin-marketplace-setup", :exist?
+              assert_predicate bin/"claude-plugin-marketplace-setup", :executable?
+            end
+          end
+          FORMULA_EOF
+
+          # Replace template variables
+          sed -i "s|\${{ github.repository }}|${{ github.repository }}|g" "$FORMULA_DIR/claude-plugin-marketplace.rb"
+
+          echo "::notice::Homebrew formula created at $FORMULA_DIR/claude-plugin-marketplace.rb"
+          echo "::endgroup::"
+
+          cat "$FORMULA_DIR/claude-plugin-marketplace.rb"
+
+      - name: Commit brew formula
+        if: steps.update.outputs.updated == 'true'
+        run: |
+          git add Formula/
+
+          if [ -n "$(git status --porcelain Formula/)" ]; then
+            git commit -m "$(cat <<'EOF'
+          chore: update homebrew formula [skip ci]
+
+          Updated Homebrew formula for marketplace distribution.
+          EOF
+          )"
+
+            echo "::group::Pushing formula"
+            set +e
+            RETRY_COUNT=0
+            MAX_RETRIES=4
+            RETRY_DELAY=2
+
+            while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+              if git push; then
+                echo "::notice::Successfully pushed formula update"
+                break
+              else
+                RETRY_COUNT=$((RETRY_COUNT + 1))
+                if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                  echo "::warning::Push failed, retrying in ${RETRY_DELAY}s (attempt $RETRY_COUNT/$MAX_RETRIES)"
+                  sleep $RETRY_DELAY
+                  RETRY_DELAY=$((RETRY_DELAY * 2))
+                else
+                  echo "::error::Failed to push after $MAX_RETRIES attempts"
+                  exit 1
+                fi
+              fi
+            done
+            echo "::endgroup::"
+          else
+            echo "::notice::No changes to formula"
+          fi

@@ -1,0 +1,54 @@
+name: review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: review-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  claude-review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get PR diff
+        id: diff
+        run: |
+          echo "::group::Fetching PR changes"
+          git fetch origin ${{ github.event.pull_request.base.ref }}
+
+          DIFF_FILE=$(mktemp)
+          git diff origin/${{ github.event.pull_request.base.ref }}...HEAD > "$DIFF_FILE"
+
+          DIFF_SIZE=$(wc -c < "$DIFF_FILE")
+          echo "diff-size=${DIFF_SIZE}" >> $GITHUB_OUTPUT
+
+          if [ $DIFF_SIZE -gt 100000 ]; then
+            echo "::warning::Diff is large (${DIFF_SIZE} bytes), review may be truncated"
+          fi
+
+          echo "::endgroup::"
+
+      - name: Review with Claude Code
+        uses: anthropics/anthropic-quickstarts@main
+        with:
+          mode: review
+          files: |
+            ${{ github.workspace }}
+          api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          pr-number: ${{ github.event.pull_request.number }}
+
+      - name: Summary
+        run: |
+          echo "::notice::Code review completed for PR #${{ github.event.pull_request.number }}"

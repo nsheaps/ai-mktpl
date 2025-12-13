@@ -1,0 +1,126 @@
+name: Lint Files
+description: Lint YAML, JSON, Markdown, TypeScript, JavaScript, and Python files
+
+inputs:
+  fix:
+    description: Whether to auto-fix lint issues
+    required: false
+    default: 'false'
+
+outputs:
+  has-errors:
+    description: Whether lint errors were found
+    value: ${{ steps.lint.outputs.has-errors }}
+  error-count:
+    description: Number of lint errors found
+    value: ${{ steps.lint.outputs.error-count }}
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: |
+          .github/actions/lint-files/package-lock.json
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Install linters
+      shell: bash
+      run: |
+        echo "::group::Installing Node.js linters"
+        cd ${{ github.action_path }}
+        npm ci
+        echo "::endgroup::"
+
+        echo "::group::Installing Python linters"
+        pip install yamllint black flake8 isort
+        echo "::endgroup::"
+
+    - name: Run linters
+      id: lint
+      shell: bash
+      run: |
+        set +e
+        ERROR_COUNT=0
+        HAS_ERRORS=false
+
+        echo "::group::Linting YAML files"
+        yamllint -c ${{ github.action_path }}/yamllint.yaml . || {
+          ERROR_COUNT=$((ERROR_COUNT + $?))
+          HAS_ERRORS=true
+        }
+        echo "::endgroup::"
+
+        echo "::group::Linting JSON files"
+        npx prettier --check "**/*.json" || {
+          if [ "${{ inputs.fix }}" = "true" ]; then
+            npx prettier --write "**/*.json"
+          fi
+          ERROR_COUNT=$((ERROR_COUNT + 1))
+          HAS_ERRORS=true
+        }
+        echo "::endgroup::"
+
+        echo "::group::Linting Markdown files"
+        npx markdownlint-cli2 "**/*.md" "#node_modules" || {
+          if [ "${{ inputs.fix }}" = "true" ]; then
+            npx markdownlint-cli2 --fix "**/*.md" "#node_modules"
+          fi
+          ERROR_COUNT=$((ERROR_COUNT + 1))
+          HAS_ERRORS=true
+        }
+        echo "::endgroup::"
+
+        echo "::group::Linting TypeScript/JavaScript files"
+        if [ -f "package.json" ]; then
+          npx eslint "**/*.{ts,js,tsx,jsx}" --max-warnings 0 || {
+            if [ "${{ inputs.fix }}" = "true" ]; then
+              npx eslint "**/*.{ts,js,tsx,jsx}" --fix || true
+            fi
+            ERROR_COUNT=$((ERROR_COUNT + 1))
+            HAS_ERRORS=true
+          }
+        fi
+        echo "::endgroup::"
+
+        echo "::group::Linting Python files"
+        if find . -name "*.py" -not -path "*/\.*" | grep -q .; then
+          black --check . || {
+            if [ "${{ inputs.fix }}" = "true" ]; then
+              black .
+            fi
+            ERROR_COUNT=$((ERROR_COUNT + 1))
+            HAS_ERRORS=true
+          }
+
+          flake8 . || {
+            ERROR_COUNT=$((ERROR_COUNT + 1))
+            HAS_ERRORS=true
+          }
+
+          isort --check-only . || {
+            if [ "${{ inputs.fix }}" = "true" ]; then
+              isort .
+            fi
+            ERROR_COUNT=$((ERROR_COUNT + 1))
+            HAS_ERRORS=true
+          }
+        fi
+        echo "::endgroup::"
+
+        echo "has-errors=${HAS_ERRORS}" >> $GITHUB_OUTPUT
+        echo "error-count=${ERROR_COUNT}" >> $GITHUB_OUTPUT
+
+        if [ "${HAS_ERRORS}" = "true" ]; then
+          echo "::warning::Found ${ERROR_COUNT} lint issue(s)"
+        else
+          echo "::notice::All files passed linting checks"
+        fi
