@@ -1,0 +1,182 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_PAT_TOKEN_NSHEAPS }}
+
+      - name: Remove old lint comments
+        if: github.event_name == 'pull_request'
+        uses: peter-evans/find-comment@v3
+        id: find-comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: 'Lint Errors'
+
+      - name: Delete old lint comments
+        if: github.event_name == 'pull_request' && steps.find-comment.outputs.comment-id != ''
+        uses: peter-evans/delete-comment@v2
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+
+      - name: Run initial lint check
+        id: initial-lint
+        uses: ./.github/actions/lint-files
+        continue-on-error: true
+
+      - name: Auto-fix lint issues
+        if: steps.initial-lint.outputs.has-errors == 'true'
+        id: fix-lint
+        uses: ./.github/actions/lint-files
+        with:
+          fix: 'true'
+        continue-on-error: true
+
+      - name: Check for changes after fix
+        if: steps.fix-lint.conclusion != 'skipped'
+        id: check-changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "has-changes=true" >> $GITHUB_OUTPUT
+            echo "::notice::Lint fixes were applied"
+          else
+            echo "has-changes=false" >> $GITHUB_OUTPUT
+            echo "::notice::No auto-fixable changes"
+          fi
+
+      - name: Commit and push fixes
+        if: steps.check-changes.outputs.has-changes == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+          git add -A
+
+          git commit -m "$(cat <<'EOF'
+          chore: auto-fix lint issues
+
+          Automatically fixed lint errors found in CI.
+          EOF
+          )"
+
+          echo "::group::Pushing changes"
+          set +e
+          RETRY_COUNT=0
+          MAX_RETRIES=4
+          RETRY_DELAY=2
+
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            if git push; then
+              echo "::notice::Successfully pushed lint fixes"
+              exit 0
+            else
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                echo "::warning::Push failed, retrying in ${RETRY_DELAY}s (attempt $RETRY_COUNT/$MAX_RETRIES)"
+                sleep $RETRY_DELAY
+                RETRY_DELAY=$((RETRY_DELAY * 2))
+              else
+                echo "::error::Failed to push after $MAX_RETRIES attempts"
+                exit 1
+              fi
+            fi
+          done
+          echo "::endgroup::"
+
+      - name: Rerun lint after fixes
+        if: steps.check-changes.outputs.has-changes == 'true'
+        id: rerun-lint
+        uses: ./.github/actions/lint-files
+        continue-on-error: true
+
+      - name: Collect unfixable errors
+        if: steps.rerun-lint.conclusion == 'failure' || (steps.fix-lint.conclusion == 'failure' && steps.check-changes.outputs.has-changes != 'true')
+        id: collect-errors
+        run: |
+          echo "::group::Collecting lint errors"
+
+          ERROR_LOG=$(mktemp)
+
+          # Rerun linters to collect errors
+          yamllint -f parsable . > $ERROR_LOG 2>&1 || true
+          npx prettier --check "**/*.json" >> $ERROR_LOG 2>&1 || true
+          npx markdownlint-cli2 "**/*.md" "#node_modules" >> $ERROR_LOG 2>&1 || true
+
+          if [ -f "package.json" ]; then
+            npx eslint "**/*.{ts,js,tsx,jsx}" >> $ERROR_LOG 2>&1 || true
+          fi
+
+          if find . -name "*.py" -not -path "*/\.*" | grep -q .; then
+            flake8 . >> $ERROR_LOG 2>&1 || true
+          fi
+
+          # Format errors for comment
+          ERRORS=$(cat $ERROR_LOG | head -50)
+
+          if [ -z "$ERRORS" ]; then
+            ERRORS="No specific errors captured, but lint check failed."
+          fi
+
+          # Save to output
+          {
+            echo 'errors<<EOF'
+            echo "$ERRORS"
+            echo 'EOF'
+          } >> $GITHUB_OUTPUT
+
+          echo "::endgroup::"
+
+      - name: Comment unfixable errors on PR
+        if: github.event_name == 'pull_request' && (steps.rerun-lint.conclusion == 'failure' || (steps.fix-lint.conclusion == 'failure' && steps.check-changes.outputs.has-changes != 'true'))
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ## ❌ Lint Errors
+
+            The following lint errors could not be auto-fixed and require manual attention:
+
+            ```
+            ${{ steps.collect-errors.outputs.errors }}
+            ```
+
+            Please fix these errors manually and push your changes.
+
+      - name: Fail if lint errors found
+        if: steps.initial-lint.outputs.has-errors == 'true'
+        run: |
+          echo "::error::Lint errors were found in this PR"
+          if [ "${{ steps.check-changes.outputs.has-changes }}" = "true" ]; then
+            echo "::warning::Some errors were auto-fixed and pushed"
+          fi
+          exit 1
+
+  validate:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate plugin structure
+        uses: ./.github/actions/validate-plugins
