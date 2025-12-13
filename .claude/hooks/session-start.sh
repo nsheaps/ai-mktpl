@@ -3,8 +3,6 @@ set -e
 
 pbe() {
   # pbe print before executing
-  # will shift the args to drop the function name, then print all the args, and then execute it
-  shift
   echo "▶️  $*"
   "$@"
 }
