@@ -7,11 +7,12 @@
 **Name**: Claude Code Plugin Marketplace
 **Purpose**: A curated collection of high-quality plugins for Claude Code, focusing on git automation and intelligent development workflows
 **Owner**: @nsheaps
-**Repository**: https://github.com/nsheaps/.ai
+**Repository**: <https://github.com/nsheaps/.ai>
 
 ## Quick Summary
 
 This is a plugin marketplace for Claude Code that:
+
 - Hosts reusable plugins (slash commands and agent skills)
 - Automates plugin versioning and distribution
 - Provides CI/CD workflows for quality assurance
@@ -70,12 +71,14 @@ This is a plugin marketplace for Claude Code that:
 ## Key Files & Their Purpose
 
 ### Marketplace Files
+
 - **.claude-plugin/marketplace.json**: Central registry of all plugins. **Auto-updated by CD workflow** - DO NOT manually edit unless necessary
 - **plugins/*/​.claude-plugin/plugin.json**: Individual plugin metadata including version numbers
 
 ### CI/CD Workflows
 
 #### ci.yaml (Continuous Integration)
+
 - **Triggers**: PR to any branch, push to main, manual dispatch
 - **Jobs**:
   - `lint`: Multi-language linting with auto-fix
@@ -88,6 +91,7 @@ This is a plugin marketplace for Claude Code that:
   - `validate`: Validates plugin structure and marketplace consistency
 
 #### cd.yaml (Continuous Deployment)
+
 - **Triggers**: Push to main or PR with `plugins/**` changes
 - **Jobs**:
   - `check-version-bump`: Enforces semantic versioning in PRs
@@ -100,6 +104,7 @@ This is a plugin marketplace for Claude Code that:
     - Generates Homebrew formula for distribution
 
 #### review.yaml (Code Review)
+
 - **Triggers**: PR opened/synchronized/reopened
 - **Jobs**: AI-powered code review using Claude Code
 
@@ -128,12 +133,14 @@ This is a plugin marketplace for Claude Code that:
 ### Technology Preferences
 
 **For compiled binaries and complex plugins:**
+
 - ✅ **Prefer Bun** as the runtime (fast, TypeScript-native, all-in-one tooling)
 - ✅ **Prefer TypeScript** for type safety and better developer experience
 - ✅ Use `bun build --compile` for standalone executables
 - ✅ TypeScript provides better IDE support and catches errors early
 
 **Why Bun + TypeScript:**
+
 - Single tool for package management, building, testing, and running
 - Native TypeScript support (no transpilation step needed)
 - Fast startup and execution times
@@ -154,6 +161,7 @@ This is a plugin marketplace for Claude Code that:
 ### Plugin Structure Requirements
 
 Every plugin must have:
+
 - `.claude-plugin/plugin.json` with required fields:
   - `name`: Plugin identifier (lowercase, hyphen-separated)
   - `version`: Semver version (x.y.z)
@@ -171,12 +179,14 @@ Every plugin must have:
 ## Current Plugins
 
 ### commit-command (v1.0.0)
+
 - **Type**: Slash command
 - **Usage**: `/commit [optional prefix]`
 - **Purpose**: AI-generated commit messages matching repo conventions
 - **Location**: plugins/commit-command/
 
 ### commit-skill (v1.0.0)
+
 - **Type**: Agent skill
 - **Activation**: Auto-activates during development tasks
 - **Purpose**: Intelligent commit analysis and creation
@@ -185,6 +195,7 @@ Every plugin must have:
 ## Workflow Behavior
 
 ### When You Open a PR
+
 1. CI lints all files, auto-fixes issues, pushes fixes
 2. CI validates plugin structure
 3. CD checks version bumps if plugins changed
@@ -192,6 +203,7 @@ Every plugin must have:
 5. Lint errors commented on PR if unfixable
 
 ### When You Push to Main
+
 1. CI runs validation
 2. CD updates marketplace.json if plugins changed
 3. CD generates/updates Homebrew formula
@@ -210,6 +222,7 @@ All files owned by: **@nsheaps** (see .github/CODEOWNERS)
 ## Common Tasks & How to Handle Them
 
 ### Adding/Modifying a Plugin
+
 1. ✅ Make changes in `plugins/plugin-name/`
 2. ✅ Bump version in `plugins/plugin-name/.claude-plugin/plugin.json`
 3. ✅ Update plugin README if needed
@@ -218,18 +231,21 @@ All files owned by: **@nsheaps** (see .github/CODEOWNERS)
 6. ❌ DO NOT manually update marketplace.json (auto-synced)
 
 ### Updating CI/CD Workflows
+
 1. ✅ Modify workflow files in `.github/workflows/`
 2. ✅ Test workflow changes
 3. ✅ **Update this AGENTS.md file** with workflow behavior changes
 4. ✅ Update docs/todo.md if adding new tasks
 
 ### Adding Documentation
+
 1. ✅ Update README.md for user-facing docs
 2. ✅ Update relevant plugin READMEs
 3. ✅ **Update this AGENTS.md file** if structure changes
 4. ✅ Add to docs/ for internal documentation
 
 ### Fixing Linting Issues
+
 - Let CI auto-fix when possible
 - If CI comments unfixable errors, address manually
 - Run linters locally before pushing: `yamllint`, `prettier`, `markdownlint-cli2`, `eslint`, `black`, `flake8`
@@ -251,6 +267,7 @@ All files owned by: **@nsheaps** (see .github/CODEOWNERS)
 ### Why This Matters
 
 This file serves as the **source of truth** for AI agents working on this repository. An outdated AGENTS.md leads to:
+
 - ❌ Incorrect assumptions about repository structure
 - ❌ Missed validation requirements
 - ❌ Wrong workflow expectations
@@ -261,6 +278,7 @@ This file serves as the **source of truth** for AI agents working on this reposi
 ## Recent Major Changes
 
 ### 2025-12-13: CI/CD Workflows Added
+
 - Created comprehensive GitHub Actions workflows (ci, cd, review)
 - Added composite actions for linting, validation, version checking
 - Implemented auto-fix for lint issues with PR commenting
@@ -269,6 +287,7 @@ This file serves as the **source of truth** for AI agents working on this reposi
 - Created CODEOWNERS and PR template
 
 ### 2025-12-13: Initial Marketplace Setup
+
 - Created marketplace structure
 - Added commit-command plugin (v1.0.0)
 - Added commit-skill plugin (v1.0.0)
@@ -277,6 +296,7 @@ This file serves as the **source of truth** for AI agents working on this reposi
 ## Future Roadmap
 
 See `docs/todo.md` for detailed roadmap. Key items:
+
 - Claude Code Enterprise Settings Brew formula
 - Additional plugins (auto-test-runner, pr-description-generator, etc.)
 - Plugin marketplace enhancements

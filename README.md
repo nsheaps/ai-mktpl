@@ -5,6 +5,7 @@ A curated collection of high-quality plugins for [Claude Code](https://code.clau
 ## Available Plugins
 
 ### 🚀 [Commit Command Plugin](./plugins/commit-command)
+
 **Type:** Slash Command
 **Category:** Git Automation
 
@@ -20,6 +21,7 @@ Automate git commits with AI-generated messages that match your repository's com
   - Smart file staging
 
 **Installation:**
+
 ```bash
 cd ~/.claude/plugins
 git clone https://github.com/nsheaps/.ai commit-command
@@ -29,6 +31,7 @@ git clone https://github.com/nsheaps/.ai commit-command
 ---
 
 ### 🧠 [Smart Commit Skill](./plugins/commit-skill)
+
 **Type:** Agent Skill
 **Category:** Git Automation
 
@@ -48,6 +51,7 @@ Enables Claude to automatically analyze git changes and create well-formatted co
   - Adapts to repository style
 
 **Installation:**
+
 ```bash
 cd ~/.claude/skills
 git clone https://github.com/nsheaps/.ai commit-skill
@@ -208,6 +212,7 @@ The plugins automatically detect your conventions, but you can guide them:
 ### Sensitive File Patterns
 
 By default, these files are excluded:
+
 - `.env*`
 - `credentials.json`
 - `secrets.yml`
@@ -261,12 +266,14 @@ Add custom patterns via `.gitignore` or specify during commits.
 ## Best Practices
 
 ### For Commands
+
 1. **Review changes** with `git diff` before committing
 2. **Use argument hints** to guide message generation
 3. **Keep commits atomic** - one logical change per commit
 4. **Unstage unwanted files** before running `/commit`
 
 ### For Skills
+
 1. **Let Claude commit naturally** during development
 2. **Provide context** about commit conventions if needed
 3. **Trust the skill** to organize commits logically
@@ -275,21 +282,25 @@ Add custom patterns via `.gitignore` or specify during commits.
 ## Troubleshooting
 
 ### Command not found
+
 - Ensure plugin is installed in `~/.claude/plugins/commit-command`
 - Restart Claude Code
 - Check plugin is enabled in settings
 
 ### Skill not activating
+
 - Verify installation in `~/.claude/skills/commit-skill`
 - Ensure you're in a git repository
 - Check there are changes to commit
 
 ### Messages don't match style
+
 - Make a few manual commits to establish patterns
 - Provide explicit instructions about your conventions
 - The plugins learn from history over time
 
 ### Sensitive files being committed
+
 - Check `.gitignore` configuration
 - Review staged files before commit
 - The plugins automatically exclude common sensitive files

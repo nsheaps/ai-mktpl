@@ -20,12 +20,14 @@ Claude will automatically use this skill when:
 ## What This Skill Enables
 
 ### 1. Intelligent Change Analysis
+
 - Examines staged and unstaged changes semantically
 - Identifies the type of change (feature, fix, refactor, docs, test, etc.)
 - Groups related changes logically
 - Detects breaking changes and significant modifications
 
 ### 2. Convention Detection
+
 - Learns from existing commit history
 - Identifies commit message patterns:
   - Conventional Commits (`feat:`, `fix:`, `docs:`, etc.)
@@ -35,13 +37,16 @@ Claude will automatically use this skill when:
 - Maintains consistency across commits
 
 ### 3. Smart File Staging
+
 - Stages related files together for atomic commits
 - Groups changes by logical functionality
 - Respects `.gitignore` patterns
 - Excludes sensitive files automatically
 
 ### 4. Security-Aware Committing
+
 Claude will **never** commit files that may contain sensitive information:
+
 - Environment files (`.env*`)
 - Credential files (`credentials.json`, `secrets.yml`, `*.pem`, `*.key`)
 - API keys and tokens
@@ -50,7 +55,9 @@ Claude will **never** commit files that may contain sensitive information:
 - SSH keys
 
 ### 5. Semantic Message Generation
+
 Creates commit messages that:
+
 - Accurately describe the changes and their purpose
 - Match your repository's established style
 - Include appropriate scope and context
@@ -60,6 +67,7 @@ Creates commit messages that:
 ## How Claude Uses This Skill
 
 ### Scenario 1: Feature Implementation
+
 ```
 User: "Add user authentication with JWT tokens"
 
@@ -73,6 +81,7 @@ Claude's workflow with this skill:
 ```
 
 ### Scenario 2: Bug Fix
+
 ```
 User: "Fix the null pointer error in payment processing"
 
@@ -86,6 +95,7 @@ Claude's workflow:
 ```
 
 ### Scenario 3: Multi-Part Refactoring
+
 ```
 User: "Refactor the database layer to use repositories"
 
@@ -102,6 +112,7 @@ Claude's workflow:
 ## Skill Capabilities
 
 ### Change Type Detection
+
 Claude can identify and categorize changes as:
 
 - **feat**: New features or functionality
@@ -116,6 +127,7 @@ Claude can identify and categorize changes as:
 - **build**: Build system or external dependency changes
 
 ### Atomic Commit Strategy
+
 The skill helps Claude create focused commits:
 
 - One logical change per commit
@@ -126,6 +138,7 @@ The skill helps Claude create focused commits:
 - Enables better git bisect usage
 
 ### Repository Style Adaptation
+
 Claude learns your preferences:
 
 - Analyzes last 10-20 commits for patterns
@@ -138,6 +151,7 @@ Claude learns your preferences:
 ## Usage Examples
 
 ### Example 1: Automatic Commit During Feature Work
+
 ```
 User: "Implement dark mode toggle in the settings page"
 
@@ -149,6 +163,7 @@ Claude:
 ```
 
 ### Example 2: Multiple Related Commits
+
 ```
 User: "Add user profile page with avatar upload"
 
@@ -160,6 +175,7 @@ Claude creates atomic commits:
 ```
 
 ### Example 3: Bug Fix with Context
+
 ```
 User: "Fix issue #456 - login fails with special characters"
 
@@ -169,6 +185,7 @@ Claude commits: "fix: handle special characters in login (#456)"
 ## Best Practices Followed
 
 ### Commit Message Structure
+
 ```
 <type>[optional scope]: <description>
 
@@ -178,6 +195,7 @@ Claude commits: "fix: handle special characters in login (#456)"
 ```
 
 ### Examples of Well-Formed Messages
+
 - `feat: add user authentication system`
 - `fix: resolve memory leak in image processor`
 - `refactor(api): simplify error handling logic`
@@ -185,6 +203,7 @@ Claude commits: "fix: handle special characters in login (#456)"
 - `test: add unit tests for validation`
 
 ### What Claude Won't Do
+
 - Commit commented-out code without purpose
 - Create commits with generic messages like "update files"
 - Combine unrelated changes in a single commit
@@ -195,6 +214,7 @@ Claude commits: "fix: handle special characters in login (#456)"
 ## Configuration and Customization
 
 ### Repository-Specific Patterns
+
 Claude adapts to your repository's patterns automatically, but you can guide it:
 
 ```
@@ -205,7 +225,9 @@ Claude adapts to your repository's patterns automatically, but you can guide it:
 ```
 
 ### Pre-commit Hook Integration
+
 This skill works seamlessly with pre-commit hooks:
+
 - Respects hook requirements
 - Handles auto-formatting from hooks
 - Retries commits if hooks modify files
@@ -214,6 +236,7 @@ This skill works seamlessly with pre-commit hooks:
 ## Workflow Integration
 
 ### With Pull Requests
+
 ```
 User: "Prepare this work for PR"
 
@@ -226,6 +249,7 @@ Claude:
 ```
 
 ### With Code Review
+
 ```
 Reviewer: "These changes need better commit organization"
 
@@ -239,6 +263,7 @@ Claude:
 ## Technical Details
 
 ### Git Commands Used
+
 - `git status` - Identify changed files
 - `git diff` - Analyze actual changes
 - `git log` - Study commit history and patterns
@@ -246,7 +271,9 @@ Claude:
 - `git commit` - Create commits with generated messages
 
 ### Pattern Recognition
+
 The skill uses AI to:
+
 - Parse commit message structures
 - Identify semantic change types
 - Detect organizational conventions
@@ -254,6 +281,7 @@ The skill uses AI to:
 - Preserve context and references
 
 ### Safety Mechanisms
+
 - Pre-commit validation
 - Sensitive file detection
 - Staged changes verification
@@ -288,6 +316,7 @@ The skill uses AI to:
 ## Learning and Improvement
 
 The skill improves with usage:
+
 - Learns repository-specific conventions over time
 - Adapts to feedback on commit messages
 - Recognizes project-specific patterns
