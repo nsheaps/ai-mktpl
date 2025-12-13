@@ -89,14 +89,14 @@ This is a plugin marketplace for Claude Code that:
 
 ### Claude Code Configuration
 
-- **.claude/settings.json**: Project-level Claude Code settings with SessionStart hooks and environment configuration (checked into git)
-  - Sets NEWPATH environment variable with mise shims and bin directories
-  - Session-start hook converts NEWPATH to PATH to avoid conflicts
-  - Ensures mise-installed tools (gh, node, python, bun) are available
+- **.claude/settings.json**: Project-level Claude Code settings with SessionStart hooks (checked into git)
+  - Runs session-start hook on startup and resume
+  - No environment variable configuration (PATH should not be overridden here)
 - **.claude/settings.local.json**: Personal user settings (gitignored, not tracked)
 - **.claude/hooks/session-start.sh**: Auto-execution script for web sessions
-  - Converts NEWPATH to PATH at session start
-  - Installs mise and tools once per session
+  - Installs mise and tools from .mise.toml once per session
+  - Installs linter dependencies (npm packages)
+  - Tools available via `mise exec` or by activating mise in specific shells
 
 ### Marketplace Files
 
@@ -110,8 +110,8 @@ This is a plugin marketplace for Claude Code that:
   - Auto-installed in web sessions via session-start hook
   - Auto-installed in CI workflows before running jobs
   - Ensures consistent tool versions across environments
-  - NEWPATH set in .claude/settings.json, converted to PATH by hook
-  - Avoids PATH conflicts while ensuring tool availability
+  - Use tools via `mise exec <command>` or activate mise in specific shells
+  - Do NOT set PATH in settings.json - it breaks the shell environment
 
 ### Linting Configuration
 
@@ -382,8 +382,8 @@ This file serves as the **source of truth** for AI agents working on this reposi
   - Updated session-start.sh hook to install mise and tools automatically
   - Updated all CI workflows (ci.yaml, cd.yaml, review.yaml) to use mise
   - Ensures consistent tool versions across local and CI environments
-  - GitHub CLI now available via mise instead of manual installation attempts
-  - Set NEWPATH in .claude/settings.json, converted to PATH by hook to avoid conflicts
+  - GitHub CLI now available via `mise exec gh` or mise activation
+  - **IMPORTANT**: Removed PATH override from settings.json - it broke the shell environment
 
 - **Session Hook Simplification**:
   - Removed context printing, linting checks, and project stats from session-start hook
