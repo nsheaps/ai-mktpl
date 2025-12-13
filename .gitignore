@@ -1,0 +1,69 @@
+# OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-workspace
+*.sublime-project
+
+# Node modules (if using npm)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Build outputs
+dist/
+build/
+out/
+
+# Package manager lock files (optional - keep if needed)
+# package-lock.json
+# yarn.lock
+
+# Coverage reports
+coverage/
+*.lcov
+.nyc_output/
+
+# Testing
+.cache/
+
+# macOS
+._*
+
+# Windows
+ehthumbs.db
+ehthumbs_vista.db
+
+# Linux
+*~
+
+# Backup files
+*.bak
+*.backup
