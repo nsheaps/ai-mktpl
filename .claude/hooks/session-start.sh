@@ -4,6 +4,16 @@ set -e
 # Detect execution environment
 IS_WEB_SESSION="${CLAUDE_CODE_REMOTE:-}"
 
+if [ -n "$CLAUDE_ENV_FILE" ]; then
+  # if PATHMOD is set, modify PATH accordingly
+  if [ -n "$PATHMOD" ]; then
+    echo "export PATH=\"$PATHMOD:\$PATH\"" >> "$CLAUDE_ENV_FILE"
+    echo "✅ Modified PATH"
+    echo "  PATH: $PATH"
+    echo "  CLAUDE_ENV_FILE: $CLAUDE_ENV_FILE"
+  fi
+fi
+
 # Get project directory
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 
