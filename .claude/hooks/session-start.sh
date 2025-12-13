@@ -1,6 +1,14 @@
 #!/bin/bash
 set -e
 
+pbe() {
+  # pbe print before executing
+  # will shift the args to drop the function name, then print all the args, and then execute it
+  shift
+  echo "▶️  $*"
+  "$@"
+}
+
 # Detect execution environment
 IS_WEB_SESSION="${CLAUDE_CODE_REMOTE:-}"
 
@@ -17,6 +25,12 @@ fi
 # Get project directory
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 
+# if the PROJECT_DIR is a git repository, fetch latest changes, and print git status
+if [ -d "$PROJECT_DIR/.git" ]; then
+  pbe git -C "$PROJECT_DIR" fetch
+  pbe git -C "$PROJECT_DIR" status
+fi
+
 # Only run expensive operations in web sessions
 if [ "$IS_WEB_SESSION" = "true" ]; then
   echo "⚙️  Installing session dependencies..."
@@ -32,7 +46,7 @@ if [ "$IS_WEB_SESSION" = "true" ]; then
   # Activate mise and install tools from .mise.toml
   if [ -f "$PROJECT_DIR/.mise.toml" ]; then
     cd "$PROJECT_DIR"
-    mise install -y
+    pbe mise install -y
   fi
 
   echo "✅ Session setup complete"
