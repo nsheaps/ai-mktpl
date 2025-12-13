@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Reload direnv configuration to trigger sync scripts
+# This ensures .ai/ directories are synced to .claude/
+
+set -euo pipefail
+
+# Export direnv changes to current shell
+eval "$(direnv export bash)"
+
+echo "✓ Direnv reloaded - agents and commands synced from .ai/ to .claude/"

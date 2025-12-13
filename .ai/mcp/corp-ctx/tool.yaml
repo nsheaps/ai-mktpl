@@ -1,0 +1,13 @@
+kind: aitkit/Tool
+version: v1alpha1
+metadata:
+  name: corp-ctx # how it will look in mcp.json
+  description: "Gets context from sources in your organization for agents to better understand requests and tasks"
+spec:
+  type: http
+  # passed to bash -c
+  url: https://mcp.grapevine.app/mcp
+  headers:
+    Authorization: ${GRAPEVINE_API_KEY} # like "Authorization: Bearer 1234"
+    User-Agent: grapevine-mcp/1.0
+  

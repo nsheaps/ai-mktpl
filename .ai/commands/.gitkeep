@@ -1,0 +1,2 @@
+# This directory contains the source command definitions
+# Commands are synced to .claude/commands/ via direnv/rc.d scripts

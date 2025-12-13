@@ -1,0 +1,108 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mv:*)",
+      "Bash(git clone:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git rm:*)",
+
+      "Bash(claude mcp:*)",
+      "Bash(claude mcp add:*)",
+      "Bash(claude mcp list:*)",
+      "Bash(MCP_USER=claude npx -y @modelcontextprotocol/inspector:*)",
+
+      "mcp__slack__slack_list_channels",
+      "mcp__slack__slack_get_channel_history",
+      "mcp__slack__slack_get_thread_replies",
+      "mcp__slack__slack_get_users",
+      "mcp__slack__slack_get_user_profile",
+
+      "mcp__sequential-thinking__sequentialthinking",
+
+      "mcp__linear__linear_get_user_issues",
+      "mcp__linear__introspect-schema",
+
+      "mcp__notion__API-get-user",
+      "mcp__notion__API-get-users",
+      "mcp__notion__API-get-self",
+      "mcp__notion__API-post-database-query",
+      "mcp__notion__API-post-search",
+      "mcp__notion__API-get-block-children",
+      "mcp__notion__API-retrieve-a-block",
+      "mcp__notion__API-retrieve-a-page",
+      "mcp__notion__API-retrieve-a-database",
+      "mcp__notion__API-retrieve-a-page-property",
+      "mcp__notion__API-retrieve-a-comment",
+
+      "mcp__organization-context__get_document",
+      "mcp__organization-context__get_documents",
+      "mcp__organization-context__get_document_metadata",
+      "mcp__organization-context__get_document_id_patterns",
+      "mcp__organization-context__keyword_search",
+      "mcp__organization-context__semantic_search",
+      "mcp__organization-context__summarize",
+
+      "mcp__serena__activate_project",
+      "mcp__serena__check_onboarding_performed",
+      "mcp__serena__onboarding",
+      "mcp__serena__list_dir",
+      "mcp__serena__find_file",
+      "mcp__serena__search_for_pattern",
+      "mcp__serena__get_symbols_overview",
+      "mcp__serena__find_symbol",
+      "mcp__serena__find_referencing_symbols",
+      "mcp__serena__replace_symbol_body",
+      "mcp__serena__insert_after_symbol",
+      "mcp__serena__insert_before_symbol",
+      "mcp__serena__write_memory",
+      "mcp__serena__read_memory",
+      "mcp__serena__list_memories",
+      "mcp__serena__delete_memory",
+      "mcp__serena__think_about_collected_information",
+      "mcp__serena__think_about_task_adherence",
+      "mcp__serena__think_about_whether_you_are_done",
+
+      "mcp__memory__add_observations",
+      "mcp__memory__create_entities",
+      "mcp__memory__create_relations",
+      "mcp__memory__delete_entities",
+      "mcp__memory__delete_observations",
+      "mcp__memory__delete_relations",
+      "mcp__memory__read_graph",
+      "mcp__memory__search_nodes",
+      "mcp__memory__open_nodes",
+
+      "mcp__aitkit-memory__open_nodes",
+
+      "WebFetch(domain:forecast.weather.gov)",
+      "WebFetch(domain:weather.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:www.npmjs.com)",
+      "WebFetch(domain:buildermethods.com)",
+      "WebSearch",
+
+      "Read(//Users/nheaps/src/claude-code-sessions/**)",
+
+      "Bash(bin/reload-direnv:*)",
+      "Bash(chmod:*)",
+      "Bash(cp:*)",
+      "Bash(direnv reload:*)",
+      "Bash(find:*)",
+      "Bash(git log:*)",
+      "Bash(go build:*)",
+      "Bash(go mod:*)",
+      "Bash(go test:*)",
+      "Bash(grep:*)",
+      "Bash(mkdir:*)"
+    ],
+    "deny": [
+      "Bash(git add .)"
+    ],
+    "additionalDirectories": [
+      "/Users/nheaps/src/claude-code-sessions/"
+    ]
+  },
+  "enableAllProjectMcpServers": true
+}

@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+
+export CLAUDE_CODE_ENABLE_TELEMETRY="1"
+export OTEL_METRICS_EXPORTER="otlp"
+export OTEL_LOGS_EXPORTER="otlp"
+export OTEL_CLI_VERBOSE="true"
+export OTEL_SERVICE_NAME="claude-code-local"
+export OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://otlp.nr-data.net:4317"
+export OTEL_METRIC_EXPORT_INTERVAL="10000"
+export OTEL_LOGS_EXPORT_INTERVAL="5000"
+
+
+# get the users organization from ~/.claude.json
+ORG_NAME="$(jq -r '.oauthAccount.organizationName' "$HOME/.claude.json" 2>/dev/null || echo 'default')"
+# convert @, spaces to dashes
+ORG_NAME="${ORG_NAME//@/-}"
+ORG_NAME="${ORG_NAME// /-}"
+# remove ., ' and " characters
+ORG_NAME="${ORG_NAME//./}"
+ORG_NAME="${ORG_NAME//\'/}"
+ORG_NAME="${ORG_NAME//\"/}"
+
+export OTEL_RESOURCE_ATTRIBUTES="user.organizationName=${ORG_NAME},agent.session=local"
+
+# find the original claude binary by removing the parent folder from
+# the path before executing it
+# 1. split by :
+# 2. remove the entry that matches the parent directory of this script
+# 3. join back with :
+PATH_WITHOUT_THIS_DIR="$(echo "$PATH" | tr ':' '\n' | grep -v "$(dirname "$(dirname "$(realpath "$0")")")" | tr '\n' ':')"
+ORIGINAL_CLAUDE="$(PATH="${PATH_WITHOUT_THIS_DIR}" command -v claude)"
+ARGS=("$@")
+COMMAND_TO_RUN="$(cat <<EOF
+echo TRACEPARENT=\$TRACEPARENT
+echo "OTEL_RESOURCE_ATTRIBUTES=\$OTEL_RESOURCE_ATTRIBUTES"
+"$ORIGINAL_CLAUDE" $(printf "%q " "${ARGS[@]}")
+npx -y --package ccusage@latest -- ccusage session --breakdown
+
+EOF
+)"
+# TODO this shouldn't be a session, a session should be defined by user prompt -> stop (not subagent stop) when run locally
+exec doppler run -p 'mcp' -c "user_${MCP_USER:-$USER}" -- \
+  otel-cli exec --service "claude-code-local" --name "session" -- \
+    bash -c "$COMMAND_TO_RUN"

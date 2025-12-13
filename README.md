@@ -378,6 +378,3 @@ Built for the Claude Code community with ❤️
 - [Agent Skills Guide](https://code.claude.com/docs/en/skills)
 - [Conventional Commits](https://www.conventionalcommits.org/)
 
----
-
-**Made with Claude Code** | **Star this repo** ⭐ if you find it useful!

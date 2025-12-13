@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "slack": {
+      "command": "bin/mcp/slack.sh"
+    },
+    "sequential-thinking": {
+      "command": "bin/mcp/sequential-thinking.sh"
+    },
+    "notion": {
+      "command": "bin/mcp/notion.sh"
+    },
+    "linear": {
+      "command": "bin/mcp/linear.sh"
+    },
+    "serena": {
+      "command": "bin/mcp/serena.sh"
+    },
+    "memory": {
+      "command": "bin/mcp/memory.sh"
+    }
+  }
+}

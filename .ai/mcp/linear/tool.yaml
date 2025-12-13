@@ -1,0 +1,10 @@
+kind: aitkit/Tool
+version: v1alpha1
+metadata:
+  name: linear # how it will look in mcp.json
+  description: "Linear integration for AI agents"
+spec:
+  # type: http
+  # url: https://mcp.linear.app/mcp
+  type: sse
+  url: https://mcp.linear.app/sse

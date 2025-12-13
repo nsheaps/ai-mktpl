@@ -1,0 +1,12 @@
+kind: aitkit/Tool
+version: v1alpha1
+metadata:
+  name: slack # how it will look in mcp.json
+  description: "Slack integration for AI agents"
+spec:
+  type: stdio
+  # passed to bash -c
+  command: |
+    npx -y @zencoderai/slack-mcp-server
+  env:
+    SLACK_BOT_TOKEN: ${SLACK_BOT_TOKEN}

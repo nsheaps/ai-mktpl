@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+# Run claude-monitor with all passed arguments
+exec uvx --from=claude-monitor@latest claude-monitor "$@"
