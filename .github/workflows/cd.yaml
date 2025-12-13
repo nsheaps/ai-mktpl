@@ -1,6 +1,6 @@
 name: cd
 
-on:
+'on':
   push:
     branches:
       - main
@@ -139,7 +139,8 @@ jobs:
                 echo ""
                 echo "Available plugins:"
                 if command -v jq &> /dev/null; then
-                  jq -r '.plugins[] | "  - \\(.name) (v\\(.version)): \\(.description)"' "$MARKETPLACE_DIR/.claude-plugin/marketplace.json"
+                  jq -r '.plugins[] | "  - \\(.name) (v\\(.version)): \\(.description)"' \
+                    "$MARKETPLACE_DIR/.claude-plugin/marketplace.json"
                 else
                   echo "  Install jq to see plugin list"
                 fi

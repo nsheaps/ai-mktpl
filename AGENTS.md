@@ -99,7 +99,8 @@ This is a plugin marketplace for Claude Code that:
 
 ### Linting Configuration
 
-- **.markdownlint-cli2.jsonc**: Markdown linting rules (line length: 300, disabled strict rules for docs)
+- **.markdownlint-cli2.jsonc**: Markdown linting rules (line length: 300, disabled strict rules for docs, excludes node_modules)
+- **.github/actions/lint-files/yamllint.yaml**: YAML linting rules (line length: 120 warning, allows 'on'/'off' truthy values, excludes node_modules)
 
 ### CI/CD Workflows
 
@@ -311,6 +312,19 @@ This file serves as the **source of truth** for AI agents working on this reposi
 
 ## Recent Major Changes
 
+### 2025-12-13: Linting Configuration Fixes
+
+- **YAML Linting Fixes**:
+  - Fixed truthy warnings by quoting `on:` as `'on':` in all workflow files (ci.yaml, cd.yaml, review.yaml)
+  - Updated yamllint.yaml to exclude node_modules and allow 'on'/'off' truthy values
+  - Fixed line-too-long warnings in workflow and action files using multiline YAML syntax
+
+- **Markdown Linting Fixes**:
+  - Fixed MD036 warning in skills-maintenance/SKILL.md (emphasis used instead of heading)
+  - Verified .markdownlint-cli2.jsonc properly excludes node_modules
+
+- **All linters now pass**: YAML, JSON, Markdown all pass with zero errors
+
 ### 2025-12-13: Claude Code Web Support & Skills Maintenance
 
 - **Added Claude Code Configuration**:
@@ -361,6 +375,6 @@ See `docs/todo.md` for detailed roadmap. Key items:
 
 **Last Updated**: 2025-12-13
 **Last Updated By**: AI Agent (Claude)
-**Update Reason**: Added Claude Code web support, skills-maintenance plugin, and linting configuration
+**Update Reason**: Fixed all linting errors (YAML truthy warnings, line-too-long issues, Markdown formatting)
 
 > **Remember**: Update this file after every significant change to the repository!

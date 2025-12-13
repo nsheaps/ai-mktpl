@@ -108,9 +108,12 @@ runs:
           fi
 
           # Validate marketplace version matches plugin version
-          MARKETPLACE_VERSION=$(jq -r ".plugins[] | select(.name == \"$plugin\") | .version" .claude-plugin/marketplace.json)
+          MARKETPLACE_VERSION=$(jq -r \
+            ".plugins[] | select(.name == \"$plugin\") | .version" \
+            .claude-plugin/marketplace.json)
           if [ "$PLUGIN_VERSION" != "$MARKETPLACE_VERSION" ]; then
-            echo "::error::Version mismatch for $plugin: plugin.json=$PLUGIN_VERSION, marketplace.json=$MARKETPLACE_VERSION"
+            echo "::error::Version mismatch for $plugin: " \
+              "plugin.json=$PLUGIN_VERSION, marketplace.json=$MARKETPLACE_VERSION"
             VALID=false
             ERRORS="${ERRORS}Version mismatch: $plugin\n"
           else
