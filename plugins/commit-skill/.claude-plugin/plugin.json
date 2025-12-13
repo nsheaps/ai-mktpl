@@ -1,0 +1,14 @@
+{
+  "name": "commit-skill",
+  "version": "1.0.0",
+  "description": "Intelligent skill that enables Claude to automatically analyze git changes and create well-formatted commits during development",
+  "author": {
+    "name": "Claude Code Community",
+    "email": "community@example.com",
+    "url": "https://github.com/nsheaps/.ai"
+  },
+  "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/commit-skill",
+  "repository": "https://github.com/nsheaps/.ai",
+  "license": "MIT",
+  "keywords": ["git", "commit", "skill", "automation", "ai", "smart-commit"]
+}

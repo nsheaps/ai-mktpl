@@ -1,0 +1,37 @@
+{
+  "name": "claude-code-plugin-marketplace",
+  "owner": {
+    "name": "Claude Code Community",
+    "email": "community@example.com"
+  },
+  "metadata": {
+    "description": "Community-driven marketplace for Claude Code plugins featuring git automation and commit management",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "commit-command",
+      "description": "Automate git commits with AI-generated messages matching your repository style",
+      "version": "1.0.0",
+      "author": {
+        "name": "Claude Code Community"
+      },
+      "source": "./plugins/commit-command",
+      "category": "git",
+      "tags": ["git", "automation", "commit", "workflow"],
+      "keywords": ["git", "commit", "automation", "ai-generated", "conventional-commits"]
+    },
+    {
+      "name": "commit-skill",
+      "description": "Intelligent skill for automatic commit analysis and creation during development",
+      "version": "1.0.0",
+      "author": {
+        "name": "Claude Code Community"
+      },
+      "source": "./plugins/commit-skill",
+      "category": "git",
+      "tags": ["git", "skill", "ai", "automation"],
+      "keywords": ["git", "commit", "skill", "smart-commit", "auto-commit"]
+    }
+  ]
+}

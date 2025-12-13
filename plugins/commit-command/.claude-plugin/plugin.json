@@ -1,0 +1,14 @@
+{
+  "name": "commit-command",
+  "version": "1.0.0",
+  "description": "Automate git commits with AI-generated messages that match your repository's commit style and conventions",
+  "author": {
+    "name": "Claude Code Community",
+    "email": "community@example.com",
+    "url": "https://github.com/nsheaps/.ai"
+  },
+  "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/commit-command",
+  "repository": "https://github.com/nsheaps/.ai",
+  "license": "MIT",
+  "keywords": ["git", "commit", "automation", "conventional-commits", "semantic-commit"]
+}
