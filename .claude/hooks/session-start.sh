@@ -25,26 +25,14 @@ if [ "$IS_WEB_SESSION" = "true" ]; then
   if ! command -v mise &> /dev/null; then
     echo "📦 Installing mise..."
     curl https://mise.run | sh
-    export PATH="$HOME/.local/bin:$PATH"
+    eval "$(mise activate bash)"
+    echo 'eval "$(mise activate bash)"' >> "$CLAUDE_ENV_FILE"
   fi
 
   # Activate mise and install tools from .mise.toml
   if [ -f "$PROJECT_DIR/.mise.toml" ]; then
     cd "$PROJECT_DIR"
-    eval "$(mise activate bash)"
-    mise install -y 2>&1 | grep -v "mise" | head -20 || true
-  fi
-
-  # Install linter dependencies
-  if [ -f "$PROJECT_DIR/.github/actions/lint-files/package.json" ]; then
-    cd "$PROJECT_DIR/.github/actions/lint-files"
-    npm install --omit=dev 2>&1 | grep -v "npm WARN" || true
-    cd "$PROJECT_DIR"
-  fi
-
-  # Run any custom setup script
-  if [ -f "$PROJECT_DIR/scripts/install-dependencies.sh" ]; then
-    bash "$PROJECT_DIR/scripts/install-dependencies.sh"
+    mise install -y
   fi
 
   echo "✅ Session setup complete"
