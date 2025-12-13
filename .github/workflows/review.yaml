@@ -1,6 +1,6 @@
 name: review
 
-on:
+'on':
   pull_request:
     types: [opened, synchronize, reopened]
 

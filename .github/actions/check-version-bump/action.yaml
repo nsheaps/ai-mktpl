@@ -74,7 +74,8 @@ runs:
           CURRENT_VERSION=$(jq -r '.version' "$PLUGIN_JSON")
 
           # Get version from base ref
-          BASE_VERSION=$(git show ${{ inputs.base-ref }}:$PLUGIN_JSON 2>/dev/null | jq -r '.version' 2>/dev/null || echo "0.0.0")
+          BASE_VERSION=$(git show ${{ inputs.base-ref }}:$PLUGIN_JSON 2>/dev/null | \
+            jq -r '.version' 2>/dev/null || echo "0.0.0")
 
           echo "  Current version: $CURRENT_VERSION"
           echo "  Base version: $BASE_VERSION"
@@ -113,7 +114,9 @@ runs:
               VERSION_VALID=true
             elif [ "$CURRENT_MAJOR" -eq "$BASE_MAJOR" ] && [ "$CURRENT_MINOR" -gt "$BASE_MINOR" ]; then
               VERSION_VALID=true
-            elif [ "$CURRENT_MAJOR" -eq "$BASE_MAJOR" ] && [ "$CURRENT_MINOR" -eq "$BASE_MINOR" ] && [ "$CURRENT_PATCH" -gt "$BASE_PATCH" ]; then
+            elif [ "$CURRENT_MAJOR" -eq "$BASE_MAJOR" ] && \
+                 [ "$CURRENT_MINOR" -eq "$BASE_MINOR" ] && \
+                 [ "$CURRENT_PATCH" -gt "$BASE_PATCH" ]; then
               VERSION_VALID=true
             fi
 

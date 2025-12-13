@@ -517,4 +517,4 @@ Keep these handy when maintaining skills:
 - **Reference official docs**: Don't guess - use authoritative sources
 - **Think about activation**: Most skill issues are activation-related
 
-**Happy maintaining! 🛠️**
+Happy maintaining! 🛠️

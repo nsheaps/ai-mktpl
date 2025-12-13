@@ -1,6 +1,6 @@
 name: ci
 
-on:
+'on':
   pull_request:
   push:
     branches:
@@ -110,7 +110,10 @@ jobs:
         continue-on-error: true
 
       - name: Collect unfixable errors
-        if: steps.rerun-lint.conclusion == 'failure' || (steps.fix-lint.conclusion == 'failure' && steps.check-changes.outputs.has-changes != 'true')
+        if: >-
+          steps.rerun-lint.conclusion == 'failure' ||
+          (steps.fix-lint.conclusion == 'failure' &&
+          steps.check-changes.outputs.has-changes != 'true')
         id: collect-errors
         run: |
           echo "::group::Collecting lint errors"
@@ -147,7 +150,11 @@ jobs:
           echo "::endgroup::"
 
       - name: Comment unfixable errors on PR
-        if: github.event_name == 'pull_request' && (steps.rerun-lint.conclusion == 'failure' || (steps.fix-lint.conclusion == 'failure' && steps.check-changes.outputs.has-changes != 'true'))
+        if: >-
+          github.event_name == 'pull_request' &&
+          (steps.rerun-lint.conclusion == 'failure' ||
+          (steps.fix-lint.conclusion == 'failure' &&
+          steps.check-changes.outputs.has-changes != 'true'))
         uses: peter-evans/create-or-update-comment@v4
         with:
           issue-number: ${{ github.event.pull_request.number }}
