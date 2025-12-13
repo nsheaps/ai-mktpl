@@ -322,10 +322,6 @@ Contributions welcome! Please:
 3. Make your changes
 4. Submit a pull request
 
-## License
-
-MIT License - see [LICENSE](../../LICENSE)
-
 ## Changelog
 
 ### Version 1.0.0

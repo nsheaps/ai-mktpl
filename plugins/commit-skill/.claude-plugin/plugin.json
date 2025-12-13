@@ -9,6 +9,5 @@
   },
   "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/commit-skill",
   "repository": "https://github.com/nsheaps/.ai",
-  "license": "MIT",
   "keywords": ["git", "commit", "skill", "automation", "ai", "smart-commit"]
 }

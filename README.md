@@ -363,10 +363,6 @@ Documentation about activation and capabilities...
 - [ ] Release automation skill
 - [ ] Git history analyzer
 
-## License
-
-MIT License - see [LICENSE](./LICENSE) file for details
-
 ## Acknowledgments
 
 Built for the Claude Code community with ❤️
