@@ -185,6 +185,21 @@ This is a plugin marketplace for Claude Code that:
 - ❌ Bad: Create helpers and abstractions for one-time operations
 - ✅ Good: Write the code inline - three similar lines is better than a premature abstraction
 
+**Exception:** When the user **explicitly plans for future expansion** where the system is actually needed and the current implementation is just the first of many, then building for extensibility makes sense. Otherwise, KISS.
+
+### YAGNI: You Ain't Gonna Need It
+
+**Don't build things you don't need yet:**
+
+- ❌ Don't add features "because we might need them later"
+- ❌ Don't build infrastructure for future use cases
+- ❌ Don't create configuration options for things that aren't configurable yet
+- ✅ Build exactly what's needed today
+- ✅ Add features when you actually need them, not before
+- ✅ Trust that you can refactor later when requirements are clear
+
+**Remember:** The code you don't write has zero bugs, zero maintenance cost, and zero complexity.
+
 ### Technology Preferences
 
 **For compiled binaries and complex plugins:**
