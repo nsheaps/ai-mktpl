@@ -33,16 +33,32 @@ fi
 if [ "$IS_WEB_SESSION" = "true" ]; then
   echo "⚙️  Installing session dependencies..."
 
-  # Install mise (tool version manager)
+  # Install mise (tool version manager) if not already available
   if ! command -v mise &> /dev/null; then
     echo "📦 Installing mise..."
-    curl https://mise.run | sh
+    # Download from GitHub releases instead of mise.run (avoids proxy issues)
+    MISE_VERSION="2024.12.16"
+    MISE_URL="https://github.com/jdx/mise/releases/download/v${MISE_VERSION}/mise-v${MISE_VERSION}-linux-x64"
+    mkdir -p "$HOME/.local/bin"
+
+    if curl -fsSL "$MISE_URL" -o "$HOME/.local/bin/mise" 2>/dev/null; then
+      chmod +x "$HOME/.local/bin/mise"
+      export PATH="$HOME/.local/bin:$PATH"
+      eval "$(mise activate bash)"
+      echo 'eval "$(mise activate bash)"' >> "$CLAUDE_ENV_FILE"
+      echo "✅ mise installed successfully"
+    else
+      echo "⚠️  mise installation failed (network restricted)"
+      echo "   Tools from .mise.toml will not be available"
+    fi
+  else
+    # mise already available, activate it
     eval "$(mise activate bash)"
     echo 'eval "$(mise activate bash)"' >> "$CLAUDE_ENV_FILE"
   fi
 
-  # Activate mise and install tools from .mise.toml
-  if [ -f "$PROJECT_DIR/.mise.toml" ]; then
+  # Activate mise and install tools from .mise.toml (if mise is available)
+  if command -v mise &> /dev/null && [ -f "$PROJECT_DIR/.mise.toml" ]; then
     cd "$PROJECT_DIR"
     pbe mise install -y
   fi
