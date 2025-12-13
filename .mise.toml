@@ -3,13 +3,15 @@
 gh = "latest"
 
 # Node.js for running JavaScript/TypeScript tools
-node = "22"
+node = "lts"
 
 # Python for running Python linters
 python = "3.12"
 
 # Bun for TypeScript compilation and package management
 bun = "latest"
+
+curl = "latest"
 
 [settings]
 # Use shorter paths for tools
