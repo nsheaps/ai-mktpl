@@ -40,6 +40,8 @@
       "WebFetch(domain:claude.ai)",
       "WebFetch(domain:*.claude.ai)",
       "WebFetch(domain:code.visualstudio.com)",
+      "WebFetch(domain:mise.run)",
+      "WebFetch(domain:*.mise.run)",
       "Bash(git log:*)",
       "Bash(git diff:*)",
       "Bash(git status:*)",
