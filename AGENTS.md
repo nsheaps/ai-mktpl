@@ -90,7 +90,7 @@ This is a plugin marketplace for Claude Code that:
 
 - **.claude/settings.json**: Project-level Claude Code settings with SessionStart hooks (checked into git)
 - **.claude/settings.local.json**: Personal user settings (gitignored, not tracked)
-- **.claude/hooks/session-start.sh**: Auto-execution script for web sessions - installs dependencies, loads context
+- **.claude/hooks/session-start.sh**: Auto-execution script for web sessions - installs dependencies, runs linters, loads context
 
 ### Marketplace Files
 
@@ -317,6 +317,7 @@ This file serves as the **source of truth** for AI agents working on this reposi
   - Created .claude/settings.json with SessionStart hooks
   - Created .claude/hooks/session-start.sh for web session setup
   - Auto-installs dependencies for Claude Code on the web
+  - Runs linters automatically to catch issues before CI
   - Loads project context and displays available commands
 
 - **Added skills-maintenance plugin (v1.0.0)**:
