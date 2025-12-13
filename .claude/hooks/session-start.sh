@@ -7,6 +7,11 @@ IS_WEB_SESSION="${CLAUDE_CODE_REMOTE:-}"
 # Get project directory
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 
+# Set up PATH from NEWPATH if available
+if [ -n "$NEWPATH" ]; then
+  export PATH="$NEWPATH"
+fi
+
 # Only run expensive operations in web sessions
 if [ "$IS_WEB_SESSION" = "true" ]; then
   echo "⚙️  Installing session dependencies..."
