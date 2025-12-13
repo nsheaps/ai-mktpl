@@ -21,6 +21,16 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install mise
+        run: |
+          curl https://mise.run | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Install tools via mise
+        run: |
+          eval "$(mise activate bash)"
+          mise install -y
+
       - name: Get PR diff
         id: diff
         run: |

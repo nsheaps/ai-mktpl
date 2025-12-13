@@ -1,0 +1,16 @@
+[tools]
+# GitHub CLI for interacting with GitHub from command line
+gh = "latest"
+
+# Node.js for running JavaScript/TypeScript tools
+node = "22"
+
+# Python for running Python linters
+python = "3.12"
+
+# Bun for TypeScript compilation and package management
+bun = "latest"
+
+[settings]
+# Use shorter paths for tools
+legacy_version_file = false

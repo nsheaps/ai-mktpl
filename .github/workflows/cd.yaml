@@ -24,6 +24,16 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install mise
+        run: |
+          curl https://mise.run | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Install tools via mise
+        run: |
+          eval "$(mise activate bash)"
+          mise install -y
+
       - name: Check version bumps
         uses: ./.github/actions/check-version-bump
         with:
@@ -41,6 +51,16 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_PAT_TOKEN_NSHEAPS }}
+
+      - name: Install mise
+        run: |
+          curl https://mise.run | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Install tools via mise
+        run: |
+          eval "$(mise activate bash)"
+          mise install -y
 
       - name: Update marketplace metadata
         id: update
