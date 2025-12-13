@@ -167,6 +167,24 @@ This is a plugin marketplace for Claude Code that:
 
 ## Plugin Development Guidelines
 
+### CRITICAL: Keep It Simple, Stupid (KISS)
+
+**Always start with the simplest possible implementation:**
+
+1. ✅ **Simple first, complex later** - Start with basic functionality, add features only when needed
+2. ✅ **Avoid over-engineering** - Don't add abstraction layers, configuration, or flexibility until you need them
+3. ✅ **Solve the immediate problem** - Don't design for hypothetical future requirements
+4. ✅ **Prefer clarity over cleverness** - Code should be obvious, not impressive
+5. ✅ **Question every feature** - Does this solve a real problem today, or is it "nice to have"?
+
+**Examples:**
+- ❌ Bad: Build a configurable, extensible framework for handling one use case
+- ✅ Good: Write a simple script that solves the one use case
+- ❌ Bad: Add feature flags, backwards compatibility, and migration paths
+- ✅ Good: Just change the code - it's a marketplace, not production infrastructure
+- ❌ Bad: Create helpers and abstractions for one-time operations
+- ✅ Good: Write the code inline - three similar lines is better than a premature abstraction
+
 ### Technology Preferences
 
 **For compiled binaries and complex plugins:**
