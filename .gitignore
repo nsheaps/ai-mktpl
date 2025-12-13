@@ -28,6 +28,9 @@ yarn-error.log*
 .env.development
 .env.production
 
+# Claude Code personal settings
+.claude/settings.local.json
+
 # Logs
 logs/
 *.log
