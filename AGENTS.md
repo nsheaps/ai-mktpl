@@ -89,9 +89,12 @@ This is a plugin marketplace for Claude Code that:
 
 ### Claude Code Configuration
 
-- **.claude/settings.json**: Project-level Claude Code settings with SessionStart hooks (checked into git)
+- **.claude/settings.json**: Project-level Claude Code settings with SessionStart hooks and environment configuration (checked into git)
+  - Configures PATH to include mise shims and bin directories
+  - Ensures mise-installed tools (gh, node, python, bun) are available in all shells
+  - No need to run `mise activate` or `mise exec` - tools work automatically
 - **.claude/settings.local.json**: Personal user settings (gitignored, not tracked)
-- **.claude/hooks/session-start.sh**: Auto-execution script for web sessions - installs dependencies, runs linters, loads context
+- **.claude/hooks/session-start.sh**: Auto-execution script for web sessions - installs mise and tools once at session start
 
 ### Marketplace Files
 
@@ -105,7 +108,8 @@ This is a plugin marketplace for Claude Code that:
   - Auto-installed in web sessions via session-start hook
   - Auto-installed in CI workflows before running jobs
   - Ensures consistent tool versions across environments
-  - Replaces manual installation of gh CLI and other tools
+  - PATH configured in .claude/settings.json for automatic availability
+  - Tools work in all shells without needing `mise activate` or `mise exec`
 
 ### Linting Configuration
 
@@ -377,6 +381,7 @@ This file serves as the **source of truth** for AI agents working on this reposi
   - Updated all CI workflows (ci.yaml, cd.yaml, review.yaml) to use mise
   - Ensures consistent tool versions across local and CI environments
   - GitHub CLI now available via mise instead of manual installation attempts
+  - Configured PATH in .claude/settings.json so tools work automatically without `mise activate`
 
 - **Session Hook Simplification**:
   - Removed context printing, linting checks, and project stats from session-start hook
