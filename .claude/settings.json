@@ -1,0 +1,23 @@
+{
+  "includeCoAuthoredBy": false,
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:cursor.com)",
+      "WebFetch(domain:www.anthropic.com)",
+      "WebFetch(domain:platform.claude.com)",
+      "WebFetch(domain:code.visualstudio.com)",
+      "Bash(pnpm lint:tsc:*)",
+      "Bash(pnpm lint:eslint:*)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git status:*)",
+      "Bash(brew search:*)",
+      "Bash(brew info:*)",
+      "Bash(man:*)"
+    ],
+    "deny": ["Bash(rm -rf /:*)"],
+    "ask": ["Bash(rm -rf .:*)"]
+  }
+}
