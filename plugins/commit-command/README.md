@@ -121,6 +121,7 @@ The plugin works out of the box with sensible defaults, but adapts to your prefe
 ### Commit Message Conventions
 
 The plugin detects and adapts to:
+
 - **Conventional Commits**: `type(scope): description`
 - **Issue References**: `#123`, `[JIRA-456]`, `Fixes #789`
 - **Custom Formats**: Learns from your existing commits
@@ -130,6 +131,7 @@ The plugin detects and adapts to:
 ### Sensitive File Exclusion
 
 Automatically excludes:
+
 - `.env*` files
 - `credentials.json`
 - `secrets.yml`
@@ -179,6 +181,7 @@ git push
 **Problem**: `/commit` command doesn't work
 
 **Solutions**:
+
 - Verify plugin is in `~/.claude/plugins/commit-command/`
 - Restart Claude Code
 - Check plugin is enabled in settings
@@ -188,6 +191,7 @@ git push
 **Problem**: "No changes to commit" message
 
 **Solutions**:
+
 - Run `git status` to verify you have modifications
 - Ensure files aren't in .gitignore
 - Check you're in a git repository
@@ -197,6 +201,7 @@ git push
 **Problem**: Generated messages don't follow your conventions
 
 **Solutions**:
+
 - Make a few manual commits to establish patterns
 - Use argument hints to guide generation
 - Specify your convention explicitly: "Use Conventional Commits format"
@@ -206,6 +211,7 @@ git push
 **Problem**: Warning about sensitive files
 
 **Solutions**:
+
 - Add files to `.gitignore`
 - Review and verify files are safe to commit
 - Use `git add` to explicitly stage specific files
@@ -264,6 +270,7 @@ git add test/auth.test.js
 ## Allowed Tools
 
 The command uses these tools:
+
 - `Bash(git add:*)` - Stage files
 - `Bash(git status:*)` - Check repository status
 - `Bash(git commit:*)` - Create commits
@@ -285,6 +292,7 @@ The command uses these tools:
 ### What's Committed
 
 The command only commits:
+
 - Source code files
 - Configuration files (non-sensitive)
 - Documentation
@@ -317,6 +325,7 @@ The command only commits:
 ## Contributing
 
 Contributions welcome! Please:
+
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
@@ -325,6 +334,7 @@ Contributions welcome! Please:
 ## Changelog
 
 ### Version 1.0.0
+
 - Initial release
 - Intelligent commit message generation
 - Conventional Commits support
