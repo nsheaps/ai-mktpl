@@ -1,18 +1,1 @@
-# Code Owners for Claude Code Plugin Marketplace
-# These owners will be requested for review when someone opens a PR
-
-# Global ownership
 * @nsheaps
-
-# Workflow and CI/CD
-/.github/ @nsheaps
-
-# Plugin directories
-/plugins/ @nsheaps
-
-# Marketplace metadata
-/.claude-plugin/ @nsheaps
-
-# Documentation
-/docs/ @nsheaps
-*.md @nsheaps
