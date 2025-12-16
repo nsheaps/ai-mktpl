@@ -1,0 +1,151 @@
+name: Validate Plugins
+description: Validate plugin structure and marketplace consistency
+
+outputs:
+  valid:
+    description: Whether all plugins are valid
+    value: ${{ steps.validate.outputs.valid }}
+  errors:
+    description: Validation errors found
+    value: ${{ steps.validate.outputs.errors }}
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Validate plugin structure
+      id: validate
+      shell: bash
+      run: |
+        set +e
+        VALID=true
+        ERRORS=""
+
+        echo "::group::Validating marketplace.json"
+
+        # Check if marketplace.json exists and is valid JSON
+        if [ ! -f ".claude-plugin/marketplace.json" ]; then
+          echo "::error::Marketplace file not found: .claude-plugin/marketplace.json"
+          VALID=false
+          ERRORS="${ERRORS}Marketplace file missing\n"
+        else
+          if ! jq empty .claude-plugin/marketplace.json 2>/dev/null; then
+            echo "::error::Invalid JSON in marketplace.json"
+            VALID=false
+            ERRORS="${ERRORS}Invalid marketplace JSON\n"
+          else
+            echo "::notice::marketplace.json is valid JSON"
+          fi
+        fi
+        echo "::endgroup::"
+
+        echo "::group::Validating plugin directories"
+
+        # Get list of plugins from marketplace
+        MARKETPLACE_PLUGINS=$(jq -r '.plugins[].name' .claude-plugin/marketplace.json 2>/dev/null || echo "")
+
+        for plugin in $MARKETPLACE_PLUGINS; do
+          echo "Validating plugin: $plugin"
+
+          # Check if plugin directory exists
+          PLUGIN_PATH="plugins/$plugin"
+          if [ ! -d "$PLUGIN_PATH" ]; then
+            echo "::error::Plugin directory not found: $PLUGIN_PATH"
+            VALID=false
+            ERRORS="${ERRORS}Plugin directory missing: $plugin\n"
+            continue
+          fi
+
+          # Check if plugin.json exists
+          PLUGIN_JSON="$PLUGIN_PATH/.claude-plugin/plugin.json"
+          if [ ! -f "$PLUGIN_JSON" ]; then
+            echo "::error::Plugin metadata not found: $PLUGIN_JSON"
+            VALID=false
+            ERRORS="${ERRORS}Plugin metadata missing: $plugin\n"
+            continue
+          fi
+
+          # Validate plugin.json is valid JSON
+          if ! jq empty "$PLUGIN_JSON" 2>/dev/null; then
+            echo "::error::Invalid JSON in $PLUGIN_JSON"
+            VALID=false
+            ERRORS="${ERRORS}Invalid plugin JSON: $plugin\n"
+            continue
+          fi
+
+          # Validate required fields
+          PLUGIN_NAME=$(jq -r '.name' "$PLUGIN_JSON")
+          PLUGIN_VERSION=$(jq -r '.version' "$PLUGIN_JSON")
+          PLUGIN_DESC=$(jq -r '.description' "$PLUGIN_JSON")
+
+          if [ -z "$PLUGIN_NAME" ] || [ "$PLUGIN_NAME" = "null" ]; then
+            echo "::error::Missing 'name' field in $PLUGIN_JSON"
+            VALID=false
+            ERRORS="${ERRORS}Missing name field: $plugin\n"
+          fi
+
+          if [ -z "$PLUGIN_VERSION" ] || [ "$PLUGIN_VERSION" = "null" ]; then
+            echo "::error::Missing 'version' field in $PLUGIN_JSON"
+            VALID=false
+            ERRORS="${ERRORS}Missing version field: $plugin\n"
+          fi
+
+          if [ -z "$PLUGIN_DESC" ] || [ "$PLUGIN_DESC" = "null" ]; then
+            echo "::error::Missing 'description' field in $PLUGIN_JSON"
+            VALID=false
+            ERRORS="${ERRORS}Missing description field: $plugin\n"
+          fi
+
+          # Check version format (semver)
+          if ! echo "$PLUGIN_VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+'; then
+            echo "::error::Invalid version format in $PLUGIN_JSON: $PLUGIN_VERSION"
+            VALID=false
+            ERRORS="${ERRORS}Invalid version format: $plugin\n"
+          fi
+
+          # Validate marketplace version matches plugin version
+          MARKETPLACE_VERSION=$(jq -r \
+            ".plugins[] | select(.name == \"$plugin\") | .version" \
+            .claude-plugin/marketplace.json)
+          if [ "$PLUGIN_VERSION" != "$MARKETPLACE_VERSION" ]; then
+            echo "::error::Version mismatch for $plugin: " \
+              "plugin.json=$PLUGIN_VERSION, marketplace.json=$MARKETPLACE_VERSION"
+            VALID=false
+            ERRORS="${ERRORS}Version mismatch: $plugin\n"
+          else
+            echo "::notice::Plugin $plugin passed validation (v$PLUGIN_VERSION)"
+          fi
+        done
+
+        echo "::endgroup::"
+
+        echo "::group::Checking for orphaned plugins"
+
+        # Check if there are plugin directories not in marketplace
+        for dir in plugins/*; do
+          if [ -d "$dir" ]; then
+            PLUGIN_NAME=$(basename "$dir")
+            if ! echo "$MARKETPLACE_PLUGINS" | grep -q "^$PLUGIN_NAME$"; then
+              echo "::warning::Plugin directory exists but not in marketplace: $PLUGIN_NAME"
+            fi
+          fi
+        done
+
+        echo "::endgroup::"
+
+        echo "valid=${VALID}" >> $GITHUB_OUTPUT
+        echo "errors<<EOF" >> $GITHUB_OUTPUT
+        echo -e "${ERRORS}" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
+        if [ "$VALID" = "true" ]; then
+          echo "::notice::All plugins validated successfully"
+          exit 0
+        else
+          echo "::error::Plugin validation failed"
+          exit 1
+        fi
