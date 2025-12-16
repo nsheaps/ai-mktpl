@@ -171,6 +171,102 @@ GET /v1/environment_providers
 
 Returns available remote execution environments for Claude Code Web.
 
+**Response** (inferred from binary analysis):
+```json
+{
+  "environments": [
+    {
+      "environment_id": "env-abc123",
+      "name": "Default Environment",
+      "tier": "pro|max|enterprise"
+    }
+  ]
+}
+```
+
+This is the **key** to understanding how Claude Code Web works:
+- Sessions don't run on GitHub Actions
+- They run on Anthropic-hosted **remote environments**
+- These are sandboxed containers/VMs that execute code
+- The `environment_providers` endpoint lists what's available to your account
+
+---
+
+## Environment Providers (Remote Execution)
+
+### What Are Environment Providers?
+
+Claude Code Web doesn't run code on your machine or via GitHub Actions. Instead, it uses
+**remote execution environments** hosted by Anthropic. These are:
+
+- Sandboxed containers (likely Firecracker microVMs or similar)
+- Pre-configured with common development tools
+- Connected to your GitHub repository
+- Isolated per-session for security
+
+### Key Telemetry Fields
+
+From binary analysis, sessions track:
+```javascript
+{
+  "is_claude_code_remote": true,
+  "remote_environment_type": "sandbox|container|...",
+  "claude_code_container_id": "container-xyz",
+  "claude_code_remote_session_id": "session-abc"
+}
+```
+
+### How Sessions Use Environments
+
+1. **Session Creation**: When you start a Claude Code Web session, an environment is provisioned
+2. **Code Execution**: All tool calls (Bash, Read, Write, etc.) run in this environment
+3. **Git Integration**: Environment clones your repo from GitHub
+4. **Persistence**: Environment state persists for the session duration
+5. **Cleanup**: Environment is destroyed when session ends/archives
+
+### Configuration
+
+The CLI has a setting for default remote environment:
+```
+"Configure the default remote environment for teleport sessions"
+```
+
+This suggests you can choose which environment type to use for teleport operations.
+
+### Checking Environment Availability
+
+```javascript
+// From binary: ZP2() - checkHasRemoteEnvironment
+async function checkHasRemoteEnvironment() {
+  try {
+    return (await fetchEnvironmentProviders()).length > 0;
+  } catch (error) {
+    return false;
+  }
+}
+```
+
+If no environments are available, you'll see:
+```
+"No environments available for session creation"
+```
+
+### GitHub App Integration
+
+The system also checks if the GitHub App is installed on your repo:
+```http
+GET /api/oauth/organizations/{org_uuid}/code/repos/{owner}/{repo}
+```
+
+Response includes:
+```json
+{
+  "status": {
+    "app_installed": true
+  }
+}
+```
+
 ---
 
 ## Teleport Flow (Web → CLI)
