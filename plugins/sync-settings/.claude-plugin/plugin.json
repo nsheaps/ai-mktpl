@@ -1,0 +1,22 @@
+{
+  "name": "sync-settings",
+  "version": "1.0.0",
+  "description": "Automatically sync and merge local Claude Code settings, commands, and files using configurable rules in syncconfig.yaml",
+  "author": {
+    "name": "Claude Code Community",
+    "email": "community@example.com",
+    "url": "https://github.com/nsheaps/.ai"
+  },
+  "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/sync-settings",
+  "repository": "https://github.com/nsheaps/.ai",
+  "keywords": [
+    "sync",
+    "settings",
+    "merge",
+    "json",
+    "symlink",
+    "hooks",
+    "configuration",
+    "local-settings"
+  ]
+}
