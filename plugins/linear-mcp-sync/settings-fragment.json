@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Copy the 'hooks' section into your Claude Code settings.json to enable Linear hash validation. Update the paths to match your installation location.",
+
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "mcp__linear__.*(get|Get|issue$|Issue$)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/plugins/linear-mcp-sync/hooks/linear-hash-save.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "mcp__linear__.*(update|Update|create|Create)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/plugins/linear-mcp-sync/hooks/linear-hash-check.sh"
+          }
+        ]
+      }
+    ]
+  },
+
+  "mcpServers": {
+    "$comment": "This configuration is handled by 'claude mcp add', shown here for reference only",
+    "linear": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcp.linear.app/sse"]
+    }
+  }
+}
