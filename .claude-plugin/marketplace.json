@@ -32,6 +32,18 @@
       "category": "git",
       "tags": ["git", "skill", "ai", "automation"],
       "keywords": ["git", "commit", "skill", "smart-commit", "auto-commit"]
+    },
+    {
+      "name": "memory-manager",
+      "description": "Intelligent memory management for CLAUDE.md files with automatic preference detection",
+      "version": "1.0.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/memory-manager",
+      "category": "productivity",
+      "tags": ["memory", "preferences", "context", "automation"],
+      "keywords": ["memory", "preferences", "claude.md", "context", "instructions"]
     }
   ]
 }
