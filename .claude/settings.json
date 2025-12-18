@@ -15,11 +15,20 @@
       "WebFetch(domain:claude.ai)",
       "WebFetch(domain:*.claude.ai)",
       "WebFetch(domain:code.visualstudio.com)",
+
       "Bash(git log:*)",
       "Bash(git diff:*)",
       "Bash(git status:*)",
+
       "Bash(brew search:*)",
       "Bash(brew info:*)",
+
+      "Bash(gh pr checks:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+
       "Bash(man:*)"
     ],
     "deny": ["Bash(rm -rf /:*)"],
