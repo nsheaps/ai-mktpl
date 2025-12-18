@@ -54,6 +54,40 @@ git clone https://github.com/nsheaps/.ai commit-skill
 # Or install via Claude Code plugin manager
 ```
 
+---
+
+### 🧠 [Memory Manager](./plugins/memory-manager)
+**Type:** Agent Skill
+**Category:** Productivity
+
+Intelligent memory management for CLAUDE.md files. Automatically detects when you express preferences, rules, or instructions and maintains them in organized memory files.
+
+- **Auto-activates when you say:**
+  - "Always do X"
+  - "Never use Y"
+  - "Don't forget to Z"
+  - "Prefer X over Y"
+  - "Remember to..."
+  - "From now on..."
+
+- **Features:**
+  - Smart scope detection (global vs project-specific)
+  - Hierarchical organization with categories
+  - Supports `@reference` and bash command syntax
+  - Clear confirmation messages (🧠 and 📝)
+  - Self-updating with version awareness
+
+**Installation:**
+```bash
+# Via Claude Code plugin manager
+/plugin marketplace add nsheaps/.ai
+/plugin install memory-manager@claude-code-plugin-marketplace
+
+# Or via CLI
+claude plugin marketplace add nsheaps/.ai
+claude plugin install memory-manager@claude-code-plugin-marketplace
+```
+
 ## Installation
 
 ### Method 1: Claude Code Plugin Manager (Recommended)
@@ -160,6 +194,7 @@ Claude: [analyzes changes and creates appropriate commit(s)]
 - **Git Automation**: Tools for streamlining git workflows
 - **Development Workflow**: Enhance daily development tasks
 - **Code Quality**: Maintain high code standards
+- **Productivity**: Context management and preference tracking
 
 ## Features
 
