@@ -1,8 +1,8 @@
 ---
 name: correct-behavior
 description: Correct a behavior mistake I made and update rules to prevent recurrence
-argument-hint: "[USER|PROJECT] <description of what I did wrong>"
-allowed-tools: Read, Glob, Grep, Edit, Write, Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git rev-parse:*), Bash(ls:*), Bash(pwd:*), AskUserQuestion
+argument-hint: "[SCOPE] <description of what I did wrong>"
+allowed-tools: Read, Glob, Grep, Edit, Write, Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git rev-parse:*), Bash(git add:*), Bash(git commit:*), Bash(git push:*), Bash(git checkout:*), Bash(gh pr:*), Bash(ls:*), Bash(pwd:*), Bash(mkdir:*), AskUserQuestion
 ---
 
 # Behavior Correction Command
@@ -12,6 +12,19 @@ This command helps correct AI behavior mistakes and ensures they don't happen ag
 ## Context
 
 **User's correction:** $ARGUMENTS
+
+## Supported Scopes
+
+| Scope | Description | Location |
+|-------|-------------|----------|
+| `user` | Personal rules for all projects | `~/.claude/CLAUDE.md` or `~/.claude/rules/*.md` |
+| `project` | Rules for the current project | `<git-root>/.claude/CLAUDE.md` or `<git-root>/.claude/rules/*.md` |
+| `slash-commands` / `commands` | User's slash commands | `~/.claude/commands/*.md` |
+| `skills` | User's skills | `~/.claude/skills/*/SKILL.md` |
+| `plugins` | Plugin source code | `~/src/nsheaps/ai/plugins/...` |
+| `marketplace` | The AI config marketplace repo | `~/src/nsheaps/ai/...` |
+
+**Note:** If scope is obvious from context (e.g., correcting a slash command behavior), infer it. Otherwise, ask the user.
 
 ## Process
 
@@ -40,11 +53,9 @@ Analyze the user's correction (`$ARGUMENTS`) in context of your recent work:
 ### Step 3: Determine Scope
 
 Parse the arguments to determine scope:
-- If first word is `USER` (case-insensitive): correction applies to `~/.claude/` (user-level)
-- If first word is `PROJECT` (case-insensitive): correction applies to project config (`.claude/` or `CLAUDE.md` in git root)
-- If scope is not specified:
-  - Ask the user which scope applies using AskUserQuestion
-  - Default suggestion: USER for general behavior, PROJECT for project-specific patterns
+- If first word matches a scope keyword (case-insensitive), use that scope
+- If scope is obvious from context (e.g., the correction is about a slash command you just wrote), infer it
+- If scope is unclear, ask the user using AskUserQuestion with options for relevant scopes
 
 ### Step 4: Review Existing Rules
 
@@ -65,6 +76,11 @@ Parse the arguments to determine scope:
    - `<git-root>/.claude/commands/*.md`
    - Check if behavior is controlled by a skill or command
 
+4. **Marketplace repo (if relevant):**
+   - `~/src/nsheaps/ai/.claude/rules/*.md` - rules for modifying the repo itself
+   - `~/src/nsheaps/ai/.ai/rules/*.md` - user behavior rules (AI-agnostic, syncs to user config)
+   - `~/src/nsheaps/ai/plugins/*/commands/*.md` - plugin commands
+
 Identify:
 - Are there existing rules about this behavior?
 - If yes, why weren't they followed?
@@ -75,9 +91,16 @@ Identify:
 Based on your analysis:
 
 1. **Determine the best place for the rule:**
-   - If it's a general behavior: user CLAUDE.md or user rules
-   - If it's project-specific: project CLAUDE.md or project rules
-   - If it affects a command/skill: consider updating that instead
+
+   | If the correction is... | Put it in... |
+   |-------------------------|--------------|
+   | General user behavior | `~/.claude/CLAUDE.md` or `~/.claude/rules/*.md` |
+   | Project-specific | `<git-root>/.claude/CLAUDE.md` or `<git-root>/.claude/rules/*.md` |
+   | About a slash command | The command file itself |
+   | About a skill | The skill's `SKILL.md` |
+   | About a plugin | The plugin source in `~/src/nsheaps/ai/plugins/...` |
+   | User behavior (shared/backed up) | `~/src/nsheaps/ai/.ai/rules/*.md` (AI-agnostic) |
+   | Repo contribution rules | `~/src/nsheaps/ai/.claude/rules/*.md` (Claude-specific) |
 
 2. **Write the correction:**
    - Be specific and actionable
@@ -87,7 +110,7 @@ Based on your analysis:
 
 3. **Structure appropriately:**
    - If adding to CLAUDE.md: find the appropriate section or create one
-   - If creating a new rule file: use descriptive filename in `.claude/rules/`
+   - If creating a new rule file: use descriptive filename in appropriate `rules/` directory
    - Keep rules focused and organized
 
 4. **Review your changes:**
@@ -95,26 +118,29 @@ Based on your analysis:
    - Verify it will actually prevent the behavior
    - Ensure it doesn't conflict with existing rules
 
-### Step 6: Handle Slash Commands and Skills
+### Step 6: Ensure Changes Are Committed
 
-If the behavior issue stems from a slash command or skill:
-- **Ask the user before making changes to commands/skills**
-- Consider if changes should also be made to `~/src/nsheaps/ai/...` plugins
-- If changes are needed in plugins, offer to create a PR
+**CRITICAL: All changes must end up committed somewhere.**
 
-### Step 7: Notify User of Changes
+| Scope | Commit Strategy |
+|-------|-----------------|
+| `user` | Changes go to `~/.claude/...` immediately. Source of truth is `~/src/nsheaps/ai/.ai/rules/`. Ask user if they want changes synced there (requires PR). |
+| `project` | Remind user to commit changes to the project repo |
+| `slash-commands` / `skills` | If in `~/.claude/...`, ask about syncing to `~/src/nsheaps/ai/...` |
+| `plugins` / `marketplace` | Changes are in `~/src/nsheaps/ai/...`. Create a PR and assign to user. |
 
-After making changes:
+**Directory Structure in `~/src/nsheaps/ai/`:**
+- `.claude/rules/` - Rules for working on this repo (Claude-specific)
+- `.ai/rules/` - User behavior rules that sync to user's config (AI-agnostic, can be used by other AI tools)
 
-**For PROJECT scope:**
-- Remind the user that changes need to be committed
-- Show what files were modified
+When making changes to `~/src/nsheaps/ai/...`:
+1. Check current git status
+2. Create a feature branch if not already on one
+3. Stage and commit changes
+4. Push and create PR using `gh pr create --assignee <user>`
+5. Open PR in browser with `gh pr view --web`
 
-**For USER scope:**
-- Ask if the change should also be made in `~/src/nsheaps/ai/...` for sharing/backup
-- If yes, follow the PR workflow for that repo
-
-### Step 8: Correct the Original Work
+### Step 7: Correct the Original Work
 
 Go back to the work you just did and fix what was done incorrectly:
 - Identify the specific changes that were wrong
@@ -123,7 +149,7 @@ Go back to the work you just did and fix what was done incorrectly:
 
 ## Important Notes
 
-- **Worktrees for PRs:** If making changes to `~/src/nsheaps/ai/...`, consider using a git worktree at `~/src/_worktrees/nsheaps/ai/<task-name>/` to keep changes separate. Use `gh` CLI to create the PR and assign it to the current user.
+- **Always commit:** Changes must always end up committed somewhere. User config changes should be synced to `~/src/nsheaps/ai/.ai/rules/` as source of truth.
 
 - **Never guess:** If uncertain about the scope or the correction, always ask the user.
 
@@ -131,29 +157,37 @@ Go back to the work you just did and fix what was done incorrectly:
 
 - **Document the "why":** Include brief context in the rule so future AI instances understand the reasoning.
 
+- **AI-agnostic rules:** When the behavior applies to any AI assistant (not just Claude), put it in `.ai/rules/` instead of `.claude/rules/`.
+
 ## Example Corrections
 
-### Example 1: Don't commit without asking
+### Example 1: Don't commit without asking (user scope)
 ```
-/correct-behavior USER don't commit unless I tell you
+/correct-behavior user don't commit unless I tell you
 ```
-Would add to `~/.claude/CLAUDE.md`:
+Would add to `~/.claude/CLAUDE.md` and offer to sync to `~/src/nsheaps/ai/.ai/rules/`:
 ```markdown
-- NEVER commit changes to git unless the user explicitly asks you to commit. Wait for explicit instruction like "commit this" or "make a commit".
+- NEVER commit changes to git unless the user explicitly asks you to commit.
 ```
 
 ### Example 2: Project-specific API pattern
 ```
-/correct-behavior PROJECT always use the ApiClient class for API calls
+/correct-behavior project always use the ApiClient class for API calls
 ```
-Would add to project's `.claude/CLAUDE.md` or a rule file:
-```markdown
-- Always use the `ApiClient` class from `src/utils/api.ts` for all API calls. Do not use fetch or axios directly.
-```
+Would add to project's `.claude/CLAUDE.md` and remind user to commit.
 
-### Example 3: Scope clarification needed
+### Example 3: Slash command fix (inferred scope)
+```
+/correct-behavior the commit command should always show a preview first
+```
+Would update `~/.claude/commands/commit.md` (or the plugin source) and offer to PR to marketplace.
+
+### Example 4: Scope clarification needed
 ```
 /correct-behavior stop adding unnecessary comments
 ```
 Would prompt:
-> This could apply to all your projects or just this one. Should I add this rule at the USER level (applies everywhere) or PROJECT level (just this codebase)?
+> This could apply in multiple places. Where should I add this rule?
+> - USER (applies to all your projects)
+> - PROJECT (just this codebase)
+> - MARKETPLACE (shared with others via ~/src/nsheaps/ai)
