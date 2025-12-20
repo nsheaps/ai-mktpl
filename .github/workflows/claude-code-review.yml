@@ -39,7 +39,7 @@ jobs:
           use_sticky_comment: true
           # WARNING: PRINTS FULL JSON OUTPUT WHICH MAY INCLUDE SECRETS.
           # ONLY USE IN PRIVATE ENVIRONMENTS.
-          # show_full_output: true
+          show_full_output: true
           # bug: https://github.com/anthropics/claude-code-action/issues/759
           # won't find the past comments since it's looking for github-actions[bot], not the auth it uses to post the comment.
           bot_id: "209825114"  # ← Workaround: correct claude[bot] ID
