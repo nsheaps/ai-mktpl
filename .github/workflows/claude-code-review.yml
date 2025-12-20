@@ -36,6 +36,7 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          use_sticky_comment: true
           prompt: |
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
@@ -46,11 +47,68 @@ jobs:
             - Performance considerations
             - Security concerns
             - Test coverage
+            - Accuracy of comments
 
             Use the repository's CLAUDE.md for guidance on style and conventions. Be constructive and helpful in your feedback.
 
+            Use `gh pr view` and associated `gh` tools to evaluate the changes in the context of the PR title/body, commit messages, other user's reviews, and comments and reviews left on the PR.
+            Questions you leave in past reviews may be answered in the PR body or comments.
+
             Use `gh pr comment` with your Bash tool to leave your review as a comment on the PR.
 
+            CRITICAL: your review should have a summary section and capture details in a collapsable section so the default view is concise and to the point.
+
+            Use these emoji to help convey your summary.
+            ✅ Something you checked that is correct, or something the code changes and does what it's supposed to
+            ❔ When you're confused about something that requires clarification before approval
+            ⚠️ For something that you think might be a problem
+            ❌ For something that is definitely a problem
+              If any ❌ exists, your review summary should start with:
+              > ❌ Some changes need to be made
+
+            Use shields.io badges to convey high level metrics for your review. Here is an example:
+            https://img.shields.io/badge/the%20result%20short%20string%20or%20number%20-%20?style=for-the-badge&label=REVIEW%20PART&labelColor=%23444&color=%23D00
+
+            Use the "document name" url encoded for the result of you reviewing that part, and the label for the thing that you are reviewing.
+            You MUST have badges for at least the following:
+            - (Code) quality ( number from 0-100% )
+            - Security (number from 0-100%, or N/A if not applicable)
+            - Simplicity (number from 0-100%, if below 90% suggest how to make it simpler)
+            - Confidence (number from 0-100% signifying how confident you are in your assessment, aim for higher confidence but you can't know everything)
+
+            Use the color (not label color) to indicate if it's good or bad. Generally 85+ should be green, 65+ yellow, and below that red.
+            Anything below a 65% is a failure.
+            Feel free to use badges to communicate strings as well, though that should be rare.
+
+            Some examples: 
+              <details>
+              <summary>This review looks great!
+              ![](badge1)
+              ![](badge2)
+              
+              ✅ Thing I checked
+              ✅ Another thing I think is great</summary>
+              
+              Heres all the detail from my review that I would normally capture to cover the details
+              requested for the review.
+              
+              </details>
+
+            or if you think there's an issue with the changes...
+
+              <details>
+              <summary>I think some things need changes. Check in the details for more info
+              ❔ I don't understand how <a specific part> works.
+              ⚠️ I think this the performance will be an issue
+              ❌ Your comments and PR descriptions suggest that you're trying to assign permissions to admins but it looks like you're actually assigning them to guests</summary>
+              
+              Heres all the detail from my review that I would normally capture to cover the details
+              requested for the review.
+              
+              </details>
+
+            If you would like to use a tool that isn't available to you but would help with future reviews, call them out in your review outside of the details block with details
+            of which changes are needed to give you or grant you access to that tool.
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://docs.claude.com/en/docs/claude-code/cli-reference for available options
           claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'
