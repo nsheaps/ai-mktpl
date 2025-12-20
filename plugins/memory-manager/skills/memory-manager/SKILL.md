@@ -1,6 +1,13 @@
 ---
 name: memory-manager
-description: Automatically detects and maintains user preferences, instructions, and rules in CLAUDE.md files. Activates when user says phrases like 'always', 'never', 'don't forget', 'prefer', 'remember to', or 'from now on'. Intelligently determines whether preferences should be stored globally or per-project, organizes memories hierarchically with categories, and confirms updates with 🧠 and 📝 messages.
+description: >
+	Automatically detects and maintains user preferences, instructions, and rules in CLAUDE.md and other rules files. Activates when user says phrases like 'always', 'never', 'don't forget', 'prefer', 'remember to', or 'from now on'. Intelligently determines whether preferences should be stored globally or per-project, organizes memories hierarchically with categories, and confirms updates with 🧠 and 📝 messages.
+  Other Keywords and Triggerwords:
+    - I can't believe you did that
+    - You fucked up / You messed up
+    - did it wrong
+    - make sure you
+    - important dates and milestones like vacation, birthdays, deadlines, etc
 allowed-tools: Read, Edit, Write, Glob, Grep, Bash, AskUserQuestion
 ---
 
