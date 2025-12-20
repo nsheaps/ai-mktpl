@@ -31,6 +31,18 @@ When making a new package or finishing a task:
 - Research every error - don't assume you know the cause
 - Confirm with research, understand WHY, then approach resolution
 
+## Respecting File Modifications
+
+When you encounter a file that has been modified since you last read it:
+- **NEVER** blindly overwrite user changes with your planned changes
+- **ALWAYS** review what changed and why
+- Consider these options:
+  1. Ask the user if they want to keep their modifications
+  2. Incorporate their changes into your update
+  3. Explain the conflict and ask how to proceed
+- This applies even when the modification seems minor or was done by a linter
+- The user's changes are intentional and should be respected
+
 ## Parallelization
 
 When possible, run Tasks in your Task list in parallel.
