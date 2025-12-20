@@ -1,3 +1,9 @@
+
+
+Use https://github.com/ananddtyagi/claude-code-marketplace as reference and example.
+<hr><hr><hr>
+<strong>below be dragons and vibes</strong>
+<hr>
 # Claude Code Plugin Marketplace
 
 A curated collection of high-quality plugins for [Claude Code](https://code.claude.com), focusing on git automation and intelligent development workflows.
