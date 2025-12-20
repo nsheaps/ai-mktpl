@@ -1,4 +1,4 @@
-# CLI Installation (No Chat Required)
+# CLI Installation
 
 You can install and manage plugins directly from your terminal using the `claude` command.
 
