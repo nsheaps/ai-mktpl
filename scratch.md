@@ -1,0 +1,6 @@
+this is Nate's ramblings about how things might want to work 
+
+for plugins that require things to be installed, replicate the instructions for setting up Claude code web which utilizes a hook to install software. this can take time during startup, and so should only be done if the software is missing. you can further mitigate it by pre-installing software on the system that the agent runs on 
+
+idea for a plugin that installs a binary for use in the hooks of another plugin to say that that plug-in requires a different plugin. for example, a project might have rules, from a different repository, that are managed by a tool loaded by another plug-in, and they rules plug-in requires the plug-in that installs the other tool. this binary interfaces with claude code CLI to install plugins. because this plugin might be used to install other plugins, when used in a non-interactive environment if the plugin is not already installed it will fail with an error message requesting that the user run a command which iteratively and recursively resolves all dependencies. 
+for a plugin to be used by another plugin, it must not do anything other than setup hooks, and define inputs which running the installed tooling looks for
