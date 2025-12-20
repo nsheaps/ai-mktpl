@@ -73,7 +73,7 @@ Intelligent memory management for CLAUDE.md files. Automatically detects when yo
 - **Features:**
   - Smart scope detection (global vs project-specific)
   - Hierarchical organization with categories
-  - Supports `@reference` and bash command syntax
+  - Supports `@reference` external files
   - Clear confirmation messages (🧠 and 📝)
   - Self-updating with version awareness
 
