@@ -32,6 +32,13 @@
       "Bash(man:*)"
     ],
     "deny": ["Bash(rm -rf /:*)"],
-    "ask": ["Bash(rm -rf .:*)"]
+    "ask": [
+      "Bash(gh pr view --web:*)",
+      "Bash(rm -rf .:*)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git push --force-with-lease:*)",
+      "Bash(git push --force-if-includes:*)"
+    ]
   }
 }
