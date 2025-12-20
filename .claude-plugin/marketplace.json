@@ -1,8 +1,9 @@
 {
-  "name": "claude-code-plugin-marketplace",
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "nsheaps/claude-marketplace",
   "owner": {
-    "name": "Claude Code Community",
-    "email": "community@example.com"
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com"
   },
   "metadata": {
     "description": "Community-driven marketplace for Claude Code plugins featuring git automation and commit management",
