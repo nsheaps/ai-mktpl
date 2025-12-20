@@ -1,6 +1,6 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "nsheaps/claude-marketplace",
+  "name": "nsheaps-claude-plugins",
   "owner": {
     "name": "Nathan Heaps",
     "email": "nsheaps@gmail.com"

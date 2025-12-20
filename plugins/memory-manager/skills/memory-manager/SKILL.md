@@ -162,7 +162,7 @@ OR for "never" statements:
 
 ### Plugin Location
 
-This skill is part of the `memory-manager` plugin from the `nsheaps-ai-plugins` marketplace.
+This skill is part of the `memory-manager` plugin from the `nsheaps-claude-plugins` marketplace.
 
 **Sources:**
 - **GitHub**: `https://github.com/nsheaps/.ai`
@@ -174,11 +174,11 @@ When you detect the user wants to update plugins or skills, suggest:
 
 ```bash
 # Update the marketplace to get latest plugin list
-/plugin marketplace update nsheaps-ai-plugins
+/plugin marketplace update nsheaps-claude-plugins
 
 # Update this specific plugin
-/plugin uninstall memory-manager@nsheaps-ai-plugins
-/plugin install memory-manager@nsheaps-ai-plugins
+/plugin uninstall memory-manager@nsheaps-claude-plugins
+/plugin install memory-manager@nsheaps-claude-plugins
 ```
 
 **Trigger phrases for suggesting updates:**
@@ -197,7 +197,7 @@ When you detect the user wants to update plugins or skills, suggest:
 
 **Update all plugins from a marketplace:**
 ```bash
-/plugin marketplace update nsheaps-ai-plugins
+/plugin marketplace update nsheaps-claude-plugins
 # Then reinstall plugins to get updates
 ```
 
@@ -207,7 +207,7 @@ Current version: `1.0.0`
 
 To check for updates, suggest the user visit:
 - GitHub: https://github.com/nsheaps/.ai
-- Or run: `/plugin marketplace update nsheaps-ai-plugins`
+- Or run: `/plugin marketplace update nsheaps-claude-plugins`
 
 ### Proactive Update Suggestions
 
