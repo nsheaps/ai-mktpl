@@ -43,6 +43,24 @@ When you encounter a file that has been modified since you last read it:
 - This applies even when the modification seems minor or was done by a linter
 - The user's changes are intentional and should be respected
 
+## Safe File Deletion During Migrations
+
+When migrating, refactoring, or cleaning up files:
+- **NEVER delete files** until you've validated the new version works
+- Instead, preserve the original by:
+  1. Moving to a backup folder (e.g., `.backup/` or `_old/`)
+  2. Renaming with `.bak` extension
+  3. Commenting out code instead of deleting
+- **ESPECIALLY critical** when working outside the current project (like `~/` files)
+- Only delete the backup after confirming the new implementation works
+- This prevents data loss of important configurations, scripts, or functions
+
+Example safe migration:
+```bash
+# BAD: rm ~/.zshrc.d/00_zshconfig.zsh
+# GOOD: mv ~/.zshrc.d/00_zshconfig.zsh ~/.zshrc.d/00_zshconfig.zsh.bak
+```
+
 ## Parallelization
 
 When possible, run Tasks in your Task list in parallel.
