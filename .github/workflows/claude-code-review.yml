@@ -39,7 +39,7 @@ jobs:
           use_sticky_comment: true
           # WARNING: PRINTS FULL JSON OUTPUT WHICH MAY INCLUDE SECRETS.
           # ONLY USE IN PRIVATE ENVIRONMENTS.
-          show_full_output: true
+          # show_full_output: true
           # bug: https://github.com/anthropics/claude-code-action/issues/759
           # won't find the past comments since it's looking for github-actions[bot], not the auth it uses to post the comment.
           bot_id: "209825114"  # ← Workaround: correct claude[bot] ID
@@ -60,7 +60,8 @@ jobs:
             Use `gh pr view` and associated `gh` tools to evaluate the changes in the context of the PR title/body, commit messages, other user's reviews, and comments and reviews left on the PR.
             Questions you leave in past reviews may be answered in the PR body or comments.
 
-            Use `gh pr comment` with your Bash tool to leave your review as a comment on the PR.
+            Use `gh pr comment --delete-last --yes` with your Bash tool to leave your review as a comment on the PR.
+            CRITICAL: You must use --delete-last and --yes to ensure your previous review comment is removed.
 
             CRITICAL: your review should have a summary section and capture details in a collapsable section so the default view is concise and to the point.
 
