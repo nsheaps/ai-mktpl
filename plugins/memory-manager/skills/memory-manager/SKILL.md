@@ -57,13 +57,17 @@ You are a memory management specialist for Claude Code. Your job is to detect wh
 
 ## File Structure Conventions
 
-### Using @references for External Files
+### Using @references to reference other documentation files
 
-```markdown
-# CLAUDE.md
+Using a `@relative/path/reference/to/other/docs.md` allows claude to see the file being reference, and read it immediately after. If multiple files mention it, the file is deduplicated. If a file is read with a reference which hasn't changed since it was last (recently) read, it is not re-read. And if it is, it is re-read when the file that references it is read.
 
-@reference $HOME/.claude/docs/git-workflow.md
-@reference ./.ai/docs/architecture.md
+Capturing `@references/to/files.md` inside an inline code snippet or code block prevents it from being read. For claude to properly read it, make sure it is NOT surrounded in backticks.
+
+All paths are relative to the directory of the file being read UNLESS the path starts with `@~/` in which case it is relative to the user's home directory.
+
+Files located in ~/.claude/rules or .claude/rules of a repository will be read automatically as if they are part of the CLAUDE.md and do not need to be referenced. Anything outside of that requires it.
+
+WARNING: any `@references` inside CLAUDE.md or `.../rules/` folders may result in it being included even if not needed. Try to use the references for shared documentation in agents and slash commands, or to make specific references to other docs _within_ the rules (eg `when sending messages be sure to follow @message-sending-rules.md`)
 
 ## Project-Specific Rules
 - Use Redux for state management
