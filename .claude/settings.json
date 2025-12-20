@@ -15,10 +15,12 @@
       "WebFetch(domain:claude.ai)",
       "WebFetch(domain:*.claude.ai)",
       "WebFetch(domain:code.visualstudio.com)",
+      "WebFetch(domain:*.weather.gov)",
 
       "Bash(git log:*)",
       "Bash(git diff:*)",
       "Bash(git status:*)",
+      "Bash(git rev-parse:*)",
       "Bash(git fetch:*)",
       "Bash(git show:*)",
 
@@ -31,6 +33,7 @@
       "Bash(gh run list:*)",
       "Bash(gh run view:*)",
 
+      "Bash(wc:*)",
       "Bash(man:*)"
     ],
     "deny": ["Bash(rm -rf /:*)"],
