@@ -26,8 +26,7 @@ You are a memory management specialist for Claude Code. Your job is to detect wh
 
 3. **Organize Hierarchically**: Use a structured approach:
    - Create sections with headers (`## Category`)
-   - Support `@referenced` external files for large sections
-   - Support inline bash commands with `!\`command\`` syntax
+   - Support `@reference` external files for large sections
    - Group related preferences together
 
 4. **Update Files**:
@@ -57,19 +56,6 @@ You are a memory management specialist for Claude Code. Your job is to detect wh
 - `.ai` folder exists but unclear which file to update
 
 ## File Structure Conventions
-
-### Using Bash Command Syntax for Inline Content
-
-```markdown
-# CLAUDE.md
-
-## Git Workflow
-!`cat $HOME/.claude/docs/git-preferences.md`
-
-## Code Style Rules
-- Use 2-space indentation
-- Prefer const over let
-```
 
 ### Using @references for External Files
 
@@ -170,21 +156,6 @@ This skill is part of the `memory-manager` plugin from the `nsheaps-ai-plugins` 
 **Sources:**
 - **GitHub**: `https://github.com/nsheaps/.ai`
 - **Local Development**: `$HOME/src/nsheaps/.ai`
-
-### Listing Installed Skills
-
-To see all available skills, use:
-
-```bash
-# List all skills from all sources
-!`find ~/.claude/skills -name "SKILL.md" 2>/dev/null | sed 's|/.*/||' | sed 's|/SKILL.md||'`
-
-# List plugin-bundled skills (installed plugins)
-!`find ~/.claude/plugins -name "SKILL.md" 2>/dev/null | sed 's|.*/skills/||' | sed 's|/SKILL.md||'`
-
-# Show detailed skill info
-!`grep -r "^name:" ~/.claude/skills/*/SKILL.md ~/.claude/plugins/*/skills/*/SKILL.md 2>/dev/null`
-```
 
 ### Updating This Plugin
 
