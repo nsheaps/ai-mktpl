@@ -70,6 +70,7 @@ jobs:
             https://img.shields.io/badge/the%20result%20short%20string%20or%20number%20-%20?style=for-the-badge&label=REVIEW%20PART&labelColor=%23444&color=%23D00
 
             Use the "document name" url encoded for the result of you reviewing that part, and the label for the thing that you are reviewing.
+            CRITICAL: The "document name" MUST end in "-%20" just before the query parameter delimeter. Without it, the shield will 404.
             You MUST have badges for at least the following:
             - (Code) quality ( number from 0-100% )
             - Security (number from 0-100%, or N/A if not applicable)
@@ -111,5 +112,5 @@ jobs:
             of which changes are needed to give you or grant you access to that tool.
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://docs.claude.com/en/docs/claude-code/cli-reference for available options
-          claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'
+          claude_args: '--allowed-tools "WebFetch(*),WebSearch,Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'
 
