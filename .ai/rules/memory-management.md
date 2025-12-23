@@ -5,9 +5,12 @@ Rules for when and how to update Claude configuration files and recall past conv
 ## Checking Conversation History
 
 When a user references something they've told you previously:
-1. Search `~/.claude/history.jsonl` and `~/.claude/projects/**` for records of past conversations
-2. Find what they said and confirm with the user that you found the correct information
-3. Only ask the user to repeat themselves if you genuinely cannot find it
+
+**CRITICAL: You MUST use the `conversation-history-search` agent for this. Never search conversation history directly in the main context - it consumes too many tokens.**
+
+1. Invoke the `conversation-history-search` agent with the Task tool to search `~/.claude/history.jsonl` and `~/.claude/projects/**`
+2. Review what the agent finds and confirm with the user that you found the correct information
+3. Only ask the user to repeat themselves if the agent genuinely cannot find it
 
 Never ask "what did you say?" when you can look it up yourself.
 
