@@ -2,6 +2,10 @@
 
 Standards for writing and reviewing code.
 
+## Git Workflow
+
+After committing changes, always push immediately. Don't ask - just push.
+
 ## DRY Principle
 
 Always write DRY code. NEVER write WET code.
