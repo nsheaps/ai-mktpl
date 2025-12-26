@@ -1,0 +1,19 @@
+{
+  "name": "task-parallelization",
+  "version": "1.0.0",
+  "description": "Intelligent skill that helps Claude parallelize Task tool calls when working on repetitive or batch operations, optimizing throughput based on task complexity",
+  "author": {
+    "name": "Claude Code Community",
+    "email": "community@example.com"
+  },
+  "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/task-parallelization",
+  "keywords": [
+    "parallelization",
+    "task",
+    "agent",
+    "batch",
+    "performance",
+    "optimization",
+    "concurrent"
+  ]
+}
