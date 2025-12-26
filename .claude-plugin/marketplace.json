@@ -63,6 +63,18 @@
       "category": "integration",
       "tags": ["linear", "mcp", "hooks", "sync", "issue-tracking"],
       "keywords": ["linear", "mcp", "hooks", "hash-validation", "conflict-detection", "issue-tracking"]
+    },
+    {
+      "name": "task-parallelization",
+      "description": "Intelligent skill that helps Claude parallelize Task tool calls for batch operations and repetitive changes",
+      "version": "1.0.0",
+      "author": {
+        "name": "Claude Code Community"
+      },
+      "source": "./plugins/task-parallelization",
+      "category": "performance",
+      "tags": ["parallelization", "task", "batch", "performance", "optimization"],
+      "keywords": ["parallel", "concurrent", "batch", "task", "agent", "performance", "optimization"]
     }
   ]
 }
