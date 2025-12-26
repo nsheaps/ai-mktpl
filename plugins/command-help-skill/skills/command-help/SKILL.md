@@ -1,6 +1,12 @@
 ---
 name: command-help
-description: Help users understand and discover slash commands when they accidentally type them as messages instead of executing them
+description: >
+  Help users understand and discover slash commands when they accidentally type them as messages instead of executing them
+  For example if they type:
+  /commit a thing
+  /correct-behavior blah blah
+  /assist with something
+  /review bleh
 ---
 
 # Command Help Skill
