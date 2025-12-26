@@ -1,0 +1,13 @@
+{
+  "name": "opengraph-image",
+  "version": "1.0.0",
+  "description": "xxxx",
+  "author": {
+    "name": "alvinunreal + modifications by nsheaps",
+    "email": "unknown",
+    "url": "https://www.reddit.com/user/alvinunreal"
+  },
+  "homepage": "https://www.reddit.com/r/ClaudeCode/comments/1pw2psj/this_is_how_i_generate_og_images_using_claude_code/",
+  "repository": "https://github.com/nsheaps/.ai",
+  "keywords": ["generation", "image", "opengraph", "og-image", "social media", "png", "html", "svg" ]
+}
