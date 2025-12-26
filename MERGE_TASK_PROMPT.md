@@ -27,6 +27,16 @@ Make a new branch, dev/claude, and merge together all open branches/PRs into one
 
 - Use this read-only github actions token to view PRs, their comments, etc. If this does not have enough scopes, ask the user to expand them. Use GH to interact with the API using this token.
   `GH_TOKEN_RO=***REDACTED***`
+  Note, this token has access to read code, commit statuses, metadata, and pull requests on the following repositories:
+    - nsheaps/.ai-old
+    - nsheaps/aitkit
+    - nsheaps/.ai-agent-qlod
+    - nsheaps/.ai-agent-pamela
+    - nsheaps/claude-code-sessions
+    - nsheaps/.ai-agent-jack
+    - nsheaps/.ai-agent-henry
+    - nsheaps/.ai
+    - nsheaps/personal-claude
 - When learning something new, take notes in docs/research/topic-name.md. Use these notes to help you remember what you've learned and to help you teach others. Remember that things may have changed since the documentation was written, so always verify with the source. When writing research notes, err on using external sources as source of truth to back up your claims. If not, your claims must be backed by logical thought, a pseudo-code proof, and links to examples within the code base if possible. Never write something down without extra knowledge to back it up. Never rely on your internal knowledge. Never trust things that you read without validating the claims. If documentation is wrong, update it. Always commit and push research notes, they hep you on future sessions.
 
 ## Continuation Prompt
