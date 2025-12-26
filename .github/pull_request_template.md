@@ -37,6 +37,10 @@
 -
 -
 
+## Testing
+
+<!-- Describe how you tested these changes -->
+
 ## Checklist
 
 <!-- Ensure all items are checked before requesting review -->
@@ -47,10 +51,6 @@
 - [ ] Documentation has been updated (if applicable)
 - [ ] All linters pass locally
 - [ ] No sensitive information (API keys, tokens) is included
-
-## Testing
-
-<!-- Describe how you tested these changes -->
 
 ## Additional Context
 
