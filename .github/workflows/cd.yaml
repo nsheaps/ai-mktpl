@@ -50,7 +50,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_PAT_TOKEN_NSHEAPS }}
+          # Use PAT for pushing, fallback to github.token
+          token: ${{ secrets.GITHUB_PAT_TOKEN_NSHEAPS || github.token }}
 
       - name: Install mise
         run: |
