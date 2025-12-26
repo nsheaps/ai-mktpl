@@ -48,3 +48,15 @@ Track and report code coverage changes in PRs.
 - Compare to base branch
 - Report coverage delta
 - Warn on coverage decrease
+
+### rules-sync-plugin
+
+Automate syncing of `.ai/rules/` to user's `~/.claude/rules/` directory.
+
+**Features:**
+- MCP server for automation tasks
+- Hooks to guide when to use skills or reference rules
+- Symlink management (create, update, cleanup orphaned)
+- Cross-device sync support
+
+**Context:** Rules cannot be included as plugins directly. An MCP server could perform this automation, while hooks guide behavior application.

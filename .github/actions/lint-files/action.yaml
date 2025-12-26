@@ -21,8 +21,10 @@ runs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
+        # TODO: Use mise for consistent versioning
         node-version: '20'
-        cache: 'npm' # /correct-behavior, prefer yarn over npm. Use corepack to enable and install the latest versions of yarn.
+        # TODO: Migrate to yarn with corepack per .ai/rules/tool-preferences.md
+        cache: 'npm'
         cache-dependency-path: |
           .github/actions/lint-files/package-lock.json
 

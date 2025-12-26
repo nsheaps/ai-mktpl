@@ -3,9 +3,12 @@
 Standards for writing and reviewing code.
 
 ## Git Workflow
-<!-- TODO: This is only specific to agents running automatically in an external environment.
-Local "ASSISTANTS" should always be doing what the user wants them to and nothing more. -->
+
+**For automated agents in CI/remote environments:**
 After committing changes, always push immediately. Don't ask - just push.
+
+**For local/interactive assistants:**
+Only commit and push when explicitly asked by the user. Local assistants should always defer to user preferences.
 
 ## DRY Principle
 
