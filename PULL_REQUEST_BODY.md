@@ -42,17 +42,22 @@ This PR consolidates **25 feature branches** into a single cohesive megabranch, 
 
 ## Key Changes
 
-### New Plugins (8 total)
+### Plugins (13 total)
 | Plugin | Category | Description |
 |--------|----------|-------------|
-| `memory-manager` | productivity | Intelligent CLAUDE.md file management |
-| `linear-mcp-sync` | integration | Linear MCP with hash validation hooks |
-| `safety-evaluation-prompt` | security | Pre-tool-call safety evaluation (prompt-based) |
-| `safety-evaluation-script` | security | Pre-tool-call safety evaluation (script-based) |
-| `sync-settings` | productivity | Automatic settings synchronization |
-| `task-parallelization` | performance | Parallel Task tool execution |
-| `command-help-skill` | productivity | Slash command discovery and help |
-| `github-auth-skill` | integration | GitHub authentication skill |
+| `commit-command` | git | AI-generated commit messages |
+| `commit-skill` | git | Intelligent commit skill |
+| `skills-maintenance` | productivity | Skill maintenance workflow |
+| `correct-behavior` | productivity | Behavior correction command |
+| `memory-manager` | productivity | Intelligent CLAUDE.md management |
+| `linear-mcp-sync` | integration | Linear MCP with hash validation |
+| `safety-evaluation-prompt` | security | Pre-tool-call safety (prompt) |
+| `safety-evaluation-script` | security | Pre-tool-call safety (script) |
+| `sync-settings` | productivity | Settings synchronization |
+| `task-parallelization` | performance | Parallel Task execution |
+| `command-help-skill` | productivity | Slash command discovery |
+| `github-auth-skill` | integration | GitHub authentication |
+| `og-image` | generation | OpenGraph image generation |
 
 ### CI/CD Infrastructure
 - **GitHub Actions Workflows:**
@@ -60,7 +65,6 @@ This PR consolidates **25 feature branches** into a single cohesive megabranch, 
   - `cd.yaml` - Continuous deployment pipeline
   - `claude.yml` - On-demand Claude assistance via `@claude` mentions
   - `claude-code-review.yml` - Automated PR review with badges
-  - `review.yaml` - Additional review workflow
 
 - **Reusable Actions:**
   - `check-version-bump` - Validates plugin version bumps
@@ -70,35 +74,40 @@ This PR consolidates **25 feature branches** into a single cohesive megabranch, 
   - `update-marketplace` - Marketplace JSON updates
   - `validate-plugins` - Plugin validation
 
+### Documentation Restructuring
+- **Distributed rules:** AGENTS.md content moved to `.claude/rules/`:
+  - `plugin-development.md` - KISS/YAGNI principles, Bun+TypeScript preferences
+  - `versioning.md` - Semantic versioning rules
+  - `ci-cd/conventions.md` - Workflow conventions
+- **Simplified AGENTS.md:** Now an index pointing to distributed rules
+- **Short CLAUDE.md:** Created `.claude/CLAUDE.md` for quick reference
+- **Spec files:** TODOs moved to individual `docs/specs/drafts/*.md` files
+
 ### Development Environment
 - **mise** integration for tool management (`.mise.toml`)
 - **SessionStart hooks** for environment setup
 - **Markdownlint** configuration (`.markdownlint-cli2.jsonc`)
+- **justfile** for local development commands
 
-### Rules & Guidelines
-- Todo management requirements
-- Bash scripting best practices
-- Code quality guidelines
-- Memory management rules
-- Tool preferences
-- Incremental development mantras
-- Engineering assumption correction guidelines
+### Standards
+- Added `$schema` references to all plugin.json files
+- Removed duplicate review.yaml (use claude-code-review.yml instead)
 
 ## Files Changed
 
-- **98 files changed**
-- **19,486 insertions(+)**, **18 deletions(-)**
+- **110 files changed**
+- **19,909 insertions(+)**, **17 deletions(-)**
 
 ## Testing
 
 - [ ] GitHub Actions workflows run successfully
-- [ ] Linting passes locally
-- [ ] Plugin validation passes
+- [ ] Linting passes locally (`just lint`)
+- [ ] Plugin validation passes (`just validate`)
 - [ ] Version bump detection works
 
 ## Notes
 
-- The actual plugins and skills don't need to work yet, but the GitHub Actions infrastructure should be functional
+- Plugins don't need to work yet, but GitHub Actions infrastructure should be functional
 - Version bumps should be posted as comments (update if exists, never duplicate)
 - This establishes patterns for future plugin development
 
