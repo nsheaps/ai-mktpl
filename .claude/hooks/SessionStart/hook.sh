@@ -61,8 +61,8 @@ if [ "$IS_WEB_SESSION" = "true" ]; then
   # Activate mise and install tools from .mise.toml (if mise is available)
   if command -v mise &> /dev/null && [ -f "$PROJECT_DIR/.mise.toml" ]; then
     cd "$PROJECT_DIR"
-    mise trust
-    pbe mise install -y
+    mise trust --verbose
+    pbe mise install -y --verbose
   fi
 
   echo "✅ Session setup complete"
