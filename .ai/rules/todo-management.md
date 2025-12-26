@@ -49,3 +49,37 @@ Simple conversational responses that don't use tools are exempt. Everything else
 2. Start using tools immediately
 3. Maybe update todos later (or forget)
 ```
+
+## Rule: Capture User Messages Mid-Task
+
+**CRITICAL:** When the user sends a message while you are "churning" (executing multiple tool calls), you MUST immediately add it to your TodoWrite.
+
+### Why This Matters
+
+The user cannot see your output while you're in the middle of tool execution. Their messages may contain:
+- Corrections to what you're doing
+- New requirements
+- Questions that need answers
+- Feedback on your approach
+
+If you don't capture these as todos, you will forget them or fail to address them.
+
+### Correct Pattern
+
+```
+1. You're mid-task, executing tools
+2. User sends a message (appears as system-reminder)
+3. IMMEDIATELY add a todo: "Address user message: <summary>"
+4. Continue current work OR pivot based on urgency
+5. Address the todo before considering work complete
+```
+
+### Incorrect Pattern
+
+```
+1. You're mid-task, executing tools
+2. User sends a message
+3. You see it but keep working
+4. You forget to address it
+5. User gets frustrated
+```

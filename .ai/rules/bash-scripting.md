@@ -2,6 +2,28 @@
 
 Guidelines for shell commands and script handling.
 
+## Command Chaining in Bash Tool
+
+When using the Bash tool directly, do NOT chain commands with `&&` or `||`.
+
+**Why:** The user sets granular permissions for individual commands. Chaining prevents them from approving safe commands while rejecting unsafe ones.
+
+**Bad:**
+```bash
+which bun && bun --version
+ls file1 2>/dev/null || ls file2
+```
+
+**Good:**
+```bash
+# Make separate Bash tool calls
+which bun
+# Then in another call:
+bun --version
+```
+
+**Exception:** Use your best judgment in scripts or when the user explicitly requests chaining.
+
 ## API Response Handling
 
 When making API calls that return data (especially structured data):
