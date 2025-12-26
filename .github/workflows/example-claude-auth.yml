@@ -1,0 +1,131 @@
+name: Example - Claude Authentication
+
+on:
+  workflow_dispatch:
+    inputs:
+      provider:
+        description: 'Secret provider to use'
+        required: true
+        type: choice
+        options:
+          - raw
+          - doppler
+          - 1password
+        default: raw
+
+jobs:
+  authenticate-and-test:
+    runs-on: ubuntu-latest
+    name: Test Claude Authentication
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Authenticate with Claude (Raw)
+        if: inputs.provider == 'raw'
+        uses: ./.github/actions/claude-auth
+        with:
+          provider: raw
+          api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Authenticate with Claude (Doppler)
+        if: inputs.provider == 'doppler'
+        uses: ./.github/actions/claude-auth
+        with:
+          provider: doppler
+          doppler-token: ${{ secrets.DOPPLER_TOKEN }}
+          doppler-project: ${{ vars.DOPPLER_PROJECT }}
+          doppler-config: ${{ vars.DOPPLER_CONFIG || 'dev' }}
+          doppler-key-name: ANTHROPIC_API_KEY
+
+      - name: Authenticate with Claude (1Password)
+        if: inputs.provider == '1password'
+        uses: ./.github/actions/claude-auth
+        with:
+          provider: 1password
+          onepassword-service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          onepassword-vault: ${{ vars.OP_VAULT || '' }}
+          onepassword-item: Claude API Key
+          onepassword-field: credential
+
+      - name: Verify Authentication
+        run: |
+          echo "Testing authentication with provider: ${{ inputs.provider }}"
+
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "❌ Error: ANTHROPIC_API_KEY is not set"
+            exit 1
+          fi
+
+          # Display masked API key (first 10 characters)
+          echo "✓ ANTHROPIC_API_KEY is set: ${ANTHROPIC_API_KEY:0:10}..."
+
+          # Test API connectivity (optional - requires curl and jq)
+          echo "Testing API connectivity..."
+          response=$(curl -s -w "\n%{http_code}" https://api.anthropic.com/v1/messages \
+            -H "x-api-key: $ANTHROPIC_API_KEY" \
+            -H "anthropic-version: 2023-06-01" \
+            -H "content-type: application/json" \
+            -d '{
+              "model": "claude-3-5-sonnet-20241022",
+              "max_tokens": 10,
+              "messages": [{"role": "user", "content": "Hello"}]
+            }')
+
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | head -n-1)
+
+          if [ "$http_code" = "200" ]; then
+            echo "✓ API authentication successful!"
+            echo "Response: $body"
+          else
+            echo "⚠ API returned status code: $http_code"
+            echo "Response: $body"
+          fi
+
+      - name: Use API in Custom Script
+        run: |
+          # Example: Use the API key in your own scripts
+          cat > test-claude.sh << 'EOF'
+          #!/bin/bash
+          echo "Running custom script with Claude API..."
+          echo "API Key is available: ${ANTHROPIC_API_KEY:0:10}..."
+
+          # Your custom logic here
+          # For example: call your deployment scripts, run tests, etc.
+          EOF
+
+          chmod +x test-claude.sh
+          ./test-claude.sh
+
+  multi-provider-test:
+    runs-on: ubuntu-latest
+    name: Test All Providers
+    strategy:
+      matrix:
+        provider: [raw]
+        # Add other providers when secrets are configured:
+        # provider: [raw, doppler, 1password]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Authenticate with Claude
+        uses: ./.github/actions/claude-auth
+        id: auth
+        with:
+          provider: ${{ matrix.provider }}
+          # Raw provider
+          api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Doppler provider (uncomment when configured)
+          # doppler-token: ${{ secrets.DOPPLER_TOKEN }}
+          # doppler-project: my-project
+          # 1Password provider (uncomment when configured)
+          # onepassword-service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+
+      - name: Verify
+        run: |
+          echo "✓ Successfully authenticated with ${{ matrix.provider }}"
+          echo "API key is available in environment"
