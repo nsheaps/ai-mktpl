@@ -37,6 +37,7 @@ if [ "$IS_WEB_SESSION" = "true" ]; then
   if ! command -v mise &> /dev/null; then
     echo "📦 Installing mise..."
     # Download from GitHub releases instead of mise.run (avoids proxy issues)
+    # TODO make renovate manage this
     MISE_VERSION="2024.12.16"
     MISE_URL="https://github.com/jdx/mise/releases/download/v${MISE_VERSION}/mise-v${MISE_VERSION}-linux-x64"
     mkdir -p "$HOME/.local/bin"
