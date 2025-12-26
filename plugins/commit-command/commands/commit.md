@@ -33,29 +33,37 @@ Automatically analyze your git changes and create commits with intelligently gen
 ## Examples
 
 ### Basic Usage
+
 ```bash
 /commit
 ```
+
 Analyzes all changes and generates a commit message like:
+
 - `feat: add user authentication with JWT tokens`
 - `fix: resolve null pointer in payment processor`
 - `refactor: simplify database connection logic`
 
 ### With Conventional Commits
+
 ```bash
 /commit feat:
 ```
+
 Ensures the message starts with "feat:" for feature additions.
 
 ```bash
 /commit fix:
 ```
+
 Ensures the message starts with "fix:" for bug fixes.
 
 ### Custom Prefixes
+
 ```bash
 /commit [TASK-123]
 ```
+
 Adds ticket reference to the commit message.
 
 ## Safety Features

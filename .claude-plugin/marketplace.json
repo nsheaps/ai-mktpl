@@ -20,7 +20,13 @@
       "source": "./plugins/commit-command",
       "category": "git",
       "tags": ["git", "automation", "commit", "workflow"],
-      "keywords": ["git", "commit", "automation", "ai-generated", "conventional-commits"]
+      "keywords": [
+        "git",
+        "commit",
+        "automation",
+        "ai-generated",
+        "conventional-commits"
+      ]
     },
     {
       "name": "commit-skill",
