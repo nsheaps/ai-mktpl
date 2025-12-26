@@ -11,70 +11,289 @@
   },
   "plugins": [
     {
+      "name": "command-help-skill",
+      "description": "Help users understand and discover slash commands when they accidentally type them as messages",
+      "version": "1.0.0",
+      "author": {
+        "name": "Claude Code Community"
+      },
+      "source": "./plugins/command-help-skill",
+      "category": "utility",
+      "tags": [
+        "utility",
+        "skill"
+      ],
+      "keywords": [
+        "commands",
+        "help",
+        "discovery",
+        "skill",
+        "slash-commands",
+        "ai",
+        "assistant"
+      ]
+    },
+    {
       "name": "commit-command",
-      "description": "Automate git commits with AI-generated messages matching your repository style",
+      "description": "Automate git commits with AI-generated messages that match your repository's commit style and conventions",
       "version": "1.0.0",
       "author": {
         "name": "Claude Code Community"
       },
       "source": "./plugins/commit-command",
       "category": "git",
-      "tags": ["git", "automation", "commit", "workflow"],
+      "tags": [
+        "utility",
+        "command"
+      ],
       "keywords": [
         "git",
         "commit",
         "automation",
-        "ai-generated",
-        "conventional-commits"
+        "conventional-commits",
+        "semantic-commit"
       ]
     },
     {
       "name": "commit-skill",
-      "description": "Intelligent skill for automatic commit analysis and creation during development",
+      "description": "Intelligent skill that enables Claude to automatically analyze git changes and create well-formatted commits during development",
       "version": "1.0.0",
       "author": {
         "name": "Claude Code Community"
       },
       "source": "./plugins/commit-skill",
       "category": "git",
-      "tags": ["git", "skill", "ai", "automation"],
-      "keywords": ["git", "commit", "skill", "smart-commit", "auto-commit"]
+      "tags": [
+        "utility",
+        "skill"
+      ],
+      "keywords": [
+        "git",
+        "commit",
+        "skill",
+        "automation",
+        "ai",
+        "smart-commit"
+      ]
     },
     {
-      "name": "memory-manager",
-      "description": "Intelligent memory management for CLAUDE.md files with automatic preference detection",
+      "name": "correct-behavior",
+      "description": "Command to correct AI behavior mistakes and update rules to prevent recurrence",
       "version": "1.0.0",
       "author": {
-        "name": "Nathan Heaps"
+        "name": "Claude Code Community"
       },
-      "source": "./plugins/memory-manager",
-      "category": "productivity",
-      "tags": ["memory", "preferences", "context", "automation"],
-      "keywords": ["memory", "preferences", "claude.md", "context", "instructions"]
+      "source": "./plugins/correct-behavior",
+      "category": "utility",
+      "tags": [
+        "utility",
+        "command"
+      ],
+      "keywords": [
+        "behavior",
+        "correction",
+        "rules",
+        "memory",
+        "learning"
+      ]
+    },
+    {
+      "name": "github-auth-skill",
+      "description": "Skill for authenticating with GitHub using device authorization flow",
+      "version": "1.0.0",
+      "author": {
+        "name": "Claude Code Community"
+      },
+      "source": "./plugins/github-auth-skill",
+      "category": "git",
+      "tags": [
+        "utility",
+        "skill"
+      ],
+      "keywords": [
+        "github",
+        "authentication",
+        "device-auth",
+        "gh",
+        "cli",
+        "skill"
+      ]
     },
     {
       "name": "linear-mcp-sync",
-      "description": "Linear MCP integration with hash validation hooks to prevent stale ticket updates",
+      "description": "Installs Linear MCP and adds hooks for safe ticket updates with hash validation to prevent stale overwrites",
       "version": "1.0.0",
       "author": {
         "name": "Claude Code Community"
       },
       "source": "./plugins/linear-mcp-sync",
       "category": "integration",
-      "tags": ["linear", "mcp", "hooks", "sync", "issue-tracking"],
-      "keywords": ["linear", "mcp", "hooks", "hash-validation", "conflict-detection", "issue-tracking"]
+      "tags": [
+        "utility"
+      ],
+      "keywords": [
+        "linear",
+        "mcp",
+        "hooks",
+        "sync",
+        "issue-tracking",
+        "conflict-detection"
+      ]
+    },
+    {
+      "name": "memory-manager",
+      "description": "Intelligent memory management for CLAUDE.md files. Automatically detects and stores user preferences, rules, and instructions with smart scope detection and hierarchical organization.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/memory-manager",
+      "category": "utility",
+      "tags": [
+        "utility",
+        "skill"
+      ],
+      "keywords": [
+        "memory",
+        "preferences",
+        "claude.md",
+        "context",
+        "instructions"
+      ]
+    },
+    {
+      "name": "og-image",
+      "description": "xxxx",
+      "version": "1.0.0",
+      "author": {
+        "name": "alvinunreal + modifications by nsheaps"
+      },
+      "source": "./plugins/og-image",
+      "category": "utility",
+      "tags": [
+        "utility",
+        "skill"
+      ],
+      "keywords": [
+        "generation",
+        "image",
+        "opengraph",
+        "og-image",
+        "social media",
+        "png",
+        "html",
+        "svg"
+      ]
+    },
+    {
+      "name": "safety-evaluation-prompt",
+      "description": "Pre-tool-call safety evaluation using prompt-style hooks for inline AI evaluation",
+      "version": "1.0.0",
+      "author": {
+        "name": "Claude Code Community"
+      },
+      "source": "./plugins/safety-evaluation-prompt",
+      "category": "security",
+      "tags": [
+        "utility"
+      ],
+      "keywords": [
+        "safety",
+        "security",
+        "hooks",
+        "pre-tool-call",
+        "evaluation",
+        "prompt"
+      ]
+    },
+    {
+      "name": "safety-evaluation-script",
+      "description": "Pre-tool-call safety evaluation using Claude CLI (haiku) with script-style hooks",
+      "version": "1.0.0",
+      "author": {
+        "name": "Claude Code Community"
+      },
+      "source": "./plugins/safety-evaluation-script",
+      "category": "security",
+      "tags": [
+        "utility"
+      ],
+      "keywords": [
+        "safety",
+        "security",
+        "hooks",
+        "pre-tool-call",
+        "evaluation",
+        "haiku"
+      ]
+    },
+    {
+      "name": "skills-maintenance",
+      "description": "Agent skill for maintaining, updating, and improving existing Claude Code skills",
+      "version": "1.0.0",
+      "author": {
+        "name": "Claude Code Community"
+      },
+      "source": "./plugins/skills-maintenance",
+      "category": "utility",
+      "tags": [
+        "utility",
+        "skill"
+      ],
+      "keywords": [
+        "skills",
+        "maintenance",
+        "update",
+        "improve",
+        "refactor",
+        "documentation"
+      ]
+    },
+    {
+      "name": "sync-settings",
+      "description": "Automatically sync and merge local Claude Code settings, commands, and files using configurable rules in syncconfig.yaml",
+      "version": "1.0.0",
+      "author": {
+        "name": "Claude Code Community"
+      },
+      "source": "./plugins/sync-settings",
+      "category": "integration",
+      "tags": [
+        "utility"
+      ],
+      "keywords": [
+        "sync",
+        "settings",
+        "merge",
+        "json",
+        "symlink",
+        "hooks",
+        "configuration",
+        "local-settings"
+      ]
     },
     {
       "name": "task-parallelization",
-      "description": "Intelligent skill that helps Claude parallelize Task tool calls for batch operations and repetitive changes",
+      "description": "Intelligent skill that helps Claude parallelize Task tool calls when working on repetitive or batch operations, optimizing throughput based on task complexity",
       "version": "1.0.0",
       "author": {
         "name": "Claude Code Community"
       },
       "source": "./plugins/task-parallelization",
-      "category": "performance",
-      "tags": ["parallelization", "task", "batch", "performance", "optimization"],
-      "keywords": ["parallel", "concurrent", "batch", "task", "agent", "performance", "optimization"]
+      "category": "utility",
+      "tags": [
+        "utility",
+        "skill"
+      ],
+      "keywords": [
+        "parallelization",
+        "task",
+        "agent",
+        "batch",
+        "performance",
+        "optimization",
+        "concurrent"
+      ]
     }
   ]
 }
