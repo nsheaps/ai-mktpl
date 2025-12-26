@@ -3,7 +3,8 @@
 Standards for writing and reviewing code.
 
 ## Git Workflow
-
+<!-- TODO: This is only specific to agents running automatically in an external environment.
+Local "ASSISTANTS" should always be doing what the user wants them to and nothing more. -->
 After committing changes, always push immediately. Don't ask - just push.
 
 ## DRY Principle
@@ -19,6 +20,15 @@ Your task is rarely done after making changes. Always:
 2. Compare against the original request
 3. Ensure it satisfies the requirements
 4. Make sure the code isn't overcomplicated
+
+### Local and remote validation
+
+Most changes should be validated by CI when creating a PR or full validation on the default branch.
+
+CRITICAL: CI workflows should be easily replicable locally using the same source-of-truth source code.
+
+CRITICAL: Validation is considered a failure if CI fails, regardless of if it passes with local tooling. If CI is inaccessible, ask the user for help.
+CRITICAL: Validation is also considered a failure if results locally do not match CI. CI is the source of truth, and must provide confidence that the changes will not introduce regressions.
 
 ## Package Management
 
