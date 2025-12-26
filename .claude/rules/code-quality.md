@@ -7,11 +7,9 @@ Standards for writing and reviewing code.
 Local "ASSISTANTS" should always be doing what the user wants them to and nothing more. -->
 After committing changes, always push immediately. Don't ask - just push.
 
-## DRY Principle
+NEVER force push with `git push --force`. Always prefer to not rewrite history on the remote. If necessary, use `git push --force-with-lease --force-if-includes` after confirming no one else has pushed changes.
 
-Always write DRY code. NEVER write WET code.
-- **DRY** = Don't Repeat Yourself - never duplicate code, centralize it when necessary
-- **WET** = Write Everything Twice - avoid this pattern
+When working on a PR branch, always keep it up to date with the target branch (usually `main` or `master`):
 
 ## Task Completion
 
