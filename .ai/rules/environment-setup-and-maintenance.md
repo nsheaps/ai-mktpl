@@ -1,1 +1,2 @@
-<!-- TODO: Fill out with brief overview of using claude-code-guide, and details from https://code.claude.com/docs/en/claude-code-on-the-web#dependency-management and this repo's specific implementation. Detail how to add tools. -->
+<!-- TODO: Fill out with brief overview of using claude-code-guide, and details from https://code.claude.com/docs/en/claude-code-on-the-web#dependency-management and this repo's specific implementation. Detail how to add tools. 
+Be sure to explicitly detail how to preserve changes to env vars as claude executes using CLAUDE_ENV -->
