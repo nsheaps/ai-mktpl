@@ -1,0 +1,222 @@
+name: 'Claude Code Debug Info'
+description: 'Extract debugging information from Claude Code CLI sessions including session IDs, status, and workflow context'
+branding:
+  icon: 'info'
+  color: 'blue'
+
+inputs:
+  continue:
+    description: 'Whether to continue from previous session (default: true)'
+    required: false
+    default: 'true'
+  working-directory:
+    description: 'Working directory for Claude Code (defaults to repository root)'
+    required: false
+    default: '.'
+  claude-api-key:
+    description: 'Claude API key (if not set in environment)'
+    required: false
+  additional-flags:
+    description: 'Additional flags to pass to claude-code CLI'
+    required: false
+    default: ''
+  extract-logs:
+    description: 'Whether to extract and include recent session logs'
+    required: false
+    default: 'false'
+
+outputs:
+  session-id:
+    description: 'Current Claude Code session ID'
+    value: ${{ steps.debug.outputs.session-id }}
+  previous-session-id:
+    description: 'Previous Claude Code session ID'
+    value: ${{ steps.debug.outputs.previous-session-id }}
+  working-directory:
+    description: 'Working directory used by Claude Code'
+    value: ${{ steps.debug.outputs.working-directory }}
+  git-branch:
+    description: 'Current git branch'
+    value: ${{ steps.debug.outputs.git-branch }}
+  git-status:
+    description: 'Git status (clean/dirty)'
+    value: ${{ steps.debug.outputs.git-status }}
+  git-commit:
+    description: 'Current git commit SHA'
+    value: ${{ steps.debug.outputs.git-commit }}
+  session-status:
+    description: 'Status of the Claude Code session'
+    value: ${{ steps.debug.outputs.session-status }}
+  session-count:
+    description: 'Number of recent sessions'
+    value: ${{ steps.debug.outputs.session-count }}
+  claude-version:
+    description: 'Claude Code CLI version'
+    value: ${{ steps.debug.outputs.claude-version }}
+  json-output:
+    description: 'Full JSON output from claude-code CLI'
+    value: ${{ steps.debug.outputs.json-output }}
+  error:
+    description: 'Error message if command failed'
+    value: ${{ steps.debug.outputs.error }}
+  logs:
+    description: 'Recent session logs (if extract-logs is true)'
+    value: ${{ steps.debug.outputs.logs }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Extract Claude Code Debug Information
+      id: debug
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        ANTHROPIC_API_KEY: ${{ inputs.claude-api-key }}
+        CONTINUE_FLAG: ${{ inputs.continue }}
+        ADDITIONAL_FLAGS: ${{ inputs.additional-flags }}
+        EXTRACT_LOGS: ${{ inputs.extract-logs }}
+      run: |
+        set +e  # Don't exit on error, we want to capture it
+
+        echo "::group::Claude Code Debug Information"
+
+        # Function to safely set output
+        set_output() {
+          local name="$1"
+          local value="$2"
+          # Escape special characters and handle multiline
+          value="${value//'%'/'%25'}"
+          value="${value//$'\n'/'%0A'}"
+          value="${value//$'\r'/'%0D'}"
+          echo "${name}=${value}" >> "$GITHUB_OUTPUT"
+        }
+
+        # Get Claude Code version
+        echo "Getting Claude Code version..."
+        CLAUDE_VERSION=$(claude-code --version 2>&1 || echo "unknown")
+        set_output "claude-version" "$CLAUDE_VERSION"
+        echo "Claude Code version: $CLAUDE_VERSION"
+
+        # Get git information
+        echo "Gathering git information..."
+        GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
+        GIT_COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
+        GIT_STATUS=$(git status --porcelain 2>/dev/null)
+        if [ -z "$GIT_STATUS" ]; then
+          GIT_STATUS_CLEAN="clean"
+        else
+          GIT_STATUS_CLEAN="dirty"
+        fi
+
+        set_output "git-branch" "$GIT_BRANCH"
+        set_output "git-commit" "$GIT_COMMIT"
+        set_output "git-status" "$GIT_STATUS_CLEAN"
+        set_output "working-directory" "$PWD"
+
+        echo "Git Branch: $GIT_BRANCH"
+        echo "Git Commit: $GIT_COMMIT"
+        echo "Git Status: $GIT_STATUS_CLEAN"
+
+        # Build claude-code command
+        CLAUDE_CMD="claude-code"
+
+        if [ "$CONTINUE_FLAG" = "true" ]; then
+          CLAUDE_CMD="$CLAUDE_CMD --continue"
+        fi
+
+        CLAUDE_CMD="$CLAUDE_CMD --output-format json"
+
+        if [ -n "$ADDITIONAL_FLAGS" ]; then
+          CLAUDE_CMD="$CLAUDE_CMD $ADDITIONAL_FLAGS"
+        fi
+
+        echo "Running: $CLAUDE_CMD"
+
+        # Run claude-code and capture output
+        JSON_OUTPUT=$(eval "$CLAUDE_CMD" 2>&1)
+        EXIT_CODE=$?
+
+        if [ $EXIT_CODE -ne 0 ]; then
+          echo "::warning::Claude Code command failed with exit code $EXIT_CODE"
+          set_output "error" "Exit code $EXIT_CODE: $JSON_OUTPUT"
+          set_output "session-status" "error"
+        else
+          set_output "session-status" "success"
+
+          # Try to parse JSON output
+          if command -v jq &> /dev/null; then
+            echo "Parsing JSON output with jq..."
+
+            # Extract session information
+            SESSION_ID=$(echo "$JSON_OUTPUT" | jq -r '.session.id // .sessionId // .current_session // "unknown"' 2>/dev/null)
+            PREV_SESSION_ID=$(echo "$JSON_OUTPUT" | jq -r '.session.previous // .previousSessionId // .previous_session // "unknown"' 2>/dev/null)
+            SESSION_COUNT=$(echo "$JSON_OUTPUT" | jq -r '.sessions | length // .session_count // 0' 2>/dev/null)
+
+            set_output "session-id" "$SESSION_ID"
+            set_output "previous-session-id" "$PREV_SESSION_ID"
+            set_output "session-count" "$SESSION_COUNT"
+
+            echo "Session ID: $SESSION_ID"
+            echo "Previous Session ID: $PREV_SESSION_ID"
+            echo "Session Count: $SESSION_COUNT"
+          else
+            echo "::warning::jq not found, skipping JSON parsing"
+            echo "::notice::Install jq in your workflow for detailed JSON parsing"
+
+            # Basic parsing without jq
+            SESSION_ID=$(echo "$JSON_OUTPUT" | grep -oP '"(?:session|sessionId)":\s*"\K[^"]+' | head -1 || echo "unknown")
+            set_output "session-id" "$SESSION_ID"
+            set_output "previous-session-id" "unknown"
+            set_output "session-count" "0"
+          fi
+        fi
+
+        # Store full JSON output (truncate if too large for GitHub Actions)
+        JSON_OUTPUT_LEN=${#JSON_OUTPUT}
+        if [ $JSON_OUTPUT_LEN -gt 65000 ]; then
+          echo "::warning::JSON output truncated (size: $JSON_OUTPUT_LEN bytes)"
+          JSON_OUTPUT="${JSON_OUTPUT:0:65000}... [TRUNCATED]"
+        fi
+        set_output "json-output" "$JSON_OUTPUT"
+
+        # Extract logs if requested
+        if [ "$EXTRACT_LOGS" = "true" ]; then
+          echo "Extracting recent session logs..."
+          CLAUDE_LOG_DIR="${HOME}/.claude/logs"
+
+          if [ -d "$CLAUDE_LOG_DIR" ]; then
+            RECENT_LOGS=$(find "$CLAUDE_LOG_DIR" -type f -name "*.log" -mtime -1 2>/dev/null | sort -r | head -3)
+
+            if [ -n "$RECENT_LOGS" ]; then
+              LOGS_CONTENT=""
+              while IFS= read -r log_file; do
+                LOGS_CONTENT="${LOGS_CONTENT}\n=== ${log_file} ===\n"
+                LOGS_CONTENT="${LOGS_CONTENT}$(tail -n 50 "$log_file" 2>/dev/null)"
+              done <<< "$RECENT_LOGS"
+
+              set_output "logs" "$LOGS_CONTENT"
+            else
+              set_output "logs" "No recent logs found"
+            fi
+          else
+            set_output "logs" "Log directory not found"
+          fi
+        fi
+
+        echo "::endgroup::"
+
+        # Create summary
+        echo "## Claude Code Debug Summary" >> "$GITHUB_STEP_SUMMARY"
+        echo "" >> "$GITHUB_STEP_SUMMARY"
+        echo "| Property | Value |" >> "$GITHUB_STEP_SUMMARY"
+        echo "|----------|-------|" >> "$GITHUB_STEP_SUMMARY"
+        echo "| Claude Version | \`$CLAUDE_VERSION\` |" >> "$GITHUB_STEP_SUMMARY"
+        echo "| Session Status | \`${session_status:-unknown}\` |" >> "$GITHUB_STEP_SUMMARY"
+        echo "| Session ID | \`${SESSION_ID:-unknown}\` |" >> "$GITHUB_STEP_SUMMARY"
+        echo "| Previous Session | \`${PREV_SESSION_ID:-unknown}\` |" >> "$GITHUB_STEP_SUMMARY"
+        echo "| Git Branch | \`$GIT_BRANCH\` |" >> "$GITHUB_STEP_SUMMARY"
+        echo "| Git Commit | \`$GIT_COMMIT\` |" >> "$GITHUB_STEP_SUMMARY"
+        echo "| Git Status | \`$GIT_STATUS_CLEAN\` |" >> "$GITHUB_STEP_SUMMARY"
+        echo "| Working Directory | \`$PWD\` |" >> "$GITHUB_STEP_SUMMARY"
+
+        exit 0
