@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-plugin.json",
   "name": "linear-mcp-sync",
   "version": "1.0.0",
   "description": "Installs Linear MCP and adds hooks for safe ticket updates with hash validation to prevent stale overwrites",

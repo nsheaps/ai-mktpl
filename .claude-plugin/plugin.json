@@ -1,9 +1,8 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-plugin.json",
   "name": "claude-code-plugin-marketplace",
   "version": "1.0.0",
   "description": "A curated marketplace for Claude Code plugins focused on git automation and intelligent development workflows",
-  "questionForClaude": "Is this file even correct/needed?",
-  "/correct-behavior project": "all json and yaml files should be accompanied by a valid (and validated) $schema reference at the top",
   "author": {
     "name": "Claude Code Community",
     "email": "community@example.com",
