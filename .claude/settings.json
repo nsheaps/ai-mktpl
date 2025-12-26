@@ -50,6 +50,7 @@
       "Bash(git rev-parse:*)",
       "Bash(git fetch:*)",
       "Bash(git show:*)",
+      "Bash(git remote get-url:*)",
 
       "Bash(brew search:*)",
       "Bash(brew info:*)",
@@ -61,12 +62,15 @@
       "Bash(gh run view:*)",
 
       "Bash(wc:*)",
-      "Bash(man:*)"
+      "Bash(man:*)",
+
+      "Bash(mkdir -p:*)"
     ],
     "deny": ["Bash(rm -rf /:*)"],
     "ask": [
       "Bash(gh pr view --web:*)",
-      "Bash(rm -rf .:*)",
+      "Bash(rm -rf:*)",
+      "Bash(chmod:*)",
       "Bash(git push --force:*)",
       "Bash(git push -f:*)",
       "Bash(git push --force-with-lease:*)",
