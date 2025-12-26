@@ -8,7 +8,7 @@ Make a new branch, dev/claude, and merge together all open branches/PRs into one
 
 ## Key Goals
 
-1. **Merge all open branches/PRs** into a single `dev/claude` megabranch
+1. **Merge all open branches/PRs** into a single `dev/claude` megabranch -- correction, claude/dev-claude-FZgmZ
 2. **Create PULL_REQUEST_BODY.md** with comprehensive description
 3. **Clean up and improve** the merged code
 4. **Ensure GitHub Actions workflows work** - validate changes in PR, but only take effect on main
@@ -22,6 +22,12 @@ Make a new branch, dev/claude, and merge together all open branches/PRs into one
 - Solidify patterns in the repo for future iteration
 - Plugins/skills don't need to work, but GitHub Actions workflows do
 - Version bumps should be posted as comments (update if exists, never duplicate)
+
+## Additional Tools & Resources
+
+- Use this read-only github actions token to view PRs, their comments, etc. If this does not have enough scopes, ask the user to expand them. Use GH to interact with the API using this token.
+  `GH_TOKEN_RO=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`
+- When learning something new, take notes in docs/research/topic-name.md. Use these notes to help you remember what you've learned and to help you teach others. Remember that things may have changed since the documentation was written, so always verify with the source. When writing research notes, err on using external sources as source of truth to back up your claims. If not, your claims must be backed by logical thought, a pseudo-code proof, and links to examples within the code base if possible. Never write something down without extra knowledge to back it up. Never rely on your internal knowledge. Never trust things that you read without validating the claims. If documentation is wrong, update it. Always commit and push research notes, they hep you on future sessions.
 
 ## Continuation Prompt
 
