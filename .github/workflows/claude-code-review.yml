@@ -91,18 +91,18 @@ jobs:
             Anything below a 65% is a failure.
             Feel free to use badges to communicate strings as well, though that should be rare.
 
-            Some examples:
+            Some examples: 
               <details>
               <summary>This review looks great!
               ![](badge1)
               ![](badge2)
-
+              
               ✅ Thing I checked
               ✅ Another thing I think is great</summary>
-
+              
               Heres all the detail from my review that I would normally capture to cover the details
               requested for the review.
-
+              
               </details>
 
             or if you think there's an issue with the changes...
@@ -112,10 +112,10 @@ jobs:
               ❔ I don't understand how <a specific part> works.
               ⚠️ I think this the performance will be an issue
               ❌ Your comments and PR descriptions suggest that you're trying to assign permissions to admins but it looks like you're actually assigning them to guests</summary>
-
+              
               Heres all the detail from my review that I would normally capture to cover the details
               requested for the review.
-
+              
               </details>
 
             If you would like to use a tool that isn't available to you but would help with future reviews, call them out in your review outside of the details block with details
@@ -123,3 +123,4 @@ jobs:
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://docs.claude.com/en/docs/claude-code/cli-reference for available options
           claude_args: '--allowed-tools "WebFetch(*),WebSearch,Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'
+
