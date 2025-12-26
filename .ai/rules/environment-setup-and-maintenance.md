@@ -4,6 +4,8 @@
 
 This repository uses **mise** for tool version management and **Claude Code hooks** for automatic session setup. The configuration ensures consistent development environments across local machines and Claude Code web sessions.
 
+CRITICAL: The hooks are a last-ditch effort to ensure a consistent environment between executions of the agent. Always try to pre-emptively install software in an earlier layer, especially one that can be re-used, such as a container layer.
+
 ## Key Resources
 
 - [Claude Code on the Web - Dependency Management](https://code.claude.com/docs/en/claude-code-on-the-web#dependency-management)
