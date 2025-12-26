@@ -4,7 +4,7 @@
 
 ## Rule: Update Todos BEFORE Any Tool Use
 
-Before using ANY tool (except for simple conversational responses), you MUST first update your todos to reflect what you're about to do.
+Before using ANY tool (except for simple conversational responses), you MUST first update your todos to reflect what you're about to do and any changes you've done since your last action.
 
 ### The Only Exception
 
