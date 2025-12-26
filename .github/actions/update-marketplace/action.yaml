@@ -1,4 +1,5 @@
 name: Update Marketplace
+# Comments about other actions apply to this action too, don't forget to update it.
 description: Update marketplace.json with latest plugin versions and metadata
 
 outputs:

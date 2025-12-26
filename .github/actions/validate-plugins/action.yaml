@@ -15,9 +15,18 @@ runs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
+        # /correct-behavior project always prefer fetching version numbers from file.
+        # in this particular case, you should use a setup-mise action instead of this
         node-version: '20'
 
     - name: Validate plugin structure
+      # /correct-behavior project always prefer to capture bash scripts (> 3 lines) in a separate file so they
+      # can be properly linted and formatted.
+      # Also, since this is primarily json manipulation, consider using js instead of bash for better readability.
+      # perhaps via the github/script action.
+      # Also be sure that whatever script is used in this action and all other actions, that the SAME script can also
+      # be executed locally (default in dry-run mode) to aid in getting high quality DX signals sooner, before CI
+      # can run.
       id: validate
       shell: bash
       run: |

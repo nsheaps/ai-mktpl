@@ -22,7 +22,7 @@ runs:
       uses: actions/setup-node@v4
       with:
         node-version: '20'
-        cache: 'npm'
+        cache: 'npm' # /correct-behavior, prefer yarn over npm. Use corepack to enable and install the latest versions of yarn.
         cache-dependency-path: |
           .github/actions/lint-files/package-lock.json
 

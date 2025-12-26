@@ -1,4 +1,5 @@
 {
+  // I think this should probably be replaced with prettier.... (installed via mise?)
   "config": {
     "default": true,
     "MD013": {
