@@ -38,3 +38,8 @@ All workflows use exponential backoff (4 attempts: 2s, 4s, 8s, 16s).
 
 - `GITHUB_PAT_TOKEN_NSHEAPS`: For authenticated pushes
 - `CLAUDE_CODE_OAUTH_TOKEN`: For Claude Code review
+
+## See Also
+
+- [Plugin Development](../plugin-development.md) - Plugin structure requirements
+- [Versioning Rules](../versioning.md) - When version bumps are required

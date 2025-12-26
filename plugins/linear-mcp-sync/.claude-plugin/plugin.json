@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin.json",
   "name": "linear-mcp-sync",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Installs Linear MCP and adds hooks for safe ticket updates with hash validation to prevent stale overwrites",
   "author": {
     "name": "Claude Code Community",
@@ -10,5 +10,12 @@
   },
   "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/linear-mcp-sync",
   "repository": "https://github.com/nsheaps/.ai",
-  "keywords": ["linear", "mcp", "hooks", "sync", "issue-tracking", "conflict-detection"]
+  "keywords": [
+    "linear",
+    "mcp",
+    "hooks",
+    "sync",
+    "issue-tracking",
+    "conflict-detection"
+  ]
 }
