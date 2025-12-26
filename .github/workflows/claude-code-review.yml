@@ -28,12 +28,14 @@ jobs:
       pull-requests: read
       issues: read
       id-token: write
+      actions: read
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
+          
       - name: Get additional job context
         uses: qoomon/actions--context@v5
         if: ${{ !cancelled() }}
