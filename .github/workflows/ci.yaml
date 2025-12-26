@@ -45,9 +45,10 @@ jobs:
 
       - name: Delete old lint comments
         if: github.event_name == 'pull_request' && steps.find-comment.outputs.comment-id != ''
-        uses: peter-evans/delete-comment@v2
-        with:
-          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api -X DELETE repos/${{ github.repository }}/issues/comments/${{ steps.find-comment.outputs.comment-id }}
 
       - name: Run initial lint check
         id: initial-lint
