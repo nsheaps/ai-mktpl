@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin.json",
   "name": "safety-evaluation-script",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Pre-tool-call safety evaluation using Claude CLI (haiku) with script-style hooks",
   "author": {
     "name": "Claude Code Community",
@@ -10,7 +10,14 @@
   },
   "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/safety-evaluation-script",
   "repository": "https://github.com/nsheaps/.ai",
-  "keywords": ["safety", "security", "hooks", "pre-tool-call", "evaluation", "haiku"],
+  "keywords": [
+    "safety",
+    "security",
+    "hooks",
+    "pre-tool-call",
+    "evaluation",
+    "haiku"
+  ],
   "hooks": {
     "PreToolCall": [
       {

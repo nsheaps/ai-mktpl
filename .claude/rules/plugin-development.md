@@ -70,3 +70,8 @@ plugins/plugin-name/
   }
 }
 ```
+
+## See Also
+
+- [Versioning Rules](versioning.md) - When and how to bump versions
+- [CI/CD Conventions](ci-cd/conventions.md) - Workflow behavior

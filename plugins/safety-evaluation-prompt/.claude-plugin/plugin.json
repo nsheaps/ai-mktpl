@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin.json",
   "name": "safety-evaluation-prompt",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Pre-tool-call safety evaluation using prompt-style hooks for inline AI evaluation",
   "author": {
     "name": "Claude Code Community",
@@ -10,7 +10,14 @@
   },
   "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/safety-evaluation-prompt",
   "repository": "https://github.com/nsheaps/.ai",
-  "keywords": ["safety", "security", "hooks", "pre-tool-call", "evaluation", "prompt"],
+  "keywords": [
+    "safety",
+    "security",
+    "hooks",
+    "pre-tool-call",
+    "evaluation",
+    "prompt"
+  ],
   "hooks": {
     "PreToolCall": [
       {

@@ -27,3 +27,8 @@ Use conventional commits:
 - `docs:` - Documentation updates
 
 Append `[skip ci]` to skip CI workflows when needed.
+
+## See Also
+
+- [Plugin Development](plugin-development.md) - Structure requirements
+- [CI/CD Conventions](ci-cd/conventions.md) - Version check workflow details
