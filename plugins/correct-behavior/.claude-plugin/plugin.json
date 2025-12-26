@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-plugin.json",
   "name": "correct-behavior",
   "version": "1.0.0",
   "description": "Command to correct AI behavior mistakes and update rules to prevent recurrence",

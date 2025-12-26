@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-plugin.json",
   "name": "commit-command",
   "version": "1.0.0",
   "description": "Automate git commits with AI-generated messages that match your repository's commit style and conventions",
