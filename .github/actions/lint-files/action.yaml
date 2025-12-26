@@ -21,15 +21,15 @@ runs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20'
-        cache: 'npm' # /correct-behavior, prefer yarn over npm. Use corepack to enable and install the latest versions of yarn.
+        node-version: '22'
+        cache: 'npm'
         cache-dependency-path: |
           .github/actions/lint-files/package-lock.json
 
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.11'
+        python-version: '3.12'
         cache: 'pip'
 
     - name: Install linters
