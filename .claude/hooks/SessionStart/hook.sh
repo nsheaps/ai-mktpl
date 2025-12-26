@@ -53,6 +53,7 @@ if [ "$IS_WEB_SESSION" = "true" ]; then
     fi
   else
     # mise already available, activate it
+    mise self-update
     eval "$(mise activate bash)"
     echo 'eval "$(mise activate bash)"' >> "$CLAUDE_ENV_FILE"
   fi
