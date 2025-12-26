@@ -1,0 +1,13 @@
+{
+  "name": "command-help-skill",
+  "version": "1.0.0",
+  "description": "Help users understand and discover slash commands when they accidentally type them as messages",
+  "author": {
+    "name": "Claude Code Community",
+    "email": "community@example.com",
+    "url": "https://github.com/nsheaps/.ai"
+  },
+  "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/command-help-skill",
+  "repository": "https://github.com/nsheaps/.ai",
+  "keywords": ["commands", "help", "discovery", "skill", "slash-commands", "ai", "assistant"]
+}
