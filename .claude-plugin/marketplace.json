@@ -51,6 +51,18 @@
       "category": "productivity",
       "tags": ["memory", "preferences", "context", "automation"],
       "keywords": ["memory", "preferences", "claude.md", "context", "instructions"]
+    },
+    {
+      "name": "linear-mcp-sync",
+      "description": "Linear MCP integration with hash validation hooks to prevent stale ticket updates",
+      "version": "1.0.0",
+      "author": {
+        "name": "Claude Code Community"
+      },
+      "source": "./plugins/linear-mcp-sync",
+      "category": "integration",
+      "tags": ["linear", "mcp", "hooks", "sync", "issue-tracking"],
+      "keywords": ["linear", "mcp", "hooks", "hash-validation", "conflict-detection", "issue-tracking"]
     }
   ]
 }
