@@ -163,7 +163,7 @@
     },
     {
       "name": "og-image",
-      "description": "xxxx",
+      "description": "Generate OpenGraph images for Nuxt/Vue pages using HTML templates and html2png.dev API",
       "version": "1.0.0",
       "author": {
         "name": "alvinunreal + modifications by nsheaps"

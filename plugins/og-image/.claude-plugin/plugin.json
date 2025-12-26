@@ -1,7 +1,7 @@
 {
   "name": "opengraph-image",
   "version": "1.0.0",
-  "description": "xxxx",
+  "description": "Generate OpenGraph images for Nuxt/Vue pages using HTML templates and html2png.dev API",
   "author": {
     "name": "alvinunreal + modifications by nsheaps",
     "email": "unknown",
