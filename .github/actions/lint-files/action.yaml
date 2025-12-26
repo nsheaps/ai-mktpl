@@ -21,6 +21,8 @@ runs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
+        # /correct-behavior project prefer yarn over npm. Use corepack to enable yarn.
+        # TODO: migrate from npm to yarn with corepack
         node-version: '22'
         cache: 'npm'
         cache-dependency-path: |

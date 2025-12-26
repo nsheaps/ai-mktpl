@@ -1,0 +1,1 @@
+../../plugins/correct-behavior/commands/correct-behavior.md
