@@ -1,5 +1,7 @@
 # AGENTS.md - Repository Context for AI Assistants
 
+<!-- remove claude.md and this file, in place of .claude/rules/xxxx.md. Use claude-code-guide agent to help you -->
+
 > **⚠️ IMPORTANT FOR AI AGENTS**: This file provides critical context about the repository structure and conventions. **You MUST update this file after completing any task that makes significant changes to the repository.** Keeping this file current ensures accurate assistance for future tasks.
 
 ## Repository Overview
@@ -19,6 +21,7 @@ This is a plugin marketplace for Claude Code that:
 - Offers Homebrew-based installation
 
 ## Directory Structure
+<!-- correct rules: this context should be in the form of AGENTS.md in each folder. One central one is bound to get out of date. Do not list specific files unless you are specifying a pattern and what it is used for. Capture folder specific stuff in README.md. Don't duplicate AGENTS.md into each plugin, instead have it in the parent plugins directory (not mentioning plugin specifics). CLAUDE.md should be a symlink ot AGENTS.md in any folder where AGENTS.md is present. -->
 
 ```
 .

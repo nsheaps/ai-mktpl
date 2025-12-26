@@ -1,3 +1,5 @@
+# This duplicates claude-code-review.yaml. Update that file, get rid of this, saving the important things. The other workflow works....this most definitely doesnt.
+
 name: review
 
 'on':
@@ -50,6 +52,7 @@ jobs:
           echo "::endgroup::"
 
       - name: Review with Claude Code
+      # This isn't even a real thing, don't use this action.
         uses: anthropics/anthropic-quickstarts@main
         with:
           mode: review
@@ -60,5 +63,8 @@ jobs:
           pr-number: ${{ github.event.pull_request.number }}
 
       - name: Summary
+        # this is stupid... update rules and /correct-behavior project to avoid status messages where the status can otherwise be deduced
+        # only use status messages where you need an explicit message (such as local CLIs should say success, not just exit quietly).
+        # ESPECIALLY don't use steps to print a single message IN CI. That's a waste, and is a drag on utilizing the github actions UX.
         run: |
           echo "::notice::Code review completed for PR #${{ github.event.pull_request.number }}"

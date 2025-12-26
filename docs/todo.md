@@ -1,5 +1,7 @@
 # TODO
 
+<!-- each of these should be their own spec(ificiation) in docs/specs/drafts/feature-name.md -->
+
 ## High Priority
 
 ### Claude Code Enterprise Settings Brew Formula
