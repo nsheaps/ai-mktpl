@@ -56,6 +56,7 @@ When you encounter a file that has been modified since you last read it:
   3. Explain the conflict and ask how to proceed
 - This applies even when the modification seems minor or was done by a linter
 - The user's changes are intentional and should be respected
+- When possible, lean on unit testing to validate integration of two change sets
 
 ## Safe File Deletion During Migrations
 
