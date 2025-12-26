@@ -1,0 +1,225 @@
+name: Repository Dispatch Debug Handler
+
+# This workflow handles repository_dispatch events from external repositories
+# External repos can trigger this workflow to get Claude Code debug information
+
+on:
+  repository_dispatch:
+    types:
+      - claude-debug-request
+      - claude-session-info
+
+jobs:
+  handle-debug-request:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.client_payload.ref || github.ref }}
+
+      - name: Validate Request
+        id: validate
+        run: |
+          # Validate the request comes from a trusted source
+          ALLOWED_REPOS="${{ vars.ALLOWED_DEBUG_REPOS }}"
+
+          SOURCE_REPO="${{ github.event.client_payload.source_repo }}"
+
+          if [ -z "$SOURCE_REPO" ]; then
+            echo "error=No source repository specified" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+          # Check if source repo is in allowed list (if configured)
+          if [ -n "$ALLOWED_REPOS" ]; then
+            if ! echo "$ALLOWED_REPOS" | grep -q "$SOURCE_REPO"; then
+              echo "error=Repository $SOURCE_REPO not authorized" >> $GITHUB_OUTPUT
+              exit 1
+            fi
+          fi
+
+          echo "source_repo=$SOURCE_REPO" >> $GITHUB_OUTPUT
+          echo "✅ Request validated from $SOURCE_REPO"
+
+      - name: Setup Environment
+        run: |
+          echo "Setting up Claude Code environment..."
+
+          # Install dependencies (customize based on your needs)
+          if [ -f package.json ]; then
+            npm install
+          fi
+
+          # Install jq for JSON parsing
+          sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Install Claude Code CLI
+        run: |
+          # Install Claude Code CLI
+          # Replace with actual installation method
+          echo "Installing Claude Code CLI..."
+
+          # Example: npm install -g @anthropic/claude-code
+          # For demo, create a mock
+          cat > /tmp/claude-code << 'EOF'
+          #!/bin/bash
+          if [[ "$*" == *"--version"* ]]; then
+            echo "claude-code version 1.2.3"
+          elif [[ "$*" == *"--output-format json"* ]]; then
+            cat << 'JSONEOF'
+          {
+            "session": {
+              "id": "sess_$(date +%s)",
+              "previous": "sess_$(( $(date +%s) - 3600 ))",
+              "created_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+              "status": "active"
+            },
+            "sessions": [],
+            "workspace": {
+              "path": "$(pwd)",
+              "files_changed": 0
+            },
+            "git": {
+              "branch": "$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo main)",
+              "commit": "$(git rev-parse HEAD 2>/dev/null || echo unknown)",
+              "dirty": $(git diff --quiet 2>/dev/null && echo false || echo true)
+            }
+          }
+          JSONEOF
+          fi
+          EOF
+          chmod +x /tmp/claude-code
+          sudo mv /tmp/claude-code /usr/local/bin/claude-code
+
+      - name: Run Claude Debug Action
+        uses: ./.github/actions/claude-debug
+        id: debug
+        with:
+          continue: ${{ github.event.client_payload.continue || 'true' }}
+          extract-logs: ${{ github.event.client_payload.extract_logs || 'false' }}
+          working-directory: ${{ github.event.client_payload.working_directory || '.' }}
+          additional-flags: ${{ github.event.client_payload.additional_flags || '' }}
+          claude-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Prepare Response Payload
+        id: response
+        run: |
+          # Create a comprehensive response payload
+          cat > /tmp/response.json << EOF
+          {
+            "request_id": "${{ github.event.client_payload.request_id }}",
+            "source_repo": "${{ steps.validate.outputs.source_repo }}",
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "debug_info": {
+              "session_id": "${{ steps.debug.outputs.session-id }}",
+              "previous_session_id": "${{ steps.debug.outputs.previous-session-id }}",
+              "session_status": "${{ steps.debug.outputs.session-status }}",
+              "session_count": "${{ steps.debug.outputs.session-count }}",
+              "claude_version": "${{ steps.debug.outputs.claude-version }}"
+            },
+            "git_context": {
+              "branch": "${{ steps.debug.outputs.git-branch }}",
+              "commit": "${{ steps.debug.outputs.git-commit }}",
+              "status": "${{ steps.debug.outputs.git-status }}",
+              "working_directory": "${{ steps.debug.outputs.working-directory }}"
+            },
+            "workflow": {
+              "run_id": "${{ github.run_id }}",
+              "run_number": "${{ github.run_number }}",
+              "run_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            }
+          }
+          EOF
+
+          # Make it available for next steps
+          echo "response_file=/tmp/response.json" >> $GITHUB_OUTPUT
+
+          cat /tmp/response.json
+
+      - name: Post Response to Webhook
+        if: github.event.client_payload.webhook_url
+        run: |
+          curl -X POST "${{ github.event.client_payload.webhook_url }}" \
+            -H "Content-Type: application/json" \
+            -H "X-GitHub-Event: repository_dispatch" \
+            -H "X-Request-ID: ${{ github.event.client_payload.request_id }}" \
+            -d @${{ steps.response.outputs.response_file }}
+
+      - name: Comment on Source Issue/PR
+        if: github.event.client_payload.issue_number && github.event.client_payload.source_repo
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PAT_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const response = JSON.parse(fs.readFileSync('${{ steps.response.outputs.response_file }}', 'utf8'));
+
+            const [owner, repo] = '${{ github.event.client_payload.source_repo }}'.split('/');
+
+            const body = `## 🤖 Claude Code Debug Information
+
+            **Session ID**: \`${response.debug_info.session_id}\`
+            **Status**: ${response.debug_info.session_status === 'success' ? '✅' : '❌'} ${response.debug_info.session_status}
+            **Claude Version**: \`${response.debug_info.claude_version}\`
+
+            ### Git Context
+            - **Branch**: \`${response.git_context.branch}\`
+            - **Commit**: \`${response.git_context.commit}\`
+            - **Status**: \`${response.git_context.status}\`
+
+            ### Session History
+            - **Previous Session**: \`${response.debug_info.previous_session_id}\`
+            - **Total Sessions**: ${response.debug_info.session_count}
+
+            <details>
+            <summary>Workflow Details</summary>
+
+            - **Run ID**: ${response.workflow.run_id}
+            - **Run URL**: ${response.workflow.run_url}
+            - **Timestamp**: ${response.timestamp}
+
+            </details>
+
+            ${ '${{ steps.debug.outputs.error }}' ? `
+            ### ⚠️ Errors
+            \`\`\`
+            ${{ steps.debug.outputs.error }}
+            \`\`\`
+            ` : '' }
+            `;
+
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: ${{ github.event.client_payload.issue_number }},
+              body
+            });
+
+      - name: Upload Debug Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: claude-debug-${{ github.run_id }}
+          path: |
+            ${{ steps.response.outputs.response_file }}
+            ~/.claude/logs/
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Notify on Failure
+        if: failure()
+        run: |
+          echo "Debug workflow failed"
+
+          # If webhook URL provided, send failure notification
+          if [ -n "${{ github.event.client_payload.webhook_url }}" ]; then
+            curl -X POST "${{ github.event.client_payload.webhook_url }}" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "request_id": "${{ github.event.client_payload.request_id }}",
+                "status": "failed",
+                "error": "Debug workflow failed",
+                "run_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+              }'
+          fi
