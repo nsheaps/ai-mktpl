@@ -34,6 +34,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
+      - name: Get additional job context
+        uses: qoomon/actions--context@v5
+        if: ${{ !cancelled() }}
+        id: additional-context
+        continue-on-error: true
 
       - name: Run Claude Code Review
         id: claude-review
@@ -48,7 +53,7 @@ jobs:
           bot_id: "209825114"  # ← Workaround: correct claude[bot] ID
           prompt: |
             REPO: ${{ github.repository }}
-            PR NUMBER: ${{ github.event.pull_request.number }}
+            PR_NUMBER: ${{ github.event.pull_request.number }}
 
             Please review this pull request and provide feedback on:
             - Code quality and best practices
@@ -120,6 +125,18 @@ jobs:
 
             If you would like to use a tool that isn't available to you but would help with future reviews, call them out in your review outside of the details block with details
             of which changes are needed to give you or grant you access to that tool.
+
+            ==== Job Context: ====
+            ${{ toJson(steps.additional-context.outputs) }}
+            ==== end job context ====
+
+            CRITICAL: Your review MUST end in a list of reference links like so:
+              Notes:[^1][^2]
+              [^1]: Workflow Run: [#123456](https://github.com/nsheaps/.ai/actions/runs.....)
+              [^2]: PR: [nsheaps/.ai#123](https://github.com/nsheaps/.ai/pull/123)
+              ... 
+            You MUST include the following references:
+              1. a link to the html_url for the workflow run
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://docs.claude.com/en/docs/claude-code/cli-reference for available options
           claude_args: '--allowed-tools "WebFetch(*),WebSearch,Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'
