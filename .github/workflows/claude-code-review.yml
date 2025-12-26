@@ -97,6 +97,10 @@ jobs:
             Use the color (not label color) to indicate if it's good or bad. Generally 85+ should be green, 65+ yellow, and below that red.
             Anything below a 65% is a failure.
             Feel free to use badges to communicate strings as well, though that should be rare.
+            
+            CRITICAL: Your review MUST end in a list of reference links as shown in the example, and you MUST include a details/summary block
+            You MUST include the following references:
+              1. a link to the html_url for the workflow run
 
             Some examples: 
               <details>
@@ -111,6 +115,11 @@ jobs:
               requested for the review.
               
               </details>
+            
+              Notes:[^1][^2]
+              [^1]: Workflow Run: [#123456](https://github.com/nsheaps/.ai/actions/runs.....)
+              [^2]: PR: [nsheaps/.ai#123](https://github.com/nsheaps/.ai/pull/123)
+              ... 
 
             or if you think there's an issue with the changes...
 
@@ -124,6 +133,11 @@ jobs:
               requested for the review.
               
               </details>
+            
+              Notes:[^1][^2]
+              [^1]: Workflow Run: [#123456](https://github.com/nsheaps/.ai/actions/runs.....)
+              [^2]: PR: [nsheaps/.ai#123](https://github.com/nsheaps/.ai/pull/123)
+              ... 
 
             If you would like to use a tool that isn't available to you but would help with future reviews, call them out in your review outside of the details block with details
             of which changes are needed to give you or grant you access to that tool.
@@ -131,14 +145,6 @@ jobs:
             ==== Job Context: ====
             ${{ toJson(steps.additional-context.outputs) }}
             ==== end job context ====
-
-            CRITICAL: Your review MUST end in a list of reference links like so:
-              Notes:[^1][^2]
-              [^1]: Workflow Run: [#123456](https://github.com/nsheaps/.ai/actions/runs.....)
-              [^2]: PR: [nsheaps/.ai#123](https://github.com/nsheaps/.ai/pull/123)
-              ... 
-            You MUST include the following references:
-              1. a link to the html_url for the workflow run
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://docs.claude.com/en/docs/claude-code/cli-reference for available options
           claude_args: '--allowed-tools "WebFetch(*),WebSearch,Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'
