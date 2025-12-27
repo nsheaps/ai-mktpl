@@ -43,7 +43,7 @@ runs:
         echo "::endgroup::"
 
         echo "::group::Installing Python linters"
-        pip install yamllint black flake8 isort
+        pip install black flake8 isort
         echo "::endgroup::"
 
     - name: Run linters
@@ -54,27 +54,10 @@ runs:
         ERROR_COUNT=0
         HAS_ERRORS=false
 
-        echo "::group::Linting YAML files"
-        yamllint -c ${{ github.action_path }}/yamllint.yaml . || {
-          ERROR_COUNT=$((ERROR_COUNT + $?))
-          HAS_ERRORS=true
-        }
-        echo "::endgroup::"
-
-        echo "::group::Linting JSON files"
-        npx prettier --check "**/*.json" || {
+        echo "::group::Linting YAML, JSON, and Markdown files with Prettier"
+        prettier --check "**/*.{yaml,yml,json,md}" || {
           if [ "${{ inputs.fix }}" = "true" ]; then
-            npx prettier --write "**/*.json"
-          fi
-          ERROR_COUNT=$((ERROR_COUNT + 1))
-          HAS_ERRORS=true
-        }
-        echo "::endgroup::"
-
-        echo "::group::Linting Markdown files"
-        npx markdownlint-cli2 "**/*.md" "#node_modules" || {
-          if [ "${{ inputs.fix }}" = "true" ]; then
-            npx markdownlint-cli2 --fix "**/*.md" "#node_modules"
+            prettier --write "**/*.{yaml,yml,json,md}"
           fi
           ERROR_COUNT=$((ERROR_COUNT + 1))
           HAS_ERRORS=true

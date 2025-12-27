@@ -95,11 +95,7 @@ jobs:
           steps.check-changes.outputs.has-changes != 'true')
         id: collect-errors
         run: |
-          {
-            yamllint -f parsable . 2>&1 || true
-            npx prettier --check "**/*.json" 2>&1 || true
-            npx markdownlint-cli2 "**/*.md" "#node_modules" 2>&1 || true
-          } | head -50 > /tmp/errors.txt
+          prettier --check "**/*.{yaml,yml,json,md}" 2>&1 | head -50 > /tmp/errors.txt
           echo 'errors<<EOF' >> $GITHUB_OUTPUT
           cat /tmp/errors.txt >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT

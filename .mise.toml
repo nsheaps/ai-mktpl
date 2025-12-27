@@ -11,6 +11,12 @@ python = "3.12"
 # Bun for TypeScript compilation and package management
 bun = "latest"
 
+# Just command runner for local development
+just = "latest"
+
+# Prettier for formatting YAML, JSON, Markdown
+"npm:prettier" = "latest"
+
 [settings]
 # Use shorter paths for tools
 legacy_version_file = false

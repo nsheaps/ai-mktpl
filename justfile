@@ -24,31 +24,13 @@ setup:
 # Run all linters
 lint:
     @echo "Running linters..."
-    @just lint-yaml
-    @just lint-json
-    @just lint-markdown
+    prettier --check "**/*.{yaml,yml,json,md}" || true
     @echo "Linting complete!"
-
-# Lint YAML files
-lint-yaml:
-    @echo "Linting YAML files..."
-    yamllint -f parsable . || true
-
-# Lint JSON files
-lint-json:
-    @echo "Linting JSON files..."
-    npx prettier --check "**/*.json" || true
-
-# Lint Markdown files
-lint-markdown:
-    @echo "Linting Markdown files..."
-    npx markdownlint-cli2 "**/*.md" "#node_modules" "#claude-remote-env-snapshot" || true
 
 # Fix linting issues where possible
 lint-fix:
     @echo "Fixing lint issues..."
-    npx prettier --write "**/*.json" || true
-    npx markdownlint-cli2 --fix "**/*.md" "#node_modules" "#claude-remote-env-snapshot" || true
+    prettier --write "**/*.{yaml,yml,json,md}" || true
     @echo "Lint fixes applied!"
 
 # Validate plugin structure
@@ -215,4 +197,3 @@ plugins:
 # Clean generated files
 clean:
     rm -rf node_modules
-    rm -f .markdownlint-cli2.jsonc.cache

@@ -1,0 +1,5 @@
+node_modules
+.git
+*.lock
+package-lock.json
+claude-remote-env-snapshot

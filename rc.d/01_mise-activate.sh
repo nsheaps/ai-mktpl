@@ -18,7 +18,7 @@ if command -v mise &> /dev/null; then
     # signing, so we'll just eat the error
     mise self-update >/dev/null 2>&1 || true
     # TODO: if claude or CI, run as verbose
-    mise trust
+    mise trust --quiet
     mise install -y
 
     # if mise's default resolution is a function, then mise is already activated.
