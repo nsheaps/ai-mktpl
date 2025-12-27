@@ -19,7 +19,7 @@ runs:
       id: lint
       shell: bash
       run: |
-        set +e
+        set +eou pipefail
         HAS_ERRORS=false
         FIX="${{ inputs.fix }}"
 

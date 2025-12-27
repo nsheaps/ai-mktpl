@@ -1,0 +1,24 @@
+# Prettier configuration
+# https://prettier.io/docs/en/configuration.html
+
+# General settings
+printWidth: 100
+tabWidth: 2
+useTabs: false
+endOfLine: lf
+
+# Only format these file types
+overrides:
+  - files:
+      - "*.yaml"
+      - "*.yml"
+    options:
+      singleQuote: true
+  - files:
+      - "*.json"
+    options:
+      trailingComma: none
+  - files:
+      - "*.md"
+    options:
+      proseWrap: preserve

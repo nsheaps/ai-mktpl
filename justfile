@@ -21,10 +21,9 @@ setup:
     mise install -y
     @echo "Setup complete!"
 
-# Run all linters
+# Run all linters (uses .prettierrc.yaml for config)
 lint:
     command -v prettier >/dev/null 2>&1 || { just setup ; }
-    # TODO convert to use prettier config file
     prettier --write "**/*.{yaml,yml,json,md}" --list-different
 
 lint-check:
