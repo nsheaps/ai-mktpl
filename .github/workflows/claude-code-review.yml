@@ -75,6 +75,8 @@ jobs:
             CRITICAL: Do not post any "test" or "review in progress" comments. Only post your final review, deleting previous reviews.
             CRITICAL: NEVER post a link like "detailed review can be found at <url>". You MUST post the FULL review in the PR.
             CRITICAL: your review should have a summary section and capture details in a collapsable section so the default view is concise and to the point.
+            CRITICAL: Your review MUST contain `<details>` and `<summary>` HTML tags to make the details collapsable.
+            CRITICAL: Your review must detail how you arrived at your conclusions, especially the % scores you assigned.
 
             Use these emoji to help convey your summary.
             ✅ Something you checked that is correct, or something the code changes and does what it's supposed to
@@ -105,15 +107,24 @@ jobs:
 
             Some examples: 
               <details>
-              <summary>This review looks great!
-              ![](badge1)
-              ![](badge2)
+              <summary>
+              ### Code review summary
+              ![](badge1) ![](badge2) ![](badge3)
+
+              :+1: Overall, great work! This looks ready to merge to me!
               
               ✅ Thing I checked
-              ✅ Another thing I think is great</summary>
+              ✅ Another thing I think is great
+              </summary>
               
               Heres all the detail from my review that I would normally capture to cover the details
               requested for the review.
+
+              Extended details about what was looked into
+
+              Another aspect
+
+              ## Headings of L2 or greater to separate sections.
               
               </details>
             
@@ -125,13 +136,24 @@ jobs:
             or if you think there's an issue with the changes...
 
               <details>
-              <summary>I think some things need changes. Check in the details for more info
+              <summary>
+              ### Code review summary
+              ![](badge1) ![](badge2) ![](badge3)
+
+              ❌ This PR does abc badly and needs to be corrected before it can be merged.
+              
               ❔ I don't understand how <a specific part> works.
               ⚠️ I think this the performance will be an issue
               ❌ Your comments and PR descriptions suggest that you're trying to assign permissions to admins but it looks like you're actually assigning them to guests</summary>
               
               Heres all the detail from my review that I would normally capture to cover the details
               requested for the review.
+
+              Extended details about what was looked into
+
+              Another aspect
+
+              ## Headings of L2 or greater to separate sections.
               
               </details>
             
