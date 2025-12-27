@@ -31,7 +31,6 @@ jobs:
           install: true
           cache: true
 
-
       - name: Check version bumps
         id: preview
         shell: bash
@@ -46,7 +45,7 @@ jobs:
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          header: "package: Version Bump Preview"
+          header: 'package: Version Bump Preview'
           message: |
             ### package: Version Bump Preview
             ${{ steps.preview.outputs.report }}
