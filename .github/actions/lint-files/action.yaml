@@ -1,5 +1,5 @@
 name: Lint Files
-description: Lint YAML, JSON, Markdown, TypeScript, JavaScript, and Python files
+description: Lint and format files using prettier, eslint, and python linters
 
 inputs:
   fix:
@@ -8,12 +8,9 @@ inputs:
     default: 'false'
 
 outputs:
-  has-errors:
-    description: Whether lint errors were found
-    value: ${{ steps.lint.outputs.has-errors }}
-  error-count:
-    description: Number of lint errors found
-    value: ${{ steps.lint.outputs.error-count }}
+  changed-or-failed:
+    description: Whether files were changed or lint errors remain
+    value: ${{ steps.lint.outputs.changed-or-failed }}
 
 runs:
   using: composite
@@ -23,61 +20,52 @@ runs:
       shell: bash
       run: |
         set +e
-        ERROR_COUNT=0
         HAS_ERRORS=false
+        FIX="${{ inputs.fix }}"
 
         echo "::group::Linting YAML, JSON, and Markdown files with Prettier"
-        prettier --check "**/*.{yaml,yml,json,md}" || {
-          if [ "${{ inputs.fix }}" = "true" ]; then
-            prettier --write "**/*.{yaml,yml,json,md}"
-          fi
-          ERROR_COUNT=$((ERROR_COUNT + 1))
-          HAS_ERRORS=true
-        }
+        if [ "$FIX" = "true" ]; then
+          prettier --write "**/*.{yaml,yml,json,md}" || HAS_ERRORS=true
+        else
+          prettier --check "**/*.{yaml,yml,json,md}" || HAS_ERRORS=true
+        fi
         echo "::endgroup::"
 
         echo "::group::Linting TypeScript/JavaScript files"
         if [ -f "package.json" ]; then
-          eslint "**/*.{ts,js,tsx,jsx}" --max-warnings 0 || {
-            if [ "${{ inputs.fix }}" = "true" ]; then
-              eslint "**/*.{ts,js,tsx,jsx}" --fix || true
-            fi
-            ERROR_COUNT=$((ERROR_COUNT + 1))
-            HAS_ERRORS=true
-          }
+          if [ "$FIX" = "true" ]; then
+            eslint "**/*.{ts,js,tsx,jsx}" --fix || HAS_ERRORS=true
+          else
+            eslint "**/*.{ts,js,tsx,jsx}" --max-warnings 0 || HAS_ERRORS=true
+          fi
         fi
         echo "::endgroup::"
 
         echo "::group::Linting Python files"
         if find . -name "*.py" -not -path "*/\.*" | grep -q .; then
-          black --check . || {
-            if [ "${{ inputs.fix }}" = "true" ]; then
-              black .
-            fi
-            ERROR_COUNT=$((ERROR_COUNT + 1))
-            HAS_ERRORS=true
-          }
-
-          flake8 . || {
-            ERROR_COUNT=$((ERROR_COUNT + 1))
-            HAS_ERRORS=true
-          }
-
-          isort --check-only . || {
-            if [ "${{ inputs.fix }}" = "true" ]; then
-              isort .
-            fi
-            ERROR_COUNT=$((ERROR_COUNT + 1))
-            HAS_ERRORS=true
-          }
+          if [ "$FIX" = "true" ]; then
+            black . || HAS_ERRORS=true
+            isort . || HAS_ERRORS=true
+          else
+            black --check . || HAS_ERRORS=true
+            isort --check-only . || HAS_ERRORS=true
+          fi
+          flake8 . || HAS_ERRORS=true
         fi
         echo "::endgroup::"
 
-        echo "has-errors=${HAS_ERRORS}" >> $GITHUB_OUTPUT
-        echo "error-count=${ERROR_COUNT}" >> $GITHUB_OUTPUT
+        # Check if any files were changed
+        CHANGED=false
+        if [ -n "$(git status --porcelain)" ]; then
+          CHANGED=true
+          echo "::notice::Files were modified by linters"
+        fi
 
-        if [ "${HAS_ERRORS}" = "true" ]; then
-          echo "::warning::Found ${ERROR_COUNT} lint issue(s)"
+        # Output true if changed OR errors remain
+        if [ "$CHANGED" = "true" ] || [ "$HAS_ERRORS" = "true" ]; then
+          echo "changed-or-failed=true" >> $GITHUB_OUTPUT
+          echo "::warning::Lint check requires attention (changed=$CHANGED, errors=$HAS_ERRORS)"
         else
+          echo "changed-or-failed=false" >> $GITHUB_OUTPUT
           echo "::notice::All files passed linting checks"
         fi
