@@ -35,7 +35,6 @@ plugins/plugin-name/
 
 ```json
 {
-  "$schema": "https://json.schemastore.org/claude-code-plugin.json",
   "name": "plugin-name",
   "version": "1.0.0",
   "description": "What the plugin does",

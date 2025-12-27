@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json.schemastore.org/claude-code-plugin.json",
   "name": "opengraph-image",
   "version": "1.0.1",
   "description": "Generate OpenGraph images for Nuxt/Vue pages using HTML templates and html2png.dev API",

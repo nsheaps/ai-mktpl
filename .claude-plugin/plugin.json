@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json.schemastore.org/claude-code-plugin.json",
   "name": "claude-code-plugin-marketplace",
   "version": "1.0.0",
   "description": "A curated marketplace for Claude Code plugins focused on git automation and intelligent development workflows",

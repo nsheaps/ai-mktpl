@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json.schemastore.org/claude-code-plugin.json",
   "name": "memory-manager",
   "version": "1.0.1",
   "description": "Intelligent memory management for CLAUDE.md files. Automatically detects and stores user preferences, rules, and instructions with smart scope detection and hierarchical organization.",
@@ -8,9 +7,5 @@
   },
   "keywords": ["memory", "preferences", "claude.md", "context", "instructions"],
   "homepage": "https://github.com/nsheaps/.ai",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/nsheaps/.ai.git",
-    "directory": "plugins/memory-manager"
-  }
+  "repository": "https://github.com/nsheaps/.ai"
 }

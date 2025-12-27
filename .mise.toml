@@ -20,10 +20,7 @@ just = "latest"
 # ESLint for TypeScript/JavaScript
 "npm:eslint" = "latest"
 
-# Python linters
-"pipx:black" = "latest"
-"pipx:flake8" = "latest"
-"pipx:isort" = "latest"
+"npm:ajv-cli" = "latest"
 
 [settings]
 # Use shorter paths for tools

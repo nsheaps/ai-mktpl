@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json.schemastore.org/claude-code-plugin.json",
   "name": "safety-evaluation-script",
   "version": "1.0.1",
   "description": "Pre-tool-call safety evaluation using Claude CLI (haiku) with script-style hooks",

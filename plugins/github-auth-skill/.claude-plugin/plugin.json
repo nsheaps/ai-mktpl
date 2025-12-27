@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json.schemastore.org/claude-code-plugin.json",
   "name": "github-auth-skill",
   "version": "1.0.1",
   "description": "Skill for authenticating with GitHub using device authorization flow",

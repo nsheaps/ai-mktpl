@@ -40,88 +40,46 @@ lint-check:
     command -v prettier >/dev/null 2>&1 || { just setup ; }
     prettier --check .
 
-# Validate plugin structure
-validate:
+validate-marketplace:
     #!/usr/bin/env bash
-    set -e
-    echo "Validating plugin structure..."
-
-    # Use Claude CLI validator if available (validates JSON schema + structure)
-    if command -v claude >/dev/null 2>&1; then
-        echo "Using Claude CLI validator..."
-        claude plugin validate .
-        exit $?
-    fi
-
-    echo "Claude CLI not found, using fallback validation..."
-    VALID=true
-
     # Check marketplace.json exists and is valid JSON
     if [ ! -f ".claude-plugin/marketplace.json" ]; then
         echo "ERROR: marketplace.json not found"
         exit 1
     fi
 
-    if ! jq empty .claude-plugin/marketplace.json 2>/dev/null; then
-        echo "ERROR: Invalid JSON in marketplace.json"
+    # start at root of repo
+    claude plugin validate .
+
+validate-plugin PLUGIN_PATH:
+    claude plugin validate {{PLUGIN_PATH}}
+
+
+# Validate plugin structure
+validate:
+    #!/usr/bin/env bash
+    set -e
+    # Use Claude CLI validator if available (validates JSON schema + structure)
+    if ! command -v claude >/dev/null 2>&1; then
+        echo "::warning::Claude CLI not found, skipping validation"
         exit 1
     fi
+    just validate-marketplace
 
-    echo "marketplace.json is valid JSON"
-
-    # Validate each plugin
-    for plugin_dir in plugins/*; do
-        if [ ! -d "$plugin_dir" ]; then
-            continue
-        fi
-
-        PLUGIN_NAME=$(basename "$plugin_dir")
-        PLUGIN_JSON="$plugin_dir/.claude-plugin/plugin.json"
-
-        if [ ! -f "$PLUGIN_JSON" ]; then
-            echo "WARNING: Plugin $PLUGIN_NAME missing plugin.json"
-            continue
-        fi
-
-        if ! jq empty "$PLUGIN_JSON" 2>/dev/null; then
-            echo "ERROR: Invalid JSON in $PLUGIN_JSON"
-            VALID=false
-            continue
-        fi
-
-        # Check required fields
-        NAME=$(jq -r '.name' "$PLUGIN_JSON")
-        VERSION=$(jq -r '.version' "$PLUGIN_JSON")
-        DESC=$(jq -r '.description' "$PLUGIN_JSON")
-
-        if [ -z "$NAME" ] || [ "$NAME" = "null" ]; then
-            echo "ERROR: Plugin $PLUGIN_NAME missing 'name' field"
-            VALID=false
-        fi
-
-        if [ -z "$VERSION" ] || [ "$VERSION" = "null" ]; then
-            echo "ERROR: Plugin $PLUGIN_NAME missing 'version' field"
-            VALID=false
-        fi
-
-        if [ -z "$DESC" ] || [ "$DESC" = "null" ]; then
-            echo "ERROR: Plugin $PLUGIN_NAME missing 'description' field"
-            VALID=false
-        fi
-
-        # Check semver format
-        if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+'; then
-            echo "ERROR: Plugin $PLUGIN_NAME has invalid version format: $VERSION"
-            VALID=false
-        else
-            echo "Plugin $PLUGIN_NAME validated (v$VERSION)"
-        fi
+    VALID=true
+    FAILED_PLUGINS=( )
+    for plugin_dir in plugins/*/.claude-plugin/plugin.json; do
+        just validate-plugin "$plugin_dir" || { VALID=false; FAILED_PLUGINS+=($plugin_dir) ; }
     done
 
-    if [ "$VALID" = "true" ]; then
+    if [ "$VALID" = true ]; then
         echo "All plugins validated successfully!"
     else
         echo "Validation failed!"
+        echo "Failed plugins:"
+        for p in "${FAILED_PLUGINS[@]}"; do
+            echo " - $p"
+        done
         exit 1
     fi
 
@@ -204,11 +162,3 @@ check:
     @just lint
     @just validate
 
-# Show plugin summary
-plugins:
-    @echo "Plugins in marketplace:"
-    @jq -r '.plugins[] | "  - \(.name) v\(.version): \(.description)"' .claude-plugin/marketplace.json
-
-# Clean generated files
-clean:
-    rm -rf node_modules
