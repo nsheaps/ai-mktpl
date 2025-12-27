@@ -25,108 +25,32 @@ jobs:
           # Use PAT for pushing back to branch, fallback to github.token for PRs from forks
           token: ${{ secrets.GITHUB_PAT_TOKEN_NSHEAPS || github.token }}
 
-      - name: Install mise
-        run: |
-          curl https://mise.run | sh
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-      - name: Install tools via mise
-        run: |
-          eval "$(mise activate bash)"
-          mise install -y
-
-      - name: Remove old lint comments
-        if: github.event_name == 'pull_request'
-        uses: peter-evans/find-comment@v3
-        id: find-comment
+      - name: mise install -y
+        uses: jdx/mise-action@v2
         with:
-          issue-number: ${{ github.event.pull_request.number }}
-          comment-author: 'github-actions[bot]'
-          body-includes: 'Lint Errors'
+          version: 'latest'
+          install: true
+          cache: true
 
-      - name: Delete old lint comments
-        if: github.event_name == 'pull_request' && steps.find-comment.outputs.comment-id != ''
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh api -X DELETE repos/${{ github.repository }}/issues/comments/${{ steps.find-comment.outputs.comment-id }}
-
-      - name: Run initial lint check
-        id: initial-lint
-        uses: ./.github/actions/lint-files
-        continue-on-error: true
-
-      - name: Auto-fix lint issues
-        if: steps.initial-lint.outputs.has-errors == 'true'
-        id: fix-lint
+      - name: just lint
+        id: lint
+        # 
         uses: ./.github/actions/lint-files
         with:
           fix: 'true'
         continue-on-error: true
 
-      - name: Check for changes after fix
-        if: steps.fix-lint.conclusion != 'skipped'
-        id: check-changes
-        run: |
-          if [ -n "$(git status --porcelain)" ]; then
-            echo "has-changes=true" >> $GITHUB_OUTPUT
-            echo "::notice::Lint fixes were applied"
-          else
-            echo "has-changes=false" >> $GITHUB_OUTPUT
-            echo "::notice::No auto-fixable changes"
-          fi
-
-      - name: Commit and push fixes
-        if: steps.check-changes.outputs.has-changes == 'true'
+      - name: git push
+        if: steps.lint.outputs.changed-or-failed == 'true' && ! cancelled()
+        id: auto-commit-action
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: 'chore: `just lint`'
 
-      - name: Rerun lint after fixes
-        if: steps.check-changes.outputs.has-changes == 'true'
-        id: rerun-lint
-        uses: ./.github/actions/lint-files
-        continue-on-error: true
-
-      - name: Collect unfixable errors
-        if: >-
-          steps.rerun-lint.conclusion == 'failure' ||
-          (steps.fix-lint.conclusion == 'failure' &&
-          steps.check-changes.outputs.has-changes != 'true')
-        id: collect-errors
+      - name: "Run if changes have been detected"
+        if: ${{ steps.lint.outputs.changed-or-failed == 'true' }}
         run: |
-          prettier --check "**/*.{yaml,yml,json,md}" 2>&1 | head -50 > /tmp/errors.txt
-          echo 'errors<<EOF' >> $GITHUB_OUTPUT
-          cat /tmp/errors.txt >> $GITHUB_OUTPUT
-          echo 'EOF' >> $GITHUB_OUTPUT
-
-      - name: Comment unfixable errors on PR
-        if: >-
-          github.event_name == 'pull_request' &&
-          (steps.rerun-lint.conclusion == 'failure' ||
-          (steps.fix-lint.conclusion == 'failure' &&
-          steps.check-changes.outputs.has-changes != 'true'))
-        uses: peter-evans/create-or-update-comment@v4
-        with:
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            ## ❌ Lint Errors
-
-            The following lint errors could not be auto-fixed and require manual attention:
-
-            ```
-            ${{ steps.collect-errors.outputs.errors }}
-            ```
-
-            Please fix these errors manually and push your changes.
-
-      - name: Fail if lint errors found
-        if: steps.initial-lint.outputs.has-errors == 'true'
-        run: |
-          echo "::error::Lint errors were found in this PR"
-          if [ "${{ steps.check-changes.outputs.has-changes }}" = "true" ]; then
-            echo "::warning::Some errors were auto-fixed and pushed"
-          fi
+          echo "Changes made or lint failed! Auto-committed the fixes, but more lint and format issues may remain."
           exit 1
 
   validate:

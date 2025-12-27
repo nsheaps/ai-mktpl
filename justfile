@@ -31,6 +31,7 @@ lint:
 # Fix linting issues where possible
 lint-fix:
     @echo "Fixing lint issues..."
+    command -v prettier >/dev/null 2>&1 || { just setup ; }
     prettier --write "**/*.{yaml,yml,json,md}" || true
     @echo "Lint fixes applied!"
 
@@ -41,7 +42,7 @@ validate:
     echo "Validating plugin structure..."
 
     VALID=true
-
+    # TODO does claude cli provide some validator? What about json schema validation?
     # Check marketplace.json exists and is valid
     if [ ! -f ".claude-plugin/marketplace.json" ]; then
         echo "ERROR: marketplace.json not found"
