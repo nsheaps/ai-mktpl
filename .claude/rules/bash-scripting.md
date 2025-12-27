@@ -43,14 +43,23 @@ Instead:
 
 ## Script Files
 
-Avoid creating inline scripts. Always:
-1. Write the script to a file with appropriate extension
-2. Include shebang if necessary (e.g., `#!/bin/bash`)
-3. This improves code clarity and code quality tool functioning
+Scripts longer than 3 lines MUST be in separate files:
 
-Common cases where this applies:
-- GitHub Actions using bash scripts
-- `actions/script` steps
+1. Write the script to a file with appropriate extension (`.sh`, `.bash`)
+2. Include shebang (e.g., `#!/bin/bash`)
+3. This enables proper linting, formatting, and testing
+
+**Why:** Inline scripts in YAML cannot be linted, are hard to test locally, and reduce code clarity.
+
+**Applies to:**
+- GitHub Actions workflow steps
+- Composite action steps
+- Any embedded shell code in YAML/JSON
+
+**Local executability requirement:**
+All CI scripts MUST be executable locally (default in dry-run mode) to provide fast DX feedback before CI runs.
+
+**JSON manipulation:** For scripts that primarily manipulate JSON, prefer using JavaScript via `actions/github-script` or Node.js for better readability and type safety.
 
 ## Structured Data
 

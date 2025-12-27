@@ -1,5 +1,5 @@
 ---
-# this should go in repo root if kept, but I think it will be replaced by a prettier config.
+# TODO: this should go in repo root if kept, but I think it will be replaced by a prettier config.
 extends: default
 
 ignore: |

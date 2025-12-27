@@ -28,6 +28,7 @@ Improvements to the CI/CD pipeline.
 - Extends `nsheaps/renovate-config`
 - Auto-merge minor/patch updates
 - Group related updates
+- **TODO:** Have Renovate manage mise version in `.claude/hooks/SessionStart/hook.sh`
 
 ### Release Automation Workflow
 
