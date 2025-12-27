@@ -25,7 +25,7 @@ setup:
 lint:
     command -v prettier >/dev/null 2>&1 || { just setup ; }
     # TODO convert to use prettier config file
-    prettier --write "**/*.{yaml,yml,json,md}" 
+    prettier --write "**/*.{yaml,yml,json,md}" --list-different
 
 lint-check:
     command -v prettier >/dev/null 2>&1 || { just setup ; }
