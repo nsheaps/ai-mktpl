@@ -20,8 +20,6 @@ just = "latest"
 # ESLint for TypeScript/JavaScript
 "npm:eslint" = "latest"
 
-"npm:ajv-cli" = "latest"
-
 [settings]
 # Use shorter paths for tools
 legacy_version_file = false

@@ -11,12 +11,16 @@
 #   just validate # Validate plugin structure
 #   just check    # Run all checks (lint + validate)
 
+set unstable
+
 # Default recipe: show help
 default:
     @just --list
 
 # Install development dependencies via mise
 setup:
+    @echo "Pruning unused tools"
+    mise prune -y
     @echo "Installing tools via mise..."
     mise install -y
     @echo "Setup complete!"
@@ -40,30 +44,25 @@ lint-check:
     command -v prettier >/dev/null 2>&1 || { just setup ; }
     prettier --check .
 
-validate-marketplace:
-    #!/usr/bin/env bash
-    # Check marketplace.json exists and is valid JSON
-    if [ ! -f ".claude-plugin/marketplace.json" ]; then
-        echo "ERROR: marketplace.json not found"
-        exit 1
-    fi
+claude := which("claude") || 'mise exec npm:@anthropic-ai/claude-code -- claude'
 
-    # start at root of repo
-    claude plugin validate .
+validate-marketplace:
+    just validate-plugin .claude-plugin/marketplace.json
 
 validate-plugin PLUGIN_PATH:
-    claude plugin validate {{PLUGIN_PATH}}
-
+    #!/usr/bin/env bash
+    OUTPUT="$({{claude}} plugin validate {{PLUGIN_PATH}})"
+    if [ $? -ne 0 ]; then
+        echo "$OUTPUT"
+        exit 1
+    else
+        echo "✅ {{PLUGIN_PATH}}"
+    fi
 
 # Validate plugin structure
 validate:
     #!/usr/bin/env bash
     set -e
-    # Use Claude CLI validator if available (validates JSON schema + structure)
-    if ! command -v claude >/dev/null 2>&1; then
-        echo "::warning::Claude CLI not found, skipping validation"
-        exit 1
-    fi
     just validate-marketplace
 
     VALID=true
@@ -71,6 +70,12 @@ validate:
     for plugin_dir in plugins/*/.claude-plugin/plugin.json; do
         just validate-plugin "$plugin_dir" || { VALID=false; FAILED_PLUGINS+=($plugin_dir) ; }
     done
+
+    # if the path to the claude binary is in */.local/share/mise/installs/* then mise prune in case it was installed at runtime
+    if [[ "$(command -v claude)" == *".local/share/mise/installs/"* ]]; then
+        echo "Pruning mise installs..."
+        mise prune -y
+    fi
 
     if [ "$VALID" = true ]; then
         echo "All plugins validated successfully!"
