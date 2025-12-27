@@ -9,32 +9,35 @@ Usage: Called as a SessionStart hook by Claude Code
 Environment: CLAUDE_PROJECT_DIR must be set
 """
 
+import glob as globlib
+import hashlib
 import json
 import os
-import sys
 import shutil
-import hashlib
-import glob as globlib
+import sys
+from copy import deepcopy
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
-from copy import deepcopy
 
 # Try to import yaml, provide fallback instructions if not available
 try:
     import yaml
 except ImportError:
-    print("Error: PyYAML is required. Install with: pip install pyyaml", file=sys.stderr)
+    print(
+        "Error: PyYAML is required. Install with: pip install pyyaml", file=sys.stderr
+    )
     sys.exit(2)
 
 
 class SyncError(Exception):
     """Custom exception for sync errors"""
+
     pass
 
 
 def get_project_dir() -> Path:
     """Get the project directory from environment or current directory"""
-    project_dir = os.environ.get('CLAUDE_PROJECT_DIR')
+    project_dir = os.environ.get("CLAUDE_PROJECT_DIR")
     if project_dir:
         return Path(project_dir)
     return Path.cwd()
@@ -46,9 +49,9 @@ def resolve_path(path: str, base_dir: Path, config_dir: Path) -> Path:
     Paths starting with ./ are relative to the config directory (.claude/)
     Other paths are resolved relative to the project directory.
     """
-    if path.startswith('./'):
+    if path.startswith("./"):
         return (config_dir / path[2:]).resolve()
-    elif path.startswith('../'):
+    elif path.startswith("../"):
         return (config_dir / path).resolve()
     else:
         return (base_dir / path).resolve()
@@ -57,8 +60,8 @@ def resolve_path(path: str, base_dir: Path, config_dir: Path) -> Path:
 def file_hash(filepath: Path) -> str:
     """Calculate SHA256 hash of a file"""
     sha256 = hashlib.sha256()
-    with open(filepath, 'rb') as f:
-        for chunk in iter(lambda: f.read(4096), b''):
+    with open(filepath, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
             sha256.update(chunk)
     return sha256.hexdigest()
 
@@ -83,7 +86,11 @@ def deep_merge(base: Dict, overlay: Dict, only_keys: Optional[List] = None) -> D
         if key not in overlay:
             continue
 
-        if key in result and isinstance(result[key], dict) and isinstance(overlay[key], dict):
+        if (
+            key in result
+            and isinstance(result[key], dict)
+            and isinstance(overlay[key], dict)
+        ):
             result[key] = deep_merge(result[key], overlay[key])
         else:
             result[key] = deepcopy(overlay[key])
@@ -106,16 +113,18 @@ def filter_by_only(data: Dict, only_spec: List[Dict]) -> Dict:
     result = {}
 
     for spec in only_spec:
-        key = spec.get('key')
+        key = spec.get("key")
         if not key or key not in data:
             continue
 
-        sub_only = spec.get('only')
+        sub_only = spec.get("only")
         if sub_only and isinstance(data[key], dict):
             # Filter sub-keys
             if isinstance(sub_only, str):
                 sub_only = [sub_only]
-            result[key] = {k: deepcopy(data[key][k]) for k in sub_only if k in data[key]}
+            result[key] = {
+                k: deepcopy(data[key][k]) for k in sub_only if k in data[key]
+            }
         else:
             # Include entire key
             result[key] = deepcopy(data[key])
@@ -128,16 +137,16 @@ def process_merge_rule(rule: Dict, project_dir: Path, config_dir: Path) -> None:
     Process a merge rule for JSON files.
     Merges source into target, optionally filtering by 'only' keys.
     """
-    source_path = resolve_path(rule['source'], project_dir, config_dir)
-    target_path = resolve_path(rule['target'], project_dir, config_dir)
-    only_spec = rule.get('only', [])
+    source_path = resolve_path(rule["source"], project_dir, config_dir)
+    target_path = resolve_path(rule["target"], project_dir, config_dir)
+    only_spec = rule.get("only", [])
 
     if not source_path.exists():
         print(f"  Skipping: source not found: {source_path}")
         return
 
     # Load source JSON
-    with open(source_path, 'r') as f:
+    with open(source_path, "r") as f:
         source_data = json.load(f)
 
     # Filter source data if 'only' is specified
@@ -146,7 +155,7 @@ def process_merge_rule(rule: Dict, project_dir: Path, config_dir: Path) -> None:
 
     # Load or create target JSON
     if target_path.exists():
-        with open(target_path, 'r') as f:
+        with open(target_path, "r") as f:
             target_data = json.load(f)
     else:
         target_data = {}
@@ -156,9 +165,9 @@ def process_merge_rule(rule: Dict, project_dir: Path, config_dir: Path) -> None:
     merged_data = deep_merge(target_data, source_data)
 
     # Write merged result
-    with open(target_path, 'w') as f:
+    with open(target_path, "w") as f:
         json.dump(merged_data, f, indent=2)
-        f.write('\n')
+        f.write("\n")
 
     print(f"  Merged: {source_path.name} -> {target_path.name}")
 
@@ -168,30 +177,30 @@ def process_sync_rule(rule: Dict, project_dir: Path, config_dir: Path) -> None:
     Process a sync rule for files/directories.
     Supports glob patterns and various sync modes.
     """
-    source_pattern = rule['source']
-    target_path_str = rule['target']
-    sync_mode = rule.get('sync-mode', 'copy')
-    if_present = rule.get('if-present', 'do-nothing')
+    source_pattern = rule["source"]
+    target_path_str = rule["target"]
+    sync_mode = rule.get("sync-mode", "copy")
+    if_present = rule.get("if-present", "do-nothing")
 
     # Resolve the source pattern
-    if source_pattern.startswith('./'):
+    if source_pattern.startswith("./"):
         source_base = config_dir
         pattern = source_pattern[2:]
-    elif source_pattern.startswith('../'):
+    elif source_pattern.startswith("../"):
         source_base = config_dir.parent
         # Count the number of ../ and adjust
-        parts = source_pattern.split('/')
+        parts = source_pattern.split("/")
         up_count = 0
         remaining_parts = []
         for part in parts:
-            if part == '..':
+            if part == "..":
                 up_count += 1
             else:
                 remaining_parts.append(part)
         source_base = config_dir
         for _ in range(up_count):
             source_base = source_base.parent
-        pattern = '/'.join(remaining_parts)
+        pattern = "/".join(remaining_parts)
     else:
         source_base = project_dir
         pattern = source_pattern
@@ -208,7 +217,7 @@ def process_sync_rule(rule: Dict, project_dir: Path, config_dir: Path) -> None:
     target_path = resolve_path(target_path_str, project_dir, config_dir)
 
     # Determine if target is a directory (ends with / or multiple sources)
-    target_is_dir = target_path_str.endswith('/') or len(source_files) > 1
+    target_is_dir = target_path_str.endswith("/") or len(source_files) > 1
 
     if target_is_dir:
         target_path.mkdir(parents=True, exist_ok=True)
@@ -226,22 +235,22 @@ def process_sync_rule(rule: Dict, project_dir: Path, config_dir: Path) -> None:
 
         # Handle existing files
         if dest_path.exists():
-            if if_present == 'do-nothing':
+            if if_present == "do-nothing":
                 print(f"  Skipping (exists): {dest_path.name}")
                 continue
-            elif if_present == 'error-if-different':
+            elif if_present == "error-if-different":
                 if files_are_different(source_path, dest_path):
                     raise SyncError(f"File exists and differs: {dest_path}")
                 print(f"  Skipping (identical): {dest_path.name}")
                 continue
-            elif if_present == 'replace':
+            elif if_present == "replace":
                 if dest_path.is_symlink():
                     dest_path.unlink()
                 elif dest_path.is_file():
                     dest_path.unlink()
 
         # Perform the sync operation
-        if sync_mode == 'symlink':
+        if sync_mode == "symlink":
             # Create relative symlink if possible
             try:
                 rel_path = os.path.relpath(source_path, dest_path.parent)
@@ -260,16 +269,16 @@ def process_source_only_rule(rule: Dict, project_dir: Path, config_dir: Path) ->
     Process a source-only rule.
     Ensures target directory only contains files from source directory.
     """
-    source_pattern = rule['source']
-    target_path_str = rule['target']
-    sync_mode = rule.get('sync-mode', 'copy')
+    source_pattern = rule["source"]
+    target_path_str = rule["target"]
+    sync_mode = rule.get("sync-mode", "copy")
 
     # First, sync all source files
     sync_rule = {
-        'source': source_pattern,
-        'target': target_path_str,
-        'sync-mode': sync_mode,
-        'if-present': 'replace'
+        "source": source_pattern,
+        "target": target_path_str,
+        "sync-mode": sync_mode,
+        "if-present": "replace",
     }
     process_sync_rule(sync_rule, project_dir, config_dir)
 
@@ -280,23 +289,27 @@ def process_source_only_rule(rule: Dict, project_dir: Path, config_dir: Path) ->
         return
 
     # Get list of source file names
-    if source_pattern.startswith('./'):
+    if source_pattern.startswith("./"):
         source_base = config_dir
         pattern = source_pattern[2:]
-    elif source_pattern.startswith('../'):
-        parts = source_pattern.split('/')
-        up_count = sum(1 for p in parts if p == '..')
-        remaining_parts = [p for p in parts if p != '..']
+    elif source_pattern.startswith("../"):
+        parts = source_pattern.split("/")
+        up_count = sum(1 for p in parts if p == "..")
+        remaining_parts = [p for p in parts if p != ".."]
         source_base = config_dir
         for _ in range(up_count):
             source_base = source_base.parent
-        pattern = '/'.join(remaining_parts)
+        pattern = "/".join(remaining_parts)
     else:
         source_base = project_dir
         pattern = source_pattern
 
     full_pattern = str(source_base / pattern)
-    source_files = {Path(f).name for f in globlib.glob(full_pattern, recursive=True) if Path(f).is_file()}
+    source_files = {
+        Path(f).name
+        for f in globlib.glob(full_pattern, recursive=True)
+        if Path(f).is_file()
+    }
 
     # Remove files not in source
     for target_file in target_path.iterdir():
@@ -310,17 +323,17 @@ def process_hoist_rule(rule: Dict, project_dir: Path, config_dir: Path) -> None:
     Process a hoist rule.
     Moves files from target to source directory, then creates links in target.
     """
-    source_path_str = rule['source']
-    target_path_str = rule['target']
-    sync_mode = rule.get('sync-mode', 'symlink')
+    source_path_str = rule["source"]
+    target_path_str = rule["target"]
+    sync_mode = rule.get("sync-mode", "symlink")
 
     source_path = resolve_path(source_path_str, project_dir, config_dir)
     target_path = resolve_path(target_path_str, project_dir, config_dir)
 
     # Ensure source directory exists
-    if source_path_str.endswith('/') or '*' in source_path_str:
+    if source_path_str.endswith("/") or "*" in source_path_str:
         # Source is a directory pattern
-        source_dir = source_path.parent if '*' in source_path_str else source_path
+        source_dir = source_path.parent if "*" in source_path_str else source_path
     else:
         source_dir = source_path if source_path.is_dir() else source_path.parent
     source_dir.mkdir(parents=True, exist_ok=True)
@@ -337,7 +350,7 @@ def process_hoist_rule(rule: Dict, project_dir: Path, config_dir: Path) -> None:
             print(f"  Hoisted: {target_path.name} -> {source_dir}")
 
         # Create link back
-        if sync_mode == 'symlink':
+        if sync_mode == "symlink":
             try:
                 rel_path = os.path.relpath(dest_in_source, target_path.parent)
                 target_path.symlink_to(rel_path)
@@ -362,7 +375,7 @@ def process_hoist_rule(rule: Dict, project_dir: Path, config_dir: Path) -> None:
                 target_file.unlink()
 
             # Create link back
-            if sync_mode == 'symlink':
+            if sync_mode == "symlink":
                 try:
                     rel_path = os.path.relpath(dest_in_source, target_path)
                     target_file.symlink_to(rel_path)
@@ -376,14 +389,14 @@ def process_replace_rule(rule: Dict, project_dir: Path, config_dir: Path) -> Non
     Process a replace rule.
     Sets file contents to the specified content.
     """
-    source_path = resolve_path(rule['source'], project_dir, config_dir)
-    contents = rule.get('contents', '')
+    source_path = resolve_path(rule["source"], project_dir, config_dir)
+    contents = rule.get("contents", "")
 
     # Ensure parent directory exists
     source_path.parent.mkdir(parents=True, exist_ok=True)
 
     # Write the content
-    with open(source_path, 'w') as f:
+    with open(source_path, "w") as f:
         f.write(contents)
 
     print(f"  Replaced: {source_path.name}")
@@ -391,19 +404,19 @@ def process_replace_rule(rule: Dict, project_dir: Path, config_dir: Path) -> Non
 
 def process_rule(rule: Dict, project_dir: Path, config_dir: Path) -> None:
     """Process a single sync rule based on its mode"""
-    mode = rule.get('mode', 'sync')
+    mode = rule.get("mode", "sync")
 
     print(f"Processing rule: {rule.get('source', 'N/A')} ({mode})")
 
-    if mode == 'merge':
+    if mode == "merge":
         process_merge_rule(rule, project_dir, config_dir)
-    elif mode == 'sync':
+    elif mode == "sync":
         process_sync_rule(rule, project_dir, config_dir)
-    elif mode == 'source-only':
+    elif mode == "source-only":
         process_source_only_rule(rule, project_dir, config_dir)
-    elif mode == 'hoist':
+    elif mode == "hoist":
         process_hoist_rule(rule, project_dir, config_dir)
-    elif mode == 'replace':
+    elif mode == "replace":
         process_replace_rule(rule, project_dir, config_dir)
     else:
         print(f"  Warning: Unknown mode '{mode}', skipping")
@@ -414,14 +427,16 @@ def load_config(config_path: Path) -> List[Dict]:
     if not config_path.exists():
         return []
 
-    with open(config_path, 'r') as f:
+    with open(config_path, "r") as f:
         config = yaml.safe_load(f)
 
     if config is None:
         return []
 
     if not isinstance(config, list):
-        raise SyncError(f"syncconfig.yaml must be a list of rules, got {type(config).__name__}")
+        raise SyncError(
+            f"syncconfig.yaml must be a list of rules, got {type(config).__name__}"
+        )
 
     return config
 
@@ -429,8 +444,8 @@ def load_config(config_path: Path) -> List[Dict]:
 def main() -> int:
     """Main entry point for the sync hook"""
     project_dir = get_project_dir()
-    config_dir = project_dir / '.claude'
-    config_path = config_dir / 'syncconfig.yaml'
+    config_dir = project_dir / ".claude"
+    config_path = config_dir / "syncconfig.yaml"
 
     print(f"Sync Settings Hook - Project: {project_dir}")
 
@@ -455,7 +470,7 @@ def main() -> int:
                 print(f"Warning: Rule {i} is not a valid dict, skipping")
                 continue
 
-            if 'source' not in rule and 'mode' != 'replace':
+            if "source" not in rule and "mode" != "replace":
                 print(f"Warning: Rule {i} missing 'source', skipping")
                 continue
 
@@ -478,5 +493,5 @@ def main() -> int:
         return 1
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())
