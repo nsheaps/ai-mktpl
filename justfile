@@ -13,6 +13,11 @@
 
 set unstable
 
+claude := which("claude") || 'mise exec npm:@anthropic-ai/claude-code -- claude'
+# By default, just runs from the directory where the justfile is defined.
+# https://just.systems/man/en/working-directory.html
+root_dir := justfile_directory()
+
 # Default recipe: show help
 default:
     @just --list
@@ -43,8 +48,6 @@ lint:
 lint-check:
     command -v prettier >/dev/null 2>&1 || { just setup ; }
     prettier --check .
-
-claude := which("claude") || 'mise exec npm:@anthropic-ai/claude-code -- claude'
 
 validate-marketplace:
     @just validate-plugin .claude-plugin/marketplace.json
@@ -88,48 +91,120 @@ validate:
         exit 1
     fi
 
+preview-version-bump PLUGIN_PATH=invocation_directory():
+    #!/usr/bin/env bash
+    command -v commit-and-tag-version >/dev/null 2>&1 || { just setup ; }
+    source {{root_dir}}/bin/lib/stdlib.sh
+    cd {{PLUGIN_PATH}}
+    PLUGIN_DIR="$(dirname "$(find_up '.claude-plugin')")"
+    cd "$PLUGIN_DIR"
+    # echo "Current version is $(just plugin-current-version {{invocation_directory()}})"
+    echo "===[ DRY RUN ]==="
+    commit-and-tag-version --dry-run
 
-preview-version-bump PLUGIN_NAME:
-    # returns the next version for the given plugin name (path assumed) using SVU
-    @echo "unimplemented"
-
-plugin-current-version PLUGIN_NAME:
-    # returns the current version for the given plugin name (path assumed)
-    @echo "unimplemented"
-
-[arg('format', pattern='--pattern=(raw|md|json)|')]
+[arg('format', pattern='--pattern=(raw|md)|')]
 preview-version-bumps format='--pattern=raw':
+    #!/usr/bin/env bash
     # takes optional args:
-    # --format=raw|md|json : output format for dry-run report (default: raw)
+    # --format=raw|md : output format for dry-run report (default: raw)
     # gets the json, then formats it accordingly.
     # format with raw:
     #  plugin-name: 1.2.2 =( patch )=> 1.2.3
     #  $plugin: $current =( $type )=> $next
     #  ...
     # format with md:
-    #  | Plugin | Current | Type | Next | 
+    #  | Plugin | Current | Type | Next |
     #  |---|---|---|---|
     #  | plugin-name | 1.2.2 | patch | 1.2.3 |
     #   ...
-    # format with json:
-    #  [
-    #    {
-    #      "name": "plugin-name",
-    #      "current": "1.2.2",
-    #      "type": "patch",
-    #      "next": "1.2.3"
-    #    },
-    #    ...
-    #  ]
-    @echo "FORMAT: {{format}}"
-    @echo "unimplemented"
+    case "{{format}}" in
+        --pattern=md )
+            echo "| Plugin | Current | Type | Next |"
+            echo "|---|---|---|---|"
+            ;;
+    esac
+    for plugin_dir in plugins/*; do
+        if [ ! -d "$plugin_dir" ]; then
+            continue
+        fi
+        PLUGIN_NAME=$(basename "$plugin_dir")
+        CURRENT=$(just plugin-current-version "$plugin_dir")
+        NEXT=$(just plugin-next-version "$plugin_dir")
+        # determine type of bump
+        IFS='.' read -r -a current_parts <<< "$CURRENT"
+        IFS='.' read -r -a next_parts <<< "$NEXT"
+        if [ "${current_parts[0]}" != "${next_parts[0]}" ]; then
+            TYPE="major"
+        elif [ "${current_parts[1]}" != "${next_parts[1]}" ]; then
+            TYPE="minor"
+        elif [ "${current_parts[2]}" != "${next_parts[2]}" ]; then
+            TYPE="patch"
+        else
+            TYPE="none"
+        fi
 
-bump-plugin-version PLUGIN_PATH:
-    @echo "unimplemented"
+        case "{{format}}" in
+            --pattern=raw|'' )
+                echo "$PLUGIN_NAME: $CURRENT =( $TYPE )=> $NEXT"
+                ;;
+            --pattern=md )
+                echo "| $PLUGIN_NAME | $CURRENT | $TYPE | $NEXT |"
+                ;;
+        esac
+    done
+
+plugin-current-versions:
+    #!/usr/bin/env bash
+    # returns a list of plugin names and their current versions
+    for plugin_dir in plugins/*; do
+        {
+          if [ ! -d "$plugin_dir" ]; then
+              continue
+          fi
+          PLUGIN_NAME=$(basename "$plugin_dir")
+          CURRENT=$(just plugin-current-version "$plugin_dir")
+          echo "$PLUGIN_NAME: $CURRENT"
+        } &
+    done
+    wait
+
+plugin-current-version PLUGIN_PATH=invocation_directory():
+    #!/usr/bin/env bash
+    # returns just the semver of the plugin at PLUGIN_PATH
+    command -v commit-and-tag-version >/dev/null 2>&1 || { just setup ; }
+    source {{root_dir}}/bin/lib/stdlib.sh
+    cd {{PLUGIN_PATH}}
+    PLUGIN_DIR="$(dirname "$(find_up '.claude-plugin')")"
+    cd "$PLUGIN_DIR"
+    echo "$(jq -r '.version' .claude-plugin/plugin.json)" | xargs
+
+plugin-next-version PLUGIN_PATH=invocation_directory():
+    #!/usr/bin/env bash
+    # returns just the semver (aka 1.1.0)
+    command -v commit-and-tag-version >/dev/null 2>&1 || { just setup ; }
+    source {{root_dir}}/bin/lib/stdlib.sh
+    cd {{PLUGIN_PATH}}
+    PLUGIN_DIR="$(dirname "$(find_up '.claude-plugin')")"
+    cd "$PLUGIN_DIR"
+    commit-and-tag-version --dry-run --skip.changelog --skip.commit | grep -Eo 'to \d+\.\d+\.\d+' | sed 's/to //g'
+
+bump-plugin-version PLUGIN_PATH=invocation_directory():
+    #!/usr/bin/env bash
+    command -v commit-and-tag-version >/dev/null 2>&1 || { just setup ; }
+    source {{root_dir}}/bin/lib/stdlib.sh
+    cd {{PLUGIN_PATH}}
+    PLUGIN_DIR="$(dirname "$(find_up '.claude-plugin')")"
+    cd "$PLUGIN_DIR"
+    commit-and-tag-version
 
 bump-plugin-versions:
-    # goes through each plugin and attempts to bump it
-    @echo "unimplemented"
+    #!/usr/bin/env bash
+    for plugin_dir in plugins/*; do
+        if [ ! -d "$plugin_dir" ]; then
+            continue
+        fi
+        just bump-plugin-version "$plugin_dir"
+    done
 
 # Update marketplace.json from plugin.json files
 update-marketplace:

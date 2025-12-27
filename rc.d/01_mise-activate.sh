@@ -31,3 +31,4 @@ else
     exit 1
 fi
 
+watch_file "${ROOT_DIR}/.mise.toml"

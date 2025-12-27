@@ -316,10 +316,17 @@ realpath.absolute() {
 find_up() {
   (
     while true; do
+      # if it is a file, return it
       if [[ -f $1 ]]; then
         echo "$PWD/$1"
         return 0
       fi
+      # if it is a directory, return it
+      if [[ -d $1 ]]; then
+        echo "$PWD/$1"
+        return 0
+      fi
+      # if we are at the root, return failure
       if [[ $PWD == / ]] || [[ $PWD == // ]]; then
         return 1
       fi

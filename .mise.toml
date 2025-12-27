@@ -1,24 +1,13 @@
 [tools]
-# GitHub CLI for interacting with GitHub from command line
 gh = "latest"
-
-# Node.js for running JavaScript/TypeScript tools
 node = "lts"
-
-# Python for running Python linters
 python = "3.12"
-
-# Bun for TypeScript compilation and package management
 bun = "latest"
-
-# Just command runner for local development
 just = "latest"
 
-# Prettier for formatting YAML, JSON, Markdown
 "npm:prettier" = "latest"
-
-# ESLint for TypeScript/JavaScript
 "npm:eslint" = "latest"
+"npm:commit-and-tag-version" = "latest"
 
 [settings]
 # Use shorter paths for tools

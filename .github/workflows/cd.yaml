@@ -28,14 +28,52 @@ jobs:
           install: true
           cache: true
 
-      - name: just version --dry-run
-        id: version
-        uses: ./.github/actions/preview-version-bump
+
+      - name: Check version bumps
+        id: preview
+        shell: bash
+        run: |
+          TMP="$(mktemp)"
+          just preview-version-bumps --format=md | tee "$TMP"
+          echo "report<<EOF" >> $GITHUB_OUTPUT
+          cat $TMP >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      - name: post version bump report
+        if: steps.preview.outputs.report != ''
+        uses: marocchino/sticky-pull-request-comment@v2
         with:
-          base-ref: ${{ github.event.pull_request.base.sha }}
-          head-ref: ${{ github.event.pull_request.head.sha }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          header: "package: Version Bump Preview"
+          message: |
+            ### package: Version Bump Preview
+            ${{ steps.preview.outputs.report }}
+
+  bump-plugin-versions:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: mise install -y
+        uses: jdx/mise-action@v2
+        with:
+          install: true
+          cache: true
+      - name: just version
+        id: bump
+        shell: bash
+        run: |
+          just bump-plugin-versions
+
+      - name: push tags
+        shell: bash
+        run: |
+          git push origin --tags
 
   update-marketplace:
+    needs: ['bump-plugin-versions']
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
@@ -43,63 +81,20 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: mise install -y
+        uses: jdx/mise-action@v2
         with:
-          fetch-depth: 0
-          # Use PAT for pushing, fallback to github.token
-          token: ${{ secrets.GITHUB_PAT_TOKEN_NSHEAPS || github.token }}
-
-      - name: Install mise
-        run: |
-          curl https://mise.run | sh
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-      - name: Install tools via mise
-        run: |
-          eval "$(mise activate bash)"
-          mise install -y
+          install: true
+          cache: true
 
       - name: Update marketplace metadata
         id: update
         uses: ./.github/actions/update-marketplace
-
-      - name: Create brew formula
-        if: steps.update.outputs.updated == 'true'
-        run: |
-          mkdir -p Formula
-          cat > Formula/claude-plugin-marketplace.rb <<'EOF'
-          class ClaudePluginMarketplace < Formula
-            desc "Claude Code plugin marketplace - community-driven plugins"
-            homepage "https://github.com/${{ github.repository }}"
-            url "https://github.com/${{ github.repository }}/archive/refs/heads/main.tar.gz"
-            version "latest"
-            sha256 :no_check
-
-            def install
-              libexec.install Dir["*"]
-              (bin/"claude-plugin-marketplace-setup").write <<~EOS
-                #!/bin/bash
-                set -e
-                MARKETPLACE_DIR="${HOME}/.claude-code/marketplaces/community"
-                if [ -d "$MARKETPLACE_DIR" ]; then
-                  cd "$MARKETPLACE_DIR" && git pull
-                else
-                  mkdir -p "$(dirname "$MARKETPLACE_DIR")"
-                  git clone "#{homepage}" "$MARKETPLACE_DIR"
-                fi
-                echo "Marketplace setup complete!"
-              EOS
-              chmod +x bin/"claude-plugin-marketplace-setup"
-            end
-
-            test do
-              assert_predicate bin/"claude-plugin-marketplace-setup", :executable?
-            end
-          end
-          EOF
 
       - name: Commit changes
         if: steps.update.outputs.updated == 'true'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: 'chore: update marketplace metadata [skip ci]'
-          file_pattern: '.claude-plugin/marketplace.json Formula/'
+          file_pattern: '.claude-plugin/marketplace.json'

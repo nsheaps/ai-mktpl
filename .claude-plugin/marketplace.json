@@ -6,8 +6,7 @@
     "email": "nsheaps@gmail.com"
   },
   "metadata": {
-    "description": "Community-driven marketplace for Claude Code plugins featuring git automation and commit management",
-    "version": "1.0.0"
+    "description": "Community-driven marketplace for Claude Code plugins featuring git automation and commit management"
   },
   "plugins": [
     {
