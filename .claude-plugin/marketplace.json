@@ -12,7 +12,7 @@
     {
       "name": "command-help-skill",
       "description": "Help users understand and discover slash commands when they accidentally type them as messages",
-      "version": "1.0.1",
+      "version": "0.0.1",
       "author": {
         "name": "Claude Code Community"
       },
@@ -24,7 +24,7 @@
     {
       "name": "commit-command",
       "description": "Automate git commits with AI-generated messages that match your repository's commit style and conventions",
-      "version": "1.0.1",
+      "version": "0.0.1",
       "author": {
         "name": "Claude Code Community"
       },
@@ -36,7 +36,7 @@
     {
       "name": "commit-skill",
       "description": "Intelligent skill that enables Claude to automatically analyze git changes and create well-formatted commits during development",
-      "version": "1.0.1",
+      "version": "0.0.1",
       "author": {
         "name": "Claude Code Community"
       },
@@ -48,7 +48,7 @@
     {
       "name": "correct-behavior",
       "description": "Command to correct AI behavior mistakes and update rules to prevent recurrence",
-      "version": "1.0.1",
+      "version": "0.0.1",
       "author": {
         "name": "Claude Code Community"
       },
@@ -60,7 +60,7 @@
     {
       "name": "github-auth-skill",
       "description": "Skill for authenticating with GitHub using device authorization flow",
-      "version": "1.0.1",
+      "version": "0.0.1",
       "author": {
         "name": "Claude Code Community"
       },
@@ -72,7 +72,7 @@
     {
       "name": "linear-mcp-sync",
       "description": "Installs Linear MCP and adds hooks for safe ticket updates with hash validation to prevent stale overwrites",
-      "version": "1.0.1",
+      "version": "0.0.1",
       "author": {
         "name": "Claude Code Community"
       },
@@ -84,7 +84,7 @@
     {
       "name": "memory-manager",
       "description": "Intelligent memory management for CLAUDE.md files. Automatically detects and stores user preferences, rules, and instructions with smart scope detection and hierarchical organization.",
-      "version": "1.0.1",
+      "version": "0.0.1",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -96,7 +96,7 @@
     {
       "name": "og-image",
       "description": "Generate OpenGraph images for Nuxt/Vue pages using HTML templates and html2png.dev API",
-      "version": "1.0.1",
+      "version": "0.0.1",
       "author": {
         "name": "alvinunreal + modifications by nsheaps"
       },
@@ -117,7 +117,7 @@
     {
       "name": "safety-evaluation-prompt",
       "description": "Pre-tool-call safety evaluation using prompt-style hooks for inline AI evaluation",
-      "version": "1.0.1",
+      "version": "0.0.1",
       "author": {
         "name": "Claude Code Community"
       },
@@ -129,7 +129,7 @@
     {
       "name": "safety-evaluation-script",
       "description": "Pre-tool-call safety evaluation using Claude CLI (haiku) with script-style hooks",
-      "version": "1.0.1",
+      "version": "0.0.1",
       "author": {
         "name": "Claude Code Community"
       },
@@ -141,7 +141,7 @@
     {
       "name": "skills-maintenance",
       "description": "Agent skill for maintaining, updating, and improving existing Claude Code skills",
-      "version": "1.0.1",
+      "version": "0.0.1",
       "author": {
         "name": "Claude Code Community"
       },
@@ -153,7 +153,7 @@
     {
       "name": "sync-settings",
       "description": "Automatically sync and merge local Claude Code settings, commands, and files using configurable rules in syncconfig.yaml",
-      "version": "1.0.1",
+      "version": "0.0.1",
       "author": {
         "name": "Claude Code Community"
       },
@@ -174,7 +174,7 @@
     {
       "name": "task-parallelization",
       "description": "Intelligent skill that helps Claude parallelize Task tool calls when working on repetitive or batch operations, optimizing throughput based on task complexity",
-      "version": "1.0.1",
+      "version": "0.0.1",
       "author": {
         "name": "Claude Code Community"
       },

@@ -1,6 +1,6 @@
 {
   "name": "safety-evaluation-prompt",
-  "version": "1.0.1",
+  "version": "0.0.1",
   "description": "Pre-tool-call safety evaluation using prompt-style hooks for inline AI evaluation",
   "author": {
     "name": "Claude Code Community",

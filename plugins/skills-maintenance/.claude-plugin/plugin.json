@@ -1,6 +1,6 @@
 {
   "name": "skills-maintenance",
-  "version": "1.0.1",
+  "version": "0.0.1",
   "description": "Agent skill for maintaining, updating, and improving existing Claude Code skills",
   "author": {
     "name": "Claude Code Community",
