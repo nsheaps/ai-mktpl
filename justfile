@@ -102,8 +102,8 @@ preview-version-bump PLUGIN_PATH=invocation_directory():
     echo "===[ DRY RUN ]==="
     commit-and-tag-version --dry-run
 
-[arg('format', pattern='--pattern=(raw|md)|')]
-preview-version-bumps format='--pattern=raw':
+[arg('format', pattern='--format=raw|--format=md')]
+preview-version-bumps format='--format=raw':
     #!/usr/bin/env bash
     # takes optional args:
     # --format=raw|md : output format for dry-run report (default: raw)
@@ -118,7 +118,7 @@ preview-version-bumps format='--pattern=raw':
     #  | plugin-name | 1.2.2 | patch | 1.2.3 |
     #   ...
     case "{{format}}" in
-        --pattern=md )
+        --format=md )
             echo "| Plugin | Current | Type | Next |"
             echo "|---|---|---|---|"
             ;;
@@ -144,10 +144,10 @@ preview-version-bumps format='--pattern=raw':
         fi
 
         case "{{format}}" in
-            --pattern=raw|'' )
+            --format=raw|'' )
                 echo "$PLUGIN_NAME: $CURRENT =( $TYPE )=> $NEXT"
                 ;;
-            --pattern=md )
+            --format=md )
                 echo "| $PLUGIN_NAME | $CURRENT | $TYPE | $NEXT |"
                 ;;
         esac
