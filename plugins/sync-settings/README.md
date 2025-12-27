@@ -1,4 +1,5 @@
 Get rid of python here
+
 ###### BELOW BE VIBES
 
 # Sync Settings Plugin
