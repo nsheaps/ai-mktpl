@@ -10,13 +10,5 @@
   },
   "homepage": "https://github.com/nsheaps/.ai",
   "repository": "https://github.com/nsheaps/.ai",
-  "keywords": [
-    "claude-code",
-    "plugins",
-    "git",
-    "automation",
-    "commit",
-    "workflow",
-    "marketplace"
-  ]
+  "keywords": ["claude-code", "plugins", "git", "automation", "commit", "workflow", "marketplace"]
 }

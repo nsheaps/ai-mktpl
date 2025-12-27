@@ -20,15 +20,7 @@
       "source": "./plugins/command-help-skill",
       "category": "utility",
       "tags": ["utility", "skill"],
-      "keywords": [
-        "commands",
-        "help",
-        "discovery",
-        "skill",
-        "slash-commands",
-        "ai",
-        "assistant"
-      ]
+      "keywords": ["commands", "help", "discovery", "skill", "slash-commands", "ai", "assistant"]
     },
     {
       "name": "commit-command",
@@ -40,13 +32,7 @@
       "source": "./plugins/commit-command",
       "category": "git",
       "tags": ["utility", "command"],
-      "keywords": [
-        "git",
-        "commit",
-        "automation",
-        "conventional-commits",
-        "semantic-commit"
-      ]
+      "keywords": ["git", "commit", "automation", "conventional-commits", "semantic-commit"]
     },
     {
       "name": "commit-skill",
@@ -82,14 +68,7 @@
       "source": "./plugins/github-auth-skill",
       "category": "git",
       "tags": ["utility", "skill"],
-      "keywords": [
-        "github",
-        "authentication",
-        "device-auth",
-        "gh",
-        "cli",
-        "skill"
-      ]
+      "keywords": ["github", "authentication", "device-auth", "gh", "cli", "skill"]
     },
     {
       "name": "linear-mcp-sync",
@@ -101,14 +80,7 @@
       "source": "./plugins/linear-mcp-sync",
       "category": "integration",
       "tags": ["utility"],
-      "keywords": [
-        "linear",
-        "mcp",
-        "hooks",
-        "sync",
-        "issue-tracking",
-        "conflict-detection"
-      ]
+      "keywords": ["linear", "mcp", "hooks", "sync", "issue-tracking", "conflict-detection"]
     },
     {
       "name": "memory-manager",
@@ -120,13 +92,7 @@
       "source": "./plugins/memory-manager",
       "category": "utility",
       "tags": ["utility", "skill"],
-      "keywords": [
-        "memory",
-        "preferences",
-        "claude.md",
-        "context",
-        "instructions"
-      ]
+      "keywords": ["memory", "preferences", "claude.md", "context", "instructions"]
     },
     {
       "name": "og-image",
@@ -159,14 +125,7 @@
       "source": "./plugins/safety-evaluation-prompt",
       "category": "security",
       "tags": ["utility"],
-      "keywords": [
-        "safety",
-        "security",
-        "hooks",
-        "pre-tool-call",
-        "evaluation",
-        "prompt"
-      ]
+      "keywords": ["safety", "security", "hooks", "pre-tool-call", "evaluation", "prompt"]
     },
     {
       "name": "safety-evaluation-script",
@@ -178,14 +137,7 @@
       "source": "./plugins/safety-evaluation-script",
       "category": "security",
       "tags": ["utility"],
-      "keywords": [
-        "safety",
-        "security",
-        "hooks",
-        "pre-tool-call",
-        "evaluation",
-        "haiku"
-      ]
+      "keywords": ["safety", "security", "hooks", "pre-tool-call", "evaluation", "haiku"]
     },
     {
       "name": "skills-maintenance",
@@ -197,14 +149,7 @@
       "source": "./plugins/skills-maintenance",
       "category": "utility",
       "tags": ["utility", "skill"],
-      "keywords": [
-        "skills",
-        "maintenance",
-        "update",
-        "improve",
-        "refactor",
-        "documentation"
-      ]
+      "keywords": ["skills", "maintenance", "update", "improve", "refactor", "documentation"]
     },
     {
       "name": "sync-settings",

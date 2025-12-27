@@ -119,8 +119,7 @@ jobs:
 ```javascript
 // Express.js webhook handler
 app.post("/webhooks/debug", (req, res) => {
-  const { request_id, source_repo, debug_info, git_context, workflow } =
-    req.body;
+  const { request_id, source_repo, debug_info, git_context, workflow } = req.body;
 
   console.log(`Debug info received for ${source_repo}`);
   console.log(`Session ID: ${debug_info.session_id}`);

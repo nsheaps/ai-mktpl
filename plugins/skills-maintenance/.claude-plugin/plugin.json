@@ -10,12 +10,5 @@
   },
   "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/skills-maintenance",
   "repository": "https://github.com/nsheaps/.ai",
-  "keywords": [
-    "skills",
-    "maintenance",
-    "update",
-    "improve",
-    "refactor",
-    "documentation"
-  ]
+  "keywords": ["skills", "maintenance", "update", "improve", "refactor", "documentation"]
 }

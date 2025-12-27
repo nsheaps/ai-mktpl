@@ -23,12 +23,22 @@ setup:
 
 # Run all linters (uses .prettierrc.yaml for config)
 lint:
+    #!/usr/bin/env bash
     command -v prettier >/dev/null 2>&1 || { just setup ; }
-    prettier --write "**/*.{yaml,yml,json,md}" --list-different
+    HAS_ERRORS=0
+    just lint-check || HAS_ERRORS=1
+    if [ $HAS_ERRORS -ne 0 ]; then
+        echo "Lint errors found. Attempting to fix them"
+        prettier --write --list-different .
+        just lint-check || echo "Errors remain after auto-fix."
+        echo "Lint failed earlier, exiting with error"
+        exit 1
+    fi
+
 
 lint-check:
     command -v prettier >/dev/null 2>&1 || { just setup ; }
-    prettier --check "**/*.{yaml,yml,json,md}"
+    prettier --check .
 
 # Validate plugin structure
 validate:

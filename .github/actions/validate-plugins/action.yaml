@@ -16,7 +16,7 @@ runs:
       uses: actions/setup-node@v4
       with:
         # TODO: Use mise for consistent versioning (see .ai/rules/bash-scripting.md)
-        node-version: "20"
+        node-version: '20'
 
     - name: Validate plugin structure
       # TODO: Extract to separate script file per .ai/rules/bash-scripting.md

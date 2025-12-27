@@ -1,14 +1,14 @@
 name: cd
 
-"on":
+'on':
   push:
     branches:
       - main
     paths:
-      - "plugins/**"
+      - 'plugins/**'
   pull_request:
     paths:
-      - "plugins/**"
+      - 'plugins/**'
 
 concurrency:
   group: cd-${{ github.ref }}
@@ -100,5 +100,5 @@ jobs:
         if: steps.update.outputs.updated == 'true'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore: update marketplace metadata [skip ci]"
-          file_pattern: ".claude-plugin/marketplace.json Formula/"
+          commit_message: 'chore: update marketplace metadata [skip ci]'
+          file_pattern: '.claude-plugin/marketplace.json Formula/'

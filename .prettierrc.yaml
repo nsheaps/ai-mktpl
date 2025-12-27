@@ -10,15 +10,15 @@ endOfLine: lf
 # Only format these file types
 overrides:
   - files:
-      - "*.yaml"
-      - "*.yml"
+      - '*.yaml'
+      - '*.yml'
     options:
       singleQuote: true
   - files:
-      - "*.json"
+      - '*.json'
     options:
       trailingComma: none
   - files:
-      - "*.md"
+      - '*.md'
     options:
       proseWrap: preserve

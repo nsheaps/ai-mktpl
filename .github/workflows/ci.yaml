@@ -1,6 +1,6 @@
 name: ci
 
-"on":
+'on':
   pull_request:
   push:
     branches:
@@ -32,7 +32,7 @@ jobs:
         #
         uses: ./.github/actions/lint-files
         with:
-          fix: "true"
+          fix: 'true'
         continue-on-error: true
 
       - name: git push
@@ -40,9 +40,9 @@ jobs:
         id: auto-commit-action
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore: `just lint`"
+          commit_message: 'chore: `just lint`'
 
-      - name: "Run if changes have been detected"
+      - name: 'Run if changes have been detected'
         if: ${{ steps.lint.outputs.changed-or-failed == 'true' }}
         run: |
           echo "Changes made or lint failed! Auto-committed the fixes, but more lint and format issues may remain."

@@ -5,7 +5,7 @@ inputs:
   fix:
     description: Whether to auto-fix lint issues
     required: false
-    default: "false"
+    default: 'false'
 
 outputs:
   changed-or-failed:
@@ -23,49 +23,15 @@ runs:
         HAS_ERRORS=false
         FIX="${{ inputs.fix }}"
 
-        echo "::group::Linting YAML, JSON, and Markdown files with Prettier"
         if [ "$FIX" = "true" ]; then
-          prettier --write "**/*.{yaml,yml,json,md}" || HAS_ERRORS=true
+          just lint || HAS_ERRORS=true
         else
-          prettier --check "**/*.{yaml,yml,json,md}" || HAS_ERRORS=true
-        fi
-        echo "::endgroup::"
-
-        echo "::group::Linting TypeScript/JavaScript files"
-        if [ -f "package.json" ]; then
-          if [ "$FIX" = "true" ]; then
-            eslint "**/*.{ts,js,tsx,jsx}" --fix || HAS_ERRORS=true
-          else
-            eslint "**/*.{ts,js,tsx,jsx}" --max-warnings 0 || HAS_ERRORS=true
-          fi
-        fi
-        echo "::endgroup::"
-
-        echo "::group::Linting Python files"
-        if find . -name "*.py" -not -path "*/\.*" | grep -q .; then
-          if [ "$FIX" = "true" ]; then
-            black . || HAS_ERRORS=true
-            isort . || HAS_ERRORS=true
-          else
-            black --check . || HAS_ERRORS=true
-            isort --check-only . || HAS_ERRORS=true
-          fi
-          flake8 . || HAS_ERRORS=true
-        fi
-        echo "::endgroup::"
-
-        # Check if any files were changed
-        CHANGED=false
-        if [ -n "$(git status --porcelain)" ]; then
-          CHANGED=true
-          echo "::notice::Files were modified by linters"
+          just lint-check || HAS_ERRORS=true
         fi
 
         # Output true if changed OR errors remain
         if [ "$CHANGED" = "true" ] || [ "$HAS_ERRORS" = "true" ]; then
           echo "changed-or-failed=true" >> $GITHUB_OUTPUT
-          echo "::warning::Lint check requires attention (changed=$CHANGED, errors=$HAS_ERRORS)"
         else
           echo "changed-or-failed=false" >> $GITHUB_OUTPUT
-          echo "::notice::All files passed linting checks"
         fi

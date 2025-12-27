@@ -1,70 +1,70 @@
-name: "Claude Code Debug Info"
-description: "Extract debugging information from Claude Code CLI sessions including session IDs, status, and workflow context"
+name: 'Claude Code Debug Info'
+description: 'Extract debugging information from Claude Code CLI sessions including session IDs, status, and workflow context'
 branding:
-  icon: "info"
-  color: "blue"
+  icon: 'info'
+  color: 'blue'
 
 inputs:
   continue:
-    description: "Whether to continue from previous session (default: true)"
+    description: 'Whether to continue from previous session (default: true)'
     required: false
-    default: "true"
+    default: 'true'
   working-directory:
-    description: "Working directory for Claude Code (defaults to repository root)"
+    description: 'Working directory for Claude Code (defaults to repository root)'
     required: false
-    default: "."
+    default: '.'
   claude-api-key:
-    description: "Claude API key (if not set in environment)"
+    description: 'Claude API key (if not set in environment)'
     required: false
   additional-flags:
-    description: "Additional flags to pass to claude-code CLI"
+    description: 'Additional flags to pass to claude-code CLI'
     required: false
-    default: ""
+    default: ''
   extract-logs:
-    description: "Whether to extract and include recent session logs"
+    description: 'Whether to extract and include recent session logs'
     required: false
-    default: "false"
+    default: 'false'
 
 outputs:
   session-id:
-    description: "Current Claude Code session ID"
+    description: 'Current Claude Code session ID'
     value: ${{ steps.debug.outputs.session-id }}
   previous-session-id:
-    description: "Previous Claude Code session ID"
+    description: 'Previous Claude Code session ID'
     value: ${{ steps.debug.outputs.previous-session-id }}
   working-directory:
-    description: "Working directory used by Claude Code"
+    description: 'Working directory used by Claude Code'
     value: ${{ steps.debug.outputs.working-directory }}
   git-branch:
-    description: "Current git branch"
+    description: 'Current git branch'
     value: ${{ steps.debug.outputs.git-branch }}
   git-status:
-    description: "Git status (clean/dirty)"
+    description: 'Git status (clean/dirty)'
     value: ${{ steps.debug.outputs.git-status }}
   git-commit:
-    description: "Current git commit SHA"
+    description: 'Current git commit SHA'
     value: ${{ steps.debug.outputs.git-commit }}
   session-status:
-    description: "Status of the Claude Code session"
+    description: 'Status of the Claude Code session'
     value: ${{ steps.debug.outputs.session-status }}
   session-count:
-    description: "Number of recent sessions"
+    description: 'Number of recent sessions'
     value: ${{ steps.debug.outputs.session-count }}
   claude-version:
-    description: "Claude Code CLI version"
+    description: 'Claude Code CLI version'
     value: ${{ steps.debug.outputs.claude-version }}
   json-output:
-    description: "Full JSON output from claude-code CLI"
+    description: 'Full JSON output from claude-code CLI'
     value: ${{ steps.debug.outputs.json-output }}
   error:
-    description: "Error message if command failed"
+    description: 'Error message if command failed'
     value: ${{ steps.debug.outputs.error }}
   logs:
-    description: "Recent session logs (if extract-logs is true)"
+    description: 'Recent session logs (if extract-logs is true)'
     value: ${{ steps.debug.outputs.logs }}
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - name: Extract Claude Code Debug Information
       id: debug

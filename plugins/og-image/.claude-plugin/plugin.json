@@ -10,14 +10,5 @@
   },
   "homepage": "https://www.reddit.com/r/ClaudeCode/comments/1pw2psj/this_is_how_i_generate_og_images_using_claude_code/",
   "repository": "https://github.com/nsheaps/.ai",
-  "keywords": [
-    "generation",
-    "image",
-    "opengraph",
-    "og-image",
-    "social media",
-    "png",
-    "html",
-    "svg"
-  ]
+  "keywords": ["generation", "image", "opengraph", "og-image", "social media", "png", "html", "svg"]
 }
