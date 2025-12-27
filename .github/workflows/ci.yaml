@@ -42,8 +42,8 @@ jobs:
         with:
           commit_message: 'chore: `just lint`'
 
-      - name: 'Run if changes have been detected'
-        if: ${{ steps.lint.outputs.changed-or-failed == 'true' }}
+      - name: 'exit 1 # changes detected or linting failed'
+        if: ${{ steps.lint.outputs.changed-or-failed == 'true' && ! cancelled() }}
         run: |
           echo "Changes made or lint failed! Auto-committed the fixes, but more lint and format issues may remain."
           exit 1

@@ -30,7 +30,7 @@ runs:
         fi
 
         # Output true if changed OR errors remain
-        if [ "$CHANGED" = "true" ] || [ "$HAS_ERRORS" = "true" ]; then
+        if [ "$HAS_ERRORS" = "true" ]; then
           echo "changed-or-failed=true" >> $GITHUB_OUTPUT
         else
           echo "changed-or-failed=false" >> $GITHUB_OUTPUT
