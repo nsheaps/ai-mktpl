@@ -13,10 +13,6 @@ inputs:
   head-ref:
     description: Head git reference to compare
     required: true
-  token:
-    description: GitHub token to use for commenting on PRs
-    required: false
-    default: ${{ github.token }}
 
 outputs:
   report:
