@@ -80,7 +80,7 @@ jobs:
         if: steps.check-changes.outputs.has-changes == 'true'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: 'chore: auto-fix lint issues'
+          commit_message: 'chore: `just lint`'
 
       - name: Rerun lint after fixes
         if: steps.check-changes.outputs.has-changes == 'true'

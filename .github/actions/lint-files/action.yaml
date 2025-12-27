@@ -18,34 +18,6 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        # TODO: Use mise for consistent versioning
-        node-version: '20'
-        # TODO: Migrate to yarn with corepack per .ai/rules/tool-preferences.md
-        cache: 'npm'
-        cache-dependency-path: |
-          .github/actions/lint-files/package-lock.json
-
-    - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-        cache: 'pip'
-
-    - name: Install linters
-      shell: bash
-      run: |
-        echo "::group::Installing Node.js linters"
-        cd ${{ github.action_path }}
-        npm ci
-        echo "::endgroup::"
-
-        echo "::group::Installing Python linters"
-        pip install black flake8 isort
-        echo "::endgroup::"
-
     - name: Run linters
       id: lint
       shell: bash
@@ -66,9 +38,9 @@ runs:
 
         echo "::group::Linting TypeScript/JavaScript files"
         if [ -f "package.json" ]; then
-          npx eslint "**/*.{ts,js,tsx,jsx}" --max-warnings 0 || {
+          eslint "**/*.{ts,js,tsx,jsx}" --max-warnings 0 || {
             if [ "${{ inputs.fix }}" = "true" ]; then
-              npx eslint "**/*.{ts,js,tsx,jsx}" --fix || true
+              eslint "**/*.{ts,js,tsx,jsx}" --fix || true
             fi
             ERROR_COUNT=$((ERROR_COUNT + 1))
             HAS_ERRORS=true

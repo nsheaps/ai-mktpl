@@ -17,6 +17,14 @@ just = "latest"
 # Prettier for formatting YAML, JSON, Markdown
 "npm:prettier" = "latest"
 
+# ESLint for TypeScript/JavaScript
+"npm:eslint" = "latest"
+
+# Python linters
+"pipx:black" = "latest"
+"pipx:flake8" = "latest"
+"pipx:isort" = "latest"
+
 [settings]
 # Use shorter paths for tools
 legacy_version_file = false

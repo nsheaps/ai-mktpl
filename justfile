@@ -24,6 +24,7 @@ setup:
 # Run all linters
 lint:
     @echo "Running linters..."
+    command -v prettier >/dev/null 2>&1 || { just setup ; }
     prettier --check "**/*.{yaml,yml,json,md}" || true
     @echo "Linting complete!"
 
