@@ -78,42 +78,9 @@ jobs:
 
       - name: Commit and push fixes
         if: steps.check-changes.outputs.has-changes == 'true'
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-
-          git add -A
-
-          git commit -m "$(cat <<'EOF'
-          chore: auto-fix lint issues
-
-          Automatically fixed lint errors found in CI.
-          EOF
-          )"
-
-          echo "::group::Pushing changes"
-          set +e
-          RETRY_COUNT=0
-          MAX_RETRIES=4
-          RETRY_DELAY=2
-
-          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-            if git push; then
-              echo "::notice::Successfully pushed lint fixes"
-              exit 0
-            else
-              RETRY_COUNT=$((RETRY_COUNT + 1))
-              if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
-                echo "::warning::Push failed, retrying in ${RETRY_DELAY}s (attempt $RETRY_COUNT/$MAX_RETRIES)"
-                sleep $RETRY_DELAY
-                RETRY_DELAY=$((RETRY_DELAY * 2))
-              else
-                echo "::error::Failed to push after $MAX_RETRIES attempts"
-                exit 1
-              fi
-            fi
-          done
-          echo "::endgroup::"
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'chore: auto-fix lint issues'
 
       - name: Rerun lint after fixes
         if: steps.check-changes.outputs.has-changes == 'true'
@@ -128,38 +95,14 @@ jobs:
           steps.check-changes.outputs.has-changes != 'true')
         id: collect-errors
         run: |
-          echo "::group::Collecting lint errors"
-
-          ERROR_LOG=$(mktemp)
-
-          # Rerun linters to collect errors
-          yamllint -f parsable . > $ERROR_LOG 2>&1 || true
-          npx prettier --check "**/*.json" >> $ERROR_LOG 2>&1 || true
-          npx markdownlint-cli2 "**/*.md" "#node_modules" >> $ERROR_LOG 2>&1 || true
-
-          if [ -f "package.json" ]; then
-            npx eslint "**/*.{ts,js,tsx,jsx}" >> $ERROR_LOG 2>&1 || true
-          fi
-
-          if find . -name "*.py" -not -path "*/\.*" | grep -q .; then
-            flake8 . >> $ERROR_LOG 2>&1 || true
-          fi
-
-          # Format errors for comment
-          ERRORS=$(cat $ERROR_LOG | head -50)
-
-          if [ -z "$ERRORS" ]; then
-            ERRORS="No specific errors captured, but lint check failed."
-          fi
-
-          # Save to output
           {
-            echo 'errors<<EOF'
-            echo "$ERRORS"
-            echo 'EOF'
-          } >> $GITHUB_OUTPUT
-
-          echo "::endgroup::"
+            yamllint -f parsable . 2>&1 || true
+            npx prettier --check "**/*.json" 2>&1 || true
+            npx markdownlint-cli2 "**/*.md" "#node_modules" 2>&1 || true
+          } | head -50 > /tmp/errors.txt
+          echo 'errors<<EOF' >> $GITHUB_OUTPUT
+          cat /tmp/errors.txt >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
 
       - name: Comment unfixable errors on PR
         if: >-

@@ -27,12 +27,21 @@ Every action in `.github/actions/` must:
 
 1. Have a test workflow that runs when the action changes
 2. Include a dry-run mode for PR validation
-3. Scripts >3 lines should be in separate files for linting
-4. Work locally via justfile commands
+3. Work locally via justfile commands
 
-## Git Push Retry Logic
+## Prefer Marketplace Actions Over Custom Scripts
 
-All workflows use exponential backoff (4 attempts: 2s, 4s, 8s, 16s).
+**CRITICAL:** When working with GitHub Actions workflows:
+
+1. **Prefer popular upstream actions** over writing custom bash scripts
+2. **Check what's already in use** in the repo before introducing new dependencies
+3. **Be consistent** - if refactoring to use a different action, update all similar usages
+4. Keep inline bash to a minimum (simple one-liners only)
+
+Common actions already in use:
+- `stefanzweifel/git-auto-commit-action@v5` - git config, add, commit, push
+- `peter-evans/create-or-update-comment@v4` - PR comments
+- `peter-evans/find-comment@v3` - finding existing comments
 
 ## Secrets Used
 
