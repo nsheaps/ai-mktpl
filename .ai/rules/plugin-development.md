@@ -1,57 +1,5 @@
 # Plugin Development Guidelines
 
-Rules for working with plugins, MCP servers, hooks, and the marketplace repo.
-
-## KISS: Keep It Simple, Stupid
-
-**Always start with the simplest possible implementation:**
-
-1. **Simple first, complex later** - Start with basic functionality, add features only when needed
-2. **Avoid over-engineering** - Don't add abstraction layers, configuration, or flexibility until you need them
-3. **Solve the immediate problem** - Don't design for hypothetical future requirements
-4. **Prefer clarity over cleverness** - Code should be obvious, not impressive
-5. **Question every feature** - Does this solve a real problem today, or is it "nice to have"?
-
-**Examples:**
-- Bad: Build a configurable, extensible framework for handling one use case
-- Good: Write a simple script that solves the one use case
-- Bad: Add feature flags, backwards compatibility, and migration paths
-- Good: Just change the code - it's a marketplace, not production infrastructure
-
-## YAGNI: You Ain't Gonna Need It
-
-**Don't build things you don't need yet:**
-
-- Don't add features "because we might need them later"
-- Don't build infrastructure for future use cases
-- Don't create configuration options for things that aren't configurable yet
-- Build exactly what's needed today
-- Trust that you can refactor later when requirements are clear
-
-**Remember:** The code you don't write has zero bugs, zero maintenance cost, and zero complexity.
-
-## Marketplace Repo Location
-
-`~/src/nsheaps/ai/...` contains:
-- Plugins
-- MCP servers
-- Hooks
-- Shared configuration
-
-## Directory Structure
-
-- `~/.ai/.claude/rules/` - Rules for working on the repo itself (symlinks to `.ai/rules/`)
-- `~/.ai/.ai/rules/` - User behavior rules (AI-agnostic, syncs to user config)
-- `~/.ai/plugins/*/` - Plugin source code
-
-## Development Workflow
-
-1. Always review Anthropic documentation before making configuration changes
-2. Check if the folder already contains in-flight work
-3. Use a git worktree to keep automated changes separate
-4. Always make changes in a background Task (`run_in_background: true`)
-5. Make a PR for any changes - these require peer review
-
 ## Technology Preferences
 
 **For compiled binaries and complex plugins:**
@@ -94,6 +42,32 @@ plugins/plugin-name/
   }
 }
 ```
+
+# Plugin & MCP Development Rules
+
+Rules for working with plugins, MCP servers, hooks, and the marketplace repo.
+
+## Marketplace Repo Location
+
+`~/src/nsheaps/ai/...` contains:
+- Plugins
+- MCP servers
+- Hooks
+- Shared configuration
+
+## Development Workflow
+
+1. Always review Anthropic documentation before making configuration changes
+2. Check if the folder already contains in-flight work
+3. Use a git worktree to keep automated changes separate
+4. Always make changes in a background Task (`run_in_background: true`)
+5. Make a PR for any changes - these require peer review
+
+## Directory Structure
+
+- `~/src/nsheaps/ai/.claude/rules/` - Rules for working on the repo itself (Claude-specific)
+- `~/src/nsheaps/ai/.ai/rules/` - User behavior rules (AI-agnostic, syncs to user config)
+- `~/src/nsheaps/ai/plugins/*/` - Plugin source code
 
 ## See Also
 

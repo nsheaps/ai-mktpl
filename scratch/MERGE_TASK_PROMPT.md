@@ -25,8 +25,7 @@ Make a new branch, dev/claude, and merge together all open branches/PRs into one
 
 ## Additional Tools & Resources
 
-- Use this read-only github actions token to view PRs, their comments, etc. If this does not have enough scopes, ask the user to expand them. Use GH to interact with the API using this token.
-  `GH_TOKEN_RO=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`
+- Use this read-only github actions token to view PRs, their comments, etc. If this does not have enough scopes, ask the user to expand them. Use GH to interact with the API using this token. Env var: `GH_TOKEN_READONLY`
   Note, this token has access to read code, commit statuses, metadata, and pull requests on the following repositories:
     - nsheaps/.ai-old
     - nsheaps/aitkit

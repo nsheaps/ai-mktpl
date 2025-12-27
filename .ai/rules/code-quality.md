@@ -4,17 +4,13 @@ Standards for writing and reviewing code.
 
 ## Git Workflow
 
+NEVER force push with `git push --force`. Always prefer to not rewrite history on the remote. If necessary, use `git push --force-with-lease --force-if-includes` after confirming no one else has pushed changes.
+
 **For automated agents in CI/remote environments:**
 After committing changes, always push immediately. Don't ask - just push.
 
 **For local/interactive assistants:**
 Only commit and push when explicitly asked by the user. Local assistants should always defer to user preferences.
-
-## DRY Principle
-
-Always write DRY code. NEVER write WET code.
-- **DRY** = Don't Repeat Yourself - never duplicate code, centralize it when necessary
-- **WET** = Write Everything Twice - avoid this pattern
 
 ## Task Completion
 
@@ -29,7 +25,6 @@ Your task is rarely done after making changes. Always:
 Most changes should be validated by CI when creating a PR or full validation on the default branch.
 
 CRITICAL: CI workflows should be easily replicable locally using the same source-of-truth source code.
-
 CRITICAL: Validation is considered a failure if CI fails, regardless of if it passes with local tooling. If CI is inaccessible, ask the user for help.
 CRITICAL: Validation is also considered a failure if results locally do not match CI. CI is the source of truth, and must provide confidence that the changes will not introduce regressions.
 
