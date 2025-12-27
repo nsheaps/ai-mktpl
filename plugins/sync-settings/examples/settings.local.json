@@ -13,8 +13,5 @@
       "mcp__filesystem__*"
     ]
   },
-  "enabledMcpServers": [
-    "filesystem",
-    "github"
-  ]
+  "enabledMcpServers": ["filesystem", "github"]
 }

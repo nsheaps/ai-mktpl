@@ -38,6 +38,7 @@ claude mcp add linear --scope user -- npx -y mcp-remote https://mcp.linear.app/s
 Add the following to your Claude Code settings.json:
 
 **Location:**
+
 - Linux: `~/.config/claude/settings.json`
 - macOS: `~/Library/Application Support/Claude/settings.json`
 - Project-level: `.claude/settings.json`
@@ -118,16 +119,17 @@ Claude: Update issue LIN-123 status to "In Progress"
 
 The default matchers cover common Linear MCP tool patterns:
 
-| Hook Type | Matcher Pattern | Description |
-|-----------|-----------------|-------------|
-| PostToolUse | `mcp__linear__.*(get\|Get\|issue$\|Issue$)` | Matches read operations |
-| PreToolUse | `mcp__linear__.*(update\|Update\|create\|Create)` | Matches write operations |
+| Hook Type   | Matcher Pattern                                   | Description              |
+| ----------- | ------------------------------------------------- | ------------------------ |
+| PostToolUse | `mcp__linear__.*(get\|Get\|issue$\|Issue$)`       | Matches read operations  |
+| PreToolUse  | `mcp__linear__.*(update\|Update\|create\|Create)` | Matches write operations |
 
 You can customize these patterns in your settings.json if the Linear MCP tool names differ.
 
 ### Storage Location
 
 Hashes are stored in session-specific files at:
+
 - `$TMPDIR/linear-mcp-hashes/<session_id>.json` (or `/tmp/linear-mcp-hashes/` if TMPDIR is not set)
 
 This ensures hashes are isolated per session and automatically cleaned up.

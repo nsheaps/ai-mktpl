@@ -11,8 +11,8 @@
   mode: merge
   only:
     - key: permissions
-      only: allow           # Only merge the 'allow' list, not 'deny' or 'ask'
-    - key: enabledMcpServers  # Merge entire key
+      only: allow # Only merge the 'allow' list, not 'deny' or 'ask'
+    - key: enabledMcpServers # Merge entire key
 
 # Example 2: Sync commands from a shared location
 # ─────────────────────────────────────────────────────────────────
@@ -21,8 +21,8 @@
 - source: ../.ai/commands/*.md
   target: ./commands/
   mode: sync
-  sync-mode: symlink        # Create symlinks instead of copies
-  if-present: replace       # Replace existing files
+  sync-mode: symlink # Create symlinks instead of copies
+  if-present: replace # Replace existing files
 
 # Example 3: Copy a file to a different location
 # ─────────────────────────────────────────────────────────────────
@@ -30,8 +30,8 @@
 - source: ../CLAUDE.md
   target: ../AGENTS.md
   mode: sync
-  sync-mode: copy           # Create a copy (default)
-  if-present: do-nothing    # Skip if target already exists
+  sync-mode: copy # Create a copy (default)
+  if-present: do-nothing # Skip if target already exists
 
 # Example 4: Source-only mode for strict synchronization
 # ─────────────────────────────────────────────────────────────────

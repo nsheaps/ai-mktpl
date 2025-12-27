@@ -121,6 +121,7 @@ Claude authenticates with org access and:
 ### Revoking Access
 
 To revoke Claude's GitHub access:
+
 1. Visit `https://github.com/settings/applications`
 2. Find "GitHub CLI"
 3. Click "Revoke access"
@@ -129,14 +130,14 @@ To revoke Claude's GitHub access:
 
 Claude can perform operations the authenticated user is permitted to do:
 
-| Operation | Scope Needed |
-|-----------|--------------|
-| Create PR | `repo` |
-| Create Issue | `repo` |
-| Fork Repository | `repo` |
-| Access Private Repo | `repo` |
-| Read Org Membership | `read:org` |
-| Manage Packages | `write:packages` |
+| Operation           | Scope Needed     |
+| ------------------- | ---------------- |
+| Create PR           | `repo`           |
+| Create Issue        | `repo`           |
+| Fork Repository     | `repo`           |
+| Access Private Repo | `repo`           |
+| Read Org Membership | `read:org`       |
+| Manage Packages     | `write:packages` |
 
 ## Requirements
 
@@ -156,6 +157,7 @@ Claude can perform operations the authenticated user is permitted to do:
 ### "gh: command not found"
 
 Install GitHub CLI:
+
 ```bash
 # macOS
 brew install gh

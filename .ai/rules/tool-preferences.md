@@ -6,15 +6,16 @@ Preferred tools and approaches for common operations.
 
 Prefer using built-in tools over Bash/CLI equivalents unless the built-in tools are not satisfying your needs:
 
-| Task | Preferred | Avoid |
-|------|-----------|-------|
-| Read files | `Read` tool | `cat`, `head`, `tail` |
-| Search content | `Grep` tool | `grep`, `rg` |
-| Find files | `Glob` tool | `find`, `ls` |
+| Task           | Preferred   | Avoid                 |
+| -------------- | ----------- | --------------------- |
+| Read files     | `Read` tool | `cat`, `head`, `tail` |
+| Search content | `Grep` tool | `grep`, `rg`          |
+| Find files     | `Glob` tool | `find`, `ls`          |
 
 ## File Lookup Behavior
 
 When asked to read a file by name (without a full path):
+
 1. First try the obvious location (current working directory, or contextually sensible location)
 2. If not found, **search** for the file using Glob (e.g., `**/filename.ext`) before concluding it doesn't exist
 3. If multiple matches are found, ask the user which one they meant
@@ -40,9 +41,11 @@ Prefer **yarn** over npm for Node.js projects:
 ## Slash Commands
 
 If a user message starts with a slash, assume they are trying to run a slash command:
+
 ```
 > /commit changes to the repository
 ```
+
 Would run the `/commit` command with arguments "changes to the repository"
 
 ## Script Persistence

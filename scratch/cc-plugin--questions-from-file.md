@@ -7,9 +7,9 @@ in line as they appear in this file. The first question after the example is to 
 user has answered. Add any questions after the questions that already exist. When adding new questions, always be sure
 there's an empty one at the end for you to add more questions to.
 
- > === Question: What color is the sky
- > Answer: ...
- > ===
+> === Question: What color is the sky
+> Answer: ...
+> ===
 
 === Question: What color is the sky
 Answer: Blue

@@ -9,12 +9,14 @@ When using the Bash tool directly, do NOT chain commands with `&&` or `||`.
 **Why:** The user sets granular permissions for individual commands. Chaining prevents them from approving safe commands while rejecting unsafe ones.
 
 **Bad:**
+
 ```bash
 which bun && bun --version
 ls file1 2>/dev/null || ls file2
 ```
 
 **Good:**
+
 ```bash
 # Make separate Bash tool calls
 which bun
@@ -27,6 +29,7 @@ bun --version
 ## API Response Handling
 
 When making API calls that return data (especially structured data):
+
 1. Write the output to a file first
 2. Read and analyze that file
 3. Don't try to parse data directly from the API response
@@ -38,6 +41,7 @@ This prevents excess calls and re-runs to get more data.
 Avoid using `| tail` and `| head` to get specific lines from command output.
 
 Instead:
+
 1. Log output to a file (use `| tee` if you need to see it too)
 2. Use `sed`, `awk`, or `grep` with context options to extract needed lines
 
@@ -52,6 +56,7 @@ Scripts longer than 3 lines MUST be in separate files:
 **Why:** Inline scripts in YAML cannot be linted, are hard to test locally, and reduce code clarity.
 
 **Applies to:**
+
 - GitHub Actions workflow steps
 - Composite action steps
 - Any embedded shell code in YAML/JSON

@@ -1,6 +1,6 @@
 name: ci
 
-'on':
+"on":
   pull_request:
   push:
     branches:
@@ -28,16 +28,16 @@ jobs:
       - name: mise install -y
         uses: jdx/mise-action@v2
         with:
-          version: 'latest'
+          version: "latest"
           install: true
           cache: true
 
       - name: just lint
         id: lint
-        # 
+        #
         uses: ./.github/actions/lint-files
         with:
-          fix: 'true'
+          fix: "true"
         continue-on-error: true
 
       - name: git push
@@ -45,7 +45,7 @@ jobs:
         id: auto-commit-action
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: 'chore: `just lint`'
+          commit_message: "chore: `just lint`"
 
       - name: "Run if changes have been detected"
         if: ${{ steps.lint.outputs.changed-or-failed == 'true' }}

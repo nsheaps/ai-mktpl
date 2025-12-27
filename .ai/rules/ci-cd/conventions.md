@@ -39,6 +39,7 @@ Every action in `.github/actions/` must:
 4. Keep inline bash to a minimum (simple one-liners only)
 
 Common actions already in use:
+
 - `stefanzweifel/git-auto-commit-action@v5` - git config, add, commit, push
 - `peter-evans/create-or-update-comment@v4` - PR comments
 - `peter-evans/find-comment@v3` - finding existing comments

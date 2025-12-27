@@ -36,6 +36,7 @@ Runs automatically when a Claude Code session starts:
 ## Adding New Tools
 
 1. Add the tool to `.mise.toml`:
+
    ```toml
    [tools]
    your-tool = "version"
@@ -57,6 +58,7 @@ fi
 ### Common Patterns
 
 **Modifying PATH:**
+
 ```bash
 if [ -n "$PATHMOD" ]; then
   echo "export PATH=\"$PATHMOD:\$PATH\"" >> "$CLAUDE_ENV_FILE"
@@ -64,6 +66,7 @@ fi
 ```
 
 **Activating mise:**
+
 ```bash
 eval "$(mise activate bash)"
 echo 'eval "$(mise activate bash)"' >> "$CLAUDE_ENV_FILE"
@@ -81,6 +84,7 @@ The hook detects web sessions via `CLAUDE_CODE_REMOTE`:
 ### mise installation fails
 
 Web environments may have network restrictions. The hook gracefully handles this:
+
 ```
 ⚠️  mise installation failed (network restricted)
    Tools from .mise.toml will not be available

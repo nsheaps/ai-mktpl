@@ -9,6 +9,7 @@
 - Use `bun build --compile` for standalone executables
 
 **Why Bun + TypeScript:**
+
 - Single tool for package management, building, testing, and running
 - Native TypeScript support (no transpilation step needed)
 - Fast startup and execution times
@@ -31,6 +32,7 @@ plugins/plugin-name/
 ```
 
 **Required plugin.json fields:**
+
 ```json
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin.json",
@@ -50,6 +52,7 @@ Rules for working with plugins, MCP servers, hooks, and the marketplace repo.
 ## Marketplace Repo Location
 
 `~/src/nsheaps/ai/...` contains:
+
 - Plugins
 - MCP servers
 - Hooks

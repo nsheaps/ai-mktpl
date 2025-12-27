@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       example:
-        description: 'Which example to run'
+        description: "Which example to run"
         required: true
         type: choice
         options:
@@ -25,7 +25,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Install Claude Code CLI (Mock for demo)
         run: |
@@ -180,7 +180,7 @@ jobs:
         uses: ./.github/actions/claude-debug
         id: debug1
         with:
-          continue: false  # Fresh session
+          continue: false # Fresh session
 
       - name: Validate Stage 1
         run: |
@@ -199,7 +199,7 @@ jobs:
         uses: ./.github/actions/claude-debug
         id: debug2
         with:
-          continue: true  # Continue from Stage 1
+          continue: true # Continue from Stage 1
 
       - name: Verify Session Continuity
         run: |

@@ -1,4 +1,4 @@
-# every action in .github/actions/xxxx/action.yaml needs a workflow that tests it when it changes. 
+# every action in .github/actions/xxxx/action.yaml needs a workflow that tests it when it changes.
 # A workflow that tests it also means that the actions MUST include a dry-run mode, that can be used
 # in PRs to understand the changes that will be made when it is run on the default branch.
 name: Check Version Bump

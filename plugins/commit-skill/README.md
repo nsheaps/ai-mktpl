@@ -347,13 +347,13 @@ Claude ensures:
 
 ## Comparison with Commit Command
 
-| Feature | Smart Commit Skill | Commit Command |
-|---------|-------------------|----------------|
-| Activation | Automatic during development | Manual with `/commit` |
-| Use Case | Ongoing development workflow | Explicit commit creation |
+| Feature      | Smart Commit Skill               | Commit Command               |
+| ------------ | -------------------------------- | ---------------------------- |
+| Activation   | Automatic during development     | Manual with `/commit`        |
+| Use Case     | Ongoing development workflow     | Explicit commit creation     |
 | Multi-commit | Creates multiple logical commits | Single commit per invocation |
-| Learning | Learns during session | Analyzes history per run |
-| User Control | Transparent, can guide | Explicit control |
+| Learning     | Learns during session            | Analyzes history per run     |
+| User Control | Transparent, can guide           | Explicit control             |
 
 ### When to Use Each
 

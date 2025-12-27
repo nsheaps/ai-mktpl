@@ -1,80 +1,80 @@
-name: 'Claude Authentication'
-description: 'Authenticate with Claude API using various secret providers (Doppler, 1Password, or raw secrets)'
-author: 'Claude Code Marketplace'
+name: "Claude Authentication"
+description: "Authenticate with Claude API using various secret providers (Doppler, 1Password, or raw secrets)"
+author: "Claude Code Marketplace"
 
 branding:
-  icon: 'key'
-  color: 'orange'
+  icon: "key"
+  color: "orange"
 
 inputs:
   provider:
-    description: 'Secret provider to use: doppler, 1password, or raw'
+    description: "Secret provider to use: doppler, 1password, or raw"
     required: true
-    default: 'raw'
+    default: "raw"
 
   # Raw provider inputs
   api-key:
-    description: 'Claude API key (for raw provider). Supports GitHub secrets.'
+    description: "Claude API key (for raw provider). Supports GitHub secrets."
     required: false
 
   # Doppler provider inputs
   doppler-token:
-    description: 'Doppler service token (for doppler provider)'
+    description: "Doppler service token (for doppler provider)"
     required: false
 
   doppler-project:
-    description: 'Doppler project name'
+    description: "Doppler project name"
     required: false
-    default: ''
+    default: ""
 
   doppler-config:
-    description: 'Doppler config name'
+    description: "Doppler config name"
     required: false
-    default: ''
+    default: ""
 
   doppler-key-name:
-    description: 'Name of the secret in Doppler containing the Claude API key'
+    description: "Name of the secret in Doppler containing the Claude API key"
     required: false
-    default: 'ANTHROPIC_API_KEY'
+    default: "ANTHROPIC_API_KEY"
 
   # 1Password provider inputs
   onepassword-service-account-token:
-    description: '1Password service account token (for 1password provider)'
+    description: "1Password service account token (for 1password provider)"
     required: false
 
   onepassword-vault:
-    description: '1Password vault name or ID'
+    description: "1Password vault name or ID"
     required: false
-    default: ''
+    default: ""
 
   onepassword-item:
-    description: '1Password item name or ID containing the Claude API key'
+    description: "1Password item name or ID containing the Claude API key"
     required: false
-    default: 'Claude API Key'
+    default: "Claude API Key"
 
   onepassword-field:
-    description: '1Password field name containing the API key'
+    description: "1Password field name containing the API key"
     required: false
-    default: 'credential'
+    default: "credential"
 
   # Output configuration
   export-env-var:
-    description: 'Environment variable name to export the API key to'
+    description: "Environment variable name to export the API key to"
     required: false
-    default: 'ANTHROPIC_API_KEY'
+    default: "ANTHROPIC_API_KEY"
 
   set-github-output:
-    description: 'Whether to set the API key as a GitHub output (masked)'
+    description: "Whether to set the API key as a GitHub output (masked)"
     required: false
-    default: 'true'
+    default: "true"
 
 outputs:
   api-key:
-    description: 'The Claude API key (masked in logs)'
+    description: "The Claude API key (masked in logs)"
     value: ${{ steps.auth.outputs.api-key }}
 
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
     - name: Setup authentication
       id: auth

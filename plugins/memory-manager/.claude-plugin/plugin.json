@@ -6,13 +6,7 @@
   "author": {
     "name": "Nathan Heaps"
   },
-  "keywords": [
-    "memory",
-    "preferences",
-    "claude.md",
-    "context",
-    "instructions"
-  ],
+  "keywords": ["memory", "preferences", "claude.md", "context", "instructions"],
   "homepage": "https://github.com/nsheaps/.ai",
   "repository": {
     "type": "git",

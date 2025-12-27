@@ -37,12 +37,14 @@ BROWSER=false gh auth login
 ```
 
 This command outputs:
+
 - A one-time code (e.g., `ABCD-1234`)
 - A URL to visit: `https://github.com/login/device`
 
 #### Step 2: User Authorization
 
 The user must:
+
 1. Open `https://github.com/login/device` in their browser
 2. Enter the displayed code
 3. Authorize the GitHub CLI application
@@ -51,6 +53,7 @@ The user must:
 #### Step 3: Complete Authentication
 
 Once authorized, Claude can:
+
 - Access repositories the user has permission to access
 - Create issues and pull requests
 - Push to branches the user can push to
@@ -114,6 +117,7 @@ BROWSER=false gh auth login
 ```
 
 Interactive prompts will ask:
+
 - Account type: `GitHub.com` or `GitHub Enterprise Server`
 - Preferred protocol: `HTTPS` or `SSH`
 - Authentication method: This uses device code by default when browser is disabled
@@ -133,16 +137,16 @@ BROWSER=false gh auth login --hostname github.mycompany.com
 
 ### Common Scopes
 
-| Scope | Description |
-|-------|-------------|
-| `repo` | Full control of private repositories |
-| `read:org` | Read organization membership |
-| `write:org` | Read and write organization membership |
-| `read:packages` | Download packages from GitHub Packages |
-| `write:packages` | Upload packages to GitHub Packages |
-| `admin:public_key` | Manage public keys |
-| `gist` | Create gists |
-| `workflow` | Update GitHub Action workflows |
+| Scope              | Description                            |
+| ------------------ | -------------------------------------- |
+| `repo`             | Full control of private repositories   |
+| `read:org`         | Read organization membership           |
+| `write:org`        | Read and write organization membership |
+| `read:packages`    | Download packages from GitHub Packages |
+| `write:packages`   | Upload packages to GitHub Packages     |
+| `admin:public_key` | Manage public keys                     |
+| `gist`             | Create gists                           |
+| `workflow`         | Update GitHub Action workflows         |
 
 ## Security Considerations
 
@@ -223,6 +227,7 @@ gh auth status
 ```
 
 If already authenticated, Claude will:
+
 1. Verify existing authentication is sufficient
 2. Proceed with the requested operation
 3. Only re-authenticate if scopes are insufficient
@@ -254,12 +259,12 @@ gh auth logout
 
 ### Common Issues and Solutions
 
-| Error | Cause | Solution |
-|-------|-------|----------|
-| `HTTP 401` | Token expired or invalid | Re-authenticate with `gh auth login` |
-| `HTTP 403` | Insufficient permissions | Re-authenticate with additional scopes |
-| `HTTP 404` | Private repo, not authenticated | Authenticate to access private repos |
-| `SSO Required` | Organization requires SSO | User must authorize SSO in browser |
+| Error          | Cause                           | Solution                               |
+| -------------- | ------------------------------- | -------------------------------------- |
+| `HTTP 401`     | Token expired or invalid        | Re-authenticate with `gh auth login`   |
+| `HTTP 403`     | Insufficient permissions        | Re-authenticate with additional scopes |
+| `HTTP 404`     | Private repo, not authenticated | Authenticate to access private repos   |
+| `SSO Required` | Organization requires SSO       | User must authorize SSO in browser     |
 
 ### SSO Authorization
 
@@ -338,20 +343,25 @@ This skill works alongside:
 ## Troubleshooting
 
 **"gh: command not found"**
+
 - Install GitHub CLI: `brew install gh` (macOS) or `sudo apt install gh` (Ubuntu)
 
 **"Authentication required"**
+
 - Run `BROWSER=false gh auth login` and complete authorization
 
 **"Resource not accessible"**
+
 - Verify user has access to the repository
 - Check if additional scopes are needed
 - For org repos, ensure SSO is authorized
 
 **"Bad credentials"**
+
 - Token may have been revoked; re-authenticate
 
 **Device code expired**
+
 - Codes expire after 15 minutes; restart authentication
 
 ## Privacy Note

@@ -57,6 +57,7 @@ Simple conversational responses that don't use tools are exempt. Everything else
 ### Why This Matters
 
 The user cannot see your output while you're in the middle of tool execution. Their messages may contain:
+
 - Corrections to what you're doing
 - New requirements
 - Questions that need answers

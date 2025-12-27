@@ -1,12 +1,6 @@
-
-
-
 This is supposed to be a skill for CLAUDE to use when a /slashcommand is typed as a message instead of executed. This is important because slash commands take up space in the context, and the window can be saved if dynamically loaded. The critical thing is to use the slash command as a prompt for the general-purpose agent.
 
-
-
 ##### BELOW BE VIBES
-
 
 # Command Help Skill Plugin
 
@@ -19,6 +13,7 @@ The Command Help Skill is an agent skill that automatically activates when Claud
 ## Problem It Solves
 
 Users often:
+
 - Type `/command` as a message instead of executing it
 - Don't know what commands are available
 - Can't find the right command for their task
@@ -66,6 +61,7 @@ The skill operates transparently in your workflow:
 ### Automatic Activation
 
 Claude activates this skill when:
+
 - User types a message starting with `/` (e.g., "/commit", "/help")
 - User asks "what commands are available?"
 - User asks "is there a command for X?"
@@ -219,6 +215,7 @@ The skill searches for commands in:
 ### Command Metadata Extraction
 
 For each command, extracts:
+
 - **Name**: Command identifier
 - **Description**: What it does
 - **Arguments**: Required/optional parameters
@@ -229,6 +226,7 @@ For each command, extracts:
 ### Intent Matching
 
 Matches user intent to commands based on:
+
 - Command names
 - Descriptions
 - Keywords
@@ -240,6 +238,7 @@ Matches user intent to commands based on:
 ### Command Type Recognition
 
 Recognizes common command patterns:
+
 - Git/version control commands
 - Code review commands
 - Testing commands
@@ -250,6 +249,7 @@ Recognizes common command patterns:
 ### Usage Explanation
 
 Provides:
+
 - Syntax and argument format
 - Practical examples
 - Common use cases
@@ -259,6 +259,7 @@ Provides:
 ### Error Guidance
 
 Helps troubleshoot:
+
 - "Command not found" errors
 - Missing prerequisites
 - Incorrect argument format
@@ -268,6 +269,7 @@ Helps troubleshoot:
 ### Custom Command Creation
 
 Guides users on:
+
 - Command file format
 - Frontmatter structure
 - File location
@@ -304,6 +306,7 @@ Examples and usage instructions...
 ### For Users
 
 **Discovering Commands:**
+
 ```
 ✅ Ask "What commands are available?"
 ✅ Ask "Is there a command for X?"
@@ -311,6 +314,7 @@ Examples and usage instructions...
 ```
 
 **Using Commands:**
+
 ```
 ✅ Execute commands directly (not as messages)
 ✅ Read command descriptions first
@@ -319,6 +323,7 @@ Examples and usage instructions...
 ```
 
 **Creating Commands:**
+
 ```
 ✅ Put in .claude/commands/ for workspace
 ✅ Use clear, descriptive names
@@ -330,6 +335,7 @@ Examples and usage instructions...
 ### For Command Authors
 
 **Good Command Design:**
+
 - Single, focused purpose
 - Clear, intuitive name
 - Helpful argument hints
@@ -338,6 +344,7 @@ Examples and usage instructions...
 - Specified tool permissions
 
 **Documentation:**
+
 - Explain what it does
 - Show how to use it
 - List requirements
@@ -351,12 +358,14 @@ Examples and usage instructions...
 The skill helps explain when to use each:
 
 **Use Slash Commands For:**
+
 - Repeatable workflows
 - Consistent behavior
 - Team-shared processes
 - Specialized tool access
 
 **Use Direct Requests For:**
+
 - One-time tasks
 - Exploratory work
 - Complex, multi-step tasks
@@ -365,6 +374,7 @@ The skill helps explain when to use each:
 ### Plugin Ecosystem
 
 The skill integrates with:
+
 - Plugin marketplace discovery
 - Plugin command auto-detection
 - Plugin documentation access
@@ -375,6 +385,7 @@ The skill integrates with:
 ### No Setup Required
 
 The skill works automatically:
+
 - No configuration files
 - No manual setup
 - Auto-discovers commands
@@ -383,6 +394,7 @@ The skill works automatically:
 ### Command Priority
 
 When multiple commands have the same name:
+
 1. Workspace commands (`.claude/commands/`)
 2. Plugin commands (`plugins/*/commands/`)
 3. User commands (`~/.claude/commands/`)
@@ -394,6 +406,7 @@ When multiple commands have the same name:
 **Problem**: Skill doesn't recognize command messages
 
 **Solutions**:
+
 - Verify installation in `~/.claude/skills/command-help-skill/`
 - Ensure message starts with `/`
 - Check Claude Code supports skills
@@ -404,6 +417,7 @@ When multiple commands have the same name:
 **Problem**: Skill can't find expected commands
 
 **Solutions**:
+
 - Check command file location
 - Verify proper frontmatter format
 - Ensure `.md` file extension
@@ -414,6 +428,7 @@ When multiple commands have the same name:
 **Problem**: Command info seems incomplete
 
 **Solutions**:
+
 - Check command file has proper metadata
 - Verify frontmatter is valid YAML
 - Ensure description field exists
@@ -424,6 +439,7 @@ When multiple commands have the same name:
 ### Cross-Reference Commands
 
 Suggests related commands:
+
 ```
 "Looking for /commit? You might also like:
 - /review - Code review automation
@@ -433,6 +449,7 @@ Suggests related commands:
 ### Task-Based Discovery
 
 Matches tasks to commands:
+
 ```
 User: "I need to run tests"
 Claude: "The /test command can help with that..."
@@ -441,6 +458,7 @@ Claude: "The /test command can help with that..."
 ### Plugin Recommendations
 
 Suggests plugins for tasks:
+
 ```
 User: "Is there a command for deployment?"
 Claude: "Not in your workspace, but the 'deploy-command'
@@ -486,6 +504,7 @@ Team member becomes productive faster
 ## Allowed Tools
 
 The skill uses:
+
 - `Glob` - Find command files
 - `Read` - Read command documentation
 - `Grep` - Search command content
@@ -573,6 +592,7 @@ Claude: [Proceeds to analyze changes and create commit]
 ## Contributing
 
 Contributions welcome! Please:
+
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
@@ -581,6 +601,7 @@ Contributions welcome! Please:
 ## Changelog
 
 ### Version 1.0.0
+
 - Initial release
 - Automatic command detection
 - Command discovery system

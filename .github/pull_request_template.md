@@ -10,10 +10,10 @@
 
 <!-- Describe the approach you took to implement the changes. -->
 
-
 ## Validation steps
 
 <!-- Describe how you tested these changes. -->
+
 - [ ] Step 1
 - [ ] Step 2
 - [ ] ...

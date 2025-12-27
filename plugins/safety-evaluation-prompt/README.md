@@ -39,23 +39,23 @@ The prompt instructs Claude to evaluate tool calls against these security criter
 
 The plugin uses this decision framework:
 
-| Operation Type | Decision |
-|---------------|----------|
-| Normal development (git, npm, file editing) | **ALLOW** |
-| Read-only operations (cat, ls, grep) | **ALLOW** |
-| Obviously dangerous (rm -rf /, credential theft) | **BLOCK** |
-| Ambiguous/risky | **ASK USER** |
+| Operation Type                                   | Decision     |
+| ------------------------------------------------ | ------------ |
+| Normal development (git, npm, file editing)      | **ALLOW**    |
+| Read-only operations (cat, ls, grep)             | **ALLOW**    |
+| Obviously dangerous (rm -rf /, credential theft) | **BLOCK**    |
+| Ambiguous/risky                                  | **ASK USER** |
 
 ## Comparison with Script-Style Hooks
 
-| Aspect | Prompt Style (This Plugin) | Script Style |
-|--------|---------------------------|--------------|
-| Execution | Inline Claude evaluation | External script process |
-| Latency | Lower (no external calls) | Higher (separate CLI call) |
-| Context | Full conversation context | Limited to tool call only |
-| Flexibility | Natural language only | Full programming capabilities |
-| Customization | Edit the prompt text | Environment variables, logging |
-| Determinism | Context-dependent | More deterministic |
+| Aspect        | Prompt Style (This Plugin) | Script Style                   |
+| ------------- | -------------------------- | ------------------------------ |
+| Execution     | Inline Claude evaluation   | External script process        |
+| Latency       | Lower (no external calls)  | Higher (separate CLI call)     |
+| Context       | Full conversation context  | Limited to tool call only      |
+| Flexibility   | Natural language only      | Full programming capabilities  |
+| Customization | Edit the prompt text       | Environment variables, logging |
+| Determinism   | Context-dependent          | More deterministic             |
 
 ## When to Use This Plugin
 

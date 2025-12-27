@@ -118,8 +118,8 @@ Merges source JSON file into target JSON file. Perfect for maintaining local set
   mode: merge
   only:
     - key: permissions
-      only: allow    # Only merge the 'allow' subkey
-    - key: enabledMcpServers  # Merge entire key
+      only: allow # Only merge the 'allow' subkey
+    - key: enabledMcpServers # Merge entire key
 ```
 
 #### `sync` - File/Directory Sync
@@ -131,7 +131,7 @@ Copies or symlinks files from source to target. Supports glob patterns.
 - source: ../CLAUDE.md
   target: ../AGENTS.md
   mode: sync
-  sync-mode: copy        # 'copy' (default) or 'symlink'
+  sync-mode: copy # 'copy' (default) or 'symlink'
   if-present: do-nothing # 'do-nothing' (default), 'replace', or 'error-if-different'
 
 # Sync multiple files with glob
@@ -142,6 +142,7 @@ Copies or symlinks files from source to target. Supports glob patterns.
 ```
 
 **Options:**
+
 - `sync-mode`: `copy` (default) or `symlink`
 - `if-present`:
   - `do-nothing` (default) - Skip if target exists
@@ -229,6 +230,7 @@ Paths are resolved relative to the `.claude/` directory:
 - Absolute paths are supported but not recommended
 
 **Examples:**
+
 ```yaml
 # These are equivalent when syncconfig.yaml is in .claude/
 source: ./settings.local.json  # .claude/settings.local.json
@@ -318,6 +320,7 @@ The hook uses these Claude Code environment variables:
 ## Changelog
 
 ### Version 1.0.0
+
 - Initial release
 - JSON deep-merge with key filtering
 - File/directory sync with glob patterns

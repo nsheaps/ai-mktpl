@@ -1,20 +1,18 @@
-
-
-
 This is supposed to be a skill for CLAUDE to use when a /slashcommand is typed as a message instead of executed. This is important because slash commands take up space in the context, and the window can be saved if dynamically loaded. The critical thing is to use the slash command as a prompt for the general-purpose agent.
 
-
-
 ##### BELOW BE VIBES
+
 ---
+
 name: command-help
 description: >
-  Help users understand and discover slash commands when they accidentally type them as messages instead of executing them
-  For example if they type:
-  /commit a thing
-  /correct-behavior blah blah
-  /assist with something
-  /review bleh
+Help users understand and discover slash commands when they accidentally type them as messages instead of executing them
+For example if they type:
+/commit a thing
+/correct-behavior blah blah
+/assist with something
+/review bleh
+
 ---
 
 # Command Help Skill
@@ -36,6 +34,7 @@ Claude will automatically use this skill when:
 ### 1. Detect Accidental Command Messages
 
 When a user sends a message like `/commit` or `/help` as regular text instead of executing it, Claude recognizes this and explains:
+
 - That this looks like a slash command
 - How to properly execute slash commands in Claude Code
 - What the command does and how to use it
@@ -43,6 +42,7 @@ When a user sends a message like `/commit` or `/help` as regular text instead of
 ### 2. Command Discovery
 
 Help users find the right command for their task:
+
 - List all available slash commands in the workspace
 - Search for commands by functionality
 - Explain what each command does
@@ -51,6 +51,7 @@ Help users find the right command for their task:
 ### 3. Command Documentation
 
 Provide detailed information about specific commands:
+
 - Command description and purpose
 - Required and optional arguments
 - Usage examples
@@ -104,6 +105,7 @@ Claude's workflow:
 ### Command Detection
 
 Claude can identify when text looks like a command:
+
 - Starts with `/`
 - Followed by a valid command name
 - May include arguments
@@ -137,6 +139,7 @@ To help users find commands, Claude will:
 ### Command Information Extraction
 
 For each command, Claude extracts:
+
 - **Name**: The command name (e.g., "commit")
 - **Description**: What the command does
 - **Arguments**: Required and optional parameters
@@ -256,6 +259,7 @@ Search locations:
 ### Step 2: Parse Command Metadata
 
 Extract from frontmatter:
+
 ```yaml
 ---
 name: command-name
@@ -268,6 +272,7 @@ allowed-tools: Tool1, Tool2, Tool3
 ### Step 3: Match User Intent
 
 Compare user's request against:
+
 - Command names
 - Command descriptions
 - Command keywords
@@ -276,6 +281,7 @@ Compare user's request against:
 ### Step 4: Present Results
 
 Show:
+
 - Matching commands
 - Brief descriptions
 - Usage syntax
@@ -286,6 +292,7 @@ Show:
 ### Clear Explanation
 
 When explaining commands:
+
 - State what the command does clearly
 - Explain when to use it
 - Provide concrete examples
@@ -366,10 +373,12 @@ Shadowing: Workspace commands override plugin/user commands with same name
 ### Metadata Parsing
 
 Required fields:
+
 - `name`: Command identifier
 - `description`: Brief explanation
 
 Optional fields:
+
 - `argument-hint`: Help text for arguments
 - `allowed-tools`: Tools the command can use
 - `requires`: Prerequisites or dependencies
@@ -379,6 +388,7 @@ Optional fields:
 ### Command Execution
 
 This skill helps users understand that:
+
 - Slash commands are executed, not sent as messages
 - Commands have special syntax and capabilities
 - Commands can be customized and extended
@@ -389,12 +399,14 @@ This skill helps users understand that:
 Explain when to use commands vs. direct requests:
 
 **Use Slash Commands When:**
+
 - Repeating a common workflow
 - Need consistent behavior
 - Want to share with team
 - Command provides specialized tools
 
 **Use Direct Requests When:**
+
 - One-time task
 - Exploratory work
 - Need full AI flexibility
@@ -405,6 +417,7 @@ Explain when to use commands vs. direct requests:
 ### "Command not found"
 
 Help users:
+
 1. Check command name spelling
 2. Verify command file exists
 3. Check file is in correct location
@@ -413,6 +426,7 @@ Help users:
 ### "Command doesn't work as expected"
 
 Guide users to:
+
 1. Read command documentation
 2. Check required arguments
 3. Verify prerequisites met
@@ -421,6 +435,7 @@ Guide users to:
 ### "How do I create a custom command?"
 
 Provide steps:
+
 1. Create `.claude/commands/` directory
 2. Create `command-name.md` file
 3. Add frontmatter with metadata
@@ -430,12 +445,14 @@ Provide steps:
 ## Plugin Marketplace Integration
 
 When users ask about more commands:
+
 - Mention the Claude Code plugin marketplace
 - Explain how to browse available plugins
 - Show how to install command plugins
 - Suggest relevant plugins for their task
 
 Example plugins that provide commands:
+
 - commit-command: Smart git commits
 - review-command: Code review automation
 - test-command: Test generation and running
@@ -444,6 +461,7 @@ Example plugins that provide commands:
 ## Learning Resources
 
 Point users to:
+
 - Claude Code documentation on commands
 - Command creation tutorials
 - Plugin development guides
@@ -467,6 +485,7 @@ Point users to:
 ## Success Indicators
 
 The skill is working well when:
+
 - Users understand how to execute commands
 - Users can discover relevant commands for their tasks
 - Users know how to view command documentation

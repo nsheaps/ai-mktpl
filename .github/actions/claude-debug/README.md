@@ -84,7 +84,7 @@ Use this action to debug or verify Claude Code automation workflows:
   uses: ./.github/actions/claude-debug
   id: debug
   with:
-    continue: true  # Continue from previous Claude session
+    continue: true # Continue from previous Claude session
     extract-logs: true
 
 - name: Check for Errors
@@ -105,7 +105,7 @@ on:
   workflow_dispatch:
     inputs:
       target-repo:
-        description: 'Repository to debug'
+        description: "Repository to debug"
         required: true
 
 jobs:
@@ -137,30 +137,30 @@ jobs:
 
 ## Inputs
 
-| Input | Description | Required | Default |
-|-------|-------------|----------|---------|
-| `continue` | Whether to continue from previous session | No | `true` |
-| `working-directory` | Working directory for Claude Code | No | `.` |
-| `claude-api-key` | Claude API key (if not in environment) | No | - |
-| `additional-flags` | Additional flags to pass to claude-code CLI | No | `''` |
-| `extract-logs` | Whether to extract recent session logs | No | `false` |
+| Input               | Description                                 | Required | Default |
+| ------------------- | ------------------------------------------- | -------- | ------- |
+| `continue`          | Whether to continue from previous session   | No       | `true`  |
+| `working-directory` | Working directory for Claude Code           | No       | `.`     |
+| `claude-api-key`    | Claude API key (if not in environment)      | No       | -       |
+| `additional-flags`  | Additional flags to pass to claude-code CLI | No       | `''`    |
+| `extract-logs`      | Whether to extract recent session logs      | No       | `false` |
 
 ## Outputs
 
-| Output | Description |
-|--------|-------------|
-| `session-id` | Current Claude Code session ID |
-| `previous-session-id` | Previous Claude Code session ID |
-| `working-directory` | Working directory used by Claude Code |
-| `git-branch` | Current git branch |
-| `git-status` | Git status (clean/dirty) |
-| `git-commit` | Current git commit SHA |
-| `session-status` | Status of the Claude Code session |
-| `session-count` | Number of recent sessions |
-| `claude-version` | Claude Code CLI version |
-| `json-output` | Full JSON output from claude-code CLI |
-| `error` | Error message if command failed |
-| `logs` | Recent session logs (if extract-logs is true) |
+| Output                | Description                                   |
+| --------------------- | --------------------------------------------- |
+| `session-id`          | Current Claude Code session ID                |
+| `previous-session-id` | Previous Claude Code session ID               |
+| `working-directory`   | Working directory used by Claude Code         |
+| `git-branch`          | Current git branch                            |
+| `git-status`          | Git status (clean/dirty)                      |
+| `git-commit`          | Current git commit SHA                        |
+| `session-status`      | Status of the Claude Code session             |
+| `session-count`       | Number of recent sessions                     |
+| `claude-version`      | Claude Code CLI version                       |
+| `json-output`         | Full JSON output from claude-code CLI         |
+| `error`               | Error message if command failed               |
+| `logs`                | Recent session logs (if extract-logs is true) |
 
 ## Environment Requirements
 
@@ -239,7 +239,7 @@ name: Claude Session Monitor
 
 on:
   schedule:
-    - cron: '0 */6 * * *'  # Every 6 hours
+    - cron: "0 */6 * * *" # Every 6 hours
 
 jobs:
   monitor:
@@ -371,7 +371,7 @@ When using with repository dispatch:
 ```yaml
 on:
   repository_dispatch:
-    types: [debug-claude-session]  # Specific type for access control
+    types: [debug-claude-session] # Specific type for access control
 
 jobs:
   debug:

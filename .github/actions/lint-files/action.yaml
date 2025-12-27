@@ -5,7 +5,7 @@ inputs:
   fix:
     description: Whether to auto-fix lint issues
     required: false
-    default: 'false'
+    default: "false"
 
 outputs:
   changed-or-failed:

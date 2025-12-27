@@ -15,6 +15,7 @@ Only commit and push when explicitly asked by the user. Local assistants should 
 ## Task Completion
 
 Your task is rarely done after making changes. Always:
+
 1. Review the code
 2. Compare against the original request
 3. Ensure it satisfies the requirements
@@ -31,6 +32,7 @@ CRITICAL: Validation is also considered a failure if results locally do not matc
 ## Package Management
 
 When making a new package or finishing a task:
+
 1. Ensure any added packages are actually needed
 2. Remove unneeded packages before finishing
 3. If working on a PR, check all changed package files (even if not your specific task)
@@ -46,6 +48,7 @@ When making a new package or finishing a task:
 ## Respecting File Modifications
 
 When you encounter a file that has been modified since you last read it:
+
 - **NEVER** blindly overwrite user changes with your planned changes
 - **ALWAYS** review what changed and why
 - Consider these options:
@@ -59,6 +62,7 @@ When you encounter a file that has been modified since you last read it:
 ## Safe File Deletion During Migrations
 
 When migrating, refactoring, or cleaning up files:
+
 - **NEVER delete files** until you've validated the new version works
 - Instead, preserve the original by:
   1. Moving to a backup folder (e.g., `.backup/` or `_old/`)
@@ -69,6 +73,7 @@ When migrating, refactoring, or cleaning up files:
 - This prevents data loss of important configurations, scripts, or functions
 
 Example safe migration:
+
 ```bash
 # BAD: rm ~/.zshrc.d/00_zshconfig.zsh
 # GOOD: mv ~/.zshrc.d/00_zshconfig.zsh ~/.zshrc.d/00_zshconfig.zsh.bak

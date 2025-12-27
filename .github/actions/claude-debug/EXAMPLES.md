@@ -47,7 +47,7 @@ on:
   workflow_dispatch:
     inputs:
       task:
-        description: 'Task for Claude'
+        description: "Task for Claude"
         required: true
 
 jobs:
@@ -118,14 +118,9 @@ jobs:
 
 ```javascript
 // Express.js webhook handler
-app.post('/webhooks/debug', (req, res) => {
-  const {
-    request_id,
-    source_repo,
-    debug_info,
-    git_context,
-    workflow
-  } = req.body;
+app.post("/webhooks/debug", (req, res) => {
+  const { request_id, source_repo, debug_info, git_context, workflow } =
+    req.body;
 
   console.log(`Debug info received for ${source_repo}`);
   console.log(`Session ID: ${debug_info.session_id}`);
@@ -133,7 +128,7 @@ app.post('/webhooks/debug', (req, res) => {
 
   // Store in database, send notifications, etc.
 
-  res.status(200).send('OK');
+  res.status(200).send("OK");
 });
 ```
 
@@ -186,7 +181,7 @@ jobs:
         uses: ./.github/actions/claude-debug
         id: stage1
         with:
-          continue: false  # New session
+          continue: false # New session
 
       # Stage 2: Fix Issues
       - name: Fix Issues
@@ -199,7 +194,7 @@ jobs:
         uses: ./.github/actions/claude-debug
         id: stage2
         with:
-          continue: true  # Continue from stage 1
+          continue: true # Continue from stage 1
 
       # Stage 3: Verify Fixes
       - name: Verify Fixes
@@ -272,7 +267,7 @@ name: Org-Wide Claude Monitor
 
 on:
   schedule:
-    - cron: '0 */6 * * *'  # Every 6 hours
+    - cron: "0 */6 * * *" # Every 6 hours
 
 jobs:
   monitor:
@@ -316,7 +311,7 @@ jobs:
 
 ### Slack Notifications
 
-```yaml
+````yaml
 name: Claude Debug with Slack
 
 on: [workflow_dispatch]
@@ -388,7 +383,7 @@ jobs:
                 }
               ]
             }
-```
+````
 
 ### DataDog Metrics
 
@@ -579,7 +574,7 @@ jobs:
   uses: ./.github/actions/claude-debug
   id: debug
   with:
-    additional-flags: '--verbose --debug'
+    additional-flags: "--verbose --debug"
     extract-logs: true
 
 - name: Show Full JSON

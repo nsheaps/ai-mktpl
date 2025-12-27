@@ -23,17 +23,13 @@ setup:
 
 # Run all linters
 lint:
-    @echo "Running linters..."
     command -v prettier >/dev/null 2>&1 || { just setup ; }
-    prettier --check "**/*.{yaml,yml,json,md}" || true
-    @echo "Linting complete!"
+    # TODO convert to use prettier config file
+    prettier --write "**/*.{yaml,yml,json,md}" 
 
-# Fix linting issues where possible
-lint-fix:
-    @echo "Fixing lint issues..."
+lint-check:
     command -v prettier >/dev/null 2>&1 || { just setup ; }
-    prettier --write "**/*.{yaml,yml,json,md}" || true
-    @echo "Lint fixes applied!"
+    prettier --check "**/*.{yaml,yml,json,md}"
 
 # Validate plugin structure
 validate:

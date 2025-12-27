@@ -1,8 +1,10 @@
 This folder essentially gets synced to ~/.ai for consistent pathing
 Then automation ensures everything in:
+
 - `.ai/rules/` gets symlinked to `$HOME/.claude/rules/`
 
 Automation also
+
 - Finds symlinks in that folder that no longer reference actual files and removes them.
 
 ## Why rules, why here?
@@ -11,10 +13,12 @@ Rules cannot be included as part of plugins. The closest you can come is an MCP 
 
 Generally these are behaviors you want across the entire organization. Skills are not the same, they capture the HOW to do things. Behaviors capture the WHEN to do things.
 
-TODO: Consider a plugin that comes along with this 
-<!-- 
+TODO: Consider a plugin that comes along with this
+
+<!--
 See [rules-sync-plugin spec](../docs/specs/drafts/plugin-ideas.md#rules-sync-plugin) for a proposed plugin to automate this with an MCP server and hooks
 -->
+
 An mcp server/hooks should be useable to perform this automation
 And a plugin can add hooks that help guide when to use certain skills or reference particular rules or documents.
 

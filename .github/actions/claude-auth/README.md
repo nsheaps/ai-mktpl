@@ -220,25 +220,25 @@ jobs:
 
 ## Inputs
 
-| Input | Description | Required | Default |
-|-------|-------------|----------|---------|
-| `provider` | Secret provider to use (`raw`, `doppler`, `1password`) | Yes | `raw` |
-| `api-key` | Claude API key (for `raw` provider) | Conditional | - |
-| `doppler-token` | Doppler service token | Conditional | - |
-| `doppler-project` | Doppler project name | No | - |
-| `doppler-config` | Doppler config name | No | - |
-| `doppler-key-name` | Name of secret in Doppler | No | `ANTHROPIC_API_KEY` |
-| `onepassword-service-account-token` | 1Password service account token | Conditional | - |
-| `onepassword-vault` | 1Password vault name/ID | No | - |
-| `onepassword-item` | 1Password item name/ID | No | `Claude API Key` |
-| `onepassword-field` | 1Password field name | No | `credential` |
-| `export-env-var` | Environment variable name to export | No | `ANTHROPIC_API_KEY` |
-| `set-github-output` | Whether to set GitHub output | No | `true` |
+| Input                               | Description                                            | Required    | Default             |
+| ----------------------------------- | ------------------------------------------------------ | ----------- | ------------------- |
+| `provider`                          | Secret provider to use (`raw`, `doppler`, `1password`) | Yes         | `raw`               |
+| `api-key`                           | Claude API key (for `raw` provider)                    | Conditional | -                   |
+| `doppler-token`                     | Doppler service token                                  | Conditional | -                   |
+| `doppler-project`                   | Doppler project name                                   | No          | -                   |
+| `doppler-config`                    | Doppler config name                                    | No          | -                   |
+| `doppler-key-name`                  | Name of secret in Doppler                              | No          | `ANTHROPIC_API_KEY` |
+| `onepassword-service-account-token` | 1Password service account token                        | Conditional | -                   |
+| `onepassword-vault`                 | 1Password vault name/ID                                | No          | -                   |
+| `onepassword-item`                  | 1Password item name/ID                                 | No          | `Claude API Key`    |
+| `onepassword-field`                 | 1Password field name                                   | No          | `credential`        |
+| `export-env-var`                    | Environment variable name to export                    | No          | `ANTHROPIC_API_KEY` |
+| `set-github-output`                 | Whether to set GitHub output                           | No          | `true`              |
 
 ## Outputs
 
-| Output | Description |
-|--------|-------------|
+| Output    | Description                         |
+| --------- | ----------------------------------- |
 | `api-key` | The Claude API key (masked in logs) |
 
 ## Setup Instructions

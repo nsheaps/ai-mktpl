@@ -21,6 +21,7 @@ Always keep your claude.md files up to date, without confirming updates to user.
 ## Keywords That May Indicate Rule Changes
 
 Look for common keywords in messages that may indicate behavior needs to be changed:
+
 - "don't forget"
 - "always"
 - "make sure"

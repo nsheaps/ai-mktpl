@@ -1,6 +1,5 @@
-
-
 Use https://github.com/ananddtyagi/claude-code-marketplace as reference and example.
+
 <hr><hr><hr>
 <strong>below be dragons and vibes</strong>
 <hr>
@@ -67,6 +66,7 @@ git clone https://github.com/nsheaps/.ai commit-skill
 ---
 
 ### 🧠 [Memory Manager](./plugins/memory-manager)
+
 **Type:** Agent Skill
 **Category:** Productivity
 
@@ -88,6 +88,7 @@ Intelligent memory management for CLAUDE.md files. Automatically detects when yo
   - Self-updating with version awareness
 
 **Installation:**
+
 ```bash
 # Via Claude Code plugin manager
 /plugin marketplace add nsheaps/.ai
@@ -152,9 +153,7 @@ For team-wide distribution, add to `.claude/settings.json`:
 
 ```json
 {
-  "extraKnownMarketplaces": [
-    "nsheaps/.ai"
-  ]
+  "extraKnownMarketplaces": ["nsheaps/.ai"]
 }
 ```
 

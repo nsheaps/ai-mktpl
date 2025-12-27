@@ -32,11 +32,11 @@ This plugin installs a **script-style hook** that intercepts all tool calls befo
 
 ### Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `SAFETY_EVAL_MODEL` | `claude-3-5-haiku-latest` | Model to use for safety evaluation |
-| `SAFETY_EVAL_TIMEOUT` | `30` | Timeout in seconds for evaluation |
-| `SAFETY_EVAL_LOG` | (none) | Path to log file for audit trail |
+| Variable              | Default                   | Description                        |
+| --------------------- | ------------------------- | ---------------------------------- |
+| `SAFETY_EVAL_MODEL`   | `claude-3-5-haiku-latest` | Model to use for safety evaluation |
+| `SAFETY_EVAL_TIMEOUT` | `30`                      | Timeout in seconds for evaluation  |
+| `SAFETY_EVAL_LOG`     | (none)                    | Path to log file for audit trail   |
 
 ### Example: Enable Logging
 
@@ -81,13 +81,13 @@ The hook returns JSON in this format:
 
 ## Comparison with Prompt-Style Hooks
 
-| Aspect | Script Style (This Plugin) | Prompt Style |
-|--------|---------------------------|--------------|
-| Execution | External script process | Inline Claude evaluation |
-| Latency | Higher (separate CLI call) | Lower (inline processing) |
-| Flexibility | Full programming capabilities | Natural language only |
-| Customization | Environment variables, logging | Prompt text only |
-| Determinism | More deterministic | Context-dependent |
+| Aspect        | Script Style (This Plugin)     | Prompt Style              |
+| ------------- | ------------------------------ | ------------------------- |
+| Execution     | External script process        | Inline Claude evaluation  |
+| Latency       | Higher (separate CLI call)     | Lower (inline processing) |
+| Flexibility   | Full programming capabilities  | Natural language only     |
+| Customization | Environment variables, logging | Prompt text only          |
+| Determinism   | More deterministic             | Context-dependent         |
 
 ## Limitations
 
@@ -101,6 +101,7 @@ The hook returns JSON in this format:
 ### Hook times out frequently
 
 Increase the timeout:
+
 ```bash
 export SAFETY_EVAL_TIMEOUT=60
 ```
@@ -112,6 +113,7 @@ Consider using the prompt-style variant which has more context about the convers
 ### Evaluation failures
 
 Check that:
+
 1. Claude CLI is installed: `which claude`
 2. CLI is authenticated: `claude --version`
 3. Network connectivity is available

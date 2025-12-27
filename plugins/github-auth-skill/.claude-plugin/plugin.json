@@ -10,12 +10,5 @@
   },
   "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/github-auth-skill",
   "repository": "https://github.com/nsheaps/.ai",
-  "keywords": [
-    "github",
-    "authentication",
-    "device-auth",
-    "gh",
-    "cli",
-    "skill"
-  ]
+  "keywords": ["github", "authentication", "device-auth", "gh", "cli", "skill"]
 }

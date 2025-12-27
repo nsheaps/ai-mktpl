@@ -24,6 +24,7 @@ Simply express preferences naturally in conversation:
 - "Don't forget to run tests before committing"
 
 The plugin will automatically:
+
 1. Detect the memory-worthy statement
 2. Determine the appropriate scope (global or project)
 3. Update the relevant CLAUDE.md file
@@ -34,6 +35,7 @@ The plugin will automatically:
 ## Trigger Phrases
 
 The plugin activates on:
+
 - "always", "never"
 - "don't forget", "make sure"
 - "prefer X over Y"
@@ -45,10 +47,12 @@ The plugin activates on:
 ## Scope Detection
 
 **Global scope** (written to `~/.claude/CLAUDE.md`):
+
 - Mentions "all projects", "everywhere"
 - Tool preferences, git workflow, communication style
 
 **Project scope** (written to project's CLAUDE.md):
+
 - Mentions specific files or directories
 - Architecture decisions for this codebase
 - User says "in this project"
@@ -56,6 +60,7 @@ The plugin activates on:
 ## Memory Categories
 
 Memories are organized under sections:
+
 - Git Workflow
 - Code Style
 - Development Environment

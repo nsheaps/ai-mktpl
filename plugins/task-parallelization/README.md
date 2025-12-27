@@ -17,17 +17,18 @@ When you ask Claude to perform the same operation across many items (files, comp
 
 The skill defines 5 parallelization levels based on task characteristics:
 
-| Level | Concurrent Tasks | Use Case |
-|-------|-----------------|----------|
-| **Maximum** | 8-10 | Read-only research, exploration, analysis |
-| **High** | 5-7 | Simple templated changes, bulk updates |
-| **Moderate** | 3-4 | Refactoring, migrations, context-aware changes |
-| **Limited** | 2 | Complex logic, subtle dependencies |
-| **Sequential** | 1 | Explicit dependencies, shared state |
+| Level          | Concurrent Tasks | Use Case                                       |
+| -------------- | ---------------- | ---------------------------------------------- |
+| **Maximum**    | 8-10             | Read-only research, exploration, analysis      |
+| **High**       | 5-7              | Simple templated changes, bulk updates         |
+| **Moderate**   | 3-4              | Refactoring, migrations, context-aware changes |
+| **Limited**    | 2                | Complex logic, subtle dependencies             |
+| **Sequential** | 1                | Explicit dependencies, shared state            |
 
 ### Automatic Complexity Assessment
 
 The skill evaluates each batch operation for:
+
 - Task independence (can tasks run without affecting each other?)
 - Resource requirements (CPU, memory, I/O intensity)
 - Failure impact (what happens if one task fails?)
@@ -36,6 +37,7 @@ The skill evaluates each batch operation for:
 ### Model Selection Guidance
 
 For cost-effective parallel execution:
+
 - **haiku**: Simple, repetitive tasks (renaming, imports, templated edits)
 - **sonnet**: Moderate complexity (refactoring, documentation)
 - **opus**: Complex reasoning (architecture, debugging)
@@ -43,6 +45,7 @@ For cost-effective parallel execution:
 ## Example Use Cases
 
 ### High Parallelization Examples
+
 ```
 "Research how 10 different libraries handle authentication"
 "Add the same import to all 50 component files"
@@ -50,6 +53,7 @@ For cost-effective parallel execution:
 ```
 
 ### Moderate Parallelization Examples
+
 ```
 "Refactor these 15 functions to use the new error handling pattern"
 "Update all configuration files to the new schema"
@@ -57,6 +61,7 @@ For cost-effective parallel execution:
 ```
 
 ### Sequential Examples
+
 ```
 "Create the base class, then create all derived classes"
 "Update the API schema, then update all callers"
@@ -65,12 +70,15 @@ For cost-effective parallel execution:
 ## Installation
 
 ### Via Plugin Manager
+
 ```
 /plugin marketplace add nsheaps/.ai
 ```
 
 ### Manual Installation
+
 Copy the `task-parallelization` directory to your Claude Code plugins directory:
+
 ```bash
 cp -r plugins/task-parallelization ~/.claude/plugins/
 ```
@@ -88,11 +96,13 @@ When you make a request that involves repetitive or batch operations, Claude wil
 ## Best Practices
 
 ### Do
+
 - Be specific about what needs to change across items
 - Provide examples of the expected transformation
 - Mention if there are any dependencies between items
 
 ### Don't
+
 - Ask to parallelize tasks that modify the same file
 - Expect shared context between parallel tasks
 - Assume order of completion matches order of launch

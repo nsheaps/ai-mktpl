@@ -13,6 +13,7 @@ ln -sf ~/src/nsheaps/ai/plugins/correct-behavior/commands/correct-behavior.md ~/
 ### Plugin Install (Future)
 
 Once the plugin system supports installation:
+
 ```bash
 claude plugin install ./plugins/correct-behavior
 ```
@@ -25,14 +26,14 @@ claude plugin install ./plugins/correct-behavior
 
 ### Scope Options
 
-| Scope | Description | Location |
-|-------|-------------|----------|
-| `user` | Personal rules for all projects | `~/.claude/CLAUDE.md` or `~/.claude/rules/*.md` |
-| `project` | Rules for the current project | `<git-root>/.claude/...` |
-| `slash-commands` / `commands` | User's slash commands | `~/.claude/commands/*.md` |
-| `skills` | User's skills | `~/.claude/skills/*/SKILL.md` |
-| `plugins` | Plugin source code | `~/src/nsheaps/ai/plugins/...` |
-| `marketplace` | The AI config marketplace repo | `~/src/nsheaps/ai/...` |
+| Scope                         | Description                     | Location                                        |
+| ----------------------------- | ------------------------------- | ----------------------------------------------- |
+| `user`                        | Personal rules for all projects | `~/.claude/CLAUDE.md` or `~/.claude/rules/*.md` |
+| `project`                     | Rules for the current project   | `<git-root>/.claude/...`                        |
+| `slash-commands` / `commands` | User's slash commands           | `~/.claude/commands/*.md`                       |
+| `skills`                      | User's skills                   | `~/.claude/skills/*/SKILL.md`                   |
+| `plugins`                     | Plugin source code              | `~/src/nsheaps/ai/plugins/...`                  |
+| `marketplace`                 | The AI config marketplace repo  | `~/src/nsheaps/ai/...`                          |
 
 If scope is obvious from context (e.g., correcting a slash command), it will be inferred. Otherwise, you'll be asked.
 
@@ -68,17 +69,20 @@ When you invoke this command, Claude will:
 The command understands the following directory structure:
 
 ### User Config (`~/.claude/`)
+
 - `CLAUDE.md` - Main user rules
 - `rules/*.md` - Modular user rules
 - `commands/*.md` - User slash commands
 - `skills/*/SKILL.md` - User skills
 
 ### Project Config (`<git-root>/.claude/`)
+
 - `CLAUDE.md` - Project rules (committed to repo)
 - `rules/*.md` - Modular project rules
 - `CLAUDE.local.md` - Personal project overrides (not modified)
 
 ### Marketplace Repo (`~/src/nsheaps/ai/`)
+
 - `.claude/rules/` - Rules for working on this repo (Claude-specific)
 - `.ai/rules/` - User behavior rules (AI-agnostic, syncs to user config)
 - `plugins/*/commands/*.md` - Plugin command source files
@@ -87,12 +91,12 @@ The command understands the following directory structure:
 
 All changes must end up committed somewhere:
 
-| Scope | What Happens |
-|-------|--------------|
-| `user` | Changes go to `~/.claude/...`. Offered to sync to `~/src/nsheaps/ai/.ai/rules/` via PR. |
-| `project` | Reminder to commit changes to project repo |
-| `slash-commands` / `skills` | If in user config, offered to sync to marketplace |
-| `plugins` / `marketplace` | PR created automatically and assigned to you |
+| Scope                       | What Happens                                                                            |
+| --------------------------- | --------------------------------------------------------------------------------------- |
+| `user`                      | Changes go to `~/.claude/...`. Offered to sync to `~/src/nsheaps/ai/.ai/rules/` via PR. |
+| `project`                   | Reminder to commit changes to project repo                                              |
+| `slash-commands` / `skills` | If in user config, offered to sync to marketplace                                       |
+| `plugins` / `marketplace`   | PR created automatically and assigned to you                                            |
 
 ## Notes
 

@@ -33,13 +33,11 @@ Before making changes, thoroughly understand the existing skill:
 
 1. **Read the skill file** (usually `skills/skill-name/SKILL.md`)
 2. **Review the frontmatter metadata:**
-
    - `name`: Skill identifier
    - `description`: When and how the skill activates
    - `examples` (if present): Usage patterns
 
 3. **Analyze the skill content:**
-
    - Activation conditions
    - Behavior and capabilities
    - Tool permissions
@@ -205,13 +203,11 @@ After making changes:
    ```
 
    **Versioning Rules:**
-
    - **Patch (1.0.X)**: Bug fixes, typos, minor documentation improvements
    - **Minor (1.X.0)**: New features, enhanced behavior, new examples
    - **Major (X.0.0)**: Breaking changes to activation or behavior
 
 2. **Update README.md:**
-
    - Reflect new features or changes
    - Add new examples if applicable
    - Update version history section
