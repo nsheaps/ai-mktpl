@@ -1,3 +1,6 @@
+Get rid of python here
+###### BELOW BE VIBES
+
 # Sync Settings Plugin
 
 Automatically sync and merge local Claude Code settings, commands, and files using configurable rules. Perfect for maintaining local customizations that shouldn't be committed to version control, or for syncing shared configurations across projects.
