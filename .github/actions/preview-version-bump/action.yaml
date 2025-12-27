@@ -1,0 +1,46 @@
+# every action in .github/actions/xxxx/action.yaml needs a workflow that tests it when it changes.
+# A workflow that tests it also means that the actions MUST include a dry-run mode, that can be used
+# in PRs to understand the changes that will be made when it is run on the default branch.
+name: Preview Version Bump
+description: |
+  Runs 'just version --dry-run' to preview version bumps for changed plugins in a PR.
+
+
+inputs:
+  base-ref:
+    description: Base git reference to compare against
+    required: true
+  head-ref:
+    description: Head git reference to compare
+    required: true
+  token:
+    description: GitHub token to use for commenting on PRs
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  report:
+    description: |
+      Markdown representation of the version bumps in table format
+      with the following info
+        { 
+          "plugin": "plugin-name",
+          "current_version": "1.2.2",
+          "bump_type": "patch"
+          "next_version": "1.2.3",
+      }
+    value: ${{ steps.preview.outputs.report }}
+
+runs:
+  using: composite
+  steps:
+
+    - name: Check version bumps
+      id: preview
+      shell: bash
+      run: |
+        TMP="$(mktemp)"
+        just version --format=md --dry-run | tee "$TMP"
+        echo "report<<EOF" >> $GITHUB_OUTPUT
+        cat $TMP >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT

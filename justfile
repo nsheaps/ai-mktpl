@@ -88,6 +88,49 @@ validate:
         exit 1
     fi
 
+
+preview-version-bump PLUGIN_NAME:
+    # returns the next version for the given plugin name (path assumed) using SVU
+    @echo "unimplemented"
+
+plugin-current-version PLUGIN_NAME:
+    # returns the current version for the given plugin name (path assumed)
+    @echo "unimplemented"
+
+[arg('format', pattern='--pattern=(raw|md|json)|')]
+preview-version-bumps format='--pattern=raw':
+    # takes optional args:
+    # --format=raw|md|json : output format for dry-run report (default: raw)
+    # gets the json, then formats it accordingly.
+    # format with raw:
+    #  plugin-name: 1.2.2 =( patch )=> 1.2.3
+    #  $plugin: $current =( $type )=> $next
+    #  ...
+    # format with md:
+    #  | Plugin | Current | Type | Next | 
+    #  |---|---|---|---|
+    #  | plugin-name | 1.2.2 | patch | 1.2.3 |
+    #   ...
+    # format with json:
+    #  [
+    #    {
+    #      "name": "plugin-name",
+    #      "current": "1.2.2",
+    #      "type": "patch",
+    #      "next": "1.2.3"
+    #    },
+    #    ...
+    #  ]
+    @echo "FORMAT: {{format}}"
+    @echo "unimplemented"
+
+bump-plugin-version PLUGIN_PATH:
+    @echo "unimplemented"
+
+bump-plugin-versions:
+    # goes through each plugin and attempts to bump it
+    @echo "unimplemented"
+
 # Update marketplace.json from plugin.json files
 update-marketplace:
     #!/usr/bin/env bash

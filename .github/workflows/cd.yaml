@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check-version-bump:
+  preview-version-bump:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
@@ -28,8 +28,9 @@ jobs:
           install: true
           cache: true
 
-      - name: Check version bumps
-        uses: ./.github/actions/check-version-bump
+      - name: just version --dry-run
+        id: version
+        uses: ./.github/actions/preview-version-bump
         with:
           base-ref: ${{ github.event.pull_request.base.sha }}
           head-ref: ${{ github.event.pull_request.head.sha }}
