@@ -44,9 +44,15 @@ if [ "$IS_WEB_SESSION" = "true" ]; then
 
     if curl -fsSL "$MISE_URL" -o "$HOME/.local/bin/mise" 2>/dev/null; then
       chmod +x "$HOME/.local/bin/mise"
-      export PATH="$HOME/.local/bin:$PATH"
-      eval "$(mise activate bash)"
-      echo 'eval "$(mise activate bash)"' >> "$CLAUDE_ENV_FILE"
+      SETUP="$(cat << EOF
+export PATH="$HOME/.local/bin:$PATH"
+export MISE_VERBOSE=1
+eval "$(mise activate bash)"
+
+EOF
+)"
+      echo "$SETUP" >> "$CLAUDE_ENV_FILE"
+      eval "$SETUP"
       echo "✅ mise installed successfully"
     else
       echo "⚠️  mise installation failed (network restricted)"
@@ -54,6 +60,7 @@ if [ "$IS_WEB_SESSION" = "true" ]; then
     fi
   else
     # mise already available, activate it
+    # TODO cleanup with 01-mise-activate.sh
     mise self-update
     eval "$(mise activate bash)"
     echo 'eval "$(mise activate bash)"' >> "$CLAUDE_ENV_FILE"
