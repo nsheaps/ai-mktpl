@@ -11,7 +11,7 @@
   "repository": "https://github.com/nsheaps/.ai",
   "keywords": ["safety", "security", "hooks", "pre-tool-call", "evaluation", "haiku"],
   "hooks": {
-    "PreToolCall": [
+    "PreToolUse": [
       {
         "matcher": "",
         "hooks": [

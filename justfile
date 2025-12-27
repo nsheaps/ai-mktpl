@@ -47,7 +47,7 @@ lint-check:
 claude := which("claude") || 'mise exec npm:@anthropic-ai/claude-code -- claude'
 
 validate-marketplace:
-    just validate-plugin .claude-plugin/marketplace.json
+    @just validate-plugin .claude-plugin/marketplace.json
 
 validate-plugin PLUGIN_PATH:
     #!/usr/bin/env bash
