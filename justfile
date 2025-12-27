@@ -37,9 +37,17 @@ validate:
     set -e
     echo "Validating plugin structure..."
 
+    # Use Claude CLI validator if available (validates JSON schema + structure)
+    if command -v claude >/dev/null 2>&1; then
+        echo "Using Claude CLI validator..."
+        claude plugin validate .
+        exit $?
+    fi
+
+    echo "Claude CLI not found, using fallback validation..."
     VALID=true
-    # TODO does claude cli provide some validator? What about json schema validation?
-    # Check marketplace.json exists and is valid
+
+    # Check marketplace.json exists and is valid JSON
     if [ ! -f ".claude-plugin/marketplace.json" ]; then
         echo "ERROR: marketplace.json not found"
         exit 1
@@ -50,7 +58,7 @@ validate:
         exit 1
     fi
 
-    echo "marketplace.json is valid"
+    echo "marketplace.json is valid JSON"
 
     # Validate each plugin
     for plugin_dir in plugins/*; do
