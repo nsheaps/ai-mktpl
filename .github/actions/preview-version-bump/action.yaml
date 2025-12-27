@@ -5,7 +5,6 @@ name: Preview Version Bump
 description: |
   Runs 'just version --dry-run' to preview version bumps for changed plugins in a PR.
 
-
 inputs:
   base-ref:
     description: Base git reference to compare against
@@ -34,7 +33,6 @@ outputs:
 runs:
   using: composite
   steps:
-
     - name: Check version bumps
       id: preview
       shell: bash
