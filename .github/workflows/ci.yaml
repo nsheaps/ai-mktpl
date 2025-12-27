@@ -55,5 +55,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: mise install -y
+        uses: jdx/mise-action@v2
+        with:
+          install: true
+          cache: true
+
       - name: Validate plugin structure
         uses: ./.github/actions/validate-plugins
