@@ -1,3 +1,11 @@
+
+
+
+This is supposed to be a skill for CLAUDE to use when a /slashcommand is typed as a message instead of executed. This is important because slash commands take up space in the context, and the window can be saved if dynamically loaded. The critical thing is to use the slash command as a prompt for the general-purpose agent.
+
+
+
+##### BELOW BE VIBES
 ---
 name: command-help
 description: >

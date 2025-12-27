@@ -1,8 +1,8 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin.json",
-  "name": "command-help-skill",
-  "version": "1.0.1",
-  "description": "Help users understand and discover slash commands when they accidentally type them as messages",
+  "name": "command-help-skill", // TODO rename to slash-command-sent-as-message
+  "version": "0.0.1",
+  "description": "Help claude understand, discover, and execute slash commands when accidentally sent as a message.",
   "author": {
     "name": "Claude Code Community",
     "email": "community@example.com",
