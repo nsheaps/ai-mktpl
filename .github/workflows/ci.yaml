@@ -20,15 +20,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          # Use PAT for pushing back to branch, fallback to github.token for PRs from forks
-          token: ${{ secrets.GITHUB_PAT_TOKEN_NSHEAPS || github.token }}
 
       - name: mise install -y
         uses: jdx/mise-action@v2
         with:
-          version: "latest"
           install: true
           cache: true
 
