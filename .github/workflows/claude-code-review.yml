@@ -24,9 +24,9 @@ jobs:
 
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      pull-requests: read
-      issues: read
+      contents: write
+      pull-requests: write
+      issues: write
       id-token: write
       actions: read
 
@@ -34,7 +34,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 50
+
+      - name: Authenticate as GitHub App
+        id: auth
+        uses: ./.github/actions/github-app-auth
+        with:
+          app-id: ${{ secrets.REVIEW_GITHUB_APP_ID }}
+          private-key: ${{ secrets.REVIEW_GITHUB_APP_PRIVATE_KEY }}
 
       - name: Get additional job context
         uses: qoomon/actions--context@v5
@@ -45,6 +52,24 @@ jobs:
       - name: Run Claude Code Review
         id: claude-review
         uses: anthropics/claude-code-action@v1
+        env:
+          # These are in addition to any parsed settings.json files
+          INPUT_CLAUDE_SETTINGS_JSON: |
+            {
+              "env": {
+                "GH_TOKEN": "${{ steps.auth.outputs.token }}"
+              }
+            }
+          INPUT_ALLOWED_TOOLS: |
+            WebFetch(*),
+            WebSearch,
+            Bash(gh issue view:*),
+            Bash(gh search:*),
+            Bash(gh issue list:*),
+            Bash(gh pr comment:*),
+            Bash(gh pr diff:*),
+            Bash(gh pr view:*),
+            Bash(gh pr list:*)
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           # WARNING: PRINTS FULL JSON OUTPUT WHICH MAY INCLUDE SECRETS.
@@ -52,7 +77,7 @@ jobs:
           show_full_output: true
           # bug: https://github.com/anthropics/claude-code-action/issues/759
           # won't find the past comments since it's looking for github-actions[bot], not the auth it uses to post the comment.
-          bot_id: '209825114' # ← Workaround: correct claude[bot] ID
+          bot_id: ${{ steps.auth.outputs.user-id }}
           prompt: |
             REPO: ${{ github.repository }}
             PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -170,4 +195,8 @@ jobs:
             ==== end job context ====
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://docs.claude.com/en/docs/claude-code/cli-reference for available options
-          claude_args: '--allowed-tools "WebFetch(*),WebSearch,Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'
+          claude_args: |
+            --allowed-tools
+              "${{ env.INPUT_ALLOWED_TOOLS }}"
+            --settings
+              "${{ env.INPUT_CLAUDE_SETTINGS_JSON }}"
