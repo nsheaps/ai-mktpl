@@ -38,8 +38,8 @@ jobs:
         id: auth
         uses: ./.github/actions/github-app-auth
         with:
-          app-id: ${{ secrets.REVIEW_GITHUB_APP_ID || secrets.AUTOMATION_GITHUB_APP_ID }}
-          private-key: ${{ secrets.REVIEW_GITHUB_APP_PRIVATE_KEY || secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
+          app-id: ${{ secrets.REVIEW_GITHUB_APP_ID }}
+          private-key: ${{ secrets.REVIEW_GITHUB_APP_PRIVATE_KEY }}
 
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -65,7 +65,7 @@ jobs:
           show_full_output: true
           # bug: https://github.com/anthropics/claude-code-action/issues/759
           # won't find the past comments since it's looking for github-actions[bot], not the auth it uses to post the comment.
-          bot_id: '209825114' # ← Workaround: correct claude[bot] ID
+          bot_id: ${{ steps.auth.outputs.user-id }}
           prompt: |
             REPO: ${{ github.repository }}
             PR_NUMBER: ${{ github.event.pull_request.number }}
