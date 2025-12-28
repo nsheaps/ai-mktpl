@@ -31,21 +31,18 @@ jobs:
       actions: read
 
     steps:
-      # Authenticate using REVIEW_* secrets if available, otherwise fall back to AUTOMATION_*
-      # Note: The || operator works with undefined secrets. If REVIEW_* secrets are set
-      # to empty strings (not recommended), they will be used instead of falling back.
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 50
+
       - name: Authenticate as GitHub App
         id: auth
         uses: ./.github/actions/github-app-auth
         with:
           app-id: ${{ secrets.REVIEW_GITHUB_APP_ID }}
           private-key: ${{ secrets.REVIEW_GITHUB_APP_PRIVATE_KEY }}
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          token: ${{ steps.auth.outputs.token }}
-          fetch-depth: 1
 
       - name: Get additional job context
         uses: qoomon/actions--context@v5
@@ -57,7 +54,23 @@ jobs:
         id: claude-review
         uses: anthropics/claude-code-action@v1
         env:
-          GH_TOKEN: ${{ steps.auth.outputs.token }}
+          # These are in addition to any parsed settings.json files
+          INPUT_CLAUDE_SETTINGS_JSON: |
+            {
+              "env": {
+                "GH_TOKEN": "${{ steps.auth.outputs.token }}"
+              }
+            }
+          INPUT_ALLOWED_TOOLS: |
+            WebFetch(*),
+            WebSearch,
+            Bash(gh issue view:*),
+            Bash(gh search:*),
+            Bash(gh issue list:*),
+            Bash(gh pr comment:*),
+            Bash(gh pr diff:*),
+            Bash(gh pr view:*),
+            Bash(gh pr list:*)
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           # WARNING: PRINTS FULL JSON OUTPUT WHICH MAY INCLUDE SECRETS.
@@ -183,4 +196,8 @@ jobs:
             ==== end job context ====
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://docs.claude.com/en/docs/claude-code/cli-reference for available options
-          claude_args: '--allowed-tools "WebFetch(*),WebSearch,Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'
+          claude_args: |
+            --allowed-tools
+              "${{ env.INPUT_ALLOWED_TOOLS }}"
+            --settings
+              "${{ env.INPUT_CLAUDE_SETTINGS_JSON }}"

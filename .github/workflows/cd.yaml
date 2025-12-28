@@ -58,17 +58,16 @@ jobs:
     permissions:
       contents: write
     steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
       - name: Authenticate as GitHub App
         id: auth
         uses: ./.github/actions/github-app-auth
         with:
           app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
           private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
-
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          token: ${{ steps.auth.outputs.token }}
 
       - name: mise install -y
         uses: jdx/mise-action@v2
@@ -94,17 +93,16 @@ jobs:
     permissions:
       contents: write
     steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+          
       - name: Authenticate as GitHub App
         id: auth
         uses: ./.github/actions/github-app-auth
         with:
           app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
           private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
-
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          token: ${{ steps.auth.outputs.token }}
 
       - name: mise install -y
         uses: jdx/mise-action@v2
