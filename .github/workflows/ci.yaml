@@ -67,6 +67,59 @@ jobs:
           echo "Changes made or lint failed! Auto-committed the fixes, but more lint and format issues may remain."
           exit 1
 
+  update-marketplace:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: github app auth
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
+          private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+
+      - name: Get GitHub App User ID
+        id: get-user-id
+        run: echo "user-id=$(gh api "/users/${{ steps.app-token.outputs.app-slug }}[bot]" --jq .id)" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+      - run: |
+          git config --global user.name '${{ steps.app-token.outputs.app-slug }}[bot]'
+          git config --global user.email '${{ steps.get-user-id.outputs.user-id }}+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com'
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: mise install -y
+        uses: jdx/mise-action@v2
+        with:
+          install: true
+          cache: true
+
+      - name: just update-marketplace
+        id: update-marketplace
+        #
+        uses: ./.github/actions/update-marketplace
+        continue-on-error: true
+
+      - name: git push
+        if: steps.update-marketplace.outputs.changed-or-failed == 'true' && ! cancelled()
+        id: auto-commit-action
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'chore: `just update-marketplace`'
+
+      - name: 'exit 1 # changes detected or update failed'
+        if: ${{ steps.update-marketplace.outputs.changed-or-failed == 'true' && ! cancelled() }}
+        run: |
+          echo "Changes made or update-marketplace failed! Auto-committed the fixes, but more issues may remain."
+          exit 1
+
   validate:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
