@@ -38,6 +38,19 @@ Your task is rarely done after making changes. Always:
 2. Compare against the original request
 3. Ensure it satisfies the requirements
 4. Make sure the code isn't overcomplicated
+5. **Test your changes locally before committing**
+
+### Testing before committing
+
+**CRITICAL:** Don't just make changes - ALWAYS test them to verify they work.
+
+- Run the project's test/check commands (e.g., `just check`, `npm test`, `pytest`)
+- For justfile changes: test each new/modified recipe
+- For workflow changes: verify syntax and test locally where possible
+- For scripts: execute them with test inputs
+- If changes can't be fully tested locally, note what remains untested
+
+Spot-checking a single command is NOT sufficient. Run the full validation suite.
 
 ### Local and remote validation
 
