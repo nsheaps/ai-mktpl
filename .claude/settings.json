@@ -43,6 +43,7 @@
       "WebFetch(domain:*.weather.gov)",
       "WebFetch(domain:mise.run)",
       "WebFetch(domain:*.mise.run)",
+      "WebFetch(domain:just.systems)",
 
       "Bash(git log:*)",
       "Bash(git diff:*)",
@@ -51,6 +52,7 @@
       "Bash(git fetch:*)",
       "Bash(git show:*)",
       "Bash(git remote get-url:*)",
+      "Bash(git rm:*)",
 
       "Bash(brew search:*)",
       "Bash(brew info:*)",
@@ -63,6 +65,12 @@
 
       "Bash(wc:*)",
       "Bash(man:*)",
+
+      "Bash(just:*)",
+      "Bash(mise:*)",
+      "Bash(yarn:*)",
+      "Bash(npm:*)",
+      "Bash(pnpm:*)",
 
       "Bash(mkdir -p:*)"
     ],
