@@ -53,6 +53,18 @@ runs:
 
     - name: Configure git
       shell: bash
+      env:
+        GH_TOKEN: ${{ steps.app-token.outputs.token }}
       run: |
         git config --global user.name '${{ steps.app-token.outputs.app-slug }}[bot]'
         git config --global user.email '${{ steps.get-user-id.outputs.user-id }}+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com'
+        gh auth setup-git
+
+    - name: Configure repo checkout token
+      # technically would checkout again, but since all refs are already local and clean is disabled
+      # this should basically just replace the token in the http header used to interact with remote
+      uses: actions/checkout@v5
+      with:
+        token: ${{ steps.app-token.outputs.token }}
+        clean: false
+        persist-credentials: true
