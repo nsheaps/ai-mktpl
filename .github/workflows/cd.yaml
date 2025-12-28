@@ -36,7 +36,7 @@ jobs:
         shell: bash
         run: |
           TMP="$(mktemp)"
-          just preview-version-bumps --format=md | tee "$TMP"
+          just release --dry-run --format=md | tee "$TMP"
           echo "report<<EOF" >> $GITHUB_OUTPUT
           cat $TMP >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
@@ -63,11 +63,11 @@ jobs:
         with:
           install: true
           cache: true
-      - name: just version
+      - name: Bump plugin versions
         id: bump
         shell: bash
         run: |
-          just bump-plugin-versions
+          just release
 
       - name: push tags
         shell: bash
@@ -92,7 +92,8 @@ jobs:
 
       - name: Update marketplace metadata
         id: update
-        uses: ./.github/actions/update-marketplace
+        shell: bash
+        run: just update-marketplace
 
       - name: Commit changes
         if: steps.update.outputs.updated == 'true'

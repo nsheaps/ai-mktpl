@@ -91,7 +91,7 @@ validate:
         exit 1
     fi
 
-preview-version-bump PLUGIN_PATH=invocation_directory():
+_preview-version-bump PLUGIN_PATH=invocation_directory():
     #!/usr/bin/env bash
     command -v commit-and-tag-version >/dev/null 2>&1 || { just setup ; }
     source {{root_dir}}/bin/lib/stdlib.sh
@@ -103,7 +103,7 @@ preview-version-bump PLUGIN_PATH=invocation_directory():
     commit-and-tag-version --dry-run
 
 [arg('format', pattern='--format=raw|--format=md')]
-preview-version-bumps format='--format=raw':
+_preview-version-bumps format='--format=raw':
     #!/usr/bin/env bash
     # takes optional args:
     # --format=raw|md : output format for dry-run report (default: raw)
@@ -128,8 +128,8 @@ preview-version-bumps format='--format=raw':
             continue
         fi
         PLUGIN_NAME=$(basename "$plugin_dir")
-        CURRENT=$(just plugin-current-version "$plugin_dir")
-        NEXT=$(just plugin-next-version "$plugin_dir")
+        CURRENT=$(just _plugin-current-version "$plugin_dir")
+        NEXT=$(just _plugin-next-version "$plugin_dir")
         # determine type of bump
         IFS='.' read -r -a current_parts <<< "$CURRENT"
         IFS='.' read -r -a next_parts <<< "$NEXT"
@@ -153,7 +153,7 @@ preview-version-bumps format='--format=raw':
         esac
     done
 
-plugin-current-versions:
+_plugin-current-versions:
     #!/usr/bin/env bash
     # returns a list of plugin names and their current versions
     for plugin_dir in plugins/*; do
@@ -162,13 +162,13 @@ plugin-current-versions:
               continue
           fi
           PLUGIN_NAME=$(basename "$plugin_dir")
-          CURRENT=$(just plugin-current-version "$plugin_dir")
+          CURRENT=$(just _plugin-current-version "$plugin_dir")
           echo "$PLUGIN_NAME: $CURRENT"
         } &
     done
     wait
 
-plugin-current-version PLUGIN_PATH=invocation_directory():
+_plugin-current-version PLUGIN_PATH=invocation_directory():
     #!/usr/bin/env bash
     # returns just the semver of the plugin at PLUGIN_PATH
     command -v commit-and-tag-version >/dev/null 2>&1 || { just setup ; }
@@ -178,7 +178,7 @@ plugin-current-version PLUGIN_PATH=invocation_directory():
     cd "$PLUGIN_DIR"
     echo "$(jq -r '.version' .claude-plugin/plugin.json)" | xargs
 
-plugin-next-version PLUGIN_PATH=invocation_directory():
+_plugin-next-version PLUGIN_PATH=invocation_directory():
     #!/usr/bin/env bash
     # returns just the semver (aka 1.1.0)
     command -v commit-and-tag-version >/dev/null 2>&1 || { just setup ; }
@@ -188,7 +188,7 @@ plugin-next-version PLUGIN_PATH=invocation_directory():
     cd "$PLUGIN_DIR"
     commit-and-tag-version --dry-run --skip.changelog --skip.commit | grep -Eo 'to \d+\.\d+\.\d+' | sed 's/to //g'
 
-bump-plugin-version PLUGIN_PATH=invocation_directory():
+_bump-plugin-version PLUGIN_PATH=invocation_directory():
     #!/usr/bin/env bash
     command -v commit-and-tag-version >/dev/null 2>&1 || { just setup ; }
     source {{root_dir}}/bin/lib/stdlib.sh
@@ -197,14 +197,28 @@ bump-plugin-version PLUGIN_PATH=invocation_directory():
     cd "$PLUGIN_DIR"
     commit-and-tag-version
 
-bump-plugin-versions:
+_bump-plugin-versions:
     #!/usr/bin/env bash
     for plugin_dir in plugins/*; do
         if [ ! -d "$plugin_dir" ]; then
             continue
         fi
-        just bump-plugin-version "$plugin_dir"
+        just _bump-plugin-version "$plugin_dir"
     done
+
+# Bump plugin versions (use --dry-run to preview)
+release *FLAGS:
+    #!/usr/bin/env bash
+    if [[ "{{FLAGS}}" == *"--dry-run"* ]]; then
+        # Extract format flag if present, default to raw
+        if [[ "{{FLAGS}}" == *"--format=md"* ]]; then
+            just _preview-version-bumps --format=md
+        else
+            just _preview-version-bumps --format=raw
+        fi
+    else
+        just _bump-plugin-versions
+    fi
 
 # Update marketplace.json from plugin.json files
 update-marketplace:
@@ -214,6 +228,8 @@ update-marketplace:
 
     MARKETPLACE_FILE=".claude-plugin/marketplace.json"
     TEMP_FILE=$(mktemp)
+    UPDATED=false
+    CHANGED_PLUGINS=""
 
     # Start with empty plugins array
     jq '.plugins = []' "$MARKETPLACE_FILE" > "$TEMP_FILE"
@@ -235,6 +251,13 @@ update-marketplace:
         DESC=$(jq -r '.description' "$PLUGIN_JSON")
         AUTHOR=$(jq -r '.author.name' "$PLUGIN_JSON")
         KEYWORDS=$(jq -c '.keywords // []' "$PLUGIN_JSON")
+
+        # Check if version changed from current marketplace
+        CURRENT_VERSION=$(jq -r ".plugins[] | select(.name == \"$PLUGIN_NAME\") | .version" "$MARKETPLACE_FILE" 2>/dev/null || echo "")
+        if [ "$VERSION" != "$CURRENT_VERSION" ] && [ -n "$CURRENT_VERSION" ]; then
+            echo "Version changed: $PLUGIN_NAME $CURRENT_VERSION -> $VERSION"
+            CHANGED_PLUGINS="${CHANGED_PLUGINS}${PLUGIN_NAME},"
+        fi
 
         # Determine category
         CATEGORY="utility"
@@ -274,11 +297,33 @@ update-marketplace:
         echo "Added $PLUGIN_NAME"
     done
 
-    # Sort and save
-    jq '.plugins |= sort_by(.name)' "$TEMP_FILE" > "$MARKETPLACE_FILE"
-    rm -f "$TEMP_FILE"
+    # Sort the new marketplace
+    jq '.plugins |= sort_by(.name)' "$TEMP_FILE" > "${TEMP_FILE}.sorted"
 
-    echo "Marketplace updated!"
+    # Compare with current marketplace to detect changes
+    if ! diff -q "$MARKETPLACE_FILE" "${TEMP_FILE}.sorted" > /dev/null 2>&1; then
+        UPDATED=true
+        mv "${TEMP_FILE}.sorted" "$MARKETPLACE_FILE"
+        echo "Marketplace updated!"
+    else
+        echo "No changes to marketplace"
+    fi
+
+    rm -f "$TEMP_FILE" "${TEMP_FILE}.sorted"
+
+    # Remove trailing comma from changed plugins
+    CHANGED_PLUGINS=$(echo "$CHANGED_PLUGINS" | sed 's/,$//')
+
+    # Output for GitHub Actions if running in CI
+    if [ -n "$GITHUB_OUTPUT" ]; then
+        echo "updated=${UPDATED}" >> "$GITHUB_OUTPUT"
+        echo "changed-plugins=${CHANGED_PLUGINS}" >> "$GITHUB_OUTPUT"
+    fi
+
+    echo "Updated: $UPDATED"
+    if [ -n "$CHANGED_PLUGINS" ]; then
+        echo "Changed plugins: $CHANGED_PLUGINS"
+    fi
 
 # Run all checks (lint + validate)
 check:
