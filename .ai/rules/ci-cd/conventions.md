@@ -29,6 +29,18 @@ Every action in `.github/actions/` must:
 2. Include a dry-run mode for PR validation
 3. Work locally via justfile commands
 
+## Prefer Justfile Over Custom Actions
+
+**CRITICAL:** Business logic should live in justfile recipes, not composite actions.
+
+- Composite actions should be thin wrappers that call `just <recipe>`
+- This ensures CI logic is locally replicable (per code-quality.md)
+- If an action needs outputs, use `$GITHUB_OUTPUT` from within the justfile recipe
+- Custom actions are only justified when:
+  1. The logic is truly GitHub-specific (API calls, permissions)
+  2. Reusable across multiple repositories
+  3. Needs complex multi-step orchestration that just can't handle
+
 ## Prefer Marketplace Actions Over Custom Scripts
 
 **CRITICAL:** When working with GitHub Actions workflows:
