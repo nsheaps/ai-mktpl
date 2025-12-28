@@ -6,9 +6,11 @@ name: cd
       - main
     paths:
       - 'plugins/**'
+      - '.github/workflows/cd.yaml'
   pull_request:
     paths:
       - 'plugins/**'
+      - '.github/workflows/cd.yaml'
 
 concurrency:
   group: cd-${{ github.ref }}
