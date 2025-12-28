@@ -103,7 +103,6 @@ jobs:
 
       - name: just update-marketplace
         id: update-marketplace
-        #
         uses: ./.github/actions/update-marketplace
         continue-on-error: true
 
