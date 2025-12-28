@@ -1,4 +1,29 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PROJECT_DIR}/.claude/hooks/SessionStart/hook.sh startup",
+            "timeout": 120
+          }
+        ]
+      },
+      {
+        "matcher": "resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PROJECT_DIR}/.claude/hooks/SessionStart/hook.sh resume",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  },
   "includeCoAuthoredBy": false,
   "permissions": {
     "allow": [
@@ -16,6 +41,9 @@
       "WebFetch(domain:*.claude.ai)",
       "WebFetch(domain:code.visualstudio.com)",
       "WebFetch(domain:*.weather.gov)",
+      "WebFetch(domain:mise.run)",
+      "WebFetch(domain:*.mise.run)",
+      "WebFetch(domain:just.systems)",
 
       "Bash(git log:*)",
       "Bash(git diff:*)",
@@ -23,6 +51,8 @@
       "Bash(git rev-parse:*)",
       "Bash(git fetch:*)",
       "Bash(git show:*)",
+      "Bash(git remote get-url:*)",
+      "Bash(git rm:*)",
 
       "Bash(brew search:*)",
       "Bash(brew info:*)",
@@ -34,12 +64,21 @@
       "Bash(gh run view:*)",
 
       "Bash(wc:*)",
-      "Bash(man:*)"
+      "Bash(man:*)",
+
+      "Bash(just:*)",
+      "Bash(mise:*)",
+      "Bash(yarn:*)",
+      "Bash(npm:*)",
+      "Bash(pnpm:*)",
+
+      "Bash(mkdir -p:*)"
     ],
     "deny": ["Bash(rm -rf /:*)"],
     "ask": [
       "Bash(gh pr view --web:*)",
-      "Bash(rm -rf .:*)",
+      "Bash(rm -rf:*)",
+      "Bash(chmod:*)",
       "Bash(git push --force:*)",
       "Bash(git push -f:*)",
       "Bash(git push --force-with-lease:*)",

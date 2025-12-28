@@ -1,0 +1,13 @@
+{
+  "name": "github-auth-skill",
+  "version": "0.0.1",
+  "description": "Skill for authenticating with GitHub using device authorization flow",
+  "author": {
+    "name": "Claude Code Community",
+    "email": "community@example.com",
+    "url": "https://github.com/nsheaps/.ai"
+  },
+  "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/github-auth-skill",
+  "repository": "https://github.com/nsheaps/.ai",
+  "keywords": ["github", "authentication", "device-auth", "gh", "cli", "skill"]
+}

@@ -1,0 +1,103 @@
+name: cd
+
+'on':
+  push:
+    branches:
+      - main
+    paths:
+      - 'plugins/**'
+  pull_request:
+    paths:
+      - 'plugins/**'
+
+concurrency:
+  group: cd-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  preview-version-bump:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: mise install -y
+        uses: jdx/mise-action@v2
+        with:
+          install: true
+          cache: true
+
+      - name: Check version bumps
+        id: preview
+        shell: bash
+        run: |
+          TMP="$(mktemp)"
+          just release --dry-run --format=md | tee "$TMP"
+          echo "report<<EOF" >> $GITHUB_OUTPUT
+          cat $TMP >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      - name: post version bump report
+        if: steps.preview.outputs.report != ''
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          header: 'package: Version Bump Preview'
+          message: |
+            ### package: Version Bump Preview
+            ${{ steps.preview.outputs.report }}
+
+  bump-plugin-versions:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: mise install -y
+        uses: jdx/mise-action@v2
+        with:
+          install: true
+          cache: true
+      - name: Bump plugin versions
+        id: bump
+        shell: bash
+        run: |
+          just release
+
+      - name: push tags
+        shell: bash
+        run: |
+          git push origin --tags
+
+  update-marketplace:
+    needs: ['bump-plugin-versions']
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: mise install -y
+        uses: jdx/mise-action@v2
+        with:
+          install: true
+          cache: true
+
+      - name: Update marketplace metadata
+        id: update
+        shell: bash
+        run: just update-marketplace
+
+      - name: Commit changes
+        if: steps.update.outputs.updated == 'true'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'chore: update marketplace metadata [skip ci]'
+          file_pattern: '.claude-plugin/marketplace.json'

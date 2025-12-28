@@ -1,0 +1,84 @@
+# Sync Settings Configuration
+# Place this file at: .claude/syncconfig.yaml
+# Rules are processed in order from top to bottom
+
+# Example 1: Merge local settings into project settings
+# ─────────────────────────────────────────────────────────────────
+# Use case: Keep personal permissions without committing them
+# The 'only' filter ensures only specified keys are merged
+- source: ./settings.local.json
+  target: ./settings.json
+  mode: merge
+  only:
+    - key: permissions
+      only: allow # Only merge the 'allow' list, not 'deny' or 'ask'
+    - key: enabledMcpServers # Merge entire key
+
+# Example 2: Sync commands from a shared location
+# ─────────────────────────────────────────────────────────────────
+# Use case: Share commands across multiple projects via symlinks
+# Glob patterns match multiple files
+- source: ../.ai/commands/*.md
+  target: ./commands/
+  mode: sync
+  sync-mode: symlink # Create symlinks instead of copies
+  if-present: replace # Replace existing files
+
+# Example 3: Copy a file to a different location
+# ─────────────────────────────────────────────────────────────────
+# Use case: Create AGENTS.md as a copy of CLAUDE.md for compatibility
+- source: ../CLAUDE.md
+  target: ../AGENTS.md
+  mode: sync
+  sync-mode: copy # Create a copy (default)
+  if-present: do-nothing # Skip if target already exists
+
+# Example 4: Source-only mode for strict synchronization
+# ─────────────────────────────────────────────────────────────────
+# Use case: Ensure target dir only contains files from source
+# Files in target not present in source will be REMOVED
+# - source: ../shared-rules/*.md
+#   target: ./rules/
+#   mode: source-only
+#   sync-mode: symlink
+
+# Example 5: Hoist files to a central location
+# ─────────────────────────────────────────────────────────────────
+# Use case: Move scattered files to one place and create links back
+# Files are moved from target to source, then symlinked
+# - source: ../.ai/hoisted/
+#   target: ./scattered-files/
+#   mode: hoist
+#   sync-mode: symlink
+
+# Example 6: Set file contents directly
+# ─────────────────────────────────────────────────────────────────
+# Use case: Create a file that references another file
+# - source: ../CLAUDE.md
+#   mode: replace
+#   contents: |
+#     @AGENTS.md
+#
+#     See AGENTS.md for project guidelines.
+
+# Example 7: Merge with complex key filtering
+# ─────────────────────────────────────────────────────────────────
+# Use case: Only merge specific nested keys
+# - source: ./settings.local.json
+#   target: ./settings.json
+#   mode: merge
+#   only:
+#     - key: permissions
+#       only:
+#         - allow          # Merge permissions.allow
+#         - deny           # Merge permissions.deny
+#     - key: hooks         # Merge entire hooks object
+#     - key: mcpServers    # Merge entire mcpServers object
+
+# Example 8: Conditional file sync
+# ─────────────────────────────────────────────────────────────────
+# Use case: Fail if files differ (safety check)
+# - source: ../critical-config.json
+#   target: ./config.json
+#   mode: sync
+#   if-present: error-if-different  # Fail if target exists and differs

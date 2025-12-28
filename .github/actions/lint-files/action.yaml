@@ -1,0 +1,37 @@
+name: Lint Files
+description: Lint and format files using prettier, eslint, and python linters
+
+inputs:
+  fix:
+    description: Whether to auto-fix lint issues
+    required: false
+    default: 'false'
+
+outputs:
+  changed-or-failed:
+    description: Whether files were changed or lint errors remain
+    value: ${{ steps.lint.outputs.changed-or-failed }}
+
+runs:
+  using: composite
+  steps:
+    - name: Run linters
+      id: lint
+      shell: bash
+      run: |
+        set +eou pipefail
+        HAS_ERRORS=false
+        FIX="${{ inputs.fix }}"
+
+        if [ "$FIX" = "true" ]; then
+          just lint || HAS_ERRORS=true
+        else
+          just lint-check || HAS_ERRORS=true
+        fi
+
+        # Output true if changed OR errors remain
+        if [ "$HAS_ERRORS" = "true" ]; then
+          echo "changed-or-failed=true" >> $GITHUB_OUTPUT
+        else
+          echo "changed-or-failed=false" >> $GITHUB_OUTPUT
+        fi

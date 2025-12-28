@@ -15,14 +15,14 @@ This command helps correct AI behavior mistakes and ensures they don't happen ag
 
 ## Supported Scopes
 
-| Scope | Description | Location |
-|-------|-------------|----------|
-| `user` | Personal rules for all projects | `~/.claude/CLAUDE.md` or `~/.claude/rules/*.md` |
-| `project` | Rules for the current project | `<git-root>/.claude/CLAUDE.md` or `<git-root>/.claude/rules/*.md` |
-| `slash-commands` / `commands` | User's slash commands | `~/.claude/commands/*.md` |
-| `skills` | User's skills | `~/.claude/skills/*/SKILL.md` |
-| `plugins` | Plugin source code | `~/src/nsheaps/ai/plugins/...` |
-| `marketplace` | The AI config marketplace repo | `~/src/nsheaps/ai/...` |
+| Scope                         | Description                     | Location                                                          |
+| ----------------------------- | ------------------------------- | ----------------------------------------------------------------- |
+| `user`                        | Personal rules for all projects | `~/.claude/CLAUDE.md` or `~/.claude/rules/*.md`                   |
+| `project`                     | Rules for the current project   | `<git-root>/.claude/CLAUDE.md` or `<git-root>/.claude/rules/*.md` |
+| `slash-commands` / `commands` | User's slash commands           | `~/.claude/commands/*.md`                                         |
+| `skills`                      | User's skills                   | `~/.claude/skills/*/SKILL.md`                                     |
+| `plugins`                     | Plugin source code              | `~/src/nsheaps/ai/plugins/...`                                    |
+| `marketplace`                 | The AI config marketplace repo  | `~/src/nsheaps/ai/...`                                            |
 
 **Note:** If scope is obvious from context (e.g., correcting a slash command behavior), infer it. Otherwise, ask the user.
 
@@ -33,6 +33,7 @@ You MUST follow these steps in order:
 ### Step 1: Reflect on Recent Work
 
 Think carefully about:
+
 - What task was I just working on?
 - What was I supposed to do?
 - What did I actually do?
@@ -44,6 +45,7 @@ Document your reflection clearly before proceeding.
 ### Step 2: Understand the Correction
 
 Analyze the user's correction (`$ARGUMENTS`) in context of your recent work:
+
 - What specifically did I do wrong?
 - Where did I start going awry?
 - Was this a one-time mistake or a pattern?
@@ -53,6 +55,7 @@ Analyze the user's correction (`$ARGUMENTS`) in context of your recent work:
 ### Step 3: Determine Scope
 
 Parse the arguments to determine scope:
+
 - If first word matches a scope keyword (case-insensitive), use that scope
 - If scope is obvious from context (e.g., the correction is about a slash command you just wrote), infer it
 - If scope is unclear, ask the user using AskUserQuestion with options for relevant scopes
@@ -82,6 +85,7 @@ Parse the arguments to determine scope:
    - `~/src/nsheaps/ai/plugins/*/commands/*.md` - plugin commands
 
 Identify:
+
 - Are there existing rules about this behavior?
 - If yes, why weren't they followed?
 - Are there conflicting rules? **If so, STOP and ask the user what to do about the conflict.**
@@ -92,15 +96,15 @@ Based on your analysis:
 
 1. **Determine the best place for the rule:**
 
-   | If the correction is... | Put it in... |
-   |-------------------------|--------------|
-   | General user behavior | `~/.claude/CLAUDE.md` or `~/.claude/rules/*.md` |
-   | Project-specific | `<git-root>/.claude/CLAUDE.md` or `<git-root>/.claude/rules/*.md` |
-   | About a slash command | The command file itself |
-   | About a skill | The skill's `SKILL.md` |
-   | About a plugin | The plugin source in `~/src/nsheaps/ai/plugins/...` |
-   | User behavior (shared/backed up) | `~/src/nsheaps/ai/.ai/rules/*.md` (AI-agnostic) |
-   | Repo contribution rules | `~/src/nsheaps/ai/.claude/rules/*.md` (Claude-specific) |
+   | If the correction is...          | Put it in...                                                      |
+   | -------------------------------- | ----------------------------------------------------------------- |
+   | General user behavior            | `~/.claude/CLAUDE.md` or `~/.claude/rules/*.md`                   |
+   | Project-specific                 | `<git-root>/.claude/CLAUDE.md` or `<git-root>/.claude/rules/*.md` |
+   | About a slash command            | The command file itself                                           |
+   | About a skill                    | The skill's `SKILL.md`                                            |
+   | About a plugin                   | The plugin source in `~/src/nsheaps/ai/plugins/...`               |
+   | User behavior (shared/backed up) | `~/src/nsheaps/ai/.ai/rules/*.md` (AI-agnostic)                   |
+   | Repo contribution rules          | `~/src/nsheaps/ai/.claude/rules/*.md` (Claude-specific)           |
 
 2. **Write the correction:**
    - Be specific and actionable
@@ -122,18 +126,20 @@ Based on your analysis:
 
 **CRITICAL: All changes must end up committed somewhere.**
 
-| Scope | Commit Strategy |
-|-------|-----------------|
-| `user` | Changes go to `~/.claude/...` immediately. Source of truth is `~/src/nsheaps/ai/.ai/rules/`. Ask user if they want changes synced there (requires PR). |
-| `project` | Remind user to commit changes to the project repo |
-| `slash-commands` / `skills` | If in `~/.claude/...`, ask about syncing to `~/src/nsheaps/ai/...` |
-| `plugins` / `marketplace` | Changes are in `~/src/nsheaps/ai/...`. Create a PR and assign to user. |
+| Scope                       | Commit Strategy                                                                                                                                        |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `user`                      | Changes go to `~/.claude/...` immediately. Source of truth is `~/src/nsheaps/ai/.ai/rules/`. Ask user if they want changes synced there (requires PR). |
+| `project`                   | Remind user to commit changes to the project repo                                                                                                      |
+| `slash-commands` / `skills` | If in `~/.claude/...`, ask about syncing to `~/src/nsheaps/ai/...`                                                                                     |
+| `plugins` / `marketplace`   | Changes are in `~/src/nsheaps/ai/...`. Create a PR and assign to user.                                                                                 |
 
 **Directory Structure in `~/src/nsheaps/ai/`:**
+
 - `.claude/rules/` - Rules for working on this repo (Claude-specific)
 - `.ai/rules/` - User behavior rules that sync to user's config (AI-agnostic, can be used by other AI tools)
 
 When making changes to `~/src/nsheaps/ai/...`:
+
 1. Check current git status
 2. Create a feature branch if not already on one
 3. Stage and commit changes
@@ -143,6 +149,7 @@ When making changes to `~/src/nsheaps/ai/...`:
 ### Step 7: Correct the Original Work
 
 Go back to the work you just did and fix what was done incorrectly:
+
 - Identify the specific changes that were wrong
 - Undo or correct those changes
 - Verify the correction aligns with what the user wanted
@@ -162,32 +169,43 @@ Go back to the work you just did and fix what was done incorrectly:
 ## Example Corrections
 
 ### Example 1: Don't commit without asking (user scope)
+
 ```
 /correct-behavior user don't commit unless I tell you
 ```
+
 Would add to `~/.claude/CLAUDE.md` and offer to sync to `~/src/nsheaps/ai/.ai/rules/`:
+
 ```markdown
 - NEVER commit changes to git unless the user explicitly asks you to commit.
 ```
 
 ### Example 2: Project-specific API pattern
+
 ```
 /correct-behavior project always use the ApiClient class for API calls
 ```
+
 Would add to project's `.claude/CLAUDE.md` and remind user to commit.
 
 ### Example 3: Slash command fix (inferred scope)
+
 ```
 /correct-behavior the commit command should always show a preview first
 ```
+
 Would update `~/.claude/commands/commit.md` (or the plugin source) and offer to PR to marketplace.
 
 ### Example 4: Scope clarification needed
+
 ```
 /correct-behavior stop adding unnecessary comments
 ```
+
 Would prompt:
+
 > This could apply in multiple places. Where should I add this rule?
+>
 > - USER (applies to all your projects)
 > - PROJECT (just this codebase)
 > - MARKETPLACE (shared with others via ~/src/nsheaps/ai)

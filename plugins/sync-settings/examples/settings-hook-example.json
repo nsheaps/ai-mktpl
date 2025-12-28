@@ -1,0 +1,16 @@
+{
+  "_comment": "Add this hooks configuration to your ~/.claude/settings.json or .claude/settings.json",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/plugins/sync-settings/hooks/sync-settings.py"
+          }
+        ]
+      }
+    ]
+  }
+}

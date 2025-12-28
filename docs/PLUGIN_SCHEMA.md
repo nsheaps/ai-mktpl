@@ -64,6 +64,7 @@ The plugin manifest file is **required** for all plugins. It must contain valid 
 #### Example `plugin.json`
 
 **Minimal:**
+
 ```json
 {
   "name": "my-plugin",
@@ -73,6 +74,7 @@ The plugin manifest file is **required** for all plugins. It must contain valid 
 ```
 
 **Complete:**
+
 ```json
 {
   "name": "enterprise-plugin",
@@ -107,6 +109,7 @@ Contains agent definition files (`.md` format). Each file defines a specialized 
 ### `skills/`
 
 Contains skill directories. Each skill directory should have:
+
 - `SKILL.md` - Skill definition
 - Optional subdirectories for scripts and resources
 
@@ -165,21 +168,27 @@ python3 scripts/validate-marketplace-sync.py
 ### Common Validation Errors
 
 1. **Missing `plugin.json`**
+
    ```
    Error: Missing required file: .claude-plugin/plugin.json
    ```
+
    Solution: Create the `.claude-plugin/` directory and add a `plugin.json` file.
 
 2. **Invalid `plugin.json` structure**
+
    ```
    Error: plugin.json missing required fields: name, version
    ```
+
    Solution: Ensure all required fields are present.
 
 3. **Invalid author field**
+
    ```
    Error: plugin.json 'author' must be an object
    ```
+
    Solution: Use the proper author object format with at least a `name` field.
 
 4. **Invalid JSON syntax**
@@ -221,15 +230,16 @@ EOF
 ## CI/CD Integration
 
 The validation runs automatically via GitHub Actions on:
+
 - Push to main/master branch
 - Pull requests to main/master branch
 - Changes in the `plugins/` directory
 
 The workflow:
+
 - Checks out the code
 - Sets up Python 3.11
 - Runs schema validation
 - Runs marketplace sync validation
 
 Failed validation will block PR merges.
-

@@ -1,0 +1,13 @@
+{
+  "name": "skills-maintenance",
+  "version": "0.0.1",
+  "description": "Agent skill for maintaining, updating, and improving existing Claude Code skills",
+  "author": {
+    "name": "Claude Code Community",
+    "email": "community@example.com",
+    "url": "https://github.com/nsheaps/.ai"
+  },
+  "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/skills-maintenance",
+  "repository": "https://github.com/nsheaps/.ai",
+  "keywords": ["skills", "maintenance", "update", "improve", "refactor", "documentation"]
+}

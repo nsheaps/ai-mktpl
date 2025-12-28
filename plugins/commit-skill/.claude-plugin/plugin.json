@@ -1,6 +1,6 @@
 {
   "name": "commit-skill",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Intelligent skill that enables Claude to automatically analyze git changes and create well-formatted commits during development",
   "author": {
     "name": "Claude Code Community",

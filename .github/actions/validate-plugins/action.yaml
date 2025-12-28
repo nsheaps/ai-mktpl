@@ -1,0 +1,11 @@
+name: Validate Plugins
+description: Validate plugin structure and marketplace consistency
+
+runs:
+  using: composite
+  steps:
+    - name: just validate
+      id: validate
+      shell: bash
+      run: |
+        just validate

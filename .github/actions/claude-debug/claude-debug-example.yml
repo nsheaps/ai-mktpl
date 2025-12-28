@@ -1,0 +1,282 @@
+name: Claude Debug Action Examples
+
+on:
+  workflow_dispatch:
+    inputs:
+      example:
+        description: 'Which example to run'
+        required: true
+        type: choice
+        options:
+          - basic
+          - with-logs
+          - repository-dispatch
+          - multi-stage
+
+jobs:
+  # Example 1: Basic Usage
+  basic-debug:
+    if: github.event.inputs.example == 'basic'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Claude Code CLI (Mock for demo)
+        run: |
+          echo "In production, install Claude Code CLI here"
+          echo "npm install -g @anthropic/claude-code"
+          # For demo purposes, create a mock script
+          mkdir -p /usr/local/bin
+          cat > /tmp/claude-code << 'EOF'
+          #!/bin/bash
+          if [[ "$*" == *"--version"* ]]; then
+            echo "claude-code version 1.0.0"
+          elif [[ "$*" == *"--output-format json"* ]]; then
+            cat << 'JSONEOF'
+          {
+            "session": {
+              "id": "session-abc123",
+              "previous": "session-xyz789"
+            },
+            "sessions": ["session-abc123", "session-xyz789", "session-def456"],
+            "status": "success"
+          }
+          JSONEOF
+          fi
+          EOF
+          chmod +x /tmp/claude-code
+          sudo mv /tmp/claude-code /usr/local/bin/claude-code
+
+      - name: Run Claude Debug Action
+        uses: ./.github/actions/claude-debug
+        id: debug
+
+      - name: Display Debug Information
+        run: |
+          echo "Session ID: ${{ steps.debug.outputs.session-id }}"
+          echo "Previous Session: ${{ steps.debug.outputs.previous-session-id }}"
+          echo "Git Branch: ${{ steps.debug.outputs.git-branch }}"
+          echo "Git Status: ${{ steps.debug.outputs.git-status }}"
+          echo "Claude Version: ${{ steps.debug.outputs.claude-version }}"
+
+      - name: Check Session Status
+        run: |
+          if [ "${{ steps.debug.outputs.session-status }}" != "success" ]; then
+            echo "Session failed with error: ${{ steps.debug.outputs.error }}"
+            exit 1
+          fi
+
+  # Example 2: With Log Extraction
+  debug-with-logs:
+    if: github.event.inputs.example == 'with-logs'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Claude Code
+        run: |
+          # Mock setup (replace with actual installation)
+          mkdir -p ~/.claude/logs
+          echo "Sample log entry" > ~/.claude/logs/session-$(date +%s).log
+
+      - name: Run Debug with Logs
+        uses: ./.github/actions/claude-debug
+        id: debug
+        with:
+          continue: true
+          extract-logs: true
+
+      - name: Save Logs as Artifact
+        if: steps.debug.outputs.logs != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: claude-session-logs
+          path: ~/.claude/logs/
+          retention-days: 7
+
+      - name: Post to PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 🤖 Claude Debug Report
+
+              - **Session**: \`${{ steps.debug.outputs.session-id }}\`
+              - **Status**: ${{ steps.debug.outputs.session-status }}
+              - **Branch**: \`${{ steps.debug.outputs.git-branch }}\`
+              - **Commit**: \`${{ steps.debug.outputs.git-commit }}\`
+
+              Logs have been uploaded as workflow artifacts.`
+            })
+
+  # Example 3: Repository Dispatch Handler
+  repository-dispatch-handler:
+    if: github.event.inputs.example == 'repository-dispatch' || github.event_name == 'repository_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Debug Claude Session
+        uses: ./.github/actions/claude-debug
+        id: debug
+        with:
+          continue: true
+          claude-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Send Results to External System
+        run: |
+          # Example: Post results to webhook
+          curl -X POST https://webhook.example.com/claude-debug \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.WEBHOOK_TOKEN }}" \
+            -d '{
+              "source": "${{ github.repository }}",
+              "session_id": "${{ steps.debug.outputs.session-id }}",
+              "previous_session": "${{ steps.debug.outputs.previous-session-id }}",
+              "branch": "${{ steps.debug.outputs.git-branch }}",
+              "commit": "${{ steps.debug.outputs.git-commit }}",
+              "status": "${{ steps.debug.outputs.session-status }}",
+              "triggered_by": "${{ github.event_name }}"
+            }'
+
+      - name: Comment on Source PR (if from external repo)
+        if: github.event.client_payload.issue_number
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PAT_TOKEN }}
+          script: |
+            const [owner, repo] = '${{ github.event.client_payload.source_repo }}'.split('/');
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: ${{ github.event.client_payload.issue_number }},
+              body: `✅ Debug completed in external repository\n\n**Session ID**: \`${{ steps.debug.outputs.session-id }}\`\n**Status**: ${{ steps.debug.outputs.session-status }}`
+            });
+
+  # Example 4: Multi-Stage Workflow
+  multi-stage-claude:
+    if: github.event.inputs.example == 'multi-stage'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Stage 1 - Initial Analysis
+        id: stage1
+        run: |
+          echo "Running Claude Code for initial analysis..."
+          # Your Claude Code automation here
+
+      - name: Debug Stage 1
+        uses: ./.github/actions/claude-debug
+        id: debug1
+        with:
+          continue: false # Fresh session
+
+      - name: Validate Stage 1
+        run: |
+          if [ "${{ steps.debug1.outputs.session-status }}" != "success" ]; then
+            echo "Stage 1 failed"
+            exit 1
+          fi
+
+      - name: Stage 2 - Apply Changes
+        run: |
+          echo "Running Claude Code with changes from Stage 1..."
+          echo "Previous session: ${{ steps.debug1.outputs.session-id }}"
+          # Your Claude Code automation here
+
+      - name: Debug Stage 2
+        uses: ./.github/actions/claude-debug
+        id: debug2
+        with:
+          continue: true # Continue from Stage 1
+
+      - name: Verify Session Continuity
+        run: |
+          echo "Stage 1 Session: ${{ steps.debug1.outputs.session-id }}"
+          echo "Stage 2 Session: ${{ steps.debug2.outputs.session-id }}"
+          echo "Stage 2 Previous: ${{ steps.debug2.outputs.previous-session-id }}"
+
+          # Verify session chain
+          if [ "${{ steps.debug2.outputs.previous-session-id }}" == "${{ steps.debug1.outputs.session-id }}" ]; then
+            echo "✅ Session continuity verified"
+          else
+            echo "❌ Session continuity broken"
+            exit 1
+          fi
+
+      - name: Generate Summary
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << 'EOF'
+          ## Multi-Stage Claude Workflow Summary
+
+          ### Stage 1: Analysis
+          - **Session ID**: `${{ steps.debug1.outputs.session-id }}`
+          - **Status**: ${{ steps.debug1.outputs.session-status }}
+
+          ### Stage 2: Implementation
+          - **Session ID**: `${{ steps.debug2.outputs.session-id }}`
+          - **Previous Session**: `${{ steps.debug2.outputs.previous-session-id }}`
+          - **Status**: ${{ steps.debug2.outputs.session-status }}
+
+          ### Git Context
+          - **Branch**: `${{ steps.debug2.outputs.git-branch }}`
+          - **Commit**: `${{ steps.debug2.outputs.git-commit }}`
+          - **Status**: ${{ steps.debug2.outputs.git-status }}
+          EOF
+
+  # Example 5: Cross-Repository Debug
+  cross-repo-debug:
+    if: github.event.inputs.example == 'cross-repo'
+    strategy:
+      matrix:
+        repo:
+          - repo1
+          - repo2
+          - repo3
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Target Repository
+        uses: actions/checkout@v4
+        with:
+          repository: my-org/${{ matrix.repo }}
+          token: ${{ secrets.ORG_PAT }}
+
+      - name: Debug Claude Session
+        uses: nsheaps/.ai/.github/actions/claude-debug@main
+        id: debug
+
+      - name: Aggregate Results
+        run: |
+          # Send results to central monitoring system
+          echo "Repository: ${{ matrix.repo }}"
+          echo "Session: ${{ steps.debug.outputs.session-id }}"
+          echo "Status: ${{ steps.debug.outputs.session-status }}"
+
+          # Example: Store in artifact for aggregation
+          mkdir -p debug-results
+          cat > debug-results/${{ matrix.repo }}.json << EOF
+          {
+            "repository": "${{ matrix.repo }}",
+            "session_id": "${{ steps.debug.outputs.session-id }}",
+            "status": "${{ steps.debug.outputs.session-status }}",
+            "branch": "${{ steps.debug.outputs.git-branch }}",
+            "commit": "${{ steps.debug.outputs.git-commit }}"
+          }
+          EOF
+
+      - name: Upload Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-results-${{ matrix.repo }}
+          path: debug-results/

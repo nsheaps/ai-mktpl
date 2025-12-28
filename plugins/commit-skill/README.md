@@ -45,6 +45,7 @@ The skill operates transparently during your development workflow:
 ### Automatic Activation
 
 Claude activates this skill when:
+
 - Completing development tasks
 - Multiple files have been modified
 - Working in repositories with commit conventions
@@ -113,6 +114,7 @@ Claude creates separate commits:
 ### Change Type Detection
 
 The skill identifies changes as:
+
 - **feat**: New features or functionality
 - **fix**: Bug fixes and corrections
 - **refactor**: Code restructuring
@@ -127,6 +129,7 @@ The skill identifies changes as:
 ### Atomic Commit Strategy
 
 Creates commits that are:
+
 - Focused on one logical change
 - Independently reviewable
 - Bisect-friendly
@@ -136,6 +139,7 @@ Creates commits that are:
 ### Repository Adaptation
 
 Learns from your repository:
+
 - Commit message format
 - Imperative vs. past tense
 - Capitalization style
@@ -205,6 +209,7 @@ Claude creates logical commits:
 ### Never Commits Sensitive Files
 
 Protected file types:
+
 - `.env*` - Environment variables
 - `credentials.json` - Credential files
 - `secrets.yml` - Secret configuration
@@ -226,6 +231,7 @@ Protected file types:
 ### Pre-commit Hook Integration
 
 Works seamlessly with hooks:
+
 - Respects hook requirements
 - Handles auto-formatting
 - Retries if hooks modify files
@@ -234,6 +240,7 @@ Works seamlessly with hooks:
 ### Multi-Commit Organization
 
 For complex changes:
+
 ```
 You: "Migrate authentication from sessions to JWT"
 
@@ -302,6 +309,7 @@ Claude ensures:
 **Problem**: Skill doesn't seem to be working
 
 **Solutions**:
+
 - Verify installation in `~/.claude/skills/commit-skill/`
 - Ensure you're in a git repository
 - Check there are changes to commit
@@ -312,6 +320,7 @@ Claude ensures:
 **Problem**: Commit messages don't follow your conventions
 
 **Solutions**:
+
 - Make manual commits to establish patterns
 - Explicitly state your conventions
 - The skill learns over time
@@ -321,6 +330,7 @@ Claude ensures:
 **Problem**: Commits aren't organized as expected
 
 **Solutions**:
+
 - Provide guidance on commit granularity
 - Specify "create one commit" or "create atomic commits"
 - The skill learns your preferences
@@ -330,29 +340,32 @@ Claude ensures:
 **Problem**: Expected files aren't committed
 
 **Solutions**:
+
 - Check `.gitignore` patterns
 - Verify file permissions
 - Ensure files aren't marked as sensitive
 
 ## Comparison with Commit Command
 
-| Feature | Smart Commit Skill | Commit Command |
-|---------|-------------------|----------------|
-| Activation | Automatic during development | Manual with `/commit` |
-| Use Case | Ongoing development workflow | Explicit commit creation |
+| Feature      | Smart Commit Skill               | Commit Command               |
+| ------------ | -------------------------------- | ---------------------------- |
+| Activation   | Automatic during development     | Manual with `/commit`        |
+| Use Case     | Ongoing development workflow     | Explicit commit creation     |
 | Multi-commit | Creates multiple logical commits | Single commit per invocation |
-| Learning | Learns during session | Analyzes history per run |
-| User Control | Transparent, can guide | Explicit control |
+| Learning     | Learns during session            | Analyzes history per run     |
+| User Control | Transparent, can guide           | Explicit control             |
 
 ### When to Use Each
 
 **Use the Skill when:**
+
 - Actively developing features
 - Want Claude to handle commits automatically
 - Working on multi-part implementations
 - Prefer transparent commit management
 
 **Use the Command when:**
+
 - Want explicit control over commits
 - Need to commit specific changes
 - Prefer manual commit workflow
@@ -368,6 +381,7 @@ Claude ensures:
 ## Allowed Tools
 
 The skill uses:
+
 - `Bash(git add:*)` - Stage files
 - `Bash(git status:*)` - Check status
 - `Bash(git commit:*)` - Create commits
@@ -403,6 +417,7 @@ The skill uses:
 ## Contributing
 
 Contributions welcome! Please:
+
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
@@ -411,6 +426,7 @@ Contributions welcome! Please:
 ## Changelog
 
 ### Version 1.0.0
+
 - Initial release
 - Automatic skill activation
 - Semantic change analysis
