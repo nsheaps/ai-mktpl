@@ -4,13 +4,19 @@ Standards for writing and reviewing code.
 
 ## Git Workflow
 
-**NEVER rewrite git history:**
+**NEVER rewrite pushed git history:**
 
-- NEVER use `git commit --amend` - always create new commits instead
+- NEVER use `git commit --amend` on commits that have been pushed - create new commits instead
 - NEVER use `git push --force` - if you must force push, use `--force-with-lease --force-if-includes`
-- NEVER use `git rebase` to rewrite commits that have been pushed
+- NEVER use `git rebase` to rewrite commits that already exist on the remote
 - Always prefer adding to history over changing it
 - When you make a mistake, fix it with a new commit rather than amending
+
+**When rebase IS appropriate:**
+
+- Rebasing local commits before pushing (to clean up history before it's shared)
+- `git pull --rebase` to avoid merge commits when syncing with remote
+- Rebasing a feature branch onto main before merging (if commits haven't been pushed yet)
 
 **For automated agents in CI/remote environments:**
 After committing changes, always push immediately. Don't ask - just push.
