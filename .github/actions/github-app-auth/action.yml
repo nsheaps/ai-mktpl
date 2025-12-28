@@ -10,11 +10,11 @@ inputs:
   app-id:
     description: 'GitHub App ID'
     required: true
-  
+
   private-key:
     description: 'GitHub App private key'
     required: true
-  
+
   owner:
     description: 'Repository owner (defaults to current repository owner)'
     required: false
@@ -24,11 +24,11 @@ outputs:
   token:
     description: 'GitHub App token'
     value: ${{ steps.app-token.outputs.token }}
-  
+
   app-slug:
     description: 'GitHub App slug name'
     value: ${{ steps.app-token.outputs.app-slug }}
-  
+
   user-id:
     description: 'GitHub App bot user ID'
     value: ${{ steps.get-user-id.outputs.user-id }}
@@ -50,7 +50,7 @@ runs:
       run: echo "user-id=$(gh api "/users/${{ steps.app-token.outputs.app-slug }}[bot]" --jq .id)" >> "$GITHUB_OUTPUT"
       env:
         GH_TOKEN: ${{ steps.app-token.outputs.token }}
-    
+
     - name: Configure git
       shell: bash
       run: |
