@@ -24,16 +24,24 @@ jobs:
 
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      pull-requests: read
-      issues: read
+      contents: write
+      pull-requests: write
+      issues: write
       id-token: write
       actions: read
 
     steps:
+      - name: Authenticate as GitHub App
+        id: auth
+        uses: ./.github/actions/github-app-auth
+        with:
+          app-id: ${{ secrets.REVIEW_GITHUB_APP_ID || secrets.AUTOMATION_GITHUB_APP_ID }}
+          private-key: ${{ secrets.REVIEW_GITHUB_APP_PRIVATE_KEY || secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          token: ${{ steps.auth.outputs.token }}
           fetch-depth: 1
 
       - name: Get additional job context
@@ -45,6 +53,8 @@ jobs:
       - name: Run Claude Code Review
         id: claude-review
         uses: anthropics/claude-code-action@v1
+        env:
+          GH_TOKEN: ${{ steps.auth.outputs.token }}
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           # WARNING: PRINTS FULL JSON OUTPUT WHICH MAY INCLUDE SECRETS.
