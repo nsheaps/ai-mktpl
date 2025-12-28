@@ -38,9 +38,9 @@ Your task is rarely done after making changes. Always:
 2. Compare against the original request
 3. Ensure it satisfies the requirements
 4. Make sure the code isn't overcomplicated
-5. **Test your changes locally before committing**
+5. **Test your changes locally**
 
-### Testing before committing
+### Testing your changes
 
 **CRITICAL:** Don't just make changes - ALWAYS test them to verify they work.
 
@@ -51,6 +51,8 @@ Your task is rarely done after making changes. Always:
 - If changes can't be fully tested locally, note what remains untested
 
 Spot-checking a single command is NOT sufficient. Run the full validation suite.
+
+You can commit before or after testing - the order doesn't matter. What matters is that you DO test.
 
 ### Local and remote validation
 
