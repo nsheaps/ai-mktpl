@@ -31,6 +31,9 @@ jobs:
       actions: read
 
     steps:
+      # Authenticate using REVIEW_* secrets if available, otherwise fall back to AUTOMATION_*
+      # Note: The || operator works with undefined secrets. If REVIEW_* secrets are set
+      # to empty strings (not recommended), they will be used instead of falling back.
       - name: Authenticate as GitHub App
         id: auth
         uses: ./.github/actions/github-app-auth
