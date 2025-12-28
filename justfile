@@ -325,6 +325,8 @@ update-marketplace:
         echo "Changed plugins: $CHANGED_PLUGINS"
     fi
 
+    just lint
+
 # Run all checks (lint + validate)
 check:
     @just lint
