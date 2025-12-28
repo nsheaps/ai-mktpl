@@ -58,10 +58,9 @@ jobs:
     permissions:
       contents: write
     steps:
-
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Authenticate as GitHub App
         id: auth
         uses: ./.github/actions/github-app-auth
@@ -93,10 +92,9 @@ jobs:
     permissions:
       contents: write
     steps:
-
       - name: Checkout code
         uses: actions/checkout@v4
-          
+
       - name: Authenticate as GitHub App
         id: auth
         uses: ./.github/actions/github-app-auth
