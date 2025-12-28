@@ -12,6 +12,24 @@ After committing changes, always push immediately. Don't ask - just push.
 **For local/interactive assistants:**
 Only commit and push when explicitly asked by the user. Local assistants should always defer to user preferences.
 
+**Git command formatting (for permissions compatibility):**
+
+- Prefer `git <cmd>` over `git -C <directory> <cmd>`
+- The `-C` flag makes it harder to write permission approval patterns
+- Only specify directory when your working directory has been reset and it's truly necessary
+- When directory IS needed, prefer `cd <dir> && git <cmd>` over `git -C <dir> <cmd>`
+
+```bash
+# GOOD (when already in repo):
+git rm -r .github/actions/old-action
+
+# AVOID:
+git -C /path/to/repo rm -r .github/actions/old-action
+
+# ACCEPTABLE (when directory change is necessary):
+cd /path/to/repo && git rm -r .github/actions/old-action
+```
+
 ## Task Completion
 
 Your task is rarely done after making changes. Always:
@@ -72,11 +90,22 @@ When migrating, refactoring, or cleaning up files:
 - Only delete the backup after confirming the new implementation works
 - This prevents data loss of important configurations, scripts, or functions
 
+**Prefer `git rm` over `rm -rf` for tracked files:**
+
+- Use `git rm -r <path>` instead of `rm -rf <path>` for git-tracked files/directories
+- `git rm` is safer: it only removes tracked files and stages the deletion
+- `rm -rf` can accidentally delete untracked files, ignores git state, and requires separate `git add`
+- This also typically gets auto-approved by permission systems since it's a git command
+
 Example safe migration:
 
 ```bash
 # BAD: rm ~/.zshrc.d/00_zshconfig.zsh
 # GOOD: mv ~/.zshrc.d/00_zshconfig.zsh ~/.zshrc.d/00_zshconfig.zsh.bak
+
+# For git-tracked files:
+# BAD: rm -rf .github/actions/old-action
+# GOOD: git rm -r .github/actions/old-action
 ```
 
 ## Parallelization
