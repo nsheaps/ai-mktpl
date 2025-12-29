@@ -78,7 +78,7 @@ jobs:
           # bug: https://github.com/anthropics/claude-code-action/issues/759
           # won't find the past comments since it's looking for github-actions[bot], not the auth it uses to post the comment.
           bot_id: ${{ steps.auth.outputs.user-id }}
-          settings: ${{ fromJSON(env.INPUT_SETTINGS_JSON ) }}
+          settings: ${{ env.INPUT_SETTINGS_JSON }}
           prompt: |
             REPO: ${{ github.repository }}
             PR_NUMBER: ${{ github.event.pull_request.number }}
