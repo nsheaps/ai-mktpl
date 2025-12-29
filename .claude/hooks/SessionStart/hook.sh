@@ -73,6 +73,8 @@ EOF
     pbe mise install -y --verbose
   fi
 
+  pbe gh auth status
+
   echo "✅ Session setup complete"
 fi
 
