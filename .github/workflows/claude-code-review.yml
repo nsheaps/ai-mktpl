@@ -54,7 +54,7 @@ jobs:
         uses: anthropics/claude-code-action@v1
         env:
           # These are in addition to any parsed settings.json files
-          INPUT_CLAUDE_SETTINGS_JSON: |
+          INPUT_SETTINGS_JSON: |
             {
               "env": {
                 "GH_TOKEN": "${{ steps.auth.outputs.token }}"
@@ -78,6 +78,7 @@ jobs:
           # bug: https://github.com/anthropics/claude-code-action/issues/759
           # won't find the past comments since it's looking for github-actions[bot], not the auth it uses to post the comment.
           bot_id: ${{ steps.auth.outputs.user-id }}
+          settings: ${{ fromJSON(env.INPUT_SETTINGS_JSON ) }}
           prompt: |
             REPO: ${{ github.repository }}
             PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -198,5 +199,3 @@ jobs:
           claude_args: |
             --allowed-tools
               "${{ env.INPUT_ALLOWED_TOOLS }}"
-            --settings
-              "$INPUT_CLAUDE_SETTINGS_JSON"
