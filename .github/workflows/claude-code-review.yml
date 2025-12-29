@@ -199,4 +199,4 @@ jobs:
             --allowed-tools
               "${{ env.INPUT_ALLOWED_TOOLS }}"
             --settings
-              "${{ env.INPUT_CLAUDE_SETTINGS_JSON }}"
+              "$INPUT_CLAUDE_SETTINGS_JSON"
