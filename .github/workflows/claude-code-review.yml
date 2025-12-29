@@ -139,9 +139,9 @@ jobs:
 
             Use `gh pr view` and associated `gh` tools to evaluate the changes in the context of the PR title/body, commit messages, other user's reviews, and comments and reviews left on the PR.
             Questions you leave in past reviews may be answered in the PR body or comments.
-            
+
             Use `mcp__github_inline_comment__create_inline_comment` to highlight specific code issues. Do not leave duplicate inline comments, and resolve comments that have been addressed since your last review.
-            
+
             Use `gh pr comment --delete-last --yes` with your Bash tool to leave your review as a comment on the PR.
             CRITICAL: You must use --delete-last and --yes to ensure your previous review comment is removed.
             CRITICAL: Do not post any "test" or "review in progress" comments. Only post your final review, deleting previous reviews.
