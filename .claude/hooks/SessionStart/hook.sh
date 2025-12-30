@@ -60,28 +60,27 @@ if [ "$IS_WEB_SESSION" = "true" ]; then
     MISE_URL="https://github.com/jdx/mise/releases/download/v${MISE_VERSION}/mise-v${MISE_VERSION}-linux-x64"
     mkdir -p "$HOME/.local/bin"
 
-    if curl -fsSL "$MISE_URL" -o "$HOME/.local/bin/mise" 2>/dev/null; then
-      chmod +x "$HOME/.local/bin/mise"
-      SETUP="$(cat << EOF
+    SETUP="$(cat << EOF
 export PATH="$HOME/.local/bin:$PATH"
 export MISE_VERBOSE=1
-eval "$(mise activate bash)"
 
 EOF
 )"
-      echo "$SETUP" >> "$CLAUDE_ENV_FILE"
-      eval "$SETUP"
+    echo "$SETUP" >> "$CLAUDE_ENV_FILE"
+    eval "$SETUP"
+
+    if curl -fsSL "$MISE_URL" -o "$HOME/.local/bin/mise" 2>/dev/null; then
+      chmod +x "$HOME/.local/bin/mise"
       success "mise installed successfully"
     else
       failed "mise installation failed (network restricted)\n   Tools from .mise.toml will not be available"
     fi
   else
-    # mise already available, activate it
     # TODO cleanup with 01-mise-activate.sh
     mise self-update || warn "mise self-update failed"
-    eval "$(mise activate bash)"
-    echo 'eval "$(mise activate bash)"' >> "$CLAUDE_ENV_FILE"
   fi
+
+  eval "$(mise activate bash)"
 
   # Activate mise and install tools from .mise.toml (if mise is available)
   if command -v mise &> /dev/null && [ -f "$PROJECT_DIR/.mise.toml" ]; then
