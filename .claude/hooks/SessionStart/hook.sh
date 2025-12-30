@@ -85,8 +85,8 @@ EOF
   # Activate mise and install tools from .mise.toml (if mise is available)
   if command -v mise &> /dev/null && [ -f "$PROJECT_DIR/.mise.toml" ]; then
     cd "$PROJECT_DIR"
-    pbe mise trust --verbose
-    pbe mise install -y --verbose
+    pbe mise trust
+    pbe mise install -y
   fi
 
   pbe gh auth status
