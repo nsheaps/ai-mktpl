@@ -102,7 +102,7 @@ jobs:
                   "Bash(gh run list:*)",
                   "Bash(gh run view:*)"
                 ],
-                "_denyComment": "It will wait for it's own check run to complete, not to mention it should review the code."
+                "_denyComment": "It will wait for it's own check run to complete, not to mention it should review the code.",
                 "deny": [
                   "mcp__github_ci__get_ci_status",
                   "mcp__github_ci__get_workflow_run_details",
