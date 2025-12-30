@@ -1,26 +1,44 @@
 #!/bin/bash
 set -e
 
+info() {
+  echo "ℹ️  $*"
+}
+
+success() {
+  echo "✅ $*"
+}
+
+failed() {
+  echo "❌ $*"
+}
+
+warn() {
+  echo "⚠️  $*"
+}
+
 pbe() {
   # pbe print before executing
   echo "▶️  $*"
-  "$@"
+  "$@" 2>&1
 }
 
 # Detect execution environment
 IS_WEB_SESSION="${CLAUDE_CODE_REMOTE:-}"
+info "CLAUDE_CODE_REMOTE: ${IS_WEB_SESSION:-false}"
 
 if [ -n "$CLAUDE_ENV_FILE" ]; then
   # if PATHMOD is set, modify PATH accordingly
   if [ -n "$PATHMOD" ]; then
     echo "export PATH=\"$PATHMOD:\$PATH\"" >> "$CLAUDE_ENV_FILE"
     echo "✅ Modified PATH"
-    echo "  PATH: $PATH"
-    echo "  CLAUDE_ENV_FILE: $CLAUDE_ENV_FILE"
   fi
+  info "PATH: $PATH"
+  info "CLAUDE_ENV_FILE: $CLAUDE_ENV_FILE"
 fi
 
 # Get project directory
+info "CLAUDE_PROJECT_DIR: ${CLAUDE_PROJECT_DIR}"
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 
 # if the PROJECT_DIR is a git repository, fetch latest changes, and print git status
@@ -53,15 +71,14 @@ EOF
 )"
       echo "$SETUP" >> "$CLAUDE_ENV_FILE"
       eval "$SETUP"
-      echo "✅ mise installed successfully"
+      success "mise installed successfully"
     else
-      echo "⚠️  mise installation failed (network restricted)"
-      echo "   Tools from .mise.toml will not be available"
+      failed "mise installation failed (network restricted)\n   Tools from .mise.toml will not be available"
     fi
   else
     # mise already available, activate it
     # TODO cleanup with 01-mise-activate.sh
-    mise self-update
+    mise self-update || warn "mise self-update failed"
     eval "$(mise activate bash)"
     echo 'eval "$(mise activate bash)"' >> "$CLAUDE_ENV_FILE"
   fi
@@ -69,13 +86,13 @@ EOF
   # Activate mise and install tools from .mise.toml (if mise is available)
   if command -v mise &> /dev/null && [ -f "$PROJECT_DIR/.mise.toml" ]; then
     cd "$PROJECT_DIR"
-    mise trust --verbose
+    pbe mise trust --verbose
     pbe mise install -y --verbose
   fi
 
   pbe gh auth status
 
-  echo "✅ Session setup complete"
 fi
 
+success "✅ Session setup complete"
 exit 0

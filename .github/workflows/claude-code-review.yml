@@ -82,7 +82,6 @@ jobs:
                   "ReadMcpResourceTool",
                   "SlashCommand",
                   "Skill",
-                  "mcp__github_comment__update_claude_comment",
                   "mcp__github_ci__get_ci_status",
                   "mcp__github_ci__get_workflow_run_details",
                   "mcp__github_ci__download_job_log",
@@ -110,7 +109,8 @@ jobs:
                 ]
               },
               "env": {
-                "GH_TOKEN": "${{ steps.auth.outputs.token }}"
+                "GH_TOKEN": "${{ steps.auth.outputs.token }}",
+                "CLAUDE_CODE_REMOTE": "true"
               }
             }
         with:
