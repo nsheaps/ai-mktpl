@@ -102,7 +102,7 @@ jobs:
                   "Bash(gh run list:*)",
                   "Bash(gh run view:*)"
                 ],
-                "_denyComment": "It will wait for it's own check run to complete, not to mention it should review the code.",
+                "_denyComment": "It will wait for it's own check run to complete, not to mention it should review the code."
                 "deny": [
                   "mcp__github_ci__get_ci_status",
                   "mcp__github_ci__get_workflow_run_details",
@@ -112,6 +112,11 @@ jobs:
               },
               "env": {
                 "GH_TOKEN": "${{ steps.auth.outputs.token }}",
+                "_GH_PAGER_COMMENT": "disable gh from being able to treat the terminal as interactive",
+                "GH_PAGER": "cat",
+                "GH_PROMPT_DISABLED": "true",
+                "_GH_BROWSER_COMMENT": "what app to open URLs with, since claude is not interactive, we use curl to pipe it to stdout",
+                "GH_BROWSER": "curl",
                 "CLAUDE_CODE_REMOTE": "true"
               }
             }
@@ -137,6 +142,8 @@ jobs:
             - Security concerns
             - Test coverage
             - Accuracy of comments
+
+            Do not use the CI output from this PR to base your review. You are to review the code itself, not the output of the CI jobs.
 
             Use the repository's CLAUDE.md for guidance on style and conventions. Be constructive and helpful in your feedback.
 
