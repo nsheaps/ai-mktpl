@@ -54,6 +54,7 @@ jobs:
         id: claude-review
         uses: anthropics/claude-code-action@v1
         env:
+          GH_TOKEN: '${{ steps.auth.outputs.token }}'
           # These are in addition to any parsed settings.json files
           INPUT_SETTINGS_JSON: |
             {
