@@ -80,10 +80,3 @@ runs:
 
         echo "GitHub CLI authenticated user:"
         gh auth status
-
-        echo "Git upstream remote URL:"
-        git remote get-url origin
-        git remote -v
-
-        echo "extraHttpHeaders for git:"
-        git config --get-all http.extraheader
