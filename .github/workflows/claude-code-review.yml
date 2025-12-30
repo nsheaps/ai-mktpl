@@ -82,9 +82,6 @@ jobs:
                   "ReadMcpResourceTool",
                   "SlashCommand",
                   "Skill",
-                  "mcp__github_ci__get_ci_status",
-                  "mcp__github_ci__get_workflow_run_details",
-                  "mcp__github_ci__download_job_log",
                   "mcp__github_inline_comment__create_inline_comment",
                   
                   "Bash(git log:*)",
@@ -102,10 +99,15 @@ jobs:
                   "Bash(gh pr diff:*)",
                   "Bash(gh pr view:*)",
                   "Bash(gh pr list:*)",
-                  "Bash(gh pr checks:*)",
                   "Bash(gh run list:*)",
                   "Bash(gh run view:*)"
-
+                ],
+                "_denyComment": "It will wait for it's own check run to complete, not to mention it should review the code.",
+                "deny": [
+                  "mcp__github_ci__get_ci_status",
+                  "mcp__github_ci__get_workflow_run_details",
+                  "mcp__github_ci__download_job_log",
+                  "Bash(gh pr checks:*)"
                 ]
               },
               "env": {
