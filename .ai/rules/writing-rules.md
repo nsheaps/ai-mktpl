@@ -1,4 +1,4 @@
-Rules in this folder (.ai/rules (current folder), .claude/rules, ~/.ai/rules, ~/.claude/rules) are used to customize the behavior of AI assistants like ChatGPT and Claude. Each rule is a markdown file that contains specific instructions or guidelines for the AI to follow during interactions. These rules exist on every API call to the AI API endpoint, taking up valueable context.
+Rules in this folder (.ai/rules (current folder), .claude/rules (symlinked here), ~/.ai/rules, ~/.claude/rules) are used to customize the behavior of AI assistants like ChatGPT and Claude. Each rule is a markdown file that contains specific instructions or guidelines for the AI to follow during interactions. These rules exist on every API call to the AI API endpoint, taking up valueable context.
 
 ALWAYS try to keep rules in the folder short and concise. Reference documents in a sibbling directory (explicitly: `.ai/docs/xxxx.md`, or `~/.ai/docs/xxxx.md`, a folder specifically for documentation for you to improve your behaviors, or `docs/` if the documentation is specific to the project, or an appropriate organization-wide documentation repository) if additional information is needed.
 
