@@ -53,6 +53,9 @@ error() {
 }
 
 warn() {
+  # Flush stdout before writing to stderr to maintain message ordering
+  # The exec trick forces a flush of the stdout buffer
+  exec 1>&1
   echo -e "${ANSI_ORANGE}$1${ANSI_RESET}" >&2
 }
 
