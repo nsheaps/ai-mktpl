@@ -112,10 +112,15 @@ derive_upstream_folder() {
 
 UPSTREAM_FOLDER=$(derive_upstream_folder "$ROOT_DIR")
 
-# List existing content in a target directory
+# List existing content in a target directory and handle migration
+# Args: target_type_dir type_name source_base
+# Sets MIGRATED_COUNT as side effect
 list_existing_content() {
     local target_type_dir="$1"
     local type_name="$2"
+    local source_base="$3"
+
+    MIGRATED_COUNT=0
 
     if [[ ! -d "$target_type_dir" ]]; then
         info "  (no existing $type_name directory)"
@@ -126,7 +131,7 @@ list_existing_content() {
 
     # List all items in the directory
     for item in "$target_type_dir"/*; do
-        [[ -e "$item" ]] || continue  # Skip if no matches
+        [[ -e "$item" ]] || [[ -L "$item" ]] || continue  # Skip if no matches (but keep broken symlinks)
         has_content=true
 
         local name
@@ -136,6 +141,26 @@ list_existing_content() {
             local link_target
             link_target=$(readlink "$item")
             info "  [symlink] $name -> $link_target"
+
+            # Check if this symlink should be migrated (points to our source)
+            if [[ "$link_target" == "$source_base/$type_name"* ]]; then
+                if [[ "$DRY_RUN" == true ]]; then
+                    dryrun "             ^ would be removed (old file symlink)"
+                else
+                    rm "$item"
+                    info "             ^ removed (old file symlink)"
+                fi
+                ((MIGRATED_COUNT++)) || true
+            elif [[ ! -e "$item" ]]; then
+                # Stale symlink
+                if [[ "$DRY_RUN" == true ]]; then
+                    dryrun "             ^ would be removed (stale symlink)"
+                else
+                    rm "$item"
+                    verbose "             ^ removed (stale symlink)"
+                fi
+                ((MIGRATED_COUNT++)) || true
+            fi
         elif [[ -d "$item" ]]; then
             local file_count
             file_count=$(find "$item" -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' ')
@@ -159,9 +184,9 @@ sync_directory() {
 
     info "Syncing $source_type..."
 
-    # Show existing content in target directory
+    # Show existing content in target directory (also handles migration inline)
     info "Existing $source_type in target:"
-    list_existing_content "$target_type_dir" "$source_type"
+    list_existing_content "$target_type_dir" "$source_type" "$ROOT_DIR/$BASE_SYNC_PATH"
 
     if [[ ! -d "$source_dir" ]]; then
         verbose "Source directory does not exist: $source_dir"
@@ -193,95 +218,6 @@ sync_directory() {
     info "  $count $source_type files available via upstream symlink"
 }
 
-# Migrate old file symlinks and clean up stale symlinks
-migrate_and_cleanup() {
-    local target_dir="$TARGET_DIR"
-    local source_base="$ROOT_DIR/$BASE_SYNC_PATH"
-
-    info "Checking for old file symlinks to migrate..."
-
-    local migrated=0
-    local stale=0
-
-    for type in rules agents commands; do
-        local type_dir="$target_dir/$type"
-        local upstream_dir="$type_dir/$UPSTREAM_FOLDER"
-
-        # Skip if type directory doesn't exist
-        if [[ ! -d "$type_dir" ]]; then
-            continue
-        fi
-
-        # If upstream_dir is already a symlink to a directory, it's the new format
-        if [[ -L "$upstream_dir" ]]; then
-            verbose "Already using directory symlink for $type"
-        fi
-
-        # Find old file symlinks directly in the type directory (not in subdirs)
-        # These are symlinks like ~/.claude/rules/bash-scripting.md -> /path/to/.ai/rules/bash-scripting.md
-        while IFS= read -r -d '' symlink; do
-            local link_target
-            link_target=$(readlink "$symlink")
-
-            # Check if this symlink points to our source directory
-            if [[ "$link_target" == "$source_base/$type"* ]]; then
-                if [[ "$DRY_RUN" == true ]]; then
-                    dryrun "Would remove old file symlink: $symlink"
-                else
-                    rm "$symlink"
-                    info "Removed old file symlink: $symlink"
-                fi
-                ((migrated++)) || true
-            elif [[ ! -e "$symlink" ]]; then
-                # Stale symlink (target doesn't exist)
-                if [[ "$DRY_RUN" == true ]]; then
-                    dryrun "Would remove stale: $symlink"
-                else
-                    rm "$symlink"
-                    verbose "Removed stale: $symlink"
-                fi
-                ((stale++)) || true
-            fi
-        done < <(find "$type_dir" -maxdepth 1 -type l -print0 2>/dev/null || true)
-
-        # Also check inside old upstream folder if it exists as a directory (not symlink)
-        if [[ -d "$upstream_dir" ]] && [[ ! -L "$upstream_dir" ]]; then
-            while IFS= read -r -d '' symlink; do
-                local link_target
-                link_target=$(readlink "$symlink")
-
-                if [[ "$link_target" == "$source_base"* ]]; then
-                    if [[ "$DRY_RUN" == true ]]; then
-                        dryrun "Would migrate: $symlink"
-                    else
-                        rm "$symlink"
-                        info "Migrating: $symlink"
-                    fi
-                    ((migrated++)) || true
-                fi
-            done < <(find "$upstream_dir" -type l -print0 2>/dev/null || true)
-
-            # Remove empty directories after migration
-            if [[ "$DRY_RUN" != true ]]; then
-                find "$upstream_dir" -type d -empty -delete 2>/dev/null || true
-                if [[ -d "$upstream_dir" ]] && [[ -z "$(ls -A "$upstream_dir" 2>/dev/null)" ]]; then
-                    rmdir "$upstream_dir" 2>/dev/null || true
-                fi
-            fi
-        fi
-    done
-
-    if [[ $migrated -gt 0 ]]; then
-        info "Migrated $migrated old file symlinks"
-    fi
-    if [[ $stale -gt 0 ]]; then
-        info "Removed $stale stale symlinks"
-    fi
-    if [[ $migrated -eq 0 ]] && [[ $stale -eq 0 ]]; then
-        verbose "No migration or cleanup needed"
-    fi
-}
-
 # Main
 main() {
     local source_path="$ROOT_DIR/$BASE_SYNC_PATH"
@@ -294,10 +230,7 @@ main() {
         warn "=== DRY RUN MODE ==="
     fi
 
-    # First, migrate old file symlinks and clean up stale ones
-    migrate_and_cleanup
-
-    # Then sync each type (creates directory symlinks)
+    # Sync each type (creates directory symlinks, migration handled inline)
     sync_directory "rules"
     sync_directory "agents"
     sync_directory "commands"
