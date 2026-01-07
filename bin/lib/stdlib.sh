@@ -459,7 +459,6 @@ create_dir_symlink() {
     local existing_target
     existing_target=$(readlink "$target")
     if [[ "$existing_target" == "$source" ]]; then
-      debug "Symlink already correct: $target"
       return 0
     else
       error "Symlink exists but points to different target!"
