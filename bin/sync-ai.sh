@@ -128,7 +128,7 @@ Agent rules can be found at places like:
 
 - \`**/AGENTS.md\`
 - \`**/CLAUDE.md\`
-- \`**/.claude/rules/\`
+- \`.claude/rules/**/*.md\`
 - \`.github/copilot-instructions.md\`
 - \`.github/instructions/*.instructions.md\`"
 
