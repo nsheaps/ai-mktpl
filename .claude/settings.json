@@ -24,9 +24,14 @@
       }
     ]
   },
-  "includeCoAuthoredBy": false,
+  "attribution": {
+    "commits": false,
+    "pullRequests": true
+  },
   "permissions": {
     "allow": [
+      "Skill",
+      "SlashCommand",
       "WebSearch",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:*.github.com)",
@@ -53,6 +58,7 @@
       "Bash(git show:*)",
       "Bash(git remote get-url:*)",
       "Bash(git rm:*)",
+      "Bash(git mv:*)",
 
       "Bash(brew search:*)",
       "Bash(brew info:*)",
@@ -71,14 +77,13 @@
       "Bash(yarn:*)",
       "Bash(npm:*)",
       "Bash(pnpm:*)",
-
-      "Bash(mkdir -p:*)"
+      "Bash(chmod:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": ["Bash(rm -rf /:*)"],
     "ask": [
       "Bash(gh pr view --web:*)",
       "Bash(rm -rf:*)",
-      "Bash(chmod:*)",
       "Bash(git push --force:*)",
       "Bash(git push -f:*)",
       "Bash(git push --force-with-lease:*)",
