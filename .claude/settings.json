@@ -79,6 +79,7 @@
       "Bash(npm:*)",
       "Bash(pnpm:*)",
       "Bash(chmod:*)",
+      "Bash(readlink:*)",
       "Bash(mkdir:*)"
     ],
     "deny": ["Bash(rm -rf /:*)"],
