@@ -4,15 +4,25 @@ Guidelines for shell commands and script handling.
 
 ## Command Chaining in Bash Tool
 
-When using the Bash tool directly, do NOT chain commands with `&&` or `||`.
+When using the Bash tool directly:
 
-**Why:** The user sets granular permissions for individual commands. Chaining prevents them from approving safe commands while rejecting unsafe ones.
+1. **Do NOT chain commands** with `&&` or `||`
+2. **Do NOT pipe output** with `|` (e.g., `| head`, `| grep`, `| jq`)
+3. **Run each command separately** in its own Bash tool call
+
+**Why:**
+
+- The user sets granular permissions for individual commands. Chaining prevents them from approving safe commands while rejecting unsafe ones.
+- Separate commands provide clarity and easier debugging
+- Piped output is harder to analyze and may require re-running the command
 
 **Bad:**
 
 ```bash
 which bun && bun --version
 ls file1 2>/dev/null || ls file2
+curl api.example.com | jq '.data'
+git log --oneline | head -5
 ```
 
 **Good:**
@@ -22,6 +32,11 @@ ls file1 2>/dev/null || ls file2
 which bun
 # Then in another call:
 bun --version
+
+# For data analysis, save to file first:
+curl api.example.com > /tmp/response.json
+# Then analyze with Read tool or:
+jq '.data' /tmp/response.json
 ```
 
 **Exception:** Use your best judgment in scripts or when the user explicitly requests chaining.
