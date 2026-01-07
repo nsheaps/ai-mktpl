@@ -94,13 +94,19 @@ Agent rules can be found at places like:
 - \`.github/instructions/*.instructions.md\`"
 
     if [[ "$DRY_RUN" == true ]]; then
-        dryrun "Would create: $doc_file"
+        if [[ -f "$doc_file" ]]; then
+            dryrun "Would update: $doc_file"
+        else
+            dryrun "Would create: $doc_file"
+        fi
         dryrun "Contents:"
         while IFS= read -r line; do dryrun "  $line"; done <<< "$content"
     else
+        local action="Created"
+        [[ -f "$doc_file" ]] && action="Updated"
         mkdir -p "$(dirname "$doc_file")"
         echo "$content" > "$doc_file"
-        success "Created: $doc_file"
+        success "$action: $doc_file"
     fi
 }
 

@@ -98,7 +98,10 @@ list_existing_content() {
             info "  [symlink] $name -> $link_target"
 
             # Check if this symlink should be migrated (points to our source)
-            if [[ "$link_target" == "$source_base/$type_name"* ]]; then
+            # Skip our directory symlink (UPSTREAM_FOLDER) - that's the one we want to keep
+            if [[ "$name" == "$UPSTREAM_FOLDER" ]]; then
+                : # This is our directory symlink, don't remove it
+            elif [[ "$link_target" == "$source_base/$type_name"* ]]; then
                 maybe_rm "$item" "old file symlink"
             elif [[ ! -e "$item" ]]; then
                 maybe_rm "$item" "stale symlink"
@@ -149,12 +152,17 @@ sync_type_directory() {
 
     create_dir_symlink "$link_source" "$target_link"
 
-    # List files available through symlink
+    # Count and list files available through symlink
     local count=0
+    local files=()
     while IFS= read -r -d '' file; do
         local rel_path="${file#"$source_dir"/}"
-        debug "    $rel_path"
+        files+=("$rel_path")
         ((count++)) || true
     done < <(find "$source_dir" -name "*.md" -type f -print0 | sort -z)
-    info "  $count $source_type files available via upstream symlink"
+
+    info "  $count $source_type files available via upstream symlink:"
+    for f in "${files[@]}"; do
+        debug "    $f"
+    done
 }
