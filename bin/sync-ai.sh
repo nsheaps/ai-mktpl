@@ -189,8 +189,19 @@ sync_directory() {
 
     log_info "Syncing $source_type..."
 
+    # Determine the symlink source path
+    local link_source
+    if [[ "$TARGET_LEVEL" == "project" ]]; then
+        # Use relative path for project-level (e.g., ../../.ai/rules)
+        # From .claude/<type>/upstream--... to .ai/<type>
+        link_source="../../$BASE_SYNC_PATH/$source_type"
+    else
+        # Use absolute path for user-level
+        link_source="$source_dir"
+    fi
+
     # Create a single directory symlink
-    create_dir_symlink "$source_dir" "$target_link"
+    create_dir_symlink "$link_source" "$target_link"
 
     # List files that will be available through this symlink
     local count=0
