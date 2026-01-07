@@ -69,9 +69,9 @@ This plan outlines the conversion of the `agent-config` shell scripts to a TypeS
 }
 ```
 
-| Package | Rationale |
-|---------|-----------|
-| **commander** | Industry-standard CLI framework, excellent TypeScript support |
+| Package        | Rationale                                                      |
+| -------------- | -------------------------------------------------------------- |
+| **commander**  | Industry-standard CLI framework, excellent TypeScript support  |
 | **picocolors** | Lightweight (3.8KB), faster than chalk, all needed ANSI colors |
 
 ## 3. Build Strategy
@@ -102,13 +102,13 @@ bun build src/agent-config/index.ts --compile --outfile bin/agent-config --minif
 Matches stdlib.sh logging:
 
 ```typescript
-import pc from 'picocolors';
+import pc from "picocolors";
 
-export const info = (msg: string) => console.log(`${pc.blue('[INFO]')} ${msg}`);
-export const error = (msg: string) => console.error(`${pc.red('ERROR:')} ${msg}`);
+export const info = (msg: string) => console.log(`${pc.blue("[INFO]")} ${msg}`);
+export const error = (msg: string) => console.error(`${pc.red("ERROR:")} ${msg}`);
 export const success = (msg: string) => console.log(pc.green(msg));
 export const debug = (msg: string) => console.log(pc.gray(msg));
-export const dryrun = (msg: string) => console.log(`${pc.yellow('[DRY]')} ${msg}`);
+export const dryrun = (msg: string) => console.log(`${pc.yellow("[DRY]")} ${msg}`);
 export const warn = (msg: string) => console.error(pc.yellow(msg));
 ```
 
@@ -117,23 +117,21 @@ export const warn = (msg: string) => console.error(pc.yellow(msg));
 Configuration and UPSTREAM_FOLDER derivation:
 
 ```typescript
-export const BASE_SYNC_PATH = '.ai';
+export const BASE_SYNC_PATH = ".ai";
 
 function deriveUpstreamFolder(rootDir: string, homeDir: string): string {
-  const relativePath = rootDir.startsWith(homeDir)
-    ? rootDir.slice(homeDir.length + 1)
-    : rootDir;
-  return `upstream--${relativePath.replace(/\//g, '-')}`;
+  const relativePath = rootDir.startsWith(homeDir) ? rootDir.slice(homeDir.length + 1) : rootDir;
+  return `upstream--${relativePath.replace(/\//g, "-")}`;
 }
 
 async function findGitRoot(): Promise<string> {
-  const proc = Bun.spawn(['git', 'rev-parse', '--show-toplevel'], { stdout: 'pipe' });
+  const proc = Bun.spawn(["git", "rev-parse", "--show-toplevel"], { stdout: "pipe" });
   return (await new Response(proc.stdout).text()).trim();
 }
 
 export async function loadConfig() {
-  const homeDir = process.env.HOME ?? '';
-  const rootDir = process.env.ROOT_DIR ?? await findGitRoot();
+  const homeDir = process.env.HOME ?? "";
+  const rootDir = process.env.ROOT_DIR ?? (await findGitRoot());
   return {
     baseSyncPath: BASE_SYNC_PATH,
     upstreamFolder: deriveUpstreamFolder(rootDir, homeDir),
@@ -148,9 +146,9 @@ export async function loadConfig() {
 Symlink utilities matching stdlib.sh behavior:
 
 ```typescript
-import { existsSync, lstatSync, readlinkSync, mkdirSync, symlinkSync, rmSync } from 'fs';
-import { dirname } from 'path';
-import * as log from './logger';
+import { existsSync, lstatSync, readlinkSync, mkdirSync, symlinkSync, rmSync } from "fs";
+import { dirname } from "path";
+import * as log from "./logger";
 
 export function createDirSymlink(source: string, target: string, dryRun: boolean) {
   const stat = lstatSync(target, { throwIfNoEntry: false });
@@ -180,18 +178,24 @@ export function unlinkItem(path: string, itemType: string, dryRun: boolean): boo
   const stat = lstatSync(path, { throwIfNoEntry: false });
   if (!stat) return false;
 
-  const name = path.split('/').pop() ?? path;
+  const name = path.split("/").pop() ?? path;
 
   if (stat.isSymbolicLink()) {
     const linkTarget = readlinkSync(path);
     if (dryRun) log.dryrun(`Would remove ${itemType}: ${name} -> ${linkTarget}`);
-    else { rmSync(path); log.success(`Removed ${itemType}: ${name}`); }
+    else {
+      rmSync(path);
+      log.success(`Removed ${itemType}: ${name}`);
+    }
     return true;
   }
 
   if (stat.isFile()) {
     if (dryRun) log.dryrun(`Would remove ${itemType}: ${name}`);
-    else { rmSync(path); log.success(`Removed ${itemType}: ${name}`); }
+    else {
+      rmSync(path);
+      log.success(`Removed ${itemType}: ${name}`);
+    }
     return true;
   }
 
@@ -204,38 +208,41 @@ export function unlinkItem(path: string, itemType: string, dryRun: boolean): boo
 Commander.js CLI setup:
 
 ```typescript
-import { Command } from 'commander';
-import { loadConfig } from './lib/config';
-import { syncCommand } from './commands/sync';
-import { unlinkCommand } from './commands/unlink';
+import { Command } from "commander";
+import { loadConfig } from "./lib/config";
+import { syncCommand } from "./commands/sync";
+import { unlinkCommand } from "./commands/unlink";
 
 export function createCLI(): Command {
   const program = new Command()
-    .name('agent-config')
-    .description('Manage AI agent configuration')
-    .version('1.0.0');
+    .name("agent-config")
+    .description("Manage AI agent configuration")
+    .version("1.0.0");
 
   program
-    .command('sync')
-    .description('Sync .ai content to Claude Code directories')
-    .argument('[types...]', 'Types: rules, agents, commands, _all')
-    .option('-T, --target <path>', 'Target directory', '~/.claude')
-    .option('-d, --dry-run', 'Show what would be done (default)', true)
-    .option('-n, --no-dry-run', 'Actually perform the sync')
+    .command("sync")
+    .description("Sync .ai content to Claude Code directories")
+    .argument("[types...]", "Types: rules, agents, commands, _all")
+    .option("-T, --target <path>", "Target directory", "~/.claude")
+    .option("-d, --dry-run", "Show what would be done (default)", true)
+    .option("-n, --no-dry-run", "Actually perform the sync")
     .action(async (types, options) => {
       const config = await loadConfig();
-      await syncCommand({ ...options, types, target: options.target.replace('~', config.homeDir) }, config);
+      await syncCommand(
+        { ...options, types, target: options.target.replace("~", config.homeDir) },
+        config,
+      );
     });
 
   program
-    .command('unlink')
-    .description('Remove symlinks created by sync')
-    .argument('<dir>', 'Target directory to unlink')
-    .option('-d, --dry-run', 'Show what would be done (default)', true)
-    .option('-n, --no-dry-run', 'Actually perform the unlink')
+    .command("unlink")
+    .description("Remove symlinks created by sync")
+    .argument("<dir>", "Target directory to unlink")
+    .option("-d, --dry-run", "Show what would be done (default)", true)
+    .option("-n, --no-dry-run", "Actually perform the unlink")
     .action(async (dir, options) => {
       const config = await loadConfig();
-      await unlinkCommand({ ...options, target: dir.replace('~', config.homeDir) });
+      await unlinkCommand({ ...options, target: dir.replace("~", config.homeDir) });
     });
 
   return program;
@@ -248,7 +255,7 @@ Entry point:
 
 ```typescript
 #!/usr/bin/env bun
-import { createCLI } from './cli';
+import { createCLI } from "./cli";
 await createCLI().parseAsync(process.argv);
 ```
 
