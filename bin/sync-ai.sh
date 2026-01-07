@@ -39,8 +39,8 @@ Usage: $0 [OPTIONS]
 Sync .ai content to Claude Code directories
 
 Options:
-  -T, --target PATH  Sync to specified directory (default: $ROOT_DIR/.claude)
-  -u, --user         Sync to user ~/.claude directory
+  -T, --target PATH  Sync to specified directory (detected default: $ROOT_DIR/.claude)
+  -u, --user         Sync to user ~/.claude directory (detected: $HOME/.claude)
   -d, --dry-run      Show what would be done without doing it (default)
   -n, --no-dry-run   Actually perform the sync
   -v, --verbose      Show detailed output
