@@ -113,6 +113,7 @@ If you don't capture these as todos, you will forget them or fail to address the
 ### When to Create New Agent Types
 
 If no existing agent fits the task pattern well, ask the user:
+
 > "This task seems specialized. Should I create a role-specific agent that captures the needed behaviors, or use the general-purpose agent?"
 
 ### Agent Resumption

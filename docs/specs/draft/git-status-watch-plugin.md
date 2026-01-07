@@ -120,6 +120,7 @@ plugins/git-status-watch/
 4. Agent tries to run tool B
 5. PreToolUse: Compare hash - differs!
 6. Output:
+
    ```
    ⚠️  Repository state has changed since last tool use!
 
@@ -133,6 +134,7 @@ plugins/git-status-watch/
 
    Run the command again to acknowledge and continue.
    ```
+
 7. Tool B is blocked (exit 1)
 8. Hash is updated for next run
 9. Agent must explicitly re-run tool B to proceed
@@ -150,6 +152,7 @@ If `git status` fails (not a git repo), the hooks should gracefully allow execut
 ### Hash File Location
 
 Store in `.git/.claude-status-hash` to:
+
 - Keep it out of the working tree
 - Automatically clean up if `.git` is removed
 - Avoid committing it accidentally

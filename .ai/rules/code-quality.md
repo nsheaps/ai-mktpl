@@ -68,6 +68,7 @@ When a user mentions git configuration issues or requests config changes, **alwa
 **Why:** Global config changes require explicit permission approval and affect other projects. The user should consciously choose the scope.
 
 **Example prompt:**
+
 > "Should this git config change be made for this repository only, or globally for all your repositories?"
 
 **Git command formatting (for permissions compatibility):**

@@ -65,13 +65,13 @@ After exploration (or for moderately complex tasks), use the **Plan agent** to c
 
 ### Standard Locations
 
-| Content Type | Location |
-|--------------|----------|
-| Task plans | `docs/scratch/plans/<request-summary>.md` |
-| Task list | `docs/scratch/todo.md` |
-| Scratch notes | `docs/scratch/note-<topic>.md` |
-| Research | `docs/research/<topic>.md` |
-| Product specs | `docs/specs/draft/<feature>.md` |
+| Content Type  | Location                                  |
+| ------------- | ----------------------------------------- |
+| Task plans    | `docs/scratch/plans/<request-summary>.md` |
+| Task list     | `docs/scratch/todo.md`                    |
+| Scratch notes | `docs/scratch/note-<topic>.md`            |
+| Research      | `docs/research/<topic>.md`                |
+| Product specs | `docs/specs/draft/<feature>.md`           |
 
 ### Why Persist to Files
 
