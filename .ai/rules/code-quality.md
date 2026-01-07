@@ -4,6 +4,40 @@ Standards for writing and reviewing code.
 
 ## Git Workflow
 
+### Clean Working Directory Before Starting Tasks
+
+**CRITICAL:** Before starting any significant new task, check `git status` to ensure the working directory is clean.
+
+If uncommitted changes exist:
+
+1. **Ask the user** what to do with them:
+   - Commit them first (if they're complete)
+   - Stash them (if they're work-in-progress)
+   - Discard them (if they're unwanted)
+2. **Do NOT proceed** with new work until resolved
+
+**Why this matters:**
+
+- Isolates changes from the new task for easier review/revert
+- Prevents mixing unrelated changes in commits
+- Avoids confusion about what belongs to which task
+- Deleted symlinks, untracked files, or staged changes indicate prior work that needs handling
+
+**Example workflow:**
+
+```bash
+# FIRST: Check status
+git status
+
+# IF dirty, ask user before proceeding:
+# "I see uncommitted changes (deleted symlinks, untracked spec file).
+#  Should I commit these first, stash them, or discard them?"
+
+# ONLY THEN: Start new work
+```
+
+### Preserving Git History
+
 **NEVER rewrite pushed git history:**
 
 - NEVER use `git commit --amend` on commits that have been pushed - create new commits instead
