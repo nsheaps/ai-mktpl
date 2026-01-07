@@ -215,8 +215,11 @@ EOF
 
     if [[ "$DRY_RUN" == true ]]; then
         dryrun "Would create: $doc_file"
-        verbose "Content preview:"
-        verbose "$(echo "$content" | head -5)..."
+        dryrun "Contents:"
+        # Show indented content preview
+        while IFS= read -r line; do
+            dryrun "  $line"
+        done <<< "$content"
     else
         mkdir -p "$target_rules_dir"
         echo "$content" > "$doc_file"
@@ -276,7 +279,7 @@ main() {
     info "Upstream folder: $UPSTREAM_FOLDER"
 
     if [[ "$DRY_RUN" == true ]]; then
-        warn "=== DRY RUN MODE ==="
+        dryrun "=== DRY RUN MODE ==="
     fi
 
     # Sync each type (creates directory symlinks, migration handled inline)
@@ -287,6 +290,16 @@ main() {
 
     if [[ "$DRY_RUN" == true ]]; then
         info "Dry run complete. No changes were made."
+        # Show command to apply changes
+        local apply_cmd="$0"
+        if [[ "$TARGET_LEVEL" == "user" ]]; then
+            apply_cmd="$apply_cmd --user"
+        elif [[ "$TARGET_DIR" != "$ROOT_DIR/.claude" ]]; then
+            apply_cmd="$apply_cmd --target \"$TARGET_DIR\""
+        fi
+        apply_cmd="$apply_cmd --no-dry-run"
+        info "To apply these changes, run:"
+        info "  $apply_cmd"
     else
         success "Sync complete!"
     fi
