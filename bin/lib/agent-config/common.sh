@@ -100,7 +100,7 @@ list_existing_content() {
             # Check if this symlink should be migrated (points to our source)
             # Skip our directory symlink (UPSTREAM_FOLDER) - that's the one we want to keep
             if [[ "$name" == "$UPSTREAM_FOLDER" ]]; then
-                : # This is our directory symlink, don't remove it
+                debug "             ^ upstream symlink OK"
             elif [[ "$link_target" == "$source_base/$type_name"* ]]; then
                 maybe_rm "$item" "old file symlink"
             elif [[ ! -e "$item" ]]; then
