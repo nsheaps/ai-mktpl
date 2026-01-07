@@ -126,20 +126,16 @@ Types:
   commands  Sync only commands
 
 Options:
-  -T, --target PATH  Sync to specified directory
-                     (detected default: $ROOT_DIR/.claude)
-  -u, --user         Sync to user ~/.claude directory
-                     (detected: $HOME/.claude)
+  -T, --target PATH  Sync to specified directory (default: $HOME/.claude)
   -d, --dry-run      Show what would be done without doing it (default)
   -n, --no-dry-run   Actually perform the sync
   -h, --help         Show this help message
 
 Examples:
-  agent-config sync                    # Dry-run: show what would sync
-  agent-config sync -n                 # Actually sync all types
-  agent-config sync rules -n           # Sync only rules
-  agent-config sync agents commands    # Sync agents and commands (dry-run)
-  agent-config sync --user -n          # Sync to ~/.claude
+  agent-config sync                        # Dry-run: show what would sync
+  agent-config sync -n                     # Actually sync to ~/.claude
+  agent-config sync -T .claude -n          # Sync to project .claude directory
+  agent-config sync rules -n               # Sync only rules
 
 Synced Content:
   .ai/rules/    -> <target>/rules/$UPSTREAM_FOLDER/
@@ -166,10 +162,6 @@ sync_main() {
         case $1 in
             _all|rules|agents|commands)
                 types+=("$1")
-                shift
-                ;;
-            -u|--user)
-                TARGET_DIR="$HOME/.claude"
                 shift
                 ;;
             -T|--target)
@@ -204,8 +196,8 @@ sync_main() {
     # Default to _all if no types specified
     [[ ${#types[@]} -eq 0 ]] && types=("_all")
 
-    # Default target if not set
-    [[ -z "$TARGET_DIR" ]] && TARGET_DIR="$ROOT_DIR/.claude"
+    # Default target if not set (user config by default)
+    [[ -z "$TARGET_DIR" ]] && TARGET_DIR="$HOME/.claude"
 
     # Show header
     info "Source: $ROOT_DIR/$BASE_SYNC_PATH"
@@ -246,8 +238,8 @@ sync_main() {
         for type in "${types[@]}"; do
             [[ "$type" != "_all" ]] && cmd="$cmd $type"
         done
-        [[ "$TARGET_DIR" == "$HOME/.claude" ]] && cmd="$cmd --user"
-        [[ "$TARGET_DIR" != "$HOME/.claude" && "$TARGET_DIR" != "$ROOT_DIR/.claude" ]] && cmd="$cmd --target \"$TARGET_DIR\""
+        # User config is default, so only add --target for non-default
+        [[ "$TARGET_DIR" != "$HOME/.claude" ]] && cmd="$cmd --target \"$TARGET_DIR\""
         info "To apply these changes, run:"
         info "  $cmd --no-dry-run"
     else
