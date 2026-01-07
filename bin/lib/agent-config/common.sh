@@ -149,6 +149,12 @@ sync_type_directory() {
 
     create_dir_symlink "$link_source" "$target_link"
 
-    local count=$(find "$source_dir" -name "*.md" -type f | wc -l | tr -d ' ')
+    # List files available through symlink
+    local count=0
+    while IFS= read -r -d '' file; do
+        local rel_path="${file#"$source_dir"/}"
+        debug "    $rel_path"
+        ((count++)) || true
+    done < <(find "$source_dir" -name "*.md" -type f -print0 | sort -z)
     info "  $count $source_type files available via upstream symlink"
 }

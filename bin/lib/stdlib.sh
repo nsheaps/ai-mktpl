@@ -85,13 +85,6 @@ info() {
   echo -e "${ANSI_BLUE}[INFO]${ANSI_RESET} $1"
 }
 
-# verbose() prints debug messages only when VERBOSE is set to true
-# Usage: VERBOSE=true; verbose "message"
-verbose() {
-  if [[ "${VERBOSE:-false}" == true ]]; then
-    echo -e "${ANSI_BLUE}[DEBUG]${ANSI_RESET} $1"
-  fi
-}
 
 # dryrun() prints a dry-run message with [DRY] prefix
 dryrun() {
@@ -455,7 +448,6 @@ sync_directory() {
 #
 # Dependencies (variables expected to be set by caller):
 #   - DRY_RUN: boolean (true/false) - if true, only shows what would be done
-#   - VERBOSE: boolean (true/false) - if true, shows debug output
 #
 # Usage: create_dir_symlink <source> <target>
 create_dir_symlink() {
@@ -467,7 +459,7 @@ create_dir_symlink() {
     local existing_target
     existing_target=$(readlink "$target")
     if [[ "$existing_target" == "$source" ]]; then
-      verbose "Already linked: $target -> $source"
+      debug "Symlink already correct: $target"
       return 0
     else
       error "Symlink exists but points to different target!"
