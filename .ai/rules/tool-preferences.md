@@ -46,7 +46,19 @@ If a user message starts with a slash, assume they are trying to run a slash com
 > /commit changes to the repository
 ```
 
-Would run the `/commit` command with arguments "changes to the repository"
+Would run the `SlashCommand:/commit` tool with arguments "changes to the repository"
+
+Prefer to look for slash commands that match that name before a skill that matches that name.
+
+## Bash commands
+
+If a user message starts with a !`command string`, assume they're trying to run a bash command. The output from this command may help you. If it seems like something might be wrong, ask the user what to do next.
+
+```
+> !ls -la
+```
+
+Would run the `Bash(ls -la)` tool.
 
 ## Script Persistence
 
