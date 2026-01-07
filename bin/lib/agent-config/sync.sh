@@ -38,10 +38,9 @@ source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 # Sync Type Implementations
 # =============================================================================
 
-# sync_rules - Sync rules and generate documentation file
+# sync_rules - Sync rules directory
 sync_rules() {
     sync_type_directory "rules"
-    _generate_rules_doc
 }
 
 # sync_agents - Sync agents directory
@@ -215,15 +214,18 @@ sync_main() {
     [[ "$DRY_RUN" == true ]] && dryrun "=== DRY RUN MODE ===" || true
 
     # Execute sync for each type
+    local synced_rules=false
     for type in "${types[@]}"; do
         case $type in
             _all)
                 sync_rules
                 sync_agents
                 sync_commands
+                synced_rules=true
                 ;;
             rules)
                 sync_rules
+                synced_rules=true
                 ;;
             agents)
                 sync_agents
@@ -233,6 +235,9 @@ sync_main() {
                 ;;
         esac
     done
+
+    # Generate rules documentation if rules were synced
+    [[ "$synced_rules" == true ]] && _generate_rules_doc
 
     # Show completion message
     if [[ "$DRY_RUN" == true ]]; then
