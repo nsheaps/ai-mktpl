@@ -3,9 +3,10 @@
 # sync-ai.sh - Sync .ai content to Claude Code directories
 #
 # Usage:
-#   ./bin/sync-ai.sh           # Dry-run: show what would sync to project .claude
-#   ./bin/sync-ai.sh --execute # Actually sync to project .claude directory
-#   ./bin/sync-ai.sh --user -e # Actually sync to user ~/.claude directory
+#   ./bin/sync-ai.sh              # Dry-run: show what would sync to .claude
+#   ./bin/sync-ai.sh -n           # Actually sync to .claude directory
+#   ./bin/sync-ai.sh --user -n    # Actually sync to user ~/.claude directory
+#   ./bin/sync-ai.sh -T /path/dir # Sync to custom target directory
 #
 # Syncs:
 #   .ai/rules/    -> {target}/rules/upstream--{repo-name}/
@@ -32,7 +33,8 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 BASE_SYNC_PATH=".ai"
 
 # Defaults
-TARGET_LEVEL="project"  # or "user"
+TARGET_DIR=""  # Will be set after parsing args
+TARGET_LEVEL="custom"  # "user" or "custom"
 DRY_RUN=true  # Default to dry-run for safety
 VERBOSE=false
 
@@ -43,15 +45,21 @@ while [[ $# -gt 0 ]]; do
             TARGET_LEVEL="user"
             shift
             ;;
-        -p|--project)
-            TARGET_LEVEL="project"
-            shift
+        -T|--target)
+            TARGET_LEVEL="custom"
+            if [[ -n "${2:-}" && ! "$2" =~ ^- ]]; then
+                TARGET_DIR="$2"
+                shift 2
+            else
+                echo -e "${RED}--target requires a path argument${NC}" >&2
+                exit 1
+            fi
             ;;
-        -n|--dry-run)
+        -D|--dry-run)
             DRY_RUN=true
             shift
             ;;
-        -e|--execute)
+        -n|--no-dry-run)
             DRY_RUN=false
             shift
             ;;
@@ -65,12 +73,12 @@ while [[ $# -gt 0 ]]; do
             echo "Sync .ai content to Claude Code directories"
             echo ""
             echo "Options:"
-            echo "  -p, --project   Sync to project .claude directory (default)"
-            echo "  -u, --user      Sync to user ~/.claude directory"
-            echo "  -n, --dry-run   Show what would be done without doing it (default)"
-            echo "  -e, --execute   Actually perform the sync (disables dry-run)"
-            echo "  -v, --verbose   Show detailed output"
-            echo "  -h, --help      Show this help message"
+            echo "  -T, --target PATH  Sync to specified directory (default: .claude relative to repo root)"
+            echo "  -u, --user         Sync to user ~/.claude directory"
+            echo "  -D, --dry-run      Show what would be done without doing it (default)"
+            echo "  -n, --no-dry-run   Actually perform the sync"
+            echo "  -v, --verbose      Show detailed output"
+            echo "  -h, --help         Show this help message"
             exit 0
             ;;
         *)
@@ -83,8 +91,12 @@ done
 # Determine target directory
 if [[ "$TARGET_LEVEL" == "user" ]]; then
     TARGET_DIR="$HOME/.claude"
-else
+elif [[ -z "$TARGET_DIR" ]]; then
+    # Default: .claude relative to repo root
     TARGET_DIR="$REPO_ROOT/.claude"
+elif [[ "$TARGET_DIR" != /* ]]; then
+    # Relative path: make it absolute relative to CWD
+    TARGET_DIR="$(cd "$(pwd)" && cd "$(dirname "$TARGET_DIR")" && pwd)/$(basename "$TARGET_DIR")"
 fi
 
 # Derive upstream folder name from path relative to $HOME
@@ -234,13 +246,13 @@ sync_directory() {
 
     # Determine the symlink source path
     local link_source
-    if [[ "$TARGET_LEVEL" == "project" ]]; then
-        # Use relative path for project-level (e.g., ../../.ai/rules)
-        # From .claude/<type>/upstream--... to .ai/<type>
-        link_source="../../$BASE_SYNC_PATH/$source_type"
-    else
+    if [[ "$TARGET_LEVEL" == "user" ]]; then
         # Use absolute path for user-level
         link_source="$source_dir"
+    else
+        # Use relative path for custom targets (e.g., ../../.ai/rules)
+        # From <target>/<type>/upstream--... to .ai/<type>
+        link_source="../../$BASE_SYNC_PATH/$source_type"
     fi
 
     # Create a single directory symlink
@@ -334,7 +346,7 @@ main() {
     local source_path="$REPO_ROOT/$BASE_SYNC_PATH"
 
     log_info "Source: $source_path"
-    log_info "Target: $TARGET_DIR ($TARGET_LEVEL level)"
+    log_info "Target: $TARGET_DIR"
     log_info "Upstream folder: $UPSTREAM_FOLDER"
 
     if [[ "$DRY_RUN" == true ]]; then
