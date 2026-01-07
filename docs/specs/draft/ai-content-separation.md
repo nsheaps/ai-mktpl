@@ -3,6 +3,7 @@
 ## Overview
 
 This document proposes how to separate content in `.ai/` between:
+
 - **Repo-specific**: Stays in project's `.claude/` directory
 - **User-level**: Synced to `~/.claude/` for use across all projects
 
@@ -14,30 +15,30 @@ These are general behaviors that apply across all projects:
 
 #### Rules (.ai/rules/ → ~/.claude/rules/)
 
-| File | Reason |
-|------|--------|
-| bash-scripting.md | General shell scripting practices |
-| claude-code-config.md | General Claude Code configuration guidance |
-| code-quality.md | Universal code quality standards |
-| how-to-politely-correct-someone.md | General interaction behavior |
-| mantras-and-incremental-development.md | Universal development principles |
-| memory-management.md | General memory/rules management |
-| preferences.md | General tool preferences |
-| todo-management.md | Universal task tracking behavior |
-| tool-preferences.md | General tool usage preferences |
-| when-something-doesnt-work.md | Universal error handling behavior |
-| writing-rules.md | General guidance on writing rules |
+| File                                   | Reason                                     |
+| -------------------------------------- | ------------------------------------------ |
+| bash-scripting.md                      | General shell scripting practices          |
+| claude-code-config.md                  | General Claude Code configuration guidance |
+| code-quality.md                        | Universal code quality standards           |
+| how-to-politely-correct-someone.md     | General interaction behavior               |
+| mantras-and-incremental-development.md | Universal development principles           |
+| memory-management.md                   | General memory/rules management            |
+| preferences.md                         | General tool preferences                   |
+| todo-management.md                     | Universal task tracking behavior           |
+| tool-preferences.md                    | General tool usage preferences             |
+| when-something-doesnt-work.md          | Universal error handling behavior          |
+| writing-rules.md                       | General guidance on writing rules          |
 
 #### Agents (.ai/agents/ → ~/.claude/agents/)
 
-| File | Reason |
-|------|--------|
+| File                           | Reason                                                 |
+| ------------------------------ | ------------------------------------------------------ |
 | conversation-history-search.md | Searches user's conversation history (user-level data) |
 
 #### Commands (.ai/commands/ → ~/.claude/commands/)
 
-| File | Reason |
-|------|--------|
+| File                | Reason                                           |
+| ------------------- | ------------------------------------------------ |
 | correct-behavior.md | General behavior correction (applies everywhere) |
 
 ### Repo-Specific Content (stays in .claude/)
@@ -46,12 +47,12 @@ These are specific to this marketplace repository:
 
 #### Rules
 
-| File | Reason |
-|------|--------|
-| ci-cd/conventions.md | This repo's CI/CD workflows |
-| environment-setup-and-maintenance.md | This repo's hooks and setup |
-| plugin-development.md | Marketplace plugin structure |
-| versioning.md | This repo's versioning requirements |
+| File                                 | Reason                              |
+| ------------------------------------ | ----------------------------------- |
+| ci-cd/conventions.md                 | This repo's CI/CD workflows         |
+| environment-setup-and-maintenance.md | This repo's hooks and setup         |
+| plugin-development.md                | Marketplace plugin structure        |
+| versioning.md                        | This repo's versioning requirements |
 
 ## Implementation
 
