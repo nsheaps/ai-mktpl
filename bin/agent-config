@@ -10,12 +10,14 @@
 #
 # Subcommands:
 #   sync    Sync .ai content to Claude Code directories
+#   unlink  Remove symlinks created by sync
 #   help    Show help for a subcommand
 #
 # Examples:
-#   agent-config sync              # Dry-run sync all content
+#   agent-config sync              # Dry-run sync all content to ~/.claude
 #   agent-config sync -n           # Actually sync all content
-#   agent-config sync rules -n     # Sync only rules
+#   agent-config unlink ~/.claude  # Dry-run show what would be removed
+#   agent-config unlink .claude -n # Actually remove symlinks from project
 #   agent-config help sync         # Show sync help
 #
 # For more information on a subcommand:
@@ -46,13 +48,14 @@ Usage:
 
 Subcommands:
   sync    Sync .ai content to Claude Code directories
+  unlink  Remove symlinks created by sync
   help    Show help for a subcommand
 
 Examples:
-  agent-config sync              # Dry-run: show what would sync
+  agent-config sync              # Dry-run: show what would sync to ~/.claude
   agent-config sync -n           # Actually sync all content
-  agent-config sync rules -n     # Sync only rules
-  agent-config sync --user -n    # Sync to ~/.claude
+  agent-config unlink ~/.claude  # Dry-run: show what would be removed
+  agent-config unlink .claude -n # Actually remove symlinks from project
   agent-config help sync         # Show sync subcommand help
 
 For more information on a subcommand:
@@ -125,6 +128,9 @@ main() {
             ;;
         sync)
             _run_subcommand sync "$@"
+            ;;
+        unlink)
+            _run_subcommand unlink "$@"
             ;;
         *)
             error "Unknown subcommand: $subcommand"
