@@ -204,31 +204,32 @@ migrate_and_cleanup() {
     local stale=0
 
     for type in rules agents commands; do
-        local upstream_dir="$target_dir/$type/$UPSTREAM_FOLDER"
+        local type_dir="$target_dir/$type"
+        local upstream_dir="$type_dir/$UPSTREAM_FOLDER"
 
-        # Skip if directory doesn't exist (nothing to clean up)
-        if [[ ! -d "$upstream_dir" ]]; then
+        # Skip if type directory doesn't exist
+        if [[ ! -d "$type_dir" ]]; then
             continue
         fi
 
-        # If upstream_dir is already a symlink to a directory, it's the new format - skip
+        # If upstream_dir is already a symlink to a directory, it's the new format
         if [[ -L "$upstream_dir" ]]; then
             verbose "Already using directory symlink for $type"
-            continue
         fi
 
-        # Find all symlinks in the upstream folder (old file-based format)
+        # Find old file symlinks directly in the type directory (not in subdirs)
+        # These are symlinks like ~/.claude/rules/bash-scripting.md -> /path/to/.ai/rules/bash-scripting.md
         while IFS= read -r -d '' symlink; do
             local link_target
             link_target=$(readlink "$symlink")
 
             # Check if this symlink points to our source directory
-            if [[ "$link_target" == "$source_base"* ]]; then
+            if [[ "$link_target" == "$source_base/$type"* ]]; then
                 if [[ "$DRY_RUN" == true ]]; then
-                    dryrun "Would migrate: $symlink"
+                    dryrun "Would remove old file symlink: $symlink"
                 else
                     rm "$symlink"
-                    info "Migrating: $symlink"
+                    info "Removed old file symlink: $symlink"
                 fi
                 ((migrated++)) || true
             elif [[ ! -e "$symlink" ]]; then
@@ -241,14 +242,31 @@ migrate_and_cleanup() {
                 fi
                 ((stale++)) || true
             fi
-        done < <(find "$upstream_dir" -type l -print0 2>/dev/null || true)
+        done < <(find "$type_dir" -maxdepth 1 -type l -print0 2>/dev/null || true)
 
-        # Remove empty directories (cleanup after migration)
-        if [[ "$DRY_RUN" != true ]] && [[ -d "$upstream_dir" ]]; then
-            find "$upstream_dir" -type d -empty -delete 2>/dev/null || true
-            # Remove the upstream dir itself if it's now empty
-            if [[ -d "$upstream_dir" ]] && [[ -z "$(ls -A "$upstream_dir" 2>/dev/null)" ]]; then
-                rmdir "$upstream_dir" 2>/dev/null || true
+        # Also check inside old upstream folder if it exists as a directory (not symlink)
+        if [[ -d "$upstream_dir" ]] && [[ ! -L "$upstream_dir" ]]; then
+            while IFS= read -r -d '' symlink; do
+                local link_target
+                link_target=$(readlink "$symlink")
+
+                if [[ "$link_target" == "$source_base"* ]]; then
+                    if [[ "$DRY_RUN" == true ]]; then
+                        dryrun "Would migrate: $symlink"
+                    else
+                        rm "$symlink"
+                        info "Migrating: $symlink"
+                    fi
+                    ((migrated++)) || true
+                fi
+            done < <(find "$upstream_dir" -type l -print0 2>/dev/null || true)
+
+            # Remove empty directories after migration
+            if [[ "$DRY_RUN" != true ]]; then
+                find "$upstream_dir" -type d -empty -delete 2>/dev/null || true
+                if [[ -d "$upstream_dir" ]] && [[ -z "$(ls -A "$upstream_dir" 2>/dev/null)" ]]; then
+                    rmdir "$upstream_dir" 2>/dev/null || true
+                fi
             fi
         fi
     done
