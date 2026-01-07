@@ -58,6 +58,18 @@ After committing changes, always push immediately. Don't ask - just push.
 **For local/interactive assistants:**
 Only commit and push when explicitly asked by the user. Local assistants should always defer to user preferences.
 
+### Git Configuration Scope
+
+When a user mentions git configuration issues or requests config changes, **always ask** whether the change should be:
+
+1. **In-repo** (`git config` without `--global`) - Affects only this repository
+2. **Global** (`git config --global`) - Affects all repositories for this user
+
+**Why:** Global config changes require explicit permission approval and affect other projects. The user should consciously choose the scope.
+
+**Example prompt:**
+> "Should this git config change be made for this repository only, or globally for all your repositories?"
+
 **Git command formatting (for permissions compatibility):**
 
 - Prefer `git <cmd>` over `git -C <directory> <cmd>`
