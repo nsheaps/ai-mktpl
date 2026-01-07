@@ -55,7 +55,7 @@ while [[ $# -gt 0 ]]; do
                 exit 1
             fi
             ;;
-        -D|--dry-run)
+        -d|--dry-run)
             DRY_RUN=true
             shift
             ;;
@@ -75,7 +75,7 @@ while [[ $# -gt 0 ]]; do
             echo "Options:"
             echo "  -T, --target PATH  Sync to specified directory (default: \$REPO_ROOT/.claude, detected: $REPO_ROOT/.claude)"
             echo "  -u, --user         Sync to user ~/.claude directory (detected: $HOME/.claude)"
-            echo "  -D, --dry-run      Show what would be done without doing it (default)"
+            echo "  -d, --dry-run      Show what would be done without doing it (default)"
             echo "  -n, --no-dry-run   Actually perform the sync"
             echo "  -v, --verbose      Show detailed output"
             echo "  -h, --help         Show this help message"
