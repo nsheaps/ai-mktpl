@@ -22,7 +22,6 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib/stdlib.sh"
 BASE_SYNC_PATH=".ai"
 TARGET_DIR=""
 DRY_RUN=true
-VERBOSE=false
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -31,7 +30,6 @@ while [[ $# -gt 0 ]]; do
         -T|--target)     TARGET_DIR="${2:?--target requires a path}"; shift 2 ;;
         -d|--dry-run)    DRY_RUN=true; shift ;;
         -n|--no-dry-run) DRY_RUN=false; shift ;;
-        -v|--verbose)    VERBOSE=true; shift ;;
         -h|--help)
             cat <<EOF
 Usage: $0 [OPTIONS]
@@ -43,7 +41,6 @@ Options:
   -u, --user         Sync to user ~/.claude directory (detected: $HOME/.claude)
   -d, --dry-run      Show what would be done without doing it (default)
   -n, --no-dry-run   Actually perform the sync
-  -v, --verbose      Show detailed output
   -h, --help         Show this help message
 EOF
             exit 0 ;;
@@ -157,7 +154,7 @@ sync_directory() {
     info "Existing $source_type in target:"
     list_existing_content "$target_type_dir" "$source_type" "$ROOT_DIR/$BASE_SYNC_PATH"
 
-    [[ ! -d "$source_dir" ]] && { verbose "Source directory does not exist: $source_dir"; return 0; }
+    [[ ! -d "$source_dir" ]] && return 0
 
     # Use absolute path for user config, relative for project config
     local link_source
