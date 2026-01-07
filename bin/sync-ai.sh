@@ -176,18 +176,61 @@ create_dir_symlink() {
     log_success "Created: $target -> $source"
 }
 
+# List existing content in a target directory
+list_existing_content() {
+    local target_type_dir="$1"
+    local type_name="$2"
+
+    if [[ ! -d "$target_type_dir" ]]; then
+        log_info "  (no existing $type_name directory)"
+        return 0
+    fi
+
+    local has_content=false
+
+    # List all items in the directory
+    for item in "$target_type_dir"/*; do
+        [[ -e "$item" ]] || continue  # Skip if no matches
+        has_content=true
+
+        local name
+        name=$(basename "$item")
+
+        if [[ -L "$item" ]]; then
+            local link_target
+            link_target=$(readlink "$item")
+            log_info "  [symlink] $name -> $link_target"
+        elif [[ -d "$item" ]]; then
+            local file_count
+            file_count=$(find "$item" -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' ')
+            log_info "  [dir] $name/ ($file_count .md files)"
+        elif [[ -f "$item" ]]; then
+            log_info "  [file] $name"
+        fi
+    done
+
+    if [[ "$has_content" == false ]]; then
+        log_info "  (empty directory)"
+    fi
+}
+
 # Sync a directory by creating a single directory symlink
 sync_directory() {
     local source_type="$1"  # rules, agents, or commands
     local source_dir="$REPO_ROOT/$BASE_SYNC_PATH/$source_type"
-    local target_link="$TARGET_DIR/$source_type/$UPSTREAM_FOLDER"
+    local target_type_dir="$TARGET_DIR/$source_type"
+    local target_link="$target_type_dir/$UPSTREAM_FOLDER"
+
+    log_info "Syncing $source_type..."
+
+    # Show existing content in target directory
+    log_info "Existing $source_type in target:"
+    list_existing_content "$target_type_dir" "$source_type"
 
     if [[ ! -d "$source_dir" ]]; then
         log_verbose "Source directory does not exist: $source_dir"
         return 0
     fi
-
-    log_info "Syncing $source_type..."
 
     # Determine the symlink source path
     local link_source
@@ -211,7 +254,7 @@ sync_directory() {
         ((count++)) || true
     done < <(find "$source_dir" -name "*.md" -type f -print0)
 
-    log_info "  $count $source_type files available via symlink"
+    log_info "  $count $source_type files available via upstream symlink"
 }
 
 # Migrate old file symlinks and clean up stale symlinks
