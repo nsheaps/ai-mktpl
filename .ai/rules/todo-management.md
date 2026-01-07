@@ -84,3 +84,37 @@ If you don't capture these as todos, you will forget them or fail to address the
 4. You forget to address it
 5. User gets frustrated
 ```
+
+## Rule: Delegate Todos to Agents
+
+**CRITICAL:** When working on a todo, prefer delegating to an appropriate agent rather than executing directly in your own context.
+
+### Why This Matters
+
+- Better isolation of work
+- Clearer permissions boundaries
+- More efficient context usage
+- Agents can be resumed for related follow-up work
+- Creates accountability trail for each task
+
+### Correct Pattern
+
+```
+1. Break work into todos
+2. For each todo, identify appropriate agent type:
+   - Explore agent for codebase investigation
+   - Plan agent for architectural decisions
+   - general-purpose agent for implementation tasks
+3. Launch agent with run_in_background: true if possible
+4. Use TaskOutput to get results
+5. Consider resuming the same agent for related follow-up
+```
+
+### When to Create New Agent Types
+
+If no existing agent fits the task pattern well, ask the user:
+> "This task seems specialized. Should I create a role-specific agent that captures the needed behaviors, or use the general-purpose agent?"
+
+### Agent Resumption
+
+When continuing work on a similar task, prefer resuming an existing agent by ID rather than starting fresh. This preserves context and reduces redundant exploration.
