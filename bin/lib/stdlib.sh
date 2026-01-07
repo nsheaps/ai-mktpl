@@ -27,8 +27,10 @@ export ROOT_DIR
 
 ANSI_RED="\033[0;31m"
 ANSI_GREEN="\033[0;32m"
+ANSI_BLUE="\033[0;34m"
 ANSI_GREY="\033[38;5;246m"
 ANSI_DARK_YELLOW="\033[0;33m"
+ANSI_YELLOW="\033[1;33m"
 ANSI_ORANGE="\033[38;5;208m"
 ANSI_PURPLE="\033[0;35m"
 ANSI_RESET="\033[0m"
@@ -75,6 +77,24 @@ debug() {
   echo -e "${ANSI_GREY}$1${ANSI_RESET}"
 }
 
+# info() prints an info message with [INFO] prefix
+info() {
+  echo -e "${ANSI_BLUE}[INFO]${ANSI_RESET} $1"
+}
+
+# verbose() prints debug messages only when VERBOSE is set to true
+# Usage: VERBOSE=true; verbose "message"
+verbose() {
+  if [[ "${VERBOSE:-false}" == true ]]; then
+    echo -e "${ANSI_BLUE}[DEBUG]${ANSI_RESET} $1"
+  fi
+}
+
+# dryrun() prints a dry-run message with [DRY] prefix
+dryrun() {
+  echo -e "${ANSI_YELLOW}[DRY]${ANSI_RESET} $1"
+}
+
 stream_command_as_debug() {
   while IFS= read -r line; do
     debug "$line"
@@ -87,8 +107,15 @@ run() {
 }
 
 # Map color names to terminfo setaf/setab codes.
-declare -A colors=([black]=0 [red]=1 [green]=2 [yellow]=3 [blue]=4
-  [magenta]=5 [cyan]=6 [white]=7)
+declare -A colors
+colors["black"]=0
+colors["red"]=1
+colors["green"]=2
+colors["yellow"]=3
+colors["blue"]=4
+colors["magenta"]=5
+colors["cyan"]=6
+colors["white"]=7
 # colorize colorname text
 # Returns text wrapped in ANSI color tags. Unknown color names are mapped to white.
 colorize() {
@@ -419,4 +446,50 @@ sync_directory() {
       fatal "rsync command not found, cannot sync $SOURCE_DIR to $DEST_DIR"
     fi
   fi
+}
+
+# Create directory symlink, handling dry-run mode and existing links
+#
+# Dependencies (variables expected to be set by caller):
+#   - DRY_RUN: boolean (true/false) - if true, only shows what would be done
+#   - VERBOSE: boolean (true/false) - if true, shows debug output
+#
+# Usage: create_dir_symlink <source> <target>
+create_dir_symlink() {
+  local source="$1"
+  local target="$2"
+
+  # Check if symlink already exists
+  if [[ -L "$target" ]]; then
+    local existing_target
+    existing_target=$(readlink "$target")
+    if [[ "$existing_target" == "$source" ]]; then
+      verbose "Already linked: $target -> $source"
+      return 0
+    else
+      error "Symlink exists but points to different target!"
+      error "  Expected: $source"
+      error "  Actual:   $existing_target"
+      error "  Remove the symlink manually or fix the conflict."
+      exit 1
+    fi
+  elif [[ -e "$target" ]]; then
+    error "Target exists and is not a symlink: $target"
+    error "  Remove it manually if you want to sync here."
+    exit 1
+  fi
+
+  if [[ "${DRY_RUN:-true}" == true ]]; then
+    dryrun "Would create: $target -> $source"
+    return 0
+  fi
+
+  # Create parent directory if needed
+  local parent_dir
+  parent_dir=$(dirname "$target")
+  mkdir -p "$parent_dir"
+
+  # Create the symlink
+  ln -s "$source" "$target"
+  success "Created: $target -> $source"
 }
