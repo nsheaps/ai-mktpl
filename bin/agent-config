@@ -1,0 +1,137 @@
+#!/usr/bin/env bash
+#
+# agent-config - Manage AI agent configuration
+#
+# A command-line tool for managing Claude Code and other AI agent configurations,
+# including syncing rules, agents, and commands across projects and user config.
+#
+# Usage:
+#   agent-config <subcommand> [options]
+#
+# Subcommands:
+#   sync    Sync .ai content to Claude Code directories
+#   help    Show help for a subcommand
+#
+# Examples:
+#   agent-config sync              # Dry-run sync all content
+#   agent-config sync -n           # Actually sync all content
+#   agent-config sync rules -n     # Sync only rules
+#   agent-config help sync         # Show sync help
+#
+# For more information on a subcommand:
+#   agent-config <subcommand> --help
+#   agent-config help <subcommand>
+#
+
+set -euo pipefail
+
+# Resolve script directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LIB_DIR="$SCRIPT_DIR/lib/agent-config"
+
+# Source stdlib for basic utilities (colors, error handling)
+# shellcheck source=lib/stdlib.sh
+source "$SCRIPT_DIR/lib/stdlib.sh"
+
+# =============================================================================
+# Help
+# =============================================================================
+
+_show_main_help() {
+    cat <<EOF
+agent-config - Manage AI agent configuration
+
+Usage:
+  agent-config <subcommand> [options]
+
+Subcommands:
+  sync    Sync .ai content to Claude Code directories
+  help    Show help for a subcommand
+
+Examples:
+  agent-config sync              # Dry-run: show what would sync
+  agent-config sync -n           # Actually sync all content
+  agent-config sync rules -n     # Sync only rules
+  agent-config sync --user -n    # Sync to ~/.claude
+  agent-config help sync         # Show sync subcommand help
+
+For more information on a subcommand:
+  agent-config <subcommand> --help
+  agent-config help <subcommand>
+EOF
+}
+
+_show_subcommand_help() {
+    local subcommand="$1"
+    local subcommand_file="$LIB_DIR/${subcommand}.sh"
+
+    if [[ ! -f "$subcommand_file" ]]; then
+        error "Unknown subcommand: $subcommand"
+        error "Run 'agent-config' to see available subcommands"
+        return 1
+    fi
+
+    # Source and run with --help
+    # shellcheck source=lib/agent-config/sync.sh
+    source "$subcommand_file"
+    "${subcommand}_main" --help
+}
+
+# =============================================================================
+# Subcommand Dispatcher
+# =============================================================================
+
+_run_subcommand() {
+    local subcommand="$1"
+    shift
+    local subcommand_file="$LIB_DIR/${subcommand}.sh"
+
+    if [[ ! -f "$subcommand_file" ]]; then
+        error "Unknown subcommand: $subcommand"
+        error "Run 'agent-config' to see available subcommands"
+        return 1
+    fi
+
+    # Source the subcommand module and run its main function
+    # shellcheck source=lib/agent-config/sync.sh
+    source "$subcommand_file"
+    "${subcommand}_main" "$@"
+}
+
+# =============================================================================
+# Main
+# =============================================================================
+
+main() {
+    # No arguments - show help
+    if [[ $# -eq 0 ]]; then
+        _show_main_help
+        return 0
+    fi
+
+    local subcommand="$1"
+    shift
+
+    case "$subcommand" in
+        -h|--help)
+            _show_main_help
+            ;;
+        help)
+            if [[ $# -eq 0 ]]; then
+                _show_main_help
+            else
+                _show_subcommand_help "$1"
+            fi
+            ;;
+        sync)
+            _run_subcommand sync "$@"
+            ;;
+        *)
+            error "Unknown subcommand: $subcommand"
+            error "Run 'agent-config' to see available subcommands"
+            return 1
+            ;;
+    esac
+}
+
+main "$@"
