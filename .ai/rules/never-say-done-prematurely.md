@@ -29,12 +29,14 @@ Before declaring "done", complete this entire chain:
 ### What "Done" Means
 
 "Done" means:
+
 - The original user request is fully satisfied
 - Changes have been tested and validated
 - Code review feedback has been addressed
 - No known issues remain
 
 "Done" does NOT mean:
+
 - "I made some changes"
 - "I think this should work"
 - "I followed my plan"
@@ -42,12 +44,12 @@ Before declaring "done", complete this entire chain:
 
 ### Common Mistakes
 
-| What You Did | What You Should Have Done |
-|--------------|---------------------------|
-| Made code changes, said "done" | Made changes, tested, reviewed, validated, THEN said "done" |
-| Followed your plan, said "done" | Followed plan, compared to ORIGINAL request, validated it matches |
-| Fixed an issue, said "done" | Fixed issue, verified fix works, checked for regressions |
-| Wrote tests, said "done" | Wrote tests, ran tests, confirmed they pass AND catch the right things |
+| What You Did                    | What You Should Have Done                                              |
+| ------------------------------- | ---------------------------------------------------------------------- |
+| Made code changes, said "done"  | Made changes, tested, reviewed, validated, THEN said "done"            |
+| Followed your plan, said "done" | Followed plan, compared to ORIGINAL request, validated it matches      |
+| Fixed an issue, said "done"     | Fixed issue, verified fix works, checked for regressions               |
+| Wrote tests, said "done"        | Wrote tests, ran tests, confirmed they pass AND catch the right things |
 
 ### The Original Request Is The Source of Truth
 
@@ -72,6 +74,7 @@ You must do ALL of this, front-loaded, before you impact another system.
 ### Iterate Until Actually Done
 
 Work iteratively until you can:
+
 1. Step back
 2. Look at the ORIGINAL prompt from the user
 3. Honestly say "Yes, this is done"
@@ -81,11 +84,13 @@ If you cannot do that, you are not done. Keep working.
 ## Anti-Patterns
 
 **Never do this:**
+
 ```
 "I've made the changes. Done!"
 ```
 
 **Always do this:**
+
 ```
 "I've made the changes. Let me validate:
 1. Running end-to-end test... [results]
