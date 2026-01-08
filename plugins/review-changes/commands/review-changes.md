@@ -13,10 +13,10 @@ Review the current changes with detailed feedback on code quality, security, per
 
 **Format:** `[focus area or file pattern]`
 
-| Argument   | Required | Description                                      |
-| ---------- | -------- | ------------------------------------------------ |
-| focus area | No       | Specific aspect to focus on (e.g., "security")   |
-| file pattern | No     | Specific files to review (e.g., "src/api/")      |
+| Argument     | Required | Description                                    |
+| ------------ | -------- | ---------------------------------------------- |
+| focus area   | No       | Specific aspect to focus on (e.g., "security") |
+| file pattern | No       | Specific files to review (e.g., "src/api/")    |
 
 **Examples:**
 
@@ -44,6 +44,7 @@ Collect information about the current state:
 ### Step 2: Create Review Tracking Document
 
 Create a local document at `/tmp/review-notes-$(date +%s).md` to track:
+
 - Summary of findings
 - Specific comments with file:line references
 - Questions or clarifications needed
@@ -56,35 +57,42 @@ Create a local document at `/tmp/review-notes-$(date +%s).md` to track:
 Evaluate the changes against these criteria:
 
 #### Code Quality and Best Practices
+
 - Is the code readable and self-documenting?
 - Does it follow project conventions?
 - Are there any code smells?
 
 #### Potential Bugs or Issues
+
 - Are edge cases handled?
 - Is error handling appropriate?
 - Are there race conditions or concurrency issues?
 
 #### Performance Considerations
+
 - Are there inefficient algorithms or data structures?
 - Are there unnecessary operations or allocations?
 - Could caching improve performance?
 
 #### Security Concerns
+
 - Are inputs validated and sanitized?
 - Are there potential injection vulnerabilities?
 - Are secrets handled properly?
 
 #### Maintainability
+
 - Is the code modular and testable?
 - Are dependencies appropriate?
 - Is the code complexity manageable?
 
 #### Test Coverage
+
 - Are there adequate tests for the changes?
 - Do tests cover edge cases?
 
 #### Documentation
+
 - Are comments accurate and helpful?
 - Is the PR description accurate vs code changes?
 
@@ -108,6 +116,7 @@ Duplication is the enemy of maintainability; strive for single sources of truth.
 Encapsulate logic within objects rather than querying for data externally.
 
 **SOLID** - Follow SOLID principles:
+
 - Single Responsibility/Separation of Concerns
 - Open/Closed
 - Liskov Substitution
@@ -128,12 +137,14 @@ Create a detailed review with:
 4. **Suggestions for improvement**
 
 Use these indicators:
+
 - ✅ Something correct or well-done
 - ❔ Something requiring clarification
 - ⚠️ Potential problem
 - ❌ Definite problem that should be addressed
 
 **Score Guidelines:**
+
 - 85%+ = Green (good)
 - 65-84% = Yellow (needs attention)
 - Below 65% = Red (failure/must fix)
@@ -145,6 +156,7 @@ After completing the review, use AskUserQuestion to ask:
 **Question:** "Would you like me to address any of the issues found during this review?"
 
 **Options** (based on issues found):
+
 1. Fix critical issues (❌) - Address definite problems
 2. Address warnings (⚠️) - Fix potential problems
 3. Improve based on suggestions - Apply recommended changes
@@ -155,6 +167,7 @@ After completing the review, use AskUserQuestion to ask:
 If provided, focus the review on: $ARGUMENTS
 
 When a focus area is specified:
+
 - Prioritize reviewing aspects related to that area
 - Still note other issues but don't deep-dive on them
 - Organize findings by relevance to the focus area
@@ -165,11 +178,13 @@ When a focus area is specified:
 # Code Review Summary
 
 ## Overall Assessment
+
 [1-2 sentence summary]
 
 ## Scores
+
 | Metric     | Score | Notes |
-|------------|-------|-------|
+| ---------- | ----- | ----- |
 | Quality    | XX%   | ...   |
 | Security   | XX%   | ...   |
 | Simplicity | XX%   | ...   |
@@ -178,18 +193,23 @@ When a focus area is specified:
 ## Findings
 
 ### Critical Issues (❌)
+
 - [file:line] Description of issue
 
 ### Warnings (⚠️)
+
 - [file:line] Description of concern
 
 ### Questions (❔)
+
 - [file:line] Clarification needed
 
 ### Positive Notes (✅)
+
 - What was done well
 
 ## Suggestions
+
 1. Specific improvement suggestion
 2. ...
 ```
