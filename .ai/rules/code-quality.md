@@ -114,6 +114,7 @@ fatal: Unable to create '/path/to/repo/.git/index.lock': File exists.
 **Instead, ALWAYS ask the user:**
 
 > "I encountered a git lock file error. This usually means another git process is running. Could you:
+>
 > 1. Check if another git operation is in progress (another terminal, IDE, etc.)
 > 2. If you're certain no other process is running, let me know and I can remove the lock file
 > 3. Or run `rm .git/index.lock` yourself if you prefer"
