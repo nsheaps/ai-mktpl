@@ -1,0 +1,13 @@
+{
+  "name": "review-changes",
+  "version": "0.0.1",
+  "description": "Review code changes with detailed feedback on quality, security, performance, and maintainability",
+  "author": {
+    "name": "Claude Code Community",
+    "email": "community@example.com",
+    "url": "https://github.com/nsheaps/.ai"
+  },
+  "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/review-changes",
+  "repository": "https://github.com/nsheaps/.ai",
+  "keywords": ["code-review", "review", "quality", "security", "lint"]
+}
