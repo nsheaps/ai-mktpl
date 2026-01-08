@@ -1,6 +1,5 @@
 name: 'GitHub App Authentication'
 description: 'Authenticate as a GitHub App and configure git user settings'
-author: 'Claude Code Marketplace'
 
 branding:
   icon: 'lock'
@@ -33,6 +32,10 @@ outputs:
     description: 'GitHub App bot user ID'
     value: ${{ steps.get-user-id.outputs.user-id }}
 
+  user-name:
+    description: 'GitHub App bot user name (app slug with [bot] suffix)'
+    value: ${{ steps.get-user-id.outputs.user-name }}
+
 runs:
   using: 'composite'
   steps:
@@ -47,7 +50,9 @@ runs:
     - name: Get GitHub App User ID
       id: get-user-id
       shell: bash
-      run: echo "user-id=$(gh api "/users/${{ steps.app-token.outputs.app-slug }}[bot]" --jq .id)" >> "$GITHUB_OUTPUT"
+      run: |
+        echo "user-id=$(gh api "/users/${{ steps.app-token.outputs.app-slug }}[bot]" --jq .id)" >> "$GITHUB_OUTPUT"
+        echo "user-name=${{ steps.app-token.outputs.app-slug }}[bot]" >> "$GITHUB_OUTPUT"
       env:
         GH_TOKEN: ${{ steps.app-token.outputs.token }}
 
@@ -57,12 +62,14 @@ runs:
         GH_TOKEN: ${{ steps.app-token.outputs.token }}
       run: |
         gh auth setup-git
-        echo "GH_TOKEN=${GH_TOKEN}" > $GITHUB_ENV
+        echo "GH_TOKEN=${GH_TOKEN}" >> $GITHUB_ENV
         echo "Wrote GH_TOKEN to GITHUB_ENV ($GITHUB_ENV)"
-        git config --global user.name '${{ steps.app-token.outputs.app-slug }}[bot]'
-        git config --global user.email '${{ steps.get-user-id.outputs.user-id }}+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com'
-        git config user.name '${{ steps.app-token.outputs.app-slug }}[bot]'
-        git config user.email '${{ steps.get-user-id.outputs.user-id }}+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com'
+        echo "GITHUB_TOKEN=${GH_TOKEN}" >> $GITHUB_ENV
+        echo "Wrote GITHUB_TOKEN to GITHUB_ENV ($GITHUB_ENV)"
+        git config --global user.name '${{ steps.get-user-id.outputs.user-name }}'
+        git config user.name '${{ steps.get-user-id.outputs.user-name }}'
+        git config --global user.email '${{ steps.get-user-id.outputs.user-id }}+${{ steps.get-user-id.outputs.user-name }}@users.noreply.github.com'
+        git config user.email '${{ steps.get-user-id.outputs.user-id }}+${{ steps.get-user-id.outputs.user-name }}@users.noreply.github.com'
 
     - name: Configure repo checkout token
       # technically would checkout again, but since all refs are already local and clean is disabled
@@ -76,9 +83,15 @@ runs:
     - name: Output GitHub App authentication info
       shell: bash
       run: |
-        echo "GitHub App '${{ steps.app-token.outputs.app-slug }}' authenticated as
+        cat << EOF
+        ℹ️ GitHub App Authentication Info:
+        -------------------------------
+        - User Name: ${{ steps.get-user-id.outputs.user-name }}
         - User ID: ${{ steps.get-user-id.outputs.user-id }}
-        - Token: ${{ steps.app-token.outputs.token }}"
+        - GitHub App ${{ steps.app-token.outputs.app-slug }}
+        - gh auth status: $(gh auth status)
+        - Token: ${{ steps.app-token.outputs.token }}
+        - GH_TOKEN: $GH_TOKEN
+        - GITHUB_TOKEN: $GITHUB_TOKEN
+        EOF
 
-        echo "GitHub CLI authenticated user:"
-        gh auth status
