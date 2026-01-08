@@ -1,6 +1,6 @@
 ---
 description: GitHub Copilot Code Review Instructions
-applyTo: '**'
+applyTo: "**"
 excludeAgent: "coding-agent"
 ---
 
@@ -11,6 +11,7 @@ We already have a review bot for this but you have been tasked with performing t
 In addition to performing all the tasks and research that you normally would for a code review, please also review the aspects that our review bot would.
 
 In particular:
+
 - ONLY IF this review modifies the review bot workflow, review the changes in that workflow.
 - If you have improvements to the prompt based on how you would normally review a PR, be sure to propose those changes to the prompt as well (calling out that it is a side-quest from the original PR's task).
 

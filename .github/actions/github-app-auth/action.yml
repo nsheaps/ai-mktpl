@@ -94,4 +94,3 @@ runs:
         - GH_TOKEN: $GH_TOKEN
         - GITHUB_TOKEN: $GITHUB_TOKEN
         EOF
-
