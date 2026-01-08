@@ -89,6 +89,37 @@ git -C /path/to/repo rm -r .github/actions/old-action
 cd /path/to/repo && git rm -r .github/actions/old-action
 ```
 
+### Never Remove Git Lock Files
+
+**CRITICAL:** NEVER remove git lock files (`.git/**/index.lock`, `.git/**/HEAD.lock`, etc.) automatically.
+
+When you encounter a git lock file error like:
+
+```
+fatal: Unable to create '/path/to/repo/.git/index.lock': File exists.
+```
+
+**Do NOT:**
+
+- Run `rm -f .git/index.lock` or similar
+- Automatically remove any `.lock` file in the `.git` directory
+- Assume the lock is stale and can be safely removed
+
+**Why this is dangerous:**
+
+1. **Lock files exist for a reason** - Another git process may be actively running
+2. **Removing them can cause data corruption** - Interrupting a git operation mid-write can corrupt the repository
+3. **The user may have another terminal/IDE using git** - VSCode, GitKraken, or another process may hold the lock
+
+**Instead, ALWAYS ask the user:**
+
+> "I encountered a git lock file error. This usually means another git process is running. Could you:
+> 1. Check if another git operation is in progress (another terminal, IDE, etc.)
+> 2. If you're certain no other process is running, let me know and I can remove the lock file
+> 3. Or run `rm .git/index.lock` yourself if you prefer"
+
+**Only remove the lock after explicit user confirmation.**
+
 ## Task Completion
 
 Your task is rarely done after making changes. Always:
