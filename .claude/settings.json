@@ -1,5 +1,19 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "extraKnownMarketplaces": {
+    "anthropics-claude-code": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-code"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "agent-sdk-dev@anthropics-claude-code": true,
+    "code-review@anthropics-claude-code": true,
+    "pr-review-toolkit@anthropics-claude-code": true,
+    "plugin-dev@anthropics-claude-code": true
+  },
   "hooks": {
     "SessionStart": [
       {
