@@ -50,12 +50,25 @@ jobs:
         id: additional-context
         continue-on-error: true
 
+      - name: Ensure gh has the review extension to aid in getting review comments (not PR comments)
+        # Used by claude to fetch PR review comments rather than direct API queries.
+        # See https://github.com/cli/cli/discussions/3993
+        # See https://github.com/cli/cli/issues/8409
+        shell: bash
+        run: |
+          gh extension install agynio/gh-pr-review || echo "gh-pr-review extension already installed"
+
       - name: Run Claude Code Review
         id: claude-review
         uses: anthropics/claude-code-action@v1
         env:
           GH_TOKEN: '${{ steps.auth.outputs.token }}'
+          GITHUB_TOKEN: '${{ steps.auth.outputs.token }}'
           # These are in addition to any parsed settings.json files
+          # Prefer this over claude_args, almost everything can be specified via settings json or env vars
+          # While Bash is allowed, the list here is passed directly to the agent, so explicitly defining them
+          # causes the agent to see those Bash commands as more relevant and will use them more often.
+          # Ref: https://code.claude.com/docs/en/settings
           INPUT_SETTINGS_JSON: |
             {
               "permissions": {
@@ -83,14 +96,25 @@ jobs:
                   "ReadMcpResourceTool",
                   "SlashCommand",
                   "Skill",
-                  "mcp__github_inline_comment__create_inline_comment",
-                  
+
+                  "mcp__github__github_support_docs_search",
+                  "mcp__github__get_pull_request",
+                  "mcp__github__get_pull_request_diff",
+                  "mcp__github__get_pull_request_files",
+                  "mcp__github__get_pull_request_review_comments",
+                  "mcp__github__get_pull_request_reviews",
+                  "mcp__github__get_pull_request_status",
+                  "mcp__github__create_pending_pull_request_review",
+                  "mcp__github__add_comment_to_pending_review",
+                  "mcp__github__submit_pending_pull_request_review",
+
                   "Bash(git log:*)",
                   "Bash(git diff:*)",
                   "Bash(git status:*)",
                   "Bash(git rev-parse:*)",
                   "Bash(git fetch:*)",
                   "Bash(git show:*)",
+                  "Bash(git merge:*)",
                   "Bash(git remote get-url:*)",
                   "Bash(git rm:*)",
                   "Bash(gh issue view:*)",
@@ -99,20 +123,26 @@ jobs:
                   "Bash(gh pr comment:*)",
                   "Bash(gh pr diff:*)",
                   "Bash(gh pr view:*)",
+                  "Bash(gh pr-review:*)",
+                  "Bash(gh pr-review review view:*)",
                   "Bash(gh pr list:*)",
                   "Bash(gh run list:*)",
-                  "Bash(gh run view:*)"
+                  "Bash(gh run view:*)",
+                  "Bash(gh extension list:*)"
                 ],
                 "_denyComment": "It will wait for it's own check run to complete, not to mention it should review the code.",
                 "deny": [
                   "mcp__github_ci__get_ci_status",
                   "mcp__github_ci__get_workflow_run_details",
                   "mcp__github_ci__download_job_log",
-                  "Bash(gh pr checks:*)"
+                  "Bash(gh pr checks:*)",
+                  "Bash(git push:*)"
                 ]
               },
+              "model": "opus",
               "env": {
                 "GH_TOKEN": "${{ steps.auth.outputs.token }}",
+                "GITHUB_TOKEN": "${{ steps.auth.outputs.token }}",
                 "_GH_PAGER_COMMENT": "disable gh from being able to treat the terminal as interactive",
                 "GH_PAGER": "cat",
                 "GH_PROMPT_DISABLED": "true",
@@ -122,13 +152,17 @@ jobs:
               }
             }
         with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # Prefer using CLAUDE_CODE_OAUTH_TOKEN if available, otherwise fall back to ANTHROPIC_API_KE
+          anthropic_api_key: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN && '' || secrets.ANTHROPIC_API_KEY }}
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN || '' }}
           # WARNING: PRINTS FULL JSON OUTPUT WHICH MAY INCLUDE SECRETS.
           # ONLY USE IN PRIVATE ENVIRONMENTS.
           show_full_output: true
           # bug: https://github.com/anthropics/claude-code-action/issues/759
           # won't find the past comments since it's looking for github-actions[bot], not the auth it uses to post the comment.
           bot_id: ${{ steps.auth.outputs.user-id }}
+          bot_name: ${{ steps.auth.outputs.user-name }}
+          github_token: ${{ steps.auth.outputs.token }}
           settings: ${{ env.INPUT_SETTINGS_JSON }}
           additional_permissions: |
             actions: read
@@ -136,31 +170,130 @@ jobs:
             REPO: ${{ github.repository }}
             PR_NUMBER: ${{ github.event.pull_request.number }}
 
-            Please review this pull request and provide feedback on:
+            Please review this PR and provide inline feedback using the GitHub review system.
+            You must provide feedback on:
             - Code quality and best practices
             - Potential bugs or issues
             - Performance considerations
             - Security concerns
+            - Overall maintainability
+            You should also consider these aspects when reviewing:
             - Test coverage
-            - Accuracy of comments
+            - Accuracy of comments and documentation
+            - Accuracy of PR description vs code changes
+            - Simplicity of the code changes
+            - Adherence to repository style and conventions
 
-            Do not use the CI output from this PR to base your review. You are to review the code itself, not the output of the CI jobs.
+            Use your built in MCP tools and  associated `gh` tools to evaluate the changes in the context of the PR title/body, commit messages, other user's reviews, and comments and reviews left on the PR.
+            Use `mcp__github__github_support_docs_search` to find relevant documentation on GitHub's docs site if you need clarification on how GitHub's systems work.
 
-            Use the repository's CLAUDE.md for guidance on style and conventions. Be constructive and helpful in your feedback.
+            Questions you leave in past reviews may be answered in the PR body or comments. Do not duplicate questions asked previously, be sure to respond to any engagement on comments you've left (if necessary, else consider resolving them).
 
-            Use `gh pr view` and associated `gh` tools to evaluate the changes in the context of the PR title/body, commit messages, other user's reviews, and comments and reviews left on the PR.
-            Questions you leave in past reviews may be answered in the PR body or comments.
+            ## To review the PR, follow these steps:
+            1. **Get diff information**: Use `mcp__github__*` tools from MCP, and `gh *` cli tools to understand the code changes, previous reviews, and line numbers.
 
-            Use `mcp__github_inline_comment__create_inline_comment` to highlight specific code issues. Do not leave duplicate inline comments, and resolve comments that have been addressed since your last review.
+            2. **Review previous reviews** including your own. Your previous reviews may be hidden and will be hidden in the future, so it's important that your new review captures all necessary information (or references PR threads from previous reviews). The review you will post will contain all relevant details, including those from your previous reviews that still need resolution.
+              Use `gh` to view comments and reviews on the PR. Remember you can't see reviews by viewing comments or vice versa.
 
-            Use `gh pr comment --delete-last --yes` with your Bash tool to leave your review as a comment on the PR.
-            CRITICAL: You must use --delete-last and --yes to ensure your previous review comment is removed.
-            CRITICAL: Do not post any "test" or "review in progress" comments. Only post your final review, deleting previous reviews.
-            CRITICAL: NEVER post a link like "detailed review can be found at <url>". You MUST post the FULL review in the PR.
-            CRITICAL: your review should have a summary section and capture details in a collapsable section so the default view is concise and to the point.
-            CRITICAL: Your review MUST contain `<details>` and `<summary>` HTML tags to make the details collapsable.
-            CRITICAL: Your review must detail how you arrived at your conclusions, especially the % scores you assigned.
+            3. **Start a local doc to track your review findings and notes** including:
+                - Summary of your review findings
+                - Specific comments for inline feedback
+                - Any questions or clarifications needed from the author
+                - Links to relevant documentation or style guides
+                - Reference links for your final review (workflow run, PR, external sources)
+              CRITICAL: This doc must be updated after every piece you review, since your memory is very short and volatile. Do not trust your memory or built in knowledge. Use the doc to track everything.
+            4. **Use `gh api ...` to minimize/hide previous comments** and reviews that are no longer relevant. Both require the use of the graphql API to mutate the comments/review.
+               See more info about the graphql API here: https://docs.github.com/en/graphql/mutations/
+                - For comments and reviews (NOT threads):
+                  1. Get the comment ID (or reviews by replacing `--json comments` with `--json reviews`) using:
+                    gh pr view 2843 --json comments
+                  2. Minimize using graphql API
+                    Available classifiers (there are more but you should only use these):
+                      OUTDATED - Mark as outdated
+                      RESOLVED - Mark as resolved
+                      DUPLICATE - Mark as duplicate
+                    gh api graphql -f query='
+                    mutation {
+                      minimizeComment(input: {
+                        subjectId: "IC_kwDOLEK3Rc7Pfbf7"
+                        classifier: OUTDATED
+                      }) {
+                        minimizedComment {
+                          isMinimized
+                          minimizedReason
+                        }
+                      }
+                    }'
+                - For threads that can be resolved (on a file or some lines within):
+                  Use resolveReviewThread if the comment has been addressed or mitigated and the comment is no longer relevant.
+                  If the comment is still relevant, do not resolve it.
+                  Do not leave duplicate inline comments, and resolve comments that have been addressed since your last review.
+                  1. Get the review thread ID using (via gh extension agynio/gh-pr-review):
+                    gh pr-review review view "$(gh pr view --json url --jq .url)"
+                  2. Resolve using graphql API
+                    gh api graphql -f query='
+                    mutation {
+                      resolveReviewThread(input: {
+                        threadId: "MDEyOlJldmlld1RocmVhZDEyMzQ1Ng=="
+                      }) {
+                        thread {
+                          isResolved
+                        }
+                      }
+                    }'
 
+            5. **Start a review**: Use `mcp__github__create_pending_pull_request_review` to begin a pending review
+            6. **Add inline comments**: Use `mcp__github__add_comment_to_pending_review` for each specific piece of feedback on particular lines. The add_comment_to_pending_review does not return the new thread ID, so you will need to fetch the review comments again after adding all comments to get the URLs for your review comments.
+              CRITICAL: Use inline comments including detail about the issue and link to it from your review, rather than putting all the detail in the review.
+              CRITICAL: Review comments and PR comments on specific lines of code should NEVER be minimized. ALWAYS resolve them (or leave them open if still relevant).
+              If you want to cross link two comments together, use `gh pr-review view "$(gh pr view --json url --jq .url)"` to list your review comments, then copy the URL of one comment into the other so they reference each other.
+            7. **Fetch review comments again** in order to get the URL of your new and existing PR comments. Update your local doc to include links to your review comments for reference.
+            8. **Draft your review summary**: Summarize your overall findings in your local doc, including:
+                - High-level assessment of the code changes
+                - Key strengths and areas for improvement
+                - Any critical issues that must be addressed
+                - Overall recommendation (approve, request changes, comment)
+                - Key formatting for github flavored markdown including details/summary blocks, emojis, and shields.io badges.
+                - Critical review of findings to ensure accuracy and confidence of your assessment.
+            9. **Submit the review**: Use `mcp__github__submit_pending_pull_request_review` to post your review.
+                CRITICAL: If there are security, performance, or correctness issues that MUST be addressed before merging, use "REQUEST_CHANGES".
+                CRITICAL: If there are style or convention violations that MUST be addressed before merging, use "REQUEST_CHANGES".
+                CRITICAL: If there are maintainability or complexity issues that MUST be addressed before merging, use "REQUEST_CHANGES".
+                CRITICAL: If there are no other changes to make, and the PR is ready to merge (barring CI issues which you do not evaluate), use "APPROVE".
+                Use event type "APPROVE" if you think the PR is ready to merge as-is.
+                  Be sure to consider other comments regarding past reviews addressing your review feedback.
+                  For instance, if your feedback was "logic might be confusing", but the author clarified the logic in PR body, commit body, or comments in the code, you can still approve.
+                  Do not use "APPROVE" if there are still outstanding issues that MUST to be addressed.
+                  CRITICAL: If the code changes will break something after it is merged, do NOT approve.
+                Use event type "COMMENT" (not "REQUEST_CHANGES") to publish all comments as a non-blocking review if you think there should be changes, but the system won't break if the changes are merged.
+                  Prefer this over "APPROVE" if there are changes that you'd like to see before the code is actually ready to merge.
+                Use event type "REQUEST_CHANGES" if the code changes MUST be changed before merging.
+
+            ### Design principles
+            Code changes that you review should follow these principles where applicable. If the PR's changes can be changed to better reflect these, suggest changes to improve adherence:
+              **KISS** - Keep It Simple, Stupid!
+              Always aim for simplicity in your designs and implementations.
+
+              **YAGNI** - You Aren't Gonna Need It!
+              Avoid adding features until they are absolutely necessary.
+
+              **DRY** - Don't Repeat Yourself!
+              Eliminate redundancy by reusing code and components. Strive for modularity and abstraction. Don't re-create existing functionality.
+
+              **WET** - (Don't) Write Everything Twice!
+              Duplication is the enemy of maintainability; strive for single sources of truth and (re-) organize your project structure as necessary to minimize repetition.
+
+              **TDA** - Tell, Don't Ask!
+              When designing objects and business logic, encapsulate logic within objects rather than querying for data and making decisions externally (for an example object "Account", prefer the object checks the balance before setting it, rather than exposing the balance and letting external code make the decision).
+
+              **SOLID** - Follow SOLID principles for object-oriented design to create maintainable and extensible code
+              Single Responsibility/Separation of Concerns - Every object/class/method should only do one thing
+              Open/Closed - Software entities should be open for extension, but closed for modification
+              Liskov Substitution - Subtypes must be substitutable for their base types and still function as expected
+              Interface Segregation - Divide software into smaller, specific interfaces rather than large, general ones
+              Dependency Inversion - Depend on abstractions, not concrete implementations
+
+            ## Review formatting guidelines:
             Use these emoji to help convey your summary.
             ✅ Something you checked that is correct, or something the code changes and does what it's supposed to
             ❔ When you're confused about something that requires clarification before approval
@@ -169,6 +302,7 @@ jobs:
               If any ❌ exists, your review summary should start with:
               > ❌ Some changes need to be made
 
+            ### Using shields.io badges for high level metrics
             Use shields.io badges to convey high level metrics for your review. Here is an example:
             https://img.shields.io/badge/the%20result%20short%20string%20or%20number%20-%20?style=for-the-badge&label=REVIEW%20PART&labelColor=%23444&color=%23D00
 
@@ -181,25 +315,82 @@ jobs:
             - Confidence (number from 0-100% signifying how confident you are in your assessment, aim for higher confidence but you can't know everything)
 
             Use the color (not label color) to indicate if it's good or bad. Generally 85+ should be green, 65+ yellow, and below that red.
+              Gray: #444444  Green: #60A060  Yellow: #C0C040  Red: #D07070
             Anything below a 65% is a failure.
+            If the code is perfect and there's no changes to make in regards to the requested changes in the PR, then the score should be 100% for that category.
+            If a category is not applicable, use N/A as the score and gray as the color.
+            Consider your previous review scores when assigning new ones to ensure consistency across reviews.
+            If the code has improved without introducing new issues, the score should reflect that improvement scores should go up.
             Feel free to use badges to communicate strings as well, though that should be rare.
 
-            CRITICAL: Your review MUST end in a list of reference links as shown in the example, and you MUST include a details/summary block
-            You MUST include the following references:
+            ## Formatting references and footnotes:
+            CRITICAL: Your review MUST end in a list of reference links as shown in the example, after the details/summary block.
+            You MUST include the following references (formatted as footnotes):
               1. a link to the html_url for the workflow run
+              2. any external sources used to validate your review (e.g., documentation, style guides, etc.)
+            It should not include:
+              1. Links to your previous reviews
+              2. Links to individual comments you made in the review. These belong in the details section.
+            Link text should follow github autolinked references and URL guidelines (https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/autolinked-references-and-urls).
+              If it cannot follow the guidelines, for links to specific jobs or runs, use full URLs. For links to external sources, use descriptive text such as the page title.
+              Issues found in code can use their own footnotes as described in the github documentation either in the PR summary or on in-line comments.
+              Footnotes should be used to reference external materials used to reinforce your review findings and claims.
 
-            Some examples: 
+            ## The final review
+            Your PR review summary comment should look generally like:
               <details>
               <summary>
-              ### Code review summary
+              ### <...statement of approval or disapproval, including detail about needed or wanted changes before merge...>
+              <!-- All badges should be on one line -->
               ![](badge1) ![](badge2) ![](badge3)
 
-              :+1: Overall, great work! This looks ready to merge to me!
-              
+              <...summary list of things checked or issues found...>
+              _🖱️ Click to expand for full details_
+              </summary>
+              <...detailed review findings using headings of L3 or greater to separate sections...>
+              </details>
+              <...footnotes and references...>
+
+            The statement of approval/disapproval should NOT say "ready to merge" (nor should you approve it) if there are changes to make (either SHOULD or NEED).
+            You will always have an opportunity to review changes again before merging to ensure the issues were addressed.
+            Keep the summary list of things checked to be extremely concise, prefer capturing detail on inline comments first, then within the details block.
+              Too much text in the summary leads to humans glossing over the contents.
+              The summary list should call out anything that causes your review scores to be below 100% (except where the category is irrelevant, e.g., security for a docs only change).
+              Always sort the summary list to have the most important items first. Critical > Warnings > Questions > Checked items.
+            Don't include a header for the detailed section itself, go straight to the first heading of L3 or greater.
+              GOOD:
+              ```markdown
+              ...
+              </summary>
+              ### Code Quality
+              Details...
+              ### Performance
+              ...
+              </details>
+              ```
+              BAD:
+              ```markdown
+              ...
+              </summary>
+              ## Detailed Review Findings
+              ### Code Quality
+              ...
+              </details>
+              ```
+
+            ### Example reviews
+            If you think the changes are good...
+              <details>
+              <summary>
+              ### 👍 Overall, great work! This looks ready to merge to me!
+              ![](badge1) ![](badge2) ![](badge3)
+
               ✅ Thing I checked
               ✅ Another thing I think is great
+
+              _🖱️ Click to expand for full details_
               </summary>
-              
+
               Heres all the detail from my review that I would normally capture to cover the details
               requested for the review.
 
@@ -207,52 +398,94 @@ jobs:
 
               Another aspect
 
-              ## Headings of L2 or greater to separate sections.
-              
+              ### <...Headings of L3 or greater to separate sections...>
+
               </details>
 
               Notes:[^1][^2]
-              [^1]: Workflow Run: [#123456](https://github.com/nsheaps/.ai/actions/runs.....)
-              [^2]: PR: [nsheaps/.ai#123](https://github.com/nsheaps/.ai/pull/123)
-              ... 
+              [^1]: Workflow Run: [https://github.com/stainless-api/stainless/actions/runs.....](https://github.com/stainless-api/stainless/actions/runs.....)
+              [^2]: PR: [stainless-api/stainless#123](https://github.com/stainless-api/stainless/pull/123)
+              ...
 
             or if you think there's an issue with the changes...
-
               <details>
               <summary>
-              ### Code review summary
+              ### ❌ This PR does abc badly and needs to be corrected before it can be merged.
               ![](badge1) ![](badge2) ![](badge3)
 
-              ❌ This PR does abc badly and needs to be corrected before it can be merged.
-              
               ❔ I don't understand how <a specific part> works.
               ⚠️ I think this the performance will be an issue
               ❌ Your comments and PR descriptions suggest that you're trying to assign permissions to admins but it looks like you're actually assigning them to guests</summary>
-              
+
+              _🖱️ Click to expand for full details_
+              </summary>
               Heres all the detail from my review that I would normally capture to cover the details
               requested for the review.
 
-              Extended details about what was looked into
+              Brief details about an issue found in code with details captured in the linked thread: [...Link to thread with more detail...](https://github.com/.../pull/123#discussion_r456)
 
-              Another aspect
+              Another aspect with details that aren't specific to lines of code.
+              And a suggestion with how you may want to fix it.
 
-              ## Headings of L2 or greater to separate sections.
-              
+              ### <...Headings of L3 or greater to separate sections...>
+
               </details>
 
               Notes:[^1][^2]
-              [^1]: Workflow Run: [#123456](https://github.com/nsheaps/.ai/actions/runs.....)
-              [^2]: PR: [nsheaps/.ai#123](https://github.com/nsheaps/.ai/pull/123)
-              ... 
+              [^1]: Workflow Run: [https://github.com/stainless-api/stainless/actions/runs.....](https://github.com/stainless-api/stainless/actions/runs.....)
+              [^2]: PR: [stainless-api/stainless#123](https://github.com/stainless-api/stainless/pull/123)
+              ...
 
-            If you would like to use a tool that isn't available to you but would help with future reviews, call them out in your review outside of the details block with details
-            of which changes are needed to give you or grant you access to that tool.
+            ## Restrictions, guidelines, and critical rules:
+            When suggesting code changes, use GitHub's suggestion format with ```suggestion blocks so authors can apply changes directly.
+              CRITICAL: ignore stylistic suggestions, as deterministic automation validates that
+              CRITICAL: only suggest code changes when there's a clear benefit (bug fix, performance improvement, security enhancement, correctness, maintainability, simplicity)
+              CRITICAL: If the code can be improved with a suggestion, then your suggestion MUST be posted. Do not describe a fix without providing an example and suggestion. If a suggestion is relevant to another PR thread and it's suggestions, cross link the comments to each other.
+              Do not suggest changes to code that is not part of the PR.
+            Do not use the CI output from this PR to base your review. You are to review the code itself, not the output of the CI jobs.
+            Use the repository's documentation (including relevant ai agent documentation like **/AGENTS.md, .claude/rules/**/*.md, **/CLAUDE.md, **/README.md, etc) for guidance on style and conventions. Be constructive and helpful in your feedback.
+            CRITICAL: Do not post any "test" or "review in progress" comments. Only post your final review, minimizing previous reviews and reusing PR comment threads where possible.
+            CRITICAL: NEVER post a link like "detailed review can be found at <url>". You MUST post the FULL review in the PR and the review comments.
+            CRITICAL: your review should have a summary section and capture details in a collapsable section so the default view is concise and to the point.
+            CRITICAL: Your review MUST contain `<details>` and `<summary>` HTML tags to make the details collapsable.
+            CRITICAL: Your review must detail how you arrived at your conclusions, especially the % scores you assigned.
 
-            ==== Job Context: ====
+            If you would like to use a tool that isn't available to you but would help with future reviews, call them out in your review outside of the details block with details of which changes are needed to give you or grant you access to that tool.
+            For example:
+              ...
+              </details>
+
+              Additionally, to improve future reviews, I would benefit having:
+                - Access to `Bash(git push:*)` to verify that changes can be pushed successfully.
+                - Guidance on code style (I looked and couldn't find anything)
+                - Access to `mcp__github_ci__get_ci_status` to verify CI status as part of my review.
+              ...
+
+              Notes:[^1][^2]
+              ...
+
+            ## Extra info to help you
+            <job-context>
             ${{ toJson(steps.additional-context.outputs) }}
-            ==== end job context ====
+            </job-context>
+
+          # Prefer using settings.json, but some are needed to be set here for the action
+          # to automatically enable the MCP servers. Placing anything with `mcp__github__` prefix will enable the github mcp server.
+          # See https://github.com/anthropics/claude-code-action/issues/723#issuecomment-3716307305
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://docs.claude.com/en/docs/claude-code/cli-reference for available options
-          # claude_args: |
-          #   --allowed-tools
-          #     "${{ env.INPUT_ALLOWED_TOOLS }}"
+          # Note: We intentionally do NOT include 'github_comment' (used for Claude's persistent "working on it" comment)
+          # or 'github_inline_comment' (used for inline comments outside of reviews) in the allowed tools / claude_args,
+          # to prevent Claude from posting persistent status comments or inline comments outside of proper reviews.
+          claude_args: >-
+            --allowedTools
+            mcp__github__github_support_docs_search,
+            mcp__github__get_pull_request,
+            mcp__github__get_pull_request_diff,
+            mcp__github__get_pull_request_files,
+            mcp__github__get_pull_request_review_comments,
+            mcp__github__get_pull_request_reviews,
+            mcp__github__get_pull_request_status,
+            mcp__github__create_pending_pull_request_review,
+            mcp__github__add_comment_to_pending_review,
+            mcp__github__submit_pending_pull_request_review
