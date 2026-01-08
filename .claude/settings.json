@@ -26,8 +26,8 @@
   },
   "includeCoAuthoredBy": false,
   "attribution": {
-    "commit": "Generated with AI (~/src/nsheaps/ai/.claude/settings.json)\n\nCo-Authored-By: Claude Code (Project Config) <noreply@anthropic.com>",
-    "pullRequests": ""
+    "commit": "\n\nCo-Authored-By: Claude Code (nsheaps/.ai) <noreply@anthropic.com>",
+    "pullRequests": "\n\nCo-Authored-By: Claude Code (nsheaps/.ai) <noreply@anthropic.com>"
   },
   "permissions": {
     "allow": [
