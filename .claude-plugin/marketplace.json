@@ -18,8 +18,19 @@
       },
       "source": "./plugins/command-help-skill",
       "category": "utility",
-      "tags": ["utility", "skill"],
-      "keywords": ["commands", "help", "discovery", "skill", "slash-commands", "ai", "assistant"]
+      "tags": [
+        "utility",
+        "skill"
+      ],
+      "keywords": [
+        "commands",
+        "help",
+        "discovery",
+        "skill",
+        "slash-commands",
+        "ai",
+        "assistant"
+      ]
     },
     {
       "name": "commit-command",
@@ -30,8 +41,17 @@
       },
       "source": "./plugins/commit-command",
       "category": "git",
-      "tags": ["utility", "command"],
-      "keywords": ["git", "commit", "automation", "conventional-commits", "semantic-commit"]
+      "tags": [
+        "utility",
+        "command"
+      ],
+      "keywords": [
+        "git",
+        "commit",
+        "automation",
+        "conventional-commits",
+        "semantic-commit"
+      ]
     },
     {
       "name": "commit-skill",
@@ -42,8 +62,18 @@
       },
       "source": "./plugins/commit-skill",
       "category": "git",
-      "tags": ["utility", "skill"],
-      "keywords": ["git", "commit", "skill", "automation", "ai", "smart-commit"]
+      "tags": [
+        "utility",
+        "skill"
+      ],
+      "keywords": [
+        "git",
+        "commit",
+        "skill",
+        "automation",
+        "ai",
+        "smart-commit"
+      ]
     },
     {
       "name": "correct-behavior",
@@ -54,8 +84,17 @@
       },
       "source": "./plugins/correct-behavior",
       "category": "utility",
-      "tags": ["utility", "command"],
-      "keywords": ["behavior", "correction", "rules", "memory", "learning"]
+      "tags": [
+        "utility",
+        "command"
+      ],
+      "keywords": [
+        "behavior",
+        "correction",
+        "rules",
+        "memory",
+        "learning"
+      ]
     },
     {
       "name": "create-command",
@@ -66,8 +105,18 @@
       },
       "source": "./plugins/create-command",
       "category": "utility",
-      "tags": ["utility", "command", "skill"],
-      "keywords": ["slash-command", "command", "create", "automation", "workflow"]
+      "tags": [
+        "utility",
+        "command",
+        "skill"
+      ],
+      "keywords": [
+        "slash-command",
+        "command",
+        "create",
+        "automation",
+        "workflow"
+      ]
     },
     {
       "name": "github-auth-skill",
@@ -78,8 +127,18 @@
       },
       "source": "./plugins/github-auth-skill",
       "category": "git",
-      "tags": ["utility", "skill"],
-      "keywords": ["github", "authentication", "device-auth", "gh", "cli", "skill"]
+      "tags": [
+        "utility",
+        "skill"
+      ],
+      "keywords": [
+        "github",
+        "authentication",
+        "device-auth",
+        "gh",
+        "cli",
+        "skill"
+      ]
     },
     {
       "name": "linear-mcp-sync",
@@ -90,8 +149,17 @@
       },
       "source": "./plugins/linear-mcp-sync",
       "category": "utility",
-      "tags": ["utility"],
-      "keywords": ["linear", "mcp", "hooks", "sync", "issue-tracking", "conflict-detection"]
+      "tags": [
+        "utility"
+      ],
+      "keywords": [
+        "linear",
+        "mcp",
+        "hooks",
+        "sync",
+        "issue-tracking",
+        "conflict-detection"
+      ]
     },
     {
       "name": "memory-manager",
@@ -102,8 +170,17 @@
       },
       "source": "./plugins/memory-manager",
       "category": "utility",
-      "tags": ["utility", "skill"],
-      "keywords": ["memory", "preferences", "claude.md", "context", "instructions"]
+      "tags": [
+        "utility",
+        "skill"
+      ],
+      "keywords": [
+        "memory",
+        "preferences",
+        "claude.md",
+        "context",
+        "instructions"
+      ]
     },
     {
       "name": "og-image",
@@ -114,7 +191,10 @@
       },
       "source": "./plugins/og-image",
       "category": "utility",
-      "tags": ["utility", "skill"],
+      "tags": [
+        "utility",
+        "skill"
+      ],
       "keywords": [
         "generation",
         "image",
@@ -127,6 +207,27 @@
       ]
     },
     {
+      "name": "review-changes",
+      "description": "Review code changes with detailed feedback on quality, security, performance, and maintainability",
+      "version": "0.0.1",
+      "author": {
+        "name": "Claude Code Community"
+      },
+      "source": "./plugins/review-changes",
+      "category": "utility",
+      "tags": [
+        "utility",
+        "command"
+      ],
+      "keywords": [
+        "code-review",
+        "review",
+        "quality",
+        "security",
+        "lint"
+      ]
+    },
+    {
       "name": "safety-evaluation-prompt",
       "description": "Pre-tool-call safety evaluation using prompt-style hooks for inline AI evaluation",
       "version": "0.0.1",
@@ -135,8 +236,17 @@
       },
       "source": "./plugins/safety-evaluation-prompt",
       "category": "utility",
-      "tags": ["utility"],
-      "keywords": ["safety", "security", "hooks", "pre-tool-call", "evaluation", "prompt"]
+      "tags": [
+        "utility"
+      ],
+      "keywords": [
+        "safety",
+        "security",
+        "hooks",
+        "pre-tool-call",
+        "evaluation",
+        "prompt"
+      ]
     },
     {
       "name": "safety-evaluation-script",
@@ -147,8 +257,17 @@
       },
       "source": "./plugins/safety-evaluation-script",
       "category": "utility",
-      "tags": ["utility"],
-      "keywords": ["safety", "security", "hooks", "pre-tool-call", "evaluation", "haiku"]
+      "tags": [
+        "utility"
+      ],
+      "keywords": [
+        "safety",
+        "security",
+        "hooks",
+        "pre-tool-call",
+        "evaluation",
+        "haiku"
+      ]
     },
     {
       "name": "skills-maintenance",
@@ -159,8 +278,18 @@
       },
       "source": "./plugins/skills-maintenance",
       "category": "utility",
-      "tags": ["utility", "skill"],
-      "keywords": ["skills", "maintenance", "update", "improve", "refactor", "documentation"]
+      "tags": [
+        "utility",
+        "skill"
+      ],
+      "keywords": [
+        "skills",
+        "maintenance",
+        "update",
+        "improve",
+        "refactor",
+        "documentation"
+      ]
     },
     {
       "name": "sync-settings",
@@ -171,7 +300,9 @@
       },
       "source": "./plugins/sync-settings",
       "category": "utility",
-      "tags": ["utility"],
+      "tags": [
+        "utility"
+      ],
       "keywords": [
         "sync",
         "settings",
@@ -192,7 +323,10 @@
       },
       "source": "./plugins/task-parallelization",
       "category": "utility",
-      "tags": ["utility", "skill"],
+      "tags": [
+        "utility",
+        "skill"
+      ],
       "keywords": [
         "parallelization",
         "task",
