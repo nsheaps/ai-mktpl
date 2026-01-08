@@ -296,3 +296,5 @@ Creates: `~/src/backend/.claude/commands/deploy-staging.md`
 - **Iterative refinement:** Commands can be updated using this same command
 - **Don't over-engineer:** Start simple, add complexity only when needed
 - **Reference the skill:** Complex scenarios should consult the full SKILL.md
+- **Use claude-code-guide agent:** You can and should consider using the `claude-code-guide` agent to help you with any changes needed to Claude Code configuration files.
+- **Work on main branch:** When creating commands, make the change directly on the main branch and `/commit` and push after completing the creation.
