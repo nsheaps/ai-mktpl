@@ -1,0 +1,12 @@
+{
+  "name": "spec-validation",
+  "version": "1.0.0",
+  "description": "Spec-based development plugin that captures requirements into spec files and validates deliverables against them",
+  "author": {
+    "name": "Claude Code Community",
+    "url": "https://github.com/nsheaps/.ai"
+  },
+  "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/spec-validation",
+  "repository": "https://github.com/nsheaps/.ai",
+  "keywords": ["spec", "requirements", "validation", "development", "planning", "testing"]
+}
