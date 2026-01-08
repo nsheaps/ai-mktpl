@@ -5,6 +5,7 @@ Rules for demonstrating understanding and acknowledging gaps.
 ## Responding to "Did You Miss That?" Questions
 
 When a user asks a clarifying question like:
+
 - "...or did you miss that?"
 - "Did you see the part where I said...?"
 - "Do you remember when I mentioned...?"
@@ -37,12 +38,12 @@ Then actually search for or re-read the relevant context before proceeding.
 
 ## Anti-Patterns to Avoid
 
-| Bad Response | Why It's Wrong |
-|--------------|----------------|
-| "Yes, I'll do X" | Doesn't demonstrate whether you actually saw it |
-| "Of course" | Dismissive, doesn't prove understanding |
-| "Right, I was going to do that" | May be covering for a missed detail |
-| "Got it" | No evidence of retention |
+| Bad Response                    | Why It's Wrong                                  |
+| ------------------------------- | ----------------------------------------------- |
+| "Yes, I'll do X"                | Doesn't demonstrate whether you actually saw it |
+| "Of course"                     | Dismissive, doesn't prove understanding         |
+| "Right, I was going to do that" | May be covering for a missed detail             |
+| "Got it"                        | No evidence of retention                        |
 
 ## Correct Pattern
 
