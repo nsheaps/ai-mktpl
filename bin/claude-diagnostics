@@ -1,0 +1,152 @@
+#!/usr/bin/env bash
+# Claude Code Diagnostics - captures /status-like info, /context, and config files
+# Usage: claude-diagnostics [--no-archive]
+#   --no-archive  Only print diagnostics to stdout, don't create archive
+
+set -euo pipefail
+
+NO_ARCHIVE=false
+if [[ "${1:-}" == "--no-archive" ]]; then
+  NO_ARCHIVE=true
+fi
+
+# Create temp directory for all outputs
+DIAG_DIR=$(mktemp -d)
+TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+# Gather Claude Code stream output
+STREAM_OUTPUT=$(echo '{"type":"user","message":{"role":"user","content":"/context"},"session_id":"default","parent_tool_use_id":null}' \
+  | claude -p --input-format stream-json --output-format stream-json 2>&1)
+
+# Extract init message (type=system, subtype=init)
+INIT_JSON=$(echo "$STREAM_OUTPUT" | jq -c 'select(.type=="system" and .subtype=="init")' | head -1)
+
+# Extract context output from user message
+CONTEXT_OUTPUT=$(echo "$STREAM_OUTPUT" | grep '"type":"user"' | jq -r '.message.content' \
+  | sed 's/<local-command-stdout>//g' | sed 's/<\/local-command-stdout>//g' 2>/dev/null || echo "(failed to parse)")
+
+# Generate diagnostics report
+generate_report() {
+  cat <<EOF
+=== Claude Code Diagnostics ===
+Generated: $TIMESTAMP
+
+## Status
+
+$(echo "$INIT_JSON" | jq -r '
+"Version: \(.claude_code_version // "unknown")
+Model: \(.model // "unknown")
+Permission Mode: \(.permissionMode // "unknown")
+API Key Source: \(.apiKeySource // "unknown")
+Working Directory: \(.cwd // "unknown")
+
+### MCP Servers
+\(if (.mcp_servers // []) | length > 0 then
+  (.mcp_servers | map("- \(.name): \(.status)") | join("\n"))
+else
+  "(none)"
+end)
+
+### Plugins
+\(if (.plugins // []) | length > 0 then
+  (.plugins | map("- \(.name) (\(.path))") | join("\n"))
+else
+  "(none)"
+end)
+
+### Slash Commands
+\((.slash_commands // []) | join(", ") | if . == "" then "(none)" else . end)
+
+### Built-in Agents
+\((.agents // []) | join(", ") | if . == "" then "(none)" else . end)
+
+### Tools
+\((.tools // []) | join(", ") | if . == "" then "(none)" else . end)"')
+
+## Context
+$CONTEXT_OUTPUT
+
+=== End Diagnostics ===
+EOF
+}
+
+# Print report to stdout
+REPORT=$(generate_report)
+echo "$REPORT"
+
+if [[ "$NO_ARCHIVE" == "true" ]]; then
+  exit 0
+fi
+
+# Save report to temp directory
+echo "$REPORT" > "$DIAG_DIR/diagnostics.md"
+
+# Save raw init JSON for debugging
+echo "$INIT_JSON" | jq '.' > "$DIAG_DIR/init.json" 2>/dev/null || echo "{}" > "$DIAG_DIR/init.json"
+
+# Copy config files (with error handling for missing files)
+copy_if_exists() {
+  local src="$1"
+  local dest="$2"
+  if [[ -e "$src" ]]; then
+    mkdir -p "$(dirname "$dest")"
+    if [[ -d "$src" ]]; then
+      cp -r "$src" "$dest"
+    else
+      cp "$src" "$dest"
+    fi
+    return 0
+  fi
+  return 1
+}
+
+# User-level config
+USER_DIR="$DIAG_DIR/user-config"
+mkdir -p "$USER_DIR"
+copy_if_exists "$HOME/.claude/settings.json" "$USER_DIR/settings.json" || true
+copy_if_exists "$HOME/.claude/settings.local.json" "$USER_DIR/settings.local.json" || true
+copy_if_exists "$HOME/.claude/CLAUDE.md" "$USER_DIR/CLAUDE.md" || true
+copy_if_exists "$HOME/.claude/rules" "$USER_DIR/rules" || true
+copy_if_exists "$HOME/.claude/commands" "$USER_DIR/commands" || true
+copy_if_exists "$HOME/.claude/agents" "$USER_DIR/agents" || true
+
+# Project-level config (from cwd)
+PROJECT_DIR="$DIAG_DIR/project-config"
+mkdir -p "$PROJECT_DIR"
+CWD=$(echo "$INIT_JSON" | jq -r '.cwd // "."')
+copy_if_exists "$CWD/.claude/settings.json" "$PROJECT_DIR/settings.json" || true
+copy_if_exists "$CWD/.claude/settings.local.json" "$PROJECT_DIR/settings.local.json" || true
+copy_if_exists "$CWD/.claude/CLAUDE.md" "$PROJECT_DIR/CLAUDE.md" || true
+copy_if_exists "$CWD/.claude/rules" "$PROJECT_DIR/rules" || true
+copy_if_exists "$CWD/.claude/commands" "$PROJECT_DIR/commands" || true
+copy_if_exists "$CWD/.claude/agents" "$PROJECT_DIR/agents" || true
+copy_if_exists "$CWD/AGENTS.md" "$PROJECT_DIR/AGENTS.md" || true
+
+# Also check .ai folder (user's custom structure)
+copy_if_exists "$HOME/.ai/rules" "$USER_DIR/ai-rules" || true
+copy_if_exists "$CWD/.ai/rules" "$PROJECT_DIR/ai-rules" || true
+copy_if_exists "$CWD/.ai/commands" "$PROJECT_DIR/ai-commands" || true
+copy_if_exists "$CWD/.ai/agents" "$PROJECT_DIR/ai-agents" || true
+copy_if_exists "$CWD/.ai/CLAUDE.md" "$PROJECT_DIR/ai-CLAUDE.md" || true
+
+# Create manifest of what was collected
+find "$DIAG_DIR" -type f | sed "s|$DIAG_DIR/||" | sort > "$DIAG_DIR/manifest.txt"
+
+# Create archive with clean folder name
+ARCHIVE_NAME="claude-diagnostics-$(date -u +%Y%m%d-%H%M%S)"
+ARCHIVE_PATH="/tmp/${ARCHIVE_NAME}.tar.gz"
+
+# Rename temp dir to have clean name for archive
+CLEAN_DIR="$(dirname "$DIAG_DIR")/$ARCHIVE_NAME"
+mv "$DIAG_DIR" "$CLEAN_DIR"
+DIAG_DIR="$CLEAN_DIR"
+
+tar -czf "$ARCHIVE_PATH" -C "$(dirname "$DIAG_DIR")" "$(basename "$DIAG_DIR")"
+
+echo ""
+echo "=== Archive Created ==="
+echo "Archive: $ARCHIVE_PATH"
+echo "Uncompressed: $DIAG_DIR"
+echo ""
+echo "Contents:"
+cat "$DIAG_DIR/manifest.txt" | sed 's/^/  /'
