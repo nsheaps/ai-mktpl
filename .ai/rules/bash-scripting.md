@@ -57,36 +57,24 @@ This prevents excess calls and re-runs to get more data.
 
 ## Output Processing
 
-Avoid using `| tail` and `| head` to get specific lines from command output.
+Avoid using pipes like `| tail` and `| head` to get specific lines from command output.
 
-Instead:
-
-1. Log output to a file (use `| tee` if you need to see it too)
-2. Use `sed`, `awk`, or `grep` with context options to extract needed lines
+Instead focus on dumping output to a file and analyzing that with the appropriate tools.
 
 ## Script Files
 
 Scripts longer than 3 lines MUST be in separate files:
 
 1. Write the script to a file with appropriate extension (`.sh`, `.bash`)
-2. Include shebang (e.g., `#!/bin/bash`)
+2. Include shebang (e.g., `#!/usr/bin/env bash`)
 3. This enables proper linting, formatting, and testing
 
-**Why:** Inline scripts in YAML cannot be linted, are hard to test locally, and reduce code clarity.
-
-**Applies to:**
-
-- GitHub Actions workflow steps
-- Composite action steps
-- Any embedded shell code in YAML/JSON
-
-**Local executability requirement:**
-All CI scripts MUST be executable locally (default in dry-run mode) to provide fast DX feedback before CI runs.
-
-**JSON manipulation:** For scripts that primarily manipulate JSON, prefer using JavaScript via `actions/github-script` or Node.js for better readability and type safety.
+**Why:** Inline scripts in other file types cannot be linted, are hard to test, and reduce code clarity.
 
 ## Structured Data
 
 NEVER write structured data to a file by manually formatting it with `echo` or heredoc unless absolutely necessary.
 
 Use proper serialization tools or libraries instead.
+
+Use tools like `jq` for JSON, `yq` for YAML, etc., to generate, manipulate, and read structured data. files.
