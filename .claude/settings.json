@@ -40,14 +40,16 @@
   },
   "includeCoAuthoredBy": false,
   "attribution": {
-    "commit": "\n\nCo-Authored-By: Claude Code (nsheaps/.ai) <noreply@anthropic.com>",
-    "pullRequests": "\n\nCo-Authored-By: Claude Code (nsheaps/.ai) <noreply@anthropic.com>"
+    "commit": "\nCo-Authored-By: Claude Code (${CLAUDE_PROJECT_DIR}) <noreply@anthropic.com>",
+    "pullRequests": "\nCo-Authored-By: Claude Code (${CLAUDE_PROJECT_DIR}) <noreply@anthropic.com>"
   },
   "permissions": {
     "allow": [
       "Skill",
       "SlashCommand",
       "WebSearch",
+      "Glob",
+      "Grep",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:*.github.com)",
       "WebFetch(domain:*.githubusercontent.com)",

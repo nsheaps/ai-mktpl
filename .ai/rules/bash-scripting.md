@@ -2,6 +2,10 @@
 
 Guidelines for shell commands and script handling.
 
+## Trying to do something in Bash? Try these tools first
+
+For finding files, searching text, and working with structured data, prefer these specialized tools over raw Bash scripting: `Grep`, `Glob`. These tools require no permission prompts and should be used prior to trying to find stuff with Bash. This is preferred also for safety reasons, as using those tools don't allow you to chain results to potentially unsafe commands.
+
 ## Command Chaining in Bash Tool
 
 When using the Bash tool directly:
