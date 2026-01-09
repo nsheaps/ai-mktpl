@@ -1,14 +1,49 @@
 #!/usr/bin/env bash
 # Claude Code Diagnostics - captures /status-like info, /context, and config files
-# Usage: claude-diagnostics [--no-archive]
-#   --no-archive  Only print diagnostics to stdout, don't create archive
+# Usage: claude-diagnostics [OPTIONS]
+#
+# Options:
+#   -v, --verbose     Print diagnostics to console (quiet by default)
+#   --no-archive      Only print diagnostics to stdout, don't create archive
+#   --no-user         Exclude user-level config (~/.claude/, ~/.ai/)
+#   --no-project      Exclude project-level config (.claude/, .ai/)
+#   --no-rules        Exclude rules files
+#   --no-agents       Exclude agent definitions
+#   --no-commands     Exclude command/skill files
+#   --no-settings     Exclude settings.json files
+#   -h, --help        Show this help message
 
 set -euo pipefail
 
+# Parse arguments
+VERBOSE=false
 NO_ARCHIVE=false
-if [[ "${1:-}" == "--no-archive" ]]; then
-  NO_ARCHIVE=true
-fi
+NO_USER=false
+NO_PROJECT=false
+NO_RULES=false
+NO_AGENTS=false
+NO_COMMANDS=false
+NO_SETTINGS=false
+
+show_help() {
+  sed -n '2,14p' "$0" | sed 's/^# //' | sed 's/^#//'
+  exit 0
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -v|--verbose)  VERBOSE=true; shift ;;
+    --no-archive)  NO_ARCHIVE=true; shift ;;
+    --no-user)     NO_USER=true; shift ;;
+    --no-project)  NO_PROJECT=true; shift ;;
+    --no-rules)    NO_RULES=true; shift ;;
+    --no-agents)   NO_AGENTS=true; shift ;;
+    --no-commands) NO_COMMANDS=true; shift ;;
+    --no-settings) NO_SETTINGS=true; shift ;;
+    -h|--help)     show_help ;;
+    *)             echo "Unknown option: $1" >&2; show_help ;;
+  esac
+done
 
 # Create temp directory for all outputs
 DIAG_DIR=$(mktemp -d)
@@ -70,12 +105,18 @@ $CONTEXT_OUTPUT
 EOF
 }
 
-# Print report to stdout
+# Generate report
 REPORT=$(generate_report)
-echo "$REPORT"
 
+# --no-archive implies verbose (print to stdout only)
 if [[ "$NO_ARCHIVE" == "true" ]]; then
+  echo "$REPORT"
   exit 0
+fi
+
+# Print to console if verbose
+if [[ "$VERBOSE" == "true" ]]; then
+  echo "$REPORT"
 fi
 
 # Save report to temp directory
@@ -91,46 +132,89 @@ copy_if_exists() {
   if [[ -e "$src" ]]; then
     mkdir -p "$(dirname "$dest")"
     if [[ -d "$src" ]]; then
-      cp -r "$src" "$dest"
+      # -L follows symlinks to copy actual content (not broken symlinks)
+      cp -rL "$src" "$dest"
     else
-      cp "$src" "$dest"
+      cp -L "$src" "$dest"
     fi
     return 0
   fi
   return 1
 }
 
+# Track what categories were included
+INCLUDED_CATEGORIES=()
+
+CWD=$(echo "$INIT_JSON" | jq -r '.cwd // "."')
+
 # User-level config
-USER_DIR="$DIAG_DIR/user-config"
-mkdir -p "$USER_DIR"
-copy_if_exists "$HOME/.claude/settings.json" "$USER_DIR/settings.json" || true
-copy_if_exists "$HOME/.claude/settings.local.json" "$USER_DIR/settings.local.json" || true
-copy_if_exists "$HOME/.claude/CLAUDE.md" "$USER_DIR/CLAUDE.md" || true
-copy_if_exists "$HOME/.claude/rules" "$USER_DIR/rules" || true
-copy_if_exists "$HOME/.claude/commands" "$USER_DIR/commands" || true
-copy_if_exists "$HOME/.claude/agents" "$USER_DIR/agents" || true
+if [[ "$NO_USER" != "true" ]]; then
+  USER_DIR="$DIAG_DIR/user-config"
+  mkdir -p "$USER_DIR"
+
+  if [[ "$NO_SETTINGS" != "true" ]]; then
+    copy_if_exists "$HOME/.claude/settings.json" "$USER_DIR/settings.json" && INCLUDED_CATEGORIES+=("user-settings") || true
+    copy_if_exists "$HOME/.claude/settings.local.json" "$USER_DIR/settings.local.json" || true
+  fi
+
+  copy_if_exists "$HOME/.claude/CLAUDE.md" "$USER_DIR/CLAUDE.md" && INCLUDED_CATEGORIES+=("user-claude-md") || true
+
+  if [[ "$NO_RULES" != "true" ]]; then
+    copy_if_exists "$HOME/.claude/rules" "$USER_DIR/rules" && INCLUDED_CATEGORIES+=("user-rules") || true
+    copy_if_exists "$HOME/.ai/rules" "$USER_DIR/ai-rules" || true
+  fi
+
+  if [[ "$NO_COMMANDS" != "true" ]]; then
+    copy_if_exists "$HOME/.claude/commands" "$USER_DIR/commands" && INCLUDED_CATEGORIES+=("user-commands") || true
+  fi
+
+  if [[ "$NO_AGENTS" != "true" ]]; then
+    copy_if_exists "$HOME/.claude/agents" "$USER_DIR/agents" && INCLUDED_CATEGORIES+=("user-agents") || true
+  fi
+fi
 
 # Project-level config (from cwd)
-PROJECT_DIR="$DIAG_DIR/project-config"
-mkdir -p "$PROJECT_DIR"
-CWD=$(echo "$INIT_JSON" | jq -r '.cwd // "."')
-copy_if_exists "$CWD/.claude/settings.json" "$PROJECT_DIR/settings.json" || true
-copy_if_exists "$CWD/.claude/settings.local.json" "$PROJECT_DIR/settings.local.json" || true
-copy_if_exists "$CWD/.claude/CLAUDE.md" "$PROJECT_DIR/CLAUDE.md" || true
-copy_if_exists "$CWD/.claude/rules" "$PROJECT_DIR/rules" || true
-copy_if_exists "$CWD/.claude/commands" "$PROJECT_DIR/commands" || true
-copy_if_exists "$CWD/.claude/agents" "$PROJECT_DIR/agents" || true
-copy_if_exists "$CWD/AGENTS.md" "$PROJECT_DIR/AGENTS.md" || true
+if [[ "$NO_PROJECT" != "true" ]]; then
+  PROJECT_DIR="$DIAG_DIR/project-config"
+  mkdir -p "$PROJECT_DIR"
 
-# Also check .ai folder (user's custom structure)
-copy_if_exists "$HOME/.ai/rules" "$USER_DIR/ai-rules" || true
-copy_if_exists "$CWD/.ai/rules" "$PROJECT_DIR/ai-rules" || true
-copy_if_exists "$CWD/.ai/commands" "$PROJECT_DIR/ai-commands" || true
-copy_if_exists "$CWD/.ai/agents" "$PROJECT_DIR/ai-agents" || true
-copy_if_exists "$CWD/.ai/CLAUDE.md" "$PROJECT_DIR/ai-CLAUDE.md" || true
+  if [[ "$NO_SETTINGS" != "true" ]]; then
+    copy_if_exists "$CWD/.claude/settings.json" "$PROJECT_DIR/settings.json" && INCLUDED_CATEGORIES+=("project-settings") || true
+    copy_if_exists "$CWD/.claude/settings.local.json" "$PROJECT_DIR/settings.local.json" || true
+  fi
+
+  copy_if_exists "$CWD/.claude/CLAUDE.md" "$PROJECT_DIR/CLAUDE.md" && INCLUDED_CATEGORIES+=("project-claude-md") || true
+  copy_if_exists "$CWD/AGENTS.md" "$PROJECT_DIR/AGENTS.md" || true
+  copy_if_exists "$CWD/.ai/CLAUDE.md" "$PROJECT_DIR/ai-CLAUDE.md" || true
+
+  if [[ "$NO_RULES" != "true" ]]; then
+    copy_if_exists "$CWD/.claude/rules" "$PROJECT_DIR/rules" && INCLUDED_CATEGORIES+=("project-rules") || true
+    copy_if_exists "$CWD/.ai/rules" "$PROJECT_DIR/ai-rules" || true
+  fi
+
+  if [[ "$NO_COMMANDS" != "true" ]]; then
+    copy_if_exists "$CWD/.claude/commands" "$PROJECT_DIR/commands" && INCLUDED_CATEGORIES+=("project-commands") || true
+    copy_if_exists "$CWD/.ai/commands" "$PROJECT_DIR/ai-commands" || true
+  fi
+
+  if [[ "$NO_AGENTS" != "true" ]]; then
+    copy_if_exists "$CWD/.claude/agents" "$PROJECT_DIR/agents" && INCLUDED_CATEGORIES+=("project-agents") || true
+    copy_if_exists "$CWD/.ai/agents" "$PROJECT_DIR/ai-agents" || true
+  fi
+fi
 
 # Create manifest of what was collected
 find "$DIAG_DIR" -type f | sed "s|$DIAG_DIR/||" | sort > "$DIAG_DIR/manifest.txt"
+
+# Count files by category
+count_files() {
+  local dir="$1"
+  if [[ -d "$dir" ]]; then
+    find "$dir" -type f | wc -l | tr -d ' '
+  else
+    echo "0"
+  fi
+}
 
 # Create archive with clean folder name
 ARCHIVE_NAME="claude-diagnostics-$(date -u +%Y%m%d-%H%M%S)"
@@ -143,10 +227,43 @@ DIAG_DIR="$CLEAN_DIR"
 
 tar -czf "$ARCHIVE_PATH" -C "$(dirname "$DIAG_DIR")" "$(basename "$DIAG_DIR")"
 
+# Generate summary output
 echo ""
 echo "=== Archive Created ==="
-echo "Archive: $ARCHIVE_PATH"
-echo "Uncompressed: $DIAG_DIR"
 echo ""
-echo "Contents:"
-cat "$DIAG_DIR/manifest.txt" | sed 's/^/  /'
+echo "Contents included:"
+echo "  - diagnostics.md (this report)"
+echo "  - init.json (raw Claude Code init data)"
+
+if [[ "$NO_USER" != "true" ]]; then
+  USER_COUNT=$(count_files "$DIAG_DIR/user-config")
+  if [[ "$USER_COUNT" -gt 0 ]]; then
+    echo "  - user-config/ ($USER_COUNT files: settings, rules, commands, agents from ~/.claude/)"
+  fi
+fi
+
+if [[ "$NO_PROJECT" != "true" ]]; then
+  PROJECT_COUNT=$(count_files "$DIAG_DIR/project-config")
+  if [[ "$PROJECT_COUNT" -gt 0 ]]; then
+    echo "  - project-config/ ($PROJECT_COUNT files: settings, rules, commands, agents from .claude/, .ai/)"
+  fi
+fi
+
+echo ""
+echo "Files:"
+echo "  Archive:      $ARCHIVE_PATH"
+echo "  Uncompressed: $DIAG_DIR"
+echo ""
+echo "Review contents before sharing (check for sensitive data):"
+echo "  less $DIAG_DIR/manifest.txt"
+echo "  less $DIAG_DIR/diagnostics.md"
+echo ""
+echo "To regenerate with options:"
+echo "  --no-user      Exclude ~/.claude/ config"
+echo "  --no-project   Exclude project .claude/.ai/ config"
+echo "  --no-settings  Exclude settings.json files"
+echo "  --no-rules     Exclude rules files"
+echo "  --no-agents    Exclude agent definitions"
+echo "  --no-commands  Exclude command/skill files"
+echo "  --no-archive   Don't create archive, print only"
+echo "  -v, --verbose  Print full diagnostics (not contents of files) to console"
