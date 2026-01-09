@@ -147,60 +147,68 @@ INCLUDED_CATEGORIES=()
 
 CWD=$(echo "$INIT_JSON" | jq -r '.cwd // "."')
 
-# User-level config
+# User-level config (preserves .claude/ and .ai/ directory structure)
 if [[ "$NO_USER" != "true" ]]; then
   USER_DIR="$DIAG_DIR/user-config"
-  mkdir -p "$USER_DIR"
+  mkdir -p "$USER_DIR/.claude" "$USER_DIR/.ai"
 
   if [[ "$NO_SETTINGS" != "true" ]]; then
-    copy_if_exists "$HOME/.claude/settings.json" "$USER_DIR/settings.json" && INCLUDED_CATEGORIES+=("user-settings") || true
-    copy_if_exists "$HOME/.claude/settings.local.json" "$USER_DIR/settings.local.json" || true
+    copy_if_exists "$HOME/.claude/settings.json" "$USER_DIR/.claude/settings.json" && INCLUDED_CATEGORIES+=("user-settings") || true
+    copy_if_exists "$HOME/.claude/settings.local.json" "$USER_DIR/.claude/settings.local.json" || true
   fi
 
-  copy_if_exists "$HOME/.claude/CLAUDE.md" "$USER_DIR/CLAUDE.md" && INCLUDED_CATEGORIES+=("user-claude-md") || true
+  copy_if_exists "$HOME/.claude/CLAUDE.md" "$USER_DIR/.claude/CLAUDE.md" && INCLUDED_CATEGORIES+=("user-claude-md") || true
 
   if [[ "$NO_RULES" != "true" ]]; then
-    copy_if_exists "$HOME/.claude/rules" "$USER_DIR/rules" && INCLUDED_CATEGORIES+=("user-rules") || true
-    copy_if_exists "$HOME/.ai/rules" "$USER_DIR/ai-rules" || true
+    copy_if_exists "$HOME/.claude/rules" "$USER_DIR/.claude/rules" && INCLUDED_CATEGORIES+=("user-rules") || true
+    copy_if_exists "$HOME/.ai/rules" "$USER_DIR/.ai/rules" || true
   fi
 
   if [[ "$NO_COMMANDS" != "true" ]]; then
-    copy_if_exists "$HOME/.claude/commands" "$USER_DIR/commands" && INCLUDED_CATEGORIES+=("user-commands") || true
+    copy_if_exists "$HOME/.claude/commands" "$USER_DIR/.claude/commands" && INCLUDED_CATEGORIES+=("user-commands") || true
   fi
 
   if [[ "$NO_AGENTS" != "true" ]]; then
-    copy_if_exists "$HOME/.claude/agents" "$USER_DIR/agents" && INCLUDED_CATEGORIES+=("user-agents") || true
+    copy_if_exists "$HOME/.claude/agents" "$USER_DIR/.claude/agents" && INCLUDED_CATEGORIES+=("user-agents") || true
   fi
+
+  # Remove empty directories
+  rmdir "$USER_DIR/.claude" 2>/dev/null || true
+  rmdir "$USER_DIR/.ai" 2>/dev/null || true
 fi
 
-# Project-level config (from cwd)
+# Project-level config (preserves .claude/ and .ai/ directory structure)
 if [[ "$NO_PROJECT" != "true" ]]; then
   PROJECT_DIR="$DIAG_DIR/project-config"
-  mkdir -p "$PROJECT_DIR"
+  mkdir -p "$PROJECT_DIR/.claude" "$PROJECT_DIR/.ai"
 
   if [[ "$NO_SETTINGS" != "true" ]]; then
-    copy_if_exists "$CWD/.claude/settings.json" "$PROJECT_DIR/settings.json" && INCLUDED_CATEGORIES+=("project-settings") || true
-    copy_if_exists "$CWD/.claude/settings.local.json" "$PROJECT_DIR/settings.local.json" || true
+    copy_if_exists "$CWD/.claude/settings.json" "$PROJECT_DIR/.claude/settings.json" && INCLUDED_CATEGORIES+=("project-settings") || true
+    copy_if_exists "$CWD/.claude/settings.local.json" "$PROJECT_DIR/.claude/settings.local.json" || true
   fi
 
-  copy_if_exists "$CWD/.claude/CLAUDE.md" "$PROJECT_DIR/CLAUDE.md" && INCLUDED_CATEGORIES+=("project-claude-md") || true
+  copy_if_exists "$CWD/.claude/CLAUDE.md" "$PROJECT_DIR/.claude/CLAUDE.md" && INCLUDED_CATEGORIES+=("project-claude-md") || true
   copy_if_exists "$CWD/AGENTS.md" "$PROJECT_DIR/AGENTS.md" || true
-  copy_if_exists "$CWD/.ai/CLAUDE.md" "$PROJECT_DIR/ai-CLAUDE.md" || true
+  copy_if_exists "$CWD/.ai/CLAUDE.md" "$PROJECT_DIR/.ai/CLAUDE.md" || true
 
   if [[ "$NO_RULES" != "true" ]]; then
-    copy_if_exists "$CWD/.claude/rules" "$PROJECT_DIR/rules" && INCLUDED_CATEGORIES+=("project-rules") || true
-    copy_if_exists "$CWD/.ai/rules" "$PROJECT_DIR/ai-rules" || true
+    copy_if_exists "$CWD/.claude/rules" "$PROJECT_DIR/.claude/rules" && INCLUDED_CATEGORIES+=("project-rules") || true
+    copy_if_exists "$CWD/.ai/rules" "$PROJECT_DIR/.ai/rules" || true
   fi
 
   if [[ "$NO_COMMANDS" != "true" ]]; then
-    copy_if_exists "$CWD/.claude/commands" "$PROJECT_DIR/commands" && INCLUDED_CATEGORIES+=("project-commands") || true
-    copy_if_exists "$CWD/.ai/commands" "$PROJECT_DIR/ai-commands" || true
+    copy_if_exists "$CWD/.claude/commands" "$PROJECT_DIR/.claude/commands" && INCLUDED_CATEGORIES+=("project-commands") || true
+    copy_if_exists "$CWD/.ai/commands" "$PROJECT_DIR/.ai/commands" || true
   fi
 
   if [[ "$NO_AGENTS" != "true" ]]; then
-    copy_if_exists "$CWD/.claude/agents" "$PROJECT_DIR/agents" && INCLUDED_CATEGORIES+=("project-agents") || true
-    copy_if_exists "$CWD/.ai/agents" "$PROJECT_DIR/ai-agents" || true
+    copy_if_exists "$CWD/.claude/agents" "$PROJECT_DIR/.claude/agents" && INCLUDED_CATEGORIES+=("project-agents") || true
+    copy_if_exists "$CWD/.ai/agents" "$PROJECT_DIR/.ai/agents" || true
   fi
+
+  # Remove empty directories
+  rmdir "$PROJECT_DIR/.claude" 2>/dev/null || true
+  rmdir "$PROJECT_DIR/.ai" 2>/dev/null || true
 fi
 
 # Create manifest of what was collected
