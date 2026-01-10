@@ -69,9 +69,11 @@ Best for documents with multiple sources:
 # Feature Plan
 
 ## Overview
+
 ...content...
 
 ## Implementation
+
 ...content...
 
 ## References
@@ -104,15 +106,15 @@ The algorithm runs in O(n log n) time[^1].
 
 ## What to Reference
 
-| Content Type | What to Link |
-|--------------|--------------|
-| PR feedback prompts | The actual PR review comments |
-| Bug fix plans | The issue or bug report |
-| Architecture decisions | Design docs, ADRs, discussion threads |
-| Performance claims | Benchmark results, profiling data |
-| API usage | Official documentation |
-| Workarounds | The issue being worked around |
-| Best practices | Authoritative source (docs, style guides) |
+| Content Type           | What to Link                              |
+| ---------------------- | ----------------------------------------- |
+| PR feedback prompts    | The actual PR review comments             |
+| Bug fix plans          | The issue or bug report                   |
+| Architecture decisions | Design docs, ADRs, discussion threads     |
+| Performance claims     | Benchmark results, profiling data         |
+| API usage              | Official documentation                    |
+| Workarounds            | The issue being worked around             |
+| Best practices         | Authoritative source (docs, style guides) |
 
 ## Getting GitHub Comment Links
 

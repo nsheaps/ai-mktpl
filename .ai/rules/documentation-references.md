@@ -18,15 +18,15 @@ Include references to external sources that validate claims, provide context, or
 
 ## Valid Reference Types
 
-| Type | Example |
-|------|---------|
-| GitHub PR/Issue | `[PR #123](https://github.com/org/repo/pull/123)` |
-| GitHub comment | `[Review comment](https://github.com/org/repo/pull/123#discussion_r12345)` |
-| Slack permalink | `[Discussion](https://workspace.slack.com/archives/C123/p1234567890)` |
-| Blog post | `[Article title](https://example.com/blog/post)` |
-| Stack Overflow | `[SO answer](https://stackoverflow.com/a/12345)` |
-| Documentation | `[Docs: Topic](https://docs.example.com/topic)` |
-| Raw excerpt | Blockquote with attribution |
+| Type            | Example                                                                    |
+| --------------- | -------------------------------------------------------------------------- |
+| GitHub PR/Issue | `[PR #123](https://github.com/org/repo/pull/123)`                          |
+| GitHub comment  | `[Review comment](https://github.com/org/repo/pull/123#discussion_r12345)` |
+| Slack permalink | `[Discussion](https://workspace.slack.com/archives/C123/p1234567890)`      |
+| Blog post       | `[Article title](https://example.com/blog/post)`                           |
+| Stack Overflow  | `[SO answer](https://stackoverflow.com/a/12345)`                           |
+| Documentation   | `[Docs: Topic](https://docs.example.com/topic)`                            |
+| Raw excerpt     | Blockquote with attribution                                                |
 
 ## Minimum Standard
 
