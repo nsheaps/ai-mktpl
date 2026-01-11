@@ -67,7 +67,6 @@ description: |
   - The slack app automatically (configurable) shares the session with the whole org, but no buttons to turn on/off?
   - This would make it better when ephemeral agents can teleport the previous session from one instance to another
     - There's some downside to keeping a session going for too long
-- Can you use environment variables in (settings.json/attribution/(commit|pullRequest))
 - Can you get claude to automatically fix anything that's been deprecated after upgrading claude versions?
 - Does AskUserQuestion pause execution or can it be run in background?
 
@@ -103,6 +102,8 @@ These are some notes about how certain things work in claude code, to aide in co
         - Should there be a sub-agent for relevant skill finder to help preserve the context of the outer agent trying to iterate through them all? This agent could also update the description to help make recall better.
     - Same thing can happen with **WHAT** it did. @nsheaps noted that he requested it make a script to programmatically update one file with the contents of another based on rules. It made the script, then forgot it existed and manually updated the file using the _inverse_ criteria (even on opus).
 - environment variables from settings.local.json will be evaluated before hooks are run, letting you use env vars to enable local feature flags to gate functionality in claude's configs
+- Bash variable substitution works in settings.json attribution fields. Example: `${CLAUDE_PROJECT_DIR/$HOME/~}` correctly replaces $HOME with ~ in the path.
+  - Confirmed by testing 2026-01-10 @nsheaps in ai-agent-henry repo
 - Almost everything dynamic except actual messages and other info in the context in the conversation are tool use. That includes the use of SlashCommands, Skills, Agents (which are really just the Task tool with a special prompt).
   - which means conversation logs can tell you how often certain things are being used. There's no other good metrics interface.
     - we need to build something that can automatically track these, perhaps via a proxy that can bubble it back to datadog
