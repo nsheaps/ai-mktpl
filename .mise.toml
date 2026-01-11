@@ -1,5 +1,6 @@
 [tools]
 gh = "latest"
+jq = "latest"
 node = "lts"
 python = "3.12"
 bun = "latest"
