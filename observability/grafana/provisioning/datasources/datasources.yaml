@@ -14,7 +14,7 @@ datasources:
     isDefault: true
     editable: false
     jsonData:
-      timeInterval: "15s"
+      timeInterval: '15s'
       httpMethod: POST
 
   # Loki - for Claude Code events/logs

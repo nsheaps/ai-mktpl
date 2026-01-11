@@ -69,12 +69,12 @@ Navigate to **Dashboards → Claude Code** to view your metrics.
 
 ## Services
 
-| Service | Port | Description |
-|---------|------|-------------|
+| Service        | Port                     | Description                         |
+| -------------- | ------------------------ | ----------------------------------- |
 | OTEL Collector | 4317 (gRPC), 4318 (HTTP) | Receives telemetry from Claude Code |
-| Prometheus | 9090 | Metrics storage and querying |
-| Loki | 3100 | Log/event storage |
-| Grafana | 3000 | Visualization and dashboards |
+| Prometheus     | 9090                     | Metrics storage and querying        |
+| Loki           | 3100                     | Log/event storage                   |
+| Grafana        | 3000                     | Visualization and dashboards        |
 
 ## Configuration Options
 
@@ -143,28 +143,28 @@ export OTEL_EXPORTER_OTLP_LOGS_ENDPOINT=http://localhost:4318/v1/logs
 
 Claude Code exports the following metrics:
 
-| Metric | Description | Attributes |
-|--------|-------------|------------|
-| `claude_code.session.count` | Sessions started | - |
-| `claude_code.cost.usage` | Cost in USD | `model` |
-| `claude_code.token.usage` | Tokens used | `model`, `type` (input/output/cacheRead/cacheCreation) |
-| `claude_code.lines_of_code.count` | Lines changed | `type` (added/removed) |
-| `claude_code.commit.count` | Git commits | - |
-| `claude_code.pull_request.count` | PRs created | - |
-| `claude_code.code_edit_tool.decision` | Edit decisions | `tool`, `decision`, `language` |
-| `claude_code.active_time.total` | Active time (seconds) | - |
+| Metric                                | Description           | Attributes                                             |
+| ------------------------------------- | --------------------- | ------------------------------------------------------ |
+| `claude_code.session.count`           | Sessions started      | -                                                      |
+| `claude_code.cost.usage`              | Cost in USD           | `model`                                                |
+| `claude_code.token.usage`             | Tokens used           | `model`, `type` (input/output/cacheRead/cacheCreation) |
+| `claude_code.lines_of_code.count`     | Lines changed         | `type` (added/removed)                                 |
+| `claude_code.commit.count`            | Git commits           | -                                                      |
+| `claude_code.pull_request.count`      | PRs created           | -                                                      |
+| `claude_code.code_edit_tool.decision` | Edit decisions        | `tool`, `decision`, `language`                         |
+| `claude_code.active_time.total`       | Active time (seconds) | -                                                      |
 
 ## Available Events
 
 Events are exported via the logs pipeline:
 
-| Event | Description | Key Attributes |
-|-------|-------------|----------------|
-| `claude_code.user_prompt` | User input | `prompt_length`, `prompt` (if enabled) |
-| `claude_code.tool_result` | Tool execution | `tool_name`, `success`, `duration_ms` |
-| `claude_code.api_request` | API calls | `model`, `cost_usd`, `duration_ms`, tokens |
-| `claude_code.api_error` | API errors | `model`, `error`, `status_code` |
-| `claude_code.tool_decision` | Permission decisions | `tool_name`, `decision`, `source` |
+| Event                       | Description          | Key Attributes                             |
+| --------------------------- | -------------------- | ------------------------------------------ |
+| `claude_code.user_prompt`   | User input           | `prompt_length`, `prompt` (if enabled)     |
+| `claude_code.tool_result`   | Tool execution       | `tool_name`, `success`, `duration_ms`      |
+| `claude_code.api_request`   | API calls            | `model`, `cost_usd`, `duration_ms`, tokens |
+| `claude_code.api_error`     | API errors           | `model`, `error`, `status_code`            |
+| `claude_code.tool_decision` | Permission decisions | `tool_name`, `decision`, `source`          |
 
 ## Troubleshooting
 
@@ -223,15 +223,15 @@ docker compose up -d
 
 All telemetry includes these resource attributes:
 
-| Attribute | Description |
-|-----------|-------------|
-| `service.name` | `claude-code` |
-| `service.version` | Claude Code version |
-| `os.type` | Operating system |
-| `os.version` | OS version |
-| `host.arch` | CPU architecture |
-| `session.id` | Unique session ID |
-| `terminal.type` | Terminal type (iTerm, vscode, etc.) |
+| Attribute         | Description                         |
+| ----------------- | ----------------------------------- |
+| `service.name`    | `claude-code`                       |
+| `service.version` | Claude Code version                 |
+| `os.type`         | Operating system                    |
+| `os.version`      | OS version                          |
+| `host.arch`       | CPU architecture                    |
+| `session.id`      | Unique session ID                   |
+| `terminal.type`   | Terminal type (iTerm, vscode, etc.) |
 
 ## Customizing the Dashboard
 
