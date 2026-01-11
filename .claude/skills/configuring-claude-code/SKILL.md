@@ -12,12 +12,12 @@ description: |
 
 > [!NOTE]
 > This skill is a living document located at:
->   https://github.com/stainless-api/stainless/.claude/skills/configuring-claude-code/SKILL.md
+> https://github.com/stainless-api/stainless/.claude/skills/configuring-claude-code/SKILL.md
 > It is intended to be used only to capture extra information.
 > If using this skill to perform a task and you learn something new, please update this skill to capture that knowledge for future use. Be sure these updates end up pushed to a remote repository so they are not lost.
 > It is rare that something is in this skill that isn't added by this branch that has not been validated by others before merging it to the default branch. Sometimes the behaviors change, and the skill may be out of date. Always validate the information here against official documentation when possible. If you find something that is out of date, please update this skill to reflect the current state of affairs. Do not remove information in the same time you change anything, instead add a note about the new information and that the old information is deprecated. Be sure to include references to external sites to back up the deprecation claim.
 > When adding information, be sure to include references to official documentation or other sources of truth whenever possible. These are critical to ensuring claims in this document are backed up by reliable sources. However, the addition of claims in this document without sources is acceptable when the information is learned from direct experience and experimentation, especially if added by a human.
->   Make sure references use markdown link format for you to summarize what the link is and hide long urls from the human.
+> Make sure references use markdown link format for you to summarize what the link is and hide long urls from the human.
 > Always use the configuring-claude-code skill when making changes to claude code configuration files, rules, slash commands, agents, plugins, skills, or settings.
 > CRITICAL: Any changes to THIS skill MUST be verified using the claude-code-guide when running code reviews from .github/workflows/claude-code-review.yml
 
@@ -35,7 +35,6 @@ description: |
 - [Claude Code Github Repo](https://github.com/anthropic/claude-code)
 - [Claude Code Github Action Repo](https://github.com/anthropic/claude-code-action)
 - https://github.com/dair-ai/Prompt-Engineering-Guide / https://promptingguide.ai/
-
 
 ### You have tools built in to help you.
 
@@ -83,7 +82,7 @@ These are some notes about how certain things work in claude code, to aide in co
   - Confirmed by testing 2025-11-15 @nsheaps, showed in /context
 - Despite no documentation, you can place (agents/commands/rules) in subfolders (and via symlinks) and they will be detected. Slash commands will get a prefix based on the folder name.
   - Confirmed by testing 2025-11-15 @nsheaps
-- The bash syntax "\!\`command arg1 arg2 ...\`" (without the \ and ", so ! then ` then the command then another `) works in slash commands to get info from them to the agent when the slash command is executed. It saves on token usage because the agent does not need to run a loop to run the command, look at the output for every command listed. Unfortunately it _only_ works in slash commands, not in agents, skills, or rules. However, agents CAN run a slash command by running the tool "SlashCommand:/command-name arg1 arg2 ...", at least when guided to.
+- The bash syntax "\!\`command arg1 arg2 ...\`" (without the \ and ", so ! then `then the command then another`) works in slash commands to get info from them to the agent when the slash command is executed. It saves on token usage because the agent does not need to run a loop to run the command, look at the output for every command listed. Unfortunately it _only_ works in slash commands, not in agents, skills, or rules. However, agents CAN run a slash command by running the tool "SlashCommand:/command-name arg1 arg2 ...", at least when guided to.
   - Confirmed by testing 2025-11-15 @nsheaps
   - References to claude docs needed.
 - Despite what the creator of claude code said, Skills and SlashCommands are not the same thing. Skills cannot be invoked by the user using "/skill-name", only slash commands can. Skills are only invoked by agents when they decide to use them (though they can be told to). Claude frequently confuses the two in its selection of which tool to use, and will lean more heavily on Skills. Good news is that Skills don't get directory name modifications and skills by the same name can overwrite previous ones, so you can add a note skill to override a previous one. Sad news is that the built in skills don't have files on disk that you can say "you might be calling the wrong skill/command but if you're sure you want to use this skill, read here instead", so you have to override them blindly.
@@ -100,7 +99,7 @@ These are some notes about how certain things work in claude code, to aide in co
 - Claude will absolutely most definitely forget the prompt you sent him.
   - (future thinking @nsheaps): We should have a hook on UserPromptSubmit that saves it into `./.claude/prompts/$sessionId.md`, then use a mini `claude -p --model=haiku 'rename the file to be more descriptive based on it's content'` to rename it to something more useful.
     - it still needs guidance to look there
-      - We should do the same with injected guidance to use Explore and Plan and mcp__structuralthinking__* to help figure out how to accomplish requests from users submitted in prompts.
+      - We should do the same with injected guidance to use Explore and Plan and mcp**structuralthinking**\* to help figure out how to accomplish requests from users submitted in prompts.
         - Should there be a sub-agent for relevant skill finder to help preserve the context of the outer agent trying to iterate through them all? This agent could also update the description to help make recall better.
     - Same thing can happen with **WHAT** it did. @nsheaps noted that he requested it make a script to programmatically update one file with the contents of another based on rules. It made the script, then forgot it existed and manually updated the file using the _inverse_ criteria (even on opus).
 - environment variables from settings.local.json will be evaluated before hooks are run, letting you use env vars to enable local feature flags to gate functionality in claude's configs
