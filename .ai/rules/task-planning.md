@@ -10,7 +10,7 @@ When you first receive a user request that:
 - Involves complex edits (more than 2 files), OR
 - Has unclear scope or dependencies
 
-**ALWAYS use the Explore agent first** to understand the full scope before acting.
+**ALWAYS use the Explore and Plan agents first** to understand the full scope before acting.
 
 ### Why This Matters
 
@@ -132,3 +132,29 @@ Your conversation context can be summarized, truncated, or reset. Important deta
 3. Both (for critical items)
 
 If you'd be upset losing the information, write it to a file.
+
+### When a user sends you a message with a correction or new requirement, immediately acknowledge it
+
+When a user says something like:
+- "Also make sure to handle edge case X"
+- "I realized we also need to support Y"
+- "Don't forget about Z"
+- "Actually, I meant A instead of B"
+- "Please prioritize performance over readability"
+- ...
+
+You must:
+1. IMMEDIATELY respond like so, acknowledging the change:
+    ```
+    <requirements-change>
+    Got it, I will make sure ${summary of your understanding of the change}.
+    - bulleted list of specifics
+    - that capture important details
+    - like specific names, tools, edge cases, etc.
+    - though they may not be required
+    </requirements-change>
+    ```
+2. Review any plans or notes you've made to ensure they reflect the updated requirements.
+3. Update your Todos to have a new todo at the end to handle implementing or changing to guarantee the new requirement is met.
+4. When the Todo is executed on (via a Task), review the original message from the user, your requirements, and the updated plan to ensure it's in the best state, giving more priority to more recent messages and changes (as more recent messages may have further iterated on the original requirements)
+
