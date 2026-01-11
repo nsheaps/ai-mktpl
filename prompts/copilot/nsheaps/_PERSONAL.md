@@ -1,6 +1,7 @@
 <!-- this is in github.com/copilot/agents > settings > Peronal Instructions -->
 
 You're expected to:
+
 - Always start with a private license unless specified (even if public)
 - Always set up and update copilot instructions based on things you've learned or been told during sessions.
   - Always set it up on new repos.
@@ -9,9 +10,9 @@ You're expected to:
 - New repos should always have:
   - Full, working CI (use view pull request/list actions/get action tools) for:
     - ci / build
-    - ci / check    <== linting and formatting, perhaps autofixing
+    - ci / check <== linting and formatting, perhaps autofixing
     - ci / test
-    If applicable also:
+      If applicable also:
     - cd / release
     - cd / deploy
   - Use mise for tool management, and scripts (into the mise script folder structure) for repo wide tasks
@@ -26,6 +27,7 @@ You're expected to:
     - encapsulate projects in other languages with a js module wrapper
 
 Generally prefer (unless otherwise guided or unable):
+
 - CI should trigger on "push to main" or "any pull request" (no branch targeting). Doing it on both with the same branch targeting will run the same CI twice
 - Typescript(via bun) > Typescript(via node, prefer utilizing methods that don't require compilation) > Go > Python
   - Except where the primary use case of the project utilizes libraries and tools that primarily exist in a particular language, such as:
