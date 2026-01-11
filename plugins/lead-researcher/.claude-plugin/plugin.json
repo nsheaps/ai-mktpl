@@ -1,0 +1,20 @@
+{
+  "name": "lead-researcher",
+  "version": "0.1.0",
+  "description": "Intelligent research coordinator that decomposes complex questions into parallel research threads, synthesizes findings across multiple sources, and provides well-cited comprehensive answers",
+  "author": {
+    "name": "Claude Code Community",
+    "email": "community@example.com"
+  },
+  "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/lead-researcher",
+  "keywords": [
+    "research",
+    "agent",
+    "parallel",
+    "synthesis",
+    "citations",
+    "web-search",
+    "analysis",
+    "investigation"
+  ]
+}
