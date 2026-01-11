@@ -98,25 +98,31 @@ Results delivered with:
 
 ```markdown
 ## Summary
+
 [2-3 sentence answer]
 
 ## Key Findings
 
 ### [Topic 1]
+
 Finding with [citation](url)...
 
 ### [Topic 2]
+
 Analysis from `src/file.ts:42`...
 
 ## Recommendation
+
 [Actionable guidance]
 
 ## Confidence Assessment
+
 - Overall: Medium
 - Certain: [aspects]
 - Uncertain: [aspects]
 
 ## Sources
+
 - [Doc Title](url) - relevance
 - `path/file.ts:line` - what was found
 ```
@@ -126,6 +132,7 @@ Analysis from `src/file.ts:42`...
 ### Allowed Tools
 
 The plugin uses these tools:
+
 - `Task` - Spawning research agents
 - `WebSearch` - Current web information
 - `WebFetch` - Specific documentation
@@ -135,12 +142,12 @@ The plugin uses these tools:
 
 ### Parallelization Levels
 
-| Complexity | Parallel Agents | Use Case                    |
-| ---------- | --------------- | --------------------------- |
-| Simple     | 8-10            | Pure information gathering  |
-| Medium     | 4-6             | Mixed research + analysis   |
-| Complex    | 2-3             | Analytical questions        |
-| Dependent  | Sequential      | Answer A needed for B       |
+| Complexity | Parallel Agents | Use Case                   |
+| ---------- | --------------- | -------------------------- |
+| Simple     | 8-10            | Pure information gathering |
+| Medium     | 4-6             | Mixed research + analysis  |
+| Complex    | 2-3             | Analytical questions       |
+| Dependent  | Sequential      | Answer A needed for B      |
 
 ## Best Practices
 

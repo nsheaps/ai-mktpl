@@ -58,12 +58,12 @@ Spawn research agents for independent sub-questions using the Task tool.
 
 **Agent Types:**
 
-| Agent Type | Use For | Tool |
-|------------|---------|------|
-| `Explore` | Codebase questions, architecture, patterns | Task (subagent_type: Explore) |
-| `general-purpose` | Complex multi-step research | Task (subagent_type: general-purpose) |
-| `WebSearch` | Current information, comparisons | WebSearch tool directly |
-| `WebFetch` | Specific documentation pages | WebFetch tool directly |
+| Agent Type        | Use For                                    | Tool                                  |
+| ----------------- | ------------------------------------------ | ------------------------------------- |
+| `Explore`         | Codebase questions, architecture, patterns | Task (subagent_type: Explore)         |
+| `general-purpose` | Complex multi-step research                | Task (subagent_type: general-purpose) |
+| `WebSearch`       | Current information, comparisons           | WebSearch tool directly               |
+| `WebFetch`        | Specific documentation pages               | WebFetch tool directly                |
 
 **Dispatch Pattern:**
 
@@ -100,20 +100,25 @@ Deliver findings in this format:
 
 ```markdown
 ## Summary
+
 [2-3 sentence answer to the core question]
 
 ## Key Findings
 
 ### [Sub-topic 1]
+
 [Findings with inline citations]
 
 ### [Sub-topic 2]
+
 [Findings with inline citations]
 
 ## Recommendation
+
 [Specific, actionable recommendation based on synthesis]
 
 ## Sources
+
 - [Source 1 Title](url) - [brief relevance note]
 - [Source 2 Title](url) - [brief relevance note]
 - `path/to/file.ts:123` - [what was found]
@@ -141,6 +146,7 @@ As specified in your CLAUDE.md, the team prefers...
 When dispatching research agents, use detailed prompts:
 
 **For Explore agents:**
+
 ```
 Research question: [specific question]
 
@@ -157,6 +163,7 @@ Return:
 ```
 
 **For web research:**
+
 ```
 Search for: [specific query]
 
@@ -175,6 +182,7 @@ Prioritize:
 ### Contradictory Sources
 
 When sources disagree:
+
 1. Note the disagreement explicitly
 2. Evaluate source credibility
 3. Check publication dates (newer often better for tech)
@@ -184,6 +192,7 @@ When sources disagree:
 ### Insufficient Information
 
 When you can't find enough:
+
 1. State what you found and what's missing
 2. Suggest where information might exist
 3. Ask user for clarification or access
@@ -192,6 +201,7 @@ When you can't find enough:
 ### Scope Creep
 
 Keep research focused:
+
 1. Re-read the original question
 2. Ask "Does this directly answer the question?"
 3. Note tangential findings briefly, don't deep-dive
@@ -202,6 +212,7 @@ Keep research focused:
 **User**: "Should we use tRPC or GraphQL for our new API?"
 
 **Phase 1 - Decomposition:**
+
 ```
 Core: Recommend API approach (tRPC vs GraphQL)
 Sub-questions:
@@ -213,6 +224,7 @@ Sub-questions:
 ```
 
 **Phase 2 - Dispatch (parallel):**
+
 ```
 Task 1 (Explore): "Analyze current tech stack - framework, existing APIs, TypeScript usage"
 Task 2 (WebSearch): "tRPC vs GraphQL comparison 2024 pros cons"
@@ -220,6 +232,7 @@ Task 3 (Explore): "Check for existing API patterns, client types, team preferenc
 ```
 
 **Phase 3 - Synthesis:**
+
 - Stack is Next.js + TypeScript (strong TS)
 - tRPC: Better DX for TS-only, less boilerplate, full type safety
 - GraphQL: Better for multiple clients, established ecosystem
@@ -227,33 +240,40 @@ Task 3 (Explore): "Check for existing API patterns, client types, team preferenc
 - Only internal consumers (no mobile/external)
 
 **Phase 4 - Response:**
+
 ```markdown
 ## Summary
+
 For your Next.js TypeScript stack with only internal consumers,
 tRPC is likely the better choice due to superior DX and type safety.
 
 ## Key Findings
 
 ### Current Stack Analysis
+
 Your codebase (`src/pages/api/`) shows a Next.js setup with strong
 TypeScript adoption. The existing API routes use manual typing.
 
 ### tRPC Advantages for Your Case
+
 - End-to-end type safety without code generation
 - Smaller bundle size than GraphQL clients
 - Simpler mental model for internal APIs
-[Source](https://trpc.io/docs/comparison)
+  [Source](https://trpc.io/docs/comparison)
 
 ### GraphQL Considerations
+
 - Would be overkill for internal-only consumption
 - Requires schema maintenance and codegen
 - Better suited for multi-platform scenarios
 
 ## Recommendation
+
 Adopt tRPC. Your TypeScript-first stack and internal-only
 consumers make it the simpler, more maintainable choice.
 
 ## Sources
+
 - [tRPC Official Docs](https://trpc.io/docs)
 - [tRPC vs GraphQL Comparison](https://trpc.io/docs/comparison)
 - `src/pages/api/users.ts:1-50` - current API pattern

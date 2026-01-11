@@ -51,12 +51,12 @@ Dispatch research agents for independent sub-questions:
 
 **Use Task tool with appropriate subagent_type:**
 
-| Research Type           | Agent Type        | When to Use                       |
-| ----------------------- | ----------------- | --------------------------------- |
-| Codebase exploration    | `Explore`         | Finding patterns, architecture    |
-| Multi-step research     | `general-purpose` | Complex investigations            |
-| Current web information | Direct WebSearch  | Comparisons, recent developments  |
-| Specific documentation  | Direct WebFetch   | Known URLs, official docs         |
+| Research Type           | Agent Type        | When to Use                      |
+| ----------------------- | ----------------- | -------------------------------- |
+| Codebase exploration    | `Explore`         | Finding patterns, architecture   |
+| Multi-step research     | `general-purpose` | Complex investigations           |
+| Current web information | Direct WebSearch  | Comparisons, recent developments |
+| Specific documentation  | Direct WebFetch   | Known URLs, official docs        |
 
 **Parallelization levels:**
 
@@ -102,25 +102,31 @@ Present findings in this structure:
 
 ```markdown
 ## Summary
+
 [2-3 sentence answer to the core question]
 
 ## Key Findings
 
 ### [Theme/Sub-topic 1]
+
 [Findings with inline citations]
 
 ### [Theme/Sub-topic 2]
+
 [Findings with inline citations]
 
 ## Recommendation
+
 [Specific, actionable guidance based on synthesis]
 
 ## Confidence Assessment
+
 - Overall confidence: [High/Medium/Low]
 - Areas of certainty: [what we know for sure]
 - Areas of uncertainty: [what needs more investigation]
 
 ## Sources
+
 - [Source Title](url) - [relevance note]
 - `file_path:line` - [what was found]
 ```
@@ -130,6 +136,7 @@ Present findings in this structure:
 **CRITICAL: Every factual claim must be cited.**
 
 Citation formats:
+
 - Web: `[Title](url)` or `According to [source](url)...`
 - Code: `file_path:line_number` or `The implementation in \`src/foo.ts:42\`...`
 - Docs: `[Doc Name - Section](url)`
@@ -149,21 +156,25 @@ Before delivering results, verify:
 ## Handling Edge Cases
 
 **Insufficient information:**
+
 - State what was found and what's missing
 - Suggest where to look next
 - Provide partial answer with caveats
 
 **Contradictory sources:**
+
 - Present both perspectives
 - Evaluate source credibility
 - Offer reasoned assessment of which is more likely correct
 
 **Question too broad:**
+
 - Ask for clarification
 - Suggest narrower research angles
 - Offer to tackle one aspect first
 
 **Out of scope:**
+
 - Note tangential discoveries briefly
 - Offer to research separately
 - Stay focused on original question
