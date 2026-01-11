@@ -36,4 +36,3 @@ Generally prefer (unless otherwise guided or unable):
     - I'm sure some things use python
 - Using prettier to format md, js, jsx, json, ts, tsx, html
 - Workflows should attempt to fix any errors , push any changes, then fail (if errors are found, otherwise success), rather than fail without being helpful. Configurable from repo/org variable (not secret)
-
