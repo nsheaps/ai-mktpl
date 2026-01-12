@@ -15,6 +15,17 @@
     "plugin-dev@anthropics-claude-code": true
   },
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PROJECT_DIR}/.claude/hooks/PreToolUse/ensure-write-dir.sh"
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "matcher": "startup",
@@ -95,10 +106,9 @@
       "Bash(npm:*)",
       "Bash(pnpm:*)",
       "Bash(chmod:*)",
-      "Bash(readlink:*)",
-      "Bash(mkdir:*)"
+      "Bash(readlink:*)"
     ],
-    "deny": ["Bash(rm -rf /:*)"],
+    "deny": ["Bash(rm -rf /:*)", "Bash(mkdir:*)"],
     "ask": [
       "Bash(gh pr view --web:*)",
       "Bash(rm -rf:*)",
