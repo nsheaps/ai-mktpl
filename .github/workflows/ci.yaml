@@ -57,6 +57,48 @@ jobs:
           echo "Changes made or lint failed! Auto-committed the fixes, but more lint and format issues may remain."
           exit 1
 
+  update-marketplace:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Authenticate as GitHub App
+        id: auth
+        uses: ./.github/actions/github-app-auth
+        with:
+          app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
+          private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
+
+      - name: mise install -y
+        uses: jdx/mise-action@v2
+        with:
+          install: true
+          cache: true
+
+      - name: just update-marketplace
+        id: update-marketplace
+        uses: ./.github/actions/update-marketplace
+        continue-on-error: true
+
+      - name: git push
+        if: steps.update-marketplace.outputs.changed-or-failed == 'true' && ! cancelled()
+        id: auto-commit-action
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'chore: `just update-marketplace`'
+
+      - name: 'exit 1 # changes detected or update failed'
+        if: ${{ steps.update-marketplace.outputs.changed-or-failed == 'true' && ! cancelled() }}
+        run: |
+          echo "Changes made or update-marketplace failed! Auto-committed the fixes, but more issues may remain."
+          exit 1
+
   validate:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'

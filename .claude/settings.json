@@ -125,7 +125,9 @@
       "Bash(npm:*)",
       "Bash(pnpm:*)",
       "Bash(chmod:*)",
-      "Bash(readlink:*)"
+      "Bash(readlink:*)",
+
+      "mcp__memory__*"
     ],
     "deny": ["Bash(rm -rf /:*)", "Bash(mkdir:*)"],
     "ask": [

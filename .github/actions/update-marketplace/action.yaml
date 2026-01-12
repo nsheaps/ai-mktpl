@@ -1,0 +1,33 @@
+name: Update Marketplace
+description: Update marketplace.json from plugin.json files
+
+outputs:
+  changed-or-failed:
+    description: Whether files were changed or update failed
+    value: ${{ steps.update.outputs.changed-or-failed }}
+
+runs:
+  using: composite
+  steps:
+    - name: Update marketplace
+      id: update
+      shell: bash
+      run: |
+        set +eou pipefail
+        HAS_ERRORS=false
+
+        just update-marketplace || HAS_ERRORS=true
+
+        # Check if there are any changes
+        if git diff --quiet .claude-plugin/marketplace.json; then
+          CHANGED=false
+        else
+          CHANGED=true
+        fi
+
+        # Output true if changed OR errors occurred
+        if [ "$HAS_ERRORS" = "true" ] || [ "$CHANGED" = "true" ]; then
+          echo "changed-or-failed=true" >> $GITHUB_OUTPUT
+        else
+          echo "changed-or-failed=false" >> $GITHUB_OUTPUT
+        fi

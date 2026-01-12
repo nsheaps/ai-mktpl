@@ -1,0 +1,14 @@
+# Labels for the Claude Code Review workflow
+# These labels control when the review bot runs on PRs
+
+- name: request-review
+  description: Request a one-time review from the Claude review bot (label is removed after review starts)
+  color: 'f19cFb'
+
+- name: always-review
+  description: Always run Claude review bot on this PR, even when in draft state
+  color: 'f19c3b'
+
+- name: ai-review
+  description: Ask claude to review this PR even if you're not on the beta list
+  color: 'f1cd3b'

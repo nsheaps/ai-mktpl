@@ -38,13 +38,16 @@ lint:
     just lint-check || HAS_ERRORS=1
     if [ $HAS_ERRORS -ne 0 ]; then
         echo "Lint errors found. Attempting to fix them"
-        prettier --write --list-different .
+        just lint-fix
         just lint-check || echo "Errors remain after auto-fix."
         echo "Lint failed earlier, exiting with error"
         exit 1
     fi
 
-
+lint-fix:
+    #!/usr/bin/env bash
+    command -v prettier >/dev/null 2>&1 || { just setup ; }
+    prettier --write --list-different .
 lint-check:
     command -v prettier >/dev/null 2>&1 || { just setup ; }
     prettier --check .
@@ -324,6 +327,8 @@ update-marketplace:
     if [ -n "$CHANGED_PLUGINS" ]; then
         echo "Changed plugins: $CHANGED_PLUGINS"
     fi
+
+    just lint-fix
 
 # Run all checks (lint + validate)
 check:
