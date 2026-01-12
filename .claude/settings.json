@@ -40,8 +40,8 @@
   },
   "includeCoAuthoredBy": false,
   "attribution": {
-    "commit": "\nCo-Authored-By: Claude Code (${CLAUDE_PROJECT_DIR}) <noreply@anthropic.com>",
-    "pullRequests": "\nCo-Authored-By: Claude Code (${CLAUDE_PROJECT_DIR}) <noreply@anthropic.com>"
+    "commit": "\nCo-Authored-By: Claude Code (${CLAUDE_PROJECT_DIR/$HOME/~}) <noreply@anthropic.com>",
+    "pullRequests": "\nCo-Authored-By: Claude Code (${CLAUDE_PROJECT_DIR/$HOME/~}) <noreply@anthropic.com>"
   },
   "permissions": {
     "allow": [
