@@ -3,6 +3,7 @@ name: killing-claude-code-web
 description: |
   Use this when running a claude code web session (aka remote session) and you make a change that requires a restart of the session.
 ---
+
 # Skill: Gracefully Killing Claude Code Web
 
 ## Description
