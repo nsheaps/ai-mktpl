@@ -33,6 +33,7 @@ Claude Code Web uses a stop hook at `~/.claude/stop-hook-git-check.sh` that:
 ### Method 1: Let It Idle
 
 Claude Code Web automatically shuts down after a period of inactivity. Simply:
+
 1. Ensure all work is committed and pushed
 2. Stop sending messages
 3. Wait for idle timeout (exact duration TBD, likely 5-15 minutes)
@@ -46,6 +47,7 @@ Claude Code Web automatically shuts down after a period of inactivity. Simply:
 ### Method 3: Use the UI Controls
 
 The Claude Code Web interface may have session controls. Check for:
+
 - "End Session" button
 - Session dropdown menu
 - Account/settings menu
@@ -95,11 +97,11 @@ cat '{}' | ~/.claude/stop-hook-git-check.sh
 
 ## Environment Variables
 
-| Variable | Description |
-|----------|-------------|
-| `stop_hook_active` | Set to "true" during stop hook execution |
-| `CLAUDE_PROJECT_DIR` | Repository root (available in hooks) |
-| `CLAUDE_CODE_SESSION_ID` | Current session UUID |
+| Variable                 | Description                              |
+| ------------------------ | ---------------------------------------- |
+| `stop_hook_active`       | Set to "true" during stop hook execution |
+| `CLAUDE_PROJECT_DIR`     | Repository root (available in hooks)     |
+| `CLAUDE_CODE_SESSION_ID` | Current session UUID                     |
 
 ## Related Files
 
