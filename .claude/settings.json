@@ -1,14 +1,40 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "extraKnownMarketplaces": {
+    "claude-plugins-official": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "agent-sdk-dev@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true,
+    "pr-review-toolkit@claude-plugins-official": true,
+    "plugin-dev@claude-plugins-official": true
+  },
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "_note": "todo move mather into command and make generic",
+            "command": "bash ${CLAUDE_PROJECT_DIR}/.claude/hooks/pre-tool-use/ensure-write-dir.sh"
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
+        "_note": "move matcher into command and make generic",
         "matcher": "startup",
         "hooks": [
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PROJECT_DIR}/.claude/hooks/SessionStart/hook.sh startup",
-            "timeout": 120
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/run-hook.sh session-start start"
           }
         ]
       },
@@ -17,17 +43,42 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PROJECT_DIR}/.claude/hooks/SessionStart/hook.sh resume",
-            "timeout": 60
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/run-hook.sh session-start resume"
+          }
+        ]
+      },
+      {
+        "matcher": "clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/run-hook.sh session-start clear"
+          }
+        ]
+      },
+      {
+        "matcher": "compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/run-hook.sh session-start compact"
           }
         ]
       }
     ]
   },
   "includeCoAuthoredBy": false,
+  "attribution": {
+    "commit": "\nCo-Authored-By: Claude Code (${CLAUDE_PROJECT_DIR/$HOME/~}) <noreply@anthropic.com>",
+    "pullRequests": "\nCo-Authored-By: Claude Code (${CLAUDE_PROJECT_DIR/$HOME/~}) <noreply@anthropic.com>"
+  },
   "permissions": {
     "allow": [
+      "Skill",
+      "SlashCommand",
       "WebSearch",
+      "Glob",
+      "Grep",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:*.github.com)",
       "WebFetch(domain:*.githubusercontent.com)",
@@ -44,6 +95,7 @@
       "WebFetch(domain:mise.run)",
       "WebFetch(domain:*.mise.run)",
       "WebFetch(domain:just.systems)",
+      "WebFetch(domain:developer.1password.com)",
 
       "Bash(git log:*)",
       "Bash(git diff:*)",
@@ -53,6 +105,7 @@
       "Bash(git show:*)",
       "Bash(git remote get-url:*)",
       "Bash(git rm:*)",
+      "Bash(git mv:*)",
 
       "Bash(brew search:*)",
       "Bash(brew info:*)",
@@ -71,14 +124,13 @@
       "Bash(yarn:*)",
       "Bash(npm:*)",
       "Bash(pnpm:*)",
-
-      "Bash(mkdir -p:*)"
+      "Bash(chmod:*)",
+      "Bash(readlink:*)"
     ],
-    "deny": ["Bash(rm -rf /:*)"],
+    "deny": ["Bash(rm -rf /:*)", "Bash(mkdir:*)"],
     "ask": [
       "Bash(gh pr view --web:*)",
       "Bash(rm -rf:*)",
-      "Bash(chmod:*)",
       "Bash(git push --force:*)",
       "Bash(git push -f:*)",
       "Bash(git push --force-with-lease:*)",

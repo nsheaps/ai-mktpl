@@ -1,0 +1,243 @@
+#!/usr/bin/env bash
+#
+# op-exec - Execute a command with 1Password secrets as environment variables
+#
+# Similar to `doppler run`, but uses a 1Password item as the config source.
+# Field values can be raw values or op:// references that get recursively resolved.
+#
+# Usage:
+#   op-exec op://vault/item -- command [args...]
+#   op-exec op://vault/item  # just print exports (for debugging)
+#
+# Examples:
+#   op-exec op://Development/my-app-config -- npm start
+#   op-exec op://Work/aws-creds -- aws s3 ls
+#
+# Field labels are converted to valid env var names:
+#   "API Key" -> API_KEY
+#   "database-url" -> DATABASE_URL
+#
+# POC Limitations:
+#   - No section handling (flat items only)
+#   - Max recursion depth: 5
+#   - Only STRING and CONCEALED field types exported
+#
+
+set -euo pipefail
+
+# -----------------------------------------------------------------------------
+# Config
+# -----------------------------------------------------------------------------
+MAX_DEPTH=5
+DEBUG=${DEBUG:-}
+
+# -----------------------------------------------------------------------------
+# Helpers
+# -----------------------------------------------------------------------------
+debug() {
+  [[ -n "$DEBUG" ]] && echo "[DEBUG] $*" >&2 || true
+}
+
+error() {
+  echo "op-exec: error: $*" >&2
+}
+
+fatal() {
+  error "$@"
+  exit 1
+}
+
+# Convert label to valid env var name: uppercase, spaces/hyphens to underscores
+to_env_name() {
+  echo "$1" | tr '[:lower:]' '[:upper:]' | tr ' -' '__' | tr -cd 'A-Z0-9_'
+}
+
+# Check if value looks like an op:// reference
+is_op_ref() {
+  [[ "$1" =~ ^op:// ]]
+}
+
+# Resolve an op:// reference
+resolve_ref() {
+  local ref="$1"
+  debug "Resolving: $ref"
+  op read "$ref" 2>/dev/null || echo ""
+}
+
+# -----------------------------------------------------------------------------
+# Main Logic
+# -----------------------------------------------------------------------------
+
+# Recursively resolve a value until it's not an op:// ref (or max depth)
+resolve_value() {
+  local value="$1"
+  local depth="${2:-0}"
+
+  if [[ $depth -ge $MAX_DEPTH ]]; then
+    debug "Max depth reached for value"
+    echo "$value"
+    return
+  fi
+
+  if is_op_ref "$value"; then
+    local resolved
+    resolved=$(resolve_ref "$value")
+    if [[ -n "$resolved" ]]; then
+      resolve_value "$resolved" $((depth + 1))
+    else
+      debug "Failed to resolve: $value"
+      echo "$value"
+    fi
+  else
+    echo "$value"
+  fi
+}
+
+# Parse op://vault/item reference
+parse_ref() {
+  local ref="$1"
+
+  # Strip op:// prefix
+  local path="${ref#op://}"
+
+  # Split by /
+  local vault="${path%%/*}"
+  local item="${path#*/}"
+  # Remove any trailing field references (we want the item)
+  item="${item%%/*}"
+
+  echo "$vault" "$item"
+}
+
+# Fetch item and extract fields
+fetch_fields() {
+  local vault="$1"
+  local item="$2"
+
+  debug "Fetching: vault=$vault item=$item"
+
+  # Get item as JSON and extract fields
+  # Filter to STRING and CONCEALED types, output as label<TAB>value
+  op item get "$item" --vault "$vault" --format json 2>/dev/null | \
+    jq -r '.fields[]? | select(.type == "STRING" or .type == "CONCEALED") | "\(.label)\t\(.value // "")"'
+}
+
+# -----------------------------------------------------------------------------
+# Entry Point
+# -----------------------------------------------------------------------------
+
+show_help() {
+  cat <<'EOF'
+op-exec - Execute a command with 1Password secrets as environment variables
+
+Usage:
+  op-exec op://vault/item -- command [args...]
+  op-exec op://vault/item  # print exports (for debugging/sourcing)
+
+Options:
+  -h, --help    Show this help
+  -d, --debug   Enable debug output
+
+Examples:
+  op-exec op://Development/my-app-config -- npm start
+  op-exec op://Work/aws-creds -- aws s3 ls
+
+  # Source into current shell
+  eval "$(op-exec op://vault/item)"
+
+Environment:
+  DEBUG=1       Enable debug output
+EOF
+}
+
+main() {
+  # Parse flags
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -h|--help)
+        show_help
+        exit 0
+        ;;
+      -d|--debug)
+        DEBUG=1
+        shift
+        ;;
+      --)
+        shift
+        break
+        ;;
+      op://*)
+        # Found the reference, stop parsing flags
+        break
+        ;;
+      *)
+        fatal "Unknown option: $1"
+        ;;
+    esac
+  done
+
+  # Need at least the op:// reference
+  if [[ $# -lt 1 ]]; then
+    show_help
+    exit 1
+  fi
+
+  local ref="$1"
+  shift
+
+  # Validate reference format
+  if ! [[ "$ref" =~ ^op://[^/]+/[^/]+ ]]; then
+    fatal "Invalid reference format: $ref (expected op://vault/item)"
+  fi
+
+  # Check dependencies
+  command -v op >/dev/null 2>&1 || fatal "1Password CLI (op) not found"
+  command -v jq >/dev/null 2>&1 || fatal "jq not found"
+
+  # Check if signed in
+  if ! op account list >/dev/null 2>&1; then
+    fatal "Not signed in to 1Password. Run 'op signin' first."
+  fi
+
+  # Parse reference
+  read -r vault item <<< "$(parse_ref "$ref")"
+  debug "Parsed: vault=$vault item=$item"
+
+  # Fetch and process fields
+  declare -A env_vars
+
+  while IFS=$'\t' read -r label value; do
+    [[ -z "$label" ]] && continue
+
+    local env_name
+    env_name=$(to_env_name "$label")
+
+    debug "Processing: $label -> $env_name"
+
+    # Recursively resolve if it's a reference
+    local resolved
+    resolved=$(resolve_value "$value")
+
+    env_vars["$env_name"]="$resolved"
+  done < <(fetch_fields "$vault" "$item")
+
+  # If no command provided, just print exports
+  if [[ $# -eq 0 ]]; then
+    for name in "${!env_vars[@]}"; do
+      # Escape value for shell
+      printf 'export %s=%q\n' "$name" "${env_vars[$name]}"
+    done
+    exit 0
+  fi
+
+  # Otherwise, export and exec
+  for name in "${!env_vars[@]}"; do
+    export "$name"="${env_vars[$name]}"
+    debug "Exported: $name"
+  done
+
+  debug "Executing: $*"
+  exec "$@"
+}
+
+main "$@"

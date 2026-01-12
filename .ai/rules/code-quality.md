@@ -4,6 +4,40 @@ Standards for writing and reviewing code.
 
 ## Git Workflow
 
+### Clean Working Directory Before Starting Tasks
+
+**CRITICAL:** Before starting any significant new task, check `git status` to ensure the working directory is clean.
+
+If uncommitted changes exist:
+
+1. **Ask the user** what to do with them:
+   - Commit them first (if they're complete)
+   - Stash them (if they're work-in-progress)
+   - Discard them (if they're unwanted)
+2. **Do NOT proceed** with new work until resolved
+
+**Why this matters:**
+
+- Isolates changes from the new task for easier review/revert
+- Prevents mixing unrelated changes in commits
+- Avoids confusion about what belongs to which task
+- Deleted symlinks, untracked files, or staged changes indicate prior work that needs handling
+
+**Example workflow:**
+
+```bash
+# FIRST: Check status
+git status
+
+# IF dirty, ask user before proceeding:
+# "I see uncommitted changes (deleted symlinks, untracked spec file).
+#  Should I commit these first, stash them, or discard them?"
+
+# ONLY THEN: Start new work
+```
+
+### Preserving Git History
+
 **NEVER rewrite pushed git history:**
 
 - NEVER use `git commit --amend` on commits that have been pushed - create new commits instead
@@ -24,6 +58,19 @@ After committing changes, always push immediately. Don't ask - just push.
 **For local/interactive assistants:**
 Only commit and push when explicitly asked by the user. Local assistants should always defer to user preferences.
 
+### Git Configuration Scope
+
+When a user mentions git configuration issues or requests config changes, **always ask** whether the change should be:
+
+1. **In-repo** (`git config` without `--global`) - Affects only this repository
+2. **Global** (`git config --global`) - Affects all repositories for this user
+
+**Why:** Global config changes require explicit permission approval and affect other projects. The user should consciously choose the scope.
+
+**Example prompt:**
+
+> "Should this git config change be made for this repository only, or globally for all your repositories?"
+
 **Git command formatting (for permissions compatibility):**
 
 - Prefer `git <cmd>` over `git -C <directory> <cmd>`
@@ -41,6 +88,38 @@ git -C /path/to/repo rm -r .github/actions/old-action
 # ACCEPTABLE (when directory change is necessary):
 cd /path/to/repo && git rm -r .github/actions/old-action
 ```
+
+### Never Remove Git Lock Files
+
+**CRITICAL:** NEVER remove git lock files (`.git/**/index.lock`, `.git/**/HEAD.lock`, etc.) automatically.
+
+When you encounter a git lock file error like:
+
+```
+fatal: Unable to create '/path/to/repo/.git/index.lock': File exists.
+```
+
+**Do NOT:**
+
+- Run `rm -f .git/index.lock` or similar
+- Automatically remove any `.lock` file in the `.git` directory
+- Assume the lock is stale and can be safely removed
+
+**Why this is dangerous:**
+
+1. **Lock files exist for a reason** - Another git process may be actively running
+2. **Removing them can cause data corruption** - Interrupting a git operation mid-write can corrupt the repository
+3. **The user may have another terminal/IDE using git** - VSCode, GitKraken, or another process may hold the lock
+
+**Instead, ALWAYS ask the user:**
+
+> "I encountered a git lock file error. This usually means another git process is running. Could you:
+>
+> 1. Check if another git operation is in progress (another terminal, IDE, etc.)
+> 2. If you're certain no other process is running, let me know and I can remove the lock file
+> 3. Or run `rm .git/index.lock` yourself if you prefer"
+
+**Only remove the lock after explicit user confirmation.**
 
 ## Task Completion
 

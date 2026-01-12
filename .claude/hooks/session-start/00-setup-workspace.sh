@@ -79,15 +79,15 @@ EOF
     # TODO cleanup with 01-mise-activate.sh
     mise self-update || warn "mise self-update failed"
   fi
-
-  eval "$(mise activate bash)"
-
   # Activate mise and install tools from .mise.toml (if mise is available)
   if command -v mise &> /dev/null && [ -f "$PROJECT_DIR/.mise.toml" ]; then
     cd "$PROJECT_DIR"
     pbe mise trust
     pbe mise install -y
   fi
+  
+  eval "$(mise activate bash)"
+
 
   pbe gh auth status
 

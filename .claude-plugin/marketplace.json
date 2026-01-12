@@ -58,6 +58,18 @@
       "keywords": ["behavior", "correction", "rules", "memory", "learning"]
     },
     {
+      "name": "create-command",
+      "description": "Create and maintain Claude Code slash commands with guided assistance",
+      "version": "0.0.1",
+      "author": {
+        "name": "Claude Code Community"
+      },
+      "source": "./plugins/create-command",
+      "category": "utility",
+      "tags": ["utility", "command", "skill"],
+      "keywords": ["slash-command", "command", "create", "automation", "workflow"]
+    },
+    {
       "name": "github-auth-skill",
       "description": "Skill for authenticating with GitHub using device authorization flow",
       "version": "0.0.1",
@@ -113,6 +125,18 @@
         "html",
         "svg"
       ]
+    },
+    {
+      "name": "review-changes",
+      "description": "Review code changes with detailed feedback on quality, security, performance, and maintainability",
+      "version": "0.0.1",
+      "author": {
+        "name": "Claude Code Community"
+      },
+      "source": "./plugins/review-changes",
+      "category": "utility",
+      "tags": ["utility", "command"],
+      "keywords": ["code-review", "review", "quality", "security", "lint"]
     },
     {
       "name": "safety-evaluation-prompt",

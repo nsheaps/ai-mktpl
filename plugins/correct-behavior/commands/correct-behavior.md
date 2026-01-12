@@ -166,6 +166,10 @@ Go back to the work you just did and fix what was done incorrectly:
 
 - **AI-agnostic rules:** When the behavior applies to any AI assistant (not just Claude), put it in `.ai/rules/` instead of `.claude/rules/`.
 
+- **Use claude-code-guide agent:** You can and should consider using the `claude-code-guide` agent to help you with any changes needed to Claude Code configuration files.
+
+- **Work on main branch:** When correcting behavior, make the change directly on the main branch and `/commit` and push after completing the correction.
+
 ## Example Corrections
 
 ### Example 1: Don't commit without asking (user scope)
