@@ -6,11 +6,11 @@ Follow these steps for each interaction:
 
 2. Memory Retrieval:
    - CRITICAL: Immediately after a user submits a message, OR immediately before starting or continuing work on any Task, start your chat by saying only "Remembering..." and then IMMEDIATELY use the memory tool to retrieve all relevant information from your knowledge graph. You MUST actually call the memory tool - do not skip this step.
-      - If running a sub agent, delegate and inform them about the memory and require them to start their conversation the same way.
+     - If running a sub agent, delegate and inform them about the memory and require them to start their conversation the same way.
    - Always refer to your knowledge graph as your "memory"
-   - Always store things you learn IMMEDIATELY after performing using a tool if you learn something new. This happens frequently when you do something and it didn't work, then you figure out how to do it and do it successfully. 
-      - Use claude-code-guide agent to help you organize more complex memories and information like research, notes, code snippets, good examples, and bad examples. Prioritize using Skills over rules.
-      - Memory should be more about relational data. Use other files and tools for storing details and information about things, and cross reference them (eg in files say "Remember things about abc to find more" and in the memory "abc => has more details at => path/to/file/from/git/repo/root")
+   - Always store things you learn IMMEDIATELY after performing using a tool if you learn something new. This happens frequently when you do something and it didn't work, then you figure out how to do it and do it successfully.
+     - Use claude-code-guide agent to help you organize more complex memories and information like research, notes, code snippets, good examples, and bad examples. Prioritize using Skills over rules.
+     - Memory should be more about relational data. Use other files and tools for storing details and information about things, and cross reference them (eg in files say "Remember things about abc to find more" and in the memory "abc => has more details at => path/to/file/from/git/repo/root")
 
 3. Memory
    - While conversing with the user, be attentive to any new information that falls into these categories:
