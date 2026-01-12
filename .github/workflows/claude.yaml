@@ -1,0 +1,128 @@
+name: Claude Code
+
+on:
+  # Note this runs from the default branch (main), even if commented on a PR
+  issue_comment:
+    types: [created, edited]
+  pull_request_review_comment:
+    types: [created, edited]
+  issues:
+    types: [opened, assigned]
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  claude:
+    if: |
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
+      (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+      actions: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 50
+
+      - name: Install mise
+        uses: jdx/mise-action@v2
+        with:
+          install: true
+
+      - name: Run Claude Code
+        id: claude
+        uses: anthropics/claude-code-action@v1
+        env:
+          # These are in addition to any parsed settings.json files
+          # Prefer this over claude_args, almost everything can be specified via settings json or env vars
+          # Ref: https://code.claude.com/docs/en/settings
+          # This is allowed to get CI status (unlike the review workflow)
+          # because it won't wait for this workflow run when mentioned
+          INPUT_SETTINGS_JSON: |
+            {
+              "permissions": {
+                "additionalDirectories": ["/tmp/"],
+                "allow": [
+                  "Task",
+                  "Glob",
+                  "Grep",
+                  "LS",
+                  "ExitPlanMode",
+                  "Read",
+                  "Edit",
+                  "Write",
+                  "Replace",
+                  "MultiEdit",
+                  "NotebookRead",
+                  "NotebookEdit",
+                  "TodoWrite",
+                  "WebSearch",
+                  "WebFetch",
+                  "Bash",
+                  "BashOutput",
+                  "KillBash",
+                  "ListMcpResourcesTool",
+                  "ReadMcpResourceTool",
+                  "SlashCommand",
+                  "Skill",
+                  "mcp__github_comment__update_claude_comment",
+                  "mcp__github_ci__get_ci_status",
+                  "mcp__github_ci__get_workflow_run_details",
+                  "mcp__github_ci__download_job_log"
+                ]
+              },
+              "model": "opus",
+              "env": {
+                "_GH_PAGER_COMMENT": "disable gh from being able to treat the terminal as interactive",
+                "GH_PAGER": "cat",
+                "GH_PROMPT_DISABLED": "true",
+                "_GH_BROWSER_COMMENT": "what app to open URLs with, since claude is not interactive, we use curl to pipe it to stdout",
+                "GH_BROWSER": "curl",
+                "CLAUDE_CODE_REMOTE": "true"
+              }
+            }
+        with:
+          # If CLAUDE_API_KEY is set, it takes precedence over ANTHROPIC_API_KEY
+          # If ANTHROPIC_API_KEY is set but CLAUDE_API_KEY is not, it will be used
+          anthropic_api_key: ${{
+              secrets.CLAUDE_API_KEY && secrets.CLAUDE_API_KEY ||
+              ( secrets.ANTHROPIC_API_KEY && secrets.ANTHROPIC_API_KEY || '' ) }}
+          # If CLAUDE_API_KEY is set, claude_code_oauth_token is not needed
+          # If ANTHROPIC_API_KEY is set, claude_code_oauth_token is not needed
+          # If neither is set, claude_code_oauth_token will be used
+          claude_code_oauth_token: ${{
+            secrets.CLAUDE_API_KEY && '' ||
+            ( secrets.ANTHROPIC_API_KEY && '' || secrets.CLAUDE_CODE_OAUTH_TOKEN ) }}
+          # WARNING: PRINTS FULL JSON OUTPUT WHICH MAY INCLUDE SECRETS.
+          # ONLY USE IN PRIVATE ENVIRONMENTS.
+          show_full_output: true
+          additional_permissions: |
+            actions: read
+          settings: ${{ env.INPUT_SETTINGS_JSON }}
+          # Prefer using settings.json, but some are needed to be set here for the action
+          # to automatically enable the MCP servers.
+          # github_comment and github_ci are included by default in tag mode, but being explicit in case we change
+          # to agent mode
+          # See https://github.com/anthropics/claude-code-action/blob/main/src/modes/tag/index.ts#L146
+          # See https://github.com/anthropics/claude-code-action/issues/723#issuecomment-3716307305
+          # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
+          # or https://docs.claude.com/en/docs/claude-code/cli-reference for available options
+          claude_args: >-
+            --allowedTools
+            mcp__github__create_pending_pull_request_review,
+            mcp__github__get_pull_request_diff,
+            mcp__github__add_comment_to_pending_review,
+            mcp__github__submit_pending_pull_request_review,
+            mcp__github__pull_request_read,
+            mcp__github__github_support_docs_search,
+            mcp__github_comment__update_claude_comment,
+            mcp__github_ci__get_ci_status,
+            mcp__github_ci__get_workflow_run_details,
+            mcp__github_ci__download_job_log

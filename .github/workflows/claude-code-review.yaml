@@ -2,25 +2,39 @@ name: Claude Code Review
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [opened, synchronize, ready_for_review, labeled]
     # Optional: Only run on specific file changes
     # paths:
     #   - "src/**/*.ts"
     #   - "src/**/*.tsx"
     #   - "src/**/*.js"
     #   - "src/**/*.jsx"
+    # Don't run this when this file is modified in the PR since it will fail (for security reasons)
+    # Sometimes claude will reject to review the PR if it sees this file changed (programatically) but it doesn't
+    # seem consistent
+    # paths-ignore:
+    #   - ".github/workflows/claude-code-review.yaml"
 
 concurrency:
   group: ${{ github.event_name == 'pull_request' && format('claude-review-{0}', github.event.pull_request.number) || format('claude-review-{0}-{1}', github.ref, github.sha) }}
-  cancel-in-progress: true
+  # always let a previous review finish (so that time isn't wasted), but queued builds will still
+  # be cancelled if a newer build is pushed
+  # NOTE THIS IS NOT GUARANTEED AT THE JOB LEVEL
+  cancel-in-progress: false
 
 jobs:
   claude-review:
-    # Optional: Filter by PR author
-    # if: |
-    #   github.event.pull_request.user.login == 'external-contributor' ||
-    #   github.event.pull_request.user.login == 'new-developer' ||
-    #   github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR'
+    # Draft PR behavior:
+    # - By default, draft PRs are skipped
+    # - Add 'request-review' label for a one-time review (label is removed when review starts)
+    # - Add 'always-review' label to always review this PR even in draft state
+    # - Add 'ai-review' label to have the PR reviewed regardless of other conditions
+    if: |
+      (
+        github.event.pull_request.draft != true ||
+        (github.event.action == 'labeled' && github.event.label.name == 'request-review') ||
+        contains(github.event.pull_request.labels.*.name, 'always-review')
+      )
 
     runs-on: ubuntu-latest
     permissions:
@@ -43,6 +57,13 @@ jobs:
         with:
           app-id: ${{ secrets.REVIEW_GITHUB_APP_ID }}
           private-key: ${{ secrets.REVIEW_GITHUB_APP_PRIVATE_KEY }}
+
+      - name: Remove request-review label
+        if: github.event.action == 'labeled' && github.event.label.name == 'request-review'
+        env:
+          GH_TOKEN: ${{ steps.auth.outputs.token }}
+        run: |
+          gh pr edit ${{ github.event.pull_request.number }} --remove-label "request-review"
 
       - name: Get additional job context
         uses: qoomon/actions--context@v5
@@ -152,9 +173,8 @@ jobs:
               }
             }
         with:
-          # Prefer using CLAUDE_CODE_OAUTH_TOKEN if available, otherwise fall back to ANTHROPIC_API_KE
-          anthropic_api_key: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN && '' || secrets.ANTHROPIC_API_KEY }}
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN || '' }}
+          anthropic_api_key: ${{ secrets.REVIEW_ANTHROPIC_API_KEY || secrets.ANTHROPIC_API_KEY || '' }}
+          claude_code_oauth_token: ${{ (secrets.REVIEW_ANTHROPIC_API_KEY || secrets.ANTHROPIC_API_KEY) && '' || secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           # WARNING: PRINTS FULL JSON OUTPUT WHICH MAY INCLUDE SECRETS.
           # ONLY USE IN PRIVATE ENVIRONMENTS.
           show_full_output: true
@@ -162,6 +182,7 @@ jobs:
           # won't find the past comments since it's looking for github-actions[bot], not the auth it uses to post the comment.
           bot_id: ${{ steps.auth.outputs.user-id }}
           bot_name: ${{ steps.auth.outputs.user-name }}
+          github_token: ${{ steps.auth.outputs.token }}
           settings: ${{ env.INPUT_SETTINGS_JSON }}
           additional_permissions: |
             actions: read
