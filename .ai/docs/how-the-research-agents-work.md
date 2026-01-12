@@ -7,10 +7,10 @@ This directory contains Claude Code agent files that replicate the behavior of A
 - `research-lead.md` - The lead research agent (orchestrator)
 - `research-subagent.md` - The research subagent (worker)
 
-
 ## Usage
 
 In Claude Code, you can invoke these agents by:
+
 - "Use the research-lead agent to research [topic]"
 - The lead agent will automatically spawn subagents for complex queries
 
@@ -51,12 +51,14 @@ This replicates Anthropic's multi-agent research system architecture:
 ## Key Features Replicated
 
 ### From the Lead Agent
+
 - **Query complexity assessment** - Simple/Medium/Complex classification
 - **Parallel subagent spawning** - 3-5 subagents simultaneously
 - **Research plan persistence** - Memory management for long sessions
 - **Synthesis guidelines** - Theme-based organization with citations
 
 ### From the Subagents
+
 - **OODA Loop methodology** - Observe, Orient, Decide, Act
 - **Adaptive effort scaling** - Tool calls scaled to task complexity
 - **Start broad, narrow down** - Mirrors expert human research
@@ -92,6 +94,7 @@ These agent files were created based on official Anthropic documentation:
 ## Key Metrics from Anthropic
 
 According to Anthropic's internal evaluations:
+
 - Multi-agent (Opus lead + Sonnet subagents) outperforms single-agent Opus by **90.2%**
 - Multi-agent systems use approximately **15x more tokens** than chat interactions
 - Parallel tool calling cut research time by up to **90%** for complex queries
@@ -100,6 +103,7 @@ According to Anthropic's internal evaluations:
 ## Limitations
 
 These files are approximations based on public documentation. The actual production system includes:
+
 - Proprietary tool definitions
 - Custom MCP server integrations
 - CitationAgent for final attribution processing
@@ -109,6 +113,7 @@ These files are approximations based on public documentation. The actual product
 ## Customization
 
 You can customize these agents by:
+
 1. Adjusting the `model` field (opus/sonnet/haiku)
 2. Modifying `tools` for your available MCP servers
 3. Adding domain-specific instructions to the prompts
