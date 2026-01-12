@@ -1,18 +1,18 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "extraKnownMarketplaces": {
-    "anthropics-claude-code": {
+    "claude-plugins-official": {
       "source": {
         "source": "github",
-        "repo": "anthropics/claude-code"
+        "repo": "anthropics/claude-plugins-official"
       }
     }
   },
   "enabledPlugins": {
-    "agent-sdk-dev@anthropics-claude-code": true,
-    "code-review@anthropics-claude-code": true,
-    "pr-review-toolkit@anthropics-claude-code": true,
-    "plugin-dev@anthropics-claude-code": true
+    "agent-sdk-dev@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true,
+    "pr-review-toolkit@claude-plugins-official": true,
+    "plugin-dev@claude-plugins-official": true
   },
   "hooks": {
     "PreToolUse": [
