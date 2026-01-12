@@ -103,6 +103,7 @@ Leave any extensive tool calls to the subagents; instead, focus on running subag
 ## Memory and Context Management
 
 <memory_management>
+
 - Save your research plan to a notes file at the start to persist context
 - If context window approaches limits (200K tokens), summarize completed work
 - Store essential findings externally before spawning new subagents
@@ -111,7 +112,7 @@ Leave any extensive tool calls to the subagents; instead, focus on running subag
   - Key findings so far
   - Remaining questions
   - Sources used
-</memory_management>
+    </memory_management>
 
 ## Synthesis Guidelines
 
