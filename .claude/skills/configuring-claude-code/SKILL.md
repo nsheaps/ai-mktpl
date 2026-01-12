@@ -20,6 +20,7 @@ description: |
 > Make sure references use markdown link format for you to summarize what the link is and hide long urls from the human.
 > Always use the configuring-claude-code skill when making changes to claude code configuration files, rules, slash commands, agents, plugins, skills, or settings.
 > CRITICAL: Any changes to THIS skill MUST be verified using the claude-code-guide when running code reviews from .github/workflows/claude-code-review.yml
+> To test this, the stainless-review-bot[bot] should notice this line and suggest removing it in the code review, and confirm anything that's not in the theories and questions section.
 
 > [!NOTE]
 > This document should work as a treasure trove of extra knowledge learned about claude, claude code, and associated AI tooling. It is generally targeted towards claude because the organization (Stainless) primarily uses claude, but may contain useful information about other ai tools as well, especially about how to share the claude configurations with other tools.
@@ -45,7 +46,7 @@ description: |
 - You have a command called `scripts/claude-diagnostics` which hoists all configs into an archive to be shared
   - Use this generously when asked "Why did you do that?"
   - If asked "Show me your config", point directly to the source instead, ensuring to follow and call out any symlinks.
-  - This command can be run either in claude using the REPL '! scripts/claude-diagnostics' syntax or in a regular terminal for the base state.
+  - This command can be run either in claude using the REPL `! scripts/claude-diagnostics` syntax or in a regular terminal for the base state.
   - Be cautious about sharing the contents. It may contain secrets, keys, passwords, tokens, personal information, proprietary info, or other sensitive data. Always review before sharing except when sharing directly with a user.
 
 ### Theories (we haven't confirmed) and questions (we haven't researched and answered yet)
@@ -67,7 +68,6 @@ description: |
   - The slack app automatically (configurable) shares the session with the whole org, but no buttons to turn on/off?
   - This would make it better when ephemeral agents can teleport the previous session from one instance to another
     - There's some downside to keeping a session going for too long
-- Can you use environment variables in (settings.json/attribution/(commit|pullRequest))
 - Can you get claude to automatically fix anything that's been deprecated after upgrading claude versions?
 - Does AskUserQuestion pause execution or can it be run in background?
 
@@ -103,6 +103,8 @@ These are some notes about how certain things work in claude code, to aide in co
         - Should there be a sub-agent for relevant skill finder to help preserve the context of the outer agent trying to iterate through them all? This agent could also update the description to help make recall better.
     - Same thing can happen with **WHAT** it did. @nsheaps noted that he requested it make a script to programmatically update one file with the contents of another based on rules. It made the script, then forgot it existed and manually updated the file using the _inverse_ criteria (even on opus).
 - environment variables from settings.local.json will be evaluated before hooks are run, letting you use env vars to enable local feature flags to gate functionality in claude's configs
+- Bash variable substitution works in settings.json attribution fields. Example: `${CLAUDE_PROJECT_DIR/$HOME/~}` correctly replaces $HOME with ~ in the path.
+  - Confirmed by testing 2026-01-10 @nsheaps in ai-agent-henry repo
 - Almost everything dynamic except actual messages and other info in the context in the conversation are tool use. That includes the use of SlashCommands, Skills, Agents (which are really just the Task tool with a special prompt).
   - which means conversation logs can tell you how often certain things are being used. There's no other good metrics interface.
     - we need to build something that can automatically track these, perhaps via a proxy that can bubble it back to datadog
