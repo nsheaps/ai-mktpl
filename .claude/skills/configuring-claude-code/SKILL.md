@@ -36,6 +36,10 @@ description: |
 - [Claude Code Github Repo](https://github.com/anthropic/claude-code)
 - [Claude Code Github Action Repo](https://github.com/anthropic/claude-code-action)
 - https://github.com/dair-ai/Prompt-Engineering-Guide / https://promptingguide.ai/
+- https://api.pierce.dev/claude_code_prompts
+- https://pierce.dev/notes/under-the-hood-of-claude-code
+- https://claude.md
+- https://code.charliegleason.com/understanding-context-windows
 
 ### You have tools built in to help you.
 
