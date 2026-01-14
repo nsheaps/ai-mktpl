@@ -2,13 +2,13 @@
 
 ## Overview
 
-| Attribute | Value |
-|-----------|-------|
-| **Name** | CCstatus |
+| Attribute      | Value                                                     |
+| -------------- | --------------------------------------------------------- |
+| **Name**       | CCstatus                                                  |
 | **Repository** | [MaurUppi/CCstatus](https://github.com/MaurUppi/CCstatus) |
-| **Stars** | N/A |
-| **Language** | Rust |
-| **Install** | `npm install @mauruppi/ccstatus` |
+| **Stars**      | N/A                                                       |
+| **Language**   | Rust                                                      |
+| **Install**    | `npm install @mauruppi/ccstatus`                          |
 
 ## Summary
 

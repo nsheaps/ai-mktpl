@@ -2,13 +2,13 @@
 
 ## Overview
 
-| Attribute | Value |
-|-----------|-------|
-| **Name** | ccline-packycc |
+| Attribute      | Value                                                               |
+| -------------- | ------------------------------------------------------------------- |
+| **Name**       | ccline-packycc                                                      |
 | **Repository** | [ding113/ccline-packycc](https://github.com/ding113/ccline-packycc) |
-| **Stars** | N/A |
-| **Language** | Rust |
-| **Install** | `ccline --init` |
+| **Stars**      | N/A                                                                 |
+| **Language**   | Rust                                                                |
+| **Install**    | `ccline --init`                                                     |
 
 ## Summary
 

@@ -2,13 +2,13 @@
 
 ## Overview
 
-| Attribute | Value |
-|-----------|-------|
-| **Name** | Claude Code Status Bar |
+| Attribute      | Value                                                                                |
+| -------------- | ------------------------------------------------------------------------------------ |
+| **Name**       | Claude Code Status Bar                                                               |
 | **Repository** | [steipete (Gist)](https://gist.github.com/steipete/8396e512171d31e934f0013e5651691e) |
-| **Stars** | N/A |
-| **Language** | Shell/Bash |
-| **Install** | See gist for manual setup |
+| **Stars**      | N/A                                                                                  |
+| **Language**   | Shell/Bash                                                                           |
+| **Install**    | See gist for manual setup                                                            |
 
 ## Summary
 

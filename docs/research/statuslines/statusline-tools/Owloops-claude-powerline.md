@@ -2,13 +2,13 @@
 
 ## Overview
 
-| Attribute | Value |
-|-----------|-------|
-| **Name** | claude-powerline |
+| Attribute      | Value                                                                   |
+| -------------- | ----------------------------------------------------------------------- |
+| **Name**       | claude-powerline                                                        |
 | **Repository** | [Owloops/claude-powerline](https://github.com/Owloops/claude-powerline) |
-| **Stars** | ~678 |
-| **Language** | TypeScript/JavaScript |
-| **Install** | `npx -y @owloops/claude-powerline@latest --style=powerline` |
+| **Stars**      | ~678                                                                    |
+| **Language**   | TypeScript/JavaScript                                                   |
+| **Install**    | `npx -y @owloops/claude-powerline@latest --style=powerline`             |
 
 ## Summary
 

@@ -2,13 +2,13 @@
 
 ## Overview
 
-| Attribute | Value |
-|-----------|-------|
-| **Name** | cc-statusline-rs |
+| Attribute      | Value                                                             |
+| -------------- | ----------------------------------------------------------------- |
+| **Name**       | cc-statusline-rs                                                  |
 | **Repository** | [khoi/cc-statusline-rs](https://github.com/khoi/cc-statusline-rs) |
-| **Stars** | N/A |
-| **Language** | Rust |
-| **Install** | `cargo build --release` |
+| **Stars**      | N/A                                                               |
+| **Language**   | Rust                                                              |
+| **Install**    | `cargo build --release`                                           |
 
 ## Summary
 

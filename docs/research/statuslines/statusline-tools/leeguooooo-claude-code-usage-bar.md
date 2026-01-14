@@ -2,13 +2,13 @@
 
 ## Overview
 
-| Attribute | Value |
-|-----------|-------|
-| **Name** | claude-code-usage-bar |
+| Attribute      | Value                                                                                   |
+| -------------- | --------------------------------------------------------------------------------------- |
+| **Name**       | claude-code-usage-bar                                                                   |
 | **Repository** | [leeguooooo/claude-code-usage-bar](https://github.com/leeguooooo/claude-code-usage-bar) |
-| **Stars** | N/A |
-| **Language** | Python |
-| **Install** | `pip install claude-statusbar` |
+| **Stars**      | N/A                                                                                     |
+| **Language**   | Python                                                                                  |
+| **Install**    | `pip install claude-statusbar`                                                          |
 
 ## Summary
 

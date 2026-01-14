@@ -2,13 +2,13 @@
 
 ## Overview
 
-| Attribute | Value |
-|-----------|-------|
-| **Name** | ccusage |
+| Attribute      | Value                                                     |
+| -------------- | --------------------------------------------------------- |
+| **Name**       | ccusage                                                   |
 | **Repository** | [ryoppippi/ccusage](https://github.com/ryoppippi/ccusage) |
-| **Stars** | N/A |
-| **Language** | TypeScript |
-| **Install** | `bun x ccusage statusline` |
+| **Stars**      | N/A                                                       |
+| **Language**   | TypeScript                                                |
+| **Install**    | `bun x ccusage statusline`                                |
 
 ## Summary
 

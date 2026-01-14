@@ -2,13 +2,13 @@
 
 ## Overview
 
-| Attribute | Value |
-|-----------|-------|
-| **Name** | claude-statusline |
+| Attribute      | Value                                                                           |
+| -------------- | ------------------------------------------------------------------------------- |
+| **Name**       | claude-statusline                                                               |
 | **Repository** | [illumin8ca/claude-statusline](https://github.com/illumin8ca/claude-statusline) |
-| **Stars** | N/A |
-| **Language** | TypeScript/JavaScript |
-| **Install** | `npx @illumin8ca/claude-statusline` |
+| **Stars**      | N/A                                                                             |
+| **Language**   | TypeScript/JavaScript                                                           |
+| **Install**    | `npx @illumin8ca/claude-statusline`                                             |
 
 ## Summary
 

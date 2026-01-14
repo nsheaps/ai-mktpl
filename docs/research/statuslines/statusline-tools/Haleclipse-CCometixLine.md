@@ -2,13 +2,13 @@
 
 ## Overview
 
-| Attribute | Value |
-|-----------|-------|
-| **Name** | CCometixLine |
+| Attribute      | Value                                                                 |
+| -------------- | --------------------------------------------------------------------- |
+| **Name**       | CCometixLine                                                          |
 | **Repository** | [Haleclipse/CCometixLine](https://github.com/Haleclipse/CCometixLine) |
-| **Stars** | ~1,300 |
-| **Language** | Rust |
-| **Install** | `ccline --init` |
+| **Stars**      | ~1,300                                                                |
+| **Language**   | Rust                                                                  |
+| **Install**    | `ccline --init`                                                       |
 
 ## Summary
 

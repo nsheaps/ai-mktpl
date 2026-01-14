@@ -2,13 +2,13 @@
 
 ## Overview
 
-| Attribute | Value |
-|-----------|-------|
-| **Name** | ccburn |
+| Attribute      | Value                                                       |
+| -------------- | ----------------------------------------------------------- |
+| **Name**       | ccburn                                                      |
 | **Repository** | [JuanjoFuchs/ccburn](https://github.com/JuanjoFuchs/ccburn) |
-| **Stars** | N/A |
-| **Language** | N/A |
-| **Install** | See repository |
+| **Stars**      | N/A                                                         |
+| **Language**   | N/A                                                         |
+| **Install**    | See repository                                              |
 
 ## Summary
 

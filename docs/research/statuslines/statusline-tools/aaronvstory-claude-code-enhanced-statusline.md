@@ -2,13 +2,13 @@
 
 ## Overview
 
-| Attribute | Value |
-|-----------|-------|
-| **Name** | claude-code-enhanced-statusline |
+| Attribute      | Value                                                                                                         |
+| -------------- | ------------------------------------------------------------------------------------------------------------- |
+| **Name**       | claude-code-enhanced-statusline                                                                               |
 | **Repository** | [aaronvstory/claude-code-enhanced-statusline](https://github.com/aaronvstory/claude-code-enhanced-statusline) |
-| **Stars** | N/A |
-| **Language** | JavaScript/Node.js |
-| **Install** | See repository for manual installation |
+| **Stars**      | N/A                                                                                                           |
+| **Language**   | JavaScript/Node.js                                                                                            |
+| **Install**    | See repository for manual installation                                                                        |
 
 ## Summary
 

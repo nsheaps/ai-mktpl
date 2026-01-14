@@ -2,13 +2,13 @@
 
 ## Overview
 
-| Attribute | Value |
-|-----------|-------|
-| **Name** | Claude Code Usage Monitor |
+| Attribute      | Value                                                                                                     |
+| -------------- | --------------------------------------------------------------------------------------------------------- |
+| **Name**       | Claude Code Usage Monitor                                                                                 |
 | **Repository** | [Maciek-roboblog/Claude-Code-Usage-Monitor](https://github.com/Maciek-roboblog/Claude-Code-Usage-Monitor) |
-| **Stars** | N/A |
-| **Language** | Python |
-| **Install** | See repository |
+| **Stars**      | N/A                                                                                                       |
+| **Language**   | Python                                                                                                    |
+| **Install**    | See repository                                                                                            |
 
 ## Summary
 

@@ -2,13 +2,13 @@
 
 ## Overview
 
-| Attribute | Value |
-|-----------|-------|
-| **Name** | ccstatusline |
+| Attribute      | Value                                                             |
+| -------------- | ----------------------------------------------------------------- |
+| **Name**       | ccstatusline                                                      |
 | **Repository** | [syou6162/ccstatusline](https://github.com/syou6162/ccstatusline) |
-| **Stars** | N/A |
-| **Language** | Go |
-| **Install** | `go install github.com/syou6162/ccstatusline@latest` |
+| **Stars**      | N/A                                                               |
+| **Language**   | Go                                                                |
+| **Install**    | `go install github.com/syou6162/ccstatusline@latest`              |
 
 ## Summary
 

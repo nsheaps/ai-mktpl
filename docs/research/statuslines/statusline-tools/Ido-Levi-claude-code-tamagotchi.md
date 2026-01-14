@@ -2,13 +2,13 @@
 
 ## Overview
 
-| Attribute | Value |
-|-----------|-------|
-| **Name** | Claude Code Tamagotchi |
+| Attribute      | Value                                                                                 |
+| -------------- | ------------------------------------------------------------------------------------- |
+| **Name**       | Claude Code Tamagotchi                                                                |
 | **Repository** | [Ido-Levi/claude-code-tamagotchi](https://github.com/Ido-Levi/claude-code-tamagotchi) |
-| **Stars** | ~240 |
-| **Language** | TypeScript/JavaScript |
-| **Install** | `bun add -g claude-code-tamagotchi` |
+| **Stars**      | ~240                                                                                  |
+| **Language**   | TypeScript/JavaScript                                                                 |
+| **Install**    | `bun add -g claude-code-tamagotchi`                                                   |
 
 ## Summary
 

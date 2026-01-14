@@ -2,13 +2,13 @@
 
 ## Overview
 
-| Attribute | Value |
-|-----------|-------|
-| **Name** | claude_monitor_statusline |
+| Attribute      | Value                                                                                                 |
+| -------------- | ----------------------------------------------------------------------------------------------------- |
+| **Name**       | claude_monitor_statusline                                                                             |
 | **Repository** | [gabriel-dehan/claude_monitor_statusline](https://github.com/gabriel-dehan/claude_monitor_statusline) |
-| **Stars** | N/A |
-| **Language** | Ruby |
-| **Install** | `ruby ~/.claude/utils/claude_monitor_statusline/statusline.rb` |
+| **Stars**      | N/A                                                                                                   |
+| **Language**   | Ruby                                                                                                  |
+| **Install**    | `ruby ~/.claude/utils/claude_monitor_statusline/statusline.rb`                                        |
 
 ## Summary
 

@@ -2,13 +2,13 @@
 
 ## Overview
 
-| Attribute | Value |
-|-----------|-------|
-| **Name** | claude-code-tools |
+| Attribute      | Value                                                                           |
+| -------------- | ------------------------------------------------------------------------------- |
+| **Name**       | claude-code-tools                                                               |
 | **Repository** | [pchalasani/claude-code-tools](https://github.com/pchalasani/claude-code-tools) |
-| **Stars** | N/A |
-| **Language** | TypeScript/JavaScript |
-| **Install** | `claude plugin install tmux-cli@cctools-plugins` |
+| **Stars**      | N/A                                                                             |
+| **Language**   | TypeScript/JavaScript                                                           |
+| **Install**    | `claude plugin install tmux-cli@cctools-plugins`                                |
 
 ## Summary
 

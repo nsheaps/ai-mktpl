@@ -2,13 +2,13 @@
 
 ## Overview
 
-| Attribute | Value |
-|-----------|-------|
-| **Name** | cc-statusline |
+| Attribute      | Value                                                                   |
+| -------------- | ----------------------------------------------------------------------- |
+| **Name**       | cc-statusline                                                           |
 | **Repository** | [chongdashu/cc-statusline](https://github.com/chongdashu/cc-statusline) |
-| **Stars** | ~360 |
-| **Language** | Bash/Shell |
-| **Install** | `npm install -g @chongdashu/cc-statusline` |
+| **Stars**      | ~360                                                                    |
+| **Language**   | Bash/Shell                                                              |
+| **Install**    | `npm install -g @chongdashu/cc-statusline`                              |
 
 ## Summary
 

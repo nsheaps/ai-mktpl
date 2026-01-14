@@ -2,13 +2,13 @@
 
 ## Overview
 
-| Attribute | Value |
-|-----------|-------|
-| **Name** | claude-statusline |
+| Attribute      | Value                                                                       |
+| -------------- | --------------------------------------------------------------------------- |
+| **Name**       | claude-statusline                                                           |
 | **Repository** | [ersinkoc/claude-statusline](https://github.com/ersinkoc/claude-statusline) |
-| **Stars** | ~68 |
-| **Language** | Python |
-| **Install** | `pip install claude-statusline` |
+| **Stars**      | ~68                                                                         |
+| **Language**   | Python                                                                      |
+| **Install**    | `pip install claude-statusline`                                             |
 
 ## Summary
 

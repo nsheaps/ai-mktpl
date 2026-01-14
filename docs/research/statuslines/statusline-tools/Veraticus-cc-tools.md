@@ -2,13 +2,13 @@
 
 ## Overview
 
-| Attribute | Value |
-|-----------|-------|
-| **Name** | cc-tools |
+| Attribute      | Value                                                       |
+| -------------- | ----------------------------------------------------------- |
+| **Name**       | cc-tools                                                    |
 | **Repository** | [Veraticus/cc-tools](https://github.com/Veraticus/cc-tools) |
-| **Stars** | N/A |
-| **Language** | Go |
-| **Install** | `go build && ./cc-tools statusline` |
+| **Stars**      | N/A                                                         |
+| **Language**   | Go                                                          |
+| **Install**    | `go build && ./cc-tools statusline`                         |
 
 ## Summary
 

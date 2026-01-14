@@ -2,13 +2,13 @@
 
 ## Overview
 
-| Attribute | Value |
-|-----------|-------|
-| **Name** | claude-hud |
+| Attribute      | Value                                                               |
+| -------------- | ------------------------------------------------------------------- |
+| **Name**       | claude-hud                                                          |
 | **Repository** | [jarrodwatts/claude-hud](https://github.com/jarrodwatts/claude-hud) |
-| **Stars** | N/A |
-| **Language** | TypeScript/JavaScript |
-| **Install** | `/plugin marketplace add jarrodwatts/claude-hud` |
+| **Stars**      | N/A                                                                 |
+| **Language**   | TypeScript/JavaScript                                               |
+| **Install**    | `/plugin marketplace add jarrodwatts/claude-hud`                    |
 
 ## Summary
 

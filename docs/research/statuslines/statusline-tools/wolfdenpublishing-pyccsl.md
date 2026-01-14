@@ -2,13 +2,13 @@
 
 ## Overview
 
-| Attribute | Value |
-|-----------|-------|
-| **Name** | pyccsl (PyCCSL - pronounced "pixel") |
-| **Repository** | [wolfdenpublishing/pyccsl](https://github.com/wolfdenpublishing/pyccsl) |
-| **Stars** | ~81 |
-| **Language** | Python |
-| **Install** | `python3 ~/.claude/pyccsl.py badge,model,perf-all-metrics,cost --theme nord` |
+| Attribute      | Value                                                                        |
+| -------------- | ---------------------------------------------------------------------------- |
+| **Name**       | pyccsl (PyCCSL - pronounced "pixel")                                         |
+| **Repository** | [wolfdenpublishing/pyccsl](https://github.com/wolfdenpublishing/pyccsl)      |
+| **Stars**      | ~81                                                                          |
+| **Language**   | Python                                                                       |
+| **Install**    | `python3 ~/.claude/pyccsl.py badge,model,perf-all-metrics,cost --theme nord` |
 
 ## Summary
 

@@ -2,13 +2,13 @@
 
 ## Overview
 
-| Attribute | Value |
-|-----------|-------|
-| **Name** | vibe-log-cli |
+| Attribute      | Value                                                             |
+| -------------- | ----------------------------------------------------------------- |
+| **Name**       | vibe-log-cli                                                      |
 | **Repository** | [vibe-log/vibe-log-cli](https://github.com/vibe-log/vibe-log-cli) |
-| **Stars** | N/A |
-| **Language** | TypeScript/JavaScript |
-| **Install** | See repository for installation |
+| **Stars**      | N/A                                                               |
+| **Language**   | TypeScript/JavaScript                                             |
+| **Install**    | See repository for installation                                   |
 
 ## Summary
 

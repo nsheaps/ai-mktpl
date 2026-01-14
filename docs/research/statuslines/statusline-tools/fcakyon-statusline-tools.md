@@ -2,13 +2,13 @@
 
 ## Overview
 
-| Attribute | Value |
-|-----------|-------|
-| **Name** | statusline-tools |
-| **Repository** | [fcakyon/claude-codex-settings](https://github.com/fcakyon/claude-codex-settings) |
-| **Stars** | N/A |
-| **Language** | TypeScript/JavaScript |
-| **Install** | `/plugin marketplace add fcakyon/claude-codex-settings && /plugin install statusline-tools@claude-settings` |
+| Attribute      | Value                                                                                                       |
+| -------------- | ----------------------------------------------------------------------------------------------------------- |
+| **Name**       | statusline-tools                                                                                            |
+| **Repository** | [fcakyon/claude-codex-settings](https://github.com/fcakyon/claude-codex-settings)                           |
+| **Stars**      | N/A                                                                                                         |
+| **Language**   | TypeScript/JavaScript                                                                                       |
+| **Install**    | `/plugin marketplace add fcakyon/claude-codex-settings && /plugin install statusline-tools@claude-settings` |
 
 ## Summary
 

@@ -2,13 +2,13 @@
 
 ## Overview
 
-| Attribute | Value |
-|-----------|-------|
-| **Name** | CCstatusline |
+| Attribute      | Value                                                           |
+| -------------- | --------------------------------------------------------------- |
+| **Name**       | CCstatusline                                                    |
 | **Repository** | [Wzh0718/CCstatusline](https://github.com/Wzh0718/CCstatusline) |
-| **Stars** | N/A |
-| **Language** | Python |
-| **Install** | `python %USERPROFILE%\\.claude\\statusline-ccusage.py` |
+| **Stars**      | N/A                                                             |
+| **Language**   | Python                                                          |
+| **Install**    | `python %USERPROFILE%\\.claude\\statusline-ccusage.py`          |
 
 ## Summary
 

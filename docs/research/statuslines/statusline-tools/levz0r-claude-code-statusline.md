@@ -2,13 +2,13 @@
 
 ## Overview
 
-| Attribute | Value |
-|-----------|-------|
-| **Name** | claude-code-statusline |
-| **Repository** | [levz0r/claude-code-statusline](https://github.com/levz0r/claude-code-statusline) |
-| **Stars** | N/A |
-| **Language** | Bash/Shell |
-| **Install** | `curl -o ~/.claude/statusline-command.sh https://raw.githubusercontent.com/levz0r/claude-code-statusline/main/statusline.sh` |
+| Attribute      | Value                                                                                                                        |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| **Name**       | claude-code-statusline                                                                                                       |
+| **Repository** | [levz0r/claude-code-statusline](https://github.com/levz0r/claude-code-statusline)                                            |
+| **Stars**      | N/A                                                                                                                          |
+| **Language**   | Bash/Shell                                                                                                                   |
+| **Install**    | `curl -o ~/.claude/statusline-command.sh https://raw.githubusercontent.com/levz0r/claude-code-statusline/main/statusline.sh` |
 
 ## Summary
 

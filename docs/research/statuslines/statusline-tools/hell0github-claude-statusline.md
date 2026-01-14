@@ -2,13 +2,13 @@
 
 ## Overview
 
-| Attribute | Value |
-|-----------|-------|
-| **Name** | claude-statusline |
-| **Repository** | [hell0github/claude-statusline](https://github.com/hell0github/claude-statusline) |
-| **Stars** | N/A |
-| **Language** | Bash/Shell |
-| **Install** | `curl -sSL https://raw.githubusercontent.com/hell0github/claude-statusline/main/install.sh \| bash` |
+| Attribute      | Value                                                                                               |
+| -------------- | --------------------------------------------------------------------------------------------------- |
+| **Name**       | claude-statusline                                                                                   |
+| **Repository** | [hell0github/claude-statusline](https://github.com/hell0github/claude-statusline)                   |
+| **Stars**      | N/A                                                                                                 |
+| **Language**   | Bash/Shell                                                                                          |
+| **Install**    | `curl -sSL https://raw.githubusercontent.com/hell0github/claude-statusline/main/install.sh \| bash` |
 
 ## Summary
 

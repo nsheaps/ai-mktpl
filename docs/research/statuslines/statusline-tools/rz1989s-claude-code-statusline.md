@@ -2,13 +2,13 @@
 
 ## Overview
 
-| Attribute | Value |
-|-----------|-------|
-| **Name** | claude-code-statusline |
-| **Repository** | [rz1989s/claude-code-statusline](https://github.com/rz1989s/claude-code-statusline) |
-| **Stars** | N/A |
-| **Language** | Shell/Bash |
-| **Install** | `curl -sSfL https://raw.githubusercontent.com/rz1989s/claude-code-statusline/main/install.sh \| bash` |
+| Attribute      | Value                                                                                                 |
+| -------------- | ----------------------------------------------------------------------------------------------------- |
+| **Name**       | claude-code-statusline                                                                                |
+| **Repository** | [rz1989s/claude-code-statusline](https://github.com/rz1989s/claude-code-statusline)                   |
+| **Stars**      | N/A                                                                                                   |
+| **Language**   | Shell/Bash                                                                                            |
+| **Install**    | `curl -sSfL https://raw.githubusercontent.com/rz1989s/claude-code-statusline/main/install.sh \| bash` |
 
 ## Summary
 

@@ -2,13 +2,13 @@
 
 ## Overview
 
-| Attribute | Value |
-|-----------|-------|
-| **Name** | claude-powerline-rust |
+| Attribute      | Value                                                                                       |
+| -------------- | ------------------------------------------------------------------------------------------- |
+| **Name**       | claude-powerline-rust                                                                       |
 | **Repository** | [david-strejc/claude-powerline-rust](https://github.com/david-strejc/claude-powerline-rust) |
-| **Stars** | N/A |
-| **Language** | Rust |
-| **Install** | `cargo build --release && sudo cp target/release/claude-powerline /usr/local/bin/` |
+| **Stars**      | N/A                                                                                         |
+| **Language**   | Rust                                                                                        |
+| **Install**    | `cargo build --release && sudo cp target/release/claude-powerline /usr/local/bin/`          |
 
 ## Summary
 

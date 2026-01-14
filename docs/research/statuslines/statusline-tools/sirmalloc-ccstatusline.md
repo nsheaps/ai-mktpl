@@ -2,13 +2,13 @@
 
 ## Overview
 
-| Attribute | Value |
-|-----------|-------|
-| **Name** | ccstatusline |
+| Attribute      | Value                                                               |
+| -------------- | ------------------------------------------------------------------- |
+| **Name**       | ccstatusline                                                        |
 | **Repository** | [sirmalloc/ccstatusline](https://github.com/sirmalloc/ccstatusline) |
-| **Stars** | ~2,300 |
-| **Language** | TypeScript/JavaScript |
-| **Install** | `npx ccstatusline@latest` |
+| **Stars**      | ~2,300                                                              |
+| **Language**   | TypeScript/JavaScript                                               |
+| **Install**    | `npx ccstatusline@latest`                                           |
 
 ## Summary
 

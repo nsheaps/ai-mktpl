@@ -2,13 +2,13 @@
 
 ## Overview
 
-| Attribute | Value |
-|-----------|-------|
-| **Name** | claudia-statusline |
-| **Repository** | [hagan/claudia-statusline](https://github.com/hagan/claudia-statusline) |
-| **Stars** | N/A |
-| **Language** | Rust |
-| **Install** | `curl -fsSL https://raw.githubusercontent.com/hagan/claudia-statusline/main/scripts/quick-install.sh \| bash` |
+| Attribute      | Value                                                                                                         |
+| -------------- | ------------------------------------------------------------------------------------------------------------- |
+| **Name**       | claudia-statusline                                                                                            |
+| **Repository** | [hagan/claudia-statusline](https://github.com/hagan/claudia-statusline)                                       |
+| **Stars**      | N/A                                                                                                           |
+| **Language**   | Rust                                                                                                          |
+| **Install**    | `curl -fsSL https://raw.githubusercontent.com/hagan/claudia-statusline/main/scripts/quick-install.sh \| bash` |
 
 ## Summary
 

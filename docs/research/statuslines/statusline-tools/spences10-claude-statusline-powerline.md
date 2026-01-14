@@ -2,13 +2,13 @@
 
 ## Overview
 
-| Attribute | Value |
-|-----------|-------|
-| **Name** | claude-statusline-powerline |
+| Attribute      | Value                                                                                             |
+| -------------- | ------------------------------------------------------------------------------------------------- |
+| **Name**       | claude-statusline-powerline                                                                       |
 | **Repository** | [spences10/claude-statusline-powerline](https://github.com/spences10/claude-statusline-powerline) |
-| **Stars** | N/A |
-| **Language** | TypeScript/JavaScript |
-| **Install** | `npx @spences10/claude-statusline-powerline` |
+| **Stars**      | N/A                                                                                               |
+| **Language**   | TypeScript/JavaScript                                                                             |
+| **Install**    | `npx @spences10/claude-statusline-powerline`                                                      |
 
 ## Summary
 

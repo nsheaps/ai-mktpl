@@ -2,13 +2,13 @@
 
 ## Overview
 
-| Attribute | Value |
-|-----------|-------|
-| **Name** | claude-hud |
+| Attribute      | Value                                                           |
+| -------------- | --------------------------------------------------------------- |
+| **Name**       | claude-hud                                                      |
 | **Repository** | [melon-hub/claude-hud](https://github.com/melon-hub/claude-hud) |
-| **Stars** | N/A |
-| **Language** | TypeScript/JavaScript |
-| **Install** | `/plugin marketplace add melon-hub/claude-hud` |
+| **Stars**      | N/A                                                             |
+| **Language**   | TypeScript/JavaScript                                           |
+| **Install**    | `/plugin marketplace add melon-hub/claude-hud`                  |
 
 ## Summary
 
