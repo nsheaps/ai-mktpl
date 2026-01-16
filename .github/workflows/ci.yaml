@@ -49,7 +49,7 @@ jobs:
         id: auto-commit-action
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: 'chore: `just lint`'
+          commit_message: 'chore: `just lint` [skip ci]'
 
       - name: 'exit 1 # changes detected or linting failed'
         if: ${{ steps.lint.outputs.changed-or-failed == 'true' && ! cancelled() }}
@@ -91,7 +91,7 @@ jobs:
         id: auto-commit-action
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: 'chore: `just update-marketplace`'
+          commit_message: 'chore: `just update-marketplace` [skip ci]'
 
       - name: 'exit 1 # changes detected or update failed'
         if: ${{ steps.update-marketplace.outputs.changed-or-failed == 'true' && ! cancelled() }}
