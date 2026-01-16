@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## 0.2.1 (2026-01-16)
+
+
+### Features
+
+* add self-terminate plugin for graceful session exit ([9d120e8](https://github.com/nsheaps/.ai/commit/9d120e88d621263049463073af9750b99259a5c2))
+
 ## 0.1.7 (2026-01-16)
 
 ## 0.1.6 (2026-01-16)
