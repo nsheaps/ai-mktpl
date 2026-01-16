@@ -1,6 +1,9 @@
 ---
 name: self-terminate
-description: Gracefully terminate the Claude Code session by sending SIGINT to the Claude process
+description: |
+  Gracefully terminate the Claude Code session by sending SIGINT to the Claude process.
+  Works for local CLI sessions and Claude Code Web (remote sessions).
+  Use when you make a change that requires a restart, or when the user requests termination.
 ---
 
 # Self-Terminate Skill
@@ -10,8 +13,25 @@ This skill enables Claude to gracefully terminate its own session by sending a S
 ## When to Use This Skill
 
 - When the user explicitly asks Claude to exit or terminate
-- When Claude needs to restart with a fresh session
+- When Claude needs to restart with a fresh session (e.g., after configuration changes)
+- When running Claude Code Web and you make a change that requires a session restart
 - When testing process management or signal handling
+
+## Automatic Git State Validation
+
+This plugin includes a PreToolUse hook that automatically validates git state before termination:
+
+✅ **Automatically checks:**
+1. No uncommitted changes (staged or unstaged)
+2. No unpushed commits
+3. No untracked files
+
+❌ **Blocks termination if:**
+- Working directory is dirty
+- Commits haven't been pushed
+- Untracked files exist
+
+The hook provides clear error messages explaining what needs to be resolved before termination can proceed.
 
 ## How It Works
 
@@ -92,3 +112,31 @@ After termination:
 **Script says parent is not Claude**: You may be running in a nested shell or different environment. Check `pstree -p $$` to see the full process tree.
 
 **Signal ignored**: Some environments may mask signals. Try `kill -TERM $PPID` as an alternative.
+
+## Stop Hooks (Claude Code Web)
+
+In Claude Code Web environments, stop hooks may validate state before shutdown:
+
+- Checks for uncommitted changes
+- Checks for untracked files
+- Checks for unpushed commits
+- Blocks shutdown (exit 2) if validation fails
+- Allows shutdown (exit 0) if clean
+
+Example stop hook location: `~/.claude/stop-hook-git-check.sh`
+
+## Environment Detection
+
+| Environment Variable     | Purpose                              |
+| ------------------------ | ------------------------------------ |
+| `CLAUDE_CODE_REMOTE`     | Set to "true" in Claude Code Web     |
+| `CLAUDE_PROJECT_DIR`     | Repository root (available in hooks) |
+| `CLAUDE_CODE_SESSION_ID` | Current session UUID                 |
+
+## Alternative Methods (Claude Code Web Only)
+
+For Claude Code Web sessions, you can also terminate by:
+
+1. **Idle timeout** - Stop sending messages and wait for auto-shutdown
+2. **Close browser tab** - Session terminates gracefully
+3. **UI controls** - Use session management UI if available
