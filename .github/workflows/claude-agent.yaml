@@ -24,6 +24,7 @@ jobs:
 
       - name: Authenticate as GitHub App
         id: auth
+        if: secrets.AUTOMATION_GITHUB_APP_ID != ''
         uses: ./.github/actions/github-app-auth
         with:
           app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
@@ -258,10 +259,10 @@ jobs:
           claude_code_oauth_token: ${{
             secrets.CLAUDE_API_KEY && '' ||
             ( secrets.ANTHROPIC_API_KEY && '' || secrets.CLAUDE_CODE_OAUTH_TOKEN ) }}
-          # GitHub App bot identity for git commits
-          bot_id: ${{ steps.auth.outputs.user-id }}
-          bot_name: ${{ steps.auth.outputs.user-name }}
-          github_token: ${{ steps.auth.outputs.token }}
+          # GitHub App bot identity for git commits (fallback to Claude's default bot)
+          bot_id: ${{ steps.auth.outputs.user-id || '41898282' }}
+          bot_name: ${{ steps.auth.outputs.user-name || 'claude[bot]' }}
+          github_token: ${{ steps.auth.outputs.token || github.token }}
           # Prompt extracted from repository_dispatch payload
           prompt: ${{ steps.prompt.outputs.prompt }}
           # Enable full output for debugging
