@@ -94,7 +94,7 @@ jobs:
 
       - name: Save Logs as Artifact
         if: steps.debug.outputs.logs != ''
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: claude-session-logs
           path: ~/.claude/logs/
@@ -276,7 +276,7 @@ jobs:
           EOF
 
       - name: Upload Results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: debug-results-${{ matrix.repo }}
           path: debug-results/
