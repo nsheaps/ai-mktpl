@@ -2,7 +2,7 @@
 gh = "latest"
 jq = "latest"
 node = "lts"
-python = "3.12"
+python = "3.14.2"
 bun = "latest"
 just = "latest"
 
