@@ -1,15 +1,6 @@
 {
   "version": "0.2",
   "language": "en",
-  "words": [
-    "mktemp",
-    "marocchino",
-    "stefanzweifel"
-  ],
-  "ignorePaths": [
-    "node_modules",
-    ".git",
-    "*.lock",
-    "*.log"
-  ]
+  "words": ["mktemp", "marocchino", "stefanzweifel"],
+  "ignorePaths": ["node_modules", ".git", "*.lock", "*.log"]
 }
