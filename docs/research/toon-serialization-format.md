@@ -11,22 +11,22 @@ TOON (Token-Oriented Object Notation) is a compact, human-readable serialization
 
 ### Primary Resources
 
-| Resource | URL |
-|----------|-----|
-| **Official Spec** | https://github.com/toon-format/spec |
-| **Spec Document** | https://github.com/toon-format/spec/blob/main/SPEC.md |
-| **Reference Implementation (TypeScript)** | https://github.com/toon-format/toon |
-| **Organization** | https://github.com/toon-format |
+| Resource                                  | URL                                                   |
+| ----------------------------------------- | ----------------------------------------------------- |
+| **Official Spec**                         | https://github.com/toon-format/spec                   |
+| **Spec Document**                         | https://github.com/toon-format/spec/blob/main/SPEC.md |
+| **Reference Implementation (TypeScript)** | https://github.com/toon-format/toon                   |
+| **Organization**                          | https://github.com/toon-format                        |
 
 ### Language Implementations
 
-| Language | Repository | Package |
-|----------|------------|---------|
-| TypeScript/Node.js | toon-format/toon | `@toon-format/toon` (npm) |
-| Python | toon-format/toon-python | `pip install git+https://github.com/toon-format/toon-python.git` |
-| .NET | toon-format/toon-dotnet | NuGet (in development) |
-| Java | toon-format/toon-java | Maven (in development) |
-| Go | toon-format/toon-go | (in development) |
+| Language           | Repository              | Package                                                          |
+| ------------------ | ----------------------- | ---------------------------------------------------------------- |
+| TypeScript/Node.js | toon-format/toon        | `@toon-format/toon` (npm)                                        |
+| Python             | toon-format/toon-python | `pip install git+https://github.com/toon-format/toon-python.git` |
+| .NET               | toon-format/toon-dotnet | NuGet (in development)                                           |
+| Java               | toon-format/toon-java   | Maven (in development)                                           |
+| Go                 | toon-format/toon-go     | (in development)                                                 |
 
 ### Alternative Python Packages
 
@@ -131,11 +131,11 @@ items[3]:
 
 ### Delimiter Rules
 
-| Symbol | Header Syntax | Usage |
-|--------|---------------|-------|
-| Comma | `[N]:` | Default, no symbol needed |
-| Tab | `[N\t]:` | Values containing commas |
-| Pipe | `[N\|]:` | Values containing commas/tabs |
+| Symbol | Header Syntax | Usage                         |
+| ------ | ------------- | ----------------------------- |
+| Comma  | `[N]:`        | Default, no symbol needed     |
+| Tab    | `[N\t]:`      | Values containing commas      |
+| Pipe   | `[N\|]:`      | Values containing commas/tabs |
 
 **Critical:** The same delimiter declared in the bracket MUST be used consistently throughout that scope.
 
@@ -147,13 +147,13 @@ items[3]:
 
 ### Escaping (in quoted strings)
 
-| Escape | Character |
-|--------|-----------|
-| `\\` | Backslash |
-| `\"` | Double quote |
-| `\n` | Newline |
-| `\r` | Carriage return |
-| `\t` | Tab |
+| Escape | Character       |
+| ------ | --------------- |
+| `\\`   | Backslash       |
+| `\"`   | Double quote    |
+| `\n`   | Newline         |
+| `\r`   | Carriage return |
+| `\t`   | Tab             |
 
 No other escape sequences are valid.
 
@@ -212,23 +212,23 @@ toon data.toon --decode --no-strict
 ### TypeScript/JavaScript
 
 ```typescript
-import { encode, decode, encodeLines, decodeStream } from '@toon-format/toon'
+import { encode, decode, encodeLines, decodeStream } from "@toon-format/toon";
 
 // Basic encoding
-const toon = encode({ users: [{ id: 1, name: 'Alice' }] })
+const toon = encode({ users: [{ id: 1, name: "Alice" }] });
 
 // Basic decoding
-const data = decode(toonString)
+const data = decode(toonString);
 
 // Streaming for large datasets
 for (const line of encodeLines(largeData)) {
-  process.stdout.write(`${line}\n`)
+  process.stdout.write(`${line}\n`);
 }
 
 // With replacer (like JSON.stringify)
 encode(data, {
-  replacer: (key, value) => key === 'password' ? undefined : value
-})
+  replacer: (key, value) => (key === "password" ? undefined : value),
+});
 ```
 
 ### Python
@@ -253,21 +253,21 @@ data = decode("items[2]: apple,banana")
 
 ### Overall Comparison
 
-| Format | Accuracy | Tokens | Efficiency (acc%/1K tokens) |
-|--------|----------|--------|----------------------------|
-| **TOON** | 73.9% | 2,744 | **26.9** |
-| JSON compact | 70.7% | 3,081 | 22.9 |
-| YAML | 69.0% | 3,719 | 18.6 |
-| JSON (formatted) | 69.7% | 4,545 | 15.3 |
-| XML | 67.1% | 5,167 | 13.0 |
+| Format           | Accuracy | Tokens | Efficiency (acc%/1K tokens) |
+| ---------------- | -------- | ------ | --------------------------- |
+| **TOON**         | 73.9%    | 2,744  | **26.9**                    |
+| JSON compact     | 70.7%    | 3,081  | 22.9                        |
+| YAML             | 69.0%    | 3,719  | 18.6                        |
+| JSON (formatted) | 69.7%    | 4,545  | 15.3                        |
+| XML              | 67.1%    | 5,167  | 13.0                        |
 
 ### Token Reduction vs JSON
 
-| Data Type | Reduction vs JSON |
-|-----------|-------------------|
-| Uniform tabular data | **39.6%** |
-| Mixed-structure data | **21.8%** |
-| Deeply nested data | 0-10% (JSON may be better) |
+| Data Type            | Reduction vs JSON          |
+| -------------------- | -------------------------- |
+| Uniform tabular data | **39.6%**                  |
+| Mixed-structure data | **21.8%**                  |
+| Deeply nested data   | 0-10% (JSON may be better) |
 
 ### Key Findings
 
@@ -370,12 +370,12 @@ multiline: "line1\nline2"
 
 ### Conversion Matrix
 
-| From/To | TOON | JSON | YAML | XML |
-|---------|------|------|------|-----|
-| TOON | - | Decode | Decode->YAML | Decode->XML |
-| JSON | Encode | - | Direct | Direct |
-| YAML | Parse->Encode | Parse | - | Parse->XML |
-| XML | Parse->Encode | Parse | Parse->YAML | - |
+| From/To | TOON          | JSON   | YAML         | XML         |
+| ------- | ------------- | ------ | ------------ | ----------- |
+| TOON    | -             | Decode | Decode->YAML | Decode->XML |
+| JSON    | Encode        | -      | Direct       | Direct      |
+| YAML    | Parse->Encode | Parse  | -            | Parse->XML  |
+| XML     | Parse->Encode | Parse  | Parse->YAML  | -           |
 
 ### Recommended Approach
 

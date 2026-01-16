@@ -57,6 +57,7 @@ See the skill documentation for comprehensive jq, yq, and XPath examples.
   - `dicttoxml` - Dict to XML conversion (optional)
 
 Install on macOS:
+
 ```bash
 brew install jq yq
 pip install git+https://github.com/toon-format/toon-python.git xmltodict dicttoxml
@@ -64,12 +65,12 @@ pip install git+https://github.com/toon-format/toon-python.git xmltodict dicttox
 
 ## Format Recommendations
 
-| Use Case | Recommended Format |
-|----------|-------------------|
-| LLM prompts/context | TOON (30-60% fewer tokens) |
-| API data interchange | JSON |
-| Config files humans edit | YAML |
-| Enterprise integrations | XML |
+| Use Case                 | Recommended Format         |
+| ------------------------ | -------------------------- |
+| LLM prompts/context      | TOON (30-60% fewer tokens) |
+| API data interchange     | JSON                       |
+| Config files humans edit | YAML                       |
+| Enterprise integrations  | XML                        |
 
 ## When to Use TOON
 
