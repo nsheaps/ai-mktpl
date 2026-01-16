@@ -35,15 +35,13 @@ setup:
 lint FILE='.':
     #!/usr/bin/env bash
     command -v prettier >/dev/null 2>&1 || { just setup ; }
-    HAS_ERRORS=0
-    just lint-check "{{FILE}}" || HAS_ERRORS=1
-    if [ $HAS_ERRORS -ne 0 ]; then
-        echo "Lint errors found. Attempting to fix them"
-        just lint-fix "{{FILE}}"
-        just lint-check "{{FILE}}" || echo "Errors remain after auto-fix."
-        echo "Lint failed earlier, exiting with error"
-        exit 1
+    if just lint-check "{{FILE}}"; then
+        exit 0
     fi
+    echo "Lint errors found. Attempting to fix..."
+    just lint-fix "{{FILE}}"
+    # Exit based on whether issues remain - CI handles detecting/committing changes
+    just lint-check "{{FILE}}"
 
 lint-fix FILE='.':
     #!/usr/bin/env bash
