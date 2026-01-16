@@ -52,17 +52,39 @@ export HOOK_DIR
 export HOOK_ARGS
 export INPUT
 
-all_scripts_in_hook_dir="$(find "$HOOK_DIR" -type f -executable | sort)"
-
-if [ -z "$all_scripts_in_hook_dir" ]; then
-    echo "Warning: No executable scripts found in $HOOK_DIR."
+# Check if hook directory exists
+if [ ! -d "$HOOK_DIR" ]; then
+    echo "Warning: Hook directory $HOOK_DIR does not exist."
     exit 0
 fi
 
+# Find all shell scripts in the hook directory (portable approach)
+# Use glob instead of find for better cross-platform compatibility
+shopt -s nullglob
+all_scripts=("$HOOK_DIR"/*.sh)
+shopt -u nullglob
+
+if [ ${#all_scripts[@]} -eq 0 ]; then
+    echo "Warning: No shell scripts found in $HOOK_DIR."
+    exit 0
+fi
+
+# Ensure all scripts are executable
+for script in "${all_scripts[@]}"; do
+    if [ ! -x "$script" ]; then
+        echo "Making $script executable..."
+        chmod +x "$script"
+    fi
+done
+
+# Sort scripts by name for consistent execution order
+IFS=$'\n' sorted_scripts=($(printf '%s\n' "${all_scripts[@]}" | sort))
+unset IFS
+
 EXIT_CODE=0
 
-# run hooks sequentially
-while IFS= read -r script; do
+# Run hooks sequentially
+for script in "${sorted_scripts[@]}"; do
     echo "Running hook script: $script"
     # Execute the script, passing INPUT via stdin
     echo "$INPUT" | "$script" "${HOOK_ARGS[@]}"
@@ -71,7 +93,7 @@ while IFS= read -r script; do
         echo "Error: Hook script $script exited with code $SCRIPT_EXIT_CODE."
         EXIT_CODE=$SCRIPT_EXIT_CODE
     fi
-done <<< "$all_scripts_in_hook_dir"
+done
 
 echo "Finished running $HOOK_NAME" >&2
 exit $EXIT_CODE

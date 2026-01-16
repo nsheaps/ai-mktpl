@@ -25,7 +25,7 @@ jobs:
       contents: write
     steps:
       - name: Dispatch to Claude agent
-        uses: peter-evans/repository-dispatch@v3
+        uses: peter-evans/repository-dispatch@v4
         with:
           event-type: claude-agent
           # Schema: .github/schemas/claude-agent-payload.schema.json

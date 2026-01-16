@@ -1,0 +1,16 @@
+{
+  "description": "Pre-tool-call safety evaluation using prompt-style hooks for inline AI evaluation",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "SAFETY EVALUATION REQUIRED: Before executing this tool call, perform a security assessment.\n\nEvaluate the tool call against these criteria:\n\n1. **Destructive Operations**: Does this delete, overwrite, or modify critical files or systems? (e.g., rm -rf, format, truncate)\n\n2. **Data Exfiltration**: Could this leak sensitive data such as credentials, API keys, environment variables, or personal information? (e.g., curl posting .env files, cat ~/.ssh/id_rsa)\n\n3. **Network Security**: Does it make suspicious network calls, open ports, or expose services inappropriately? (e.g., nc -l, exposing internal services)\n\n4. **Privilege Escalation**: Does it attempt to gain elevated permissions or sudo access unexpectedly?\n\n5. **Code Injection**: Could it execute arbitrary or potentially malicious code? (e.g., eval, exec with user input)\n\n6. **Resource Abuse**: Could it consume excessive resources like fork bombs, infinite loops, or fill disk space?\n\nDECISION GUIDELINES:\n- ALLOW normal development operations (git commands, npm/yarn, file editing in project directories, running tests, building)\n- ALLOW read-only operations (cat, ls, grep, find for exploration)\n- BLOCK obviously dangerous operations (rm -rf /, credential theft attempts, cryptomining)\n- For AMBIGUOUS cases: If the operation seems potentially risky but could be legitimate development work, ASK the user for confirmation before proceeding\n\nIf you determine the operation is unsafe, explain the risk and ask the user whether they want to proceed. Do not silently block - always communicate your assessment."
+          }
+        ]
+      }
+    ]
+  }
+}

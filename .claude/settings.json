@@ -132,7 +132,8 @@
     "code-review@claude-plugins-official": true,
     "pr-review-toolkit@claude-plugins-official": true,
     "plugin-dev@claude-plugins-official": true,
-    "data-serialization@nsheaps-ai-local": true
+    "data-serialization@nsheaps-claude-plugins": true,
+    "todo-sync@nsheaps-claude-plugins": true
   },
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
@@ -141,7 +142,7 @@
         "repo": "anthropics/claude-plugins-official"
       }
     },
-    "nsheaps-ai-local": {
+    "nsheaps-claude-plugins": {
       "source": {
         "source": "directory",
         "path": "/Users/nathan.heaps/src/nsheaps/ai"
