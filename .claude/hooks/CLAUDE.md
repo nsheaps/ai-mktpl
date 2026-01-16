@@ -12,17 +12,20 @@ This directory contains Claude Code hooks that run at various lifecycle points. 
 The `run-hook.sh` script provides automatic hook discovery and execution.
 
 **Usage:**
+
 ```bash
 ./run-hook.sh <hook-name> [additional-args...]
 ```
 
 **Behavior:**
+
 1. Finds all executable files in `.claude/hooks/<hook-name>/`
 2. Runs them sequentially, passing Claude's stdin input to each
 3. Exits with the last non-zero exit code (or 0 if all succeed)
 4. Prints a warning if no executable scripts are found (but exits 0)
 
 **Environment variables set:**
+
 - `HOOK_NAME` - The hook type being run
 - `HOOK_DIR` - Path to the hook directory
 - `HOOK_ARGS` - Additional arguments passed after hook name
@@ -37,10 +40,12 @@ Uses `run-hook.sh` for auto-discovery. All scripts in `.claude/hooks/session-sta
 ```json
 {
   "matcher": "startup",
-  "hooks": [{
-    "type": "command",
-    "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/run-hook.sh session-start start"
-  }]
+  "hooks": [
+    {
+      "type": "command",
+      "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/run-hook.sh session-start start"
+    }
+  ]
 }
 ```
 
@@ -53,10 +58,12 @@ Currently uses **manual mapping** (not run-hook.sh). Each hook is explicitly con
 ```json
 {
   "matcher": "Bash",
-  "hooks": [{
-    "type": "command",
-    "command": "bash ${CLAUDE_PROJECT_DIR}/.claude/hooks/pre-tool-use/warn-force-push.sh"
-  }]
+  "hooks": [
+    {
+      "type": "command",
+      "command": "bash ${CLAUDE_PROJECT_DIR}/.claude/hooks/pre-tool-use/warn-force-push.sh"
+    }
+  ]
 }
 ```
 
@@ -102,6 +109,7 @@ echo '{"status": "approved"}'
 ### Making Scripts Executable
 
 Scripts must be executable to be discovered by run-hook.sh:
+
 ```bash
 chmod +x .claude/hooks/<hook-type>/your-script.sh
 ```
