@@ -9,11 +9,5 @@
   },
   "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/create-command",
   "repository": "https://github.com/nsheaps/.ai",
-  "keywords": [
-    "slash-command",
-    "command",
-    "create",
-    "automation",
-    "workflow"
-  ]
+  "keywords": ["slash-command", "command", "create", "automation", "workflow"]
 }
