@@ -30,6 +30,7 @@ Is there any way to customize the compacting process in Claude Code to always us
 #### Custom Instructions
 
 The `/compact` command accepts optional instructions:
+
 ```bash
 /compact "focus on TODO items and architectural decisions"
 ```
@@ -47,6 +48,7 @@ This influences what gets summarized but not how (model, parameters, etc.).
 ### Settings Schema Review
 
 The complete `settings.json` schema was reviewed. Compact-related settings are limited to:
+
 - Hook configuration for `PreCompact` event
 - Hook configuration for `SessionStart` with `"compact"` source
 
@@ -69,6 +71,7 @@ This is manual and not automatable via hooks or settings.
 Submit a feature request via `/feedback` for one of:
 
 1. **`compactModel` setting** in `settings.json`:
+
    ```json
    {
      "compactModel": "claude-sonnet-4-20250514"
