@@ -1,6 +1,6 @@
 {
   "name": "opengraph-image",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Generate OpenGraph images for Nuxt/Vue pages using HTML templates and html2png.dev API",
   "author": {
     "name": "alvinunreal + modifications by nsheaps",
@@ -9,5 +9,14 @@
   },
   "homepage": "https://www.reddit.com/r/ClaudeCode/comments/1pw2psj/this_is_how_i_generate_og_images_using_claude_code/",
   "repository": "https://github.com/nsheaps/.ai",
-  "keywords": ["generation", "image", "opengraph", "og-image", "social media", "png", "html", "svg"]
+  "keywords": [
+    "generation",
+    "image",
+    "opengraph",
+    "og-image",
+    "social media",
+    "png",
+    "html",
+    "svg"
+  ]
 }
