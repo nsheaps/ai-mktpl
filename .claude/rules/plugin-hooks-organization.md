@@ -23,7 +23,7 @@ plugins/my-plugin/
 // In .claude-plugin/plugin.json
 {
   "name": "my-plugin",
-  "hooks": "./hooks/hooks.json"   // Correct: relative to plugin root
+  "hooks": "./hooks/hooks.json" // Correct: relative to plugin root
 }
 ```
 
@@ -31,7 +31,7 @@ plugins/my-plugin/
 
 ```json
 {
-  "hooks": "../hooks/hooks.json"  // WRONG: traverses outside plugin root
+  "hooks": "../hooks/hooks.json" // WRONG: traverses outside plugin root
 }
 ```
 
