@@ -88,6 +88,7 @@ Questions you leave in past reviews may be answered in the PR body or comments. 
    6. Do NOT resolve the thread
 
    **Resolve using graphql API:**
+
    ```bash
    gh api graphql -f query='
      mutation {
