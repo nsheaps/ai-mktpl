@@ -99,6 +99,13 @@ For deeply nested or non-uniform data, JSON may be more efficient.
 - [jq Manual](https://jqlang.github.io/jq/manual/)
 - [yq Documentation](https://mikefarah.gitbook.io/yq/)
 
+## Changelog
+
+### Latest
+
+- Improved version bump workflow with plugin-specific commit messages
+- Enhanced CI integration with consistent formatting
+
 ## License
 
 MIT

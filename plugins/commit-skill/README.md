@@ -425,6 +425,12 @@ Contributions welcome! Please:
 
 ## Changelog
 
+### Latest
+
+- Improved version bump commit messages with plugin-specific formatting
+- Added automatic prettier formatting after version bumps
+- Enhanced CI integration by removing skip-ci tags
+
 ### Version 1.0.0
 
 - Initial release
