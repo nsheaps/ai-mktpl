@@ -44,9 +44,14 @@ claude plugin install pr-review-toolkit@claude-plugins-official --scope local
 
 ### After Installation
 
-If the plugin was just installed, inform the user:
+After installing the plugin:
 
-> The plugin has been installed. Plugins load at session start, so you'll need to restart Claude Code.
+1. Wait approximately 15 seconds for the plugin to load
+2. Re-check if the `pr-review-toolkit:code-simplifier` agent is now available
+3. If the agent is available, proceed with simplification
+4. If the agent is still NOT available after waiting, inform the user:
+
+> The plugin has been installed, but the agent is not yet available. Plugins typically load at session start, so you may need to restart Claude Code.
 >
 > To continue this session after restarting:
 >
@@ -60,7 +65,7 @@ If the plugin was just installed, inform the user:
 > claude --resume $SESSION_ID
 > ```
 
-Then stop - do not attempt to use the agent until after restart.
+Only stop if the agent is unavailable after the availability check - do not assume a restart is needed.
 
 ## When Dependency is Available
 
@@ -116,6 +121,8 @@ The code-simplifier agent focuses on:
 - Changes are made incrementally
 - Original logic is maintained
 - No breaking changes introduced
+
+**Note:** After simplification, the agent should verify these safety claims by running tests and reviewing the changes to confirm functionality is preserved.
 
 ## Troubleshooting
 
