@@ -1,10 +1,9 @@
 name: Claude Agent Trigger
 
 # Detects events that should trigger Claude agent and dispatches to agent workflow
-# Mirrors the original claude.yaml structure - ONE job, conditional logic
+# Schema: .github/schemas/claude-agent-payload.schema.json
 
 on:
-  # Note: Runs from default branch (main), even if triggered on PR
   issue_comment:
     types: [created, edited]
   pull_request_review_comment:
@@ -25,11 +24,67 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Build payload
+        id: payload
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Extract fields based on event type - see schema at .github/schemas/claude-agent-payload.schema.json
+            const event = context.eventName;
+            const e = context.payload;
+
+            // Determine source content based on event type
+            const isComment = event === 'issue_comment' || event === 'pull_request_review_comment';
+            const isReview = event === 'pull_request_review';
+            const isIssue = event === 'issues';
+
+            const body = isComment ? e.comment.body
+                       : isReview ? e.review.body
+                       : e.issue.body;
+
+            const author = isComment ? e.comment.user
+                         : isReview ? e.review.user
+                         : e.issue.user;
+
+            const authorAssociation = isComment ? e.comment.author_association
+                                    : isReview ? e.review.author_association
+                                    : e.issue.author_association;
+
+            const commentId = isComment ? e.comment.id
+                            : isReview ? e.review.id
+                            : null;
+
+            // Determine issue/PR numbers
+            const issueNumber = e.issue?.number || null;
+            const prNumber = e.pull_request?.number || (e.issue?.pull_request ? issueNumber : null);
+
+            const payload = {
+              prompt: body,
+              trigger: {
+                type: event,
+                action: e.action
+              },
+              source: {
+                repo: e.repository.full_name,
+                issue_number: issueNumber,
+                pr_number: prNumber,
+                comment_id: commentId,
+                ref: context.ref
+              },
+              author: {
+                login: author.login,
+                association: authorAssociation
+              },
+              content: {
+                title: e.issue?.title || e.pull_request?.title || null,
+                body: body
+              }
+            };
+
+            core.setOutput('json', JSON.stringify(payload));
+
       - name: Dispatch to Claude agent
         uses: peter-evans/repository-dispatch@v3
         with:
           event-type: claude-agent
-          client-payload: |-
-            {
-              "github": ${{ toJson(github) }}
-            }
+          client-payload: ${{ steps.payload.outputs.json }}
