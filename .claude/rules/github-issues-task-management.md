@@ -5,6 +5,7 @@ This repository uses GitHub Issues as the primary task management system.
 ## When to Create Issues
 
 Create GitHub issues for:
+
 - Bugs discovered during development
 - Feature requests and enhancements
 - Tasks that cannot be completed in the current session
@@ -12,16 +13,19 @@ Create GitHub issues for:
 - Items requiring user input or review before proceeding
 
 Do NOT create issues for:
+
 - Tasks you can complete immediately
 - Temporary notes (use scratch files instead)
 
 ## Issue Structure
 
 **Title**: Clear, actionable description starting with a verb
+
 - Good: "Add validation for plugin manifest files"
 - Bad: "Validation issue" or "Plugin stuff"
 
 **Body**: Include context an AI agent needs to pick up the work:
+
 - What needs to be done
 - Why it matters
 - Acceptance criteria (if applicable)
@@ -31,38 +35,40 @@ Do NOT create issues for:
 
 Use labels to indicate issue state beyond open/closed:
 
-| Label | Purpose |
-|-------|---------|
-| `status:in-progress` | Actively being worked on |
-| `status:blocked` | Cannot proceed - see comments for blocker |
-| `status:needs-review` | Work complete, awaiting human review |
-| `status:on-hold` | Intentionally paused, not abandoned |
+| Label                 | Purpose                                   |
+| --------------------- | ----------------------------------------- |
+| `status:in-progress`  | Actively being worked on                  |
+| `status:blocked`      | Cannot proceed - see comments for blocker |
+| `status:needs-review` | Work complete, awaiting human review      |
+| `status:on-hold`      | Intentionally paused, not abandoned       |
 
 ## Labels for Issue Type
 
-| Label | Purpose |
-|-------|---------|
-| `bug` | Something isn't working correctly |
-| `enhancement` | New feature or improvement |
-| `documentation` | Documentation updates needed |
-| `chore` | Maintenance, refactoring, cleanup |
+| Label           | Purpose                           |
+| --------------- | --------------------------------- |
+| `bug`           | Something isn't working correctly |
+| `enhancement`   | New feature or improvement        |
+| `documentation` | Documentation updates needed      |
+| `chore`         | Maintenance, refactoring, cleanup |
 
 ## Labels for Priority
 
-| Label | Purpose |
-|-------|---------|
-| `priority:high` | Address soon, blocks other work |
-| `priority:low` | Nice to have, do when convenient |
+| Label           | Purpose                          |
+| --------------- | -------------------------------- |
+| `priority:high` | Address soon, blocks other work  |
+| `priority:low`  | Nice to have, do when convenient |
 
 ## Working with Issues
 
 **Starting work on an issue:**
+
 ```bash
 # Add in-progress label
 gh issue edit <number> --add-label "status:in-progress"
 ```
 
 **When blocked:**
+
 ```bash
 # Add blocked label and comment explaining why
 gh issue edit <number> --add-label "status:blocked"
@@ -70,6 +76,7 @@ gh issue comment <number> --body "Blocked: <reason>"
 ```
 
 **Completing work:**
+
 ```bash
 # Remove status labels, close with comment
 gh issue edit <number> --remove-label "status:in-progress"
