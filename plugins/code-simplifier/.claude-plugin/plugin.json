@@ -4,7 +4,10 @@
   "description": "Simplify and refine code for clarity, consistency, and maintainability. Requires pr-review-toolkit plugin.",
   "author": {
     "name": "Nathan Heaps",
-    "email": "nsheaps@gmail.com"
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
   },
+  "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/code-simplifier",
+  "repository": "https://github.com/nsheaps/.ai",
   "keywords": ["refactoring", "code-quality", "simplification", "cleanup"]
 }
