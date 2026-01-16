@@ -81,6 +81,7 @@ iTerm/Terminal
 ## What Happens After
 
 After termination:
+
 1. The Claude session ends immediately
 2. Any in-progress work is interrupted
 3. The user returns to their shell
