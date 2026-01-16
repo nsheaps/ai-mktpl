@@ -108,58 +108,91 @@ _preview-version-bump PLUGIN_PATH=invocation_directory():
 [arg('format', pattern='--format=raw|--format=md')]
 _preview-version-bumps format='--format=raw':
     #!/usr/bin/env bash
-    # takes optional args:
-    # --format=raw|md : output format for dry-run report (default: raw)
-    # gets the json, then formats it accordingly.
+    # Compare plugin versions between base branch (main) and current HEAD
+    # Shows actual version changes in PR, not predicted future bumps
+    #
     # format with raw:
     #  plugin-name: 1.2.2 =( patch )=> 1.2.3
-    #  $plugin: $current =( $type )=> $next
-    #  ...
     # format with md:
-    #  | Plugin | Current | Type | Next |
+    #  | Plugin | Base | Type | Head |
     #  |---|---|---|---|
     #  | plugin-name | 1.2.2 | patch | 1.2.3 |
-    #   ...
+
+    # Determine base branch (origin/main in CI, main locally)
+    BASE_BRANCH="${GITHUB_BASE_REF:-main}"
+    if ! git rev-parse --verify "origin/$BASE_BRANCH" >/dev/null 2>&1; then
+        BASE_BRANCH="main"
+    else
+        BASE_BRANCH="origin/$BASE_BRANCH"
+    fi
+
     case "{{format}}" in
         --format=md )
-            echo "| Plugin | Current | Type | Next |"
+            echo "| Plugin | Base | Type | Head |"
             echo "|---|---|---|---|"
             ;;
     esac
+
+    FOUND_CHANGES=0
     for plugin_dir in plugins/*; do
         if [ ! -d "$plugin_dir" ]; then
             continue
         fi
         PLUGIN_NAME=$(basename "$plugin_dir")
-        CURRENT=$(just _plugin-current-version "$plugin_dir")
-        NEXT=$(just _plugin-next-version "$plugin_dir")
-        # determine type of bump
-        IFS='.' read -r -a current_parts <<< "$CURRENT"
-        IFS='.' read -r -a next_parts <<< "$NEXT"
-        if [ "${current_parts[0]}" != "${next_parts[0]}" ]; then
-            TYPE="major"
-        elif [ "${current_parts[1]}" != "${next_parts[1]}" ]; then
-            TYPE="minor"
-        elif [ "${current_parts[2]}" != "${next_parts[2]}" ]; then
-            TYPE="patch"
-        else
-            TYPE="none"
-        fi
+        PLUGIN_JSON="$plugin_dir/.claude-plugin/plugin.json"
 
-        # Skip plugins with no version change
-        if [ "$TYPE" = "none" ]; then
+        # Get version from HEAD (current branch)
+        HEAD_VERSION=$(jq -r '.version' "$PLUGIN_JSON" 2>/dev/null || echo "")
+        if [ -z "$HEAD_VERSION" ]; then
             continue
         fi
 
+        # Get version from base branch
+        BASE_VERSION=$(git show "$BASE_BRANCH:$PLUGIN_JSON" 2>/dev/null | jq -r '.version' 2>/dev/null || echo "")
+        if [ -z "$BASE_VERSION" ]; then
+            # Plugin doesn't exist in base branch (new plugin)
+            BASE_VERSION="0.0.0"
+        fi
+
+        # Skip if versions are the same
+        if [ "$BASE_VERSION" = "$HEAD_VERSION" ]; then
+            continue
+        fi
+
+        # Determine type of bump
+        IFS='.' read -r -a base_parts <<< "$BASE_VERSION"
+        IFS='.' read -r -a head_parts <<< "$HEAD_VERSION"
+        if [ "${base_parts[0]}" != "${head_parts[0]}" ]; then
+            TYPE="major"
+        elif [ "${base_parts[1]}" != "${head_parts[1]}" ]; then
+            TYPE="minor"
+        elif [ "${base_parts[2]}" != "${head_parts[2]}" ]; then
+            TYPE="patch"
+        else
+            TYPE="unknown"
+        fi
+
+        FOUND_CHANGES=1
         case "{{format}}" in
             --format=raw|'' )
-                echo "$PLUGIN_NAME: $CURRENT =( $TYPE )=> $NEXT"
+                echo "$PLUGIN_NAME: $BASE_VERSION =( $TYPE )=> $HEAD_VERSION"
                 ;;
             --format=md )
-                echo "| $PLUGIN_NAME | $CURRENT | $TYPE | $NEXT |"
+                echo "| $PLUGIN_NAME | $BASE_VERSION | $TYPE | $HEAD_VERSION |"
                 ;;
         esac
     done
+
+    if [ "$FOUND_CHANGES" -eq 0 ]; then
+        case "{{format}}" in
+            --format=md )
+                echo "| *No version changes detected* | | | |"
+                ;;
+            * )
+                echo "No version changes detected"
+                ;;
+        esac
+    fi
 
 _plugin-current-versions:
     #!/usr/bin/env bash
