@@ -14,7 +14,7 @@ name: cd
 
 concurrency:
   group: cd-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   preview-version-bump:

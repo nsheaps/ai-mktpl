@@ -8,6 +8,10 @@ on:
       - .github/labels.yaml
   workflow_dispatch:
 
+concurrency:
+  group: sync-labels-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   sync-labels:
     runs-on: ubuntu-latest
