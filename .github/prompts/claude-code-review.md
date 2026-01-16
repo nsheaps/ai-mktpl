@@ -45,18 +45,20 @@ Questions you leave in past reviews may be answered in the PR body or comments. 
    CRITICAL: Never minimize or hide comments from other users.
    - Get your comment IDs using: `gh pr view <PR_NUMBER> --json comments`
    - Minimize using graphql API with OUTDATED classifier:
+     ```bash
      gh api graphql -f query='
-     mutation {
-     minimizeComment(input: {
-     subjectId: "IC_kwDOLEK3Rc7Pfbf7"
-     classifier: OUTDATED
-     }) {
-     minimizedComment {
-     isMinimized
-     minimizedReason
-     }
-     }
-     }'
+       mutation {
+         minimizeComment(input: {
+           subjectId: "IC_kwDOLEK3Rc7Pfbf7"
+           classifier: OUTDATED
+         }) {
+           minimizedComment {
+             isMinimized
+             minimizedReason
+           }
+         }
+       }'
+     ```
 
    ### 4b. Resolving review threads
 
@@ -86,16 +88,18 @@ Questions you leave in past reviews may be answered in the PR body or comments. 
    6. Do NOT resolve the thread
 
    **Resolve using graphql API:**
+   ```bash
    gh api graphql -f query='
-   mutation {
-   resolveReviewThread(input: {
-   threadId: "MDEyOlJldmlld1RocmVhZDEyMzQ1Ng=="
-   }) {
-   thread {
-   isResolved
-   }
-   }
-   }'
+     mutation {
+       resolveReviewThread(input: {
+         threadId: "MDEyOlJldmlld1RocmVhZDEyMzQ1Ng=="
+       }) {
+         thread {
+           isResolved
+         }
+       }
+     }'
+   ```
 
    ### 4c. Updating existing comments (not reposting)
 
@@ -112,18 +116,20 @@ Questions you leave in past reviews may be answered in the PR body or comments. 
      ```
 
    - To update a comment:
+     ```bash
      gh api graphql -f query='
-     mutation {
-     updateIssueComment(input: {
-     id: "IC_kwDOLEK3Rc7Pfbf7"
-     body: "Updated comment body here"
-     }) {
-     issueComment {
-     id
-     body
-     }
-     }
-     }'
+       mutation {
+         updateIssueComment(input: {
+           id: "IC_kwDOLEK3Rc7Pfbf7"
+           body: "Updated comment body here"
+         }) {
+           issueComment {
+             id
+             body
+           }
+         }
+       }'
+     ```
 
 5. **Start a review**: Use `mcp__github__create_pending_pull_request_review` to begin a pending review
 6. **Add inline comments**: Use `mcp__github__add_comment_to_pending_review` for each specific piece of feedback on particular lines. The add_comment_to_pending_review does not return the new thread ID, so you will need to fetch the review comments again after adding all comments to get the URLs for your review comments.
@@ -145,18 +151,20 @@ Questions you leave in past reviews may be answered in the PR body or comments. 
    CRITICAL: Only hide YOUR OWN previous reviews, never reviews from other users.
    - Get your previous reviews: `gh pr view <PR_NUMBER> --json reviews --jq '.reviews[] | select(.author.login == "<BOT_USERNAME>") | {id: .id, state: .state}'`
    - Minimize each of your previous review summary comments using the GraphQL API:
+     ```bash
      gh api graphql -f query='
-     mutation {
-     minimizeComment(input: {
-     subjectId: "<REVIEW_ID>"
-     classifier: OUTDATED
-     }) {
-     minimizedComment {
-     isMinimized
-     minimizedReason
-     }
-     }
-     }'
+       mutation {
+         minimizeComment(input: {
+           subjectId: "<REVIEW_ID>"
+           classifier: OUTDATED
+         }) {
+           minimizedComment {
+             isMinimized
+             minimizedReason
+           }
+         }
+       }'
+     ```
      NOTE: Minimizing reviews does NOT affect the review threads (inline comments). Those are managed separately via resolve/unresolve as described in step 4b.
 10. **Submit the review**: Use `mcp__github__submit_pending_pull_request_review` to post your review.
     CRITICAL: If there are security, performance, or correctness issues that MUST be addressed before merging, use "REQUEST_CHANGES".
