@@ -29,8 +29,14 @@ runs:
           just lint-check || HAS_ERRORS=true
         fi
 
-        # Output true if changed OR errors remain
-        if [ "$HAS_ERRORS" = "true" ]; then
+        # Check if any files were changed by auto-fix
+        HAS_CHANGES=false
+        if [ -n "$(git status --porcelain)" ]; then
+          HAS_CHANGES=true
+        fi
+
+        # Output true if files changed OR errors remain
+        if [ "$HAS_ERRORS" = "true" ] || [ "$HAS_CHANGES" = "true" ]; then
           echo "changed-or-failed=true" >> $GITHUB_OUTPUT
         else
           echo "changed-or-failed=false" >> $GITHUB_OUTPUT

@@ -43,7 +43,7 @@ jobs:
         run: git fetch origin ${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}
 
       - name: mise install -y
-        uses: jdx/mise-action@v2
+        uses: jdx/mise-action@v3
         with:
           install: true
           cache: true
@@ -88,7 +88,7 @@ jobs:
 
       - name: Push version bumps to PR
         if: steps.detect.outputs.has_changes == 'true'
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v6
         with:
           commit_message: 'chore: bump plugin versions'
           file_pattern: 'plugins/*/.claude-plugin/plugin.json plugins/*/CHANGELOG.md'
@@ -134,7 +134,7 @@ jobs:
           private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
 
       - name: mise install -y
-        uses: jdx/mise-action@v2
+        uses: jdx/mise-action@v3
         with:
           install: true
           cache: true
@@ -146,7 +146,7 @@ jobs:
 
       - name: Commit marketplace changes
         if: steps.update.outputs.updated == 'true'
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v6
         with:
           commit_message: 'chore: update marketplace metadata [skip ci]'
           file_pattern: '.claude-plugin/marketplace.json'
