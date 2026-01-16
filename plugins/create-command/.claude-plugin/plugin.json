@@ -1,6 +1,6 @@
 {
   "name": "create-command",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Create and maintain Claude Code slash commands with guided assistance",
   "author": {
     "name": "Nathan Heaps",
@@ -9,5 +9,11 @@
   },
   "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/create-command",
   "repository": "https://github.com/nsheaps/.ai",
-  "keywords": ["slash-command", "command", "create", "automation", "workflow"]
+  "keywords": [
+    "slash-command",
+    "command",
+    "create",
+    "automation",
+    "workflow"
+  ]
 }
