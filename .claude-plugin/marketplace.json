@@ -168,7 +168,7 @@
     {
       "name": "safety-evaluation-prompt",
       "description": "Pre-tool-call safety evaluation using prompt-style hooks for inline AI evaluation",
-      "version": "0.2.24",
+      "version": "0.2.25",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -180,7 +180,7 @@
     {
       "name": "safety-evaluation-script",
       "description": "Pre-tool-call safety evaluation using Claude CLI (haiku) with script-style hooks",
-      "version": "0.2.24",
+      "version": "0.2.25",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -216,7 +216,7 @@
     {
       "name": "statusline",
       "description": "Configurable status line for Claude Code showing session info, project context, and git status",
-      "version": "0.1.8",
+      "version": "0.1.10",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -277,6 +277,18 @@
       "category": "utility",
       "tags": ["utility", "command", "skill"],
       "keywords": ["tmux", "subagent", "parallel", "iterm", "terminal", "isolation", "delegation"]
+    },
+    {
+      "name": "todo-sync",
+      "description": "Automatically syncs todos and plans from ~/.claude/ to the current project's .claude/ directory",
+      "version": "0.1.1",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/todo-sync",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": ["todos", "plans", "sync", "workflow", "productivity"]
     }
   ]
 }
