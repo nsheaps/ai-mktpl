@@ -1,5 +1,10 @@
 name: cd
 
+# Architecture:
+# - PRs: Automatically bump plugin versions and push to PR branch for review
+# - Main: Only update marketplace.json metadata (versions already bumped in PR)
+# This prevents infinite loops from version bump commits triggering themselves
+
 'on':
   push:
     branches:
@@ -14,7 +19,6 @@ name: cd
 
 concurrency:
   group: cd-${{ github.ref }}
-  # Allow cancellation in both PRs and main (no more version tagging on main)
   cancel-in-progress: true
 
 jobs:
@@ -39,8 +43,11 @@ jobs:
           app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
           private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
 
-      - name: Fetch base branch
-        run: git fetch origin ${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}
+      - name: Fetch and configure base branch
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          git config user.name "automation-nsheaps[bot]"
+          git config user.email "251779498+automation-nsheaps[bot]@users.noreply.github.com"
 
       - name: mise install -y
         uses: jdx/mise-action@v2
@@ -48,71 +55,40 @@ jobs:
           install: true
           cache: true
 
-      - name: Detect changed plugins
-        id: detect
+      - name: Check if version bumps needed
+        id: check
         shell: bash
         run: |
-          # Find plugins that have changes (compare to base branch)
-          CHANGED_PLUGINS=()
-          for plugin_dir in plugins/*; do
-            if [ ! -d "$plugin_dir" ]; then
-              continue
-            fi
-            PLUGIN_NAME=$(basename "$plugin_dir")
-
-            # Check if any files in this plugin changed
-            if git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -q "^$plugin_dir/"; then
-              CHANGED_PLUGINS+=("$PLUGIN_NAME")
-            fi
-          done
-
-          if [ ${#CHANGED_PLUGINS[@]} -eq 0 ]; then
-            echo "No plugins changed"
-            echo "has_changes=false" >> $GITHUB_OUTPUT
+          # Use justfile which handles base/HEAD comparison correctly
+          PREVIEW=$(just release --dry-run --format=md)
+          if echo "$PREVIEW" | grep -q "No version changes detected"; then
+            echo "needs_bump=false" >> $GITHUB_OUTPUT
+            echo "No plugins need version bumps"
           else
-            echo "Changed plugins: ${CHANGED_PLUGINS[*]}"
-            echo "has_changes=true" >> $GITHUB_OUTPUT
-            echo "plugins=${CHANGED_PLUGINS[*]}" >> $GITHUB_OUTPUT
+            echo "needs_bump=true" >> $GITHUB_OUTPUT
+            echo "Plugins to bump:"
+            echo "$PREVIEW"
           fi
 
-      - name: Bump versions for changed plugins
-        if: steps.detect.outputs.has_changes == 'true'
-        shell: bash
-        run: |
-          # Bump versions only for changed plugins
-          for plugin_name in ${{ steps.detect.outputs.plugins }}; do
-            echo "Bumping version for $plugin_name"
-            just _bump-plugin-version "plugins/$plugin_name"
-          done
+      - name: Bump plugin versions
+        if: steps.check.outputs.needs_bump == 'true'
+        run: just release
 
       - name: Push version bumps to PR
-        if: steps.detect.outputs.has_changes == 'true'
+        if: steps.check.outputs.needs_bump == 'true'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: 'chore: bump plugin versions'
           file_pattern: 'plugins/*/.claude-plugin/plugin.json plugins/*/CHANGELOG.md'
-          branch: ${{ github.head_ref }}
 
-      - name: Generate version bump report
-        if: steps.detect.outputs.has_changes == 'true'
-        id: report
-        shell: bash
-        run: |
-          TMP="$(mktemp)"
-          just release --dry-run --format=md | tee "$TMP"
-          echo "report<<EOF" >> $GITHUB_OUTPUT
-          cat $TMP >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
-      - name: Post version bump comment
-        if: steps.detect.outputs.has_changes == 'true' && steps.report.outputs.report != ''
+      - name: Post version bump status
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          header: 'plugin-versions'
+          header: 'package: Version Bump Status'
           message: |
-            ### Plugin Version Bumps
-            ${{ steps.report.outputs.report }}
+            ### package: Version Bump Status
+            ${{ steps.check.outputs.needs_bump == 'true' && '✅ Version bumps committed to PR' || 'ℹ️ No version bumps needed' }}
 
   update-marketplace:
     runs-on: ubuntu-latest
@@ -122,8 +98,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-        with:
-          persist-credentials: false
 
       - name: Authenticate as GitHub App
         id: auth
@@ -143,7 +117,7 @@ jobs:
         shell: bash
         run: just update-marketplace
 
-      - name: Commit marketplace changes
+      - name: Commit changes
         if: steps.update.outputs.updated == 'true'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
