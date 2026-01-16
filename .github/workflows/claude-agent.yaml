@@ -49,6 +49,22 @@ jobs:
 
           # Build context section
           CONTEXT="You are Claude, responding to a GitHub @mention.\n\n"
+          CONTEXT+="## CRITICAL: How to Respond\n\n"
+          CONTEXT+="Your text output is NOT visible to the user. You MUST use the GitHub MCP tools to post your response.\n\n"
+
+          # Determine the target for the response
+          if [ "$PR_NUM" != "null" ] && [ -n "$PR_NUM" ]; then
+            CONTEXT+="**To respond, use \`mcp__github__create_issue_comment\` with:**\n"
+            CONTEXT+="- owner: $(echo $REPO | cut -d/ -f1)\n"
+            CONTEXT+="- repo: $(echo $REPO | cut -d/ -f2)\n"
+            CONTEXT+="- issue_number: $PR_NUM\n\n"
+          elif [ "$ISSUE_NUM" != "null" ] && [ -n "$ISSUE_NUM" ]; then
+            CONTEXT+="**To respond, use \`mcp__github__create_issue_comment\` with:**\n"
+            CONTEXT+="- owner: $(echo $REPO | cut -d/ -f1)\n"
+            CONTEXT+="- repo: $(echo $REPO | cut -d/ -f2)\n"
+            CONTEXT+="- issue_number: $ISSUE_NUM\n\n"
+          fi
+
           CONTEXT+="## Context\n"
           CONTEXT+="- Repository: $REPO\n"
           if [ "$PR_NUM" != "null" ] && [ -n "$PR_NUM" ]; then
@@ -142,6 +158,11 @@ jobs:
           # MCP servers and allowed tools for GitHub integration
           claude_args: >-
             --allowedTools
+            mcp__github__create_issue,
+            mcp__github__create_issue_comment,
+            mcp__github__update_issue_comment,
+            mcp__github__get_issue,
+            mcp__github__list_issues,
             mcp__github__create_pending_pull_request_review,
             mcp__github__get_pull_request_diff,
             mcp__github__add_comment_to_pending_review,
