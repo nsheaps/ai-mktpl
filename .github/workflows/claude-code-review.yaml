@@ -24,17 +24,14 @@ concurrency:
 
 jobs:
   claude-review:
-    # Draft PR behavior:
-    # - By default, draft PRs are skipped
-    # - Add 'request-review' label for a one-time review (label is removed when review starts)
-    # - Add 'always-review' label to always review this PR even in draft state
-    # - Add 'ai-review' label to have the PR reviewed regardless of other conditions
+    # Triggers:
+    # - Automatically on all open (non-draft) PRs
+    # - On draft PRs only when 'request-review' label is added (label is removed after review starts)
+    #
+    # Logic: (not a draft) OR (labeled event with request-review)
     if: |
-      (
-        github.event.pull_request.draft != true ||
-        (github.event.action == 'labeled' && github.event.label.name == 'request-review') ||
-        contains(github.event.pull_request.labels.*.name, 'always-review')
-      )
+      github.event.pull_request.draft != true ||
+      ( github.event.action == 'labeled' && github.event.label.name == 'request-review')
 
     runs-on: ubuntu-latest
     permissions:
@@ -222,7 +219,13 @@ jobs:
                 - Links to relevant documentation or style guides
                 - Reference links for your final review (workflow run, PR, external sources)
               CRITICAL: This doc must be updated after every piece you review, since your memory is very short and volatile. Do not trust your memory or built in knowledge. Use the doc to track everything.
-            4. **Use `gh api ...` to minimize/hide previous comments** and reviews that are no longer relevant. Both require the use of the graphql API to mutate the comments/review.
+            4. **Use `gh api ...` to minimize/hide previous comments** that are no longer relevant.
+               You must use the GraphQL API to minimize comments.
+               Do not minimize/hide reviews and review threads, only comments.
+                - Instead, dismiss old reviews and resolve review threads if they're no longer relevant.
+                - Hiding reviews may dismiss review threads without resolution.
+               CRITICAL: You MUST ensure your latest review and active review threads and comments are the only visible ones.
+               CRITICAL: Do not minimize/hide OR resolve comments or threads that are not your own. You may comment on others though.
                See more info about the graphql API here: https://docs.github.com/en/graphql/mutations/
                 - For comments and reviews (NOT threads):
                   1. Get the comment ID (or reviews by replacing `--json comments` with `--json reviews`) using:
@@ -349,8 +352,9 @@ jobs:
               1. a link to the html_url for the workflow run
               2. any external sources used to validate your review (e.g., documentation, style guides, etc.)
             It should not include:
-              1. Links to your previous reviews
-              2. Links to individual comments you made in the review. These belong in the details section.
+              1. Any <![CDATA[...]]> wrappers
+              2. Links to your previous reviews
+              3. Links to individual comments you made in the review. These belong in the details section.
             Link text should follow github autolinked references and URL guidelines (https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/autolinked-references-and-urls).
               If it cannot follow the guidelines, for links to specific jobs or runs, use full URLs. For links to external sources, use descriptive text such as the page title.
               Issues found in code can use their own footnotes as described in the github documentation either in the PR summary or on in-line comments.
