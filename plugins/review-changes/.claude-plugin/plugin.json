@@ -1,6 +1,6 @@
 {
   "name": "review-changes",
-  "version": "0.0.8",
+  "version": "0.0.2",
   "description": "Review code changes with detailed feedback on quality, security, performance, and maintainability",
   "author": {
     "name": "Nathan Heaps",
@@ -9,11 +9,5 @@
   },
   "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/review-changes",
   "repository": "https://github.com/nsheaps/.ai",
-  "keywords": [
-    "code-review",
-    "review",
-    "quality",
-    "security",
-    "lint"
-  ]
+  "keywords": ["code-review", "review", "quality", "security", "lint"]
 }
