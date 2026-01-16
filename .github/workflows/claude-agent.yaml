@@ -22,9 +22,20 @@ jobs:
         with:
           fetch-depth: 50
 
+      - name: Check for GitHub App secrets
+        id: check-secrets
+        env:
+          APP_ID: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
+        run: |
+          if [ -n "$APP_ID" ]; then
+            echo "has_secrets=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_secrets=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Authenticate as GitHub App
         id: auth
-        if: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
+        if: steps.check-secrets.outputs.has_secrets == 'true'
         uses: ./.github/actions/github-app-auth
         with:
           app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
