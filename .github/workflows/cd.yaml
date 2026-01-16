@@ -14,21 +14,30 @@ name: cd
 
 concurrency:
   group: cd-${{ github.ref }}
-  # Allow cancellation in PRs (preview only), but never cancel version tagging on main
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  # Allow cancellation in both PRs and main (no more version tagging on main)
+  cancel-in-progress: true
 
 jobs:
-  preview-version-bump:
+  bump-plugin-versions-in-pr:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     permissions:
-      contents: read
+      contents: write
       pull-requests: write
     steps:
-      - name: Checkout code
+      - name: Checkout PR branch
         uses: actions/checkout@v6
         with:
-          fetch-depth: 0 # Fetch full history for version comparison
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Authenticate as GitHub App
+        id: auth
+        uses: ./.github/actions/github-app-auth
+        with:
+          app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
+          private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
 
       - name: Fetch base branch
         run: git fetch origin ${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}
@@ -39,8 +48,54 @@ jobs:
           install: true
           cache: true
 
-      - name: Check version bumps
-        id: preview
+      - name: Detect changed plugins
+        id: detect
+        shell: bash
+        run: |
+          # Find plugins that have changes (compare to base branch)
+          CHANGED_PLUGINS=()
+          for plugin_dir in plugins/*; do
+            if [ ! -d "$plugin_dir" ]; then
+              continue
+            fi
+            PLUGIN_NAME=$(basename "$plugin_dir")
+
+            # Check if any files in this plugin changed
+            if git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -q "^$plugin_dir/"; then
+              CHANGED_PLUGINS+=("$PLUGIN_NAME")
+            fi
+          done
+
+          if [ ${#CHANGED_PLUGINS[@]} -eq 0 ]; then
+            echo "No plugins changed"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "Changed plugins: ${CHANGED_PLUGINS[*]}"
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "plugins=${CHANGED_PLUGINS[*]}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Bump versions for changed plugins
+        if: steps.detect.outputs.has_changes == 'true'
+        shell: bash
+        run: |
+          # Bump versions only for changed plugins
+          for plugin_name in ${{ steps.detect.outputs.plugins }}; do
+            echo "Bumping version for $plugin_name"
+            just _bump-plugin-version "plugins/$plugin_name"
+          done
+
+      - name: Push version bumps to PR
+        if: steps.detect.outputs.has_changes == 'true'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'chore: bump plugin versions'
+          file_pattern: 'plugins/*/.claude-plugin/plugin.json plugins/*/CHANGELOG.md'
+          branch: ${{ github.head_ref }}
+
+      - name: Generate version bump report
+        if: steps.detect.outputs.has_changes == 'true'
+        id: report
         shell: bash
         run: |
           TMP="$(mktemp)"
@@ -48,19 +103,20 @@ jobs:
           echo "report<<EOF" >> $GITHUB_OUTPUT
           cat $TMP >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
-      - name: post version bump report
-        if: steps.preview.outputs.report != ''
+
+      - name: Post version bump comment
+        if: steps.detect.outputs.has_changes == 'true' && steps.report.outputs.report != ''
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          header: 'package: Version Bump Preview'
+          header: 'plugin-versions'
           message: |
-            ### package: Version Bump Preview
-            ${{ steps.preview.outputs.report }}
+            ### Plugin Version Bumps
+            ${{ steps.report.outputs.report }}
 
-  bump-plugin-versions:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+  update-marketplace:
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       contents: write
     steps:
@@ -82,46 +138,12 @@ jobs:
           install: true
           cache: true
 
-      - name: Bump plugin versions
-        id: bump
-        shell: bash
-        run: |
-          just release
-
-      - name: push commits
-        shell: bash
-        run: |
-          git push origin main
-
-  update-marketplace:
-    needs: ['bump-plugin-versions']
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Authenticate as GitHub App
-        id: auth
-        uses: ./.github/actions/github-app-auth
-        with:
-          app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
-          private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
-
-      - name: mise install -y
-        uses: jdx/mise-action@v2
-        with:
-          install: true
-          cache: true
-
       - name: Update marketplace metadata
         id: update
         shell: bash
         run: just update-marketplace
 
-      - name: Commit changes
+      - name: Commit marketplace changes
         if: steps.update.outputs.updated == 'true'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
