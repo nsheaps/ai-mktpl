@@ -2,13 +2,12 @@ scratch
 prompts
 plans
 
-!**/.gitkeep
 !**/.local
-!**/CLAUDE.md
+
+# BEGIN: Managed by todo-sync plugin (plugins/todo-sync/scripts/init-gitignore.sh)
 todos/
-!todos/**/.gitkeep
-!todos/**/AGENTS.md
-!todos/**/CLAUDE.md
-!plans/**/.gitkeep
-!plans/**/AGENTS.md
-!plans/**/CLAUDE.md
+plans/
+!**/.gitkeep
+!**/AGENTS.md
+!**/CLAUDE.md
+# END: Managed by todo-sync plugin

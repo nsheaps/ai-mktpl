@@ -10,46 +10,18 @@ project_dir="${CLAUDE_PROJECT_DIR:-$(pwd)}"
 # Target gitignore file
 gitignore_file="$project_dir/.claude/.gitignore"
 
-# Patterns to ensure are present (in order)
+# Comment markers
+start_marker="# BEGIN: Managed by todo-sync plugin (plugins/todo-sync/scripts/init-gitignore.sh)"
+end_marker="# END: Managed by todo-sync plugin"
+
+# Patterns to ensure are present (between markers)
 patterns=(
   "todos/"
   "plans/"
-  "!todos/**/.gitkeep"
-  "!todos/**/AGENTS.md"
-  "!todos/**/CLAUDE.md"
-  "!plans/**/.gitkeep"
-  "!plans/**/AGENTS.md"
-  "!plans/**/CLAUDE.md"
+  "!**/.gitkeep"
+  "!**/AGENTS.md"
+  "!**/CLAUDE.md"
 )
-
-# Function to check if a pattern exists in gitignore
-pattern_exists() {
-  local pattern="$1"
-  local file="$2"
-
-  # Remove trailing slash for comparison (git treats them the same)
-  local pattern_no_slash="${pattern%/}"
-
-  # Escape special regex characters in pattern for grep (including !, *, etc.)
-  local escaped_pattern=$(printf '%s\n' "$pattern_no_slash" | sed 's/[[\.*^$/!]/\\&/g')
-
-  # Check if pattern exists with or without trailing slash (allowing for comments and whitespace)
-  grep -qE "^[[:space:]]*${escaped_pattern}/?[[:space:]]*(#.*)?$" "$file" 2>/dev/null
-}
-
-# Function to add pattern to gitignore if it doesn't exist
-ensure_pattern() {
-  local pattern="$1"
-  local file="$2"
-
-  if ! pattern_exists "$pattern" "$file"; then
-    # Check if file ends with newline
-    if [ -s "$file" ] && [ -n "$(tail -c 1 "$file")" ]; then
-      echo "" >> "$file"
-    fi
-    echo "$pattern" >> "$file"
-  fi
-}
 
 # Create .claude directory if it doesn't exist
 mkdir -p "$project_dir/.claude"
@@ -59,9 +31,41 @@ if [ ! -f "$gitignore_file" ]; then
   touch "$gitignore_file"
 fi
 
-# Ensure each pattern is present
-for pattern in "${patterns[@]}"; do
-  ensure_pattern "$pattern" "$gitignore_file"
-done
+# Check if markers exist
+if ! grep -qF "$start_marker" "$gitignore_file" 2>/dev/null; then
+  # Markers don't exist, add them with patterns
+  {
+    echo ""
+    echo "$start_marker"
+    for pattern in "${patterns[@]}"; do
+      echo "$pattern"
+    done
+    echo "$end_marker"
+  } >> "$gitignore_file"
+else
+  # Markers exist, update content between them
+  # Create a temp file
+  temp_file=$(mktemp)
+
+  # Read file line by line and rebuild
+  in_section=false
+  while IFS= read -r line || [ -n "$line" ]; do
+    if [ "$line" = "$start_marker" ]; then
+      echo "$start_marker"
+      for pattern in "${patterns[@]}"; do
+        echo "$pattern"
+      done
+      echo "$end_marker"
+      in_section=true
+    elif [ "$line" = "$end_marker" ]; then
+      in_section=false
+    elif [ "$in_section" = false ]; then
+      echo "$line"
+    fi
+  done < "$gitignore_file" > "$temp_file"
+
+  # Replace original file
+  mv "$temp_file" "$gitignore_file"
+fi
 
 exit 0
