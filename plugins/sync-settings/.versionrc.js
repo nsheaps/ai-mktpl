@@ -5,7 +5,7 @@ module.exports = {
     bump: false,
     changelog: false,
     commit: false,
-    tag: false,
+    tag: true,
   },
   tagPrefix: "sync-settings@",
   packageFiles: [
