@@ -49,11 +49,13 @@ If the plugin was just installed, inform the user:
 > The plugin has been installed. Plugins load at session start, so you'll need to restart Claude Code.
 >
 > To continue this session after restarting:
+>
 > ```bash
 > claude --continue
 > ```
 >
 > Or resume by session ID:
+>
 > ```bash
 > claude --resume <session-id>
 > ```
@@ -83,6 +85,7 @@ Task tool:
 ```
 
 The agent will:
+
 1. Analyze the code structure and complexity
 2. Identify opportunities for simplification
 3. Refactor for clarity while preserving functionality
@@ -99,6 +102,7 @@ The agent will:
 ## What Gets Simplified
 
 The code-simplifier agent focuses on:
+
 - Reducing unnecessary complexity
 - Improving code readability
 - Ensuring consistent patterns
@@ -126,6 +130,7 @@ claude --continue
 ### Wrong Plugin Installed
 
 Ensure you're using the correct marketplace:
+
 - ✅ `pr-review-toolkit@claude-plugins-official`
 - ❌ `pr-review-toolkit@claude-code-plugins`
 

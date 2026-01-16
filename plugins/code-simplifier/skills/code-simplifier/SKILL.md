@@ -37,6 +37,7 @@ claude plugin install pr-review-toolkit@claude-plugins-official --scope local
 ```
 
 **Scope guidance:**
+
 - `user` - Personal use across all projects (default)
 - `project` - Team-shared, committed to `.claude/settings.json`
 - `local` - Personal override, not committed
@@ -70,6 +71,7 @@ Task tool with subagent_type: "pr-review-toolkit:code-simplifier"
 ### What the Agent Does
 
 The code-simplifier agent:
+
 - Simplifies and refines code for clarity
 - Ensures consistency and maintainability
 - Preserves all existing functionality
@@ -78,6 +80,7 @@ The code-simplifier agent:
 ### When to Use
 
 Invoke the code-simplifier agent:
+
 - After completing a feature implementation
 - Before creating a pull request
 - When code feels overly complex
@@ -87,16 +90,19 @@ Invoke the code-simplifier agent:
 ### Example Invocations
 
 **Simplify recent changes:**
+
 ```
 Use the pr-review-toolkit:code-simplifier agent to review and simplify the code I just wrote.
 ```
 
 **Target specific files:**
+
 ```
 Use the code-simplifier agent to clean up src/utils/parser.ts - it's gotten too complex.
 ```
 
 **Broader refactoring:**
+
 ```
 Launch the code-simplifier agent to review the authentication module for opportunities to reduce complexity.
 ```
@@ -108,16 +114,19 @@ Launch the code-simplifier agent to review the authentication module for opportu
 If the agent is not available after installation:
 
 1. Verify installation succeeded:
+
    ```bash
    claude plugin list --json | jq '.[] | select(.id | contains("pr-review-toolkit"))'
    ```
 
 2. Check if enabled:
+
    ```bash
    claude plugin list --json | jq '.[] | select(.id | contains("pr-review-toolkit")) | {id, enabled}'
    ```
 
 3. If disabled, enable it:
+
    ```bash
    claude plugin enable pr-review-toolkit@claude-plugins-official
    ```
@@ -127,6 +136,7 @@ If the agent is not available after installation:
 ### Wrong Marketplace
 
 The plugin is in `claude-plugins-official`, not `claude-code-plugins`. Use the correct identifier:
+
 - ✅ `pr-review-toolkit@claude-plugins-official`
 - ❌ `pr-review-toolkit@claude-code-plugins`
 
@@ -147,11 +157,11 @@ claude --resume <session-id> --fork-session
 
 ## Quick Reference
 
-| Task | Command |
-|------|---------|
+| Task               | Command                                                                                 |
+| ------------------ | --------------------------------------------------------------------------------------- |
 | Check if installed | `claude plugin list --json \| jq '.[] \| select(.id \| contains("pr-review-toolkit"))'` |
-| Install (user) | `claude plugin install pr-review-toolkit@claude-plugins-official` |
-| Install (project) | `claude plugin install pr-review-toolkit@claude-plugins-official --scope project` |
-| Enable | `claude plugin enable pr-review-toolkit@claude-plugins-official` |
-| Resume session | `claude --continue` |
-| List marketplaces | `claude plugin marketplace list` |
+| Install (user)     | `claude plugin install pr-review-toolkit@claude-plugins-official`                       |
+| Install (project)  | `claude plugin install pr-review-toolkit@claude-plugins-official --scope project`       |
+| Enable             | `claude plugin enable pr-review-toolkit@claude-plugins-official`                        |
+| Resume session     | `claude --continue`                                                                     |
+| List marketplaces  | `claude plugin marketplace list`                                                        |

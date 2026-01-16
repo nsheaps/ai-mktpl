@@ -59,6 +59,7 @@ claude --plugin-dir /path/to/code-simplifier
 ### Via Skill
 
 The skill triggers when asking about:
+
 - "simplify code"
 - "clean up code"
 - "refactor for clarity"
@@ -66,6 +67,7 @@ The skill triggers when asking about:
 - "make code more readable"
 
 Example:
+
 > "Can you simplify the parser module? It's gotten too complex."
 
 ## File Structure
@@ -91,13 +93,13 @@ code-simplifier/
 
 ## CLI Reference
 
-| Task | Command |
-|------|---------|
-| Check dependency | `claude plugin list --json \| jq '.[] \| select(.id \| contains("pr-review-toolkit"))'` |
-| Install (user) | `claude plugin install pr-review-toolkit@claude-plugins-official` |
-| Install (project) | `claude plugin install pr-review-toolkit@claude-plugins-official --scope project` |
-| Enable | `claude plugin enable pr-review-toolkit@claude-plugins-official` |
-| Resume session | `claude --continue` |
+| Task              | Command                                                                                 |
+| ----------------- | --------------------------------------------------------------------------------------- |
+| Check dependency  | `claude plugin list --json \| jq '.[] \| select(.id \| contains("pr-review-toolkit"))'` |
+| Install (user)    | `claude plugin install pr-review-toolkit@claude-plugins-official`                       |
+| Install (project) | `claude plugin install pr-review-toolkit@claude-plugins-official --scope project`       |
+| Enable            | `claude plugin enable pr-review-toolkit@claude-plugins-official`                        |
+| Resume session    | `claude --continue`                                                                     |
 
 ## License
 
