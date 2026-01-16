@@ -1,6 +1,6 @@
 {
   "name": "safety-evaluation-prompt",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Pre-tool-call safety evaluation using prompt-style hooks for inline AI evaluation",
   "author": {
     "name": "Nathan Heaps",
@@ -9,7 +9,14 @@
   },
   "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/safety-evaluation-prompt",
   "repository": "https://github.com/nsheaps/.ai",
-  "keywords": ["safety", "security", "hooks", "pre-tool-call", "evaluation", "prompt"],
+  "keywords": [
+    "safety",
+    "security",
+    "hooks",
+    "pre-tool-call",
+    "evaluation",
+    "prompt"
+  ],
   "hooks": {
     "PreToolUse": [
       {
