@@ -1,0 +1,4 @@
+# Synced files should not be tracked in the plugin itself
+# These are project-specific and created at runtime
+.claude/todos/
+.claude/plans/
