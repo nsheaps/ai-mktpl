@@ -254,4 +254,4 @@ See repository LICENSE file
 
 ---
 
-**Made for the Claude Code Community** | **Star the repo** ⭐ if you find this useful!
+**Made by [Nathan Heaps](https://github.com/nsheaps)** | **Star the repo** ⭐ if you find this useful!

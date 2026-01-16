@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "description": "Data format conversion and querying utilities. Supports YAML, JSON, TOON (Token-Oriented Object Notation), and XML/HTML transformations with special handling for Playwright accessibility snapshots. TOON provides 30-60% token reduction vs JSON for LLM contexts.",
   "author": {
-    "name": "Nathan Heaps"
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
   },
   "keywords": [
     "yaml",

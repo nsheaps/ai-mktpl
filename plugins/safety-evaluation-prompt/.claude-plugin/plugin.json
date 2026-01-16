@@ -3,9 +3,9 @@
   "version": "0.0.1",
   "description": "Pre-tool-call safety evaluation using prompt-style hooks for inline AI evaluation",
   "author": {
-    "name": "Claude Code Community",
-    "email": "community@example.com",
-    "url": "https://github.com/nsheaps/.ai"
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
   },
   "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/safety-evaluation-prompt",
   "repository": "https://github.com/nsheaps/.ai",

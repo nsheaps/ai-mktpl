@@ -3,9 +3,9 @@
   "version": "0.0.1",
   "description": "Automate git commits with AI-generated messages that match your repository's commit style and conventions",
   "author": {
-    "name": "Claude Code Community",
-    "email": "community@example.com",
-    "url": "https://github.com/nsheaps/.ai"
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
   },
   "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/commit-command",
   "repository": "https://github.com/nsheaps/.ai",

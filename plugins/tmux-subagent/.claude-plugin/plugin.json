@@ -1,0 +1,13 @@
+{
+  "name": "tmux-subagent",
+  "version": "0.0.1",
+  "description": "Launch independent Claude sub-agents in tmux sessions with custom configurations, tool restrictions, and iTerm integration",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/tmux-subagent",
+  "repository": "https://github.com/nsheaps/.ai",
+  "keywords": ["tmux", "subagent", "parallel", "iterm", "terminal", "isolation", "delegation"]
+}
