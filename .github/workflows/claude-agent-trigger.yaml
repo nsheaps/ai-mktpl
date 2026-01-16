@@ -24,67 +24,31 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Build payload
-        id: payload
-        uses: actions/github-script@v7
-        with:
-          script: |
-            // Extract fields based on event type - see schema at .github/schemas/claude-agent-payload.schema.json
-            const event = context.eventName;
-            const e = context.payload;
-
-            // Determine source content based on event type
-            const isComment = event === 'issue_comment' || event === 'pull_request_review_comment';
-            const isReview = event === 'pull_request_review';
-            const isIssue = event === 'issues';
-
-            const body = isComment ? e.comment.body
-                       : isReview ? e.review.body
-                       : e.issue.body;
-
-            const author = isComment ? e.comment.user
-                         : isReview ? e.review.user
-                         : e.issue.user;
-
-            const authorAssociation = isComment ? e.comment.author_association
-                                    : isReview ? e.review.author_association
-                                    : e.issue.author_association;
-
-            const commentId = isComment ? e.comment.id
-                            : isReview ? e.review.id
-                            : null;
-
-            // Determine issue/PR numbers
-            const issueNumber = e.issue?.number || null;
-            const prNumber = e.pull_request?.number || (e.issue?.pull_request ? issueNumber : null);
-
-            const payload = {
-              prompt: body,
-              trigger: {
-                type: event,
-                action: e.action
-              },
-              source: {
-                repo: e.repository.full_name,
-                issue_number: issueNumber,
-                pr_number: prNumber,
-                comment_id: commentId,
-                ref: context.ref
-              },
-              author: {
-                login: author.login,
-                association: authorAssociation
-              },
-              content: {
-                title: e.issue?.title || e.pull_request?.title || null,
-                body: body
-              }
-            };
-
-            core.setOutput('json', JSON.stringify(payload));
-
       - name: Dispatch to Claude agent
         uses: peter-evans/repository-dispatch@v3
         with:
           event-type: claude-agent
-          client-payload: ${{ steps.payload.outputs.json }}
+          # Schema: .github/schemas/claude-agent-payload.schema.json
+          client-payload: |
+            {
+              "prompt": ${{ toJson(github.event.comment.body || github.event.review.body || github.event.issue.body) }},
+              "trigger": {
+                "type": "${{ github.event_name }}",
+                "action": "${{ github.event.action }}"
+              },
+              "source": {
+                "repo": "${{ github.repository }}",
+                "issue_number": ${{ github.event.issue.number || 'null' }},
+                "pr_number": ${{ github.event.pull_request.number || (github.event.issue.pull_request && github.event.issue.number) || 'null' }},
+                "comment_id": ${{ github.event.comment.id || github.event.review.id || 'null' }},
+                "ref": "${{ github.ref }}"
+              },
+              "author": {
+                "login": "${{ github.event.comment.user.login || github.event.review.user.login || github.event.issue.user.login }}",
+                "association": "${{ github.event.comment.author_association || github.event.review.author_association || github.event.issue.author_association }}"
+              },
+              "content": {
+                "title": ${{ toJson(github.event.issue.title || github.event.pull_request.title) }},
+                "body": ${{ toJson(github.event.comment.body || github.event.review.body || github.event.issue.body) }}
+              }
+            }
