@@ -44,24 +44,12 @@ jobs:
           fix: 'true'
         continue-on-error: true
 
-      - name: Prepare commit message with co-author
-        if: steps.lint.outputs.changed-or-failed == 'true' && ! cancelled()
-        id: commit-msg
-        run: |
-          {
-            echo 'message<<EOF'
-            echo 'chore: `just lint`'
-            echo ''
-            echo 'Co-Authored-By: Claude Code (CI) <noreply@anthropic.com>'
-            echo 'EOF'
-          } >> "$GITHUB_OUTPUT"
-
       - name: git push
         if: steps.lint.outputs.changed-or-failed == 'true' && ! cancelled()
         id: auto-commit-action
         uses: stefanzweifel/git-auto-commit-action@v6
         with:
-          commit_message: ${{ steps.commit-msg.outputs.message }}
+          commit_message: 'chore: `just lint`'
 
       - name: 'exit 1 # changes detected or linting failed'
         if: ${{ steps.lint.outputs.changed-or-failed == 'true' && ! cancelled() }}
