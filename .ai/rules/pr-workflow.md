@@ -37,6 +37,29 @@ EOF
 )"
 ```
 
+## Keep PRs Focused
+
+**CRITICAL:** PRs must contain only changes related to the intended scope.
+
+### Before Marking Ready
+
+1. Run `gh pr diff <number> --name-only` to list changed files
+2. Verify each file is relevant to the PR's purpose
+3. Remove any unrelated changes (CI auto-commits, formatting drift, etc.)
+
+### If Unrelated Changes Appear
+
+- **CI auto-commits:** Reset to your last commit and force push
+- **Formatting changes to unrelated files:** Investigate root cause, file an issue if it's a CI bug
+- **Accidental modifications:** Use `git checkout origin/main -- <file>` to restore
+
+### Why This Matters
+
+- Reviewers shouldn't waste time on unrelated changes
+- Merge conflicts are harder to resolve with extra files
+- Git history becomes unclear when PRs touch unrelated code
+- Rollbacks are harder when changes are mixed
+
 ## When to Move from Draft
 
 Move PR from draft to ready when:
