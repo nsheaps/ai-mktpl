@@ -1,6 +1,18 @@
 {
   "description": "Syncs todos and plans from ~/.claude/ to project .claude/ directory after TodoWrite",
   "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/init-gitignore.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "TodoWrite",
