@@ -39,14 +39,15 @@ sync-todos.sh executes
 ```
 todo-sync/
 ├── .claude-plugin/
-│   └── plugin.json      # Plugin manifest
+│   └── plugin.json        # Plugin manifest
 ├── hooks/
-│   └── hooks.json       # PostToolUse hook configuration
+│   └── hooks.json         # Hook configuration (SessionStart, UserPromptSubmit, PostToolUse)
 ├── scripts/
-│   └── sync-todos.sh    # Sync logic
+│   ├── init-gitignore.sh  # Creates .gitignore in target dirs
+│   └── sync-todos.sh      # Sync logic
 ├── skills/
 │   └── todo-sync/
-│       └── SKILL.md     # Usage documentation
+│       └── SKILL.md       # Usage documentation
 └── README.md
 ```
 
@@ -54,15 +55,11 @@ todo-sync/
 
 No configuration required. The plugin works automatically once installed.
 
-### Optional: Git Integration
+### Git Integration
 
-To track todos in version control, commit `.claude/todos/`.
+The plugin automatically creates `.gitignore` files in `.claude/todos/` and `.claude/plans/` on session start and each user prompt. These ignore all synced files by default.
 
-To ignore them:
-
-```gitignore
-.claude/todos/
-```
+To track todos in version control instead, remove the generated `.gitignore` files.
 
 ## Troubleshooting
 
