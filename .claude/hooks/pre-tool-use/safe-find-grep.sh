@@ -1,6 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Helper for allow response
+allow() {
+    echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow"}}'
+    exit 0
+}
+
+# Helper for deny response
+deny() {
+    local reason="$1"
+    echo "{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":$(echo "$reason" | jq -Rs .)}}"
+    exit 0
+}
+
 # Read JSON input from stdin
 INPUT=$(cat)
 
@@ -9,8 +22,7 @@ TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty')
 
 # Only process Bash tool calls
 if [[ "$TOOL_NAME" != "Bash" ]]; then
-    echo '{"status": "approved"}'
-    exit 0
+    allow
 fi
 
 # Read the command from input JSON
@@ -35,9 +47,8 @@ deny_patterns=(
 
 for pat in "${deny_patterns[@]}"; do
     if echo "$cmd" | grep -Eiq "$pat"; then
-        echo "{\"status\": \"rejected\", \"reason\": \"Command matches dangerous pattern '$pat'. Use find/grep for searching only, not for executing commands.\"}"
-        exit 0
+        deny "Command matches dangerous pattern '$pat'. Use find/grep for searching only, not for executing commands."
     fi
 done
 
-echo '{"status": "approved"}'
+allow

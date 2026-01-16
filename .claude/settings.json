@@ -77,6 +77,17 @@
         ]
       }
     ],
+    "PostToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/run-hook.sh post-tool-use"
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "matcher": "startup",
