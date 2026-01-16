@@ -1,0 +1,103 @@
+name: Claude Agent
+
+# This workflow runs Claude Code in agent mode when triggered by repository_dispatch
+# Agent mode is automatically enabled for repository_dispatch triggers
+
+on:
+  repository_dispatch:
+    types: [claude-agent]
+
+jobs:
+  claude:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+      actions: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 50
+
+      - name: Install mise
+        uses: jdx/mise-action@v2
+        with:
+          install: true
+
+      - name: Run Claude Code
+        id: claude
+        uses: anthropics/claude-code-action@v1
+        env:
+          # Settings ported from original claude.yaml workflow
+          INPUT_SETTINGS_JSON: |
+            {
+              "permissions": {
+                "additionalDirectories": ["/tmp/"],
+                "allow": [
+                  "Task",
+                  "Glob",
+                  "Grep",
+                  "LS",
+                  "ExitPlanMode",
+                  "Read",
+                  "Edit",
+                  "Write",
+                  "Replace",
+                  "MultiEdit",
+                  "NotebookRead",
+                  "NotebookEdit",
+                  "TodoWrite",
+                  "WebSearch",
+                  "WebFetch",
+                  "Bash",
+                  "BashOutput",
+                  "KillBash",
+                  "ListMcpResourcesTool",
+                  "ReadMcpResourceTool",
+                  "SlashCommand",
+                  "Skill",
+                  "mcp__github_comment__update_claude_comment",
+                  "mcp__github_ci__get_ci_status",
+                  "mcp__github_ci__get_workflow_run_details",
+                  "mcp__github_ci__download_job_log"
+                ]
+              },
+              "model": "opus",
+              "env": {
+                "_GH_PAGER_COMMENT": "disable gh from being able to treat the terminal as interactive",
+                "GH_PAGER": "cat",
+                "GH_PROMPT_DISABLED": "true",
+                "_GH_BROWSER_COMMENT": "what app to open URLs with, since claude is not interactive, we use curl to pipe it to stdout",
+                "GH_BROWSER": "curl",
+                "CLAUDE_CODE_REMOTE": "true"
+              }
+            }
+        with:
+          # Claude API authentication with priority: CLAUDE_API_KEY > ANTHROPIC_API_KEY > CLAUDE_CODE_OAUTH_TOKEN
+          anthropic_api_key: ${{
+            secrets.CLAUDE_API_KEY && secrets.CLAUDE_API_KEY ||
+            ( secrets.ANTHROPIC_API_KEY && secrets.ANTHROPIC_API_KEY || '' ) }}
+          claude_code_oauth_token: ${{
+            secrets.CLAUDE_API_KEY && '' ||
+            ( secrets.ANTHROPIC_API_KEY && '' || secrets.CLAUDE_CODE_OAUTH_TOKEN ) }}
+          # Enable full output for debugging
+          show_full_output: true
+          additional_permissions: |
+            actions: read
+          settings: ${{ env.INPUT_SETTINGS_JSON }}
+          # MCP servers and allowed tools for GitHub integration
+          claude_args: >-
+            --allowedTools
+            mcp__github__create_pending_pull_request_review,
+            mcp__github__get_pull_request_diff,
+            mcp__github__add_comment_to_pending_review,
+            mcp__github__submit_pending_pull_request_review,
+            mcp__github__pull_request_read,
+            mcp__github__github_support_docs_search,
+            mcp__github_comment__update_claude_comment,
+            mcp__github_ci__get_ci_status,
+            mcp__github_ci__get_workflow_run_details,
+            mcp__github_ci__download_job_log

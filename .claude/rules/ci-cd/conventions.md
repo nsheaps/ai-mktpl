@@ -45,16 +45,27 @@ Every action in `.github/actions/` must:
 
 **CRITICAL:** When working with GitHub Actions workflows:
 
-1. **Prefer popular upstream actions** over writing custom bash scripts
-2. **Check what's already in use** in the repo before introducing new dependencies
-3. **Be consistent** - if refactoring to use a different action, update all similar usages
-4. Keep inline bash to a minimum (simple one-liners only)
+1. **NEVER write `actions/github-script` or custom bash when a marketplace action exists**
+2. **Search for existing actions first** - Peter Evans, stefanzweifel, and other popular maintainers have actions for most common tasks
+3. **Check what's already in use** in the repo before introducing new dependencies
+4. **Be consistent** - if refactoring to use a different action, update all similar usages
+5. Keep inline bash to a minimum (simple one-liners only)
 
 Common actions already in use:
 
-- `stefanzweifel/git-auto-commit-action@v5` - git config, add, commit, push
+- `peter-evans/repository-dispatch@v3` - create repository dispatch events
 - `peter-evans/create-or-update-comment@v4` - PR comments
 - `peter-evans/find-comment@v3` - finding existing comments
+- `stefanzweifel/git-auto-commit-action@v5` - git config, add, commit, push
+
+## DRY Principle in Workflows
+
+**CRITICAL:** Keep workflows simple and avoid repetition.
+
+1. **ONE job when possible** - Don't split into multiple jobs just to "organize"
+2. **Use conditional expressions** - GitHub expressions (`${{ }}`) can handle complex logic
+3. **Wrap context in `toJson()`** - Pass entire context objects instead of extracting fields manually
+4. **Mirror existing patterns** - If another workflow handles similar logic cleanly, copy its structure
 
 ## Secrets Used
 

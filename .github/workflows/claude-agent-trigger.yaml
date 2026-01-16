@@ -1,0 +1,54 @@
+name: Claude Agent Trigger
+
+# Detects events that should trigger Claude agent and dispatches to agent workflow
+# Schema: .github/schemas/claude-agent-payload.schema.json
+
+on:
+  issue_comment:
+    types: [created, edited]
+  pull_request_review_comment:
+    types: [created, edited]
+  issues:
+    types: [opened, assigned]
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  dispatch:
+    if: |
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
+      (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Dispatch to Claude agent
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          event-type: claude-agent
+          # Schema: .github/schemas/claude-agent-payload.schema.json
+          client-payload: |
+            {
+              "prompt": ${{ toJson(github.event.comment.body || github.event.review.body || github.event.issue.body) }},
+              "trigger": {
+                "type": "${{ github.event_name }}",
+                "action": "${{ github.event.action }}"
+              },
+              "source": {
+                "repo": "${{ github.repository }}",
+                "issue_number": ${{ github.event.issue.number || 'null' }},
+                "pr_number": ${{ github.event.pull_request.number || (github.event.issue.pull_request && github.event.issue.number) || 'null' }},
+                "comment_id": ${{ github.event.comment.id || github.event.review.id || 'null' }},
+                "ref": "${{ github.ref }}"
+              },
+              "author": {
+                "login": "${{ github.event.comment.user.login || github.event.review.user.login || github.event.issue.user.login }}",
+                "association": "${{ github.event.comment.author_association || github.event.review.author_association || github.event.issue.author_association }}"
+              },
+              "content": {
+                "title": ${{ toJson(github.event.issue.title || github.event.pull_request.title) }},
+                "body": ${{ toJson(github.event.comment.body || github.event.review.body || github.event.issue.body) }}
+              }
+            }
