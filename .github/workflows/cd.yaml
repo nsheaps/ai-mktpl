@@ -14,7 +14,8 @@ name: cd
 
 concurrency:
   group: cd-${{ github.ref }}
-  cancel-in-progress: false
+  # Allow cancellation in PRs (preview only), but never cancel version tagging on main
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   preview-version-bump:
