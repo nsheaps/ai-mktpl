@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -77,7 +77,7 @@ jobs:
     if: github.event.inputs.example == 'with-logs'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup Claude Code
         run: |
@@ -124,7 +124,7 @@ jobs:
     if: github.event.inputs.example == 'repository-dispatch' || github.event_name == 'repository_dispatch'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Debug Claude Session
         uses: ./.github/actions/claude-debug
@@ -168,7 +168,7 @@ jobs:
     if: github.event.inputs.example == 'multi-stage'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Stage 1 - Initial Analysis
         id: stage1
@@ -247,7 +247,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Target Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: my-org/${{ matrix.repo }}
           token: ${{ secrets.ORG_PAT }}
