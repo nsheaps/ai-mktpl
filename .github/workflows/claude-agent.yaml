@@ -1,23 +1,14 @@
-name: Claude Code
+name: Claude Agent
+
+# This workflow runs Claude Code in agent mode when triggered by repository_dispatch
+# Agent mode is automatically enabled for repository_dispatch triggers
 
 on:
-  # Note this runs from the default branch (main), even if commented on a PR
-  issue_comment:
-    types: [created, edited]
-  pull_request_review_comment:
-    types: [created, edited]
-  issues:
-    types: [opened, assigned]
-  pull_request_review:
-    types: [submitted]
+  repository_dispatch:
+    types: [claude-agent]
 
 jobs:
   claude:
-    if: |
-      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
-      (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -27,12 +18,12 @@ jobs:
       actions: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 50
 
       - name: Install mise
-        uses: jdx/mise-action@v3
+        uses: jdx/mise-action@v2
         with:
           install: true
 
@@ -40,11 +31,7 @@ jobs:
         id: claude
         uses: anthropics/claude-code-action@v1
         env:
-          # These are in addition to any parsed settings.json files
-          # Prefer this over claude_args, almost everything can be specified via settings json or env vars
-          # Ref: https://code.claude.com/docs/en/settings
-          # This is allowed to get CI status (unlike the review workflow)
-          # because it won't wait for this workflow run when mentioned
+          # Settings ported from original claude.yaml workflow
           INPUT_SETTINGS_JSON: |
             {
               "permissions": {
@@ -89,31 +76,19 @@ jobs:
               }
             }
         with:
-          # If CLAUDE_API_KEY is set, it takes precedence over ANTHROPIC_API_KEY
-          # If ANTHROPIC_API_KEY is set but CLAUDE_API_KEY is not, it will be used
+          # Claude API authentication with priority: CLAUDE_API_KEY > ANTHROPIC_API_KEY > CLAUDE_CODE_OAUTH_TOKEN
           anthropic_api_key: ${{
             secrets.CLAUDE_API_KEY && secrets.CLAUDE_API_KEY ||
             ( secrets.ANTHROPIC_API_KEY && secrets.ANTHROPIC_API_KEY || '' ) }}
-          # If CLAUDE_API_KEY is set, claude_code_oauth_token is not needed
-          # If ANTHROPIC_API_KEY is set, claude_code_oauth_token is not needed
-          # If neither is set, claude_code_oauth_token will be used
           claude_code_oauth_token: ${{
             secrets.CLAUDE_API_KEY && '' ||
             ( secrets.ANTHROPIC_API_KEY && '' || secrets.CLAUDE_CODE_OAUTH_TOKEN ) }}
-          # WARNING: PRINTS FULL JSON OUTPUT WHICH MAY INCLUDE SECRETS.
-          # ONLY USE IN PRIVATE ENVIRONMENTS.
+          # Enable full output for debugging
           show_full_output: true
           additional_permissions: |
             actions: read
           settings: ${{ env.INPUT_SETTINGS_JSON }}
-          # Prefer using settings.json, but some are needed to be set here for the action
-          # to automatically enable the MCP servers.
-          # github_comment and github_ci are included by default in tag mode, but being explicit in case we change
-          # to agent mode
-          # See https://github.com/anthropics/claude-code-action/blob/main/src/modes/tag/index.ts#L146
-          # See https://github.com/anthropics/claude-code-action/issues/723#issuecomment-3716307305
-          # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
-          # or https://docs.claude.com/en/docs/claude-code/cli-reference for available options
+          # MCP servers and allowed tools for GitHub integration
           claude_args: >-
             --allowedTools
             mcp__github__create_pending_pull_request_review,

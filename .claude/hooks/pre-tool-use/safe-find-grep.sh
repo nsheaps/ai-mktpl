@@ -1,8 +1,20 @@
 #!/usr/bin/env bash
 set -euo pipefail
+source "$(dirname "$0")/../lib/pretooluse.sh"
 
-# Read the command from stdin JSON
-cmd=$(jq -r '.tool_input.command // ""')
+# Read JSON input from stdin
+INPUT=$(cat)
+
+# Extract tool name
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty')
+
+# Only process Bash tool calls
+if [[ "$TOOL_NAME" != "Bash" ]]; then
+    allow
+fi
+
+# Read the command from input JSON
+cmd=$(echo "$INPUT" | jq -r '.tool_input.command // ""')
 
 # Patterns to block - these allow code execution through find/grep
 deny_patterns=(
@@ -23,9 +35,8 @@ deny_patterns=(
 
 for pat in "${deny_patterns[@]}"; do
     if echo "$cmd" | grep -Eiq "$pat"; then
-        echo "Blocked: Command matches dangerous pattern '$pat'. Use find/grep for searching only, not for executing commands." >&2
-        exit 2
+        deny "Command matches dangerous pattern '$pat'. Use find/grep for searching only, not for executing commands."
     fi
 done
 
-exit 0
+allow

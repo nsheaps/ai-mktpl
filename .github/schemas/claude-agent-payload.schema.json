@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "claude-agent-payload.schema.json",
+  "title": "Claude Agent Dispatch Payload",
+  "description": "Schema for repository_dispatch client_payload sent to claude-agent workflow",
+  "type": "object",
+  "required": ["prompt", "trigger", "source", "author"],
+  "properties": {
+    "prompt": {
+      "type": "string",
+      "description": "The message/request for Claude to work on (extracted from comment/issue body)"
+    },
+    "system_context": {
+      "type": "string",
+      "description": "Additional system prompt context to append (optional)"
+    },
+    "trigger": {
+      "type": "object",
+      "description": "Information about what triggered this dispatch",
+      "required": ["type", "action"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["issue_comment", "pull_request_review_comment", "pull_request_review", "issues"],
+          "description": "The GitHub event type that triggered this"
+        },
+        "action": {
+          "type": "string",
+          "enum": ["created", "edited", "submitted", "opened", "assigned"],
+          "description": "The action that occurred"
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "description": "Where this was triggered from",
+      "properties": {
+        "repo": {
+          "type": "string",
+          "description": "Repository full name (owner/repo)"
+        },
+        "issue_number": {
+          "type": ["integer", "null"],
+          "description": "Issue number (if applicable)"
+        },
+        "pr_number": {
+          "type": ["integer", "null"],
+          "description": "Pull request number (if applicable)"
+        },
+        "comment_id": {
+          "type": ["integer", "null"],
+          "description": "Comment or review ID that triggered this"
+        },
+        "ref": {
+          "type": "string",
+          "description": "Git ref (branch) context"
+        }
+      }
+    },
+    "author": {
+      "type": "object",
+      "description": "Who triggered this",
+      "required": ["login"],
+      "properties": {
+        "login": {
+          "type": "string",
+          "description": "GitHub username"
+        },
+        "association": {
+          "type": "string",
+          "enum": [
+            "OWNER",
+            "MEMBER",
+            "COLLABORATOR",
+            "CONTRIBUTOR",
+            "FIRST_TIME_CONTRIBUTOR",
+            "FIRST_TIMER",
+            "NONE"
+          ],
+          "description": "Author's association with the repository"
+        }
+      }
+    },
+    "content": {
+      "type": "object",
+      "description": "The actual content that triggered this",
+      "properties": {
+        "title": {
+          "type": ["string", "null"],
+          "description": "Issue/PR title (if applicable)"
+        },
+        "body": {
+          "type": "string",
+          "description": "Full body text of comment/issue/review"
+        }
+      }
+    }
+  }
+}

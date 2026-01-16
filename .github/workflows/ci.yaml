@@ -31,7 +31,7 @@ jobs:
           private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
 
       - name: mise install -y
-        uses: jdx/mise-action@v2
+        uses: jdx/mise-action@v3
         with:
           install: true
           cache: true
@@ -47,7 +47,7 @@ jobs:
       - name: git push
         if: steps.lint.outputs.changed-or-failed == 'true' && ! cancelled()
         id: auto-commit-action
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v6
         with:
           commit_message: 'chore: `just lint`'
 
@@ -65,7 +65,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: mise install -y
-        uses: jdx/mise-action@v2
+        uses: jdx/mise-action@v3
         with:
           install: true
           cache: true
