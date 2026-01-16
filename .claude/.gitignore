@@ -6,3 +6,9 @@ plans
 !**/.local
 !**/CLAUDE.md
 todos/
+!todos/**/.gitkeep
+!todos/**/AGENTS.md
+!todos/**/CLAUDE.md
+!plans/**/.gitkeep
+!plans/**/AGENTS.md
+!plans/**/CLAUDE.md

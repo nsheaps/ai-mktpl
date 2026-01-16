@@ -61,7 +61,12 @@ No configuration required. The plugin works automatically once installed.
 
 The plugin automatically ensures `.claude/.gitignore` contains patterns for `todos/` and `plans/` directories on session start and each user prompt. This ignores all synced files by default without overwriting your existing gitignore configuration.
 
-To track todos in version control instead, remove these patterns from `.claude/.gitignore`.
+The following files are explicitly allowed within the ignored directories:
+- `.gitkeep` files (for preserving directory structure)
+- `AGENTS.md` files (for agent configurations)
+- `CLAUDE.md` files (for Claude-specific documentation)
+
+To track todos in version control instead, remove the ignore patterns from `.claude/.gitignore`.
 
 ## Troubleshooting
 

@@ -10,10 +10,16 @@ project_dir="${CLAUDE_PROJECT_DIR:-$(pwd)}"
 # Target gitignore file
 gitignore_file="$project_dir/.claude/.gitignore"
 
-# Patterns to ensure are present
+# Patterns to ensure are present (in order)
 patterns=(
   "todos/"
   "plans/"
+  "!todos/**/.gitkeep"
+  "!todos/**/AGENTS.md"
+  "!todos/**/CLAUDE.md"
+  "!plans/**/.gitkeep"
+  "!plans/**/AGENTS.md"
+  "!plans/**/CLAUDE.md"
 )
 
 # Function to check if a pattern exists in gitignore
@@ -24,8 +30,8 @@ pattern_exists() {
   # Remove trailing slash for comparison (git treats them the same)
   local pattern_no_slash="${pattern%/}"
 
-  # Escape special regex characters in pattern for grep
-  local escaped_pattern=$(printf '%s\n' "$pattern_no_slash" | sed 's/[[\.*^$/]/\\&/g')
+  # Escape special regex characters in pattern for grep (including !, *, etc.)
+  local escaped_pattern=$(printf '%s\n' "$pattern_no_slash" | sed 's/[[\.*^$/!]/\\&/g')
 
   # Check if pattern exists with or without trailing slash (allowing for comments and whitespace)
   grep -qE "^[[:space:]]*${escaped_pattern}/?[[:space:]]*(#.*)?$" "$file" 2>/dev/null
