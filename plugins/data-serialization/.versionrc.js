@@ -1,6 +1,8 @@
 module.exports = {
-  releaseCommitMessageFormat: "chore(release): {{currentTag}} [skip ci]",
-  scripts: {},
+  releaseCommitMessageFormat: "chore(data-serialization): release {{currentTag}}",
+  scripts: {
+    postbump: "prettier --write .claude-plugin/plugin.json",
+  },
   skip: {
     bump: false,
     changelog: false,
