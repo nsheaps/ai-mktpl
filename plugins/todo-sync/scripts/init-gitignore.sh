@@ -1,39 +1,61 @@
 #!/usr/bin/env bash
-# init-gitignore.sh - Creates .gitignore files in .claude/todos/ and .claude/plans/
+# init-gitignore.sh - Ensures .claude/.gitignore has patterns for todos/ and plans/
 # Triggered by SessionStart and UserPromptSubmit hooks
 
 set -euo pipefail
 
-# Determine project directory and plugin root
+# Determine project directory
 project_dir="${CLAUDE_PROJECT_DIR:-$(pwd)}"
-plugin_root="${CLAUDE_PLUGIN_ROOT:-$(dirname "$(dirname "$0")")}"
 
-# Template location
-template_file="$plugin_root/templates/gitignore.template"
+# Target gitignore file
+gitignore_file="$project_dir/.claude/.gitignore"
 
-# Function to create .gitignore from template
-create_gitignore() {
-  local target_dir="$1"
-  local gitignore_file="$target_dir/.gitignore"
+# Patterns to ensure are present
+patterns=(
+  "todos/"
+  "plans/"
+)
 
-  if [ -d "$target_dir" ] || [ -d "$project_dir/.claude" ]; then
-    mkdir -p "$target_dir"
-    if [ ! -f "$gitignore_file" ]; then
-      if [ -f "$template_file" ]; then
-        cp "$template_file" "$gitignore_file"
-      else
-        # Fallback if template not found
-        echo "# Ignore all synced files in this directory" > "$gitignore_file"
-        echo "*" >> "$gitignore_file"
-      fi
+# Function to check if a pattern exists in gitignore
+pattern_exists() {
+  local pattern="$1"
+  local file="$2"
+
+  # Remove trailing slash for comparison (git treats them the same)
+  local pattern_no_slash="${pattern%/}"
+
+  # Escape special regex characters in pattern for grep
+  local escaped_pattern=$(printf '%s\n' "$pattern_no_slash" | sed 's/[[\.*^$/]/\\&/g')
+
+  # Check if pattern exists with or without trailing slash (allowing for comments and whitespace)
+  grep -qE "^[[:space:]]*${escaped_pattern}/?[[:space:]]*(#.*)?$" "$file" 2>/dev/null
+}
+
+# Function to add pattern to gitignore if it doesn't exist
+ensure_pattern() {
+  local pattern="$1"
+  local file="$2"
+
+  if ! pattern_exists "$pattern" "$file"; then
+    # Check if file ends with newline
+    if [ -s "$file" ] && [ -n "$(tail -c 1 "$file")" ]; then
+      echo "" >> "$file"
     fi
+    echo "$pattern" >> "$file"
   fi
 }
 
-# Create .gitignore in .claude/todos/
-create_gitignore "$project_dir/.claude/todos"
+# Create .claude directory if it doesn't exist
+mkdir -p "$project_dir/.claude"
 
-# Create .gitignore in .claude/plans/
-create_gitignore "$project_dir/.claude/plans"
+# Create gitignore if it doesn't exist
+if [ ! -f "$gitignore_file" ]; then
+  touch "$gitignore_file"
+fi
+
+# Ensure each pattern is present
+for pattern in "${patterns[@]}"; do
+  ensure_pattern "$pattern" "$gitignore_file"
+done
 
 exit 0

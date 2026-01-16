@@ -59,9 +59,9 @@ No configuration required. The plugin works automatically once installed.
 
 ### Git Integration
 
-The plugin automatically creates `.gitignore` files in `.claude/todos/` and `.claude/plans/` on session start and each user prompt. These ignore all synced files by default.
+The plugin automatically ensures `.claude/.gitignore` contains patterns for `todos/` and `plans/` directories on session start and each user prompt. This ignores all synced files by default without overwriting your existing gitignore configuration.
 
-To track todos in version control instead, remove the generated `.gitignore` files.
+To track todos in version control instead, remove these patterns from `.claude/.gitignore`.
 
 ## Troubleshooting
 
