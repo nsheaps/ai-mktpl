@@ -24,7 +24,7 @@ jobs:
 
       - name: Authenticate as GitHub App
         id: auth
-        if: secrets.AUTOMATION_GITHUB_APP_ID != ''
+        if: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
         uses: ./.github/actions/github-app-auth
         with:
           app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
