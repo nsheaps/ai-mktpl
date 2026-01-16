@@ -220,7 +220,7 @@
       "description": "Launch independent Claude sub-agents in tmux sessions with custom configurations, tool restrictions, and iTerm integration",
       "version": "0.0.1",
       "author": {
-        "name": "Claude Code Community"
+        "name": "Nathan Heaps"
       },
       "source": "./plugins/tmux-subagent",
       "category": "utility",
