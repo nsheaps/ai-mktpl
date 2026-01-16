@@ -4,10 +4,9 @@ All notable changes to this project will be documented in this file. See [commit
 
 ## 0.2.2 (2026-01-16)
 
-
 ### Bug Fixes
 
-* **self-terminate:** traverse process tree to find Claude ([9caa408](https://github.com/nsheaps/.ai/commit/9caa408369b3120868927b2d5f0cbdeca71aef5a))
+- **self-terminate:** traverse process tree to find Claude ([9caa408](https://github.com/nsheaps/.ai/commit/9caa408369b3120868927b2d5f0cbdeca71aef5a))
 
 ## 0.2.1 (2026-01-16)
 
