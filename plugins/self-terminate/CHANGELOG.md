@@ -4,36 +4,13 @@ All notable changes to this project will be documented in this file. See [commit
 
 ## 1.0.0 (2026-01-16)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### Bug Fixes
 
 - improve version bump workflow and CI integration ([#73](https://github.com/nsheaps/.ai/issues/73)) ([d89cca3](https://github.com/nsheaps/.ai/commit/d89cca31f5691fbe1bf11dd5f21b8800ccae3c41))
 
-
-
-
-
-
-
-
-
-
 ### Bug Fixes
 
 - **self-terminate:** traverse process tree to find Claude ([9caa408](https://github.com/nsheaps/.ai/commit/9caa408369b3120868927b2d5f0cbdeca71aef5a))
-
 
 ### Features
 

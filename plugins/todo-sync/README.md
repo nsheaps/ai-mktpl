@@ -15,9 +15,7 @@ Add to your project's `.claude/settings.json`:
 
 ```json
 {
-  "plugins": [
-    "/path/to/todo-sync"
-  ]
+  "plugins": ["/path/to/todo-sync"]
 }
 ```
 
@@ -61,6 +59,7 @@ No configuration required. The plugin works automatically once installed.
 To track todos in version control, commit `.claude/todos/`.
 
 To ignore them:
+
 ```gitignore
 .claude/todos/
 ```
@@ -68,6 +67,7 @@ To ignore them:
 ## Troubleshooting
 
 Run Claude Code in debug mode to see hook execution:
+
 ```bash
 claude --debug
 ```

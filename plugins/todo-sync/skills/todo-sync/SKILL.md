@@ -20,10 +20,12 @@ The plugin uses a **PostToolUse hook** that triggers after every `TodoWrite` too
 ## File Locations
 
 ### Source (Global)
+
 - **Todos**: `~/.claude/todos/{session-id}.json`
 - **Plans**: `~/.claude/plans/{plan-name}.md`
 
 ### Destination (Project)
+
 - **Todos**: `.claude/todos/{session-id}.json`
 - **Plans**: `.claude/plans/{plan-name}.md`
 
@@ -36,21 +38,26 @@ The plugin uses a **PostToolUse hook** that triggers after every `TodoWrite` too
 ## Troubleshooting
 
 ### Todos not syncing
+
 1. Check if `~/.claude/todos/` contains files for your session
 2. Verify the plugin is enabled: look for it in `/plugins` command output
 3. Check hook execution with `claude --debug`
 
 ### Permission errors
+
 The script creates directories automatically. If you see permission errors:
+
 1. Ensure you have write access to your project directory
 2. Check that `.claude/` isn't gitignored with restrictive permissions
 
 ### Empty todo files
+
 Files containing only `[]` (empty arrays) are skipped during sync to avoid cluttering the project.
 
 ## Integration with Git
 
 Consider adding to your `.gitignore` if you don't want to track todos:
+
 ```
 .claude/todos/
 ```
