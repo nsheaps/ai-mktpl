@@ -1,11 +1,11 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Pre-tool-use hook for Write tool
 # Ensures the target directory exists before writing a file
 #
 # This hook automatically creates parent directories using mkdir -p,
 # so Claude doesn't need to manually run mkdir commands.
 
-set -e
+set -euo pipefail
 
 # Read JSON input from stdin
 INPUT=$(cat)
@@ -15,6 +15,7 @@ TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty')
 
 # Only process Write tool calls
 if [ "$TOOL_NAME" != "Write" ]; then
+  echo '{"status": "approved"}'
   exit 0
 fi
 
@@ -22,8 +23,8 @@ fi
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
 
 if [ -z "$FILE_PATH" ]; then
-  echo "Error: No file_path provided to Write tool" >&2
-  exit 1
+  echo '{"status": "rejected", "reason": "No file_path provided to Write tool"}'
+  exit 0
 fi
 
 # Get the directory portion of the path
@@ -37,4 +38,4 @@ if [ ! -d "$DIR_PATH" ]; then
 fi
 
 # Allow the Write to proceed
-exit 0
+echo '{"status": "approved"}'

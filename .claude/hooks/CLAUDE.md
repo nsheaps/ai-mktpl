@@ -53,21 +53,25 @@ Matchers: `startup`, `resume`, `clear`, `compact`
 
 ### PreToolUse
 
-Currently uses **manual mapping** (not run-hook.sh). Each hook is explicitly configured:
+Uses `run-hook.sh` with an empty matcher to run for all tool calls. Each script filters internally by tool type.
 
 ```json
 {
-  "matcher": "Bash",
+  "matcher": "",
   "hooks": [
     {
       "type": "command",
-      "command": "bash ${CLAUDE_PROJECT_DIR}/.claude/hooks/pre-tool-use/warn-force-push.sh"
+      "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/run-hook.sh pre-tool-use"
     }
   ]
 }
 ```
 
-**Note:** PreToolUse hooks should check the tool type internally and return `{"status": "approved"}` for tools they don't handle. This allows them to work with either manual mapping or auto-discovery via run-hook.sh.
+**Important:** PreToolUse hooks MUST:
+
+1. Check `tool_name` internally and return `{"status": "approved"}` for tools they don't handle
+2. Return valid JSON: `{"status": "approved"}` or `{"status": "rejected", "reason": "..."}`
+3. Exit 0 (non-zero exits may cause issues)
 
 ## Directory Structure
 
@@ -76,8 +80,9 @@ Currently uses **manual mapping** (not run-hook.sh). Each hook is explicitly con
 ├── run-hook.sh              # Auto-discovery script
 ├── session-start/           # SessionStart hooks (auto-discovered)
 │   └── *.sh
-└── pre-tool-use/            # PreToolUse hooks (manually mapped)
+└── pre-tool-use/            # PreToolUse hooks (auto-discovered)
     ├── ensure-write-dir.sh  # Creates parent dirs for Write tool
+    ├── safe-find-grep.sh    # Blocks dangerous find/grep patterns
     └── warn-force-push.sh   # Blocks force push without acknowledgment
 ```
 
@@ -114,18 +119,11 @@ Scripts must be executable to be discovered by run-hook.sh:
 chmod +x .claude/hooks/<hook-type>/your-script.sh
 ```
 
-## Migrating to Auto-Discovery
+## Adding New Hooks
 
-To migrate PreToolUse from manual mapping to auto-discovery:
+To add a new PreToolUse hook:
 
-1. Ensure all scripts in `pre-tool-use/` check tool type internally
-2. Replace manual mappings with single run-hook.sh call:
-   ```json
-   "PreToolUse": [{
-     "matcher": "*",
-     "hooks": [{
-       "type": "command",
-       "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/run-hook.sh pre-tool-use"
-     }]
-   }]
-   ```
+1. Create script in `.claude/hooks/pre-tool-use/`
+2. Make it executable: `chmod +x your-hook.sh`
+3. Ensure it checks `tool_name` and outputs proper JSON
+4. It will be auto-discovered by run-hook.sh
