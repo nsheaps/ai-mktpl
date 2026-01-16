@@ -93,13 +93,7 @@ code-simplifier/
 
 ## CLI Reference
 
-| Task              | Command                                                                                 |
-| ----------------- | --------------------------------------------------------------------------------------- |
-| Check dependency  | `claude plugin list --json \| jq '.[] \| select(.id \| contains("pr-review-toolkit"))'` |
-| Install (user)    | `claude plugin install pr-review-toolkit@claude-plugins-official`                       |
-| Install (project) | `claude plugin install pr-review-toolkit@claude-plugins-official --scope project`       |
-| Enable            | `claude plugin enable pr-review-toolkit@claude-plugins-official`                        |
-| Resume session    | `claude --continue`                                                                     |
+See [SKILL.md Quick Reference](skills/code-simplifier/SKILL.md#quick-reference) for the full CLI command reference table.
 
 ## License
 

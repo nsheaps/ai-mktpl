@@ -119,25 +119,4 @@ The code-simplifier agent focuses on:
 
 ## Troubleshooting
 
-### Agent Not Found After Install
-
-Plugins load at session start. After installing, restart Claude:
-
-```bash
-claude --continue
-```
-
-### Wrong Plugin Installed
-
-Ensure you're using the correct marketplace:
-
-- ✅ `pr-review-toolkit@claude-plugins-official`
-- ❌ `pr-review-toolkit@claude-code-plugins`
-
-### Plugin Disabled
-
-Re-enable if disabled:
-
-```bash
-claude plugin enable pr-review-toolkit@claude-plugins-official
-```
+See [SKILL.md Troubleshooting](../skills/code-simplifier/SKILL.md#troubleshooting) for common issues and solutions.
