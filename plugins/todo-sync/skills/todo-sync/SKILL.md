@@ -1,7 +1,6 @@
 ---
 name: Todo Sync
 description: Automatically syncs todos and plans from ~/.claude/ to the current project. Use this skill when asking about todo sync behavior, troubleshooting sync issues, or understanding where todos are stored.
-version: 0.1.0
 ---
 
 # Todo Sync Plugin
