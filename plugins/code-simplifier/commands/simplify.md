@@ -54,10 +54,10 @@ If the plugin was just installed, inform the user:
 > claude --continue
 > ```
 >
-> Or resume by session ID:
+> Or resume by session ID (replace `$SESSION_ID` with the current session ID from `/session`):
 >
 > ```bash
-> claude --resume <session-id>
+> claude --resume $SESSION_ID
 > ```
 
 Then stop - do not attempt to use the agent until after restart.

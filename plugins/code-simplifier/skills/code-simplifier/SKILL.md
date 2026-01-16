@@ -54,8 +54,8 @@ Plugins load at session start. If the `pr-review-toolkit:code-simplifier` agent 
 # Resume most recent session
 claude --continue
 
-# OR resume specific session by ID
-claude --resume <session-id>
+# OR resume specific session by ID (replace $SESSION_ID with your actual session ID)
+claude --resume $SESSION_ID
 ```
 
 The agent becomes available after restart.
@@ -148,11 +148,11 @@ To continue work after restarting:
 # Continue most recent session in current directory
 claude --continue
 
-# Resume specific session
-claude --resume <session-id>
+# Resume specific session (replace $SESSION_ID with your actual session ID)
+claude --resume $SESSION_ID
 
 # Fork session (new ID, preserves context)
-claude --resume <session-id> --fork-session
+claude --resume $SESSION_ID --fork-session
 ```
 
 ## Quick Reference
