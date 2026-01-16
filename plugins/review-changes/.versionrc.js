@@ -6,7 +6,7 @@ module.exports = {
     commit: false,
     tag: false,
   },
-  tagPrefix: "command-help-skill@",
+  tagPrefix: "review-changes@",
   packageFiles: [
     {
       filename: ".claude-plugin/plugin.json",

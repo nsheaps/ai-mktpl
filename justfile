@@ -146,6 +146,11 @@ _preview-version-bumps format='--format=raw':
             TYPE="none"
         fi
 
+        # Skip plugins with no version change
+        if [ "$TYPE" = "none" ]; then
+            continue
+        fi
+
         case "{{format}}" in
             --format=raw|'' )
                 echo "$PLUGIN_NAME: $CURRENT =( $TYPE )=> $NEXT"

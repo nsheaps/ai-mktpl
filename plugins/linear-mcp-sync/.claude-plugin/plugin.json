@@ -3,9 +3,9 @@
   "version": "0.0.1",
   "description": "Installs Linear MCP and adds hooks for safe ticket updates with hash validation to prevent stale overwrites",
   "author": {
-    "name": "Claude Code Community",
-    "email": "community@example.com",
-    "url": "https://github.com/nsheaps/.ai"
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
   },
   "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/linear-mcp-sync",
   "repository": "https://github.com/nsheaps/.ai",

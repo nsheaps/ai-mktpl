@@ -3,9 +3,9 @@
   "version": "0.0.1",
   "description": "Command to correct AI behavior mistakes and update rules to prevent recurrence",
   "author": {
-    "name": "Claude Code Community",
-    "email": "community@example.com",
-    "url": "https://github.com/nsheaps/.ai"
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
   },
   "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/correct-behavior",
   "repository": "https://github.com/nsheaps/.ai",
