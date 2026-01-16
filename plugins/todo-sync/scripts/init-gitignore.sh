@@ -1,16 +1,15 @@
 #!/usr/bin/env bash
 # init-gitignore.sh - Creates .gitignore files in .claude/todos/ and .claude/plans/
-# Triggered by SessionStart hook
+# Triggered by SessionStart and UserPromptSubmit hooks
 
 set -euo pipefail
 
 # Determine project directory
 project_dir="${CLAUDE_PROJECT_DIR:-$(pwd)}"
 
-# .gitignore content: ignore everything except .gitignore itself
+# .gitignore content: ignore everything in this directory
 gitignore_content="# Ignore all synced files in this directory
 *
-!.gitignore
 "
 
 # Create .gitignore in .claude/todos/ if directory exists or will be created

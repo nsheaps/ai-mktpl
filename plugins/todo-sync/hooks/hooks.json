@@ -7,7 +7,19 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/init-gitignore.sh",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/init-gitignore.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/init-gitignore.sh",
             "timeout": 5
           }
         ]
@@ -19,7 +31,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/sync-todos.sh",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/sync-todos.sh",
             "timeout": 10
           }
         ]
