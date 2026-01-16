@@ -1,0 +1,13 @@
+{
+  "name": "claude-worktree",
+  "version": "1.0.0",
+  "description": "Combined git worktree management with Claude session handling",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/claude-worktree",
+  "repository": "https://github.com/nsheaps/.ai",
+  "keywords": ["claude", "worktree", "git", "session", "workflow"]
+}

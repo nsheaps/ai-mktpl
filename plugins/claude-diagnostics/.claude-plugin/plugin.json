@@ -1,0 +1,13 @@
+{
+  "name": "claude-diagnostics",
+  "version": "1.0.0",
+  "description": "Diagnostic tool that captures Claude Code status, context, and configuration for troubleshooting",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/claude-diagnostics",
+  "repository": "https://github.com/nsheaps/.ai",
+  "keywords": ["diagnostics", "debug", "troubleshooting", "status", "context", "config"]
+}

@@ -10,6 +10,54 @@
   },
   "plugins": [
     {
+      "name": "claude-diagnostics",
+      "description": "Diagnostic tool that captures Claude Code status, context, and configuration for troubleshooting",
+      "version": "1.0.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/claude-diagnostics",
+      "category": "utility",
+      "tags": ["utility"],
+      "keywords": ["diagnostics", "debug", "troubleshooting", "status", "context", "config"]
+    },
+    {
+      "name": "claude-simple-cli",
+      "description": "Simplified one-shot text-based interface over Claude's JSON mode",
+      "version": "1.0.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/claude-simple-cli",
+      "category": "utility",
+      "tags": ["utility"],
+      "keywords": ["claude", "cli", "simple", "text", "json", "one-shot"]
+    },
+    {
+      "name": "claude-worktree",
+      "description": "Combined git worktree management with Claude session handling",
+      "version": "1.0.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/claude-worktree",
+      "category": "git",
+      "tags": ["utility", "git"],
+      "keywords": ["claude", "worktree", "git", "session", "workflow"]
+    },
+    {
+      "name": "claude-wrapper",
+      "description": "Process supervisor for interactive Claude CLI with restart capabilities",
+      "version": "1.0.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/claude-wrapper",
+      "category": "utility",
+      "tags": ["utility"],
+      "keywords": ["claude", "wrapper", "supervisor", "restart", "process"]
+    },
+    {
       "name": "command-help-skill",
       "description": "Help claude understand, discover, and execute slash commands when accidentally sent as a message.",
       "version": "0.2.24",
@@ -289,6 +337,18 @@
       "category": "utility",
       "tags": ["utility", "skill"],
       "keywords": ["todos", "plans", "sync", "workflow", "productivity"]
+    },
+    {
+      "name": "worktree-switcher",
+      "description": "Interactive TUI for git worktree management with rich branch status display",
+      "version": "1.0.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/worktree-switcher",
+      "category": "git",
+      "tags": ["utility", "git"],
+      "keywords": ["git", "worktree", "branch", "tui", "gum", "pr-status", "ci-status"]
     }
   ]
 }

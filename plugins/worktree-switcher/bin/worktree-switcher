@@ -1,0 +1,291 @@
+#!/usr/bin/env bash
+# worktree-switcher - Interactive TUI for git worktree management
+# Usage: worktree-switcher [OPTIONS]
+#
+# Options:
+#   --no-status       Skip fetching branch status (faster)
+#   -h, --help        Show this help message
+#
+# Behavior:
+#   - If in a worktree: shows banner with main checkout location
+#   - If in a git repo: prompts to select/create worktree
+#   - Worktrees created at: ../${repo}.worktrees/${branch}
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+NO_STATUS="false"
+
+show_help() {
+  sed -n '2,13p' "$0" | sed 's/^# //' | sed 's/^#//'
+  exit 0
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --no-status) NO_STATUS="true"; shift ;;
+    -h|--help) show_help ;;
+    *) echo "Unknown option: $1" >&2; show_help ;;
+  esac
+done
+
+# Check for required tools
+check_tool() {
+  if ! command -v "$1" &>/dev/null; then
+    echo "Error: $1 is required but not installed" >&2
+    case "$1" in
+      gum) echo "Install with: brew install gum" >&2 ;;
+      gh)  echo "Install with: brew install gh" >&2 ;;
+    esac
+    exit 1
+  fi
+}
+
+check_tool gum
+check_tool gh
+check_tool git
+check_tool jq
+
+# Check if we're in a git repository
+if ! git rev-parse --git-dir &>/dev/null; then
+  echo "Error: Not in a git repository" >&2
+  exit 1
+fi
+
+# Get git root and check if we're in a worktree
+GIT_DIR=$(git rev-parse --git-dir)
+GIT_ROOT=$(git rev-parse --show-toplevel)
+REPO_NAME=$(basename "$GIT_ROOT")
+
+# Check if we're in a worktree (not the main checkout)
+if [[ "$GIT_DIR" == *".git/worktrees/"* ]]; then
+  # We're in a worktree - find the main checkout
+  MAIN_CHECKOUT=$(git -C "$GIT_ROOT" rev-parse --path-format=absolute --git-common-dir | sed 's|/.git$||')
+  echo ""
+  gum style --border rounded --padding "0 1" --border-foreground 214 \
+    "Already in a worktree"
+  echo ""
+  echo "Main checkout: $MAIN_CHECKOUT"
+  echo "Current worktree: $GIT_ROOT"
+  exit 0
+fi
+
+# We're in the main checkout - offer worktree selection
+echo ""
+gum style --bold "Git Worktree Switcher"
+echo ""
+
+# Get existing worktrees (excluding main)
+WORKTREES=()
+while IFS= read -r line; do
+  # Skip the main worktree
+  if [[ "$line" != "$GIT_ROOT" ]]; then
+    WORKTREES+=("$line")
+  fi
+done < <(git worktree list --porcelain | grep "^worktree " | cut -d' ' -f2-)
+
+# Get current user for filtering branches
+CURRENT_USER=$(gh api user -q '.login' 2>/dev/null || echo "")
+
+# Build branch list with priorities
+declare -A BRANCH_PRIORITY
+declare -A BRANCH_STATUS
+
+# Priority levels:
+# 0 = (new branch)
+# 1 = user's open PRs
+# 2 = user's draft PRs
+# 3 = user's other branches
+# 4 = other local branches
+# 5 = remote branches
+
+# Get user's open and draft PRs
+if [[ -n "$CURRENT_USER" ]]; then
+  while IFS=$'\t' read -r branch is_draft; do
+    if [[ -n "$branch" ]]; then
+      if [[ "$is_draft" == "true" ]]; then
+        BRANCH_PRIORITY["$branch"]=2
+      else
+        BRANCH_PRIORITY["$branch"]=1
+      fi
+    fi
+  done < <(gh pr list --author "$CURRENT_USER" --json headRefName,isDraft \
+    -q '.[] | [.headRefName, (.isDraft | tostring)] | @tsv' 2>/dev/null || echo "")
+fi
+
+# Get local branches
+while IFS= read -r branch; do
+  if [[ -n "$branch" ]] && [[ -z "${BRANCH_PRIORITY[$branch]:-}" ]]; then
+    # Check if it's the user's branch (by checking commits or branch naming)
+    if [[ -n "$CURRENT_USER" ]] && [[ "$branch" == "$CURRENT_USER/"* ]]; then
+      BRANCH_PRIORITY["$branch"]=3
+    else
+      BRANCH_PRIORITY["$branch"]=4
+    fi
+  fi
+done < <(git branch --format='%(refname:short)' 2>/dev/null || echo "")
+
+# Get branch status for all prioritized branches (if not disabled)
+get_branch_status() {
+  local branch="$1"
+  if [[ "$NO_STATUS" == "true" ]]; then
+    echo "     "
+  elif [[ -x "$SCRIPT_DIR/branch-status" ]]; then
+    "$SCRIPT_DIR/branch-status" --emoji "$branch" 2>/dev/null || echo "     "
+  else
+    echo "     "
+  fi
+}
+
+# Build sorted list of branches
+SORTED_BRANCHES=()
+
+# Add branches by priority
+for priority in 1 2 3 4; do
+  for branch in "${!BRANCH_PRIORITY[@]}"; do
+    if [[ "${BRANCH_PRIORITY[$branch]}" == "$priority" ]]; then
+      status=$(get_branch_status "$branch")
+      SORTED_BRANCHES+=("$status $branch")
+    fi
+  done
+done
+
+# Build menu options
+MENU_OPTIONS=()
+MENU_OPTIONS+=("📁 (create new worktree)")
+
+# Add existing worktrees first
+for wt in "${WORKTREES[@]}"; do
+  wt_branch=$(git -C "$wt" branch --show-current 2>/dev/null || echo "detached")
+  MENU_OPTIONS+=("📂 [existing] $wt_branch → $wt")
+done
+
+# Add branches
+for entry in "${SORTED_BRANCHES[@]}"; do
+  MENU_OPTIONS+=("$entry")
+done
+
+# Add option to use remote branch
+MENU_OPTIONS+=("🌐 (branch from remote)")
+
+# Show selection menu
+SELECTED=$(printf '%s\n' "${MENU_OPTIONS[@]}" | gum filter --placeholder "Select or create worktree...")
+
+if [[ -z "$SELECTED" ]]; then
+  echo "Cancelled"
+  exit 0
+fi
+
+# Handle selection
+case "$SELECTED" in
+  "📁 (create new worktree)")
+    # Get branch name
+    BRANCH_NAME=$(gum input --placeholder "Enter new branch name...")
+    if [[ -z "$BRANCH_NAME" ]]; then
+      echo "Cancelled"
+      exit 0
+    fi
+
+    # Ask for base branch
+    CURRENT_BRANCH=$(git branch --show-current)
+    DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || echo "main")
+
+    BASE_OPTIONS=("$DEFAULT_BRANCH (default)" "$CURRENT_BRANCH (current)" "other...")
+    BASE_SELECTED=$(printf '%s\n' "${BASE_OPTIONS[@]}" | gum choose --header "Base branch:")
+
+    case "$BASE_SELECTED" in
+      *"(default)"*) BASE_BRANCH="$DEFAULT_BRANCH" ;;
+      *"(current)"*) BASE_BRANCH="$CURRENT_BRANCH" ;;
+      *) BASE_BRANCH=$(git branch -a --format='%(refname:short)' | gum filter --placeholder "Select base branch...") ;;
+    esac
+
+    # Create worktree path
+    SAFE_BRANCH=$(echo "$BRANCH_NAME" | tr '/' '-')
+    WORKTREE_PATH="../${REPO_NAME}.worktrees/${SAFE_BRANCH}"
+
+    # Create the worktree
+    mkdir -p "$(dirname "$WORKTREE_PATH")"
+    git worktree add -b "$BRANCH_NAME" "$WORKTREE_PATH" "$BASE_BRANCH"
+
+    echo ""
+    echo "Created worktree at: $(cd "$WORKTREE_PATH" && pwd)"
+    echo "Branch: $BRANCH_NAME (based on $BASE_BRANCH)"
+
+    # Print the path for cd (can be captured by caller)
+    echo ""
+    echo "WORKTREE_PATH=$(cd "$WORKTREE_PATH" && pwd)"
+    ;;
+
+  "📂 [existing]"*)
+    # Extract path from selection
+    WORKTREE_PATH=$(echo "$SELECTED" | sed 's/.*→ //')
+    echo ""
+    echo "Selected existing worktree: $WORKTREE_PATH"
+
+    # Show branch status
+    WT_BRANCH=$(git -C "$WORKTREE_PATH" branch --show-current 2>/dev/null || echo "detached")
+    if [[ "$NO_STATUS" != "true" ]] && [[ -x "$SCRIPT_DIR/branch-status" ]]; then
+      echo ""
+      echo "Branch status for $WT_BRANCH:"
+      "$SCRIPT_DIR/branch-status" --json "$WT_BRANCH" 2>/dev/null | jq . || true
+    fi
+
+    echo ""
+    echo "WORKTREE_PATH=$WORKTREE_PATH"
+    ;;
+
+  "🌐 (branch from remote)")
+    # List remote branches
+    git fetch --all --prune 2>/dev/null || true
+    REMOTE_BRANCH=$(git branch -r --format='%(refname:short)' | grep -v HEAD | gum filter --placeholder "Select remote branch...")
+
+    if [[ -z "$REMOTE_BRANCH" ]]; then
+      echo "Cancelled"
+      exit 0
+    fi
+
+    # Extract branch name without remote prefix
+    BRANCH_NAME=$(echo "$REMOTE_BRANCH" | sed 's|^[^/]*/||')
+    SAFE_BRANCH=$(echo "$BRANCH_NAME" | tr '/' '-')
+    WORKTREE_PATH="../${REPO_NAME}.worktrees/${SAFE_BRANCH}"
+
+    # Create the worktree tracking the remote branch
+    mkdir -p "$(dirname "$WORKTREE_PATH")"
+    git worktree add --track -b "$BRANCH_NAME" "$WORKTREE_PATH" "$REMOTE_BRANCH"
+
+    echo ""
+    echo "Created worktree at: $(cd "$WORKTREE_PATH" && pwd)"
+    echo "Branch: $BRANCH_NAME (tracking $REMOTE_BRANCH)"
+    echo ""
+    echo "WORKTREE_PATH=$(cd "$WORKTREE_PATH" && pwd)"
+    ;;
+
+  *)
+    # Selected an existing branch - create worktree for it
+    # Extract branch name (remove emoji prefix)
+    BRANCH_NAME=$(echo "$SELECTED" | sed 's/^[^a-zA-Z0-9_-]*//' | xargs)
+
+    SAFE_BRANCH=$(echo "$BRANCH_NAME" | tr '/' '-')
+    WORKTREE_PATH="../${REPO_NAME}.worktrees/${SAFE_BRANCH}"
+
+    if [[ -d "$WORKTREE_PATH" ]]; then
+      echo "Worktree already exists at: $(cd "$WORKTREE_PATH" && pwd)"
+    else
+      mkdir -p "$(dirname "$WORKTREE_PATH")"
+      git worktree add "$WORKTREE_PATH" "$BRANCH_NAME"
+      echo "Created worktree at: $(cd "$WORKTREE_PATH" && pwd)"
+    fi
+
+    echo "Branch: $BRANCH_NAME"
+
+    # Show branch status
+    if [[ "$NO_STATUS" != "true" ]] && [[ -x "$SCRIPT_DIR/branch-status" ]]; then
+      echo ""
+      echo "Branch status:"
+      "$SCRIPT_DIR/branch-status" --json "$BRANCH_NAME" 2>/dev/null | jq . || true
+    fi
+
+    echo ""
+    echo "WORKTREE_PATH=$(cd "$WORKTREE_PATH" && pwd)"
+    ;;
+esac
