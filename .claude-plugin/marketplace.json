@@ -214,6 +214,18 @@
         "optimization",
         "concurrent"
       ]
+    },
+    {
+      "name": "tmux-subagent",
+      "description": "Launch independent Claude sub-agents in tmux sessions with custom configurations, tool restrictions, and iTerm integration",
+      "version": "1.0.0",
+      "author": {
+        "name": "Claude Code Community"
+      },
+      "source": "./plugins/tmux-subagent",
+      "category": "utility",
+      "tags": ["utility", "command", "skill"],
+      "keywords": ["tmux", "subagent", "parallel", "iterm", "terminal", "isolation", "delegation"]
     }
   ]
 }
