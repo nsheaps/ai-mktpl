@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file. See [commit
 
 ## 1.0.0 (2026-01-16)
 
+## 1.0.0 (2026-01-16)
+
 
 ### Bug Fixes
 
