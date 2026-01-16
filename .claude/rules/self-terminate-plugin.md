@@ -13,6 +13,7 @@ When working on any of the following areas, use the `self-terminate` plugin and 
 ## Plugin Location
 
 `plugins/self-terminate/` contains:
+
 - PreToolUse hook for git validation
 - Self-terminate skill with comprehensive documentation
 - Executable script for graceful termination
@@ -28,12 +29,14 @@ The self-terminate plugin provides:
 ## When to Terminate
 
 Use self-termination when:
+
 - Configuration changes require a restart
 - User explicitly requests exit
 - Session needs fresh start
 - Testing process management
 
 The plugin's hook automatically enforces:
+
 - No uncommitted changes
 - No unpushed commits
 - No untracked files
@@ -41,6 +44,7 @@ The plugin's hook automatically enforces:
 ## Development Guidelines
 
 When modifying the plugin:
+
 1. Update skill documentation to reflect hook behavior
 2. Test hook enforcement programmatically
 3. Ensure compatibility with both local CLI and Claude Code Web

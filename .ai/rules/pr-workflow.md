@@ -40,6 +40,7 @@ EOF
 ## When to Move from Draft
 
 Move PR from draft to ready when:
+
 - All planned work is complete
 - Tests pass
 - You've self-reviewed the changes
