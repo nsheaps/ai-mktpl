@@ -1,0 +1,2 @@
+[console_scripts]
+toon = toon_format.cli:main

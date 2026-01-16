@@ -70,6 +70,33 @@
       "keywords": ["slash-command", "command", "create", "automation", "workflow"]
     },
     {
+      "name": "data-serialization",
+      "description": "Data format conversion and querying utilities. Supports YAML, JSON, TOON (Token-Oriented Object Notation), and XML/HTML transformations with special handling for Playwright accessibility snapshots. TOON provides 30-60% token reduction vs JSON for LLM contexts.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/data-serialization",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": [
+        "yaml",
+        "json",
+        "toon",
+        "xml",
+        "html",
+        "conversion",
+        "serialization",
+        "token-efficient",
+        "llm",
+        "jq",
+        "yq",
+        "playwright",
+        "accessibility",
+        "data-transformation"
+      ]
+    },
+    {
       "name": "github-auth-skill",
       "description": "Skill for authenticating with GitHub using device authorization flow",
       "version": "0.0.1",
