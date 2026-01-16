@@ -37,13 +37,21 @@ fi
 PreToolUse hooks must return JSON to stdout with exit code 0:
 
 **Allow the tool call:**
+
 ```json
-{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow"}}
+{ "hookSpecificOutput": { "hookEventName": "PreToolUse", "permissionDecision": "allow" } }
 ```
 
 **Block the tool call:**
+
 ```json
-{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"..."}}
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "deny",
+    "permissionDecisionReason": "..."
+  }
+}
 ```
 
 Use the `claude-code-guide` agent for current hook API documentation.
