@@ -88,7 +88,7 @@ jobs:
 
       - name: Push version bumps to PR
         if: steps.detect.outputs.has_changes == 'true'
-        uses: stefanzweifel/git-auto-commit-action@v6
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: 'chore: bump plugin versions'
           file_pattern: 'plugins/*/.claude-plugin/plugin.json plugins/*/CHANGELOG.md'
@@ -146,7 +146,7 @@ jobs:
 
       - name: Commit marketplace changes
         if: steps.update.outputs.updated == 'true'
-        uses: stefanzweifel/git-auto-commit-action@v6
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: 'chore: update marketplace metadata [skip ci]'
           file_pattern: '.claude-plugin/marketplace.json'
