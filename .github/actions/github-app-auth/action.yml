@@ -74,7 +74,7 @@ runs:
     - name: Configure repo checkout token
       # technically would checkout again, but since all refs are already local and clean is disabled
       # this should basically just replace the token in the http header used to interact with remote
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         token: ${{ steps.app-token.outputs.token }}
         clean: false
