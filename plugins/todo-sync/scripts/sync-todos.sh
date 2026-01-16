@@ -4,6 +4,12 @@
 
 set -euo pipefail
 
+# Check for jq dependency
+if ! command -v jq &>/dev/null; then
+  echo "Warning: jq not found, skipping sync" >&2
+  exit 0
+fi
+
 # Read hook input from stdin
 input=$(cat)
 
@@ -31,39 +37,35 @@ mkdir -p "$project_dir/.claude/plans"
 global_todos_dir="$HOME/.claude/todos"
 
 if [ -d "$global_todos_dir" ]; then
-  # Find files matching this session_id
-  matching_files=$(find "$global_todos_dir" -name "${session_id}*.json" -type f 2>/dev/null || true)
+  # Find files matching this session_id (using while read to handle filenames with spaces)
+  find "$global_todos_dir" -name "${session_id}*.json" -type f 2>/dev/null | while IFS= read -r src_file; do
+    filename=$(basename "$src_file")
+    dest_file="$project_dir/.claude/todos/$filename"
 
-  if [ -n "$matching_files" ]; then
-    for src_file in $matching_files; do
-      filename=$(basename "$src_file")
-      dest_file="$project_dir/.claude/todos/$filename"
+    # Read source todos
+    src_content=$(cat "$src_file" 2>/dev/null || echo "[]")
 
-      # Read source todos
-      src_content=$(cat "$src_file" 2>/dev/null || echo "[]")
+    # Skip empty arrays
+    if [ "$src_content" = "[]" ]; then
+      continue
+    fi
 
-      # Skip empty arrays
-      if [ "$src_content" = "[]" ]; then
-        continue
-      fi
+    # Check if destination exists for merge
+    if [ -f "$dest_file" ]; then
+      dest_content=$(cat "$dest_file" 2>/dev/null || echo "[]")
 
-      # Check if destination exists for merge
-      if [ -f "$dest_file" ]; then
-        dest_content=$(cat "$dest_file" 2>/dev/null || echo "[]")
+      # Merge: combine arrays, remove duplicates by content field
+      merged=$(jq -s '
+        .[0] + .[1] |
+        unique_by(.content // .)
+      ' <(echo "$dest_content") <(echo "$src_content"))
 
-        # Merge: combine arrays, remove duplicates by content field
-        merged=$(jq -s '
-          .[0] + .[1] |
-          unique_by(.content // .)
-        ' <(echo "$dest_content") <(echo "$src_content"))
-
-        echo "$merged" > "$dest_file"
-      else
-        # No destination file, just copy
-        cp "$src_file" "$dest_file"
-      fi
-    done
-  fi
+      echo "$merged" > "$dest_file"
+    else
+      # No destination file, just copy
+      cp "$src_file" "$dest_file"
+    fi
+  done
 fi
 
 # ============================================================================
