@@ -1,0 +1,175 @@
+name: Claude Agent Trigger
+
+# This workflow detects events that should trigger the Claude agent
+# and dispatches to the agent workflow with normalized context
+
+on:
+  # Note: Runs from default branch (main), even if triggered on PR
+  issue_comment:
+    types: [created, edited]
+  pull_request_review_comment:
+    types: [created, edited]
+  issues:
+    types: [opened, assigned]
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  handle-issue-comment:
+    if: github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - name: Authenticate as GitHub App
+        id: auth
+        uses: ./.github/actions/github-app-auth
+        with:
+          app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
+          private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
+
+      - name: Dispatch to Claude agent
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ steps.auth.outputs.token }}
+          script: |
+            const payload = {
+              trigger_type: 'issue_comment',
+              issue_number: context.payload.issue.number,
+              pr_number: context.payload.issue.pull_request ? context.payload.issue.number : null,
+              comment_id: context.payload.comment.id,
+              body: context.payload.comment.body,
+              author: context.payload.comment.user.login,
+              repository: context.payload.repository.full_name,
+              event_payload: context.payload
+            };
+
+            await github.rest.repos.createDispatchEvent({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              event_type: 'claude-agent',
+              client_payload: payload
+            });
+
+            console.log('Dispatched claude-agent event:', payload);
+
+  handle-pr-review-comment:
+    if: github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - name: Authenticate as GitHub App
+        id: auth
+        uses: ./.github/actions/github-app-auth
+        with:
+          app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
+          private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
+
+      - name: Dispatch to Claude agent
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ steps.auth.outputs.token }}
+          script: |
+            const payload = {
+              trigger_type: 'pull_request_review_comment',
+              pr_number: context.payload.pull_request.number,
+              issue_number: null,
+              comment_id: context.payload.comment.id,
+              body: context.payload.comment.body,
+              author: context.payload.comment.user.login,
+              repository: context.payload.repository.full_name,
+              event_payload: context.payload
+            };
+
+            await github.rest.repos.createDispatchEvent({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              event_type: 'claude-agent',
+              client_payload: payload
+            });
+
+            console.log('Dispatched claude-agent event:', payload);
+
+  handle-pr-review:
+    if: github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - name: Authenticate as GitHub App
+        id: auth
+        uses: ./.github/actions/github-app-auth
+        with:
+          app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
+          private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
+
+      - name: Dispatch to Claude agent
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ steps.auth.outputs.token }}
+          script: |
+            const payload = {
+              trigger_type: 'pull_request_review',
+              pr_number: context.payload.pull_request.number,
+              issue_number: null,
+              comment_id: context.payload.review.id,
+              body: context.payload.review.body,
+              author: context.payload.review.user.login,
+              repository: context.payload.repository.full_name,
+              event_payload: context.payload
+            };
+
+            await github.rest.repos.createDispatchEvent({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              event_type: 'claude-agent',
+              client_payload: payload
+            });
+
+            console.log('Dispatched claude-agent event:', payload);
+
+  handle-issue:
+    if: |
+      github.event_name == 'issues' &&
+      (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - name: Authenticate as GitHub App
+        id: auth
+        uses: ./.github/actions/github-app-auth
+        with:
+          app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
+          private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
+
+      - name: Dispatch to Claude agent
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ steps.auth.outputs.token }}
+          script: |
+            const payload = {
+              trigger_type: 'issues',
+              issue_number: context.payload.issue.number,
+              pr_number: null,
+              comment_id: null,
+              body: context.payload.issue.body,
+              title: context.payload.issue.title,
+              author: context.payload.issue.user.login,
+              repository: context.payload.repository.full_name,
+              event_payload: context.payload
+            };
+
+            await github.rest.repos.createDispatchEvent({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              event_type: 'claude-agent',
+              client_payload: payload
+            });
+
+            console.log('Dispatched claude-agent event:', payload);
