@@ -27,6 +27,55 @@ jobs:
         with:
           install: true
 
+      - name: Build prompt from dispatch payload
+        id: prompt
+        env:
+          PAYLOAD: ${{ toJson(github.event.client_payload) }}
+        run: |
+          # Extract values from payload
+          PROMPT=$(echo "$PAYLOAD" | jq -r '.prompt // ""')
+          REPO=$(echo "$PAYLOAD" | jq -r '.source.repo // ""')
+          PR_NUM=$(echo "$PAYLOAD" | jq -r '.source.pr_number // ""')
+          ISSUE_NUM=$(echo "$PAYLOAD" | jq -r '.source.issue_number // ""')
+          COMMENT_ID=$(echo "$PAYLOAD" | jq -r '.source.comment_id // ""')
+          AUTHOR=$(echo "$PAYLOAD" | jq -r '.author.login // ""')
+          ASSOCIATION=$(echo "$PAYLOAD" | jq -r '.author.association // ""')
+          TRIGGER_TYPE=$(echo "$PAYLOAD" | jq -r '.trigger.type // ""')
+          TRIGGER_ACTION=$(echo "$PAYLOAD" | jq -r '.trigger.action // ""')
+          TITLE=$(echo "$PAYLOAD" | jq -r '.content.title // ""')
+
+          # Read system prompt template
+          SYSTEM_PROMPT=$(cat .ai/prompts/claude-agent-system.md)
+
+          # Build context section
+          CONTEXT="You are Claude, responding to a GitHub @mention.\n\n"
+          CONTEXT+="## Context\n"
+          CONTEXT+="- Repository: $REPO\n"
+          if [ "$PR_NUM" != "null" ] && [ -n "$PR_NUM" ]; then
+            CONTEXT+="- Related to PR #$PR_NUM\n"
+          fi
+          if [ "$ISSUE_NUM" != "null" ] && [ -n "$ISSUE_NUM" ]; then
+            CONTEXT+="- Related to issue #$ISSUE_NUM\n"
+          fi
+          CONTEXT+="- Triggered by: $AUTHOR ($ASSOCIATION)\n"
+          CONTEXT+="- Trigger: $TRIGGER_TYPE ($TRIGGER_ACTION)\n"
+          if [ "$TITLE" != "null" ] && [ -n "$TITLE" ]; then
+            CONTEXT+="\n## Title\n$TITLE\n"
+          fi
+          CONTEXT+="\n## User Request\n$PROMPT"
+
+          # Output the full prompt (escape for multiline)
+          {
+            echo "prompt<<EOF"
+            echo -e "$CONTEXT"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+          # Also output source info for potential use
+          echo "pr_number=$PR_NUM" >> "$GITHUB_OUTPUT"
+          echo "issue_number=$ISSUE_NUM" >> "$GITHUB_OUTPUT"
+          echo "comment_id=$COMMENT_ID" >> "$GITHUB_OUTPUT"
+
       - name: Run Claude Code
         id: claude
         uses: anthropics/claude-code-action@v1
@@ -83,6 +132,8 @@ jobs:
           claude_code_oauth_token: ${{
             secrets.CLAUDE_API_KEY && '' ||
             ( secrets.ANTHROPIC_API_KEY && '' || secrets.CLAUDE_CODE_OAUTH_TOKEN ) }}
+          # Prompt extracted from repository_dispatch payload
+          prompt: ${{ steps.prompt.outputs.prompt }}
           # Enable full output for debugging
           show_full_output: true
           additional_permissions: |
