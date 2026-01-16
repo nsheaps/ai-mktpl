@@ -1,6 +1,6 @@
 {
   "name": "command-help-skill",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Help claude understand, discover, and execute slash commands when accidentally sent as a message.",
   "author": {
     "name": "Nathan Heaps",
@@ -9,5 +9,13 @@
   },
   "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/command-help-skill",
   "repository": "https://github.com/nsheaps/.ai",
-  "keywords": ["commands", "help", "discovery", "skill", "slash-commands", "ai", "assistant"]
+  "keywords": [
+    "commands",
+    "help",
+    "discovery",
+    "skill",
+    "slash-commands",
+    "ai",
+    "assistant"
+  ]
 }
