@@ -54,22 +54,22 @@ check_tool jq
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_DIR="$(dirname "$SCRIPT_DIR")"
 
-# Look for worktree-switcher
+# Look for worktree-switcher (same directory since we're now in claude-tools)
 WORKTREE_SWITCHER=""
-if [[ -x "$SCRIPT_DIR/../../../worktree-switcher/bin/worktree-switcher" ]]; then
-  WORKTREE_SWITCHER="$SCRIPT_DIR/../../../worktree-switcher/bin/worktree-switcher"
+if [[ -x "$SCRIPT_DIR/worktree-switcher" ]]; then
+  WORKTREE_SWITCHER="$SCRIPT_DIR/worktree-switcher"
 elif command -v worktree-switcher &>/dev/null; then
   WORKTREE_SWITCHER="worktree-switcher"
 else
   echo "Error: worktree-switcher not found" >&2
-  echo "Install the worktree-switcher plugin first" >&2
+  echo "This command requires worktree-switcher to be in the same plugin or in PATH" >&2
   exit 1
 fi
 
-# Look for claude-wrapper
+# Look for claude-wrapper (same directory since we're now in claude-tools)
 CLAUDE_WRAPPER=""
-if [[ -x "$SCRIPT_DIR/../../../claude-wrapper/bin/claude-wrapper" ]]; then
-  CLAUDE_WRAPPER="$SCRIPT_DIR/../../../claude-wrapper/bin/claude-wrapper"
+if [[ -x "$SCRIPT_DIR/claude-wrapper" ]]; then
+  CLAUDE_WRAPPER="$SCRIPT_DIR/claude-wrapper"
 elif command -v claude-wrapper &>/dev/null; then
   CLAUDE_WRAPPER="claude-wrapper"
 fi
