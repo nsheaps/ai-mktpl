@@ -1,6 +1,6 @@
 {
   "name": "commit-skill",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Intelligent skill that enables Claude to automatically analyze git changes and create well-formatted commits during development",
   "author": {
     "name": "Nathan Heaps",
@@ -9,5 +9,12 @@
   },
   "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/commit-skill",
   "repository": "https://github.com/nsheaps/.ai",
-  "keywords": ["git", "commit", "skill", "automation", "ai", "smart-commit"]
+  "keywords": [
+    "git",
+    "commit",
+    "skill",
+    "automation",
+    "ai",
+    "smart-commit"
+  ]
 }
