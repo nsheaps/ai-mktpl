@@ -1,0 +1,98 @@
+# GitHub Issues for Task Management
+
+This repository uses GitHub Issues as the primary task management system.
+
+## When to Create Issues
+
+Create GitHub issues for:
+- Bugs discovered during development
+- Feature requests and enhancements
+- Tasks that cannot be completed in the current session
+- Work items that need tracking across multiple sessions
+- Items requiring user input or review before proceeding
+
+Do NOT create issues for:
+- Tasks you can complete immediately
+- Temporary notes (use scratch files instead)
+
+## Issue Structure
+
+**Title**: Clear, actionable description starting with a verb
+- Good: "Add validation for plugin manifest files"
+- Bad: "Validation issue" or "Plugin stuff"
+
+**Body**: Include context an AI agent needs to pick up the work:
+- What needs to be done
+- Why it matters
+- Acceptance criteria (if applicable)
+- Related files or code references
+
+## Labels for Workflow State
+
+Use labels to indicate issue state beyond open/closed:
+
+| Label | Purpose |
+|-------|---------|
+| `status:in-progress` | Actively being worked on |
+| `status:blocked` | Cannot proceed - see comments for blocker |
+| `status:needs-review` | Work complete, awaiting human review |
+| `status:on-hold` | Intentionally paused, not abandoned |
+
+## Labels for Issue Type
+
+| Label | Purpose |
+|-------|---------|
+| `bug` | Something isn't working correctly |
+| `enhancement` | New feature or improvement |
+| `documentation` | Documentation updates needed |
+| `chore` | Maintenance, refactoring, cleanup |
+
+## Labels for Priority
+
+| Label | Purpose |
+|-------|---------|
+| `priority:high` | Address soon, blocks other work |
+| `priority:low` | Nice to have, do when convenient |
+
+## Working with Issues
+
+**Starting work on an issue:**
+```bash
+# Add in-progress label
+gh issue edit <number> --add-label "status:in-progress"
+```
+
+**When blocked:**
+```bash
+# Add blocked label and comment explaining why
+gh issue edit <number> --add-label "status:blocked"
+gh issue comment <number> --body "Blocked: <reason>"
+```
+
+**Completing work:**
+```bash
+# Remove status labels, close with comment
+gh issue edit <number> --remove-label "status:in-progress"
+gh issue close <number> --comment "Completed in <commit/PR>"
+```
+
+## Searching Issues
+
+```bash
+# Find issues ready to work on
+gh issue list --label "enhancement" --no-label "status:in-progress,status:blocked"
+
+# Find blocked issues
+gh issue list --label "status:blocked"
+
+# Find issues needing review
+gh issue list --label "status:needs-review"
+```
+
+## AI Agent Guidelines
+
+1. **Check for existing issues** before starting new work - someone may have already filed it
+2. **Update issue status** when starting/stopping work so others know the state
+3. **Comment on progress** for long-running tasks so context isn't lost
+4. **Link commits/PRs** to issues using "Fixes #N" or "Related to #N"
+5. **Create issues proactively** when you discover problems you can't address immediately
