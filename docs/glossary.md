@@ -53,8 +53,6 @@ README.md                    # High-level overview, quick start
 - Kubernetes Jobs running AI analysis
 - Cron-triggered code review bots
 
-**See also:** [One-Shot Executions as Jobs](research/one-shot-executions-as-jobs.md)
-
 ---
 
 ## Agent Trigger Context
@@ -69,8 +67,6 @@ README.md                    # High-level overview, quick start
 - **Historical context**: Previous interactions, related issues, conversation history
 
 **Problem:** In GitHub Actions, agents often receive only the trigger event without surrounding context, requiring additional API calls to understand the situation.
-
-**See also:** [Agentic Workflow Context Patterns](research/agentic-workflow-context.md)
 
 ---
 
@@ -114,8 +110,6 @@ wrapper-plugin/
 - Tools must be explicitly allowed via `permissions.allow` in settings
 - `enableAllProjectMcpServers` makes project-defined servers discoverable
 - CLI args (`--mcp-config`) specify servers but don't grant permissions
-
-**See also:** [Claude Code Action MCP Configuration](research/claude-code-action-mcp-configuration.md)
 
 ---
 
