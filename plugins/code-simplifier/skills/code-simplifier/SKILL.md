@@ -27,7 +27,7 @@ Install using the Claude CLI:
 
 ```bash
 # Install to user settings (available in all projects)
-claude plugin install pr-review-toolkit@claude-plugins-official --scope user
+claude plugin install pr-review-toolkit@claude-plugins-official
 
 # OR install to project settings (shared with team via git)
 claude plugin install pr-review-toolkit@claude-plugins-official --scope project
