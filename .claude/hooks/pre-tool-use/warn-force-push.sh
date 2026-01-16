@@ -3,24 +3,12 @@
 # This hook initially blocks force push attempts and requires explicit acknowledgment
 
 set -euo pipefail
+source "$(dirname "$0")/../lib/pretooluse.sh"
 
 # Parse the tool input from stdin
 INPUT=$(cat)
 TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty')
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
-
-# Helper for allow response
-allow() {
-    echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow"}}'
-    exit 0
-}
-
-# Helper for deny response
-deny() {
-    local reason="$1"
-    echo "{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":$(echo "$reason" | jq -Rs .)}}"
-    exit 0
-}
 
 # Only process Bash tool
 if [[ "$TOOL_NAME" != "Bash" ]]; then

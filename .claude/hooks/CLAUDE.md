@@ -12,25 +12,31 @@ Scripts run sequentially, each receiving Claude's stdin JSON input.
 
 ## Writing Hooks
 
-### Internal Filtering
+### Shared Library
 
-Scripts should filter by tool/event type internally rather than relying on matchers in settings.json. This allows a single `run-hook.sh` entry to handle all cases.
+PreToolUse hooks can source `lib/pretooluse.sh` for common helpers:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
+source "$(dirname "$0")/../lib/pretooluse.sh"
 
 INPUT=$(cat)
 TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty')
 
-# Filter internally - approve tools we don't handle
+# Filter internally - allow tools we don't handle
 if [[ "$TOOL_NAME" != "Bash" ]]; then
-    echo '{"status": "approved"}'
-    exit 0
+    allow
 fi
 
 # Your logic here...
+deny "Reason for blocking"
 ```
+
+**Available helpers:**
+
+- `allow` - Output allow JSON and exit
+- `deny "reason"` - Output deny JSON with reason and exit
 
 ### Return Values
 

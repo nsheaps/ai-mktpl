@@ -6,25 +6,13 @@
 # so Claude doesn't need to manually run mkdir commands.
 
 set -euo pipefail
+source "$(dirname "$0")/../lib/pretooluse.sh"
 
 # Read JSON input from stdin
 INPUT=$(cat)
 
 # Extract tool name
 TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty')
-
-# Helper for allow response
-allow() {
-  echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow"}}'
-  exit 0
-}
-
-# Helper for deny response
-deny() {
-  local reason="$1"
-  echo "{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":$(echo "$reason" | jq -Rs .)}}"
-  exit 0
-}
 
 # Only process Write tool calls
 if [ "$TOOL_NAME" != "Write" ]; then

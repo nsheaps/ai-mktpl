@@ -1,18 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-
-# Helper for allow response
-allow() {
-    echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow"}}'
-    exit 0
-}
-
-# Helper for deny response
-deny() {
-    local reason="$1"
-    echo "{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":$(echo "$reason" | jq -Rs .)}}"
-    exit 0
-}
+source "$(dirname "$0")/../lib/pretooluse.sh"
 
 # Read JSON input from stdin
 INPUT=$(cat)
