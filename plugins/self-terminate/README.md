@@ -17,9 +17,7 @@ Or add to `~/.claude/settings.json` for auto-installation:
 ```json
 {
   "plugins": {
-    "autoInstall": [
-      "github:nsheaps/.ai/plugins/self-terminate"
-    ]
+    "autoInstall": ["github:nsheaps/.ai/plugins/self-terminate"]
   }
 }
 ```
@@ -62,6 +60,7 @@ This plugin works seamlessly in Claude Code Web (remote sessions):
 - Alternative methods available: idle timeout, close browser tab
 
 For Claude Code Web sessions, stop hooks may prevent termination if:
+
 - There are uncommitted changes
 - There are unpushed commits
 - There are untracked files

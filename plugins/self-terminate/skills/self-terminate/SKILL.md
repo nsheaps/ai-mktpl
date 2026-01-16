@@ -22,11 +22,13 @@ This skill enables Claude to gracefully terminate its own session by sending a S
 This plugin includes a PreToolUse hook that automatically validates git state before termination:
 
 ✅ **Automatically checks:**
+
 1. No uncommitted changes (staged or unstaged)
 2. No unpushed commits
 3. No untracked files
 
 ❌ **Blocks termination if:**
+
 - Working directory is dirty
 - Commits haven't been pushed
 - Untracked files exist
