@@ -54,12 +54,12 @@ jobs:
 
           # Determine the target for the response
           if [ "$PR_NUM" != "null" ] && [ -n "$PR_NUM" ]; then
-            CONTEXT+="**To respond, use \`mcp__github__create_issue_comment\` with:**\n"
+            CONTEXT+="**To respond, use \`mcp__github__add_issue_comment\` with:**\n"
             CONTEXT+="- owner: $(echo $REPO | cut -d/ -f1)\n"
             CONTEXT+="- repo: $(echo $REPO | cut -d/ -f2)\n"
             CONTEXT+="- issue_number: $PR_NUM\n\n"
           elif [ "$ISSUE_NUM" != "null" ] && [ -n "$ISSUE_NUM" ]; then
-            CONTEXT+="**To respond, use \`mcp__github__create_issue_comment\` with:**\n"
+            CONTEXT+="**To respond, use \`mcp__github__add_issue_comment\` with:**\n"
             CONTEXT+="- owner: $(echo $REPO | cut -d/ -f1)\n"
             CONTEXT+="- repo: $(echo $REPO | cut -d/ -f2)\n"
             CONTEXT+="- issue_number: $ISSUE_NUM\n\n"
@@ -158,17 +158,7 @@ jobs:
           # MCP servers and allowed tools for GitHub integration
           claude_args: >-
             --allowedTools
-            mcp__github__create_issue,
-            mcp__github__create_issue_comment,
-            mcp__github__update_issue_comment,
-            mcp__github__get_issue,
-            mcp__github__list_issues,
-            mcp__github__create_pending_pull_request_review,
-            mcp__github__get_pull_request_diff,
-            mcp__github__add_comment_to_pending_review,
-            mcp__github__submit_pending_pull_request_review,
-            mcp__github__pull_request_read,
-            mcp__github__github_support_docs_search,
+            mcp__github__*,
             mcp__github_comment__update_claude_comment,
             mcp__github_ci__get_ci_status,
             mcp__github_ci__get_workflow_run_details,
