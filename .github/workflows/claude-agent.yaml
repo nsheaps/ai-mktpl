@@ -251,6 +251,10 @@ jobs:
           claude_code_oauth_token: ${{
             secrets.CLAUDE_API_KEY && '' ||
             ( secrets.ANTHROPIC_API_KEY && '' || secrets.CLAUDE_CODE_OAUTH_TOKEN ) }}
+          # Claude default bot identity for git commits
+          bot_id: '41898282'
+          bot_name: 'claude[bot]'
+          allowed_bots: 'github-actions[bot]'
           # Prompt extracted from repository_dispatch payload
           prompt: ${{ steps.prompt.outputs.prompt }}
           # Enable full output for debugging

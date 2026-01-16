@@ -10,6 +10,18 @@
   },
   "plugins": [
     {
+      "name": "code-simplifier",
+      "description": "Simplify and refine code for clarity, consistency, and maintainability. Requires pr-review-toolkit plugin.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/code-simplifier",
+      "category": "utility",
+      "tags": ["utility", "command", "skill"],
+      "keywords": ["refactoring", "code-quality", "simplification", "cleanup"]
+    },
+    {
       "name": "command-help-skill",
       "description": "Help claude understand, discover, and execute slash commands when accidentally sent as a message.",
       "version": "0.2.24",
@@ -281,7 +293,7 @@
     {
       "name": "todo-sync",
       "description": "Automatically syncs todos and plans from ~/.claude/ to the current project's .claude/ directory",
-      "version": "0.1.1",
+      "version": "0.1.4",
       "author": {
         "name": "Nathan Heaps"
       },

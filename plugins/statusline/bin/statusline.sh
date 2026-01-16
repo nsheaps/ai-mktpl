@@ -44,11 +44,15 @@ if [ -n "$session_id" ]; then
   echo "Session: $session_id"
 fi
 
+PR_URL_OR_EMPTY="$(gh pr view --json url -q .url 2>/dev/null || echo "")"
+REPO_URL="$(gh repo view --json url -q .url 2>/dev/null || echo "")"
+PR_OR_BRANCH_OR_REPO_URL_FROM_GH="${PR_URL_OR_EMPTY:-$REPO_URL}}"
+
 # Project/cwd info
 if [ "$cwd" = "$project_dir" ]; then
-  echo "In: $project_dir_relative_to_home"
+  echo "In: $project_dir_relative_to_home | $PR_OR_BRANCH_OR_REPO_URL_FROM_GH"
 else
-  echo "In: $project_dir_relative_to_home | In: $cwd_relative_to_project"
+  echo "In: $project_dir_relative_to_home | In: $cwd_relative_to_project | $PR_OR_BRANCH_OR_REPO_URL_FROM_GH"
 fi
 
 # Git status (handles both regular repos and worktrees)

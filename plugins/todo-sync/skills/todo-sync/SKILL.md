@@ -55,13 +55,15 @@ Files containing only `[]` (empty arrays) are skipped during sync to avoid clutt
 
 ## Integration with Git
 
-Consider adding to your `.gitignore` if you don't want to track todos:
+The plugin automatically adds patterns to `.claude/.gitignore` for `todos/` and `plans/` directories. This prevents synced files from being committed by default.
 
-```
-.claude/todos/
-```
+The following files are explicitly allowed anywhere within `.claude/` (including nested subdirectories):
 
-Or commit them if you want persistent project-specific task tracking.
+- `.gitkeep` files (for preserving directory structure)
+- `AGENTS.md` files (for agent configurations)
+- `CLAUDE.md` files (for Claude-specific documentation)
+
+If you want to track todos in version control for persistent project-specific task tracking, remove the ignore patterns from `.claude/.gitignore`.
 
 ## Manual Sync
 

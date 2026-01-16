@@ -1,39 +1,71 @@
 #!/usr/bin/env bash
-# init-gitignore.sh - Creates .gitignore files in .claude/todos/ and .claude/plans/
+# init-gitignore.sh - Ensures .claude/.gitignore has patterns for todos/ and plans/
 # Triggered by SessionStart and UserPromptSubmit hooks
 
 set -euo pipefail
 
-# Determine project directory and plugin root
+# Determine project directory
 project_dir="${CLAUDE_PROJECT_DIR:-$(pwd)}"
-plugin_root="${CLAUDE_PLUGIN_ROOT:-$(dirname "$(dirname "$0")")}"
 
-# Template location
-template_file="$plugin_root/templates/gitignore.template"
+# Target gitignore file
+gitignore_file="$project_dir/.claude/.gitignore"
 
-# Function to create .gitignore from template
-create_gitignore() {
-  local target_dir="$1"
-  local gitignore_file="$target_dir/.gitignore"
+# Comment markers
+start_marker="# BEGIN: Managed by todo-sync plugin (plugins/todo-sync/scripts/init-gitignore.sh)"
+end_marker="# END: Managed by todo-sync plugin"
 
-  if [ -d "$target_dir" ] || [ -d "$project_dir/.claude" ]; then
-    mkdir -p "$target_dir"
-    if [ ! -f "$gitignore_file" ]; then
-      if [ -f "$template_file" ]; then
-        cp "$template_file" "$gitignore_file"
-      else
-        # Fallback if template not found
-        echo "# Ignore all synced files in this directory" > "$gitignore_file"
-        echo "*" >> "$gitignore_file"
-      fi
+# Patterns to ensure are present (between markers)
+patterns=(
+  "todos/"
+  "plans/"
+  "!**/.gitkeep"
+  "!**/AGENTS.md"
+  "!**/CLAUDE.md"
+)
+
+# Create .claude directory if it doesn't exist
+mkdir -p "$project_dir/.claude"
+
+# Create gitignore if it doesn't exist
+if [ ! -f "$gitignore_file" ]; then
+  touch "$gitignore_file"
+fi
+
+# Check if markers exist
+if ! grep -qF "$start_marker" "$gitignore_file" 2>/dev/null; then
+  # Markers don't exist, add them with patterns
+  {
+    echo ""
+    echo "$start_marker"
+    for pattern in "${patterns[@]}"; do
+      echo "$pattern"
+    done
+    echo "$end_marker"
+  } >> "$gitignore_file"
+else
+  # Markers exist, update content between them
+  # Create a temp file
+  temp_file=$(mktemp)
+
+  # Read file line by line and rebuild
+  in_section=false
+  while IFS= read -r line || [ -n "$line" ]; do
+    if [ "$line" = "$start_marker" ]; then
+      echo "$start_marker"
+      for pattern in "${patterns[@]}"; do
+        echo "$pattern"
+      done
+      echo "$end_marker"
+      in_section=true
+    elif [ "$line" = "$end_marker" ]; then
+      in_section=false
+    elif [ "$in_section" = false ]; then
+      echo "$line"
     fi
-  fi
-}
+  done < "$gitignore_file" > "$temp_file"
 
-# Create .gitignore in .claude/todos/
-create_gitignore "$project_dir/.claude/todos"
-
-# Create .gitignore in .claude/plans/
-create_gitignore "$project_dir/.claude/plans"
+  # Replace original file
+  mv "$temp_file" "$gitignore_file"
+fi
 
 exit 0

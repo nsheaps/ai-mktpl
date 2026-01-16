@@ -142,8 +142,12 @@ tmux capture-pane -t refactor-task -p -S -100
 # Attach to session interactively
 tmux attach -t refactor-task
 
-# Send keys to session
-tmux send-keys -t refactor-task "your message here" Enter
+# Send keys to session (C-m sends Enter key)
+tmux send-keys -t refactor-task "your message here" C-m
+
+# Alternative: separate Enter argument
+tmux send-keys -t refactor-task 'your message here'
+tmux send-keys -t refactor-task Enter
 ```
 
 ## Managing Sub-Agents

@@ -1,4 +1,4 @@
-{"type":"entity","name":"Nathan Heaps","entityType":"person","observations":["Lives in Quincy, MA","Staff Software Engineer","GitHub username: @nsheaps","Experience in devops, web engineering, agentic engineering"]}
+{"type":"entity","name":"Nathan Heaps","entityType":"person","observations":["Lives in Quincy, MA","Staff Software Engineer","GitHub username: @nsheaps","Experience in devops, web engineering, agentic engineering","Preference: Never link to documentation that doesn't exist yet - create it first or use TODO comments instead (rule: .claude/rules/documentation-linking.md)"]}
 {"type":"entity","name":"Stainless Software","entityType":"company","observations":["Creates SDKs from APIs","Nathan's current employer"]}
 {"type":"entity","name":"Gather","entityType":"company","observations":["Nathan's previous employer"]}
 {"type":"entity","name":"OpenSea","entityType":"company","observations":["Nathan's previous employer","NFT marketplace"]}
@@ -7,6 +7,8 @@
 {"type":"entity","name":"RueLaLa","entityType":"company","observations":["Nathan's previous employer","Flash sales retailer"]}
 {"type":"entity","name":"TOON","entityType":"data-format","observations":["Token-Oriented Object Notation - compact serialization format for LLM contexts","Achieves 30-60% token reduction vs JSON","Official spec at https://github.com/toon-format/spec","Python library: toon_format (pip install git+https://github.com/toon-format/toon-python.git)","API: encode(obj) to serialize, decode(str) to parse","Uses YAML-like indentation for nested objects, CSV-style tabular layout for uniform arrays","File extension: .toon","Example tabular array format: users[3]{id,name,role}: followed by comma-separated rows"]}
 {"type":"entity","name":"data-serialization-plugin","entityType":"claude-plugin","observations":["Located at plugins/data-serialization/","Supports YAML, JSON, TOON, XML, HTML format conversions","Special handling for Playwright accessibility snapshots","Main script: scripts/convert.sh","Dependencies installed to .deps/ directory with PYTHONPATH setup","First commit: b0b2515 on 2026-01-15"]}
+{"type":"entity","name":"nsheaps/.ai claude-code-review workflow","entityType":"workflow","observations":["Located at .github/workflows/claude-code-review.yaml","Uses external prompt template at .github/prompts/claude-code-review.md","Uses interpolate-prompt action for env var substitution"]}
+{"type":"entity","name":"stainless-api/stainless claude-code-review workflow","entityType":"workflow","observations":["PR #15127 contains improvements that were pulled into nsheaps/.ai","User (default_user) develops both workflows","Either workflow may be newer than the other at any given time"]}
 {"type":"relation","from":"Nathan Heaps","to":"Stainless Software","relationType":"works_at"}
 {"type":"relation","from":"Nathan Heaps","to":"Gather","relationType":"previously_worked_at"}
 {"type":"relation","from":"Nathan Heaps","to":"OpenSea","relationType":"previously_worked_at"}
@@ -14,3 +16,6 @@
 {"type":"relation","from":"Nathan Heaps","to":"Chewy","relationType":"previously_worked_at"}
 {"type":"relation","from":"Nathan Heaps","to":"RueLaLa","relationType":"previously_worked_at"}
 {"type":"relation","from":"data-serialization-plugin","to":"TOON","relationType":"supports"}
+{"type":"relation","from":"nsheaps/.ai claude-code-review workflow","to":"stainless-api/stainless claude-code-review workflow","relationType":"syncs_improvements_with"}
+{"type":"relation","from":"default_user","to":"nsheaps/.ai claude-code-review workflow","relationType":"develops"}
+{"type":"relation","from":"default_user","to":"stainless-api/stainless claude-code-review workflow","relationType":"develops"}

@@ -67,6 +67,38 @@ Common actions already in use:
 3. **Wrap context in `toJson()`** - Pass entire context objects instead of extracting fields manually
 4. **Mirror existing patterns** - If another workflow handles similar logic cleanly, copy its structure
 
+## Debugging Workflow Issues
+
+**CRITICAL:** When troubleshooting GitHub Actions workflows:
+
+1. **Parse workflow names carefully**
+   - "the Claude agent" = `claude-agent.yaml` (repository_dispatch workflow)
+   - "CI" = `ci.yaml`
+   - "CD" = `cd.yaml`
+   - "code review" = `claude-code-review.yml`
+   - Don't assume a problem affects ALL workflows when the user mentions a specific one
+
+2. **Compare working vs broken workflows**
+   - Before making changes, identify which workflow is broken
+   - Find a similar workflow that works correctly
+   - Compare the differences systematically
+   - Example: `claude-code-review.yml` (works) vs `claude-agent.yaml` (broken)
+
+3. **Ask clarifying questions**
+   - If workflow name is ambiguous, ask: "Which workflow specifically?"
+   - Don't make broad changes without confirming the scope
+   - Example: "git config issues" could be in multiple workflows
+
+4. **Repository dispatch workflows need special auth**
+   - Workflows triggered by `repository_dispatch` need the `github-app-auth` action
+   - This provides proper bot attribution for commits
+   - Example: `claude-agent.yaml` needs this, but `ci.yaml` doesn't (uses `stefanzweifel/git-auto-commit-action`)
+
+5. **Don't fix what isn't broken**
+   - If a workflow already works correctly, don't modify it
+   - Validate that your changes address the specific reported issue
+   - Test the fix against the original problem
+
 ## Secrets Used
 
 - `GITHUB_PAT_TOKEN_NSHEAPS`: For authenticated pushes
