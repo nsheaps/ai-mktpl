@@ -11,8 +11,19 @@ Intelligent memory management for CLAUDE.md files. Automatically detects and sto
 
 ## Installation
 
+See [Installation Guide](../../docs/installation.md) for all installation methods.
+
+### Quick Install
+
 ```bash
-/plugin install memory-manager@nsheaps-claude-plugins
+# Via marketplace (recommended)
+# Follow marketplace setup: ../../docs/manual-installation.md
+
+# Or via GitHub
+claude plugins install github:nsheaps/.ai/plugins/memory-manager
+
+# Or locally for testing
+cc --plugin-dir /path/to/plugins/memory-manager
 ```
 
 ## Usage

@@ -34,24 +34,19 @@ This skill automatically helps with all of these scenarios.
 
 ## Installation
 
-### Via Claude Code Plugin Manager
+See [Installation Guide](../../docs/installation.md) for all installation methods.
 
-1. Open Claude Code
-2. Run `/plugin marketplace add nsheaps/.ai`
-3. Find "Command Help Skill" plugin
-4. Click "Install now"
-5. Restart Claude Code
-
-### Manual Installation
+### Quick Install
 
 ```bash
-# Navigate to skills directory
-cd ~/.claude/skills
+# Via marketplace (recommended)
+# Follow marketplace setup: ../../docs/manual-installation.md
 
-# Copy the skill
-cp -r /path/to/marketplace/plugins/command-help-skill ~/.claude/skills/
+# Or via GitHub
+claude plugins install github:nsheaps/.ai/plugins/command-help-skill
 
-# Restart Claude Code
+# Or locally for testing
+cc --plugin-dir /path/to/plugins/command-help-skill
 ```
 
 ## How It Works

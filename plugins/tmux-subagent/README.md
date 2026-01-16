@@ -13,18 +13,19 @@ Launch independent Claude sub-agents in tmux sessions with isolated configuratio
 
 ## Installation
 
-### Using Claude Code CLI
+See [Installation Guide](../../docs/installation.md) for all installation methods.
+
+### Quick Install
 
 ```bash
-claude plugins add /path/to/tmux-subagent
-```
+# Via marketplace (recommended)
+# Follow marketplace setup: ../../docs/manual-installation.md
 
-### Manual Installation
+# Or via GitHub
+claude plugins install github:nsheaps/.ai/plugins/tmux-subagent
 
-Copy or symlink this plugin directory to your Claude plugins folder:
-
-```bash
-ln -s /path/to/tmux-subagent ~/.claude/plugins/tmux-subagent
+# Or locally for testing
+cc --plugin-dir /path/to/plugins/tmux-subagent
 ```
 
 ## Requirements

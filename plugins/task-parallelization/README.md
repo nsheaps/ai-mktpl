@@ -69,18 +69,19 @@ For cost-effective parallel execution:
 
 ## Installation
 
-### Via Plugin Manager
+See [Installation Guide](../../docs/installation.md) for all installation methods.
 
-```
-/plugin marketplace add nsheaps/.ai
-```
-
-### Manual Installation
-
-Copy the `task-parallelization` directory to your Claude Code plugins directory:
+### Quick Install
 
 ```bash
-cp -r plugins/task-parallelization ~/.claude/plugins/
+# Via marketplace (recommended)
+# Follow marketplace setup: ../../docs/manual-installation.md
+
+# Or via GitHub
+claude plugins install github:nsheaps/.ai/plugins/task-parallelization
+
+# Or locally for testing
+cc --plugin-dir /path/to/plugins/task-parallelization
 ```
 
 ## How It Works

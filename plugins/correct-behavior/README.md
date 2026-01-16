@@ -4,18 +4,19 @@ A Claude Code command for correcting AI behavior mistakes and updating rules to 
 
 ## Installation
 
-### Quick Install (Symlink)
+See [Installation Guide](../../docs/installation.md) for all installation methods.
+
+### Quick Install
 
 ```bash
-ln -sf ~/src/nsheaps/ai/plugins/correct-behavior/commands/correct-behavior.md ~/.claude/commands/correct-behavior.md
-```
+# Via marketplace (recommended)
+# Follow marketplace setup: ../../docs/manual-installation.md
 
-### Plugin Install (Future)
+# Or via GitHub
+claude plugins install github:nsheaps/.ai/plugins/correct-behavior
 
-Once the plugin system supports installation:
-
-```bash
-claude plugin install ./plugins/correct-behavior
+# Or locally for testing
+cc --plugin-dir /path/to/plugins/correct-behavior
 ```
 
 ## Usage

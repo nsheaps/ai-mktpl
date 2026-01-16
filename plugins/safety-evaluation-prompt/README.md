@@ -21,8 +21,20 @@ This plugin installs a **prompt-style hook** that provides Claude with safety ev
 
 ## Installation
 
-1. Copy this plugin to your Claude Code plugins directory
-2. That's it! No additional configuration needed.
+See [Installation Guide](../../docs/installation.md) for all installation methods.
+
+### Quick Install
+
+```bash
+# Via marketplace (recommended)
+# Follow marketplace setup: ../../docs/manual-installation.md
+
+# Or via GitHub
+claude plugins install github:nsheaps/.ai/plugins/safety-evaluation-prompt
+
+# Or locally for testing
+cc --plugin-dir /path/to/plugins/safety-evaluation-prompt
+```
 
 ## Safety Evaluation Criteria
 

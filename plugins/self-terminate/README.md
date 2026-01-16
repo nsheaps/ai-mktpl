@@ -6,10 +6,19 @@ Works for both local CLI sessions and Claude Code Web (remote sessions).
 
 ## Installation
 
-This plugin is part of the nsheaps/.ai plugin collection. Install via:
+See [Installation Guide](../../docs/installation.md) for all installation methods.
+
+### Quick Install
 
 ```bash
+# Via marketplace (recommended)
+# Follow marketplace setup: ../../docs/manual-installation.md
+
+# Or via GitHub
 claude plugins install github:nsheaps/.ai/plugins/self-terminate
+
+# Or locally for testing
+cc --plugin-dir /path/to/plugins/self-terminate
 ```
 
 ## Usage

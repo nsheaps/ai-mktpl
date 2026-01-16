@@ -12,7 +12,20 @@ A Claude Code plugin that helps you create and maintain slash commands with guid
 
 ## Installation
 
-This plugin is part of the [nsheaps/.ai](https://github.com/nsheaps/.ai) plugin marketplace.
+See [Installation Guide](../../docs/installation.md) for all installation methods.
+
+### Quick Install
+
+```bash
+# Via marketplace (recommended)
+# Follow marketplace setup: ../../docs/manual-installation.md
+
+# Or via GitHub
+claude plugins install github:nsheaps/.ai/plugins/create-command
+
+# Or locally for testing
+cc --plugin-dir /path/to/plugins/create-command
+```
 
 ## Usage
 

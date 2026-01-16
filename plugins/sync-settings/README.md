@@ -25,65 +25,24 @@ The Sync Settings Plugin uses Claude Code hooks to automatically synchronize fil
 
 ## Installation
 
-### Via Claude Code Plugin Manager
+See [Installation Guide](../../docs/installation.md) for all installation methods.
 
-1. Open Claude Code
-2. Run `/plugin marketplace add nsheaps/.ai`
-3. Find "Sync Settings" plugin
-4. Click "Install now"
-5. Restart Claude Code
-
-### Manual Installation
-
-1. Copy the plugin to your Claude Code plugins directory:
+### Quick Install
 
 ```bash
-cp -r /path/to/marketplace/plugins/sync-settings ~/.claude/plugins/
+# Via marketplace (recommended)
+# Follow marketplace setup: ../../docs/manual-installation.md
+
+# Or via GitHub
+claude plugins install github:nsheaps/.ai/plugins/sync-settings
+
+# Or locally for testing
+cc --plugin-dir /path/to/plugins/sync-settings
 ```
 
-2. Add the hook to your settings (user or project level):
+### Additional Configuration
 
-**Option A: Add to `~/.claude/settings.json`** (applies to all projects):
-
-```json
-{
-  "hooks": {
-    "SessionStart": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 ~/.claude/plugins/sync-settings/hooks/sync-settings.py"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-**Option B: Add to `.claude/settings.json`** (project-specific):
-
-```json
-{
-  "hooks": {
-    "SessionStart": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 .claude/hooks/sync-settings.py"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-3. Create your `syncconfig.yaml` (see Configuration below)
+After installation, create your `syncconfig.yaml` (see Configuration section below)
 
 ## Configuration
 

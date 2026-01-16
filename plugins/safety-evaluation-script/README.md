@@ -21,12 +21,25 @@ This plugin installs a **script-style hook** that intercepts all tool calls befo
 
 ## Installation
 
-1. Copy this plugin to your Claude Code plugins directory
-2. Ensure the hook script is executable:
-   ```bash
-   chmod +x hooks/pre-tool-safety-check.sh
-   ```
-3. Ensure you have the Claude CLI installed and authenticated
+See [Installation Guide](../../docs/installation.md) for all installation methods.
+
+### Quick Install
+
+```bash
+# Via marketplace (recommended)
+# Follow marketplace setup: ../../docs/manual-installation.md
+
+# Or via GitHub
+claude plugins install github:nsheaps/.ai/plugins/safety-evaluation-script
+
+# Or locally for testing
+cc --plugin-dir /path/to/plugins/safety-evaluation-script
+```
+
+### Additional Requirements
+
+- Claude CLI must be installed and authenticated
+- Hook script is automatically made executable during installation
 
 ## Configuration
 

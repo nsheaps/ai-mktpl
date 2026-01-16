@@ -51,28 +51,19 @@ The skill-maintenance skill activates when:
 
 ## Installation
 
-### Via Claude Code Plugin Manager
+See [Installation Guide](../../docs/installation.md) for all installation methods.
 
-1. Open Claude Code
-2. Run `/plugin marketplace add nsheaps/.ai`
-3. Find "skills-maintenance" plugin
-4. Click "Install now"
-5. Restart Claude Code
-
-### Manual Installation
+### Quick Install
 
 ```bash
-# Navigate to Claude Code skills directory
-cd ~/.claude/skills
+# Via marketplace (recommended)
+# Follow marketplace setup: ../../docs/manual-installation.md
 
-# Clone this repository (or copy the plugin)
-git clone https://github.com/nsheaps/.ai skills-maintenance
-cd skills-maintenance
-git sparse-checkout init --cone
-git sparse-checkout set plugins/skills-maintenance
+# Or via GitHub
+claude plugins install github:nsheaps/.ai/plugins/skills-maintenance
 
-# Or copy the plugin directory directly
-cp -r /path/to/repo/plugins/skills-maintenance ~/.claude/skills/
+# Or locally for testing
+cc --plugin-dir /path/to/plugins/skills-maintenance
 ```
 
 ## Usage

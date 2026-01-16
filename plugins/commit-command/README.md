@@ -18,24 +18,19 @@ The Commit Command plugin provides a `/commit` slash command that intelligently 
 
 ## Installation
 
-### Via Claude Code Plugin Manager
+See [Installation Guide](../../docs/installation.md) for all installation methods.
 
-1. Open Claude Code
-2. Run `/plugin marketplace add nsheaps/.ai`
-3. Find "Commit Command" plugin
-4. Click "Install now"
-5. Restart Claude Code
-
-### Manual Installation
+### Quick Install
 
 ```bash
-# Navigate to plugins directory
-cd ~/.claude/plugins
+# Via marketplace (recommended)
+# Follow marketplace setup: ../../docs/manual-installation.md
 
-# Copy the plugin
-cp -r /path/to/marketplace/plugins/commit-command ~/.claude/plugins/
+# Or via GitHub
+claude plugins install github:nsheaps/.ai/plugins/commit-command
 
-# Restart Claude Code
+# Or locally for testing
+cc --plugin-dir /path/to/plugins/commit-command
 ```
 
 ## Usage

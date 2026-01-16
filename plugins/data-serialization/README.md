@@ -18,8 +18,19 @@ This plugin provides tools for converting between common data formats (YAML, JSO
 
 ## Installation
 
+See [Installation Guide](../../docs/installation.md) for all installation methods.
+
+### Quick Install
+
 ```bash
-claude /plugin install data-serialization@nsheaps-claude-plugins
+# Via marketplace (recommended)
+# Follow marketplace setup: ../../docs/manual-installation.md
+
+# Or via GitHub
+claude plugins install github:nsheaps/.ai/plugins/data-serialization
+
+# Or locally for testing
+cc --plugin-dir /path/to/plugins/data-serialization
 ```
 
 ## Usage

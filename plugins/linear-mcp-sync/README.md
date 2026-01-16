@@ -14,69 +14,32 @@ This prevents accidentally overwriting changes made by teammates or external int
 
 ## Installation
 
+See [Installation Guide](../../docs/installation.md) for all installation methods.
+
 ### Quick Install
 
 ```bash
-# Navigate to the plugin directory
-cd ~/.claude/plugins/linear-mcp-sync
+# Via marketplace (recommended)
+# Follow marketplace setup: ../../docs/manual-installation.md
 
-# Run the installation script
-./scripts/install.sh
+# Or via GitHub
+claude plugins install github:nsheaps/.ai/plugins/linear-mcp-sync
+
+# Or locally for testing
+cc --plugin-dir /path/to/plugins/linear-mcp-sync
 ```
 
-### Manual Installation
+### Additional Configuration
 
-#### Step 1: Install Linear MCP Server
+After installation, you need to:
 
-```bash
-# Add Linear MCP to your Claude Code configuration
-claude mcp add linear --scope user -- npx -y mcp-remote https://mcp.linear.app/sse
-```
+1. Install Linear MCP Server:
 
-#### Step 2: Configure Hooks
+   ```bash
+   claude mcp add linear --scope user -- npx -y mcp-remote https://mcp.linear.app/sse
+   ```
 
-Add the following to your Claude Code settings.json:
-
-**Location:**
-
-- Linux: `~/.config/claude/settings.json`
-- macOS: `~/Library/Application Support/Claude/settings.json`
-- Project-level: `.claude/settings.json`
-
-```json
-{
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "mcp__linear__.*(get|Get|issue$|Issue$)",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/plugins/linear-mcp-sync/hooks/linear-hash-save.sh"
-          }
-        ]
-      }
-    ],
-    "PreToolUse": [
-      {
-        "matcher": "mcp__linear__.*(update|Update|create|Create)",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/plugins/linear-mcp-sync/hooks/linear-hash-check.sh"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-#### Step 3: Make Scripts Executable
-
-```bash
-chmod +x ~/.claude/plugins/linear-mcp-sync/hooks/*.sh
-```
+2. Hooks are automatically configured by the plugin
 
 ## How It Works
 
