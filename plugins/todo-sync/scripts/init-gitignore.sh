@@ -4,30 +4,36 @@
 
 set -euo pipefail
 
-# Determine project directory
+# Determine project directory and plugin root
 project_dir="${CLAUDE_PROJECT_DIR:-$(pwd)}"
+plugin_root="${CLAUDE_PLUGIN_ROOT:-$(dirname "$(dirname "$0")")}"
 
-# .gitignore content: ignore everything in this directory
-gitignore_content="# Ignore all synced files in this directory
-*
-"
+# Template location
+template_file="$plugin_root/templates/gitignore.template"
 
-# Create .gitignore in .claude/todos/ if directory exists or will be created
-todos_dir="$project_dir/.claude/todos"
-if [ -d "$todos_dir" ] || [ -d "$project_dir/.claude" ]; then
-  mkdir -p "$todos_dir"
-  if [ ! -f "$todos_dir/.gitignore" ]; then
-    echo "$gitignore_content" > "$todos_dir/.gitignore"
+# Function to create .gitignore from template
+create_gitignore() {
+  local target_dir="$1"
+  local gitignore_file="$target_dir/.gitignore"
+
+  if [ -d "$target_dir" ] || [ -d "$project_dir/.claude" ]; then
+    mkdir -p "$target_dir"
+    if [ ! -f "$gitignore_file" ]; then
+      if [ -f "$template_file" ]; then
+        cp "$template_file" "$gitignore_file"
+      else
+        # Fallback if template not found
+        echo "# Ignore all synced files in this directory" > "$gitignore_file"
+        echo "*" >> "$gitignore_file"
+      fi
+    fi
   fi
-fi
+}
 
-# Create .gitignore in .claude/plans/ if directory exists or will be created
-plans_dir="$project_dir/.claude/plans"
-if [ -d "$plans_dir" ] || [ -d "$project_dir/.claude" ]; then
-  mkdir -p "$plans_dir"
-  if [ ! -f "$plans_dir/.gitignore" ]; then
-    echo "$gitignore_content" > "$plans_dir/.gitignore"
-  fi
-fi
+# Create .gitignore in .claude/todos/
+create_gitignore "$project_dir/.claude/todos"
+
+# Create .gitignore in .claude/plans/
+create_gitignore "$project_dir/.claude/plans"
 
 exit 0

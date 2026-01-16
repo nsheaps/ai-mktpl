@@ -39,15 +39,17 @@ sync-todos.sh executes
 ```
 todo-sync/
 ├── .claude-plugin/
-│   └── plugin.json        # Plugin manifest
+│   └── plugin.json          # Plugin manifest
 ├── hooks/
-│   └── hooks.json         # Hook configuration (SessionStart, UserPromptSubmit, PostToolUse)
+│   └── hooks.json           # Hook configuration (SessionStart, UserPromptSubmit, PostToolUse)
 ├── scripts/
-│   ├── init-gitignore.sh  # Creates .gitignore in target dirs
-│   └── sync-todos.sh      # Sync logic
+│   ├── init-gitignore.sh    # Creates .gitignore in target dirs
+│   └── sync-todos.sh        # Sync logic
 ├── skills/
 │   └── todo-sync/
-│       └── SKILL.md       # Usage documentation
+│       └── SKILL.md         # Usage documentation
+├── templates/
+│   └── gitignore.template   # Template for generated .gitignore files
 └── README.md
 ```
 
