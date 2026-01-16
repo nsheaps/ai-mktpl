@@ -52,7 +52,8 @@ export HOOK_DIR
 export HOOK_ARGS
 export INPUT
 
-all_scripts_in_hook_dir="$(find "$HOOK_DIR" -type f -executable | sort)"
+# Use -perm for portable executable check (works on both macOS BSD find and GNU find)
+all_scripts_in_hook_dir="$(find "$HOOK_DIR" -type f -perm +111 2>/dev/null | sort)"
 
 if [ -z "$all_scripts_in_hook_dir" ]; then
     echo "Warning: No executable scripts found in $HOOK_DIR."
