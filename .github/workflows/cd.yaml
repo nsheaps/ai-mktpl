@@ -53,6 +53,7 @@ jobs:
         shell: bash
         run: |
           # Find plugins that have changes (compare to base branch)
+          # Use two-dot diff (..) instead of three-dot (...) to avoid merge base issues
           CHANGED_PLUGINS=()
           for plugin_dir in plugins/*; do
             if [ ! -d "$plugin_dir" ]; then
@@ -60,8 +61,8 @@ jobs:
             fi
             PLUGIN_NAME=$(basename "$plugin_dir")
 
-            # Check if any files in this plugin changed
-            if git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -q "^$plugin_dir/"; then
+            # Check if any files in this plugin changed (excluding CHANGELOG.md and plugin.json)
+            if git diff --name-only "origin/${{ github.base_ref }}..HEAD" -- "$plugin_dir" | grep -v 'CHANGELOG.md$' | grep -v 'plugin.json$' | grep -q .; then
               CHANGED_PLUGINS+=("$PLUGIN_NAME")
             fi
           done
