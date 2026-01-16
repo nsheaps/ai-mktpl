@@ -1,6 +1,6 @@
 {
   "name": "statusline",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Configurable status line for Claude Code showing session info, project context, and git status",
   "author": {
     "name": "Nathan Heaps",
@@ -10,5 +10,30 @@
   "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/statusline",
   "repository": "https://github.com/nsheaps/.ai",
   "keywords": ["statusline", "status", "ui", "git", "workflow", "productivity"],
-  "hooks": "../hooks/hooks.json"
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/configure-statusline.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/configure-statusline.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
 }
