@@ -6,8 +6,8 @@
 
 ## Common Substitutions
 
-| Intended | May appear as                     |
-| -------- | --------------------------------- |
-| Claude   | clawed, clod, cloud, claw, claud  |
-| sudo     | pseudo, sue dough                 |
-| grep     | grip, prep                        |
+| Intended | May appear as                    |
+| -------- | -------------------------------- |
+| Claude   | clawed, clod, cloud, claw, claud |
+| sudo     | pseudo, sue dough                |
+| grep     | grip, prep                       |
