@@ -249,6 +249,10 @@ Look for statusline hook execution logs.
 - **Documentation**: [Main README](../../README.md)
 - **Claude Code Docs**: [https://code.claude.com/docs](https://code.claude.com/docs)
 
+## Changelog
+
+See CHANGELOG.md for version history.
+
 ## License
 
 MIT
