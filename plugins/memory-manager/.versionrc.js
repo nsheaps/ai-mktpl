@@ -1,4 +1,5 @@
 module.exports = {
+  releaseCommitMessageFormat: "chore(release): {{currentTag}} [skip ci]",
   scripts: {},
   skip: {
     bump: false,

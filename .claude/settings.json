@@ -133,7 +133,7 @@
     "nsheaps-ai-local": {
       "source": {
         "source": "directory",
-        "path": "/Users/nathan.heaps/src/nsheaps/ai/plugins"
+        "path": "/Users/nathan.heaps/src/nsheaps/ai"
       }
     }
   }
