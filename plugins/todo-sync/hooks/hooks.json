@@ -1,0 +1,17 @@
+{
+  "description": "Syncs todos and plans from ~/.claude/ to project .claude/ directory after TodoWrite",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "TodoWrite",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/sync-todos.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
