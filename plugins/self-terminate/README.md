@@ -12,16 +12,6 @@ This plugin is part of the nsheaps/.ai plugin collection. Install via:
 claude plugins install github:nsheaps/.ai/plugins/self-terminate
 ```
 
-Or add to `~/.claude/settings.json` for auto-installation:
-
-```json
-{
-  "plugins": {
-    "autoInstall": ["github:nsheaps/.ai/plugins/self-terminate"]
-  }
-}
-```
-
 ## Usage
 
 ### Via Script (Recommended)
