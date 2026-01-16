@@ -3,9 +3,9 @@
   "version": "0.0.1",
   "description": "Skill for authenticating with GitHub using device authorization flow",
   "author": {
-    "name": "Claude Code Community",
-    "email": "community@example.com",
-    "url": "https://github.com/nsheaps/.ai"
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
   },
   "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/github-auth-skill",
   "repository": "https://github.com/nsheaps/.ai",
