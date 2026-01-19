@@ -130,20 +130,13 @@ If this is a replan request (triggered by the `replan` label):
 
 ## Context
 
-You are working on the repository: {{ source.repo }}
-This is for issue #{{ source.issue_number }}
+You are working on the repository: ${REPO}
+This is for issue #${ISSUE_NUMBER}
 
-Planning trigger: {{ planning_context.trigger_reason }}
-{% if planning_context.comment_history %}
-
-### Previous Discussion
-
-{% for comment in planning_context.comment_history %}
-
-{{ comment }}
-{% endfor %}
-{% endif %}
+Planning trigger: ${PLANNING_TRIGGER_REASON}
 
 ## Original Issue Body
 
-{{ planning_context.original_body }}
+${ORIGINAL_ISSUE_BODY}
+
+${COMMENT_HISTORY_SECTION}

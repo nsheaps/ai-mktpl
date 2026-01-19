@@ -35,80 +35,120 @@ jobs:
           app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
           private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
 
-      - name: Build prompt from dispatch payload
-        id: prompt
+      - name: Extract payload values
+        id: payload
         env:
           PAYLOAD: ${{ toJson(github.event.client_payload) }}
         run: |
-          # Extract values from payload
-          PROMPT=$(echo "$PAYLOAD" | jq -r '.prompt // ""')
+          # Extract values from payload and export to environment
           REPO=$(echo "$PAYLOAD" | jq -r '.source.repo // ""')
-          PR_NUM=$(echo "$PAYLOAD" | jq -r '.source.pr_number // ""')
-          ISSUE_NUM=$(echo "$PAYLOAD" | jq -r '.source.issue_number // ""')
-          COMMENT_ID=$(echo "$PAYLOAD" | jq -r '.source.comment_id // ""')
-          AUTHOR=$(echo "$PAYLOAD" | jq -r '.author.login // ""')
-          ASSOCIATION=$(echo "$PAYLOAD" | jq -r '.author.association // ""')
-          TRIGGER_TYPE=$(echo "$PAYLOAD" | jq -r '.trigger.type // ""')
-          TRIGGER_ACTION=$(echo "$PAYLOAD" | jq -r '.trigger.action // ""')
+          PR_NUMBER=$(echo "$PAYLOAD" | jq -r '.source.pr_number // ""')
+          ISSUE_NUMBER=$(echo "$PAYLOAD" | jq -r '.source.issue_number // ""')
           TITLE=$(echo "$PAYLOAD" | jq -r '.content.title // ""')
 
-          # Check for planning context
-          IS_PLANNING=$(echo "$PAYLOAD" | jq -r '.planning_context.is_planning_request // false')
-          PLANNING_REASON=$(echo "$PAYLOAD" | jq -r '.planning_context.trigger_reason // ""')
-          ORIGINAL_BODY=$(echo "$PAYLOAD" | jq -r '.planning_context.original_body // ""')
+          echo "REPO=$REPO" >> "$GITHUB_OUTPUT"
+          echo "PR_NUMBER=$PR_NUMBER" >> "$GITHUB_OUTPUT"
+          echo "ISSUE_NUMBER=$ISSUE_NUMBER" >> "$GITHUB_OUTPUT"
+          echo "COMMENT_ID=$(echo "$PAYLOAD" | jq -r '.source.comment_id // ""')" >> "$GITHUB_OUTPUT"
+          echo "AUTHOR=$(echo "$PAYLOAD" | jq -r '.author.login // ""')" >> "$GITHUB_OUTPUT"
+          echo "ASSOCIATION=$(echo "$PAYLOAD" | jq -r '.author.association // ""')" >> "$GITHUB_OUTPUT"
+          echo "TRIGGER_TYPE=$(echo "$PAYLOAD" | jq -r '.trigger.type // ""')" >> "$GITHUB_OUTPUT"
+          echo "TRIGGER_ACTION=$(echo "$PAYLOAD" | jq -r '.trigger.action // ""')" >> "$GITHUB_OUTPUT"
+          echo "TITLE=$TITLE" >> "$GITHUB_OUTPUT"
 
-          # Select system prompt based on planning context
-          if [ "$IS_PLANNING" = "true" ]; then
-            echo "Using issue planner prompt (trigger: $PLANNING_REASON)"
-            SYSTEM_PROMPT=$(cat .ai/prompts/issue-planner-system.md)
+          # Build conditional context sections for templates
+          if [ "$PR_NUMBER" != "null" ] && [ -n "$PR_NUMBER" ]; then
+            echo "PR_CONTEXT=This is related to PR #$PR_NUMBER" >> "$GITHUB_OUTPUT"
           else
-            SYSTEM_PROMPT=$(cat .ai/prompts/claude-agent-system.md)
+            echo "PR_CONTEXT=" >> "$GITHUB_OUTPUT"
           fi
 
-          # Build context section
-          CONTEXT="You are Claude, responding to a GitHub @mention.\n\n"
-          CONTEXT+="## CRITICAL: How to Respond\n\n"
-          CONTEXT+="Your text output is NOT visible to the user. You MUST use the GitHub MCP tools to post your response.\n\n"
-
-          # Determine the target for the response
-          if [ "$PR_NUM" != "null" ] && [ -n "$PR_NUM" ]; then
-            CONTEXT+="**To respond, use \`mcp__github__add_issue_comment\` with:**\n"
-            CONTEXT+="- owner: $(echo $REPO | cut -d/ -f1)\n"
-            CONTEXT+="- repo: $(echo $REPO | cut -d/ -f2)\n"
-            CONTEXT+="- issue_number: $PR_NUM\n\n"
-          elif [ "$ISSUE_NUM" != "null" ] && [ -n "$ISSUE_NUM" ]; then
-            CONTEXT+="**To respond, use \`mcp__github__add_issue_comment\` with:**\n"
-            CONTEXT+="- owner: $(echo $REPO | cut -d/ -f1)\n"
-            CONTEXT+="- repo: $(echo $REPO | cut -d/ -f2)\n"
-            CONTEXT+="- issue_number: $ISSUE_NUM\n\n"
+          if [ "$ISSUE_NUMBER" != "null" ] && [ -n "$ISSUE_NUMBER" ]; then
+            echo "ISSUE_CONTEXT=This is related to issue #$ISSUE_NUMBER" >> "$GITHUB_OUTPUT"
+          else
+            echo "ISSUE_CONTEXT=" >> "$GITHUB_OUTPUT"
           fi
 
-          CONTEXT+="## Context\n"
-          CONTEXT+="- Repository: $REPO\n"
-          if [ "$PR_NUM" != "null" ] && [ -n "$PR_NUM" ]; then
-            CONTEXT+="- Related to PR #$PR_NUM\n"
-          fi
-          if [ "$ISSUE_NUM" != "null" ] && [ -n "$ISSUE_NUM" ]; then
-            CONTEXT+="- Related to issue #$ISSUE_NUM\n"
-          fi
-          CONTEXT+="- Triggered by: $AUTHOR ($ASSOCIATION)\n"
-          CONTEXT+="- Trigger: $TRIGGER_TYPE ($TRIGGER_ACTION)\n"
           if [ "$TITLE" != "null" ] && [ -n "$TITLE" ]; then
-            CONTEXT+="\n## Title\n$TITLE\n"
+            {
+              echo "TITLE_SECTION<<EOF_TITLE"
+              echo "## Title"
+              echo ""
+              echo "$TITLE"
+              echo "EOF_TITLE"
+            } >> "$GITHUB_OUTPUT"
+          else
+            echo "TITLE_SECTION=" >> "$GITHUB_OUTPUT"
           fi
-          CONTEXT+="\n## User Request\n$PROMPT"
 
-          # Output the full prompt (escape for multiline)
+          # Planning context
+          IS_PLANNING=$(echo "$PAYLOAD" | jq -r '.planning_context.is_planning_request // false')
+          echo "IS_PLANNING=$IS_PLANNING" >> "$GITHUB_OUTPUT"
+          echo "PLANNING_TRIGGER_REASON=$(echo "$PAYLOAD" | jq -r '.planning_context.trigger_reason // ""')" >> "$GITHUB_OUTPUT"
+
+          # Select template based on planning context
+          if [ "$IS_PLANNING" = "true" ]; then
+            echo "Using issue planner prompt"
+            echo "TEMPLATE_FILE=.ai/prompts/issue-planner-system.md" >> "$GITHUB_OUTPUT"
+          else
+            echo "Using standard agent prompt"
+            echo "TEMPLATE_FILE=.ai/prompts/claude-agent-system.md" >> "$GITHUB_OUTPUT"
+          fi
+
+          # Handle multiline values with heredoc
           {
-            echo "prompt<<EOF"
-            echo -e "$CONTEXT"
-            echo "EOF"
+            echo "PROMPT<<EOF_PROMPT"
+            echo "$PAYLOAD" | jq -r '.prompt // ""'
+            echo "EOF_PROMPT"
           } >> "$GITHUB_OUTPUT"
 
-          # Also output source info for potential use
-          echo "pr_number=$PR_NUM" >> "$GITHUB_OUTPUT"
-          echo "issue_number=$ISSUE_NUM" >> "$GITHUB_OUTPUT"
-          echo "comment_id=$COMMENT_ID" >> "$GITHUB_OUTPUT"
+          {
+            echo "ORIGINAL_ISSUE_BODY<<EOF_BODY"
+            echo "$PAYLOAD" | jq -r '.planning_context.original_body // ""'
+            echo "EOF_BODY"
+          } >> "$GITHUB_OUTPUT"
+
+          # Build comment history section for replanning
+          COMMENT_HISTORY=$(echo "$PAYLOAD" | jq -r '.planning_context.comment_history // []')
+          if [ "$COMMENT_HISTORY" != "[]" ] && [ -n "$COMMENT_HISTORY" ]; then
+            {
+              echo "COMMENT_HISTORY_SECTION<<EOF_COMMENTS"
+              echo "### Previous Discussion"
+              echo ""
+              echo "$COMMENT_HISTORY" | jq -r '.[]' | while read -r comment; do
+                echo "$comment"
+                echo ""
+              done
+              echo "EOF_COMMENTS"
+            } >> "$GITHUB_OUTPUT"
+          else
+            echo "COMMENT_HISTORY_SECTION=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Interpolate system prompt
+        id: prompt
+        uses: ./.github/actions/interpolate-prompt
+        env:
+          # Core context variables
+          REPO: ${{ steps.payload.outputs.REPO }}
+          PR_NUMBER: ${{ steps.payload.outputs.PR_NUMBER }}
+          ISSUE_NUMBER: ${{ steps.payload.outputs.ISSUE_NUMBER }}
+          AUTHOR: ${{ steps.payload.outputs.AUTHOR }}
+          ASSOCIATION: ${{ steps.payload.outputs.ASSOCIATION }}
+          TRIGGER_TYPE: ${{ steps.payload.outputs.TRIGGER_TYPE }}
+          TRIGGER_ACTION: ${{ steps.payload.outputs.TRIGGER_ACTION }}
+          TITLE: ${{ steps.payload.outputs.TITLE }}
+          PROMPT: ${{ steps.payload.outputs.PROMPT }}
+          # Conditional context sections (pre-built)
+          PR_CONTEXT: ${{ steps.payload.outputs.PR_CONTEXT }}
+          ISSUE_CONTEXT: ${{ steps.payload.outputs.ISSUE_CONTEXT }}
+          TITLE_SECTION: ${{ steps.payload.outputs.TITLE_SECTION }}
+          # Planning-specific variables
+          PLANNING_TRIGGER_REASON: ${{ steps.payload.outputs.PLANNING_TRIGGER_REASON }}
+          ORIGINAL_ISSUE_BODY: ${{ steps.payload.outputs.ORIGINAL_ISSUE_BODY }}
+          COMMENT_HISTORY_SECTION: ${{ steps.payload.outputs.COMMENT_HISTORY_SECTION }}
+        with:
+          template-file: ${{ steps.payload.outputs.TEMPLATE_FILE }}
 
       - name: Run Claude Code
         id: claude
@@ -269,9 +309,9 @@ jobs:
           claude_code_oauth_token: ${{
             secrets.CLAUDE_API_KEY && '' ||
             ( secrets.ANTHROPIC_API_KEY && '' || secrets.CLAUDE_CODE_OAUTH_TOKEN ) }}
-          # Claude default bot identity for git commits
-          bot_id: '41898282'
-          bot_name: 'claude[bot]'
+          # Bot identity for git commits (from GitHub App auth)
+          bot_id: ${{ steps.auth.outputs.user-id }}
+          bot_name: '@claude via ${{ steps.auth.outputs.user-name }}'
           allowed_bots: 'github-actions[bot],automation-nsheaps[bot]'
           github_token: ${{ steps.auth.outputs.token }}
           # Prompt extracted from repository_dispatch payload
