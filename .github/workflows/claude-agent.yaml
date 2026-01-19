@@ -20,12 +20,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
+          persist-credentials: false
           fetch-depth: 50
 
       - name: Install mise
         uses: jdx/mise-action@v3
         with:
           install: true
+
+      - name: Authenticate as GitHub App
+        id: auth
+        uses: ./.github/actions/github-app-auth
+        with:
+          app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
+          private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
 
       - name: Build prompt from dispatch payload
         id: prompt
@@ -254,7 +262,8 @@ jobs:
           # Claude default bot identity for git commits
           bot_id: '41898282'
           bot_name: 'claude[bot]'
-          allowed_bots: 'github-actions[bot]'
+          allowed_bots: 'github-actions[bot],automation-nsheaps[bot]'
+          github_token: ${{ steps.auth.outputs.token }}
           # Prompt extracted from repository_dispatch payload
           prompt: ${{ steps.prompt.outputs.prompt }}
           # Enable full output for debugging
