@@ -9,6 +9,5 @@
   },
   "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/statusline",
   "repository": "https://github.com/nsheaps/.ai",
-  "keywords": ["statusline", "status", "ui", "git", "workflow", "productivity"],
-  "hooks": "./hooks/hooks.json"
+  "keywords": ["statusline", "status", "ui", "git", "workflow", "productivity"]
 }
