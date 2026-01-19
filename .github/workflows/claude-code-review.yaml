@@ -189,7 +189,7 @@ jobs:
           # won't find the past comments since it's looking for github-actions[bot], not the auth it uses to post the comment.
           bot_id: ${{ steps.auth.outputs.user-id }}
           bot_name: ${{ steps.auth.outputs.user-name }}
-          allowed_bots: 'github-actions[bot],renovate[bot],claude[bot]'
+          allowed_bots: 'github-actions[bot],renovate[bot],claude[bot],automation-nsheaps[bot]'
           github_token: ${{ steps.auth.outputs.token }}
           settings: ${{ env.INPUT_SETTINGS_JSON }}
           additional_permissions: |
