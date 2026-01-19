@@ -30,6 +30,12 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
+      - name: Authenticate as GitHub App
+        id: auth
+        uses: ./.github/actions/github-app-auth
+        with:
+          app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
+          private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
       - name: Detect planning context
         id: planning
         run: |
@@ -101,6 +107,7 @@ jobs:
         uses: peter-evans/repository-dispatch@v4
         with:
           event-type: claude-agent
+          token: ${{ steps.auth.outputs.token }}
           # Schema: .github/schemas/claude-agent-payload.schema.json
           client-payload: |
             {

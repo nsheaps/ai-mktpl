@@ -1,71 +1,50 @@
 #!/usr/bin/env bash
-# init-gitignore.sh - Ensures .claude/.gitignore has patterns for todos/ and plans/
+# init-gitignore.sh - Creates .gitignore files inside todos/ and plans/ directories
 # Triggered by SessionStart and UserPromptSubmit hooks
+#
+# This approach puts the .gitignore inside each directory so that:
+# 1. The directories are created automatically
+# 2. The .gitignore files don't show up as uncommitted changes
+# 3. Git still ignores the contents of these directories
 
 set -euo pipefail
 
 # Determine project directory
 project_dir="${CLAUDE_PROJECT_DIR:-$(pwd)}"
 
-# Target gitignore file
-gitignore_file="$project_dir/.claude/.gitignore"
-
-# Comment markers
-start_marker="# BEGIN: Managed by todo-sync plugin (plugins/todo-sync/scripts/init-gitignore.sh)"
-end_marker="# END: Managed by todo-sync plugin"
-
-# Patterns to ensure are present (between markers)
-patterns=(
-  "todos/"
-  "plans/"
-  "!**/.gitkeep"
-  "!**/AGENTS.md"
-  "!**/CLAUDE.md"
+# Directories to manage
+managed_dirs=(
+  "$project_dir/.claude/todos"
+  "$project_dir/.claude/plans"
 )
 
-# Create .claude directory if it doesn't exist
-mkdir -p "$project_dir/.claude"
+# Content for the .gitignore files
+gitignore_content="# Managed by todo-sync plugin (plugins/todo-sync/scripts/init-gitignore.sh)
+# Ignore everything in this directory except this .gitignore
+*
+!.gitignore
+"
 
-# Create gitignore if it doesn't exist
-if [ ! -f "$gitignore_file" ]; then
-  touch "$gitignore_file"
-fi
+# Create each directory with its .gitignore
+for dir in "${managed_dirs[@]}"; do
+  # Create directory if it doesn't exist
+  mkdir -p "$dir"
 
-# Check if markers exist
-if ! grep -qF "$start_marker" "$gitignore_file" 2>/dev/null; then
-  # Markers don't exist, add them with patterns
-  {
-    echo ""
-    echo "$start_marker"
-    for pattern in "${patterns[@]}"; do
-      echo "$pattern"
-    done
-    echo "$end_marker"
-  } >> "$gitignore_file"
-else
-  # Markers exist, update content between them
-  # Create a temp file
-  temp_file=$(mktemp)
+  gitignore_file="$dir/.gitignore"
 
-  # Read file line by line and rebuild
-  in_section=false
-  while IFS= read -r line || [ -n "$line" ]; do
-    if [ "$line" = "$start_marker" ]; then
-      echo "$start_marker"
-      for pattern in "${patterns[@]}"; do
-        echo "$pattern"
-      done
-      echo "$end_marker"
-      in_section=true
-    elif [ "$line" = "$end_marker" ]; then
-      in_section=false
-    elif [ "$in_section" = false ]; then
-      echo "$line"
+  # Create or update the .gitignore file
+  if [ ! -f "$gitignore_file" ]; then
+    echo "$gitignore_content" > "$gitignore_file"
+  else
+    # Check if it has our marker, update if needed
+    if ! grep -qF "Managed by todo-sync plugin" "$gitignore_file" 2>/dev/null; then
+      # File exists but isn't ours, prepend our content
+      temp_file=$(mktemp)
+      echo "$gitignore_content" > "$temp_file"
+      cat "$gitignore_file" >> "$temp_file"
+      mv "$temp_file" "$gitignore_file"
     fi
-  done < "$gitignore_file" > "$temp_file"
-
-  # Replace original file
-  mv "$temp_file" "$gitignore_file"
-fi
+  fi
+done
 
 exit 0
