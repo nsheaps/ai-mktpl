@@ -228,7 +228,7 @@
     {
       "name": "statusline",
       "description": "Configurable status line for Claude Code showing session info, project context, and git status",
-      "version": "0.1.10",
+      "version": "0.1.11",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -293,7 +293,7 @@
     {
       "name": "todo-sync",
       "description": "Automatically syncs todos and plans from ~/.claude/ to the current project's .claude/ directory",
-      "version": "0.1.5",
+      "version": "0.1.6",
       "author": {
         "name": "Nathan Heaps"
       },
