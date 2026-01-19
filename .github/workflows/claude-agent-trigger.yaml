@@ -24,7 +24,6 @@ jobs:
     permissions:
       contents: write
     steps:
-
       - name: Authenticate as GitHub App
         id: auth
         uses: ./.github/actions/github-app-auth
