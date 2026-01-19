@@ -9,22 +9,95 @@ on:
   pull_request_review_comment:
     types: [created, edited]
   issues:
-    types: [opened, assigned]
+    types: [opened, assigned, labeled]
   pull_request_review:
     types: [submitted]
 
 jobs:
   dispatch:
+    # Trigger on @claude mentions OR issue creation for auto-planning OR replan label
     if: |
       (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
       (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
       (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
-      (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
+      (github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'replan') ||
+      (github.event_name == 'issues' && github.event.action == 'opened') ||
+      (github.event_name == 'issues' && github.event.action == 'assigned' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      issues: read
+    env:
+      GH_TOKEN: ${{ github.token }}
     steps:
+      - name: Detect planning context
+        id: planning
+        run: |
+          BODY='${{ toJson(github.event.issue.body) }}'
+
+          # Function to detect if body already looks like a plan
+          detect_plan() {
+            echo "$1" | grep -qiE '## (Implementation|Overview|Acceptance Criteria)' && echo "true" && return
+            echo "$1" | grep -qiE '<details>.*<summary>.*[Oo]riginal' && echo "true" && return
+            echo "$1" | grep -qiE '### Step [0-9]+' && echo "true" && return
+            echo "false"
+          }
+
+          # Check trigger conditions
+          if [[ "${{ github.event.action }}" == "labeled" && "${{ github.event.label.name }}" == "replan" ]]; then
+            echo "is_planning_request=true" >> $GITHUB_OUTPUT
+            echo "trigger_reason=replan_label" >> $GITHUB_OUTPUT
+            echo "existing_plan_detected=true" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event.action }}" == "opened" ]]; then
+            # Check if it contains @claude (explicit mention takes priority)
+            if echo "$BODY" | grep -q '@claude'; then
+              # Check if they're asking for planning
+              if echo "$BODY" | grep -qiE '@claude.*(plan|implement|design|create)'; then
+                echo "is_planning_request=true" >> $GITHUB_OUTPUT
+                echo "trigger_reason=explicit_mention" >> $GITHUB_OUTPUT
+              else
+                echo "is_planning_request=false" >> $GITHUB_OUTPUT
+              fi
+              echo "existing_plan_detected=false" >> $GITHUB_OUTPUT
+            else
+              # No @claude, check if already a plan
+              IS_PLAN=$(detect_plan "$BODY")
+              if [[ "$IS_PLAN" == "true" ]]; then
+                echo "is_planning_request=false" >> $GITHUB_OUTPUT
+                echo "existing_plan_detected=true" >> $GITHUB_OUTPUT
+              else
+                # New issue without plan structure - trigger auto-planning
+                echo "is_planning_request=true" >> $GITHUB_OUTPUT
+                echo "trigger_reason=issue_created" >> $GITHUB_OUTPUT
+                echo "existing_plan_detected=false" >> $GITHUB_OUTPUT
+              fi
+            fi
+          else
+            echo "is_planning_request=false" >> $GITHUB_OUTPUT
+            echo "existing_plan_detected=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Fetch comment history for replan
+        id: comments
+        if: steps.planning.outputs.trigger_reason == 'replan_label'
+        run: |
+          COMMENTS=$(gh api repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments --jq '[.[].body]')
+          echo "comment_history=$COMMENTS" >> $GITHUB_OUTPUT
+
+      - name: Skip if bot created issue for auto-planning
+        id: skip
+        run: |
+          # Skip auto-planning for bot-created issues
+          if [[ "${{ steps.planning.outputs.is_planning_request }}" == "true" && \
+                "${{ steps.planning.outputs.trigger_reason }}" == "issue_created" && \
+                "${{ github.event.issue.user.type }}" == "Bot" ]]; then
+            echo "should_skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "should_skip=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Dispatch to Claude agent
+        if: steps.skip.outputs.should_skip != 'true'
         uses: peter-evans/repository-dispatch@v4
         with:
           event-type: claude-agent
@@ -50,5 +123,12 @@ jobs:
               "content": {
                 "title": ${{ toJson(github.event.issue.title || github.event.pull_request.title) }},
                 "body": ${{ toJson(github.event.comment.body || github.event.review.body || github.event.issue.body) }}
+              },
+              "planning_context": {
+                "is_planning_request": ${{ steps.planning.outputs.is_planning_request || false }},
+                "trigger_reason": "${{ steps.planning.outputs.trigger_reason || '' }}",
+                "existing_plan_detected": ${{ steps.planning.outputs.existing_plan_detected || false }},
+                "original_body": ${{ toJson(github.event.issue.body) }},
+                "comment_history": ${{ steps.comments.outputs.comment_history || '[]' }}
               }
             }

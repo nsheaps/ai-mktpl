@@ -44,8 +44,18 @@ jobs:
           TRIGGER_ACTION=$(echo "$PAYLOAD" | jq -r '.trigger.action // ""')
           TITLE=$(echo "$PAYLOAD" | jq -r '.content.title // ""')
 
-          # Read system prompt template
-          SYSTEM_PROMPT=$(cat .ai/prompts/claude-agent-system.md)
+          # Check for planning context
+          IS_PLANNING=$(echo "$PAYLOAD" | jq -r '.planning_context.is_planning_request // false')
+          PLANNING_REASON=$(echo "$PAYLOAD" | jq -r '.planning_context.trigger_reason // ""')
+          ORIGINAL_BODY=$(echo "$PAYLOAD" | jq -r '.planning_context.original_body // ""')
+
+          # Select system prompt based on planning context
+          if [ "$IS_PLANNING" = "true" ]; then
+            echo "Using issue planner prompt (trigger: $PLANNING_REASON)"
+            SYSTEM_PROMPT=$(cat .ai/prompts/issue-planner-system.md)
+          else
+            SYSTEM_PROMPT=$(cat .ai/prompts/claude-agent-system.md)
+          fi
 
           # Build context section
           CONTEXT="You are Claude, responding to a GitHub @mention.\n\n"
@@ -251,10 +261,6 @@ jobs:
           claude_code_oauth_token: ${{
             secrets.CLAUDE_API_KEY && '' ||
             ( secrets.ANTHROPIC_API_KEY && '' || secrets.CLAUDE_CODE_OAUTH_TOKEN ) }}
-          # Claude default bot identity for git commits
-          bot_id: '41898282'
-          bot_name: 'claude[bot]'
-          allowed_bots: 'github-actions[bot]'
           # Prompt extracted from repository_dispatch payload
           prompt: ${{ steps.prompt.outputs.prompt }}
           # Enable full output for debugging
