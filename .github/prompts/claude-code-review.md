@@ -6,12 +6,14 @@ Please review this PR and provide inline feedback using the GitHub review system
 ## CRITICAL: Thread Management Before New Comments
 
 **STOP before creating any new comments!** You MUST first:
+
 1. Check ALL existing review threads you created on this PR
 2. **RESOLVE** any threads where the issue has been fixed in new commits
 3. **UPDATE** existing comments instead of creating new ones on the same topic
 4. Only create a NEW comment if no existing thread covers the topic
 
 **Never leave duplicate comments about the same issue.** If you previously flagged an issue:
+
 - And it's now fixed → RESOLVE the thread (don't add a new "fixed" comment)
 - And it's still broken → UPDATE the existing comment (don't create a new thread)
 - And you have new info → REPLY to the existing thread (don't start a new one)
@@ -168,7 +170,7 @@ Questions you leave in past reviews may be answered in the PR body or comments. 
    - If issue is fixed → RESOLVE the thread (no new comment)
    - If issue persists → REPLY to existing thread or UPDATE it (no new thread)
    - If new issue on same line → Reply to existing thread, don't create new one
-   If you want to cross link two comments together, use `gh pr-review view "$(gh pr view --json url --jq .url)"` to list your review comments, then copy the URL of one comment into the other so they reference each other.
+     If you want to cross link two comments together, use `gh pr-review view "$(gh pr view --json url --jq .url)"` to list your review comments, then copy the URL of one comment into the other so they reference each other.
 7. **Fetch review comments again** in order to get the URL of your new and existing PR comments. Update your local doc to include links to your review comments for reference.
 8. **Draft your review summary**: Summarize your overall findings in your local doc, including:
    - High-level assessment of the code changes
