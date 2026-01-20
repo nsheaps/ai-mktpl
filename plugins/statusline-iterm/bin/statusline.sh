@@ -8,9 +8,13 @@ export GIT_OPTIONAL_LOCKS=0
 
 # Set an iTerm2 user variable (for badge display)
 # Usage: iterm2_set_user_var <name> <value>
+# Note: Uses osascript instead of escape sequences because Claude Code
+# captures subprocess stdout/stderr, preventing escape sequences from
+# reaching the terminal. osascript talks directly to iTerm2 via macOS
+# scripting bridge, bypassing this limitation.
 iterm2_set_user_var() {
   if [ "$TERM_PROGRAM" = "iTerm.app" ]; then
-    printf "\033]1337;SetUserVar=%s=%s\007" "$1" "$(echo -n "$2" | base64)" >&2
+    osascript -e "tell application \"iTerm2\" to tell current session of current window to set variable named \"user.$1\" to \"$2\"" 2>/dev/null || true
   fi
 }
 
