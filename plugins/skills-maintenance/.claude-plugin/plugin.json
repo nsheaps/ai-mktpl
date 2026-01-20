@@ -1,6 +1,6 @@
 {
   "name": "skills-maintenance",
-  "version": "0.2.230",
+  "version": "0.2.231",
   "description": "Agent skill for maintaining, updating, and improving existing Claude Code skills",
   "author": {
     "name": "Nathan Heaps",
