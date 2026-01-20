@@ -1,17 +1,11 @@
 {
   "name": "memory-manager",
-  "version": "0.0.1",
+  "version": "0.2.24",
   "description": "Intelligent memory management for CLAUDE.md files. Automatically detects and stores user preferences, rules, and instructions with smart scope detection and hierarchical organization.",
   "author": {
     "name": "Nathan Heaps"
   },
-  "keywords": [
-    "memory",
-    "preferences",
-    "claude.md",
-    "context",
-    "instructions"
-  ],
+  "keywords": ["memory", "preferences", "claude.md", "context", "instructions"],
   "homepage": "https://github.com/nsheaps/.ai",
   "repository": "https://github.com/nsheaps/.ai"
 }
