@@ -59,7 +59,7 @@ Settings can reference environment variables using `${VAR_NAME}` syntax:
 ```yaml
 my-plugin:
   api_key: ${MY_API_KEY}
-  endpoint: ${MY_ENDPOINT:-https://default.example.com}
+  endpoint: https://default.example.com  # Use get_setting default parameter for fallbacks
 ```
 
 The `resolve_env_var` function expands these at runtime.
