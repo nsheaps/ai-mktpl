@@ -1,6 +1,6 @@
 {
   "name": "correct-behavior",
-  "version": "0.2.215",
+  "version": "0.2.216",
   "description": "Command to correct AI behavior mistakes and update rules to prevent recurrence",
   "author": {
     "name": "Nathan Heaps",
