@@ -9,6 +9,13 @@
   },
   "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/safety-evaluation-prompt",
   "repository": "https://github.com/nsheaps/.ai",
-  "keywords": ["safety", "security", "hooks", "pre-tool-call", "evaluation", "prompt"],
+  "keywords": [
+    "safety",
+    "security",
+    "hooks",
+    "pre-tool-call",
+    "evaluation",
+    "prompt"
+  ],
   "hooks": "./hooks/hooks.json"
 }

@@ -9,5 +9,11 @@
   },
   "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/correct-behavior",
   "repository": "https://github.com/nsheaps/.ai",
-  "keywords": ["behavior", "correction", "rules", "memory", "learning"]
+  "keywords": [
+    "behavior",
+    "correction",
+    "rules",
+    "memory",
+    "learning"
+  ]
 }
