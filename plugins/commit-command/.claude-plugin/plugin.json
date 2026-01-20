@@ -1,6 +1,6 @@
 {
   "name": "commit-command",
-  "version": "0.2.131",
+  "version": "0.2.132",
   "description": "Automate git commits with AI-generated messages that match your repository's commit style and conventions",
   "author": {
     "name": "Nathan Heaps",
