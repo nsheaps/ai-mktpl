@@ -37,6 +37,40 @@ Your plan MUST follow this structure:
 
 [1-2 paragraph summary of what needs to be done and why]
 
+## Analysis
+
+<details>
+<summary>Evaluated option: [short description of selected option]</summary>
+
+### What we already have
+
+- [Bulleted list of existing components, patterns, or infrastructure we can build on]
+
+### What we need to build
+
+- [Bulleted list of new components or changes required]
+
+### Implementation options
+
+**Option 1 - [one line description]**
+
+[1-2 paragraphs explaining this approach, its benefits and drawbacks]
+
+**Option 2 - [one line description]**
+
+[1-2 paragraphs explaining this approach, its benefits and drawbacks]
+
+[Continue with additional options as needed...]
+
+### Implementation choice
+
+We'll be going with **Option N** because:
+
+- [Bulleted list of reasons evaluating pros and cons]
+- [Comparison to other considered options]
+
+</details>
+
 ## Architecture
 
 [ASCII diagram or description of the architecture/flow if helpful]
