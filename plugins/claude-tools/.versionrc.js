@@ -1,12 +1,12 @@
 module.exports = {
-  releaseCommitMessageFormat: "chore(task-parallelization): release {{currentTag}}",
+  releaseCommitMessageFormat: "chore(claude-tools): release {{currentTag}}",
   skip: {
     bump: false,
     changelog: false,
     commit: false,
     tag: true,
   },
-  tagPrefix: "task-parallelization@",
+  tagPrefix: "claude-tools@",
   packageFiles: [
     {
       filename: ".claude-plugin/plugin.json",

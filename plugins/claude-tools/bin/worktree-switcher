@@ -17,6 +17,7 @@
 #   - If in a git repo: prompts to select/create worktree
 #   - If NOT in a git repo: prompts to select repo from ~/src or clone from GitHub
 #   - Worktrees created at: ../${repo}.worktrees/${branch}
+#   - After selection, launches a new shell in the worktree directory
 
 set -euo pipefail
 
@@ -69,6 +70,16 @@ get_branch_status() {
   else
     echo "     "
   fi
+}
+
+# Switch to worktree directory - launches a new shell
+switch_to_worktree() {
+  local worktree_path="$1"
+  echo ""
+  gum style --foreground 82 "Switching to worktree: $worktree_path"
+  echo ""
+  cd "$worktree_path"
+  exec "${SHELL:-/bin/bash}"
 }
 
 # Function to find repos in a directory
@@ -237,8 +248,7 @@ switch_to_branch() {
 
   if [[ -n "$existing_worktree" ]]; then
     echo "Worktree for branch '$branch' already exists at: $existing_worktree"
-    echo ""
-    echo "WORKTREE_PATH=$existing_worktree"
+    switch_to_worktree "$existing_worktree"
     return 0
   fi
 
@@ -283,8 +293,9 @@ switch_to_branch() {
     "$SCRIPT_DIR/branch-status" --json "$branch" 2>/dev/null | jq . || true
   fi
 
-  echo ""
-  echo "WORKTREE_PATH=$(cd "$git_root/$worktree_path" && pwd)"
+  local resolved_path
+  resolved_path=$(cd "$git_root/$worktree_path" && pwd)
+  switch_to_worktree "$resolved_path"
 }
 
 # Check if we're in a git repository
@@ -491,13 +502,12 @@ case "$SELECTED" in
     mkdir -p "$(dirname "$GIT_ROOT/$WORKTREE_PATH")"
     git -C "$GIT_ROOT" worktree add -b "$BRANCH_NAME" "$WORKTREE_PATH" "$BASE_BRANCH"
 
+    RESOLVED_PATH=$(cd "$GIT_ROOT/$WORKTREE_PATH" && pwd)
     echo ""
-    echo "Created worktree at: $(cd "$GIT_ROOT/$WORKTREE_PATH" && pwd)"
+    echo "Created worktree at: $RESOLVED_PATH"
     echo "Branch: $BRANCH_NAME (based on $BASE_BRANCH)"
 
-    # Print the path for cd (can be captured by caller)
-    echo ""
-    echo "WORKTREE_PATH=$(cd "$GIT_ROOT/$WORKTREE_PATH" && pwd)"
+    switch_to_worktree "$RESOLVED_PATH"
     ;;
 
   "📂 [existing]"*)
@@ -514,8 +524,7 @@ case "$SELECTED" in
       "$SCRIPT_DIR/branch-status" --json "$WT_BRANCH" 2>/dev/null | jq . || true
     fi
 
-    echo ""
-    echo "WORKTREE_PATH=$WORKTREE_PATH"
+    switch_to_worktree "$WORKTREE_PATH"
     ;;
 
   "🌐 (branch from remote)")
@@ -537,11 +546,12 @@ case "$SELECTED" in
     mkdir -p "$(dirname "$GIT_ROOT/$WORKTREE_PATH")"
     git -C "$GIT_ROOT" worktree add --track -b "$BRANCH_NAME" "$WORKTREE_PATH" "$REMOTE_BRANCH"
 
+    RESOLVED_PATH=$(cd "$GIT_ROOT/$WORKTREE_PATH" && pwd)
     echo ""
-    echo "Created worktree at: $(cd "$GIT_ROOT/$WORKTREE_PATH" && pwd)"
+    echo "Created worktree at: $RESOLVED_PATH"
     echo "Branch: $BRANCH_NAME (tracking $REMOTE_BRANCH)"
-    echo ""
-    echo "WORKTREE_PATH=$(cd "$GIT_ROOT/$WORKTREE_PATH" && pwd)"
+
+    switch_to_worktree "$RESOLVED_PATH"
     ;;
 
   "🔄 (switch repository)")
@@ -561,11 +571,13 @@ case "$SELECTED" in
     WORKTREE_PATH="../${REPO_NAME}.worktrees/${SAFE_BRANCH}"
 
     if [[ -d "$GIT_ROOT/$WORKTREE_PATH" ]]; then
-      echo "Worktree already exists at: $(cd "$GIT_ROOT/$WORKTREE_PATH" && pwd)"
+      RESOLVED_PATH=$(cd "$GIT_ROOT/$WORKTREE_PATH" && pwd)
+      echo "Worktree already exists at: $RESOLVED_PATH"
     else
       mkdir -p "$(dirname "$GIT_ROOT/$WORKTREE_PATH")"
       git -C "$GIT_ROOT" worktree add "$WORKTREE_PATH" "$BRANCH_NAME"
-      echo "Created worktree at: $(cd "$GIT_ROOT/$WORKTREE_PATH" && pwd)"
+      RESOLVED_PATH=$(cd "$GIT_ROOT/$WORKTREE_PATH" && pwd)
+      echo "Created worktree at: $RESOLVED_PATH"
     fi
 
     echo "Branch: $BRANCH_NAME"
@@ -577,7 +589,6 @@ case "$SELECTED" in
       "$SCRIPT_DIR/branch-status" --json "$BRANCH_NAME" 2>/dev/null | jq . || true
     fi
 
-    echo ""
-    echo "WORKTREE_PATH=$(cd "$GIT_ROOT/$WORKTREE_PATH" && pwd)"
+    switch_to_worktree "$RESOLVED_PATH"
     ;;
 esac

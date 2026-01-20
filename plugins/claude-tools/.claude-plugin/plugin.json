@@ -3,7 +3,11 @@
   "version": "0.0.1",
   "description": "Collection of CLI tools for Claude Code workflow management including diagnostics, worktree management, session handling, and process supervision",
   "author": {
-    "name": "Nathan Heaps"
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
   },
-  "hooks": "./hooks/hooks.json"
+  "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/claude-tools",
+  "repository": "https://github.com/nsheaps/.ai",
+  "keywords": ["claude-code", "claude", "utility", "git", "worktree", "git-worktree"]
 }
