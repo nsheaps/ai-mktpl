@@ -211,10 +211,12 @@ All differentiation (planning vs mention handling) is captured in the `prompt` f
 Using `{{.path}}` syntax with jq-based interpolation. Templates access payload data directly via JSON paths.
 
 **Syntax:**
+
 - `{{.path.to.value}}` - Simple value extraction
 - `{{#if .path}}content{{/if}}` - Conditional sections
 
 **Available paths (from dispatch payload):**
+
 - `{{.source.repo}}` - Repository name (owner/repo)
 - `{{.source.issue_number}}` - Issue number
 - `{{.source.pr_number}}` - PR number
