@@ -1,6 +1,6 @@
 {
   "name": "safety-evaluation-script",
-  "version": "0.2.34",
+  "version": "0.2.35",
   "description": "Pre-tool-call safety evaluation using Claude CLI (haiku) with script-style hooks",
   "author": {
     "name": "Nathan Heaps",
