@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file. See [commit
 
 ### Features
 
-* Initial release - fork of statusline plugin with iTerm2 badge integration
-* Sets `user.badge` variable with repo/branch/ahead-behind/dirty status
-* Badge updates on every statusline refresh
-* Gracefully degrades when not running in iTerm2
+- Initial release - fork of statusline plugin with iTerm2 badge integration
+- Sets `user.badge` variable with repo/branch/ahead-behind/dirty status
+- Badge updates on every statusline refresh
+- Gracefully degrades when not running in iTerm2

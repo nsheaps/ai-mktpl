@@ -25,6 +25,7 @@ printf "\033]1337;SetUserVar=%s=%s\007" "badge" "$(echo -n "$badge_text" | base6
 ```
 
 Key points:
+
 - Output goes to stderr (`>&2`) to not interfere with statusline output
 - Only runs when `$TERM_PROGRAM` is `iTerm.app`
 - Badge shows: repo name, branch, ahead/behind counts, clean/dirty status

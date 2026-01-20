@@ -37,6 +37,7 @@ To display the badge, configure your iTerm2 profile:
 3. Optionally adjust badge appearance in the same settings
 
 Or use Dynamic Profiles with:
+
 ```json
 {
   "Badge Text": "\\(user.badge)"
@@ -104,11 +105,13 @@ Usage: 50K tokens (5% of limit)
 ### Statusline not appearing
 
 1. Check if the plugin is enabled:
+
    ```bash
    jq '.enabledPlugins' ~/.claude/settings.json
    ```
 
 2. Verify settings.json configuration:
+
    ```bash
    jq '.statusLine' ~/.claude/settings.json
    ```
