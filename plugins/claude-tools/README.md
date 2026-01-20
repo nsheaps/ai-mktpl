@@ -1,5 +1,18 @@
 # Claude Tools Plugin
 
+> [!WARNING]
+> **DISTRIBUTION MECHANISM NEEDS MIGRATION**
+>
+> The current symlink-based distribution via SessionStart hooks is a temporary solution.
+> These tools should be distributed through a proper package manager:
+>
+> - **Homebrew** (`brew install claude-tools`)
+> - **npm** (`npm install -g @nsheaps/claude-tools`)
+> - **mise** (`.mise.toml` with custom plugin)
+>
+> This would provide proper versioning, updates, and cross-platform support.
+> See issue tracking this migration or create one if it doesn't exist.
+
 A collection of CLI tools for Claude Code workflow management including diagnostics, worktree management, session handling, and process supervision.
 
 ## Installation
