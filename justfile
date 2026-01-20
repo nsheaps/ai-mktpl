@@ -279,10 +279,7 @@ _bump-plugin-version-svu PLUGIN_PATH=invocation_directory() BASE_REF='HEAD~1':
     if [ -f "CHANGELOG.md" ]; then
         DATE=$(date +%Y-%m-%d)
         # Add new version header after the first line (# Changelog)
-        sed -i "2i\\
-\\
-## [$NEXT_VERSION] - $DATE\\
-" CHANGELOG.md
+        sed -i "2i\\\n## [$NEXT_VERSION] - $DATE\n" CHANGELOG.md
     fi
 
     echo "Bumped $PLUGIN_DIR from $BASE_VERSION to $NEXT_VERSION"
