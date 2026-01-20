@@ -3,15 +3,12 @@ name: Claude Agent
 # This workflow runs Claude Code in agent mode when triggered by repository_dispatch
 # Agent mode is automatically enabled for repository_dispatch triggers
 #
-# Event types:
-# - claude-agent-mention: @claude mentions (uses claude-agent-system.md)
-# - claude-agent-new-issue: New issues for planning (uses issue-planner-system.md)
-#
-# The system prompt template is specified in the payload, no detection logic needed here
+# The system prompt template is specified in the payload - no detection logic needed here
+# All context for the agent is included in the prompt itself
 
 on:
   repository_dispatch:
-    types: [claude-agent-mention, claude-agent-new-issue]
+    types: [claude-agent]
 
 jobs:
   claude:
@@ -66,29 +63,6 @@ jobs:
           echo "TRIGGER_ACTION=$(echo "$PAYLOAD" | jq -r '.trigger.action // ""')" >> "$GITHUB_OUTPUT"
           echo "TITLE=$TITLE" >> "$GITHUB_OUTPUT"
 
-          # Planning context
-          echo "PLANNING_TRIGGER_REASON=$(echo "$PAYLOAD" | jq -r '.planning.trigger_reason // ""')" >> "$GITHUB_OUTPUT"
-          {
-            echo "ORIGINAL_ISSUE_BODY<<EOF_BODY"
-            echo "$PAYLOAD" | jq -r '.planning.original_issue_body // ""'
-            echo "EOF_BODY"
-          } >> "$GITHUB_OUTPUT"
-
-          # Build comment history section
-          COMMENT_HISTORY=$(echo "$PAYLOAD" | jq -r '.planning.comment_history // ""')
-          if [ -n "$COMMENT_HISTORY" ] && [ "$COMMENT_HISTORY" != "null" ] && [ "$COMMENT_HISTORY" != "" ]; then
-            {
-              echo "COMMENT_HISTORY_SECTION<<EOF_COMMENTS"
-              echo ""
-              echo "## Comment History"
-              echo ""
-              echo "$COMMENT_HISTORY"
-              echo "EOF_COMMENTS"
-            } >> "$GITHUB_OUTPUT"
-          else
-            echo "COMMENT_HISTORY_SECTION=" >> "$GITHUB_OUTPUT"
-          fi
-
           # Build conditional context sections for template
           if [ "$PR_NUMBER" != "null" ] && [ -n "$PR_NUMBER" ]; then
             echo "PR_CONTEXT=This is related to PR #$PR_NUMBER" >> "$GITHUB_OUTPUT"
@@ -137,10 +111,6 @@ jobs:
           PR_CONTEXT: ${{ steps.payload.outputs.PR_CONTEXT }}
           ISSUE_CONTEXT: ${{ steps.payload.outputs.ISSUE_CONTEXT }}
           TITLE_SECTION: ${{ steps.payload.outputs.TITLE_SECTION }}
-          # Planning-specific variables
-          PLANNING_TRIGGER_REASON: ${{ steps.payload.outputs.PLANNING_TRIGGER_REASON }}
-          ORIGINAL_ISSUE_BODY: ${{ steps.payload.outputs.ORIGINAL_ISSUE_BODY }}
-          COMMENT_HISTORY_SECTION: ${{ steps.payload.outputs.COMMENT_HISTORY_SECTION }}
         with:
           template-file: ${{ steps.payload.outputs.TEMPLATE }}
 

@@ -1,0 +1,156 @@
+name: Claude Agent Trigger
+
+# Single workflow with all trigger conditions
+# Two jobs handle different types of work:
+# - mention: @claude mentions in comments/reviews
+# - new-issue: New issues (auto-planning)
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  pull_request_review:
+    types: [submitted]
+  issues:
+    types: [opened, assigned]
+
+jobs:
+  # =============================================================================
+  # MENTION JOB: Handle @claude mentions in comments/reviews
+  # Explicitly ignores issues.opened to avoid double-triggering
+  # =============================================================================
+  mention:
+    # Run on @claude mentions, but NOT on issues.opened (that's handled by new-issue job)
+    if: >-
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
+      (github.event_name == 'issues' && github.event.action == 'assigned' &&
+        (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Dispatch to Claude agent
+        uses: ./.github/actions/dispatch-claude-agent
+        with:
+          app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
+          private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
+          workflow-type: mention
+          system-prompt-template: .ai/prompts/claude-agent-system.md
+          prompt: >-
+            ${{
+              github.event_name == 'issue_comment' && github.event.comment.body ||
+              github.event_name == 'pull_request_review_comment' && github.event.comment.body ||
+              github.event_name == 'pull_request_review' && github.event.review.body ||
+              github.event.issue.body
+            }}
+          issue-number: ${{ github.event.issue.number || '' }}
+          pr-number: >-
+            ${{
+              github.event_name == 'pull_request_review_comment' && github.event.pull_request.number ||
+              github.event_name == 'pull_request_review' && github.event.pull_request.number ||
+              (github.event.issue.pull_request && github.event.issue.number) ||
+              ''
+            }}
+          comment-id: ${{ github.event.comment.id || github.event.review.id || '' }}
+          author-login: >-
+            ${{
+              github.event.comment.user.login ||
+              github.event.review.user.login ||
+              github.event.issue.user.login
+            }}
+          author-association: >-
+            ${{
+              github.event.comment.author_association ||
+              github.event.review.author_association ||
+              github.event.issue.author_association
+            }}
+          title: ${{ github.event.issue.title || github.event.pull_request.title }}
+
+  # =============================================================================
+  # NEW-ISSUE JOB: Auto-plan new issues
+  # Plans the issue first, then if @claude mention exists with specific work,
+  # posts a comment to trigger the mention job
+  # =============================================================================
+  new-issue:
+    # Only run on issues.opened, skip bot-created issues
+    if: >-
+      github.event_name == 'issues' &&
+      github.event.action == 'opened' &&
+      github.event.issue.user.type != 'Bot'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Check if issue already has plan structure
+        id: check
+        run: |
+          BODY='${{ toJson(github.event.issue.body) }}'
+
+          # Detect if body already looks like a plan
+          if echo "$BODY" | grep -qiE '## (Implementation|Overview|Acceptance Criteria)'; then
+            echo "has_plan=true" >> $GITHUB_OUTPUT
+          elif echo "$BODY" | grep -qiE '<details>.*<summary>.*[Oo]riginal'; then
+            echo "has_plan=true" >> $GITHUB_OUTPUT
+          elif echo "$BODY" | grep -qiE '### Step [0-9]+'; then
+            echo "has_plan=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_plan=false" >> $GITHUB_OUTPUT
+          fi
+
+          # Check if there's an @claude mention with specific work request
+          if echo "$BODY" | grep -qiE '@claude'; then
+            if echo "$BODY" | grep -qiE '@claude.*(plan|implement|design|create)'; then
+              # Explicit planning request - just plan, no followup
+              echo "has_mention=true" >> $GITHUB_OUTPUT
+              echo "needs_mention_followup=false" >> $GITHUB_OUTPUT
+            else
+              # Has @claude but not explicit planning - will need followup after planning
+              echo "has_mention=true" >> $GITHUB_OUTPUT
+              echo "needs_mention_followup=true" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "has_mention=false" >> $GITHUB_OUTPUT
+            echo "needs_mention_followup=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Dispatch for planning
+        if: steps.check.outputs.has_plan != 'true'
+        uses: ./.github/actions/dispatch-claude-agent
+        with:
+          app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
+          private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
+          workflow-type: new-issue
+          system-prompt-template: .ai/prompts/issue-planner-system.md
+          prompt: ${{ github.event.issue.body }}
+          issue-number: ${{ github.event.issue.number }}
+          author-login: ${{ github.event.issue.user.login }}
+          author-association: ${{ github.event.issue.author_association }}
+          title: ${{ github.event.issue.title }}
+
+      # If there's an @claude mention that's not a planning request,
+      # post a comment to trigger the mention job after planning completes
+      - name: Post follow-up comment for mention handling
+        if: >-
+          steps.check.outputs.has_plan != 'true' &&
+          steps.check.outputs.needs_mention_followup == 'true'
+        env:
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: |
+          # Extract the @claude request from the issue body
+          # This will trigger the mention job to handle the specific work
+          REQUEST=$(echo "$ISSUE_BODY" | grep -oiE '@claude[^.!?]*[.!?]?' | head -1)
+          if [ -z "$REQUEST" ]; then
+            REQUEST="@claude please review this issue and proceed with the requested work"
+          fi
+
+          # Post comment to trigger mention workflow
+          gh issue comment "$ISSUE_NUMBER" --body "$REQUEST
+
+          _(This comment was auto-generated to trigger the Claude agent after planning completed)_"

@@ -94,34 +94,6 @@
           "description": "Full body text of comment/issue/review"
         }
       }
-    },
-    "planning_context": {
-      "type": "object",
-      "description": "Context for issue planning requests (auto-planning new issues or replanning)",
-      "properties": {
-        "is_planning_request": {
-          "type": "boolean",
-          "description": "Whether this trigger should invoke issue planning behavior"
-        },
-        "trigger_reason": {
-          "type": "string",
-          "enum": ["issue_created", "replan_label", "explicit_mention"],
-          "description": "Why planning was triggered"
-        },
-        "existing_plan_detected": {
-          "type": "boolean",
-          "description": "Whether the issue body already contains plan structure"
-        },
-        "original_body": {
-          "type": "string",
-          "description": "Original issue body (preserved for plan template)"
-        },
-        "comment_history": {
-          "type": "array",
-          "items": { "type": "string" },
-          "description": "Comment bodies for context when replanning"
-        }
-      }
     }
   }
 }
