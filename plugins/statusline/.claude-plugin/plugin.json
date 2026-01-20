@@ -1,6 +1,6 @@
 {
   "name": "statusline",
-  "version": "0.1.115",
+  "version": "0.1.116",
   "description": "Configurable status line for Claude Code showing session info, project context, and git status",
   "author": {
     "name": "Nathan Heaps",
