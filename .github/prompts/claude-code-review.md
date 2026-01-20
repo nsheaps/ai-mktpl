@@ -2,6 +2,20 @@ REPO: ${REPO}
 PR_NUMBER: ${PR_NUMBER}
 
 Please review this PR and provide inline feedback using the GitHub review system.
+
+## CRITICAL: Thread Management Before New Comments
+
+**STOP before creating any new comments!** You MUST first:
+1. Check ALL existing review threads you created on this PR
+2. **RESOLVE** any threads where the issue has been fixed in new commits
+3. **UPDATE** existing comments instead of creating new ones on the same topic
+4. Only create a NEW comment if no existing thread covers the topic
+
+**Never leave duplicate comments about the same issue.** If you previously flagged an issue:
+- And it's now fixed → RESOLVE the thread (don't add a new "fixed" comment)
+- And it's still broken → UPDATE the existing comment (don't create a new thread)
+- And you have new info → REPLY to the existing thread (don't start a new one)
+
 You must provide feedback on:
 
 - Code quality and best practices
@@ -25,8 +39,15 @@ Questions you leave in past reviews may be answered in the PR body or comments. 
 
 1. **Get diff information**: Use `mcp__github__*` tools from MCP, and `gh *` cli tools to understand the code changes, previous reviews, and line numbers.
 
-2. **Review previous reviews** including your own. Your previous reviews may be hidden and will be hidden in the future, so it's important that your new review captures all necessary information (or references PR threads from previous reviews). The review you will post will contain all relevant details, including those from your previous reviews that still need resolution.
+2. **Review previous reviews AND resolve addressed threads** including your own. Your previous reviews may be hidden and will be hidden in the future, so it's important that your new review captures all necessary information (or references PR threads from previous reviews). The review you will post will contain all relevant details, including those from your previous reviews that still need resolution.
    Use `gh` to view comments and reviews on the PR. Remember you can't see reviews by viewing comments or vice versa.
+
+   **CRITICAL: Before proceeding to step 3, you MUST:**
+   - List ALL review threads you previously created
+   - For each thread, check if the issue was addressed in new commits
+   - RESOLVE threads that are no longer applicable (issue fixed, code deleted, etc.)
+   - Do NOT create new "acknowledged" or "fixed" comments - just resolve the thread silently
+   - Use the GraphQL API from step 4b to resolve threads NOW, not later
 
 3. **Start a local doc to track your review findings and notes** including:
    - Summary of your review findings
@@ -62,19 +83,26 @@ Questions you leave in past reviews may be answered in the PR body or comments. 
 
    ### 4b. Resolving review threads
 
+   **CRITICAL: This is the most important step for thread hygiene!**
+
    Review threads (inline comments on specific lines) should be RESOLVED, not minimized/hidden.
    Use `gh pr-review review view "$(gh pr view --json url --jq .url)"` to list review threads.
 
-   **WHEN TO RESOLVE your own threads:**
-   - The issue has been fixed in new commits
-   - The author addressed the feedback in code or clarified adequately
-   - The comment is no longer applicable due to code changes
+   **WHEN TO RESOLVE your own threads (DO THIS SILENTLY - no new comment needed):**
+   - The issue has been fixed in new commits → Just resolve, don't add "fixed" comment
+   - The author addressed the feedback in code or clarified adequately → Just resolve
+   - The comment is no longer applicable due to code changes → Just resolve
 
    **WHEN NOT TO RESOLVE threads (even your own):**
    - Comments praising good design choices (leave visible as positive feedback)
    - Ongoing conversations that haven't reached conclusion
    - Issues that still need to be addressed
    - Comments noting things that could be follow-up improvements (these should stay visible)
+
+   **NEVER do this (anti-pattern to avoid):**
+   - ❌ Creating a new comment saying "This is now fixed" - instead, just RESOLVE the thread
+   - ❌ Creating duplicate threads about the same issue - instead, REPLY to existing thread
+   - ❌ Leaving multiple unresolved threads about the same fix - resolve all but one
 
    **Handling OTHER users' threads:**
    CRITICAL: Never resolve threads started by other users.
@@ -136,6 +164,10 @@ Questions you leave in past reviews may be answered in the PR body or comments. 
 6. **Add inline comments**: Use `mcp__github__add_comment_to_pending_review` for each specific piece of feedback on particular lines. The add_comment_to_pending_review does not return the new thread ID, so you will need to fetch the review comments again after adding all comments to get the URLs for your review comments.
    CRITICAL: Use inline comments including detail about the issue and link to it from your review, rather than putting all the detail in the review.
    CRITICAL: Review comments and PR comments on specific lines of code should NEVER be minimized. ALWAYS resolve them (or leave them open if still relevant).
+   CRITICAL: Before adding a new comment, check if you already have an unresolved thread on the same topic. If you do:
+   - If issue is fixed → RESOLVE the thread (no new comment)
+   - If issue persists → REPLY to existing thread or UPDATE it (no new thread)
+   - If new issue on same line → Reply to existing thread, don't create new one
    If you want to cross link two comments together, use `gh pr-review view "$(gh pr view --json url --jq .url)"` to list your review comments, then copy the URL of one comment into the other so they reference each other.
 7. **Fetch review comments again** in order to get the URL of your new and existing PR comments. Update your local doc to include links to your review comments for reference.
 8. **Draft your review summary**: Summarize your overall findings in your local doc, including:
