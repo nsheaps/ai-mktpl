@@ -9,5 +9,13 @@
   },
   "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/tmux-subagent",
   "repository": "https://github.com/nsheaps/.ai",
-  "keywords": ["tmux", "subagent", "parallel", "iterm", "terminal", "isolation", "delegation"]
+  "keywords": [
+    "tmux",
+    "subagent",
+    "parallel",
+    "iterm",
+    "terminal",
+    "isolation",
+    "delegation"
+  ]
 }

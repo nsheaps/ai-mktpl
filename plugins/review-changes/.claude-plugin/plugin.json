@@ -9,5 +9,11 @@
   },
   "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/review-changes",
   "repository": "https://github.com/nsheaps/.ai",
-  "keywords": ["code-review", "review", "quality", "security", "lint"]
+  "keywords": [
+    "code-review",
+    "review",
+    "quality",
+    "security",
+    "lint"
+  ]
 }
