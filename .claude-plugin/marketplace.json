@@ -10,6 +10,18 @@
   },
   "plugins": [
     {
+      "name": "claude-tools",
+      "description": "Collection of CLI tools for Claude Code workflow management including diagnostics, worktree management, session handling, and process supervision",
+      "version": "0.0.1",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/claude-tools",
+      "category": "utility",
+      "tags": ["utility"],
+      "keywords": []
+    },
+    {
       "name": "code-simplifier",
       "description": "Simplify and refine code for clarity, consistency, and maintainability. Requires pr-review-toolkit plugin.",
       "version": "0.1.0",
@@ -240,7 +252,7 @@
     {
       "name": "statusline-iterm",
       "description": "Status line for Claude Code with iTerm2 badge integration - shows session info, project context, git status, and updates iTerm2 badge",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "author": {
         "name": "Nathan Heaps"
       },

@@ -1,0 +1,253 @@
+#!/usr/bin/env bash
+# claude-worktree - Combined git worktree management with Claude session handling
+# Usage: claude-worktree [OPTIONS] [DESCRIPTION]
+#
+# Options:
+#   --no-session      Only switch worktree, don't start Claude session
+#   --new-session     Always start a new session (don't resume)
+#   --auto-restart    Pass --auto-restart to claude-wrapper
+#   -h, --help        Show this help message
+#
+# If DESCRIPTION is provided when creating a new branch, AI will suggest a branch name.
+#
+# Examples:
+#   claude-worktree                          # Interactive worktree + session
+#   claude-worktree "Fix login bug"          # AI-named branch for this task
+#   claude-worktree --no-session             # Just switch worktree
+
+set -euo pipefail
+
+NO_SESSION="false"
+NEW_SESSION="false"
+AUTO_RESTART="false"
+DESCRIPTION=""
+
+show_help() {
+  sed -n '2,15p' "$0" | sed 's/^# //' | sed 's/^#//'
+  exit 0
+}
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --no-session)   NO_SESSION="true"; shift ;;
+    --new-session)  NEW_SESSION="true"; shift ;;
+    --auto-restart) AUTO_RESTART="true"; shift ;;
+    -h|--help)      show_help ;;
+    -*)             echo "Unknown option: $1" >&2; show_help ;;
+    *)              DESCRIPTION="$1"; shift ;;
+  esac
+done
+
+# Check for required tools
+check_tool() {
+  if ! command -v "$1" &>/dev/null; then
+    echo "Error: $1 is required but not installed" >&2
+    exit 1
+  fi
+}
+
+check_tool git
+check_tool jq
+
+# Find plugin binaries directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PLUGIN_DIR="$(dirname "$SCRIPT_DIR")"
+
+# Look for worktree-switcher (same directory since we're now in claude-tools)
+WORKTREE_SWITCHER=""
+if [[ -x "$SCRIPT_DIR/worktree-switcher" ]]; then
+  WORKTREE_SWITCHER="$SCRIPT_DIR/worktree-switcher"
+elif command -v worktree-switcher &>/dev/null; then
+  WORKTREE_SWITCHER="worktree-switcher"
+else
+  echo "Error: worktree-switcher not found" >&2
+  echo "This command requires worktree-switcher to be in the same plugin or in PATH" >&2
+  exit 1
+fi
+
+# Look for claude-wrapper (same directory since we're now in claude-tools)
+CLAUDE_WRAPPER=""
+if [[ -x "$SCRIPT_DIR/claude-wrapper" ]]; then
+  CLAUDE_WRAPPER="$SCRIPT_DIR/claude-wrapper"
+elif command -v claude-wrapper &>/dev/null; then
+  CLAUDE_WRAPPER="claude-wrapper"
+fi
+
+# Function to generate branch name from description using AI
+generate_branch_name() {
+  local desc="$1"
+
+  # Try to use claude for naming (one-shot)
+  if command -v claude &>/dev/null; then
+    local prompt="Generate a git branch name for: $desc
+
+Rules:
+- Use lowercase with hyphens
+- Start with a prefix like 'feature/', 'fix/', 'chore/' as appropriate
+- Keep it short (under 50 chars total)
+- No special characters except hyphens and forward slash
+- Return ONLY the branch name, nothing else"
+
+    local branch_name
+    branch_name=$(claude -p --output-format json "$prompt" 2>/dev/null | jq -r '.result // empty' 2>/dev/null || true)
+
+    # Validate the generated name
+    if [[ -n "$branch_name" ]] && [[ "$branch_name" =~ ^[a-z0-9/_-]+$ ]]; then
+      echo "$branch_name"
+      return 0
+    fi
+  fi
+
+  # Fallback: simple conversion
+  local simple_name
+  simple_name=$(echo "$desc" | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | tr -cd 'a-z0-9-' | head -c 40)
+  echo "feature/$simple_name"
+}
+
+# Run worktree-switcher
+echo "Selecting worktree..."
+echo ""
+
+# Capture output to get WORKTREE_PATH
+SWITCHER_OUTPUT=$("$WORKTREE_SWITCHER" 2>&1) || true
+echo "$SWITCHER_OUTPUT"
+
+# Extract WORKTREE_PATH from output
+WORKTREE_PATH=$(echo "$SWITCHER_OUTPUT" | grep "^WORKTREE_PATH=" | cut -d= -f2)
+
+if [[ -z "$WORKTREE_PATH" ]]; then
+  # User might have cancelled or we're already in a worktree
+  if echo "$SWITCHER_OUTPUT" | grep -q "Already in a worktree"; then
+    WORKTREE_PATH=$(pwd)
+  else
+    echo "No worktree selected"
+    exit 0
+  fi
+fi
+
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "  Worktree: $WORKTREE_PATH"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+# Change to worktree directory
+cd "$WORKTREE_PATH"
+
+# Exit if --no-session
+if [[ "$NO_SESSION" == "true" ]]; then
+  echo ""
+  echo "Run 'cd $WORKTREE_PATH' to enter the worktree"
+  exit 0
+fi
+
+# Find existing Claude sessions
+echo ""
+echo "Checking for existing Claude sessions..."
+
+# Get session list for this directory
+SESSIONS_JSON=""
+if command -v claude &>/dev/null; then
+  SESSIONS_JSON=$(claude sessions list --output-format json 2>/dev/null || echo "[]")
+fi
+
+# Parse sessions
+SESSIONS=()
+TWO_HOURS_AGO=$(($(date +%s) - 7200))
+
+if [[ -n "$SESSIONS_JSON" ]] && [[ "$SESSIONS_JSON" != "[]" ]]; then
+  while IFS= read -r session; do
+    SESSION_ID=$(echo "$session" | jq -r '.id')
+    SESSION_CWD=$(echo "$session" | jq -r '.cwd // ""')
+    SESSION_TIMESTAMP=$(echo "$session" | jq -r '.lastActive // .created // 0')
+
+    # Filter to sessions from this directory
+    if [[ "$SESSION_CWD" == "$WORKTREE_PATH" ]]; then
+      SESSIONS+=("$SESSION_ID:$SESSION_TIMESTAMP")
+    fi
+  done < <(echo "$SESSIONS_JSON" | jq -c '.[]' 2>/dev/null || echo "")
+fi
+
+# Sort sessions by timestamp (most recent first)
+IFS=$'\n' SORTED_SESSIONS=($(printf '%s\n' "${SESSIONS[@]}" | sort -t: -k2 -rn))
+unset IFS
+
+# Session selection logic
+RESUME_SESSION=""
+
+if [[ "$NEW_SESSION" != "true" ]] && [[ ${#SORTED_SESSIONS[@]} -gt 0 ]]; then
+  MOST_RECENT="${SORTED_SESSIONS[0]}"
+  MOST_RECENT_ID=$(echo "$MOST_RECENT" | cut -d: -f1)
+  MOST_RECENT_TS=$(echo "$MOST_RECENT" | cut -d: -f2)
+
+  # Check if most recent session is within 2 hours
+  if [[ "$MOST_RECENT_TS" -gt "$TWO_HOURS_AGO" ]]; then
+    echo "Found recent session (within 2 hours): $MOST_RECENT_ID"
+    RESUME_SESSION="$MOST_RECENT_ID"
+  elif [[ ${#SORTED_SESSIONS[@]} -gt 1 ]]; then
+    # Multiple older sessions - show selection
+    echo "Found ${#SORTED_SESSIONS[@]} older sessions"
+
+    if command -v gum &>/dev/null; then
+      OPTIONS=("Start new session")
+      for s in "${SORTED_SESSIONS[@]}"; do
+        sid=$(echo "$s" | cut -d: -f1)
+        sts=$(echo "$s" | cut -d: -f2)
+        sdate=$(date -d "@$sts" "+%Y-%m-%d %H:%M" 2>/dev/null || date -r "$sts" "+%Y-%m-%d %H:%M" 2>/dev/null || echo "unknown")
+        OPTIONS+=("Resume $sid ($sdate)")
+      done
+
+      CHOICE=$(printf '%s\n' "${OPTIONS[@]}" | gum choose --header "Select session:")
+
+      if [[ "$CHOICE" == "Start new session" ]]; then
+        RESUME_SESSION=""
+      else
+        RESUME_SESSION=$(echo "$CHOICE" | sed 's/Resume \([^ ]*\).*/\1/')
+      fi
+    else
+      # Fallback: use most recent
+      RESUME_SESSION="$MOST_RECENT_ID"
+    fi
+  elif [[ ${#SORTED_SESSIONS[@]} -eq 1 ]]; then
+    # Single older session - ask to resume or start new
+    echo "Found 1 older session: $MOST_RECENT_ID"
+
+    if command -v gum &>/dev/null; then
+      if gum confirm "Resume this session?"; then
+        RESUME_SESSION="$MOST_RECENT_ID"
+      fi
+    else
+      read -r -p "Resume this session? [y/N]: " yn
+      if [[ "$yn" =~ ^[Yy]$ ]]; then
+        RESUME_SESSION="$MOST_RECENT_ID"
+      fi
+    fi
+  fi
+fi
+
+# Build claude command
+CLAUDE_CMD=("claude")
+
+if [[ -n "$RESUME_SESSION" ]]; then
+  CLAUDE_CMD+=("--resume" "$RESUME_SESSION")
+  echo ""
+  echo "Resuming session: $RESUME_SESSION"
+else
+  echo ""
+  echo "Starting new session"
+fi
+
+# Run with or without wrapper
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+
+if [[ -n "$CLAUDE_WRAPPER" ]]; then
+  WRAPPER_ARGS=()
+  if [[ "$AUTO_RESTART" == "true" ]]; then
+    WRAPPER_ARGS+=("--auto-restart")
+  fi
+  exec "$CLAUDE_WRAPPER" "${WRAPPER_ARGS[@]}" -- "${CLAUDE_CMD[@]}"
+else
+  exec "${CLAUDE_CMD[@]}"
+fi
