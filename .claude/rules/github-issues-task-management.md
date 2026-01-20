@@ -103,3 +103,34 @@ gh issue list --label "status:needs-review"
 3. **Comment on progress** for long-running tasks so context isn't lost
 4. **Link commits/PRs** to issues using "Fixes #N" or "Related to #N"
 5. **Create issues proactively** when you discover problems you can't address immediately
+
+## Bug Reports Require Verification
+
+**CRITICAL:** Before creating a bug report issue, you MUST verify the bug actually exists.
+
+**Required before filing a bug:**
+
+1. **Verify actual state** - Read the file/check the system state yourself
+2. **Check your own actions** - Did you actually do what you think you did?
+3. **Investigate root cause** - Is it really a bug, or missing configuration?
+4. **Include evidence** - Show actual file contents, git history, error messages
+
+**Do NOT create bug issues based on:**
+
+- Assumptions about what "must have happened"
+- Memory of what you think you did earlier
+- Guesses about tooling behavior
+
+**Example of a BAD bug report:**
+
+> "CI reverted my version bump" - based on seeing an old version, without checking git history or actual commits
+
+**Example of a GOOD bug report:**
+
+> "Version bump not applied. Evidence:
+>
+> - Committed in abc123 with version 0.1.0
+> - Current file shows 0.0.1 after CI run def456
+> - CI logs show [specific output]"
+
+See also: `.ai/rules/verify-before-blaming.md`
