@@ -1,0 +1,379 @@
+name: Claude Agent Trigger
+
+# Detects events that should trigger Claude agent and dispatches to agent workflow
+# Each job handles a specific trigger type with its own prompt construction
+# Schema: .github/schemas/claude-agent-payload.schema.json
+
+on:
+  issue_comment:
+    types: [created, edited]
+  pull_request_review_comment:
+    types: [created, edited]
+  issues:
+    types: [opened, assigned, labeled]
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  # =============================================================================
+  # Issue comment @claude mentions
+  # =============================================================================
+  issue-comment-mention:
+    if: >-
+      github.event_name == 'issue_comment' &&
+      contains(github.event.comment.body, '@claude')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Authenticate as GitHub App
+        id: auth
+        uses: ./.github/actions/github-app-auth
+        with:
+          app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
+          private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
+
+      - name: Dispatch to Claude agent
+        uses: ./.github/actions/dispatch-claude-agent
+        with:
+          token: ${{ steps.auth.outputs.token }}
+          prompt: ${{ github.event.comment.body }}
+          issue-number: ${{ github.event.issue.number }}
+          pr-number: ${{ github.event.issue.pull_request && github.event.issue.number || '' }}
+          comment-id: ${{ github.event.comment.id }}
+          author-login: ${{ github.event.comment.user.login }}
+          author-association: ${{ github.event.comment.author_association }}
+          title: ${{ github.event.issue.title }}
+
+  # =============================================================================
+  # PR review comment @claude mentions
+  # =============================================================================
+  pr-review-comment-mention:
+    if: >-
+      github.event_name == 'pull_request_review_comment' &&
+      contains(github.event.comment.body, '@claude')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Authenticate as GitHub App
+        id: auth
+        uses: ./.github/actions/github-app-auth
+        with:
+          app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
+          private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
+
+      - name: Dispatch to Claude agent
+        uses: ./.github/actions/dispatch-claude-agent
+        with:
+          token: ${{ steps.auth.outputs.token }}
+          prompt: ${{ github.event.comment.body }}
+          pr-number: ${{ github.event.pull_request.number }}
+          comment-id: ${{ github.event.comment.id }}
+          author-login: ${{ github.event.comment.user.login }}
+          author-association: ${{ github.event.comment.author_association }}
+          title: ${{ github.event.pull_request.title }}
+
+  # =============================================================================
+  # PR review @claude mentions
+  # =============================================================================
+  pr-review-mention:
+    if: >-
+      github.event_name == 'pull_request_review' &&
+      contains(github.event.review.body, '@claude')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Authenticate as GitHub App
+        id: auth
+        uses: ./.github/actions/github-app-auth
+        with:
+          app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
+          private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
+
+      - name: Dispatch to Claude agent
+        uses: ./.github/actions/dispatch-claude-agent
+        with:
+          token: ${{ steps.auth.outputs.token }}
+          prompt: ${{ github.event.review.body }}
+          pr-number: ${{ github.event.pull_request.number }}
+          comment-id: ${{ github.event.review.id }}
+          author-login: ${{ github.event.review.user.login }}
+          author-association: ${{ github.event.review.author_association }}
+          title: ${{ github.event.pull_request.title }}
+
+  # =============================================================================
+  # Issue assigned with @claude mention
+  # =============================================================================
+  issue-assigned-mention:
+    if: >-
+      github.event_name == 'issues' &&
+      github.event.action == 'assigned' &&
+      (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Authenticate as GitHub App
+        id: auth
+        uses: ./.github/actions/github-app-auth
+        with:
+          app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
+          private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
+
+      - name: Dispatch to Claude agent
+        uses: ./.github/actions/dispatch-claude-agent
+        with:
+          token: ${{ steps.auth.outputs.token }}
+          prompt: ${{ github.event.issue.body }}
+          issue-number: ${{ github.event.issue.number }}
+          author-login: ${{ github.event.issue.user.login }}
+          author-association: ${{ github.event.issue.author_association }}
+          title: ${{ github.event.issue.title }}
+
+  # =============================================================================
+  # Auto-planning: New issue without @claude mention (bot-created issues excluded)
+  # =============================================================================
+  issue-auto-plan:
+    if: >-
+      github.event_name == 'issues' &&
+      github.event.action == 'opened' &&
+      github.event.issue.user.type != 'Bot' &&
+      !contains(github.event.issue.body, '@claude')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Check if issue already has plan structure
+        id: check
+        run: |
+          BODY='${{ toJson(github.event.issue.body) }}'
+
+          # Detect if body already looks like a plan
+          if echo "$BODY" | grep -qiE '## (Implementation|Overview|Acceptance Criteria)'; then
+            echo "has_plan=true" >> $GITHUB_OUTPUT
+          elif echo "$BODY" | grep -qiE '<details>.*<summary>.*[Oo]riginal'; then
+            echo "has_plan=true" >> $GITHUB_OUTPUT
+          elif echo "$BODY" | grep -qiE '### Step [0-9]+'; then
+            echo "has_plan=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_plan=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Authenticate as GitHub App
+        if: steps.check.outputs.has_plan != 'true'
+        id: auth
+        uses: ./.github/actions/github-app-auth
+        with:
+          app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
+          private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
+
+      - name: Build auto-planning prompt
+        if: steps.check.outputs.has_plan != 'true'
+        id: prompt
+        run: |
+          # Build the planning prompt by embedding the original issue body
+          {
+            echo "prompt<<EOF_PROMPT"
+            echo "AUTO-PLANNING REQUEST"
+            echo ""
+            echo "This issue was created without an explicit @claude mention."
+            echo "Please convert this issue into a structured implementation plan."
+            echo ""
+            echo "Trigger: issue_created (auto-planning)"
+            echo ""
+            echo "Original issue body:"
+            echo '---'
+            echo '${{ github.event.issue.body }}'
+            echo '---'
+            echo "EOF_PROMPT"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Dispatch to Claude agent
+        if: steps.check.outputs.has_plan != 'true'
+        uses: ./.github/actions/dispatch-claude-agent
+        with:
+          token: ${{ steps.auth.outputs.token }}
+          prompt: ${{ steps.prompt.outputs.prompt }}
+          issue-number: ${{ github.event.issue.number }}
+          author-login: ${{ github.event.issue.user.login }}
+          author-association: ${{ github.event.issue.author_association }}
+          title: ${{ github.event.issue.title }}
+
+  # =============================================================================
+  # Explicit planning: Issue with @claude plan/implement/design/create
+  # =============================================================================
+  issue-explicit-plan:
+    if: >-
+      github.event_name == 'issues' &&
+      github.event.action == 'opened' &&
+      contains(github.event.issue.body, '@claude')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Check if planning requested
+        id: check
+        run: |
+          BODY='${{ toJson(github.event.issue.body) }}'
+
+          # Check if they're asking for planning
+          if echo "$BODY" | grep -qiE '@claude.*(plan|implement|design|create)'; then
+            echo "is_planning=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_planning=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Authenticate as GitHub App
+        id: auth
+        uses: ./.github/actions/github-app-auth
+        with:
+          app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
+          private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
+
+      - name: Build explicit planning prompt
+        if: steps.check.outputs.is_planning == 'true'
+        id: plan-prompt
+        run: |
+          {
+            echo "prompt<<EOF_PROMPT"
+            echo "PLANNING REQUEST"
+            echo ""
+            echo "The user has explicitly requested planning by mentioning @claude with a planning keyword."
+            echo "Please convert this issue into a structured implementation plan."
+            echo ""
+            echo "Trigger: explicit_mention (planning requested)"
+            echo ""
+            echo "Original request:"
+            echo '---'
+            echo '${{ github.event.issue.body }}'
+            echo '---'
+            echo "EOF_PROMPT"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Dispatch for planning
+        if: steps.check.outputs.is_planning == 'true'
+        uses: ./.github/actions/dispatch-claude-agent
+        with:
+          token: ${{ steps.auth.outputs.token }}
+          prompt: ${{ steps.plan-prompt.outputs.prompt }}
+          issue-number: ${{ github.event.issue.number }}
+          author-login: ${{ github.event.issue.user.login }}
+          author-association: ${{ github.event.issue.author_association }}
+          title: ${{ github.event.issue.title }}
+
+      - name: Dispatch for general request
+        if: steps.check.outputs.is_planning != 'true'
+        uses: ./.github/actions/dispatch-claude-agent
+        with:
+          token: ${{ steps.auth.outputs.token }}
+          prompt: ${{ github.event.issue.body }}
+          issue-number: ${{ github.event.issue.number }}
+          author-login: ${{ github.event.issue.user.login }}
+          author-association: ${{ github.event.issue.author_association }}
+          title: ${{ github.event.issue.title }}
+
+  # =============================================================================
+  # Replan: Issue labeled with 'replan'
+  # =============================================================================
+  issue-replan:
+    if: >-
+      github.event_name == 'issues' &&
+      github.event.action == 'labeled' &&
+      github.event.label.name == 'replan'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Authenticate as GitHub App
+        id: auth
+        uses: ./.github/actions/github-app-auth
+        with:
+          app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
+          private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
+
+      - name: Fetch comment history
+        id: comments
+        run: |
+          COMMENTS=$(gh api repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments --jq '[.[].body] | join("\n\n---\n\n")')
+          {
+            echo "history<<EOF_HISTORY"
+            echo "$COMMENTS"
+            echo "EOF_HISTORY"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Build replan prompt
+        id: prompt
+        run: |
+          {
+            echo "prompt<<EOF_PROMPT"
+            echo "REPLAN REQUEST"
+            echo ""
+            echo "The user has requested a replan by adding the 'replan' label."
+            echo "Please update the implementation plan based on the discussion in the comments."
+            echo ""
+            echo "Trigger: replan_label"
+            echo ""
+            echo "Current issue body:"
+            echo '---'
+            echo '${{ github.event.issue.body }}'
+            echo '---'
+            echo ""
+            echo "Comment history for context:"
+            echo '---'
+            echo '${{ steps.comments.outputs.history }}'
+            echo '---'
+            echo "EOF_PROMPT"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Dispatch to Claude agent
+        uses: ./.github/actions/dispatch-claude-agent
+        with:
+          token: ${{ steps.auth.outputs.token }}
+          prompt: ${{ steps.prompt.outputs.prompt }}
+          issue-number: ${{ github.event.issue.number }}
+          author-login: ${{ github.event.issue.user.login }}
+          author-association: ${{ github.event.issue.author_association }}
+          title: ${{ github.event.issue.title }}
