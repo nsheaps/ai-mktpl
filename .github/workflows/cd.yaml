@@ -50,9 +50,6 @@ jobs:
           install: true
           cache: true
 
-      - name: Install npm dependencies
-        run: npm ci
-
       - name: Detect changed plugins
         id: detect
         shell: bash
@@ -89,7 +86,7 @@ jobs:
           for plugin_name in ${{ steps.detect.outputs.plugins }}; do
             echo "=== Bumping version for $plugin_name ==="
             cd "plugins/$plugin_name"
-            npx release-it --ci
+            mise exec node -- npx release-it --ci
             cd ../..
           done
 
@@ -160,9 +157,6 @@ jobs:
         with:
           install: true
           cache: true
-
-      - name: Install npm dependencies
-        run: npm ci
 
       - name: Update marketplace metadata
         id: update
