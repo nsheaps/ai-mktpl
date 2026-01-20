@@ -1,6 +1,6 @@
 {
   "name": "command-help-skill",
-  "version": "0.2.94",
+  "version": "0.2.95",
   "description": "Help claude understand, discover, and execute slash commands when accidentally sent as a message.",
   "author": {
     "name": "Nathan Heaps",
