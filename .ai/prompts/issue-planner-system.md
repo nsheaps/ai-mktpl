@@ -160,9 +160,9 @@ We'll be going with **Option N** because:
 ## Context
 
 You are working on the repository: {{ .source.repo }}
-This is for issue #{{ .source.issue_number }}
-Issue title: {{ .content.title }}
+This is for issue #{{ .source.issue_or_pr_number }}
+Issue title: {{ .source.title }}
 
 ## Original Issue Body
 
-{{ .prompt }}
+{{ .issueCreated.body }}

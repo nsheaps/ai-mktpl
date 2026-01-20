@@ -38,11 +38,27 @@ jobs:
           app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
           private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
 
+      - name: Select prompt template based on trigger event
+        id: template
+        run: |
+          EVENT="${{ github.event.client_payload.trigger.event }}"
+          case "$EVENT" in
+            "mention")
+              echo "file=.ai/prompts/claude-agent-system.md" >> $GITHUB_OUTPUT
+              ;;
+            "issueCreated")
+              echo "file=.ai/prompts/issue-planner-system.md" >> $GITHUB_OUTPUT
+              ;;
+            *)
+              echo "file=.ai/prompts/claude-agent-system.md" >> $GITHUB_OUTPUT
+              ;;
+          esac
+
       - name: Interpolate system prompt
         id: prompt
         uses: ./.github/actions/interpolate-prompt
         with:
-          template-file: ${{ github.event.client_payload.system_prompt_template || '.ai/prompts/claude-agent-system.md' }}
+          template-file: ${{ steps.template.outputs.file }}
           payload: ${{ toJson(github.event.client_payload) }}
 
       - name: Run Claude Code

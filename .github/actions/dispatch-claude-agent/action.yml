@@ -1,5 +1,5 @@
 name: 'Dispatch Claude Agent'
-description: 'Complete action to dispatch Claude agent - handles checkout, auth, prompt building, and dispatch'
+description: 'Dispatch Claude agent with full payload - handles checkout, auth, and dispatch'
 
 branding:
   icon: 'send'
@@ -13,40 +13,10 @@ inputs:
   private-key:
     description: 'GitHub App private key for authentication'
     required: true
-
-  # Event context
-  workflow-type:
-    description: 'Type of workflow trigger (mention or new-issue)'
+  # Full payload to send (built by caller)
+  payload:
+    description: 'Full JSON payload to send to claude-agent workflow'
     required: true
-
-  # Prompt configuration
-  system-prompt-template:
-    description: 'Path to system prompt template file (relative to repo root)'
-    required: false
-    default: '.ai/prompts/claude-agent-system.md'
-
-  # Source context (all optional - extracted from github context if not provided)
-  prompt:
-    description: 'The prompt/request to send to Claude'
-    required: false
-  issue-number:
-    description: 'Issue number (if applicable)'
-    required: false
-  pr-number:
-    description: 'Pull request number (if applicable)'
-    required: false
-  comment-id:
-    description: 'Comment ID (if applicable)'
-    required: false
-  author-login:
-    description: 'Author username'
-    required: false
-  author-association:
-    description: 'Author association (OWNER, MEMBER, etc.)'
-    required: false
-  title:
-    description: 'Title of the issue or PR'
-    required: false
 
 outputs:
   token:
@@ -80,28 +50,4 @@ runs:
         token: ${{ steps.auth.outputs.token }}
         event-type: claude-agent
         # Schema: .github/schemas/claude-agent-payload.schema.json
-        client-payload: |
-          {
-            "prompt": ${{ toJson(inputs.prompt) }},
-            "system_prompt_template": "${{ inputs.system-prompt-template }}",
-            "workflow_type": "${{ inputs.workflow-type }}",
-            "trigger": {
-              "type": "${{ github.event_name }}",
-              "action": "${{ github.event.action }}"
-            },
-            "source": {
-              "repo": "${{ github.repository }}",
-              "issue_number": ${{ inputs.issue-number || 'null' }},
-              "pr_number": ${{ inputs.pr-number || 'null' }},
-              "comment_id": ${{ inputs.comment-id || 'null' }},
-              "ref": "${{ github.ref }}"
-            },
-            "author": {
-              "login": "${{ inputs.author-login }}",
-              "association": "${{ inputs.author-association }}"
-            },
-            "content": {
-              "title": ${{ toJson(inputs.title) }},
-              "body": ${{ toJson(inputs.prompt) }}
-            }
-          }
+        client-payload: ${{ inputs.payload }}

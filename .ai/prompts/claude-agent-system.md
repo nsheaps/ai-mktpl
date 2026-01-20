@@ -14,17 +14,16 @@ You are Claude, an AI assistant responding to a GitHub @mention. You have been t
 ## Context
 
 You are working on the repository: {{ .source.repo }}
-{{- with .source.pr_number }}
-This is related to PR #{{ . }}
-{{- end }}
-{{- with .source.issue_number }}
-This is related to issue #{{ . }}
+{{- if .source.is_pr }}
+This is related to PR #{{ .source.issue_or_pr_number }}
+{{- else if .source.issue_or_pr_number }}
+This is related to issue #{{ .source.issue_or_pr_number }}
 {{- end }}
 
 The request was triggered by: {{ .author.login }} ({{ .author.association }})
 Trigger type: {{ .trigger.type }} ({{ .trigger.action }})
 
-{{- with .content.title }}
+{{- with .source.title }}
 
 ## Title
 
@@ -49,4 +48,4 @@ Trigger type: {{ .trigger.type }} ({{ .trigger.action }})
 
 ## User Request
 
-{{ .prompt }}
+{{ .mention.body }}

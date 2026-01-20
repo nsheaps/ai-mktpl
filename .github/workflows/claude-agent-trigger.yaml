@@ -37,37 +37,30 @@ jobs:
         with:
           app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
           private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
-          workflow-type: mention
-          system-prompt-template: .ai/prompts/claude-agent-system.md
-          prompt: >-
-            ${{
-              github.event_name == 'issue_comment' && github.event.comment.body ||
-              github.event_name == 'pull_request_review_comment' && github.event.comment.body ||
-              github.event_name == 'pull_request_review' && github.event.review.body ||
-              github.event.issue.body
-            }}
-          issue-number: ${{ github.event.issue.number || '' }}
-          pr-number: >-
-            ${{
-              github.event_name == 'pull_request_review_comment' && github.event.pull_request.number ||
-              github.event_name == 'pull_request_review' && github.event.pull_request.number ||
-              (github.event.issue.pull_request && github.event.issue.number) ||
-              ''
-            }}
-          comment-id: ${{ github.event.comment.id || github.event.review.id || '' }}
-          author-login: >-
-            ${{
-              github.event.comment.user.login ||
-              github.event.review.user.login ||
-              github.event.issue.user.login
-            }}
-          author-association: >-
-            ${{
-              github.event.comment.author_association ||
-              github.event.review.author_association ||
-              github.event.issue.author_association
-            }}
-          title: ${{ github.event.issue.title || github.event.pull_request.title }}
+          payload: |
+            {
+              "trigger": {
+                "event": "mention",
+                "type": "${{ github.event_name }}",
+                "action": "${{ github.event.action }}"
+              },
+              "source": {
+                "title": ${{ toJson(github.event.issue.title || github.event.pull_request.title) }},
+                "html_url": "${{ github.event.pull_request.html_url || github.event.issue.html_url }}",
+                "repo": "${{ github.repository }}",
+                "issue_or_pr_number": ${{ github.event.pull_request.number || github.event.issue.number || 'null' }},
+                "is_pr": ${{ github.event.pull_request != null }},
+                "ref": "${{ github.ref }}"
+              },
+              "author": {
+                "login": "${{ github.event.comment.user.login || github.event.review.user.login || github.event.issue.user.login }}",
+                "association": "${{ github.event.comment.author_association || github.event.review.author_association || github.event.issue.author_association }}"
+              },
+              "mention": {
+                "comment_id": ${{ github.event.comment.id || github.event.review.id || 'null' }},
+                "body": ${{ toJson(github.event.comment.body || github.event.review.body || github.event.issue.body) }}
+              }
+            }
 
   # =============================================================================
   # NEW-ISSUE JOB: Auto-plan new issues
@@ -125,13 +118,29 @@ jobs:
         with:
           app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
           private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
-          workflow-type: new-issue
-          system-prompt-template: .ai/prompts/issue-planner-system.md
-          prompt: ${{ github.event.issue.body }}
-          issue-number: ${{ github.event.issue.number }}
-          author-login: ${{ github.event.issue.user.login }}
-          author-association: ${{ github.event.issue.author_association }}
-          title: ${{ github.event.issue.title }}
+          payload: |
+            {
+              "trigger": {
+                "event": "issueCreated",
+                "type": "${{ github.event_name }}",
+                "action": "${{ github.event.action }}"
+              },
+              "source": {
+                "title": ${{ toJson(github.event.issue.title) }},
+                "html_url": "${{ github.event.issue.html_url }}",
+                "repo": "${{ github.repository }}",
+                "issue_or_pr_number": ${{ github.event.issue.number }},
+                "is_pr": false,
+                "ref": "${{ github.ref }}"
+              },
+              "author": {
+                "login": "${{ github.event.issue.user.login }}",
+                "association": "${{ github.event.issue.author_association }}"
+              },
+              "issueCreated": {
+                "body": ${{ toJson(github.event.issue.body) }}
+              }
+            }
 
       # If there's an @claude mention that's not a planning request,
       # post a comment to trigger the mention job after planning completes

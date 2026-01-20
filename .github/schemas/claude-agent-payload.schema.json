@@ -4,21 +4,18 @@
   "title": "Claude Agent Dispatch Payload",
   "description": "Schema for repository_dispatch client_payload sent to claude-agent workflow",
   "type": "object",
-  "required": ["prompt", "trigger", "source", "author"],
+  "required": ["trigger", "source", "author"],
   "properties": {
-    "prompt": {
-      "type": "string",
-      "description": "The message/request for Claude to work on (extracted from comment/issue body)"
-    },
-    "system_context": {
-      "type": "string",
-      "description": "Additional system prompt context to append (optional)"
-    },
     "trigger": {
       "type": "object",
       "description": "Information about what triggered this dispatch",
-      "required": ["type", "action"],
+      "required": ["event", "type", "action"],
       "properties": {
+        "event": {
+          "type": "string",
+          "enum": ["mention", "issueCreated"],
+          "description": "The logical event type - determines which prompt template to use"
+        },
         "type": {
           "type": "string",
           "enum": ["issue_comment", "pull_request_review_comment", "pull_request_review", "issues"],
@@ -34,22 +31,27 @@
     "source": {
       "type": "object",
       "description": "Where this was triggered from",
+      "required": ["repo"],
       "properties": {
+        "title": {
+          "type": ["string", "null"],
+          "description": "Issue/PR title"
+        },
+        "html_url": {
+          "type": "string",
+          "description": "URL to the issue or PR"
+        },
         "repo": {
           "type": "string",
           "description": "Repository full name (owner/repo)"
         },
-        "issue_number": {
+        "issue_or_pr_number": {
           "type": ["integer", "null"],
-          "description": "Issue number (if applicable)"
+          "description": "Issue or PR number"
         },
-        "pr_number": {
-          "type": ["integer", "null"],
-          "description": "Pull request number (if applicable)"
-        },
-        "comment_id": {
-          "type": ["integer", "null"],
-          "description": "Comment or review ID that triggered this"
+        "is_pr": {
+          "type": "boolean",
+          "description": "Whether this is a pull request (true) or issue (false)"
         },
         "ref": {
           "type": "string",
@@ -81,19 +83,47 @@
         }
       }
     },
-    "content": {
+    "mention": {
       "type": "object",
-      "description": "The actual content that triggered this",
+      "description": "Data specific to mention events (trigger.event = 'mention')",
       "properties": {
-        "title": {
-          "type": ["string", "null"],
-          "description": "Issue/PR title (if applicable)"
+        "comment_id": {
+          "type": ["integer", "null"],
+          "description": "Comment or review ID that triggered this"
         },
         "body": {
           "type": "string",
-          "description": "Full body text of comment/issue/review"
+          "description": "Full body text of the comment/review/issue containing the @claude mention"
+        }
+      }
+    },
+    "issueCreated": {
+      "type": "object",
+      "description": "Data specific to issueCreated events (trigger.event = 'issueCreated')",
+      "properties": {
+        "body": {
+          "type": "string",
+          "description": "Full body text of the newly created issue"
         }
       }
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "trigger": { "properties": { "event": { "const": "mention" } } } }
+      },
+      "then": {
+        "required": ["mention"]
+      }
+    },
+    {
+      "if": {
+        "properties": { "trigger": { "properties": { "event": { "const": "issueCreated" } } } }
+      },
+      "then": {
+        "required": ["issueCreated"]
+      }
+    }
+  ]
 }
