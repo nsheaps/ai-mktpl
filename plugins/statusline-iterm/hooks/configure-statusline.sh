@@ -22,9 +22,9 @@ if [ -z "$current_command" ]; then
   exit 0
 fi
 
-# Case 2: Present and matches this plugin - update silently
-# Match if path contains "plugins/statusline-iterm" or points to statusline.sh
-if [[ "$current_command" == *"plugins/statusline-iterm"* ]] || [[ "$current_command" == *"statusline.sh"* ]]; then
+# Case 2: Present and matches this plugin or the original statusline plugin - update silently
+# Match if path contains "plugins/statusline-iterm" or "plugins/statusline/" (original plugin)
+if [[ "$current_command" == *"plugins/statusline-iterm"* ]] || [[ "$current_command" == *"plugins/statusline/"* ]]; then
   # Update to current resolved path
   jq --arg script "$STATUSLINE_SCRIPT" \
     '.statusLine.command = $script' \

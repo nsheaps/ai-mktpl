@@ -1,5 +1,5 @@
 module.exports = {
-  releaseCommitMessageFormat: "chore(statusline): release {{currentTag}}",
+  releaseCommitMessageFormat: "chore(statusline-iterm): release {{currentTag}}",
   scripts: {
     postbump: "prettier --write .claude-plugin/plugin.json",
   },
@@ -9,7 +9,7 @@ module.exports = {
     commit: false,
     tag: true,
   },
-  tagPrefix: "statusline@",
+  tagPrefix: "statusline-iterm@",
   packageFiles: [
     {
       filename: ".claude-plugin/plugin.json",

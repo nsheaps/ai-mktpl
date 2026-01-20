@@ -174,7 +174,7 @@ After modifying `bin/statusline.sh`:
 ```bash
 # Test with sample input
 echo '{"session_id": "test-123", "workspace": {"project_dir": "/Users/you/project"}}' | \
-  ./plugins/statusline/bin/statusline.sh
+  ./plugins/statusline-iterm/bin/statusline.sh
 ```
 
 ### Test in Claude Code
