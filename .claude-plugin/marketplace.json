@@ -123,7 +123,7 @@
     {
       "name": "datadog-otel-setup",
       "description": "Configure Claude Code's native OpenTelemetry integration for Datadog observability",
-      "version": "0.1.0",
+      "version": "0.0.1",
       "author": {
         "name": "Nathan Heaps"
       },
