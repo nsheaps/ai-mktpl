@@ -1,0 +1,29 @@
+{
+  "description": "Automatically configure statusLine.command in user's settings.json to use this plugin's script",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/configure-statusline.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/configure-statusline.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

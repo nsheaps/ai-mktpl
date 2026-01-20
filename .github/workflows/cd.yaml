@@ -24,6 +24,8 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+    outputs:
+      has_changes: ${{ steps.detect.outputs.has_changes }}
     steps:
       - name: Checkout PR branch
         uses: actions/checkout@v6
@@ -76,14 +78,15 @@ jobs:
             echo "plugins=${CHANGED_PLUGINS[*]}" >> $GITHUB_OUTPUT
           fi
 
-      - name: Bump versions for changed plugins
+      - name: Bump versions for changed plugins using svu
         if: steps.detect.outputs.has_changes == 'true'
         shell: bash
         run: |
           # Bump versions only for changed plugins
+          # IMPORTANT: Use version from BASE branch to avoid repeated increments
           for plugin_name in ${{ steps.detect.outputs.plugins }}; do
             echo "Bumping version for $plugin_name"
-            just _bump-plugin-version "plugins/$plugin_name"
+            just _bump-plugin-version-svu "plugins/$plugin_name" "origin/${{ github.base_ref }}"
           done
 
       - name: Push version bumps to PR
@@ -117,14 +120,25 @@ jobs:
 
   update-marketplace:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Run after version bumps in PRs, or directly on main pushes
+    needs: [bump-plugin-versions-in-pr]
+    if: |
+      always() &&
+      ((github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+       (github.event_name == 'pull_request' && needs.bump-plugin-versions-in-pr.result == 'success'))
     permissions:
       contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
+          # For PRs, checkout the head branch to get the version bump commits
+          ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
           persist-credentials: false
+
+      - name: Pull latest changes (for PR)
+        if: github.event_name == 'pull_request'
+        run: git pull origin ${{ github.head_ref }} || true
 
       - name: Authenticate as GitHub App
         id: auth
@@ -150,3 +164,4 @@ jobs:
         with:
           commit_message: 'chore: update marketplace metadata [skip ci]'
           file_pattern: '.claude-plugin/marketplace.json'
+          branch: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}

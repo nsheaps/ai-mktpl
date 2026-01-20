@@ -10,6 +10,18 @@
   },
   "plugins": [
     {
+      "name": "claude-tools",
+      "description": "Collection of CLI tools for Claude Code workflow management including diagnostics, worktree management, session handling, and process supervision",
+      "version": "0.0.1",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/claude-tools",
+      "category": "utility",
+      "tags": ["utility"],
+      "keywords": []
+    },
+    {
       "name": "code-simplifier",
       "description": "Simplify and refine code for clarity, consistency, and maintainability. Requires pr-review-toolkit plugin.",
       "version": "0.1.0",
@@ -228,7 +240,7 @@
     {
       "name": "statusline",
       "description": "Configurable status line for Claude Code showing session info, project context, and git status",
-      "version": "0.1.10",
+      "version": "0.1.12",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -236,6 +248,28 @@
       "category": "utility",
       "tags": ["utility"],
       "keywords": ["statusline", "status", "ui", "git", "workflow", "productivity"]
+    },
+    {
+      "name": "statusline-iterm",
+      "description": "Status line for Claude Code with iTerm2 badge integration - shows session info, project context, git status, and updates iTerm2 badge",
+      "version": "0.1.1",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/statusline-iterm",
+      "category": "utility",
+      "tags": ["utility"],
+      "keywords": [
+        "statusline",
+        "status",
+        "ui",
+        "git",
+        "workflow",
+        "productivity",
+        "iterm",
+        "iterm2",
+        "badge"
+      ]
     },
     {
       "name": "sync-settings",
@@ -293,7 +327,7 @@
     {
       "name": "todo-sync",
       "description": "Automatically syncs todos and plans from ~/.claude/ to the current project's .claude/ directory",
-      "version": "0.1.5",
+      "version": "0.1.6",
       "author": {
         "name": "Nathan Heaps"
       },
