@@ -1,6 +1,6 @@
 {
   "name": "memory-manager",
-  "version": "0.2.44",
+  "version": "0.2.45",
   "description": "Intelligent memory management for CLAUDE.md files. Automatically detects and stores user preferences, rules, and instructions with smart scope detection and hierarchical organization.",
   "author": {
     "name": "Nathan Heaps"
