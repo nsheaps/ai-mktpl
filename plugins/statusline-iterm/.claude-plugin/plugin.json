@@ -1,6 +1,6 @@
 {
   "name": "statusline-iterm",
-  "version": "0.1.109",
+  "version": "0.1.110",
   "description": "Status line for Claude Code with iTerm2 badge integration - shows session info, project context, git status, and updates iTerm2 badge",
   "author": {
     "name": "Nathan Heaps",
