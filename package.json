@@ -1,0 +1,11 @@
+{
+  "name": "claude-code-plugin-marketplace",
+  "private": true,
+  "description": "A curated collection of high-quality plugins for Claude Code",
+  "packageManager": "yarn@4.9.2",
+  "devDependencies": {
+    "@release-it/bumper": "^7.0.0",
+    "release-it": "^19.0.0"
+  },
+  "version": "0.0.1"
+}

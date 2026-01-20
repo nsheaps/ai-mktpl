@@ -5,11 +5,10 @@ node = "lts"
 python = "3.14.2"
 bun = "latest"
 just = "latest"
-svu = "latest"
 
 "npm:prettier" = "latest"
 "npm:eslint" = "latest"
-"npm:commit-and-tag-version" = "latest"
+yarn = "latest"
 
 [settings]
 # Use shorter paths for tools

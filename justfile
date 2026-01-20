@@ -22,12 +22,14 @@ root_dir := justfile_directory()
 default:
     @just --list
 
-# Install development dependencies via mise
+# Install development dependencies via mise and yarn
 setup:
     @echo "Pruning unused tools"
     mise prune -y
     @echo "Installing tools via mise..."
     mise install -y
+    @echo "Installing yarn dependencies (release-it)..."
+    yarn install
     @echo "Setup complete!"
 
 # Run all linters (uses .prettierrc.yaml for config)
@@ -95,30 +97,22 @@ validate:
         exit 1
     fi
 
+# Preview version bump for a single plugin (dry-run)
 _preview-version-bump PLUGIN_PATH=invocation_directory():
     #!/usr/bin/env bash
-    command -v commit-and-tag-version >/dev/null 2>&1 || { just setup ; }
+    [ -f "{{root_dir}}/.pnp.cjs" ] || { just setup ; }
     source {{root_dir}}/bin/lib/stdlib.sh
     cd {{PLUGIN_PATH}}
     PLUGIN_DIR="$(dirname "$(find_up '.claude-plugin')")"
     cd "$PLUGIN_DIR"
-    # echo "Current version is $(just plugin-current-version {{invocation_directory()}})"
-    echo "===[ DRY RUN ]==="
-    commit-and-tag-version --dry-run
+    echo "===[ DRY RUN for $(basename $PLUGIN_DIR) ]==="
+    yarn exec release-it --dry-run --ci 2>&1 || echo "No release needed"
 
+# Compare plugin versions between base branch (main) and current HEAD
+# Shows actual version changes in PR, not predicted future bumps
 [arg('format', pattern='--format=raw|--format=md')]
 _preview-version-bumps format='--format=raw':
     #!/usr/bin/env bash
-    # Compare plugin versions between base branch (main) and current HEAD
-    # Shows actual version changes in PR, not predicted future bumps
-    #
-    # format with raw:
-    #  plugin-name: 1.2.2 =( patch )=> 1.2.3
-    # format with md:
-    #  | Plugin | Base | Type | Head |
-    #  |---|---|---|---|
-    #  | plugin-name | 1.2.2 | patch | 1.2.3 |
-
     # Determine base branch (origin/main in CI, main locally)
     BASE_BRANCH="${GITHUB_BASE_REF:-main}"
     if ! git rev-parse --verify "origin/$BASE_BRANCH" >/dev/null 2>&1; then
@@ -195,6 +189,78 @@ _preview-version-bumps format='--format=raw':
         esac
     fi
 
+# Detect plugins with code changes and output JSON for CI/CD
+# Usage: just detect-plugin-changes [base-ref]
+# Output: JSON with has_changes, plugins array, and report_md
+detect-plugin-changes base_ref='main':
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    BASE_REF="{{base_ref}}"
+
+    # Resolve base ref - prefer origin/ref if it exists
+    if git rev-parse --verify "origin/$BASE_REF" >/dev/null 2>&1; then
+        BASE_REF="origin/$BASE_REF"
+    elif ! git rev-parse --verify "$BASE_REF" >/dev/null 2>&1; then
+        # Fallback to HEAD~1 if base ref doesn't exist
+        BASE_REF="HEAD~1"
+    fi
+
+    # Build JSON output
+    PLUGINS_JSON="[]"
+    REPORT_MD="| Plugin | Current | → | After Merge |\n|---|---|---|---|"
+
+    for plugin_dir in plugins/*; do
+        if [ ! -d "$plugin_dir" ]; then
+            continue
+        fi
+
+        PLUGIN_NAME=$(basename "$plugin_dir")
+        PLUGIN_JSON="$plugin_dir/.claude-plugin/plugin.json"
+
+        # Check if plugin has code changes (excluding plugin.json and CHANGELOG.md)
+        if ! git diff --name-only "$BASE_REF..HEAD" -- "$plugin_dir" 2>/dev/null | grep -v 'CHANGELOG.md$' | grep -v 'plugin.json$' | grep -q .; then
+            continue
+        fi
+
+        # Get current version
+        CURRENT_VERSION=$(jq -r '.version' "$PLUGIN_JSON" 2>/dev/null || echo "0.0.0")
+
+        # Calculate next patch version
+        IFS='.' read -r major minor patch <<< "$CURRENT_VERSION"
+        NEXT_VERSION="$major.$minor.$((patch + 1))"
+
+        # Add to plugins JSON array
+        PLUGINS_JSON=$(echo "$PLUGINS_JSON" | jq -c ". + [{\"name\": \"$PLUGIN_NAME\", \"current\": \"$CURRENT_VERSION\", \"next\": \"$NEXT_VERSION\"}]")
+
+        # Add to markdown report
+        REPORT_MD="$REPORT_MD\n| $PLUGIN_NAME | $CURRENT_VERSION | → | $NEXT_VERSION |"
+    done
+
+    # Determine if there are changes
+    PLUGIN_COUNT=$(echo "$PLUGINS_JSON" | jq 'length')
+    if [ "$PLUGIN_COUNT" -gt 0 ]; then
+        HAS_CHANGES="true"
+        PLUGINS_LIST=$(echo "$PLUGINS_JSON" | jq -r '.[].name' | tr '\n' ' ' | xargs)
+    else
+        HAS_CHANGES="false"
+        PLUGINS_LIST=""
+        REPORT_MD="| Plugin | Current | → | After Merge |\n|---|---|---|---|\n| *No changes detected* | | | |"
+    fi
+
+    # Output final JSON
+    jq -n \
+        --argjson has_changes "$HAS_CHANGES" \
+        --arg plugins "$PLUGINS_LIST" \
+        --argjson plugins_json "$PLUGINS_JSON" \
+        --arg report_md "$(printf '%b' "$REPORT_MD")" \
+        '{
+            has_changes: $has_changes,
+            plugins: $plugins,
+            plugins_json: $plugins_json,
+            report_md: $report_md
+        }'
+
 _plugin-current-versions:
     #!/usr/bin/env bash
     # returns a list of plugin names and their current versions
@@ -213,88 +279,27 @@ _plugin-current-versions:
 _plugin-current-version PLUGIN_PATH=invocation_directory():
     #!/usr/bin/env bash
     # returns just the semver of the plugin at PLUGIN_PATH
-    command -v commit-and-tag-version >/dev/null 2>&1 || { just setup ; }
     source {{root_dir}}/bin/lib/stdlib.sh
     cd {{PLUGIN_PATH}}
     PLUGIN_DIR="$(dirname "$(find_up '.claude-plugin')")"
     cd "$PLUGIN_DIR"
     echo "$(jq -r '.version' .claude-plugin/plugin.json)" | xargs
 
-_plugin-next-version PLUGIN_PATH=invocation_directory():
-    #!/usr/bin/env bash
-    # returns just the semver (aka 1.1.0)
-    command -v commit-and-tag-version >/dev/null 2>&1 || { just setup ; }
-    source {{root_dir}}/bin/lib/stdlib.sh
-    cd {{PLUGIN_PATH}}
-    PLUGIN_DIR="$(dirname "$(find_up '.claude-plugin')")"
-    cd "$PLUGIN_DIR"
-    commit-and-tag-version --dry-run --skip.changelog --skip.commit | grep -Eo 'to \d+\.\d+\.\d+' | sed 's/to //g'
-
-# Bump plugin version using svu (Semantic Version Utility)
-# BASE_REF is the git ref to get the base version from (e.g., origin/main)
-# This prevents repeated version increments on subsequent PR pushes
-_bump-plugin-version-svu PLUGIN_PATH=invocation_directory() BASE_REF='HEAD~1':
-    #!/usr/bin/env bash
-    command -v svu >/dev/null 2>&1 || { just setup ; }
-    source {{root_dir}}/bin/lib/stdlib.sh
-    cd {{PLUGIN_PATH}}
-    PLUGIN_DIR="$(dirname "$(find_up '.claude-plugin')")"
-    cd "$PLUGIN_DIR"
-    PLUGIN_JSON=".claude-plugin/plugin.json"
-
-    # Get base version from the BASE_REF (target branch in PR context)
-    BASE_VERSION=$(git show "{{BASE_REF}}:$PLUGIN_DIR/$PLUGIN_JSON" 2>/dev/null | jq -r '.version' 2>/dev/null || echo "0.0.0")
-    if [ -z "$BASE_VERSION" ] || [ "$BASE_VERSION" = "null" ]; then
-        BASE_VERSION="0.0.0"
-    fi
-    echo "Base version from {{BASE_REF}}: $BASE_VERSION"
-
-    # Create a temporary tag at base version for svu to use
-    TEMP_TAG="v${BASE_VERSION}"
-    git tag -f "$TEMP_TAG" "{{BASE_REF}}" 2>/dev/null || git tag -f "$TEMP_TAG" HEAD~1 2>/dev/null || true
-
-    # Use svu to determine next version based on conventional commits
-    # --tag.prefix="" removes the 'v' prefix from output
-    # --always ensures we always get a version even without proper tags
-    # --log.directory=. scopes to changes in this directory
-    NEXT_VERSION=$(svu next --tag.prefix "" --always --log.directory . 2>/dev/null || echo "")
-
-    # Clean up temporary tag
-    git tag -d "$TEMP_TAG" 2>/dev/null || true
-
-    # If svu fails or returns empty, fall back to patch bump
-    if [ -z "$NEXT_VERSION" ] || [ "$NEXT_VERSION" = "$BASE_VERSION" ]; then
-        IFS='.' read -r major minor patch <<< "$BASE_VERSION"
-        NEXT_VERSION="$major.$minor.$((patch + 1))"
-        echo "svu returned same version, using patch bump: $NEXT_VERSION"
-    fi
-
-    echo "Next version: $NEXT_VERSION"
-
-    # Update plugin.json with new version
-    jq --arg version "$NEXT_VERSION" '.version = $version' "$PLUGIN_JSON" > "${PLUGIN_JSON}.tmp"
-    mv "${PLUGIN_JSON}.tmp" "$PLUGIN_JSON"
-
-    # Update CHANGELOG.md if it exists
-    if [ -f "CHANGELOG.md" ]; then
-        DATE=$(date +%Y-%m-%d)
-        # Add new version header after the first line (# Changelog)
-        sed -i "2i\\\n## [$NEXT_VERSION] - $DATE\n" CHANGELOG.md
-    fi
-    
-    just lint-fix "$PLUGIN_JSON"
-
-    echo "Bumped $PLUGIN_DIR from $BASE_VERSION to $NEXT_VERSION"
-
+# Bump plugin version using release-it
+# Reads current version from plugin.json, applies patch bump
 _bump-plugin-version PLUGIN_PATH=invocation_directory():
     #!/usr/bin/env bash
-    command -v commit-and-tag-version >/dev/null 2>&1 || { just setup ; }
+    [ -f "{{root_dir}}/.pnp.cjs" ] || { just setup ; }
     source {{root_dir}}/bin/lib/stdlib.sh
     cd {{PLUGIN_PATH}}
     PLUGIN_DIR="$(dirname "$(find_up '.claude-plugin')")"
     cd "$PLUGIN_DIR"
-    commit-and-tag-version
+    PLUGIN_NAME=$(basename "$PLUGIN_DIR")
 
+    echo "=== Bumping version for $PLUGIN_NAME ==="
+    yarn exec release-it --ci
+
+# Bump all plugin versions (only those with changes)
 _bump-plugin-versions:
     #!/usr/bin/env bash
     for plugin_dir in plugins/*; do
@@ -302,6 +307,29 @@ _bump-plugin-versions:
             continue
         fi
         just _bump-plugin-version "$plugin_dir"
+    done
+
+# Bump versions for changed plugins only
+# BASE_REF is used to detect which plugins have changes
+_bump-changed-plugins BASE_REF='origin/main':
+    #!/usr/bin/env bash
+    [ -f "{{root_dir}}/.pnp.cjs" ] || { just setup ; }
+
+    for plugin_dir in plugins/*; do
+        if [ ! -d "$plugin_dir" ]; then
+            continue
+        fi
+        PLUGIN_NAME=$(basename "$plugin_dir")
+
+        # Check if plugin has changes (excluding CHANGELOG.md and plugin.json)
+        if git diff --name-only "{{BASE_REF}}..HEAD" -- "$plugin_dir" | grep -v 'CHANGELOG.md$' | grep -v 'plugin.json$' | grep -q .; then
+            echo "=== Bumping version for $PLUGIN_NAME (has changes) ==="
+            cd "$plugin_dir"
+            yarn exec release-it --ci
+            cd - > /dev/null
+        else
+            echo "=== Skipping $PLUGIN_NAME (no changes) ==="
+        fi
     done
 
 # Bump plugin versions (use --dry-run to preview)
