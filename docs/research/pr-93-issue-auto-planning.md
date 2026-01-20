@@ -208,21 +208,24 @@ All differentiation (planning vs mention handling) is captured in the `prompt` f
 
 ## Template Variables
 
-Using `envsubst` format (`${VAR}`) instead of Jinja (`{{ var }}`).
+Using `{{.path}}` syntax with jq-based interpolation. Templates access payload data directly via JSON paths.
 
-**issue-planner-system.md variables:**
+**Syntax:**
+- `{{.path.to.value}}` - Simple value extraction
+- `{{#if .path}}content{{/if}}` - Conditional sections
 
-- `${REPO}` - Repository name
-- `${ISSUE_NUMBER}` - Issue number
-- `${ORIGINAL_ISSUE_BODY}` - Original issue text
-
-**claude-agent-system.md variables:**
-
-- `${REPO}` - Repository name
-- `${PR_CONTEXT}` - PR info if applicable
-- `${ISSUE_CONTEXT}` - Issue info if applicable
-- `${AUTHOR}` - Trigger author
-- `${PROMPT}` - The user's message/request
+**Available paths (from dispatch payload):**
+- `{{.source.repo}}` - Repository name (owner/repo)
+- `{{.source.issue_number}}` - Issue number
+- `{{.source.pr_number}}` - PR number
+- `{{.source.comment_id}}` - Comment ID
+- `{{.author.login}}` - Trigger author username
+- `{{.author.association}}` - Author association (OWNER, MEMBER, etc.)
+- `{{.trigger.type}}` - Event type (issue_comment, issues, etc.)
+- `{{.trigger.action}}` - Event action (created, opened, etc.)
+- `{{.content.title}}` - Issue/PR title
+- `{{.content.body}}` - Full body text
+- `{{.prompt}}` - The user's message/request
 
 ---
 

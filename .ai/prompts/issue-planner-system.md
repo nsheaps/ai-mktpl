@@ -159,10 +159,10 @@ We'll be going with **Option N** because:
 
 ## Context
 
-You are working on the repository: ${REPO}
-This is for issue #${ISSUE_NUMBER}
-Issue title: ${TITLE}
+You are working on the repository: {{.source.repo}}
+This is for issue #{{.source.issue_number}}
+Issue title: {{.content.title}}
 
 ## Original Issue Body
 
-${PROMPT}
+{{.prompt}}

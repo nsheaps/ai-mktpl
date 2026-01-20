@@ -38,81 +38,12 @@ jobs:
           app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
           private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
 
-      - name: Extract payload values
-        id: payload
-        env:
-          PAYLOAD: ${{ toJson(github.event.client_payload) }}
-        run: |
-          # Extract values from payload
-          REPO=$(echo "$PAYLOAD" | jq -r '.source.repo // ""')
-          PR_NUMBER=$(echo "$PAYLOAD" | jq -r '.source.pr_number // ""')
-          ISSUE_NUMBER=$(echo "$PAYLOAD" | jq -r '.source.issue_number // ""')
-          TITLE=$(echo "$PAYLOAD" | jq -r '.content.title // ""')
-
-          # Get system prompt template from payload (defaults to agent system prompt)
-          TEMPLATE=$(echo "$PAYLOAD" | jq -r '.system_prompt_template // ".ai/prompts/claude-agent-system.md"')
-          echo "TEMPLATE=$TEMPLATE" >> "$GITHUB_OUTPUT"
-
-          echo "REPO=$REPO" >> "$GITHUB_OUTPUT"
-          echo "PR_NUMBER=$PR_NUMBER" >> "$GITHUB_OUTPUT"
-          echo "ISSUE_NUMBER=$ISSUE_NUMBER" >> "$GITHUB_OUTPUT"
-          echo "COMMENT_ID=$(echo "$PAYLOAD" | jq -r '.source.comment_id // ""')" >> "$GITHUB_OUTPUT"
-          echo "AUTHOR=$(echo "$PAYLOAD" | jq -r '.author.login // ""')" >> "$GITHUB_OUTPUT"
-          echo "ASSOCIATION=$(echo "$PAYLOAD" | jq -r '.author.association // ""')" >> "$GITHUB_OUTPUT"
-          echo "TRIGGER_TYPE=$(echo "$PAYLOAD" | jq -r '.trigger.type // ""')" >> "$GITHUB_OUTPUT"
-          echo "TRIGGER_ACTION=$(echo "$PAYLOAD" | jq -r '.trigger.action // ""')" >> "$GITHUB_OUTPUT"
-          echo "TITLE=$TITLE" >> "$GITHUB_OUTPUT"
-
-          # Build conditional context sections for template
-          if [ "$PR_NUMBER" != "null" ] && [ -n "$PR_NUMBER" ]; then
-            echo "PR_CONTEXT=This is related to PR #$PR_NUMBER" >> "$GITHUB_OUTPUT"
-          else
-            echo "PR_CONTEXT=" >> "$GITHUB_OUTPUT"
-          fi
-
-          if [ "$ISSUE_NUMBER" != "null" ] && [ -n "$ISSUE_NUMBER" ]; then
-            echo "ISSUE_CONTEXT=This is related to issue #$ISSUE_NUMBER" >> "$GITHUB_OUTPUT"
-          else
-            echo "ISSUE_CONTEXT=" >> "$GITHUB_OUTPUT"
-          fi
-
-          if [ "$TITLE" != "null" ] && [ -n "$TITLE" ]; then
-            {
-              echo "TITLE_SECTION<<EOF_TITLE"
-              echo "## Title"
-              echo ""
-              echo "$TITLE"
-              echo "EOF_TITLE"
-            } >> "$GITHUB_OUTPUT"
-          else
-            echo "TITLE_SECTION=" >> "$GITHUB_OUTPUT"
-          fi
-
-          # Extract the prompt
-          {
-            echo "PROMPT<<EOF_PROMPT"
-            echo "$PAYLOAD" | jq -r '.prompt // ""'
-            echo "EOF_PROMPT"
-          } >> "$GITHUB_OUTPUT"
-
       - name: Interpolate system prompt
         id: prompt
         uses: ./.github/actions/interpolate-prompt
-        env:
-          REPO: ${{ steps.payload.outputs.REPO }}
-          PR_NUMBER: ${{ steps.payload.outputs.PR_NUMBER }}
-          ISSUE_NUMBER: ${{ steps.payload.outputs.ISSUE_NUMBER }}
-          AUTHOR: ${{ steps.payload.outputs.AUTHOR }}
-          ASSOCIATION: ${{ steps.payload.outputs.ASSOCIATION }}
-          TRIGGER_TYPE: ${{ steps.payload.outputs.TRIGGER_TYPE }}
-          TRIGGER_ACTION: ${{ steps.payload.outputs.TRIGGER_ACTION }}
-          TITLE: ${{ steps.payload.outputs.TITLE }}
-          PROMPT: ${{ steps.payload.outputs.PROMPT }}
-          PR_CONTEXT: ${{ steps.payload.outputs.PR_CONTEXT }}
-          ISSUE_CONTEXT: ${{ steps.payload.outputs.ISSUE_CONTEXT }}
-          TITLE_SECTION: ${{ steps.payload.outputs.TITLE_SECTION }}
         with:
-          template-file: ${{ steps.payload.outputs.TEMPLATE }}
+          template-file: ${{ github.event.client_payload.system_prompt_template || '.ai/prompts/claude-agent-system.md' }}
+          payload: ${{ toJson(github.event.client_payload) }}
 
       - name: Run Claude Code
         id: claude
