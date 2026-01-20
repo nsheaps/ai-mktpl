@@ -14,6 +14,8 @@ export GIT_OPTIONAL_LOCKS=0
 # (not "current window" which would cause flickering with multiple sessions).
 iterm2_set_user_var() {
   if [ "$TERM_PROGRAM" = "iTerm.app" ]; then
+    # in case this doesn't work
+    # osascript -e "tell application \"iTerm2\" to tell current session of current window to set variable named \"user.$1\" to \"$2\"" >/dev/null 2>&1 || true
     # Encode value as base64 for the escape sequence
     local encoded_value
     encoded_value=$(printf '%s' "$2" | base64 | tr -d '\n')
