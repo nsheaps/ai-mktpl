@@ -1,6 +1,6 @@
 {
   "name": "safety-evaluation-prompt",
-  "version": "0.2.230",
+  "version": "0.2.231",
   "description": "Pre-tool-call safety evaluation using prompt-style hooks for inline AI evaluation",
   "author": {
     "name": "Nathan Heaps",
