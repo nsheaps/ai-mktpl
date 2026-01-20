@@ -189,6 +189,78 @@ _preview-version-bumps format='--format=raw':
         esac
     fi
 
+# Detect plugins with code changes and output JSON for CI/CD
+# Usage: just detect-plugin-changes [base-ref]
+# Output: JSON with has_changes, plugins array, and report_md
+detect-plugin-changes base_ref='main':
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    BASE_REF="{{base_ref}}"
+
+    # Resolve base ref - prefer origin/ref if it exists
+    if git rev-parse --verify "origin/$BASE_REF" >/dev/null 2>&1; then
+        BASE_REF="origin/$BASE_REF"
+    elif ! git rev-parse --verify "$BASE_REF" >/dev/null 2>&1; then
+        # Fallback to HEAD~1 if base ref doesn't exist
+        BASE_REF="HEAD~1"
+    fi
+
+    # Build JSON output
+    PLUGINS_JSON="[]"
+    REPORT_MD="| Plugin | Current | → | After Merge |\n|---|---|---|---|"
+
+    for plugin_dir in plugins/*; do
+        if [ ! -d "$plugin_dir" ]; then
+            continue
+        fi
+
+        PLUGIN_NAME=$(basename "$plugin_dir")
+        PLUGIN_JSON="$plugin_dir/.claude-plugin/plugin.json"
+
+        # Check if plugin has code changes (excluding plugin.json and CHANGELOG.md)
+        if ! git diff --name-only "$BASE_REF..HEAD" -- "$plugin_dir" 2>/dev/null | grep -v 'CHANGELOG.md$' | grep -v 'plugin.json$' | grep -q .; then
+            continue
+        fi
+
+        # Get current version
+        CURRENT_VERSION=$(jq -r '.version' "$PLUGIN_JSON" 2>/dev/null || echo "0.0.0")
+
+        # Calculate next patch version
+        IFS='.' read -r major minor patch <<< "$CURRENT_VERSION"
+        NEXT_VERSION="$major.$minor.$((patch + 1))"
+
+        # Add to plugins JSON array
+        PLUGINS_JSON=$(echo "$PLUGINS_JSON" | jq -c ". + [{\"name\": \"$PLUGIN_NAME\", \"current\": \"$CURRENT_VERSION\", \"next\": \"$NEXT_VERSION\"}]")
+
+        # Add to markdown report
+        REPORT_MD="$REPORT_MD\n| $PLUGIN_NAME | $CURRENT_VERSION | → | $NEXT_VERSION |"
+    done
+
+    # Determine if there are changes
+    PLUGIN_COUNT=$(echo "$PLUGINS_JSON" | jq 'length')
+    if [ "$PLUGIN_COUNT" -gt 0 ]; then
+        HAS_CHANGES="true"
+        PLUGINS_LIST=$(echo "$PLUGINS_JSON" | jq -r '.[].name' | tr '\n' ' ' | xargs)
+    else
+        HAS_CHANGES="false"
+        PLUGINS_LIST=""
+        REPORT_MD="| Plugin | Current | → | After Merge |\n|---|---|---|---|\n| *No changes detected* | | | |"
+    fi
+
+    # Output final JSON
+    jq -n \
+        --argjson has_changes "$HAS_CHANGES" \
+        --arg plugins "$PLUGINS_LIST" \
+        --argjson plugins_json "$PLUGINS_JSON" \
+        --arg report_md "$(echo -e "$REPORT_MD")" \
+        '{
+            has_changes: $has_changes,
+            plugins: $plugins,
+            plugins_json: $plugins_json,
+            report_md: $report_md
+        }'
+
 _plugin-current-versions:
     #!/usr/bin/env bash
     # returns a list of plugin names and their current versions

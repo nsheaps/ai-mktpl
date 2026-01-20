@@ -1,0 +1,45 @@
+name: Detect Plugin Changes
+description: Detect plugins with code changes and calculate version bumps
+
+inputs:
+  base-ref:
+    description: Base ref to compare against (branch name or commit)
+    required: false
+    default: 'main'
+
+outputs:
+  has-changes:
+    description: Whether any plugins have changes (true/false)
+    value: ${{ steps.detect.outputs.has_changes }}
+  plugins:
+    description: Space-separated list of changed plugin names
+    value: ${{ steps.detect.outputs.plugins }}
+  plugins-json:
+    description: JSON array of changed plugins with version info
+    value: ${{ steps.detect.outputs.plugins_json }}
+  report-md:
+    description: Markdown table for PR comments
+    value: ${{ steps.detect.outputs.report_md }}
+
+runs:
+  using: composite
+  steps:
+    - name: Detect plugin changes
+      id: detect
+      shell: bash
+      run: |
+        # Run justfile recipe and capture JSON output
+        OUTPUT=$(just detect-plugin-changes "${{ inputs.base-ref }}")
+
+        # Parse JSON and set outputs
+        echo "has_changes=$(echo "$OUTPUT" | jq -r '.has_changes')" >> $GITHUB_OUTPUT
+        echo "plugins=$(echo "$OUTPUT" | jq -r '.plugins')" >> $GITHUB_OUTPUT
+
+        # For JSON outputs, use heredoc to handle multiline
+        echo "plugins_json<<EOF" >> $GITHUB_OUTPUT
+        echo "$OUTPUT" | jq -c '.plugins_json' >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
+        echo "report_md<<EOF" >> $GITHUB_OUTPUT
+        echo "$OUTPUT" | jq -r '.report_md' >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
