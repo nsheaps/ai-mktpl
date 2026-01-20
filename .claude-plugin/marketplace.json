@@ -249,7 +249,7 @@
     {
       "name": "statusline",
       "description": "Configurable status line for Claude Code showing session info, project context, and git status",
-      "version": "0.1.10",
+      "version": "0.1.12",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -257,6 +257,28 @@
       "category": "utility",
       "tags": ["utility"],
       "keywords": ["statusline", "status", "ui", "git", "workflow", "productivity"]
+    },
+    {
+      "name": "statusline-iterm",
+      "description": "Status line for Claude Code with iTerm2 badge integration - shows session info, project context, git status, and updates iTerm2 badge",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/statusline-iterm",
+      "category": "utility",
+      "tags": ["utility"],
+      "keywords": [
+        "statusline",
+        "status",
+        "ui",
+        "git",
+        "workflow",
+        "productivity",
+        "iterm",
+        "iterm2",
+        "badge"
+      ]
     },
     {
       "name": "sync-settings",
@@ -314,7 +336,7 @@
     {
       "name": "todo-sync",
       "description": "Automatically syncs todos and plans from ~/.claude/ to the current project's .claude/ directory",
-      "version": "0.1.4",
+      "version": "0.1.6",
       "author": {
         "name": "Nathan Heaps"
       },

@@ -1,11 +1,10 @@
 {
   "name": "todo-sync",
-  "version": "0.1.4",
+  "version": "0.1.6",
   "description": "Automatically syncs todos and plans from ~/.claude/ to the current project's .claude/ directory",
   "author": {
     "name": "Nathan Heaps",
     "email": "nsheaps@gmail.com"
   },
-  "keywords": ["todos", "plans", "sync", "workflow", "productivity"],
-  "hooks": "./hooks/hooks.json"
+  "keywords": ["todos", "plans", "sync", "workflow", "productivity"]
 }
