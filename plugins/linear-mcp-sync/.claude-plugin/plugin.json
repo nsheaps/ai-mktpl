@@ -1,6 +1,6 @@
 {
   "name": "linear-mcp-sync",
-  "version": "0.2.90",
+  "version": "0.2.91",
   "description": "Installs Linear MCP and adds hooks for safe ticket updates with hash validation to prevent stale overwrites",
   "author": {
     "name": "Nathan Heaps",
