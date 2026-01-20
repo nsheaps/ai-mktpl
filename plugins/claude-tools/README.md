@@ -126,18 +126,18 @@ worktree-switcher [OPTIONS] [BRANCH]
 
 **Arguments:**
 
-| Argument | Description                                                     |
-| -------- | --------------------------------------------------------------- |
-| `BRANCH` | Branch name to create/switch to worktree for (skips selection)  |
+| Argument | Description                                                    |
+| -------- | -------------------------------------------------------------- |
+| `BRANCH` | Branch name to create/switch to worktree for (skips selection) |
 
 **Options:**
 
-| Option            | Description                                      |
-| ----------------- | ------------------------------------------------ |
-| `--no-status`     | Skip fetching branch status (faster)             |
-| `--scan-dir DIR`  | Directory to scan for git repos (default: ~/src) |
-| `--repo REPO`     | GitHub repo (owner/name) to clone if not in repo |
-| `-h, --help`      | Show help message                                |
+| Option           | Description                                      |
+| ---------------- | ------------------------------------------------ |
+| `--no-status`    | Skip fetching branch status (faster)             |
+| `--scan-dir DIR` | Directory to scan for git repos (default: ~/src) |
+| `--repo REPO`    | GitHub repo (owner/name) to clone if not in repo |
+| `-h, --help`     | Show help message                                |
 
 **Examples:**
 
