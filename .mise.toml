@@ -1,5 +1,6 @@
 [tools]
 gh = "latest"
+gomplate = "latest"
 jq = "latest"
 node = "lts"
 python = "3.14.2"

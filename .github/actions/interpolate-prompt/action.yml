@@ -1,5 +1,5 @@
 name: 'Interpolate Prompt'
-description: 'Interpolate a prompt template with JSON payload data using {{.path}} syntax'
+description: 'Interpolate a prompt template with JSON payload using gomplate'
 
 branding:
   icon: 'file-text'
@@ -33,43 +33,9 @@ runs:
           exit 1
         fi
 
-        # Read template
-        TEMPLATE=$(cat "$TEMPLATE_FILE")
-
-        # Process {{#if .path}}...{{/if}} conditionals first
-        # Matches: {{#if .path}}content{{/if}}
-        while [[ "$TEMPLATE" =~ \{\{#if\ \.([^}]+)\}\}(.*)\{\{/if\}\} ]]; do
-          FULL_MATCH="${BASH_REMATCH[0]}"
-          JSON_PATH="${BASH_REMATCH[1]}"
-          CONTENT="${BASH_REMATCH[2]}"
-          VALUE=$(echo "$PAYLOAD" | jq -r ".$JSON_PATH // empty")
-          if [[ -n "$VALUE" && "$VALUE" != "null" ]]; then
-            TEMPLATE="${TEMPLATE//$FULL_MATCH/$CONTENT}"
-          else
-            TEMPLATE="${TEMPLATE//$FULL_MATCH/}"
-          fi
-        done
-
-        # Process {{.path}} replacements
-        # Use a temp file to handle special characters properly
-        echo "$TEMPLATE" > /tmp/template_processing.txt
-
-        # Find all {{.path}} patterns and replace with jq values
-        grep -oE '\{\{\.[^}]+\}\}' /tmp/template_processing.txt | sort -u | while read -r PATTERN; do
-          # Extract the path (remove {{ and }})
-          JSON_PATH="${PATTERN#\{\{.}"
-          JSON_PATH="${JSON_PATH%\}\}}"
-          # Get value from payload
-          VALUE=$(echo "$PAYLOAD" | jq -r ".$JSON_PATH // \"\"")
-          # Escape special characters for sed
-          ESCAPED_PATTERN=$(printf '%s\n' "$PATTERN" | sed 's/[[\.*^$()+?{|]/\\&/g')
-          ESCAPED_VALUE=$(printf '%s\n' "$VALUE" | sed 's/[&/\]/\\&/g')
-          # Replace in file
-          sed -i.bak "s|$ESCAPED_PATTERN|$ESCAPED_VALUE|g" /tmp/template_processing.txt
-        done
-
-        INTERPOLATED=$(cat /tmp/template_processing.txt)
-        rm -f /tmp/template_processing.txt /tmp/template_processing.txt.bak
+        # Use gomplate with JSON payload as root context (enables {{ .field }} syntax)
+        # --missing-key=zero returns empty values for missing fields instead of errors
+        INTERPOLATED=$(echo "$PAYLOAD" | gomplate --missing-key=zero -c '.=stdin:?type=application/json' -f "$TEMPLATE_FILE")
 
         # Output using delimiter for multiline content
         DELIMITER="EOF_$(date +%s%N)"

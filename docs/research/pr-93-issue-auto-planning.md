@@ -208,26 +208,26 @@ All differentiation (planning vs mention handling) is captured in the `prompt` f
 
 ## Template Variables
 
-Using `{{.path}}` syntax with jq-based interpolation. Templates access payload data directly via JSON paths.
+Using [gomplate](https://docs.gomplate.ca/) for Go template interpolation. Templates access payload data directly via JSON paths.
 
 **Syntax:**
 
-- `{{.path.to.value}}` - Simple value extraction
-- `{{#if .path}}content{{/if}}` - Conditional sections
+- `{{ .path.to.value }}` - Simple value extraction
+- `{{ if .path }}content{{ end }}` - Conditional sections
 
 **Available paths (from dispatch payload):**
 
-- `{{.source.repo}}` - Repository name (owner/repo)
-- `{{.source.issue_number}}` - Issue number
-- `{{.source.pr_number}}` - PR number
-- `{{.source.comment_id}}` - Comment ID
-- `{{.author.login}}` - Trigger author username
-- `{{.author.association}}` - Author association (OWNER, MEMBER, etc.)
-- `{{.trigger.type}}` - Event type (issue_comment, issues, etc.)
-- `{{.trigger.action}}` - Event action (created, opened, etc.)
-- `{{.content.title}}` - Issue/PR title
-- `{{.content.body}}` - Full body text
-- `{{.prompt}}` - The user's message/request
+- `{{ .source.repo }}` - Repository name (owner/repo)
+- `{{ .source.issue_number }}` - Issue number
+- `{{ .source.pr_number }}` - PR number
+- `{{ .source.comment_id }}` - Comment ID
+- `{{ .author.login }}` - Trigger author username
+- `{{ .author.association }}` - Author association (OWNER, MEMBER, etc.)
+- `{{ .trigger.type }}` - Event type (issue_comment, issues, etc.)
+- `{{ .trigger.action }}` - Event action (created, opened, etc.)
+- `{{ .content.title }}` - Issue/PR title
+- `{{ .content.body }}` - Full body text
+- `{{ .prompt }}` - The user's message/request
 
 ---
 
