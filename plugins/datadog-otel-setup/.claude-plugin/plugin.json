@@ -9,12 +9,5 @@
   },
   "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/datadog-otel-setup",
   "repository": "https://github.com/nsheaps/.ai",
-  "keywords": [
-    "datadog",
-    "opentelemetry",
-    "otel",
-    "observability",
-    "telemetry",
-    "monitoring"
-  ]
+  "keywords": ["datadog", "opentelemetry", "otel", "observability", "telemetry", "monitoring"]
 }
