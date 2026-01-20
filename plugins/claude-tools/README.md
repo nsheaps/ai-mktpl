@@ -155,7 +155,7 @@ worktree-switcher [OPTIONS] [BRANCH]
 **Examples:**
 
 ```bash
-# Interactive mode - select from branches
+# Interactive mode - select and switch to worktree (launches new shell)
 worktree-switcher
 
 # Direct branch switch - find or create worktree for branch
@@ -170,6 +170,7 @@ worktree-switcher --no-status
 
 **Features:**
 
+- **Auto-switch**: After selection, launches a new shell in the worktree directory
 - **Direct branch argument**: Pass a branch name to skip interactive selection
 - **Smart branch detection**: Finds local, remote, or creates new branches
 - **Repo discovery**: When not in a git repo, offers to:

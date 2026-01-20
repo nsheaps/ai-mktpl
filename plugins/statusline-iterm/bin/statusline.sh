@@ -8,13 +8,19 @@ export GIT_OPTIONAL_LOCKS=0
 
 # Set an iTerm2 user variable (for badge display)
 # Usage: iterm2_set_user_var <name> <value>
-# Note: Uses osascript instead of escape sequences because Claude Code
-# captures subprocess stdout/stderr, preventing escape sequences from
-# reaching the terminal. osascript talks directly to iTerm2 via macOS
-# scripting bridge, bypassing this limitation.
+# Uses escape sequences written to /dev/tty to target the specific terminal
+# session running this script. Writing to /dev/tty bypasses Claude Code's
+# stdout/stderr capture, and escape sequences target the current session
+# (not "current window" which would cause flickering with multiple sessions).
 iterm2_set_user_var() {
   if [ "$TERM_PROGRAM" = "iTerm.app" ]; then
-    osascript -e "tell application \"iTerm2\" to tell current session of current window to set variable named \"user.$1\" to \"$2\"" 2>/dev/null || true
+    # in case this doesn't work
+    # osascript -e "tell application \"iTerm2\" to tell current session of current window to set variable named \"user.$1\" to \"$2\"" >/dev/null 2>&1 || true
+    # Encode value as base64 for the escape sequence
+    local encoded_value
+    encoded_value=$(printf '%s' "$2" | base64 | tr -d '\n')
+    # Write escape sequence directly to terminal, bypassing stdout capture
+    printf '\033]1337;SetUserVar=%s=%s\007' "$1" "$encoded_value" > /dev/tty 2>/dev/null || true
   fi
 }
 
@@ -56,8 +62,8 @@ if [ -n "$session_id" ]; then
   echo "Session: $session_id"
 fi
 
-PR_URL_OR_EMPTY="$(gh pr view --json url -q .url 2>/dev/null || echo "")"
-REPO_URL="$(gh repo view --json url -q .url 2>/dev/null || echo "")"
+PR_URL_OR_EMPTY="$(cd "$project_dir" && gh pr view --json url -q .url 2>/dev/null || echo "")"
+REPO_URL="$(cd "$project_dir" && gh repo view --json url -q .url 2>/dev/null || echo "")"
 PR_OR_BRANCH_OR_REPO_URL_FROM_GH="${PR_URL_OR_EMPTY:-$REPO_URL}"
 
 # Project/cwd info
