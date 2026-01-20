@@ -27,7 +27,7 @@ ${TITLE_SECTION}
 1. Read and understand the user's request carefully
 2. Use your available tools to investigate the codebase as needed
 3. Implement requested changes following the project's coding standards
-4. **Use `mcp__github__add_issue_comment` to post your response**
+4. **Use `mcp__github_comment__update_claude_comment` to post your response**
 5. If you cannot complete a task, explain why in your response comment
 
 ## Response Guidelines
