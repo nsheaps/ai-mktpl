@@ -1,6 +1,6 @@
 {
   "name": "review-changes",
-  "version": "0.2.92",
+  "version": "0.2.93",
   "description": "Review code changes with detailed feedback on quality, security, performance, and maintainability",
   "author": {
     "name": "Nathan Heaps",
