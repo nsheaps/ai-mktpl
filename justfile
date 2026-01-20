@@ -281,6 +281,8 @@ _bump-plugin-version-svu PLUGIN_PATH=invocation_directory() BASE_REF='HEAD~1':
         # Add new version header after the first line (# Changelog)
         sed -i "2i\\\n## [$NEXT_VERSION] - $DATE\n" CHANGELOG.md
     fi
+    
+    just lint-fix "$PLUGIN_JSON"
 
     echo "Bumped $PLUGIN_DIR from $BASE_VERSION to $NEXT_VERSION"
 
