@@ -35,32 +35,70 @@ deny "Reason for blocking"
 
 **Available helpers:**
 
-- `allow` - Output allow JSON and exit
-- `deny "reason"` - Output deny JSON with reason and exit
+- `allow` - Allow the tool call (optional reason shown to user)
+- `allow "reason"` - Allow with reason shown to user
+- `deny "reason"` - Block the tool call (reason shown to Claude)
+- `ask "prompt"` - Ask user for confirmation before proceeding
+- `allow_with_input '{"key": "value"}'` - Allow with modified parameters
+- `allow_with_context "message"` - Allow with additional context for Claude
 
 ### Return Values
 
-PreToolUse hooks must return JSON to stdout with exit code 0:
+PreToolUse hooks must return JSON to stdout with exit code 0.
 
-**Allow the tool call:**
-
-```json
-{ "hookSpecificOutput": { "hookEventName": "PreToolUse", "permissionDecision": "allow" } }
-```
-
-**Block the tool call:**
+**Response format:**
 
 ```json
 {
   "hookSpecificOutput": {
-    "hookEventName": "PreToolUse",
-    "permissionDecision": "deny",
-    "permissionDecisionReason": "..."
+    "permissionDecision": "allow" | "deny" | "ask",
+    "permissionDecisionReason": "string",
+    "updatedInput": { },
+    "additionalContext": "string"
   }
 }
 ```
 
-Use the `claude-code-guide` agent for current hook API documentation.
+**Allow the tool call:**
+
+```json
+{ "hookSpecificOutput": { "permissionDecision": "allow" } }
+```
+
+**Block the tool call (reason shown to Claude):**
+
+```json
+{
+  "hookSpecificOutput": {
+    "permissionDecision": "deny",
+    "permissionDecisionReason": "Cannot write to system directories"
+  }
+}
+```
+
+**Ask user for confirmation:**
+
+```json
+{
+  "hookSpecificOutput": {
+    "permissionDecision": "ask",
+    "permissionDecisionReason": "Confirm this sensitive operation?"
+  }
+}
+```
+
+**Allow with modified input:**
+
+```json
+{
+  "hookSpecificOutput": {
+    "permissionDecision": "allow",
+    "updatedInput": { "file_path": "/safe/alternative/path" }
+  }
+}
+```
+
+See [official docs](https://docs.anthropic.com/en/docs/claude-code/hooks) for complete API reference.
 
 ### Requirements
 
