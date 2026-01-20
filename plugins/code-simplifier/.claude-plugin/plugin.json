@@ -1,6 +1,6 @@
 {
   "name": "code-simplifier",
-  "version": "0.1.48",
+  "version": "0.1.49",
   "description": "Simplify and refine code for clarity, consistency, and maintainability. Requires pr-review-toolkit plugin.",
   "author": {
     "name": "Nathan Heaps",
