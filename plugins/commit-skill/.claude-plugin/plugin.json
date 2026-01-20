@@ -9,5 +9,12 @@
   },
   "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/commit-skill",
   "repository": "https://github.com/nsheaps/.ai",
-  "keywords": ["git", "commit", "skill", "automation", "ai", "smart-commit"]
+  "keywords": [
+    "git",
+    "commit",
+    "skill",
+    "automation",
+    "ai",
+    "smart-commit"
+  ]
 }

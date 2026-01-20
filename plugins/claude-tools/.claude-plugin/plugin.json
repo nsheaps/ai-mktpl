@@ -9,5 +9,12 @@
   },
   "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/claude-tools",
   "repository": "https://github.com/nsheaps/.ai",
-  "keywords": ["claude-code", "claude", "utility", "git", "worktree", "git-worktree"]
+  "keywords": [
+    "claude-code",
+    "claude",
+    "utility",
+    "git",
+    "worktree",
+    "git-worktree"
+  ]
 }

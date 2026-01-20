@@ -9,5 +9,11 @@
   },
   "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/commit-command",
   "repository": "https://github.com/nsheaps/.ai",
-  "keywords": ["git", "commit", "automation", "conventional-commits", "semantic-commit"]
+  "keywords": [
+    "git",
+    "commit",
+    "automation",
+    "conventional-commits",
+    "semantic-commit"
+  ]
 }
