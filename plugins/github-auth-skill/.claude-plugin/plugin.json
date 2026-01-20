@@ -1,6 +1,6 @@
 {
   "name": "github-auth-skill",
-  "version": "0.2.56",
+  "version": "0.2.57",
   "description": "Skill for authenticating with GitHub using device authorization flow",
   "author": {
     "name": "Nathan Heaps",
