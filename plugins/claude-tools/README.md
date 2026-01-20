@@ -1,23 +1,22 @@
 # Claude Tools Plugin
 
-> [!WARNING]
-> **DISTRIBUTION MECHANISM NEEDS MIGRATION**
->
-> The current symlink-based distribution via SessionStart hooks is a temporary solution.
-> These tools should be distributed through a proper package manager:
->
-> - **Homebrew** (`brew install claude-tools`)
-> - **npm** (`npm install -g @nsheaps/claude-tools`)
-> - **mise** (`.mise.toml` with custom plugin)
->
-> This would provide proper versioning, updates, and cross-platform support.
-> See issue tracking this migration or create one if it doesn't exist.
-
 A collection of CLI tools for Claude Code workflow management including diagnostics, worktree management, session handling, and process supervision.
 
 ## Installation
 
 This plugin is part of the nsheaps/.ai marketplace. The binaries are automatically symlinked to your PATH via the SessionStart hook.
+
+> [!NOTE]
+> **External Dependency: `worktree-switcher`**
+>
+> `worktree-switcher` is now distributed separately via Homebrew:
+>
+> ```bash
+> brew tap nsheaps/devsetup
+> brew install --HEAD worktree-switcher
+> ```
+>
+> This is required for `claude-worktree` to function.
 
 ## Binaries
 
@@ -129,59 +128,14 @@ claude-worktree --no-session             # Just switch worktree
 - AI-generated branch names from task descriptions
 - Integrates with `worktree-switcher` and `claude-wrapper`
 
-### worktree-switcher
+### worktree-switcher (External)
 
-Interactive TUI for git worktree management with rich branch status display.
+> [!NOTE]
+> `worktree-switcher` is now maintained in [nsheaps/homebrew-devsetup](https://github.com/nsheaps/homebrew-devsetup).
+>
+> Install via: `brew install --HEAD nsheaps/devsetup/worktree-switcher`
 
-```bash
-worktree-switcher [OPTIONS] [BRANCH]
-```
-
-**Arguments:**
-
-| Argument | Description                                                    |
-| -------- | -------------------------------------------------------------- |
-| `BRANCH` | Branch name to create/switch to worktree for (skips selection) |
-
-**Options:**
-
-| Option           | Description                                      |
-| ---------------- | ------------------------------------------------ |
-| `--no-status`    | Skip fetching branch status (faster)             |
-| `--scan-dir DIR` | Directory to scan for git repos (default: ~/src) |
-| `--repo REPO`    | GitHub repo (owner/name) to clone if not in repo |
-| `-h, --help`     | Show help message                                |
-
-**Examples:**
-
-```bash
-# Interactive mode - select from branches
-worktree-switcher
-
-# Direct branch switch - find or create worktree for branch
-worktree-switcher claude/fix-review-bot-ZQa8q
-
-# Clone a repo and create worktree
-worktree-switcher --repo nsheaps/.ai feature/my-branch
-
-# Faster mode without status checks
-worktree-switcher --no-status
-```
-
-**Features:**
-
-- **Direct branch argument**: Pass a branch name to skip interactive selection
-- **Smart branch detection**: Finds local, remote, or creates new branches
-- **Repo discovery**: When not in a git repo, offers to:
-  - Scan `~/src` (or custom dir) for existing repos
-  - Clone from GitHub by selecting from org/user repos
-  - Enter a path manually
-- **"Switch repository" option**: Step up to change repos during selection
-- Shows banner if already in a worktree
-- Create new worktrees with new branches
-- Select from existing worktrees
-- Branch priority (your PRs > your branches > other branches)
-- Worktrees created at: `../${repo}.worktrees/${branch}`
+Interactive TUI for git worktree management. See the [homebrew-devsetup repo](https://github.com/nsheaps/homebrew-devsetup) for full documentation.
 
 ### branch-status
 

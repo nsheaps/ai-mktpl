@@ -54,15 +54,19 @@ check_tool jq
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_DIR="$(dirname "$SCRIPT_DIR")"
 
-# Look for worktree-switcher (same directory since we're now in claude-tools)
+# Look for worktree-switcher in PATH (installed via Homebrew)
 WORKTREE_SWITCHER=""
-if [[ -x "$SCRIPT_DIR/worktree-switcher" ]]; then
-  WORKTREE_SWITCHER="$SCRIPT_DIR/worktree-switcher"
-elif command -v worktree-switcher &>/dev/null; then
+if command -v worktree-switcher &>/dev/null; then
   WORKTREE_SWITCHER="worktree-switcher"
 else
   echo "Error: worktree-switcher not found" >&2
-  echo "This command requires worktree-switcher to be in the same plugin or in PATH" >&2
+  echo "" >&2
+  echo "Install with Homebrew:" >&2
+  echo "  brew install --HEAD nsheaps/devsetup/worktree-switcher" >&2
+  echo "" >&2
+  echo "Or if the tap isn't added yet:" >&2
+  echo "  brew tap nsheaps/devsetup" >&2
+  echo "  brew install --HEAD worktree-switcher" >&2
   exit 1
 fi
 
