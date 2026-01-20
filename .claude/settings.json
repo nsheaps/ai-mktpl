@@ -55,7 +55,7 @@
       "Bash(readlink:*)",
       "mcp__memory__*"
     ],
-    "deny": ["Bash(rm -rf /:*)", "Bash(mkdir:*)"],
+    "deny": ["Bash(rm -rf /:*)"],
     "ask": [
       "Bash(gh pr view --web:*)",
       "Bash(rm -rf:*)",
