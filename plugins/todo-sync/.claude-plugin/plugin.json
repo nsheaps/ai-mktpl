@@ -1,6 +1,6 @@
 {
   "name": "todo-sync",
-  "version": "0.1.214",
+  "version": "0.1.215",
   "description": "Automatically syncs todos and plans from ~/.claude/ to the current project's .claude/ directory",
   "author": {
     "name": "Nathan Heaps",
