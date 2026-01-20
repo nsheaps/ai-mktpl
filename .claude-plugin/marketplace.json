@@ -12,23 +12,14 @@
     {
       "name": "claude-tools",
       "description": "Collection of CLI tools for Claude Code workflow management including diagnostics, worktree management, session handling, and process supervision",
-      "version": "1.0.0",
+      "version": "0.0.1",
       "author": {
         "name": "Nathan Heaps"
       },
       "source": "./plugins/claude-tools",
       "category": "utility",
-      "tags": ["utility", "git"],
-      "keywords": [
-        "diagnostics",
-        "worktree",
-        "session",
-        "wrapper",
-        "cli",
-        "workflow",
-        "branch-status",
-        "troubleshooting"
-      ]
+      "tags": ["utility"],
+      "keywords": []
     },
     {
       "name": "code-simplifier",
