@@ -1,6 +1,6 @@
 {
   "name": "self-terminate",
-  "version": "1.0.211",
+  "version": "1.0.212",
   "description": "Allows Claude to gracefully terminate itself using SIGINT",
   "author": {
     "name": "Nathan Heaps",
