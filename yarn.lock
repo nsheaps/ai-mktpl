@@ -654,7 +654,7 @@ __metadata:
   resolution: "claude-code-plugin-marketplace@workspace:."
   dependencies:
     "@release-it/bumper": "npm:^7.0.5"
-    release-it: "npm:^19.0.0"
+    release-it: "npm:^19.1.0"
   languageName: unknown
   linkType: soft
 
@@ -1753,7 +1753,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"release-it@npm:^19.0.0":
+"release-it@npm:^19.1.0":
   version: 19.2.3
   resolution: "release-it@npm:19.2.3"
   dependencies:
