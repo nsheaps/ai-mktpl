@@ -50,6 +50,9 @@ jobs:
           install: true
           cache: true
 
+      - name: Install yarn dependencies
+        run: yarn install --immutable
+
       - name: Detect changed plugins
         id: detect
         shell: bash
@@ -86,7 +89,7 @@ jobs:
           for plugin_name in ${{ steps.detect.outputs.plugins }}; do
             echo "=== Bumping version for $plugin_name ==="
             cd "plugins/$plugin_name"
-            mise exec node -- npx release-it --ci
+            yarn exec release-it --ci
             cd ../..
           done
 

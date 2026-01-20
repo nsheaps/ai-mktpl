@@ -22,12 +22,14 @@ root_dir := justfile_directory()
 default:
     @just --list
 
-# Install development dependencies via mise
+# Install development dependencies via mise and yarn
 setup:
     @echo "Pruning unused tools"
     mise prune -y
     @echo "Installing tools via mise..."
     mise install -y
+    @echo "Installing yarn dependencies (release-it)..."
+    yarn install
     @echo "Setup complete!"
 
 # Run all linters (uses .prettierrc.yaml for config)
@@ -98,13 +100,13 @@ validate:
 # Preview version bump for a single plugin (dry-run)
 _preview-version-bump PLUGIN_PATH=invocation_directory():
     #!/usr/bin/env bash
-    command -v release-it >/dev/null 2>&1 || { just setup ; }
+    [ -f "{{root_dir}}/.pnp.cjs" ] || { just setup ; }
     source {{root_dir}}/bin/lib/stdlib.sh
     cd {{PLUGIN_PATH}}
     PLUGIN_DIR="$(dirname "$(find_up '.claude-plugin')")"
     cd "$PLUGIN_DIR"
     echo "===[ DRY RUN for $(basename $PLUGIN_DIR) ]==="
-    mise exec node -- npx release-it --dry-run --ci 2>&1 || echo "No release needed"
+    yarn exec release-it --dry-run --ci 2>&1 || echo "No release needed"
 
 # Compare plugin versions between base branch (main) and current HEAD
 # Shows actual version changes in PR, not predicted future bumps
@@ -215,7 +217,7 @@ _plugin-current-version PLUGIN_PATH=invocation_directory():
 # Reads current version from plugin.json, applies patch bump
 _bump-plugin-version PLUGIN_PATH=invocation_directory():
     #!/usr/bin/env bash
-    command -v release-it >/dev/null 2>&1 || { just setup ; }
+    [ -f "{{root_dir}}/.pnp.cjs" ] || { just setup ; }
     source {{root_dir}}/bin/lib/stdlib.sh
     cd {{PLUGIN_PATH}}
     PLUGIN_DIR="$(dirname "$(find_up '.claude-plugin')")"
@@ -223,7 +225,7 @@ _bump-plugin-version PLUGIN_PATH=invocation_directory():
     PLUGIN_NAME=$(basename "$PLUGIN_DIR")
 
     echo "=== Bumping version for $PLUGIN_NAME ==="
-    mise exec node -- npx release-it --ci
+    yarn exec release-it --ci
 
 # Bump all plugin versions (only those with changes)
 _bump-plugin-versions:
@@ -239,7 +241,7 @@ _bump-plugin-versions:
 # BASE_REF is used to detect which plugins have changes
 _bump-changed-plugins BASE_REF='origin/main':
     #!/usr/bin/env bash
-    command -v release-it >/dev/null 2>&1 || { just setup ; }
+    [ -f "{{root_dir}}/.pnp.cjs" ] || { just setup ; }
 
     for plugin_dir in plugins/*; do
         if [ ! -d "$plugin_dir" ]; then
@@ -251,7 +253,7 @@ _bump-changed-plugins BASE_REF='origin/main':
         if git diff --name-only "{{BASE_REF}}..HEAD" -- "$plugin_dir" | grep -v 'CHANGELOG.md$' | grep -v 'plugin.json$' | grep -q .; then
             echo "=== Bumping version for $PLUGIN_NAME (has changes) ==="
             cd "$plugin_dir"
-            mise exec node -- npx release-it --ci
+            yarn exec release-it --ci
             cd - > /dev/null
         else
             echo "=== Skipping $PLUGIN_NAME (no changes) ==="
