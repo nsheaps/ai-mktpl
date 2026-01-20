@@ -43,7 +43,7 @@ cleanup_old_symlinks() {
       local target
       target=$(readlink "$link" 2>/dev/null || true)
       # Check if symlink points to a path containing our plugin name
-      if [[ "$target" == *"/$PLUGIN_NAME/"* ]] || [[ "$target" == *"/$PLUGIN_NAME/bin/"* ]]; then
+      if [[ "$target" == *"/$PLUGIN_NAME/"* ]]; then
         rm -f "$link"
         ((cleaned++))
       fi
