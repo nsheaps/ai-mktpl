@@ -122,16 +122,48 @@ get_setting() {
   fi
 }
 
-# Resolve environment variable references in a value
-# Supports: ${VAR_NAME} syntax
+# Resolve environment variable references in a value using envsubst
+# Supports: ${VAR_NAME} and ${VAR_NAME:-default} syntax
 resolve_env_var() {
   local value="$1"
 
-  # Check if value looks like an env var reference
-  if [[ "$value" =~ ^\$\{([A-Za-z_][A-Za-z0-9_]*)\}$ ]]; then
-    local var_name="${BASH_REMATCH[1]}"
-    echo "${!var_name:-}"
+  # Use envsubst for robust variable expansion
+  if command -v envsubst >/dev/null 2>&1; then
+    echo "$value" | envsubst
   else
-    echo "$value"
+    # Fallback: simple regex for ${VAR_NAME} only
+    if [[ "$value" =~ ^\$\{([A-Za-z_][A-Za-z0-9_]*)\}$ ]]; then
+      local var_name="${BASH_REMATCH[1]}"
+      echo "${!var_name:-}"
+    else
+      echo "$value"
+    fi
   fi
+}
+
+# Resolve target name to settings file path
+# Arguments:
+#   $1 - target name (local|project|user)
+#   $2 - project directory (optional, defaults to CLAUDE_PROJECT_DIR or .)
+# Output:
+#   Absolute path to the settings file
+resolve_target_settings_file() {
+  local target="$1"
+  local project_dir="${2:-${CLAUDE_PROJECT_DIR:-.}}"
+
+  case "$target" in
+    local)
+      echo "$project_dir/.claude/settings.local.json"
+      ;;
+    project)
+      echo "$project_dir/.claude/settings.json"
+      ;;
+    user)
+      echo "${HOME}/.claude/settings.json"
+      ;;
+    *)
+      echo "⚠️  Unknown target '$target', using local" >&2
+      echo "$project_dir/.claude/settings.local.json"
+      ;;
+  esac
 }

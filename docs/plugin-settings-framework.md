@@ -52,17 +52,35 @@ NESTED=$(get_setting "$SETTINGS" ".nested.key" "default")
 API_KEY=$(resolve_env_var "$(get_setting "$SETTINGS" ".api_key" "")")
 ```
 
+## Target Settings File Resolution
+
+Plugins that write to Claude Code's settings files can use the `resolve_target_settings_file` function:
+
+```bash
+# Resolve target name to file path
+TARGET=$(get_setting "$SETTINGS" ".target" "local")
+SETTINGS_FILE=$(resolve_target_settings_file "$TARGET" "$PROJECT_DIR")
+```
+
+Supported target values:
+
+| Target    | File                          | Use Case                     |
+| --------- | ----------------------------- | ---------------------------- |
+| `local`   | `.claude/settings.local.json` | Personal config (gitignored) |
+| `project` | `.claude/settings.json`       | Shared team config           |
+| `user`    | `~/.claude/settings.json`     | Global user config           |
+
 ## Environment Variable References
 
-Settings can reference environment variables using `${VAR_NAME}` syntax:
+Settings can reference environment variables using `${VAR_NAME}` or `${VAR_NAME:-default}` syntax:
 
 ```yaml
 my-plugin:
   api_key: ${MY_API_KEY}
-  endpoint: https://default.example.com # Use get_setting default parameter for fallbacks
+  endpoint: ${MY_ENDPOINT:-https://default.example.com}
 ```
 
-The `resolve_env_var` function expands these at runtime.
+The `resolve_env_var` function uses `envsubst` to expand these at runtime, supporting the full range of shell variable expansion syntax.
 
 ## 1Password References
 

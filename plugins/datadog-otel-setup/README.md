@@ -32,18 +32,20 @@ datadog-otel-setup:
   # Target settings file (local recommended for gitignored config)
   target: local # local | project | user
 
-  # OTEL Configuration
+  # Enable/disable the plugin
   enabled: true
-  endpoint: "https://otel.datadoghq.com:4317"
-  protocol: grpc # grpc | http/json | http/protobuf
 
   # API key (env var reference recommended)
   api_key: ${DD_API_KEY}
 
-  # Resource attributes for OTEL
-  resource_attributes:
-    service.name: claude-code
-    deployment.environment: development
+  # OTEL environment variables - keys match Claude Code's env settings
+  env:
+    CLAUDE_CODE_ENABLE_TELEMETRY: "1"
+    OTEL_METRICS_EXPORTER: otlp
+    OTEL_LOGS_EXPORTER: otlp
+    OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+    OTEL_EXPORTER_OTLP_ENDPOINT: "https://otel.datadoghq.com:4317"
+    OTEL_RESOURCE_ATTRIBUTES: "service.name=claude-code,deployment.environment=development"
 ```
 
 ### Target Options
@@ -129,6 +131,6 @@ just test-plugin-config datadog-otel-setup
 
 ## Related
 
-- [Plugin Settings Framework](../../.claude/docs/plugin-settings-framework.md)
+- [Plugin Settings Framework](../../docs/plugin-settings-framework.md)
 - [Claude Code Telemetry](https://docs.anthropic.com/claude-code/docs/telemetry)
 - [Datadog OTLP Ingestion](https://docs.datadoghq.com/opentelemetry/otlp_ingest_in_the_agent/)

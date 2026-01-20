@@ -11,7 +11,6 @@
 
 set -euo pipefail
 
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(dirname "$(dirname "$0")")}"
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 
 # Source the shared settings library
@@ -22,18 +21,21 @@ else
   load_plugin_settings() { echo "${2:-{}}"; }
   get_setting() { echo "${3:-}"; }
   resolve_env_var() { echo "$1"; }
+  resolve_target_settings_file() { echo "$PROJECT_DIR/.claude/settings.local.json"; }
 fi
 
-# Default settings
+# Default settings - env keys match OTEL environment variable names
 DEFAULT_SETTINGS='{
   "target": "local",
   "enabled": true,
-  "endpoint": "https://otel.datadoghq.com:4317",
-  "protocol": "grpc",
   "api_key": "${DD_API_KEY}",
-  "resource_attributes": {
-    "service.name": "claude-code",
-    "deployment.environment": "development"
+  "env": {
+    "CLAUDE_CODE_ENABLE_TELEMETRY": "1",
+    "OTEL_METRICS_EXPORTER": "otlp",
+    "OTEL_LOGS_EXPORTER": "otlp",
+    "OTEL_EXPORTER_OTLP_PROTOCOL": "grpc",
+    "OTEL_EXPORTER_OTLP_ENDPOINT": "https://otel.datadoghq.com:4317",
+    "OTEL_RESOURCE_ATTRIBUTES": "service.name=claude-code,deployment.environment=development"
   }
 }'
 
@@ -46,23 +48,9 @@ if [[ "$ENABLED" != "true" ]]; then
   exit 0
 fi
 
-# Resolve target settings file
+# Resolve target settings file using shared library
 TARGET=$(get_setting "$SETTINGS" ".target" "local")
-case "$TARGET" in
-  local)
-    SETTINGS_FILE="$PROJECT_DIR/.claude/settings.local.json"
-    ;;
-  project)
-    SETTINGS_FILE="$PROJECT_DIR/.claude/settings.json"
-    ;;
-  user)
-    SETTINGS_FILE="${HOME}/.claude/settings.json"
-    ;;
-  *)
-    echo "⚠️  OTEL: Unknown target '$TARGET', using local" >&2
-    SETTINGS_FILE="$PROJECT_DIR/.claude/settings.local.json"
-    ;;
-esac
+SETTINGS_FILE=$(resolve_target_settings_file "$TARGET" "$PROJECT_DIR")
 
 # Resolve API key
 API_KEY_RAW=$(get_setting "$SETTINGS" ".api_key" "\${DD_API_KEY}")
@@ -81,32 +69,6 @@ if [[ -z "$API_KEY" ]]; then
   exit 0
 fi
 
-# Get other settings
-ENDPOINT=$(get_setting "$SETTINGS" ".endpoint" "https://otel.datadoghq.com:4317")
-PROTOCOL=$(get_setting "$SETTINGS" ".protocol" "grpc")
-
-# Map protocol to OTEL format
-case "$PROTOCOL" in
-  grpc)
-    OTEL_PROTOCOL="grpc"
-    ;;
-  http/json|http-json)
-    OTEL_PROTOCOL="http/json"
-    ;;
-  http/protobuf|http-protobuf)
-    OTEL_PROTOCOL="http/protobuf"
-    ;;
-  *)
-    OTEL_PROTOCOL="grpc"
-    ;;
-esac
-
-# Build resource attributes string
-RESOURCE_ATTRS=""
-if echo "$SETTINGS" | jq -e '.resource_attributes' >/dev/null 2>&1; then
-  RESOURCE_ATTRS=$(echo "$SETTINGS" | jq -r '.resource_attributes | to_entries | map("\(.key)=\(.value)") | join(",")')
-fi
-
 # Ensure directory exists
 mkdir -p "$(dirname "$SETTINGS_FILE")"
 
@@ -117,24 +79,20 @@ else
   EXISTING="{}"
 fi
 
-# Build env object with OTEL settings
-OTEL_ENV=$(jq -n \
-  --arg telemetry "1" \
-  --arg metrics "otlp" \
-  --arg logs "otlp" \
-  --arg protocol "$OTEL_PROTOCOL" \
-  --arg endpoint "$ENDPOINT" \
-  --arg headers "DD-API-KEY=$API_KEY" \
-  --arg resource "$RESOURCE_ATTRS" \
-  '{
-    "CLAUDE_CODE_ENABLE_TELEMETRY": $telemetry,
-    "OTEL_METRICS_EXPORTER": $metrics,
-    "OTEL_LOGS_EXPORTER": $logs,
-    "OTEL_EXPORTER_OTLP_PROTOCOL": $protocol,
-    "OTEL_EXPORTER_OTLP_ENDPOINT": $endpoint,
-    "OTEL_EXPORTER_OTLP_HEADERS": $headers
-  } + (if $resource != "" then {"OTEL_RESOURCE_ATTRIBUTES": $resource} else {} end)'
-)
+# Build env object from settings, resolving env vars and adding API key header
+OTEL_ENV=$(echo "$SETTINGS" | jq -r --arg api_key "$API_KEY" '
+  .env // {} |
+  to_entries |
+  map(
+    if .key == "OTEL_EXPORTER_OTLP_HEADERS" then
+      .value = "DD-API-KEY=\($api_key)"
+    else
+      .
+    end
+  ) |
+  from_entries |
+  . + {"OTEL_EXPORTER_OTLP_HEADERS": "DD-API-KEY=\($api_key)"}
+')
 
 # Merge with existing settings
 UPDATED=$(echo "$EXISTING" | jq --argjson otel "$OTEL_ENV" '

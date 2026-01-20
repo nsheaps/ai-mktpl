@@ -15,10 +15,8 @@ datadog-otel-setup:
   # - user: ~/.claude/settings.json (global)
   target: local
 
-  # OTEL Configuration
+  # Enable/disable the plugin
   enabled: true
-  endpoint: 'https://otel.datadoghq.com:4317'
-  protocol: grpc # grpc | http/json | http/protobuf
 
   # API key can be:
   # - Environment variable reference: ${DD_API_KEY}
@@ -26,8 +24,12 @@ datadog-otel-setup:
   # - Direct value (NOT recommended for shared repos)
   api_key: ${DD_API_KEY}
 
-  # Optional: Custom resource attributes
-  # These become OTEL_RESOURCE_ATTRIBUTES
-  resource_attributes:
-    service.name: claude-code
-    deployment.environment: development
+  # OTEL environment variables - keys match Claude Code's env settings
+  # These are written directly to the target settings file
+  env:
+    CLAUDE_CODE_ENABLE_TELEMETRY: '1'
+    OTEL_METRICS_EXPORTER: otlp
+    OTEL_LOGS_EXPORTER: otlp
+    OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+    OTEL_EXPORTER_OTLP_ENDPOINT: 'https://otel.datadoghq.com:4317'
+    OTEL_RESOURCE_ATTRIBUTES: 'service.name=claude-code,deployment.environment=development'
