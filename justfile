@@ -374,3 +374,26 @@ check:
     @just lint
     @just validate
 
+# Test plugin configuration doesn't cause git changes
+test-plugin-config PLUGIN:
+    #!/usr/bin/env bash
+    SCRIPT="./plugins/{{PLUGIN}}/scripts/test-configuration.sh"
+    if [[ ! -f "$SCRIPT" ]]; then
+        echo "No test script found for {{PLUGIN}}"
+        exit 0
+    fi
+    "$SCRIPT"
+
+# Test all plugins with configuration tests
+test-all-plugin-configs:
+    #!/usr/bin/env bash
+    for script in plugins/*/scripts/test-configuration.sh; do
+        if [[ -f "$script" ]]; then
+            plugin_dir=$(dirname "$(dirname "$script")")
+            plugin_name=$(basename "$plugin_dir")
+            echo "Testing $plugin_name..."
+            "$script" || exit 1
+        fi
+    done
+    echo "All plugin configuration tests passed!"
+

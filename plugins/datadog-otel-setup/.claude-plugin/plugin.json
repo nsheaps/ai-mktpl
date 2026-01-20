@@ -1,0 +1,13 @@
+{
+  "name": "datadog-otel-setup",
+  "version": "0.1.0",
+  "description": "Configure Claude Code's native OpenTelemetry integration for Datadog observability",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/datadog-otel-setup",
+  "repository": "https://github.com/nsheaps/.ai",
+  "keywords": ["datadog", "opentelemetry", "otel", "observability", "telemetry", "monitoring"]
+}
