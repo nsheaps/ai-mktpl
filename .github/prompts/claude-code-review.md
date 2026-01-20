@@ -443,5 +443,5 @@ Notes:[^1][^2]
 ## Extra info to help you
 
 <job-context>
-{{ .job_context | toJson }}
+{{ .job_context | toJSON }}
 </job-context>
