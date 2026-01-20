@@ -19,7 +19,7 @@
       "source": "./plugins/claude-tools",
       "category": "utility",
       "tags": ["utility"],
-      "keywords": []
+      "keywords": ["claude-code", "claude", "utility", "git", "worktree", "git-worktree"]
     },
     {
       "name": "code-simplifier",
