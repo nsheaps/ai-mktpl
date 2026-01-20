@@ -1,8 +1,10 @@
 name: Claude Agent - Mention
 
-# Handles @claude mentions in comments, reviews, and assigned issues
-# This is for when someone is requesting specific work from Claude
-# Schema: .github/schemas/claude-agent-payload.schema.json
+# Handles @claude mentions in:
+# - Issue comments
+# - PR review comments
+# - PR reviews
+# - Issue assignment with @claude in body/title
 
 on:
   issue_comment:
@@ -14,18 +16,15 @@ on:
   issues:
     types: [assigned]
 
-env:
-  CLAUDE_MENTION: '@claude' # Configurable trigger phrase
-
 jobs:
   dispatch:
-    # Only trigger on @claude mentions
-    # Note: New issues with @claude are handled by claude-agent-new-issue.yaml
-    if: |
+    # Only run if @claude is mentioned
+    if: >-
       (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
       (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
       (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
-      (github.event_name == 'issues' && github.event.action == 'assigned' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
+      (github.event_name == 'issues' && github.event.action == 'assigned' &&
+        (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -44,10 +43,36 @@ jobs:
 
       - name: Dispatch to Claude agent
         uses: ./.github/actions/dispatch-claude-agent
-        env:
-          GH_TOKEN: ${{ steps.auth.outputs.token }}
         with:
           token: ${{ steps.auth.outputs.token }}
-          event-json: ${{ toJson(github.event) }}
-          event-name: ${{ github.event_name }}
-          workflow-type: mention
+          event-type: claude-agent-mention
+          # Use the appropriate body based on event type
+          prompt: ${{
+            github.event_name == 'issue_comment' && github.event.comment.body ||
+            github.event_name == 'pull_request_review_comment' && github.event.comment.body ||
+            github.event_name == 'pull_request_review' && github.event.review.body ||
+            github.event.issue.body
+          }}
+          issue-number: ${{ github.event.issue.number || '' }}
+          pr-number: ${{
+            github.event_name == 'pull_request_review_comment' && github.event.pull_request.number ||
+            github.event_name == 'pull_request_review' && github.event.pull_request.number ||
+            (github.event.issue.pull_request && github.event.issue.number) ||
+            ''
+          }}
+          comment-id: ${{
+            github.event.comment.id ||
+            github.event.review.id ||
+            ''
+          }}
+          author-login: ${{
+            github.event.comment.user.login ||
+            github.event.review.user.login ||
+            github.event.issue.user.login
+          }}
+          author-association: ${{
+            github.event.comment.author_association ||
+            github.event.review.author_association ||
+            github.event.issue.author_association
+          }}
+          title: ${{ github.event.issue.title || github.event.pull_request.title }}

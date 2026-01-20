@@ -3,12 +3,15 @@ name: Claude Agent
 # This workflow runs Claude Code in agent mode when triggered by repository_dispatch
 # Agent mode is automatically enabled for repository_dispatch triggers
 #
-# The prompt is constructed by the trigger workflow to include all context needed
-# No planning_context schema fields needed - all differentiation is in the prompt itself
+# Event types:
+# - claude-agent-mention: @claude mentions (uses claude-agent-system.md)
+# - claude-agent-new-issue: New issues for planning (uses issue-planner-system.md)
+#
+# The system prompt template is specified in the payload, no detection logic needed here
 
 on:
   repository_dispatch:
-    types: [claude-agent]
+    types: [claude-agent-mention, claude-agent-new-issue]
 
 jobs:
   claude:
@@ -49,6 +52,10 @@ jobs:
           ISSUE_NUMBER=$(echo "$PAYLOAD" | jq -r '.source.issue_number // ""')
           TITLE=$(echo "$PAYLOAD" | jq -r '.content.title // ""')
 
+          # Get system prompt template from payload (defaults to agent system prompt)
+          TEMPLATE=$(echo "$PAYLOAD" | jq -r '.system_prompt_template // ".ai/prompts/claude-agent-system.md"')
+          echo "TEMPLATE=$TEMPLATE" >> "$GITHUB_OUTPUT"
+
           echo "REPO=$REPO" >> "$GITHUB_OUTPUT"
           echo "PR_NUMBER=$PR_NUMBER" >> "$GITHUB_OUTPUT"
           echo "ISSUE_NUMBER=$ISSUE_NUMBER" >> "$GITHUB_OUTPUT"
@@ -58,6 +65,29 @@ jobs:
           echo "TRIGGER_TYPE=$(echo "$PAYLOAD" | jq -r '.trigger.type // ""')" >> "$GITHUB_OUTPUT"
           echo "TRIGGER_ACTION=$(echo "$PAYLOAD" | jq -r '.trigger.action // ""')" >> "$GITHUB_OUTPUT"
           echo "TITLE=$TITLE" >> "$GITHUB_OUTPUT"
+
+          # Planning context
+          echo "PLANNING_TRIGGER_REASON=$(echo "$PAYLOAD" | jq -r '.planning.trigger_reason // ""')" >> "$GITHUB_OUTPUT"
+          {
+            echo "ORIGINAL_ISSUE_BODY<<EOF_BODY"
+            echo "$PAYLOAD" | jq -r '.planning.original_issue_body // ""'
+            echo "EOF_BODY"
+          } >> "$GITHUB_OUTPUT"
+
+          # Build comment history section
+          COMMENT_HISTORY=$(echo "$PAYLOAD" | jq -r '.planning.comment_history // ""')
+          if [ -n "$COMMENT_HISTORY" ] && [ "$COMMENT_HISTORY" != "null" ] && [ "$COMMENT_HISTORY" != "" ]; then
+            {
+              echo "COMMENT_HISTORY_SECTION<<EOF_COMMENTS"
+              echo ""
+              echo "## Comment History"
+              echo ""
+              echo "$COMMENT_HISTORY"
+              echo "EOF_COMMENTS"
+            } >> "$GITHUB_OUTPUT"
+          else
+            echo "COMMENT_HISTORY_SECTION=" >> "$GITHUB_OUTPUT"
+          fi
 
           # Build conditional context sections for template
           if [ "$PR_NUMBER" != "null" ] && [ -n "$PR_NUMBER" ]; then
@@ -84,7 +114,7 @@ jobs:
             echo "TITLE_SECTION=" >> "$GITHUB_OUTPUT"
           fi
 
-          # Extract the prompt (which now contains all context including planning info)
+          # Extract the prompt
           {
             echo "PROMPT<<EOF_PROMPT"
             echo "$PAYLOAD" | jq -r '.prompt // ""'
@@ -107,8 +137,12 @@ jobs:
           PR_CONTEXT: ${{ steps.payload.outputs.PR_CONTEXT }}
           ISSUE_CONTEXT: ${{ steps.payload.outputs.ISSUE_CONTEXT }}
           TITLE_SECTION: ${{ steps.payload.outputs.TITLE_SECTION }}
+          # Planning-specific variables
+          PLANNING_TRIGGER_REASON: ${{ steps.payload.outputs.PLANNING_TRIGGER_REASON }}
+          ORIGINAL_ISSUE_BODY: ${{ steps.payload.outputs.ORIGINAL_ISSUE_BODY }}
+          COMMENT_HISTORY_SECTION: ${{ steps.payload.outputs.COMMENT_HISTORY_SECTION }}
         with:
-          template-file: .ai/prompts/claude-agent-system.md
+          template-file: ${{ steps.payload.outputs.TEMPLATE }}
 
       - name: Run Claude Code
         id: claude
