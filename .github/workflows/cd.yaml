@@ -77,10 +77,23 @@ jobs:
         id: report
         shell: bash
         run: |
-          TMP="$(mktemp)"
-          just release --dry-run --format=md | tee "$TMP"
+          echo "| Plugin | Current | → | After Merge |" > /tmp/report.md
+          echo "|---|---|---|---|" >> /tmp/report.md
+
+          for plugin_name in ${{ steps.detect.outputs.plugins }}; do
+            PLUGIN_JSON="plugins/$plugin_name/.claude-plugin/plugin.json"
+            CURRENT_VERSION=$(jq -r '.version' "$PLUGIN_JSON" 2>/dev/null || echo "0.0.0")
+
+            # Calculate next patch version
+            IFS='.' read -r major minor patch <<< "$CURRENT_VERSION"
+            NEXT_VERSION="$major.$minor.$((patch + 1))"
+
+            echo "| $plugin_name | $CURRENT_VERSION | → | $NEXT_VERSION |" >> /tmp/report.md
+          done
+
+          cat /tmp/report.md
           echo "report<<EOF" >> $GITHUB_OUTPUT
-          cat $TMP >> $GITHUB_OUTPUT
+          cat /tmp/report.md >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Post version preview comment
