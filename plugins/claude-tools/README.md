@@ -150,7 +150,6 @@ worktree-switcher [OPTIONS] [BRANCH]
 | `--no-status`    | Skip fetching branch status (faster)             |
 | `--scan-dir DIR` | Directory to scan for git repos (default: ~/src) |
 | `--repo REPO`    | GitHub repo (owner/name) to clone if not in repo |
-| `--print-only`   | Only print worktree path, don't switch to it     |
 | `-h, --help`     | Show help message                                |
 
 **Examples:**
@@ -167,9 +166,6 @@ worktree-switcher --repo nsheaps/.ai feature/my-branch
 
 # Faster mode without status checks
 worktree-switcher --no-status
-
-# Just print the path without switching (for scripting)
-worktree-switcher --print-only
 ```
 
 **Features:**

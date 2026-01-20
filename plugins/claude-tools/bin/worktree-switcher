@@ -9,7 +9,6 @@
 #   --no-status       Skip fetching branch status (faster)
 #   --scan-dir DIR    Directory to scan for git repos (default: ~/src)
 #   --repo REPO       GitHub repo (owner/name) to clone if not in a git repo
-#   --print-only      Only print worktree path, don't switch to it
 #   -h, --help        Show this help message
 #
 # Behavior:
@@ -18,7 +17,7 @@
 #   - If in a git repo: prompts to select/create worktree
 #   - If NOT in a git repo: prompts to select repo from ~/src or clone from GitHub
 #   - Worktrees created at: ../${repo}.worktrees/${branch}
-#   - After selection, launches a new shell in the worktree directory (unless --print-only)
+#   - After selection, launches a new shell in the worktree directory
 
 set -euo pipefail
 
@@ -27,10 +26,9 @@ NO_STATUS="false"
 SCAN_DIR="${HOME}/src"
 TARGET_REPO=""
 TARGET_BRANCH=""
-PRINT_ONLY="false"
 
 show_help() {
-  sed -n '2,21p' "$0" | sed 's/^# //' | sed 's/^#//'
+  sed -n '2,19p' "$0" | sed 's/^# //' | sed 's/^#//'
   exit 0
 }
 
@@ -39,7 +37,6 @@ while [[ $# -gt 0 ]]; do
     --no-status) NO_STATUS="true"; shift ;;
     --scan-dir) SCAN_DIR="$2"; shift 2 ;;
     --repo) TARGET_REPO="$2"; shift 2 ;;
-    --print-only) PRINT_ONLY="true"; shift ;;
     -h|--help) show_help ;;
     -*) echo "Unknown option: $1" >&2; show_help ;;
     *) TARGET_BRANCH="$1"; shift ;;
@@ -75,19 +72,14 @@ get_branch_status() {
   fi
 }
 
-# Switch to worktree directory - launches shell or prints path
+# Switch to worktree directory - launches a new shell
 switch_to_worktree() {
   local worktree_path="$1"
-
-  if [[ "$PRINT_ONLY" == "true" ]]; then
-    echo "WORKTREE_PATH=$worktree_path"
-  else
-    echo ""
-    gum style --foreground 82 "Switching to worktree: $worktree_path"
-    echo ""
-    cd "$worktree_path"
-    exec "${SHELL:-/bin/bash}"
-  fi
+  echo ""
+  gum style --foreground 82 "Switching to worktree: $worktree_path"
+  echo ""
+  cd "$worktree_path"
+  exec "${SHELL:-/bin/bash}"
 }
 
 # Function to find repos in a directory
