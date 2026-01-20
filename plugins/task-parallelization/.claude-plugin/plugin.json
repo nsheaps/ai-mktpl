@@ -1,6 +1,6 @@
 {
   "name": "task-parallelization",
-  "version": "0.2.276",
+  "version": "0.2.24",
   "description": "Intelligent skill that helps Claude parallelize Task tool calls when working on repetitive or batch operations, optimizing throughput based on task complexity",
   "author": {
     "name": "Nathan Heaps",
