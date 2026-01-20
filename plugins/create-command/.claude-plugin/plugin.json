@@ -1,6 +1,6 @@
 {
   "name": "create-command",
-  "version": "0.2.224",
+  "version": "0.2.225",
   "description": "Create and maintain Claude Code slash commands with guided assistance",
   "author": {
     "name": "Nathan Heaps",
