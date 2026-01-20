@@ -1,0 +1,1 @@
+../../../.claude/lib/load-plugin-settings.sh

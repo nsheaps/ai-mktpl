@@ -11,11 +11,12 @@
 
 set -euo pipefail
 
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(dirname "$(dirname "$0")")}"
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 
-# Source the shared settings library
-if [[ -f "$PROJECT_DIR/.claude/lib/load-plugin-settings.sh" ]]; then
-  source "$PROJECT_DIR/.claude/lib/load-plugin-settings.sh"
+# Source the shared settings library (symlinked into plugin per plugins-reference)
+if [[ -f "$PLUGIN_ROOT/lib/load-plugin-settings.sh" ]]; then
+  source "$PLUGIN_ROOT/lib/load-plugin-settings.sh"
 else
   echo "⚠️  OTEL: Settings library not found, using defaults"
   load_plugin_settings() { echo "${2:-{}}"; }
