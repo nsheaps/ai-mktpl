@@ -253,7 +253,7 @@ detect-plugin-changes base_ref='main':
         --argjson has_changes "$HAS_CHANGES" \
         --arg plugins "$PLUGINS_LIST" \
         --argjson plugins_json "$PLUGINS_JSON" \
-        --arg report_md "$(echo -e "$REPORT_MD")" \
+        --arg report_md "$(printf '%b' "$REPORT_MD")" \
         '{
             has_changes: $has_changes,
             plugins: $plugins,
