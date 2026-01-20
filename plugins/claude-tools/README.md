@@ -150,12 +150,13 @@ worktree-switcher [OPTIONS] [BRANCH]
 | `--no-status`    | Skip fetching branch status (faster)             |
 | `--scan-dir DIR` | Directory to scan for git repos (default: ~/src) |
 | `--repo REPO`    | GitHub repo (owner/name) to clone if not in repo |
+| `--print-only`   | Only print worktree path, don't switch to it     |
 | `-h, --help`     | Show help message                                |
 
 **Examples:**
 
 ```bash
-# Interactive mode - select from branches
+# Interactive mode - select and switch to worktree (launches new shell)
 worktree-switcher
 
 # Direct branch switch - find or create worktree for branch
@@ -166,10 +167,14 @@ worktree-switcher --repo nsheaps/.ai feature/my-branch
 
 # Faster mode without status checks
 worktree-switcher --no-status
+
+# Just print the path without switching (for scripting)
+worktree-switcher --print-only
 ```
 
 **Features:**
 
+- **Auto-switch**: After selection, launches a new shell in the worktree directory
 - **Direct branch argument**: Pass a branch name to skip interactive selection
 - **Smart branch detection**: Finds local, remote, or creates new branches
 - **Repo discovery**: When not in a git repo, offers to:
