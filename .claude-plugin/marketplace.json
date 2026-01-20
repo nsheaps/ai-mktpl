@@ -12,7 +12,7 @@
     {
       "name": "claude-tools",
       "description": "Collection of CLI tools for Claude Code workflow management including diagnostics, worktree management, session handling, and process supervision",
-      "version": "0.0.1",
+      "version": "0.0.2",
       "author": {
         "name": "Nathan Heaps"
       },
