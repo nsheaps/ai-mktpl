@@ -39,8 +39,6 @@ deny "Reason for blocking"
 - `allow "reason"` - Allow with reason shown to user
 - `deny "reason"` - Block the tool call (reason shown to Claude)
 - `ask "prompt"` - Ask user for confirmation before proceeding
-- `allow_with_input '{"key": "value"}'` - Allow with modified parameters
-- `allow_with_context "message"` - Allow with additional context for Claude
 
 ### Return Values
 
