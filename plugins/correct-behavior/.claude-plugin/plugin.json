@@ -1,6 +1,6 @@
 {
   "name": "correct-behavior",
-  "version": "0.2.24",
+  "version": "0.0.1",
   "description": "Command to correct AI behavior mistakes and update rules to prevent recurrence",
   "author": {
     "name": "Nathan Heaps",
@@ -9,5 +9,11 @@
   },
   "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/correct-behavior",
   "repository": "https://github.com/nsheaps/.ai",
-  "keywords": ["behavior", "correction", "rules", "memory", "learning"]
+  "keywords": [
+    "behavior",
+    "correction",
+    "rules",
+    "memory",
+    "learning"
+  ]
 }
