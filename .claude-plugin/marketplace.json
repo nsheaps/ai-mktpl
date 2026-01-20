@@ -12,7 +12,7 @@
     {
       "name": "claude-tools",
       "description": "Collection of CLI tools for Claude Code workflow management including diagnostics, worktree management, session handling, and process supervision",
-      "version": "0.0.237",
+      "version": "0.0.239",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -24,7 +24,7 @@
     {
       "name": "code-simplifier",
       "description": "Simplify and refine code for clarity, consistency, and maintainability. Requires pr-review-toolkit plugin.",
-      "version": "0.1.236",
+      "version": "0.1.238",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -36,7 +36,7 @@
     {
       "name": "command-help-skill",
       "description": "Help claude understand, discover, and execute slash commands when accidentally sent as a message.",
-      "version": "0.2.260",
+      "version": "0.2.262",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -48,7 +48,7 @@
     {
       "name": "commit-command",
       "description": "Automate git commits with AI-generated messages that match your repository's commit style and conventions",
-      "version": "0.2.260",
+      "version": "0.2.262",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -60,7 +60,7 @@
     {
       "name": "commit-skill",
       "description": "Intelligent skill that enables Claude to automatically analyze git changes and create well-formatted commits during development",
-      "version": "0.2.260",
+      "version": "0.2.262",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -72,7 +72,7 @@
     {
       "name": "correct-behavior",
       "description": "Command to correct AI behavior mistakes and update rules to prevent recurrence",
-      "version": "0.2.260",
+      "version": "0.2.262",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -84,7 +84,7 @@
     {
       "name": "create-command",
       "description": "Create and maintain Claude Code slash commands with guided assistance",
-      "version": "0.2.260",
+      "version": "0.2.262",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -96,7 +96,7 @@
     {
       "name": "data-serialization",
       "description": "Data format conversion and querying utilities. Supports YAML, JSON, TOON (Token-Oriented Object Notation), and XML/HTML transformations with special handling for Playwright accessibility snapshots. TOON provides 30-60% token reduction vs JSON for LLM contexts.",
-      "version": "0.2.260",
+      "version": "0.2.262",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -123,7 +123,7 @@
     {
       "name": "github-auth-skill",
       "description": "Skill for authenticating with GitHub using device authorization flow",
-      "version": "0.2.260",
+      "version": "0.2.262",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -135,7 +135,7 @@
     {
       "name": "linear-mcp-sync",
       "description": "Installs Linear MCP and adds hooks for safe ticket updates with hash validation to prevent stale overwrites",
-      "version": "0.2.260",
+      "version": "0.2.262",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -147,7 +147,7 @@
     {
       "name": "memory-manager",
       "description": "Intelligent memory management for CLAUDE.md files. Automatically detects and stores user preferences, rules, and instructions with smart scope detection and hierarchical organization.",
-      "version": "0.2.260",
+      "version": "0.2.262",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -159,7 +159,7 @@
     {
       "name": "og-image",
       "description": "Generate OpenGraph images for Nuxt/Vue pages using HTML templates and html2png.dev API",
-      "version": "0.2.260",
+      "version": "0.2.262",
       "author": {
         "name": "alvinunreal + modifications by nsheaps"
       },
@@ -180,7 +180,7 @@
     {
       "name": "review-changes",
       "description": "Review code changes with detailed feedback on quality, security, performance, and maintainability",
-      "version": "0.2.260",
+      "version": "0.2.262",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -192,7 +192,7 @@
     {
       "name": "safety-evaluation-prompt",
       "description": "Pre-tool-call safety evaluation using prompt-style hooks for inline AI evaluation",
-      "version": "0.2.261",
+      "version": "0.2.263",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -204,7 +204,7 @@
     {
       "name": "safety-evaluation-script",
       "description": "Pre-tool-call safety evaluation using Claude CLI (haiku) with script-style hooks",
-      "version": "0.2.261",
+      "version": "0.2.263",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -216,7 +216,7 @@
     {
       "name": "self-terminate",
       "description": "Allows Claude to gracefully terminate itself using SIGINT",
-      "version": "1.0.236",
+      "version": "1.0.238",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -228,7 +228,7 @@
     {
       "name": "skills-maintenance",
       "description": "Agent skill for maintaining, updating, and improving existing Claude Code skills",
-      "version": "0.2.260",
+      "version": "0.2.262",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -240,7 +240,7 @@
     {
       "name": "statusline",
       "description": "Configurable status line for Claude Code showing session info, project context, and git status",
-      "version": "0.1.256",
+      "version": "0.1.258",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -252,7 +252,7 @@
     {
       "name": "statusline-iterm",
       "description": "Status line for Claude Code with iTerm2 badge integration - shows session info, project context, git status, and updates iTerm2 badge",
-      "version": "0.1.256",
+      "version": "0.1.258",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -274,7 +274,7 @@
     {
       "name": "sync-settings",
       "description": "Automatically sync and merge local Claude Code settings, commands, and files using configurable rules in syncconfig.yaml",
-      "version": "0.2.260",
+      "version": "0.2.262",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -295,7 +295,7 @@
     {
       "name": "task-parallelization",
       "description": "Intelligent skill that helps Claude parallelize Task tool calls when working on repetitive or batch operations, optimizing throughput based on task complexity",
-      "version": "0.2.260",
+      "version": "0.2.262",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -315,7 +315,7 @@
     {
       "name": "tmux-subagent",
       "description": "Launch independent Claude sub-agents in tmux sessions with custom configurations, tool restrictions, and iTerm integration",
-      "version": "0.2.260",
+      "version": "0.2.262",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -327,7 +327,7 @@
     {
       "name": "todo-sync",
       "description": "Automatically syncs todos and plans from ~/.claude/ to the current project's .claude/ directory",
-      "version": "0.1.242",
+      "version": "0.1.244",
       "author": {
         "name": "Nathan Heaps"
       },
