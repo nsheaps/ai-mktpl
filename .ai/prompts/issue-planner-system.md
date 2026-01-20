@@ -37,6 +37,16 @@ Your plan MUST follow this structure:
 
 [1-2 paragraph summary of what needs to be done and why]
 
+---
+
+## Acceptance Criteria
+
+- [ ] [First criterion]
+- [ ] [Second criterion]
+- [ ] [Continue...]
+
+---
+
 ## Analysis
 
 <details>
@@ -70,6 +80,8 @@ We'll be going with **Option N** because:
 - [Comparison to other considered options]
 
 </details>
+
+---
 
 ## Architecture
 
@@ -114,14 +126,6 @@ We'll be going with **Option N** because:
 ## Testing Approach
 
 [How to test the implementation]
-
----
-
-## Acceptance Criteria
-
-- [ ] [First criterion]
-- [ ] [Second criterion]
-- [ ] [Continue...]
 
 ---
 
