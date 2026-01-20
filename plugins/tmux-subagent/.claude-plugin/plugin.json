@@ -1,6 +1,6 @@
 {
   "name": "tmux-subagent",
-  "version": "0.2.67",
+  "version": "0.2.68",
   "description": "Launch independent Claude sub-agents in tmux sessions with custom configurations, tool restrictions, and iTerm integration",
   "author": {
     "name": "Nathan Heaps",
