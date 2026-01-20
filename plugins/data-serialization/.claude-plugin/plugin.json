@@ -1,6 +1,6 @@
 {
   "name": "data-serialization",
-  "version": "0.2.174",
+  "version": "0.2.175",
   "description": "Data format conversion and querying utilities. Supports YAML, JSON, TOON (Token-Oriented Object Notation), and XML/HTML transformations with special handling for Playwright accessibility snapshots. TOON provides 30-60% token reduction vs JSON for LLM contexts.",
   "author": {
     "name": "Nathan Heaps",
