@@ -17,7 +17,7 @@ Roadmap items are tracked as individual specifications in `docs/specs/drafts/`.
 - [Marketplace Features](specs/drafts/marketplace-features.md)
 - [Developer Experience](specs/drafts/developer-experience.md)
 
-
 ### wishlist
+
 - commit plugin blocks use of `git add -A` and forces it to stage specific things
 - worktree skill and block of using write and edit when on main
