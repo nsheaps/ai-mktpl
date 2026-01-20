@@ -1,6 +1,6 @@
 {
   "name": "sync-settings",
-  "version": "0.2.202",
+  "version": "0.2.203",
   "description": "Automatically sync and merge local Claude Code settings, commands, and files using configurable rules in syncconfig.yaml",
   "author": {
     "name": "Nathan Heaps",
