@@ -230,6 +230,60 @@ _plugin-next-version PLUGIN_PATH=invocation_directory():
     cd "$PLUGIN_DIR"
     commit-and-tag-version --dry-run --skip.changelog --skip.commit | grep -Eo 'to \d+\.\d+\.\d+' | sed 's/to //g'
 
+# Bump plugin version using svu (Semantic Version Utility)
+# BASE_REF is the git ref to get the base version from (e.g., origin/main)
+# This prevents repeated version increments on subsequent PR pushes
+_bump-plugin-version-svu PLUGIN_PATH=invocation_directory() BASE_REF='HEAD~1':
+    #!/usr/bin/env bash
+    command -v svu >/dev/null 2>&1 || { just setup ; }
+    source {{root_dir}}/bin/lib/stdlib.sh
+    cd {{PLUGIN_PATH}}
+    PLUGIN_DIR="$(dirname "$(find_up '.claude-plugin')")"
+    cd "$PLUGIN_DIR"
+    PLUGIN_JSON=".claude-plugin/plugin.json"
+
+    # Get base version from the BASE_REF (target branch in PR context)
+    BASE_VERSION=$(git show "{{BASE_REF}}:$PLUGIN_DIR/$PLUGIN_JSON" 2>/dev/null | jq -r '.version' 2>/dev/null || echo "0.0.0")
+    if [ -z "$BASE_VERSION" ] || [ "$BASE_VERSION" = "null" ]; then
+        BASE_VERSION="0.0.0"
+    fi
+    echo "Base version from {{BASE_REF}}: $BASE_VERSION"
+
+    # Create a temporary tag at base version for svu to use
+    TEMP_TAG="v${BASE_VERSION}"
+    git tag -f "$TEMP_TAG" "{{BASE_REF}}" 2>/dev/null || git tag -f "$TEMP_TAG" HEAD~1 2>/dev/null || true
+
+    # Use svu to determine next version based on conventional commits
+    # --tag.prefix="" removes the 'v' prefix from output
+    # --always ensures we always get a version even without proper tags
+    # --log.directory=. scopes to changes in this directory
+    NEXT_VERSION=$(svu next --tag.prefix "" --always --log.directory . 2>/dev/null || echo "")
+
+    # Clean up temporary tag
+    git tag -d "$TEMP_TAG" 2>/dev/null || true
+
+    # If svu fails or returns empty, fall back to patch bump
+    if [ -z "$NEXT_VERSION" ] || [ "$NEXT_VERSION" = "$BASE_VERSION" ]; then
+        IFS='.' read -r major minor patch <<< "$BASE_VERSION"
+        NEXT_VERSION="$major.$minor.$((patch + 1))"
+        echo "svu returned same version, using patch bump: $NEXT_VERSION"
+    fi
+
+    echo "Next version: $NEXT_VERSION"
+
+    # Update plugin.json with new version
+    jq --arg version "$NEXT_VERSION" '.version = $version' "$PLUGIN_JSON" > "${PLUGIN_JSON}.tmp"
+    mv "${PLUGIN_JSON}.tmp" "$PLUGIN_JSON"
+
+    # Update CHANGELOG.md if it exists
+    if [ -f "CHANGELOG.md" ]; then
+        DATE=$(date +%Y-%m-%d)
+        # Add new version header after the first line (# Changelog)
+        sed -i "2i\\\n## [$NEXT_VERSION] - $DATE\n" CHANGELOG.md
+    fi
+
+    echo "Bumped $PLUGIN_DIR from $BASE_VERSION to $NEXT_VERSION"
+
 _bump-plugin-version PLUGIN_PATH=invocation_directory():
     #!/usr/bin/env bash
     command -v commit-and-tag-version >/dev/null 2>&1 || { just setup ; }
@@ -373,4 +427,3 @@ update-marketplace:
 check:
     @just lint
     @just validate
-

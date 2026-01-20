@@ -1,0 +1,163 @@
+#!/usr/bin/env bash
+# claude-simple-cli - Simplified one-shot text interface over Claude's JSON mode
+# Usage: claude-simple-cli [OPTIONS] [PROMPT]
+#
+# Options:
+#   --resume <id>     Resume a previous session by ID
+#   --fork-session    Fork from the resumed session instead of continuing it
+#   --json            Output raw JSON response (default: text)
+#   --no-stream       Wait for complete response (default: stream output)
+#   --model <model>   Use specific model (e.g., opus, sonnet, haiku)
+#   -p, --print       Print mode (non-interactive, useful for piping)
+#   -h, --help        Show this help message
+#
+# If no PROMPT is given, reads from stdin or enters interactive mode.
+#
+# Examples:
+#   claude-simple-cli "What is 2+2?"
+#   echo "Explain this code" | claude-simple-cli
+#   claude-simple-cli --resume abc123 "Continue our conversation"
+#   claude-simple-cli --json "Return data as JSON"
+
+set -euo pipefail
+
+RESUME_ID=""
+FORK_SESSION="false"
+OUTPUT_JSON="false"
+NO_STREAM="false"
+MODEL=""
+PRINT_MODE="false"
+PROMPT=""
+
+show_help() {
+  sed -n '2,18p' "$0" | sed 's/^# //' | sed 's/^#//'
+  exit 0
+}
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --resume)       RESUME_ID="$2"; shift 2 ;;
+    --fork-session) FORK_SESSION="true"; shift ;;
+    --json)         OUTPUT_JSON="true"; shift ;;
+    --no-stream)    NO_STREAM="true"; shift ;;
+    --model)        MODEL="$2"; shift 2 ;;
+    -p|--print)     PRINT_MODE="true"; shift ;;
+    -h|--help)      show_help ;;
+    -*)             echo "Unknown option: $1" >&2; show_help ;;
+    *)              PROMPT="$1"; shift ;;
+  esac
+done
+
+# Check for required tools
+if ! command -v jq &>/dev/null; then
+  echo "Error: jq is required but not installed" >&2
+  exit 1
+fi
+
+# Build claude command arguments
+CLAUDE_ARGS=()
+
+# Add print mode for non-interactive
+CLAUDE_ARGS+=("-p")
+
+# Add model if specified
+if [[ -n "$MODEL" ]]; then
+  CLAUDE_ARGS+=("--model" "$MODEL")
+fi
+
+# Add resume options
+if [[ -n "$RESUME_ID" ]]; then
+  CLAUDE_ARGS+=("--resume" "$RESUME_ID")
+fi
+
+if [[ "$FORK_SESSION" == "true" ]]; then
+  CLAUDE_ARGS+=("--fork-session")
+fi
+
+# JSON I/O mode
+CLAUDE_ARGS+=("--output-format" "json")
+
+# Get prompt from argument, stdin, or interactive
+get_prompt() {
+  if [[ -n "$PROMPT" ]]; then
+    echo "$PROMPT"
+  elif [[ ! -t 0 ]]; then
+    # Reading from pipe/file
+    cat
+  else
+    # Interactive mode - single prompt
+    if command -v gum &>/dev/null; then
+      gum input --placeholder "Enter your prompt..." --width 80
+    else
+      read -r -p "Prompt: " input
+      echo "$input"
+    fi
+  fi
+}
+
+# Format JSON response as text
+format_response() {
+  local json="$1"
+
+  if [[ "$OUTPUT_JSON" == "true" ]]; then
+    echo "$json" | jq .
+  else
+    # Extract text content from response
+    # Handle both streaming and non-streaming responses
+    local text
+    text=$(echo "$json" | jq -r '
+      if type == "array" then
+        # Array of messages
+        map(select(.type == "assistant") | .message.content // .content) | join("")
+      elif .type == "result" then
+        # Result object with result field
+        .result // ""
+      elif .message then
+        # Single message object
+        .message.content // ""
+      elif .content then
+        # Direct content
+        .content
+      else
+        # Raw text
+        .
+      end
+    ' 2>/dev/null || echo "$json")
+
+    # Clean up the text (remove extra quotes if present)
+    echo "$text" | sed 's/^"//;s/"$//'
+  fi
+}
+
+# Main execution
+USER_PROMPT=$(get_prompt)
+
+if [[ -z "$USER_PROMPT" ]]; then
+  echo "Error: No prompt provided" >&2
+  exit 1
+fi
+
+# Run claude with the prompt
+# Using claude directly (shell function or binary is fine for one-shot mode)
+RESPONSE=$(claude "${CLAUDE_ARGS[@]}" "$USER_PROMPT" 2>&1)
+EXIT_CODE=$?
+
+if [[ $EXIT_CODE -ne 0 ]]; then
+  echo "Error running claude (exit code $EXIT_CODE):" >&2
+  echo "$RESPONSE" >&2
+  exit $EXIT_CODE
+fi
+
+# Format and output response
+format_response "$RESPONSE"
+
+# If not in print mode and session was created, show session ID for resume
+if [[ "$PRINT_MODE" != "true" ]] && [[ -z "$RESUME_ID" ]]; then
+  SESSION_ID=$(echo "$RESPONSE" | jq -r '.session_id // empty' 2>/dev/null || true)
+  if [[ -n "$SESSION_ID" ]]; then
+    echo "" >&2
+    echo "Session ID: $SESSION_ID" >&2
+    echo "Resume with: claude-simple-cli --resume $SESSION_ID \"your message\"" >&2
+  fi
+fi
