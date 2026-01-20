@@ -50,6 +50,9 @@ jobs:
           install: true
           cache: true
 
+      - name: Install npm dependencies
+        run: npm ci
+
       - name: Detect changed plugins
         id: detect
         shell: bash
@@ -78,16 +81,21 @@ jobs:
             echo "plugins=${CHANGED_PLUGINS[*]}" >> $GITHUB_OUTPUT
           fi
 
-      - name: Bump versions for changed plugins using svu
+      - name: Bump versions for changed plugins using release-it
         if: steps.detect.outputs.has_changes == 'true'
         shell: bash
         run: |
-          # Bump versions only for changed plugins
-          # IMPORTANT: Use version from BASE branch to avoid repeated increments
+          # Bump versions only for changed plugins using release-it
           for plugin_name in ${{ steps.detect.outputs.plugins }}; do
-            echo "Bumping version for $plugin_name"
-            just _bump-plugin-version-svu "plugins/$plugin_name" "origin/${{ github.base_ref }}"
+            echo "=== Bumping version for $plugin_name ==="
+            cd "plugins/$plugin_name"
+            npx release-it --ci
+            cd ../..
           done
+
+      - name: Run lint after version bump
+        if: steps.detect.outputs.has_changes == 'true'
+        run: just lint
 
       - name: Push version bumps to PR
         if: steps.detect.outputs.has_changes == 'true'
@@ -153,10 +161,16 @@ jobs:
           install: true
           cache: true
 
+      - name: Install npm dependencies
+        run: npm ci
+
       - name: Update marketplace metadata
         id: update
         shell: bash
         run: just update-marketplace
+
+      - name: Run lint after marketplace update
+        run: just lint
 
       - name: Commit marketplace changes
         if: steps.update.outputs.updated == 'true'

@@ -1,0 +1,9 @@
+{
+  "name": "claude-code-plugin-marketplace",
+  "private": true,
+  "description": "A curated collection of high-quality plugins for Claude Code",
+  "devDependencies": {
+    "release-it": "^19.0.0",
+    "@release-it/bumper": "^7.0.0"
+  }
+}

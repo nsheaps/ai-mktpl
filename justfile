@@ -22,12 +22,14 @@ root_dir := justfile_directory()
 default:
     @just --list
 
-# Install development dependencies via mise
+# Install development dependencies via mise and npm
 setup:
     @echo "Pruning unused tools"
     mise prune -y
     @echo "Installing tools via mise..."
     mise install -y
+    @echo "Installing npm dependencies (release-it plugins)..."
+    npm install
     @echo "Setup complete!"
 
 # Run all linters (uses .prettierrc.yaml for config)
@@ -95,30 +97,22 @@ validate:
         exit 1
     fi
 
+# Preview version bump for a single plugin (dry-run)
 _preview-version-bump PLUGIN_PATH=invocation_directory():
     #!/usr/bin/env bash
-    command -v commit-and-tag-version >/dev/null 2>&1 || { just setup ; }
+    [ -d "{{root_dir}}/node_modules" ] || { just setup ; }
     source {{root_dir}}/bin/lib/stdlib.sh
     cd {{PLUGIN_PATH}}
     PLUGIN_DIR="$(dirname "$(find_up '.claude-plugin')")"
     cd "$PLUGIN_DIR"
-    # echo "Current version is $(just plugin-current-version {{invocation_directory()}})"
-    echo "===[ DRY RUN ]==="
-    commit-and-tag-version --dry-run
+    echo "===[ DRY RUN for $(basename $PLUGIN_DIR) ]==="
+    npx --prefix "{{root_dir}}" release-it --dry-run --ci 2>&1 || echo "No release needed"
 
+# Compare plugin versions between base branch (main) and current HEAD
+# Shows actual version changes in PR, not predicted future bumps
 [arg('format', pattern='--format=raw|--format=md')]
 _preview-version-bumps format='--format=raw':
     #!/usr/bin/env bash
-    # Compare plugin versions between base branch (main) and current HEAD
-    # Shows actual version changes in PR, not predicted future bumps
-    #
-    # format with raw:
-    #  plugin-name: 1.2.2 =( patch )=> 1.2.3
-    # format with md:
-    #  | Plugin | Base | Type | Head |
-    #  |---|---|---|---|
-    #  | plugin-name | 1.2.2 | patch | 1.2.3 |
-
     # Determine base branch (origin/main in CI, main locally)
     BASE_BRANCH="${GITHUB_BASE_REF:-main}"
     if ! git rev-parse --verify "origin/$BASE_BRANCH" >/dev/null 2>&1; then
@@ -213,88 +207,27 @@ _plugin-current-versions:
 _plugin-current-version PLUGIN_PATH=invocation_directory():
     #!/usr/bin/env bash
     # returns just the semver of the plugin at PLUGIN_PATH
-    command -v commit-and-tag-version >/dev/null 2>&1 || { just setup ; }
     source {{root_dir}}/bin/lib/stdlib.sh
     cd {{PLUGIN_PATH}}
     PLUGIN_DIR="$(dirname "$(find_up '.claude-plugin')")"
     cd "$PLUGIN_DIR"
     echo "$(jq -r '.version' .claude-plugin/plugin.json)" | xargs
 
-_plugin-next-version PLUGIN_PATH=invocation_directory():
-    #!/usr/bin/env bash
-    # returns just the semver (aka 1.1.0)
-    command -v commit-and-tag-version >/dev/null 2>&1 || { just setup ; }
-    source {{root_dir}}/bin/lib/stdlib.sh
-    cd {{PLUGIN_PATH}}
-    PLUGIN_DIR="$(dirname "$(find_up '.claude-plugin')")"
-    cd "$PLUGIN_DIR"
-    commit-and-tag-version --dry-run --skip.changelog --skip.commit | grep -Eo 'to \d+\.\d+\.\d+' | sed 's/to //g'
-
-# Bump plugin version using svu (Semantic Version Utility)
-# BASE_REF is the git ref to get the base version from (e.g., origin/main)
-# This prevents repeated version increments on subsequent PR pushes
-_bump-plugin-version-svu PLUGIN_PATH=invocation_directory() BASE_REF='HEAD~1':
-    #!/usr/bin/env bash
-    command -v svu >/dev/null 2>&1 || { just setup ; }
-    source {{root_dir}}/bin/lib/stdlib.sh
-    cd {{PLUGIN_PATH}}
-    PLUGIN_DIR="$(dirname "$(find_up '.claude-plugin')")"
-    cd "$PLUGIN_DIR"
-    PLUGIN_JSON=".claude-plugin/plugin.json"
-
-    # Get base version from the BASE_REF (target branch in PR context)
-    BASE_VERSION=$(git show "{{BASE_REF}}:$PLUGIN_DIR/$PLUGIN_JSON" 2>/dev/null | jq -r '.version' 2>/dev/null || echo "0.0.0")
-    if [ -z "$BASE_VERSION" ] || [ "$BASE_VERSION" = "null" ]; then
-        BASE_VERSION="0.0.0"
-    fi
-    echo "Base version from {{BASE_REF}}: $BASE_VERSION"
-
-    # Create a temporary tag at base version for svu to use
-    TEMP_TAG="v${BASE_VERSION}"
-    git tag -f "$TEMP_TAG" "{{BASE_REF}}" 2>/dev/null || git tag -f "$TEMP_TAG" HEAD~1 2>/dev/null || true
-
-    # Use svu to determine next version based on conventional commits
-    # --tag.prefix="" removes the 'v' prefix from output
-    # --always ensures we always get a version even without proper tags
-    # --log.directory=. scopes to changes in this directory
-    NEXT_VERSION=$(svu next --tag.prefix "" --always --log.directory . 2>/dev/null || echo "")
-
-    # Clean up temporary tag
-    git tag -d "$TEMP_TAG" 2>/dev/null || true
-
-    # If svu fails or returns empty, fall back to patch bump
-    if [ -z "$NEXT_VERSION" ] || [ "$NEXT_VERSION" = "$BASE_VERSION" ]; then
-        IFS='.' read -r major minor patch <<< "$BASE_VERSION"
-        NEXT_VERSION="$major.$minor.$((patch + 1))"
-        echo "svu returned same version, using patch bump: $NEXT_VERSION"
-    fi
-
-    echo "Next version: $NEXT_VERSION"
-
-    # Update plugin.json with new version
-    jq --arg version "$NEXT_VERSION" '.version = $version' "$PLUGIN_JSON" > "${PLUGIN_JSON}.tmp"
-    mv "${PLUGIN_JSON}.tmp" "$PLUGIN_JSON"
-
-    # Update CHANGELOG.md if it exists
-    if [ -f "CHANGELOG.md" ]; then
-        DATE=$(date +%Y-%m-%d)
-        # Add new version header after the first line (# Changelog)
-        sed -i "2i\\\n## [$NEXT_VERSION] - $DATE\n" CHANGELOG.md
-    fi
-    
-    just lint-fix "$PLUGIN_JSON"
-
-    echo "Bumped $PLUGIN_DIR from $BASE_VERSION to $NEXT_VERSION"
-
+# Bump plugin version using release-it
+# Reads current version from plugin.json, applies patch bump
 _bump-plugin-version PLUGIN_PATH=invocation_directory():
     #!/usr/bin/env bash
-    command -v commit-and-tag-version >/dev/null 2>&1 || { just setup ; }
+    [ -d "{{root_dir}}/node_modules" ] || { just setup ; }
     source {{root_dir}}/bin/lib/stdlib.sh
     cd {{PLUGIN_PATH}}
     PLUGIN_DIR="$(dirname "$(find_up '.claude-plugin')")"
     cd "$PLUGIN_DIR"
-    commit-and-tag-version
+    PLUGIN_NAME=$(basename "$PLUGIN_DIR")
 
+    echo "=== Bumping version for $PLUGIN_NAME ==="
+    npx --prefix "{{root_dir}}" release-it --ci
+
+# Bump all plugin versions (only those with changes)
 _bump-plugin-versions:
     #!/usr/bin/env bash
     for plugin_dir in plugins/*; do
@@ -302,6 +235,29 @@ _bump-plugin-versions:
             continue
         fi
         just _bump-plugin-version "$plugin_dir"
+    done
+
+# Bump versions for changed plugins only
+# BASE_REF is used to detect which plugins have changes
+_bump-changed-plugins BASE_REF='origin/main':
+    #!/usr/bin/env bash
+    [ -d "{{root_dir}}/node_modules" ] || { just setup ; }
+
+    for plugin_dir in plugins/*; do
+        if [ ! -d "$plugin_dir" ]; then
+            continue
+        fi
+        PLUGIN_NAME=$(basename "$plugin_dir")
+
+        # Check if plugin has changes (excluding CHANGELOG.md and plugin.json)
+        if git diff --name-only "{{BASE_REF}}..HEAD" -- "$plugin_dir" | grep -v 'CHANGELOG.md$' | grep -v 'plugin.json$' | grep -q .; then
+            echo "=== Bumping version for $PLUGIN_NAME (has changes) ==="
+            cd "$plugin_dir"
+            npx --prefix "{{root_dir}}" release-it --ci
+            cd - > /dev/null
+        else
+            echo "=== Skipping $PLUGIN_NAME (no changes) ==="
+        fi
     done
 
 # Bump plugin versions (use --dry-run to preview)

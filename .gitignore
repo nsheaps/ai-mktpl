@@ -73,3 +73,4 @@ ehthumbs_vista.db
 # Backup files
 *.bak
 *.backup
+.claude/ralph-loop.local.md
