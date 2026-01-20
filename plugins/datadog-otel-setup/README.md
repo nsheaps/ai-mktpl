@@ -129,6 +129,6 @@ just test-plugin-config datadog-otel-setup
 
 ## Related
 
-- [Plugin Settings Framework](../../.claude/rules/plugin-settings-framework.md)
+- [Plugin Settings Framework](../../.claude/docs/plugin-settings-framework.md)
 - [Claude Code Telemetry](https://docs.anthropic.com/claude-code/docs/telemetry)
 - [Datadog OTLP Ingestion](https://docs.datadoghq.com/opentelemetry/otlp_ingest_in_the_agent/)
