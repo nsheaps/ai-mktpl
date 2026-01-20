@@ -1,0 +1,53 @@
+name: Claude Agent - Mention
+
+# Handles @claude mentions in comments, reviews, and assigned issues
+# This is for when someone is requesting specific work from Claude
+# Schema: .github/schemas/claude-agent-payload.schema.json
+
+on:
+  issue_comment:
+    types: [created, edited]
+  pull_request_review_comment:
+    types: [created, edited]
+  pull_request_review:
+    types: [submitted]
+  issues:
+    types: [assigned]
+
+env:
+  CLAUDE_MENTION: '@claude' # Configurable trigger phrase
+
+jobs:
+  dispatch:
+    # Only trigger on @claude mentions
+    # Note: New issues with @claude are handled by claude-agent-new-issue.yaml
+    if: |
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
+      (github.event_name == 'issues' && github.event.action == 'assigned' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Authenticate as GitHub App
+        id: auth
+        uses: ./.github/actions/github-app-auth
+        with:
+          app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
+          private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
+
+      - name: Dispatch to Claude agent
+        uses: ./.github/actions/dispatch-claude-agent
+        env:
+          GH_TOKEN: ${{ steps.auth.outputs.token }}
+        with:
+          token: ${{ steps.auth.outputs.token }}
+          event-json: ${{ toJson(github.event) }}
+          event-name: ${{ github.event_name }}
+          workflow-type: mention

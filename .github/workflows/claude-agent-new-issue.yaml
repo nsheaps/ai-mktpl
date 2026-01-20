@@ -1,0 +1,190 @@
+name: Claude Agent - New Issue
+
+# Handles auto-planning for new issues
+# This workflow runs first when a new issue is created, BEFORE the mention workflow
+# Schema: .github/schemas/claude-agent-payload.schema.json
+
+on:
+  issues:
+    types: [opened, labeled]
+
+env:
+  CLAUDE_MENTION: '@claude' # Configurable trigger phrase
+
+jobs:
+  auto-plan:
+    # Trigger on:
+    # 1. New issue (opened) that doesn't already have a plan structure
+    # 2. Replan label added to an existing issue
+    # Skip bot-created issues for auto-planning
+    if: |
+      (github.event.action == 'opened' && github.event.issue.user.type != 'Bot') ||
+      (github.event.action == 'labeled' && github.event.label.name == 'replan')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+    outputs:
+      has_mention: ${{ steps.check.outputs.has_mention }}
+      mention_prompt: ${{ steps.check.outputs.mention_prompt }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Check issue for plan structure and @claude mention
+        id: check
+        run: |
+          BODY='${{ toJson(github.event.issue.body) }}'
+
+          # Check for existing plan structure
+          HAS_PLAN=false
+          if echo "$BODY" | grep -qiE '## (Implementation|Overview|Acceptance Criteria)'; then
+            HAS_PLAN=true
+          elif echo "$BODY" | grep -qiE '<details>.*<summary>.*[Oo]riginal'; then
+            HAS_PLAN=true
+          elif echo "$BODY" | grep -qiE '### Step [0-9]+'; then
+            HAS_PLAN=true
+          fi
+
+          # Check for @claude mention
+          HAS_MENTION=false
+          MENTION_PROMPT=""
+          if echo "$BODY" | grep -q '@claude'; then
+            HAS_MENTION=true
+            # Extract the prompt after @claude (the directed request)
+            MENTION_PROMPT=$(echo "$BODY" | grep -oP '@claude\s+\K.*' | head -1)
+          fi
+
+          echo "has_plan=$HAS_PLAN" >> $GITHUB_OUTPUT
+          echo "has_mention=$HAS_MENTION" >> $GITHUB_OUTPUT
+
+          # For replan, we always plan regardless of existing structure
+          if [[ "${{ github.event.action }}" == "labeled" ]]; then
+            echo "should_plan=true" >> $GITHUB_OUTPUT
+            echo "is_replan=true" >> $GITHUB_OUTPUT
+          elif [[ "$HAS_PLAN" == "true" ]]; then
+            echo "should_plan=false" >> $GITHUB_OUTPUT
+            echo "is_replan=false" >> $GITHUB_OUTPUT
+          else
+            echo "should_plan=true" >> $GITHUB_OUTPUT
+            echo "is_replan=false" >> $GITHUB_OUTPUT
+          fi
+
+          # Store mention prompt for potential handoff
+          {
+            echo "mention_prompt<<EOF_MENTION"
+            echo "$MENTION_PROMPT"
+            echo "EOF_MENTION"
+          } >> $GITHUB_OUTPUT
+
+      - name: Authenticate as GitHub App
+        if: steps.check.outputs.should_plan == 'true'
+        id: auth
+        uses: ./.github/actions/github-app-auth
+        with:
+          app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
+          private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
+
+      - name: Fetch comment history for replan
+        if: steps.check.outputs.is_replan == 'true'
+        id: comments
+        run: |
+          COMMENTS=$(gh api repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments --jq '[.[].body] | join("\n\n---\n\n")')
+          {
+            echo "history<<EOF_HISTORY"
+            echo "$COMMENTS"
+            echo "EOF_HISTORY"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Build planning prompt
+        if: steps.check.outputs.should_plan == 'true'
+        id: prompt
+        run: |
+          if [[ "${{ steps.check.outputs.is_replan }}" == "true" ]]; then
+            # Replan prompt includes comment history
+            {
+              echo "prompt<<EOF_PROMPT"
+              echo "REPLAN REQUEST"
+              echo ""
+              echo "The user has requested a replan by adding the 'replan' label."
+              echo "Please update the implementation plan based on the discussion in the comments."
+              echo ""
+              echo "Current issue body:"
+              echo '---'
+              echo '${{ github.event.issue.body }}'
+              echo '---'
+              echo ""
+              echo "Comment history for context:"
+              echo '---'
+              echo '${{ steps.comments.outputs.history }}'
+              echo '---'
+              echo "EOF_PROMPT"
+            } >> "$GITHUB_OUTPUT"
+          else
+            # Auto-planning prompt for new issues
+            {
+              echo "prompt<<EOF_PROMPT"
+              echo "AUTO-PLANNING REQUEST"
+              echo ""
+              echo "A new issue has been created. Please convert it into a structured implementation plan."
+              echo ""
+              echo "Original issue body:"
+              echo '---'
+              echo '${{ github.event.issue.body }}'
+              echo '---'
+              echo "EOF_PROMPT"
+            } >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Dispatch for planning
+        if: steps.check.outputs.should_plan == 'true'
+        uses: ./.github/actions/dispatch-claude-agent
+        env:
+          GH_TOKEN: ${{ steps.auth.outputs.token }}
+        with:
+          token: ${{ steps.auth.outputs.token }}
+          prompt: ${{ steps.prompt.outputs.prompt }}
+          event-json: ${{ toJson(github.event) }}
+          event-name: ${{ github.event_name }}
+          workflow-type: new-issue
+
+  # If the new issue contains an @claude mention with a specific request,
+  # trigger the mention workflow AFTER planning is complete
+  handoff-to-mention:
+    needs: auto-plan
+    if: |
+      needs.auto-plan.outputs.has_mention == 'true' &&
+      needs.auto-plan.outputs.mention_prompt != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Authenticate as GitHub App
+        id: auth
+        uses: ./.github/actions/github-app-auth
+        with:
+          app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
+          private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
+
+      - name: Post @claude comment to trigger mention workflow
+        env:
+          GH_TOKEN: ${{ steps.auth.outputs.token }}
+          MENTION_PROMPT: ${{ needs.auto-plan.outputs.mention_prompt }}
+        run: |
+          # Post a comment with the @claude mention to trigger the mention workflow
+          # This ensures the work request is handled by the mention workflow
+          COMMENT="@claude $MENTION_PROMPT
+
+          *(This request was extracted from the original issue after auto-planning)*"
+
+          gh issue comment ${{ github.event.issue.number }} --body "$COMMENT"

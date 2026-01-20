@@ -1,5 +1,5 @@
 name: 'Dispatch Claude Agent'
-description: 'Send a repository dispatch event to trigger the Claude agent workflow'
+description: 'Send a repository dispatch event to trigger the Claude agent workflow with full context'
 
 branding:
   icon: 'send'
@@ -10,71 +10,132 @@ inputs:
     description: 'GitHub token with permission to dispatch events'
     required: true
   prompt:
-    description: 'The prompt/request to send to Claude'
+    description: 'The prompt/request to send to Claude (defaults to comment/review/issue body)'
+    required: false
+  event-json:
+    description: 'The full github.event context as JSON'
     required: true
-  repo:
-    description: 'Repository in owner/repo format'
+  event-name:
+    description: 'The github.event_name value'
+    required: true
+  repository:
+    description: 'The github.repository value'
     required: false
     default: ${{ github.repository }}
-  issue-number:
-    description: 'Issue number (if applicable)'
+  ref:
+    description: 'The github.ref value'
     required: false
-  pr-number:
-    description: 'Pull request number (if applicable)'
-    required: false
-  comment-id:
-    description: 'Comment ID (if applicable)'
-    required: false
-  author-login:
-    description: 'Author username'
-    required: false
-    default: ''
-  author-association:
-    description: 'Author association (OWNER, MEMBER, etc.)'
-    required: false
-    default: ''
-  trigger-type:
-    description: 'Event name that triggered this (issue_comment, pull_request_review_comment, etc.)'
-    required: false
-    default: ${{ github.event_name }}
-  trigger-action:
-    description: 'Event action (created, edited, opened, etc.)'
-    required: false
-    default: ${{ github.event.action }}
-  title:
-    description: 'Title of the issue or PR'
-    required: false
-    default: ''
+    default: ${{ github.ref }}
+  workflow-type:
+    description: 'Type of workflow triggering this: "mention" or "new-issue"'
+    required: true
 
 runs:
   using: 'composite'
   steps:
-    - name: Dispatch to Claude agent
-      uses: peter-evans/repository-dispatch@v4
-      with:
-        token: ${{ inputs.token }}
-        event-type: claude-agent
+    - name: Build payload and dispatch
+      shell: bash
+      env:
+        TOKEN: ${{ inputs.token }}
+        EVENT_JSON: ${{ inputs.event-json }}
+        EVENT_NAME: ${{ inputs.event-name }}
+        REPOSITORY: ${{ inputs.repository }}
+        REF: ${{ inputs.ref }}
+        WORKFLOW_TYPE: ${{ inputs.workflow-type }}
+        CUSTOM_PROMPT: ${{ inputs.prompt }}
+      run: |
+        # Extract values from event JSON based on event type
+        case "$EVENT_NAME" in
+          issue_comment)
+            PROMPT="${CUSTOM_PROMPT:-$(echo "$EVENT_JSON" | jq -r '.comment.body // ""')}"
+            ISSUE_NUMBER=$(echo "$EVENT_JSON" | jq -r '.issue.number // null')
+            PR_NUMBER=$(echo "$EVENT_JSON" | jq -r 'if .issue.pull_request then .issue.number else null end')
+            COMMENT_ID=$(echo "$EVENT_JSON" | jq -r '.comment.id // null')
+            AUTHOR_LOGIN=$(echo "$EVENT_JSON" | jq -r '.comment.user.login // ""')
+            AUTHOR_ASSOC=$(echo "$EVENT_JSON" | jq -r '.comment.author_association // ""')
+            TITLE=$(echo "$EVENT_JSON" | jq -r '.issue.title // ""')
+            ACTION=$(echo "$EVENT_JSON" | jq -r '.action // ""')
+            ;;
+          pull_request_review_comment)
+            PROMPT="${CUSTOM_PROMPT:-$(echo "$EVENT_JSON" | jq -r '.comment.body // ""')}"
+            ISSUE_NUMBER=null
+            PR_NUMBER=$(echo "$EVENT_JSON" | jq -r '.pull_request.number // null')
+            COMMENT_ID=$(echo "$EVENT_JSON" | jq -r '.comment.id // null')
+            AUTHOR_LOGIN=$(echo "$EVENT_JSON" | jq -r '.comment.user.login // ""')
+            AUTHOR_ASSOC=$(echo "$EVENT_JSON" | jq -r '.comment.author_association // ""')
+            TITLE=$(echo "$EVENT_JSON" | jq -r '.pull_request.title // ""')
+            ACTION=$(echo "$EVENT_JSON" | jq -r '.action // ""')
+            ;;
+          pull_request_review)
+            PROMPT="${CUSTOM_PROMPT:-$(echo "$EVENT_JSON" | jq -r '.review.body // ""')}"
+            ISSUE_NUMBER=null
+            PR_NUMBER=$(echo "$EVENT_JSON" | jq -r '.pull_request.number // null')
+            COMMENT_ID=$(echo "$EVENT_JSON" | jq -r '.review.id // null')
+            AUTHOR_LOGIN=$(echo "$EVENT_JSON" | jq -r '.review.user.login // ""')
+            AUTHOR_ASSOC=$(echo "$EVENT_JSON" | jq -r '.review.author_association // ""')
+            TITLE=$(echo "$EVENT_JSON" | jq -r '.pull_request.title // ""')
+            ACTION=$(echo "$EVENT_JSON" | jq -r '.action // ""')
+            ;;
+          issues)
+            PROMPT="${CUSTOM_PROMPT:-$(echo "$EVENT_JSON" | jq -r '.issue.body // ""')}"
+            ISSUE_NUMBER=$(echo "$EVENT_JSON" | jq -r '.issue.number // null')
+            PR_NUMBER=null
+            COMMENT_ID=null
+            AUTHOR_LOGIN=$(echo "$EVENT_JSON" | jq -r '.issue.user.login // ""')
+            AUTHOR_ASSOC=$(echo "$EVENT_JSON" | jq -r '.issue.author_association // ""')
+            TITLE=$(echo "$EVENT_JSON" | jq -r '.issue.title // ""')
+            ACTION=$(echo "$EVENT_JSON" | jq -r '.action // ""')
+            ;;
+          *)
+            echo "Unknown event type: $EVENT_NAME"
+            exit 1
+            ;;
+        esac
+
+        # Build the payload JSON
         # Schema: .github/schemas/claude-agent-payload.schema.json
-        client-payload: |
-          {
-            "prompt": ${{ toJson(inputs.prompt) }},
-            "trigger": {
-              "type": "${{ inputs.trigger-type }}",
-              "action": "${{ inputs.trigger-action }}"
+        PAYLOAD=$(jq -n \
+          --arg prompt "$PROMPT" \
+          --arg trigger_type "$EVENT_NAME" \
+          --arg trigger_action "$ACTION" \
+          --arg repo "$REPOSITORY" \
+          --argjson issue_number "$ISSUE_NUMBER" \
+          --argjson pr_number "$PR_NUMBER" \
+          --argjson comment_id "$COMMENT_ID" \
+          --arg ref "$REF" \
+          --arg author_login "$AUTHOR_LOGIN" \
+          --arg author_assoc "$AUTHOR_ASSOC" \
+          --arg title "$TITLE" \
+          --arg workflow_type "$WORKFLOW_TYPE" \
+          '{
+            prompt: $prompt,
+            trigger: {
+              type: $trigger_type,
+              action: $trigger_action
             },
-            "source": {
-              "repo": "${{ inputs.repo }}",
-              "issue_number": ${{ inputs.issue-number || 'null' }},
-              "pr_number": ${{ inputs.pr-number || 'null' }},
-              "comment_id": ${{ inputs.comment-id || 'null' }},
-              "ref": "${{ github.ref }}"
+            source: {
+              repo: $repo,
+              issue_number: $issue_number,
+              pr_number: $pr_number,
+              comment_id: $comment_id,
+              ref: $ref
             },
-            "author": {
-              "login": "${{ inputs.author-login }}",
-              "association": "${{ inputs.author-association }}"
+            author: {
+              login: $author_login,
+              association: $author_assoc
             },
-            "content": {
-              "title": ${{ toJson(inputs.title) }},
-              "body": ${{ toJson(inputs.prompt) }}
-            }
-          }
+            content: {
+              title: $title,
+              body: $prompt
+            },
+            workflow_type: $workflow_type
+          }')
+
+        # Dispatch the event
+        gh api repos/$REPOSITORY/dispatches \
+          -X POST \
+          -H "Accept: application/vnd.github+json" \
+          -f event_type=claude-agent \
+          --input - <<< "{\"client_payload\": $PAYLOAD}"
+
+        echo "Dispatched claude-agent event for $WORKFLOW_TYPE workflow"
