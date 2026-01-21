@@ -12,6 +12,7 @@ brew install claude-utils
 ```
 
 This will install all the CLI tools:
+
 - `branch-status` - Display rich status for git branches
 - `claude-diagnostics` - Diagnostic tool for troubleshooting
 - `claude-simple-cli` - Simplified one-shot text interface
