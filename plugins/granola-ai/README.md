@@ -5,7 +5,7 @@ MCP server integration for [Granola.ai](https://granola.ai) meeting notes. Provi
 ## Requirements
 
 - **macOS** with Granola.ai installed
-- **Python 3.12+** and `uv` package manager
+- **[mise](https://mise.jdx.dev/)** - handles Python and uv dependencies automatically
 - Granola cache file at `~/Library/Application Support/Granola/cache-v3.json`
 
 ## Installation
