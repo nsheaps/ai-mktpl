@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Copy the 'mcpServers' section into your Claude Code settings.json to enable Granola.ai integration.",
+
+  "mcpServers": {
+    "granola-ai": {
+      "type": "stdio",
+      "command": "mise",
+      "args": [
+        "exec",
+        "uv",
+        "--",
+        "uvx",
+        "--from",
+        "git+https://github.com/proofgeist/granola-ai-mcp-server",
+        "granola-mcp-server"
+      ],
+      "$comment": "Optional: Set GRANOLA_PARSE_PANELS=0 in env to disable parsing of rich notes in documentPanels"
+    }
+  }
+}

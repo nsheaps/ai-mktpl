@@ -1,0 +1,13 @@
+{
+  "name": "granola-ai",
+  "version": "0.1.0",
+  "description": "MCP server integration for Granola.ai meeting notes - provides search, transcripts, and meeting analysis from local cache",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/granola-ai",
+  "repository": "https://github.com/nsheaps/.ai",
+  "keywords": ["granola", "meetings", "mcp", "transcripts", "notes"]
+}
