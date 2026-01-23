@@ -49,3 +49,11 @@ If merge conflicts occur:
 - For obvious conflicts (formatting, simple additions): resolve directly
 - For non-obvious conflicts: use Explore agent to understand both sides, Plan agent to determine resolution
 - The executing agent owns the final resolution - delegations are helpers
+
+## Completion Messaging
+
+When reporting completion, use clear language that doesn't imply the PR was merged:
+
+**Don't say:** "PR #123 is now merged with main" (implies PR merged INTO main)
+
+**Do say:** "Branch updated: merged base branch (main) into feature branch, synced local and remote"
