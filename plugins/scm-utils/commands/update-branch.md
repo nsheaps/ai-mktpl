@@ -20,6 +20,13 @@ Determine the target from the argument (or use defaults):
 
 Argument provided: $ARGUMENTS
 
+## Pre-fetched Context (dynamic injection)
+
+Current branch: !`git branch --show-current 2>/dev/null || echo "(not in a git repo)"`
+
+PR info for current branch:
+!`gh pr view --json baseRefName,headRefName,number,title,state 2>/dev/null || echo "(no PR found or gh not authenticated)"`
+
 ## Execute the Workflow
 
 1. Fetch all remotes
