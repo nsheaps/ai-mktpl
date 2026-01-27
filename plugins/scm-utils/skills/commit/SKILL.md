@@ -1,6 +1,7 @@
 ---
-argument-hint: [optional hint]
+name: commit
 description: Intelligently commit outstanding changes in logical, focused commits
+argument-hint: [optional hint]
 ---
 
 # Intelligent Commit Process
