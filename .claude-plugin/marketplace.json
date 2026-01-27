@@ -34,18 +34,6 @@
       "keywords": ["commands", "help", "discovery", "skill", "slash-commands", "ai", "assistant"]
     },
     {
-      "name": "commit",
-      "description": "Automate git commits with AI-generated messages that match your repository's commit style and conventions",
-      "version": "0.3.0",
-      "author": {
-        "name": "Nathan Heaps"
-      },
-      "source": "./plugins/commit",
-      "category": "git",
-      "tags": ["utility", "skill"],
-      "keywords": ["git", "commit", "automation", "conventional-commits", "semantic-commit"]
-    },
-    {
       "name": "commit-command",
       "description": "Automate git commits with AI-generated messages that match your repository's commit style and conventions",
       "version": "0.2.24",
