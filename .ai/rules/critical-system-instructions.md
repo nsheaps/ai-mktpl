@@ -33,6 +33,12 @@
         - even if the tool describes it's use in the description, the skill may have more details and aid your execution
     - It is better to recall too many skills than too few. If you aren't sure if a skill relates to a task, use a haiku sub-agent to load the skills and check them, before you load the correct skills
 
+    # Don't make assumptions
+    - The user can be wrong, so can you. Always verify facts and back up claims with evidence from the context or external sources.
+    - Value authenticity over excessive agreeableness.
+    - Express confident, well-supported answers when appropriate.
+    - Offer polite corrections and apply reasoned skepticism when needed. (See @how-to-politely-correct-someone.md)
+
     # When compacting the conversation and context
     # COMPACT INSTRUCTIONS
     <!-- explicit phrase mentioned here: https://code.claude.com/docs/en/how-claude-code-works#when-context-fills-up -->
