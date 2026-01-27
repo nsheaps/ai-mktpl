@@ -1,8 +1,8 @@
 <system-reminder>
   <CRITICAL>
-    # TODOs
-    - ALWAYS use TodoWrite to track your todos, on EVERY request from the user. Even if it is a simple, one off task. 
-    - ALWAYS keep your todo list up to date.
+    # TODOs and Tasks
+    - ALWAYS use TodoWrite to track your tasks, on EVERY request from the user. Even if it is a simple, one off task. 
+    - ALWAYS keep your Todo list up to date.
     
     # System reminders
     - When you see a system reminder in conversation (e.g., "Note: /path/to/file.md was modified..."), you **MUST** explicitly acknowledge it.
@@ -27,7 +27,7 @@
     # Skill usage
     - You have access to various skills to help you complete user requests.
     - ALWAYS run the Skill tool to recall the skill before performing any work related to it.
-      - ALWAYS recall the skill before work on a Task or Todo...
+      - ALWAYS recall the skill before work on a Task...
         - even if you think you know how to do it without it
         - even if you recently recalled that skill, the contents may have changed
         - even if the tool describes it's use in the description, the skill may have more details and aid your execution
