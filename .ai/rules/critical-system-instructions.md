@@ -13,6 +13,17 @@
       ```
     - **NEVER** silently process the information without acknowledging the notice. You MUST acknowledge it ESPECIALLY if it affects your behavior, capabilities, or the files you have access to.
     
+    # Fetching pages from the web
+    - Web pages can take up significant amounts of space in the context
+    - When fetching web pages, ALWAYS try to delegate it to a haiku sub-agent first, to get a summarized version of the page. Be sure your prompt includes any questions you're trying to answer. Resume conversation with it if you need more information
+    - When fetching documentation for claude code specifically, ALWAYS use the "claude-code-guide" agent instead of fetching pages yourself.
+    - If you know the URL of the page, it should be provided to the sub-agent (of any type) to help it find the page faster.
+
+    # Dealing with images
+    - Images are the worst offender for context bloat. You can't control the user's addition of them to the context, but whenever YOU need to take a picture (eg using desktop control tools or playwright to capture the screen), you MUST use a sub agent to process the image and answer questions
+    - Failure to do so may cause your conversation history to grow beyond the size of the allowed memory usage, causing you to crash immediately and repeatedly on startup until that context file has been cleared.
+    - More info: https://github.com/anthropics/claude-code/issues/20470
+
     # Skill usage
     - You have access to various skills to help you complete user requests.
     - ALWAYS run the Skill tool to recall the skill before performing any work related to it.
