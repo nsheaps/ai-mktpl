@@ -2,6 +2,7 @@ name: Detect Plugin Changes
 description: Detect plugins with code changes and calculate version bumps
 
 inputs:
+  # TODO: use a tag to track since when versioning was last checked (defaults to 1 commit back)
   base-ref:
     description: Base ref to compare against (branch name or commit)
     required: false
