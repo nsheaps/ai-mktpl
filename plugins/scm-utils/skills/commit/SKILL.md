@@ -5,13 +5,14 @@ description: Intelligently commit outstanding changes in logical, focused commit
 
 # Intelligent Commit Process
 
-You should commit outstanding changes by breaking them into logical, focused commits. The optional hint ($ARGUMENTS) provides guidance on what to commit, how to group changes, or what to emphasize in commit messages. 
+You should commit outstanding changes by breaking them into logical, focused commits. The optional hint ($ARGUMENTS) provides guidance on what to commit, how to group changes, or what to emphasize in commit messages.
 
 If the hint is unclear or ambiguous, **ASK THE USER** for clarification before proceeding.
 
 Follow this iterative process:
 
 ## Review Phase
+
 1. Check memory systems for commit strategies:
    - Use Serena's `read_memory commit_strategy` for project-specific patterns
    - Check Memory MCP for user preferences on commit structure
@@ -24,7 +25,8 @@ Follow this iterative process:
 8. **ASK THE USER** for clarification if the hint is unclear or ambiguous
 9. Identify any debug code, temporary changes, or unrelated modifications that shouldn't be committed
 
-## Commit Strategy  
+## Commit Strategy
+
 1. **Apply the user's hint** to determine grouping strategy, content focus, or message emphasis
 2. Group related changes into logical commits (e.g., separate documentation updates from code changes)
 3. Create focused commits that each serve a single purpose
@@ -34,8 +36,9 @@ Follow this iterative process:
 7. Include context about the change's purpose and impact
 
 ## Execution
+
 1. For each logical group of changes:
-   - Add only specific files with `git add <specific-files>` 
+   - Add only specific files with `git add <specific-files>`
    - Create commit with detailed angular-style message
    - Verify the commit with `git show --stat`
 2. **NEVER** use `git add .` - always be explicit about files
@@ -46,15 +49,18 @@ Follow this iterative process:
 ## Example Workflows
 
 **Default behavior:**
+
 - Commit 1: `docs: update memory management guidelines to clarify MCP usage`
 - Commit 2: `feat: add intelligent commit slash command for better git workflow`
 - Commit 3: `fix: correct memory.json file format documentation`
 
 **With hint `/commit each file separate`:**
+
 - Commit 1: `docs: update commit.md to support optional hints`
 - Commit 2: `docs: clarify memory management MCP tool differences`
 - Commit 3: `feat: add new agent configuration file`
 
 **With hint `/commit only documentation`:**
+
 - Commit 1: `docs: update commit workflow and memory management guidelines`
 - (Skip non-documentation changes)
