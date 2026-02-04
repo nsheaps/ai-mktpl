@@ -1,0 +1,14 @@
+{
+  "name": "bash-command-rejection",
+  "version": "0.1.0",
+  "description": "Rejects bash commands that use && or | chaining, enforcing single-command execution for proper permission handling",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/bash-command-rejection",
+  "repository": "https://github.com/nsheaps/.ai",
+  "keywords": ["bash", "security", "hooks", "permissions", "chaining"],
+  "hooks": "./hooks/hooks.json"
+}
