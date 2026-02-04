@@ -10,12 +10,12 @@ This skill helps identify which user account is authenticated for GitHub CLI (`g
 
 ## Quick Reference
 
-| Method | Command | Shows |
-|--------|---------|-------|
-| GitHub CLI | `gh auth status` | Active gh account, auth method |
-| HTTPS credentials | `git credential fill` | Stored username/password for HTTPS |
-| SSH connection | `ssh -T git@github.com` | SSH key owner |
-| Token verification | `GH_TOKEN=... gh auth status` | Token owner |
+| Method             | Command                       | Shows                              |
+| ------------------ | ----------------------------- | ---------------------------------- |
+| GitHub CLI         | `gh auth status`              | Active gh account, auth method     |
+| HTTPS credentials  | `git credential fill`         | Stored username/password for HTTPS |
+| SSH connection     | `ssh -T git@github.com`       | SSH key owner                      |
+| Token verification | `GH_TOKEN=... gh auth status` | Token owner                        |
 
 ## GitHub CLI (`gh`)
 
@@ -26,6 +26,7 @@ gh auth status
 ```
 
 **Example output:**
+
 ```
 github.com
   ✓ Logged in to github.com account octocat (/home/user/.config/gh/hosts.yml)
@@ -77,6 +78,7 @@ host=github.com" | git credential fill
 ```
 
 **Example output:**
+
 ```
 protocol=https
 host=github.com
@@ -101,13 +103,13 @@ echo "url=https://github.com" | git credential fill
 
 Credentials may be stored in different locations depending on the credential helper:
 
-| Helper | Storage Location |
-|--------|------------------|
-| `store` | `~/.git-credentials` (plaintext) |
-| `cache` | In-memory (temporary) |
-| `osxkeychain` | macOS Keychain |
-| `manager` | Windows Credential Manager |
-| `manager-core` | Git Credential Manager |
+| Helper         | Storage Location                 |
+| -------------- | -------------------------------- |
+| `store`        | `~/.git-credentials` (plaintext) |
+| `cache`        | In-memory (temporary)            |
+| `osxkeychain`  | macOS Keychain                   |
+| `manager`      | Windows Credential Manager       |
+| `manager-core` | Git Credential Manager           |
 
 Check configured helper:
 
@@ -124,6 +126,7 @@ ssh -T git@github.com
 ```
 
 **Successful output:**
+
 ```
 Hi octocat! You've successfully authenticated, but GitHub does not provide shell access.
 ```
@@ -178,6 +181,7 @@ gh auth switch
 When HTTPS and SSH credentials point to different accounts:
 
 1. Check which protocol Git is using:
+
    ```bash
    git config --get remote.origin.url
    ```
@@ -205,6 +209,7 @@ Based on the argument ($ARGUMENTS), check the relevant authentication method:
 4. **`all`**: Run all checks and summarize which accounts are configured
 
 After running commands, summarize:
+
 - The authenticated username(s)
 - The authentication method (token, SSH key, etc.)
 - Any mismatches between different auth methods
