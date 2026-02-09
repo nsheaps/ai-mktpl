@@ -1,0 +1,13 @@
+{
+  "datadog-otel-setup": {
+    "target": "local",
+    "env": {
+      "CLAUDE_CODE_ENABLE_TELEMETRY": "1",
+      "OTEL_METRICS_EXPORTER": "otlp",
+      "OTEL_LOGS_EXPORTER": "otlp",
+      "OTEL_EXPORTER_OTLP_PROTOCOL": "grpc",
+      "OTEL_EXPORTER_OTLP_ENDPOINT": "https://otel.datadoghq.com:4317",
+      "OTEL_RESOURCE_ATTRIBUTES": "service.name=claude-code,deployment.environment=development"
+    }
+  }
+}
