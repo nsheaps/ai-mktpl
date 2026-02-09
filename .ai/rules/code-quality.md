@@ -91,6 +91,9 @@ cd /path/to/repo && git rm -r .github/actions/old-action
 
 ### Never Remove Git Lock Files
 
+Sometimes a background process is using git when you want to use it. If you get a lock error, try again up to 3 times total.
+If a lock still exists, DO NOT REMOVE IT.
+
 **CRITICAL:** NEVER remove git lock files (`.git/**/index.lock`, `.git/**/HEAD.lock`, etc.) automatically.
 
 When you encounter a git lock file error like:

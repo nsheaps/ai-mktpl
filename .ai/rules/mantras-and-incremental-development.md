@@ -1,6 +1,6 @@
 ### Mantras
 
-Don't forget these mantras when working on your projects!
+Don't forget these mantras when working on your projects! What they imply is CRITICAL for maintaining high quality code. Think about them after every task to ensure they're followed.
 
 **KISS** - Keep It Simple, Stupid!
 Always aim for simplicity in your designs and implementations.

@@ -10,9 +10,11 @@ For finding files, searching text, and working with structured data, prefer thes
 
 When using the Bash tool directly:
 
-1. **Do NOT chain commands** with `&&` or `||`
-2. **Do NOT pipe output** with `|` (e.g., `| head`, `| grep`, `| jq`)
+1. **NEVER chain commands** with `&&` or `||`
+2. **NEVER pipe output** with `|` (e.g., `| head`, `| grep`, `| jq`)
+   1. EXCEPT when the command reads a file for parsing by those tools.
 3. **Run each command separately** in its own Bash tool call
+4. **Capture output in files** then read and analyze that file. DO NOT make a repeated call to run the tool in order to read other parts of the output. You MUST re-use the same output.
 
 **Why:**
 
@@ -20,7 +22,7 @@ When using the Bash tool directly:
 - Separate commands provide clarity and easier debugging
 - Piped output is harder to analyze and may require re-running the command
 
-**Bad:**
+**BAD:**
 
 ```bash
 which bun && bun --version
@@ -57,7 +59,7 @@ This prevents excess calls and re-runs to get more data.
 
 ## Output Processing
 
-Avoid using pipes like `| tail` and `| head` to get specific lines from command output.
+NEVER use pipes to pile to commands like `| tail` and `| head` to get specific lines from command output.
 
 Instead focus on dumping output to a file and analyzing that with the appropriate tools.
 
