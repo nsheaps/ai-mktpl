@@ -43,13 +43,11 @@ todo-sync/
 ├── hooks/
 │   └── hooks.json           # Hook configuration (SessionStart, UserPromptSubmit, PostToolUse)
 ├── scripts/
-│   ├── init-gitignore.sh    # Creates .gitignore in target dirs
+│   ├── init-gitignore.sh    # Ensures global gitignore patterns
 │   └── sync-todos.sh        # Sync logic
 ├── skills/
 │   └── todo-sync/
 │       └── SKILL.md         # Usage documentation
-├── templates/
-│   └── gitignore.template   # Template for generated .gitignore files
 └── README.md
 ```
 
@@ -59,15 +57,9 @@ No configuration required. The plugin works automatically once installed.
 
 ### Git Integration
 
-The plugin automatically ensures `.claude/.gitignore` contains patterns for `todos/` and `plans/` directories on session start and each user prompt. This ignores all synced files by default without overwriting your existing gitignore configuration.
+The plugin automatically ensures `~/.config/git/ignore` (the global gitignore) contains patterns for `.claude/todos/` and `.claude/plans/` directories. This ignores all synced files in any project by default.
 
-The following files are explicitly allowed anywhere within `.claude/` (including nested subdirectories):
-
-- `.gitkeep` files (for preserving directory structure)
-- `AGENTS.md` files (for agent configurations)
-- `CLAUDE.md` files (for Claude-specific documentation)
-
-To track todos in version control instead, remove the ignore patterns from `.claude/.gitignore`.
+To track todos in version control for a specific project, add explicit `!.claude/todos/` pattern to that project's `.gitignore`.
 
 ## Troubleshooting
 

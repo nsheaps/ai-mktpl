@@ -9,7 +9,7 @@ When running Bash commands or Task agents, prefer `run_in_background: true`.
 **Why:**
 
 - Output is captured to a file that you can analyze after completion
-- Avoids techniques like `| head` or `| grep` that lose context
+- NEVER pipe to other tools to narrow the output with `| head` or `| grep`. You will lose the full output and won't be able to analyze it further without re-running the command, which is NOT ALLOWED.
 - Allows you to continue working while waiting for long-running tasks
 - Makes it easier to analyze different parts of the response without re-running
 
@@ -20,7 +20,7 @@ When running Bash commands or Task agents, prefer `run_in_background: true`.
 Bash({ command: "npm test", run_in_background: true });
 // Then use TaskOutput to get results when ready
 
-// Avoid: Trying to filter output inline
+// NEVER: Trying to filter output inline
 Bash({ command: "npm test | head -50" }); // Loses full output
 ```
 
@@ -52,13 +52,7 @@ jq '.metadata' /tmp/api-response.json
 
 ## Built-in Tools Over Bash
 
-Prefer using built-in tools over Bash/CLI equivalents unless the built-in tools are not satisfying your needs:
-
-| Task           | Preferred   | Avoid                 |
-| -------------- | ----------- | --------------------- |
-| Read files     | `Read` tool | `cat`, `head`, `tail` |
-| Search content | `Grep` tool | `grep`, `rg`          |
-| Find files     | `Glob` tool | `find`, `ls`          |
+Prefer using built-in tools over Bash/CLI equivalents unless the built-in tools are not satisfying your needs.
 
 ## File Lookup Behavior
 

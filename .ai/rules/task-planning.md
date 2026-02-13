@@ -157,5 +157,5 @@ You must:
    </requirements-change>
    ```
 2. Review any plans or notes you've made to ensure they reflect the updated requirements.
-3. Update your Todos to have a new todo at the end to handle implementing or changing to guarantee the new requirement is met.
-4. When the Todo is executed on (via a Task), review the original message from the user, your requirements, and the updated plan to ensure it's in the best state, giving more priority to more recent messages and changes (as more recent messages may have further iterated on the original requirements)
+3. Update your Tasks (using TodoWrite) to have a new task at the end to handle implementing or changing to guarantee the new requirement is met.
+4. When the Task is executed on, review the original message from the user, your requirements, and the updated plan to ensure it's in the best state, giving more priority to more recent messages and changes (as more recent messages may have further iterated on the original requirements)

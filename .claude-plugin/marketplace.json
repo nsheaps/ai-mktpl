@@ -10,18 +10,6 @@
   },
   "plugins": [
     {
-      "name": "claude-tools",
-      "description": "Collection of CLI tools for Claude Code workflow management including diagnostics, worktree management, session handling, and process supervision",
-      "version": "0.0.1",
-      "author": {
-        "name": "Nathan Heaps"
-      },
-      "source": "./plugins/claude-tools",
-      "category": "utility",
-      "tags": ["utility"],
-      "keywords": ["claude-code", "claude", "utility", "git", "worktree", "git-worktree"]
-    },
-    {
       "name": "code-simplifier",
       "description": "Simplify and refine code for clarity, consistency, and maintainability. Requires pr-review-toolkit plugin.",
       "version": "0.1.0",
@@ -121,6 +109,26 @@
       ]
     },
     {
+      "name": "git-spice",
+      "description": "Skill for managing stacked Git branches with git-spice (gs) CLI tool",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/git-spice",
+      "category": "git",
+      "tags": ["utility", "skill"],
+      "keywords": [
+        "git",
+        "git-spice",
+        "gs",
+        "stacked-branches",
+        "stacked-prs",
+        "branch-management",
+        "pr-management"
+      ]
+    },
+    {
       "name": "github-auth-skill",
       "description": "Skill for authenticating with GitHub using device authorization flow",
       "version": "0.2.24",
@@ -178,6 +186,26 @@
       ]
     },
     {
+      "name": "product-development-and-sdlc",
+      "description": "Iterative PRD and user story writing with structured SDLC workflows. Guides incremental specification development through research, review, and refinement cycles.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/product-development-and-sdlc",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": [
+        "prd",
+        "product-requirements",
+        "user-stories",
+        "sdlc",
+        "specifications",
+        "iterative-development",
+        "product-management"
+      ]
+    },
+    {
       "name": "review-changes",
       "description": "Review code changes with detailed feedback on quality, security, performance, and maintainability",
       "version": "0.2.24",
@@ -212,6 +240,18 @@
       "category": "utility",
       "tags": ["utility"],
       "keywords": ["safety", "security", "hooks", "pre-tool-call", "evaluation", "haiku"]
+    },
+    {
+      "name": "scm-utils",
+      "description": "Source control management utilities for improving interactions with branches and PRs, both locally and in CI environments",
+      "version": "0.1.5",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/scm-utils",
+      "category": "utility",
+      "tags": ["utility", "command", "skill"],
+      "keywords": ["git", "branch", "pr", "pull-request", "sync", "merge", "scm", "source-control"]
     },
     {
       "name": "self-terminate",
@@ -327,7 +367,7 @@
     {
       "name": "todo-sync",
       "description": "Automatically syncs todos and plans from ~/.claude/ to the current project's .claude/ directory",
-      "version": "0.1.6",
+      "version": "0.2.0",
       "author": {
         "name": "Nathan Heaps"
       },

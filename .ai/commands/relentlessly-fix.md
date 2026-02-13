@@ -8,7 +8,7 @@ model: claude-4-5-opus
 - If no PR to review is provided, assume the current branch has an open PR and use that. If you cannot find it, ask the user.
 - Use /pr-comments /pr-review-toolkit:\* /review /code-review:code-review and any other tools. Fetch the comments from the mentioned PR on the remote.
 - Use Explore and Plan agents to plan your next move.
-- Always use sub-agents to execute on Todo's and Tasks.
+- Always use sub-agents to execute on Tasks
 - Use TodoWrite judiciously and update it to include details that help you complete your task.
 - Make sure your branch is up to date with the latest main when you push, but before requesting review.
 - The PR must be passing in CI for you to be complete.
