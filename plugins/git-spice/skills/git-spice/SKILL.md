@@ -222,10 +222,10 @@ The script requires `gs`, `gh`, and `jq` in PATH.
 
 Each branch line is annotated with two emoji indicators and the PR title:
 
-| Position | Meaning | Values |
-|----------|---------|--------|
-| First emoji | Review status | `🟢` approved, `🔴` not approved |
-| Second emoji | CI status | `🟢` passing, `🔴` failing, `🟡` pending/in-progress, `⚪` no CI |
+| Position     | Meaning       | Values                                                           |
+| ------------ | ------------- | ---------------------------------------------------------------- |
+| First emoji  | Review status | `🟢` approved, `🔴` not approved                                 |
+| Second emoji | CI status     | `🟢` passing, `🔴` failing, `🟡` pending/in-progress, `⚪` no CI |
 
 The PR URL appears on the line below each branch. Branches without open PRs (trunk, closed/merged PRs) are shown as-is from `gs ls`.
 
