@@ -133,3 +133,11 @@ while IFS= read -r line; do
     echo "$line"
   fi
 done <<< "$gs_tree"
+
+# ---------------------------------------------------------------------------
+# Legend
+# ---------------------------------------------------------------------------
+echo ""
+echo "Legend: [Review][CI] per line"
+printf '  \xf0\x9f\x9f\xa2 = approved / passing   \xf0\x9f\x94\xb4 = changes requested / failing\n'
+printf '  \xf0\x9f\x9f\xa1 = pending               \xe2\x9a\xaa = no checks\n'
