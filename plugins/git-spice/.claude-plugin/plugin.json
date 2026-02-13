@@ -1,0 +1,13 @@
+{
+  "name": "git-spice",
+  "version": "0.1.0",
+  "description": "Skill for managing stacked Git branches with git-spice (gs) CLI tool",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/git-spice",
+  "repository": "https://github.com/nsheaps/.ai",
+  "keywords": ["git", "git-spice", "gs", "stacked-branches", "stacked-prs", "branch-management", "pr-management"]
+}

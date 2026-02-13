@@ -1,0 +1,211 @@
+---
+name: git-spice
+description: >
+  This skill should be used when the user asks to "create a stacked branch",
+  "stack a branch", "submit stacked PRs", "restack branches", "use git-spice",
+  "use gs", "manage stacked PRs", "sync stacked branches", "split a branch",
+  "navigate branch stack", "submit stack", "restack", or mentions git-spice,
+  stacked branches, stacked PRs, or the gs CLI tool. Provides comprehensive
+  guidance for managing stacked Git branches with git-spice.
+version: 0.1.0
+---
+
+# git-spice (gs) - Stacked Branch Management
+
+git-spice is a CLI tool (`gs`) for managing stacked Git branches. It automates tracking parent-child relationships between branches, rebasing dependent branches when a base changes, and creating/updating PRs across entire stacks with a single command.
+
+## Prerequisites
+
+- **Git 2.38+** installed
+- **git-spice** installed (`brew install git-spice` or `go install go.abhg.dev/gs@latest`)
+- Repository initialized with `gs repo init`
+- Authenticated with `gs auth login` (for PR operations)
+
+Check installation: `gs --version`. Check auth: `gs auth status`.
+
+## Key Concepts
+
+**Trunk**: The main/default branch (e.g., `main`). Root of all stacks.
+
+**Stack**: A chain of branches where each builds on the one below:
+```
+trunk (main) → feature-a → feature-b → feature-c
+```
+
+**Upstack/Downstack**: Upstack = branches above current. Downstack = branches below current (excluding trunk).
+
+**Tracked branches**: git-spice only manages branches it tracks. Branches created with `gs branch create` are auto-tracked. Track existing branches with `gs branch track`.
+
+**Restacking**: When a branch changes, all upstack branches need rebasing. `gs commit create` and `gs commit amend` do this automatically.
+
+**Forge**: The remote hosting platform (GitHub or GitLab). PRs/MRs are called "Change Requests" (CRs).
+
+## Core Workflow
+
+### 1. Initialize and Authenticate
+
+```bash
+gs repo init --trunk main --remote origin
+gs auth login
+```
+
+### 2. Create a Stack
+
+```bash
+gs branch create feature-part-1       # gs bc
+# ... make changes, stage them ...
+gs commit create -m "Add part 1"       # gs cc
+
+gs branch create feature-part-2       # gs bc
+# ... make changes, stage them ...
+gs commit create -m "Add part 2"       # gs cc
+```
+
+### 3. View and Submit
+
+```bash
+gs log short                           # gs ls (view stack)
+gs stack submit --fill                 # gs ss (submit all as PRs)
+```
+
+### 4. Address Review Feedback
+
+```bash
+gs branch checkout feature-part-1     # gs bco (navigate to branch)
+# ... make fixes, stage them ...
+gs commit create -m "Fix feedback"     # gs cc (auto-restacks upstack)
+gs stack submit                        # gs ss (update all PRs)
+```
+
+### 5. Sync After Merges
+
+```bash
+gs repo sync                           # gs rs (pull + delete merged)
+gs stack restack                       # gs sr (rebase remaining)
+gs stack submit                        # gs ss (update PRs)
+```
+
+## Essential Commands Quick Reference
+
+| Action | Command | Shorthand |
+|--------|---------|-----------|
+| Create stacked branch | `gs branch create <name>` | `gs bc` |
+| Checkout (fuzzy search) | `gs branch checkout` | `gs bco` |
+| Commit + auto-restack | `gs commit create -m "msg"` | `gs cc` |
+| Amend + auto-restack | `gs commit amend` | `gs ca` |
+| View stack (short) | `gs log short` | `gs ls` |
+| View stack (detailed) | `gs log long` | `gs ll` |
+| Submit all PRs | `gs stack submit` | `gs ss` |
+| Restack all | `gs stack restack` | `gs sr` |
+| Sync with remote | `gs repo sync` | `gs rs` |
+| Navigate up/down | `gs up` / `gs down` | |
+| Move branch to new base | `gs branch onto <base>` | `gs bo` |
+| Move branch + upstack | `gs upstack onto <base>` | `gs uo` |
+| Delete branch | `gs branch delete` | `gs bd` |
+| Split branch | `gs branch split` | `gs bsp` |
+| Split last commit | `gs commit split` | `gs csp` |
+| Edit branch (rebase) | `gs branch edit` | `gs be` |
+| Track existing branch | `gs branch track` | `gs bt` |
+| Continue after conflict | `gs rebase continue` | `gs rbc` |
+| Abort rebase | `gs rebase abort` | `gs rba` |
+
+For the complete CLI reference with all flags and options, see `references/cli-reference.md`.
+
+## Important: Use gs Commands Over git Commands
+
+When git-spice is initialized in a repository, prefer `gs` commands over raw `git` equivalents:
+
+- **Use `gs commit create`** instead of `git commit` -- it auto-restacks upstack branches
+- **Use `gs commit amend`** instead of `git commit --amend` -- it auto-restacks upstack branches
+- **Use `gs branch create`** instead of `git checkout -b` -- it tracks the branch in the stack
+- **Use `gs branch delete`** instead of `git branch -d` -- it rebases upstack onto the next downstack
+
+Never use `git rebase`, `git cherry-pick`, or `git merge` on tracked branches -- these bypass git-spice's dependency tracking and leave the stack in an inconsistent state requiring manual recovery. If the stack gets out of sync, run `gs stack restack` to reconcile.
+
+## Submit Flags
+
+Common flags for all submit commands (`gs ss`, `gs bs`, `gs uss`, `gs dss`):
+
+| Flag | Purpose |
+|------|---------|
+| `--fill` | Populate PR title/body from commit messages |
+| `--draft` / `--no-draft` | Set draft status |
+| `--reviewer` / `-r` | Assign reviewers |
+| `--assignee` / `-a` | Assign assignees |
+| `--label` / `-l` | Add labels |
+| `--web` / `-w` | Open browser after submit |
+| `--dry-run` | Preview without submitting |
+
+## Handling Conflicts
+
+When restacking causes conflicts:
+
+1. Resolve the conflict in the affected files
+2. Stage the resolved files with `git add`
+3. Run `gs rebase continue` (or `gs rbc`)
+4. To abort instead: `gs rebase abort` (or `gs rba`)
+
+## Squash-Merge Reconciliation
+
+When a PR is squash-merged on GitHub/GitLab, commit hashes change and upstack branches become stale:
+
+```bash
+gs repo sync        # Detects merged branches, deletes them
+gs stack restack    # Rebases remaining branches onto updated trunk
+gs stack submit     # Updates remaining PRs
+```
+
+## Configuration
+
+git-spice uses `git config` for settings. Common useful settings:
+
+```bash
+# Prefix branch names (e.g., with username)
+git config spice.branchCreate.prefix "myname/"
+
+# Always create PRs as drafts
+git config spice.submit.draft true
+
+# Set default reviewers
+git config spice.submit.reviewers "teammate1,teammate2"
+
+# Show all stacks by default in gs ls
+git config spice.log.all true
+```
+
+For the complete configuration reference, see `references/cli-reference.md`.
+
+## Worktree Considerations
+
+git-spice supports Git worktrees:
+- `gs repo sync` skips branches checked out in other worktrees
+- `gs branch delete` handles cross-worktree branches gracefully
+- Restacking skips branches checked out in other worktrees
+- Use `--worktree` config scope for worktree-specific settings
+
+## Claude Code Integration Notes
+
+When acting as an AI assistant using git-spice:
+
+- **Never run interactive gs commands** (`gs bco`, `gs branch split`, `gs stack edit`, `gs commit split`) without user confirmation -- these require TTY interaction
+- **Prefer shorthand commands** for efficiency (`gs cc`, `gs ss`, `gs rs`)
+- **Always check stack state** with `gs ls` before and after operations
+- **Use `--fill` on first submit** to auto-populate PR descriptions
+- **Run `gs repo sync` before starting new work** to ensure a clean state
+- **After submitting**, share the PR URLs with the user
+- **If `gs` is not installed**, suggest installation: `brew install git-spice`
+- **If repo is not initialized**, run `gs repo init` first
+
+## Additional Resources
+
+### Reference Files
+
+For detailed command flags, configuration options, and advanced workflows:
+- **`references/cli-reference.md`** - Complete CLI reference with all commands, flags, shorthands, configuration keys, and advanced workflow examples
+
+### External Documentation
+
+- [git-spice Official Docs](https://abhinav.github.io/git-spice/)
+- [CLI Reference](https://abhinav.github.io/git-spice/cli/reference/)
+- [Configuration](https://abhinav.github.io/git-spice/cli/config/)
+- [GitHub Repository](https://github.com/abhinav/git-spice)
