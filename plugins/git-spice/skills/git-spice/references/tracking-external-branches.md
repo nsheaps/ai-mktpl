@@ -183,6 +183,23 @@ If you prefer to track the external branch (for visibility in `gs ls`), you can 
 
 ---
 
+## Non-Viable Alternative: Registering as a Second Trunk
+
+You might consider re-running `gs repo init --trunk their-branch` to register the external branch as trunk, since trunk branches are automatically excluded from submit operations. This does NOT work.
+
+### Why This Fails
+
+- **git-spice supports only a single trunk branch.** There is no concept of multiple trunks or per-stack trunk overrides.
+- **Re-running `gs repo init --trunk` changes the trunk for the ENTIRE repository.** All tracked branches across all stacks will be rebased and managed relative to the new trunk. This is a global, destructive operation -- not a scoped one.
+- **All existing branches move.** Changing trunk from `main` to `their-branch` causes git-spice to treat `their-branch` as the root of all stacks. Your other stacks that were based on `main` will break or require manual repair.
+- **You cannot register a second trunk.** There is no `--additional-trunk` or `--secondary-trunk` flag. The `--trunk` flag is a setter, not an appender.
+
+### Bottom Line
+
+Do not use `gs repo init --trunk` to work around the external branch problem. It will destabilize your entire repository's git-spice state. Stick with the recommended workflow: leave the external branch untracked and use `gs upstack submit` (`gs uss`) from your first branch above it.
+
+---
+
 ## Pitfalls and Safety Considerations
 
 ### The `--force-with-lease` Danger
@@ -235,4 +252,5 @@ If the external branch is untracked, `gs up` / `gs down` / `gs ls` will not show
 | Can you mark a branch read-only?                       | No                                                       |
 | Will `--force-with-lease` protect the external branch? | Not after a recent fetch                                 |
 | Recommended approach?                                  | Don't track; use `gs upstack onto` + `gs upstack submit` |
+| Can you register the external branch as a second trunk?| No -- `gs repo init --trunk` replaces the trunk globally |
 | What to do when the external PR merges?                | `gs upstack onto main` to move stack back to trunk       |
