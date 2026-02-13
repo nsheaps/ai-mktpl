@@ -29,8 +29,9 @@ jobs:
       - name: Check for manual version file changes
         shell: bash
         run: |
-          # Check if any plugin.json or marketplace.json files were changed
-          CHANGED_VERSION_FILES=$(git diff --name-only "origin/${{ github.base_ref }}..HEAD" -- \
+          # Check if any existing plugin.json or marketplace.json files were modified
+          # Use --diff-filter=M to only catch modifications, not additions (new plugins need plugin.json)
+          CHANGED_VERSION_FILES=$(git diff --diff-filter=M --name-only "origin/${{ github.base_ref }}..HEAD" -- \
             'plugins/*/.claude-plugin/plugin.json' \
             '.claude-plugin/marketplace.json' \
           )
@@ -43,7 +44,7 @@ jobs:
             echo ""
             echo "Version bumps happen automatically when PRs are merged to main."
             echo "Please revert these changes:"
-            echo "  git checkout origin/${{ github.base_ref }} -- plugins/*/.claude-plugin/plugin.json .claude-plugin/marketplace.json"
+            echo "  git checkout origin/${{ github.base_ref }} -- $CHANGED_VERSION_FILES"
             exit 1
           fi
 
