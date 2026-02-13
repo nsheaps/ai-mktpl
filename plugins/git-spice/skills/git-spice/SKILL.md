@@ -198,6 +198,37 @@ When acting as an AI assistant using git-spice:
 - **If `gs` is not installed**, suggest installation: `brew install git-spice`
 - **If repo is not initialized**, run `gs repo init` first
 
+## Stack Status Overview
+
+The plugin includes a script at `scripts/gs-stack-status.sh` that produces an annotated stack tree combining `gs ls --all` output with GitHub PR metadata.
+
+### When to Use
+
+- **Before starting work** to see which branches need attention (failed CI, pending review)
+- **After submitting a stack** to verify all PRs have the expected review/CI state
+- **During standup or pairing** to give a quick visual overview of all open stack work
+- **When the user asks** for a summary of their stack, PR statuses, or CI health
+
+### How to Run
+
+```bash
+# From any git-spice initialized repo
+/path/to/plugins/git-spice/scripts/gs-stack-status.sh
+```
+
+The script requires `gs`, `gh`, and `jq` in PATH.
+
+### Reading the Output
+
+Each branch line is annotated with two emoji indicators and the PR title:
+
+| Position | Meaning | Values |
+|----------|---------|--------|
+| First emoji | Review status | `🟢` approved, `🔴` not approved |
+| Second emoji | CI status | `🟢` passing, `🔴` failing, `🟡` pending/in-progress, `⚪` no CI |
+
+The PR URL appears on the line below each branch. Branches without open PRs (trunk, closed/merged PRs) are shown as-is from `gs ls`.
+
 ## Additional Resources
 
 ### Reference Files
