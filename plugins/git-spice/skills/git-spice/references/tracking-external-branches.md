@@ -3,6 +3,7 @@
 How to use someone else's PR branch as a base for your own stack, and the pitfalls to avoid.
 
 > Sources:
+>
 > - [git-spice CLI Reference](https://abhinav.github.io/git-spice/cli/reference/)
 > - [git-spice Limitations](https://abhinav.github.io/git-spice/guide/limits/)
 > - [git-spice Source: stack_submit.go](https://github.com/abhinav/git-spice/blob/main/stack_submit.go)
@@ -48,6 +49,7 @@ for _, branch := range stack {
 There is no ownership check, no read-only flag, and no per-branch skip mechanism. The only branch excluded is trunk.
 
 **The push uses `--force-with-lease`**, which means:
+
 - If the remote branch has been updated since your last fetch, the push will fail (safe).
 - If you recently fetched (which `gs repo sync` does), the lease will match and **the push will succeed**, potentially overwriting the original author's commits with your local version of their branch.
 
@@ -70,11 +72,11 @@ When the external PR is merged into trunk:
 
 **No per-branch config exists.** The closest options are:
 
-| Config/Flag | What It Does | Helps? |
-|---|---|---|
-| `--update-only` | Only update existing CRs, skip new ones | Partially -- prevents creating a NEW CR, but if the branch already has one, it still pushes and updates |
-| `--no-publish` | Push without creating CRs | No -- still pushes the branch |
-| `spice.submit.updateOnly` | Default `--update-only` | Same limitation as above |
+| Config/Flag               | What It Does                            | Helps?                                                                                                  |
+| ------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `--update-only`           | Only update existing CRs, skip new ones | Partially -- prevents creating a NEW CR, but if the branch already has one, it still pushes and updates |
+| `--no-publish`            | Push without creating CRs               | No -- still pushes the branch                                                                           |
+| `spice.submit.updateOnly` | Default `--update-only`                 | Same limitation as above                                                                                |
 
 None of these prevent the push itself.
 
@@ -125,6 +127,7 @@ gs upstack submit --fill
 ```
 
 **Critical distinction:**
+
 - `gs upstack submit` starts from the current branch and goes up. It requires the base branch to "have already been submitted by a prior command" OR to be trunk. Since the external branch already has a PR (from the other author), this condition is satisfied.
 - `gs stack submit` walks the entire stack and submits everything, which would try to push the untracked branch (and likely error or cause unexpected behavior).
 
@@ -203,6 +206,7 @@ If you run `gs ss` instead of `gs uss`, it walks the full stack and may try to p
 If you never submitted a CR for the external branch via git-spice, `gs repo sync` will not know it was merged. The branch will remain in your local tracking state as a stale base.
 
 **Mitigation:** After the external PR merges, manually run:
+
 ```bash
 gs bco my-first-branch
 gs upstack onto main
@@ -223,12 +227,12 @@ If the external branch is untracked, `gs up` / `gs down` / `gs ls` will not show
 
 ## Summary
 
-| Question | Answer |
-|---|---|
-| Can you track an external branch? | Yes, but you probably shouldn't |
-| Does `gs stack submit` push all branches? | Yes, all non-trunk tracked branches |
-| Can you skip a branch during submit? | No built-in mechanism |
-| Can you mark a branch read-only? | No |
-| Will `--force-with-lease` protect the external branch? | Not after a recent fetch |
-| Recommended approach? | Don't track; use `gs upstack onto` + `gs upstack submit` |
-| What to do when the external PR merges? | `gs upstack onto main` to move stack back to trunk |
+| Question                                               | Answer                                                   |
+| ------------------------------------------------------ | -------------------------------------------------------- |
+| Can you track an external branch?                      | Yes, but you probably shouldn't                          |
+| Does `gs stack submit` push all branches?              | Yes, all non-trunk tracked branches                      |
+| Can you skip a branch during submit?                   | No built-in mechanism                                    |
+| Can you mark a branch read-only?                       | No                                                       |
+| Will `--force-with-lease` protect the external branch? | Not after a recent fetch                                 |
+| Recommended approach?                                  | Don't track; use `gs upstack onto` + `gs upstack submit` |
+| What to do when the external PR merges?                | `gs upstack onto main` to move stack back to trunk       |
