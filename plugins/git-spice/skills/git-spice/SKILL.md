@@ -28,6 +28,7 @@ Check installation: `gs --version`. Check auth: `gs auth status`.
 **Trunk**: The main/default branch (e.g., `main`). Root of all stacks.
 
 **Stack**: A chain of branches where each builds on the one below:
+
 ```
 trunk (main) → feature-a → feature-b → feature-c
 ```
@@ -87,27 +88,27 @@ gs stack submit                        # gs ss (update PRs)
 
 ## Essential Commands Quick Reference
 
-| Action | Command | Shorthand |
-|--------|---------|-----------|
-| Create stacked branch | `gs branch create <name>` | `gs bc` |
-| Checkout (fuzzy search) | `gs branch checkout` | `gs bco` |
-| Commit + auto-restack | `gs commit create -m "msg"` | `gs cc` |
-| Amend + auto-restack | `gs commit amend` | `gs ca` |
-| View stack (short) | `gs log short` | `gs ls` |
-| View stack (detailed) | `gs log long` | `gs ll` |
-| Submit all PRs | `gs stack submit` | `gs ss` |
-| Restack all | `gs stack restack` | `gs sr` |
-| Sync with remote | `gs repo sync` | `gs rs` |
-| Navigate up/down | `gs up` / `gs down` | |
-| Move branch to new base | `gs branch onto <base>` | `gs bo` |
-| Move branch + upstack | `gs upstack onto <base>` | `gs uo` |
-| Delete branch | `gs branch delete` | `gs bd` |
-| Split branch | `gs branch split` | `gs bsp` |
-| Split last commit | `gs commit split` | `gs csp` |
-| Edit branch (rebase) | `gs branch edit` | `gs be` |
-| Track existing branch | `gs branch track` | `gs bt` |
-| Continue after conflict | `gs rebase continue` | `gs rbc` |
-| Abort rebase | `gs rebase abort` | `gs rba` |
+| Action                  | Command                     | Shorthand |
+| ----------------------- | --------------------------- | --------- |
+| Create stacked branch   | `gs branch create <name>`   | `gs bc`   |
+| Checkout (fuzzy search) | `gs branch checkout`        | `gs bco`  |
+| Commit + auto-restack   | `gs commit create -m "msg"` | `gs cc`   |
+| Amend + auto-restack    | `gs commit amend`           | `gs ca`   |
+| View stack (short)      | `gs log short`              | `gs ls`   |
+| View stack (detailed)   | `gs log long`               | `gs ll`   |
+| Submit all PRs          | `gs stack submit`           | `gs ss`   |
+| Restack all             | `gs stack restack`          | `gs sr`   |
+| Sync with remote        | `gs repo sync`              | `gs rs`   |
+| Navigate up/down        | `gs up` / `gs down`         |           |
+| Move branch to new base | `gs branch onto <base>`     | `gs bo`   |
+| Move branch + upstack   | `gs upstack onto <base>`    | `gs uo`   |
+| Delete branch           | `gs branch delete`          | `gs bd`   |
+| Split branch            | `gs branch split`           | `gs bsp`  |
+| Split last commit       | `gs commit split`           | `gs csp`  |
+| Edit branch (rebase)    | `gs branch edit`            | `gs be`   |
+| Track existing branch   | `gs branch track`           | `gs bt`   |
+| Continue after conflict | `gs rebase continue`        | `gs rbc`  |
+| Abort rebase            | `gs rebase abort`           | `gs rba`  |
 
 For the complete CLI reference with all flags and options, see `references/cli-reference.md`.
 
@@ -126,15 +127,15 @@ Never use `git rebase`, `git cherry-pick`, or `git merge` on tracked branches --
 
 Common flags for all submit commands (`gs ss`, `gs bs`, `gs uss`, `gs dss`):
 
-| Flag | Purpose |
-|------|---------|
-| `--fill` | Populate PR title/body from commit messages |
-| `--draft` / `--no-draft` | Set draft status |
-| `--reviewer` / `-r` | Assign reviewers |
-| `--assignee` / `-a` | Assign assignees |
-| `--label` / `-l` | Add labels |
-| `--web` / `-w` | Open browser after submit |
-| `--dry-run` | Preview without submitting |
+| Flag                     | Purpose                                     |
+| ------------------------ | ------------------------------------------- |
+| `--fill`                 | Populate PR title/body from commit messages |
+| `--draft` / `--no-draft` | Set draft status                            |
+| `--reviewer` / `-r`      | Assign reviewers                            |
+| `--assignee` / `-a`      | Assign assignees                            |
+| `--label` / `-l`         | Add labels                                  |
+| `--web` / `-w`           | Open browser after submit                   |
+| `--dry-run`              | Preview without submitting                  |
 
 ## Handling Conflicts
 
@@ -178,6 +179,7 @@ For the complete configuration reference, see `references/cli-reference.md`.
 ## Worktree Considerations
 
 git-spice supports Git worktrees:
+
 - `gs repo sync` skips branches checked out in other worktrees
 - `gs branch delete` handles cross-worktree branches gracefully
 - Restacking skips branches checked out in other worktrees
@@ -201,6 +203,7 @@ When acting as an AI assistant using git-spice:
 ### Reference Files
 
 For detailed command flags, configuration options, and advanced workflows:
+
 - **`references/cli-reference.md`** - Complete CLI reference with all commands, flags, shorthands, configuration keys, and advanced workflow examples
 
 ### External Documentation

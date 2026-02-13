@@ -54,7 +54,7 @@ Follow this iterative process:
 2. **NEVER** use `git add .` - always be explicit about files
 3. **EXCLUDE** debug code, temporary files, and unrelated changes
 4. **ASK** the user if they want to push changes after all commits are complete. The hint may suggest pushing, in which case you do not need to ask the user.
-5. If a PR exists for these changes, assume the PR title and/or body should be updated to reflect the new changes. Review the current state, and the changes just 
+5. If a PR exists for these changes, assume the PR title and/or body should be updated to reflect the new changes. Review the current state, and the changes just
 
 ## Example Workflows
 

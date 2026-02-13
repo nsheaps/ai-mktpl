@@ -9,5 +9,13 @@
   },
   "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/git-spice",
   "repository": "https://github.com/nsheaps/.ai",
-  "keywords": ["git", "git-spice", "gs", "stacked-branches", "stacked-prs", "branch-management", "pr-management"]
+  "keywords": [
+    "git",
+    "git-spice",
+    "gs",
+    "stacked-branches",
+    "stacked-prs",
+    "branch-management",
+    "pr-management"
+  ]
 }

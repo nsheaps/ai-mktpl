@@ -54,6 +54,7 @@ The skill activates when users:
 ### SKILL.md
 
 Core workflow guidance including:
+
 - Key concepts (trunk, stack, upstack, downstack, restacking)
 - Essential command quick reference
 - Standard workflows (create, submit, review, sync)
@@ -63,6 +64,7 @@ Core workflow guidance including:
 ### references/cli-reference.md
 
 Complete CLI reference including:
+
 - All commands with full flag documentation
 - Complete shorthand table (30+ shorthands)
 - Full configuration key reference

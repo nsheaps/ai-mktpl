@@ -16,13 +16,13 @@ Shorthands use initials: `gs branch create` -> `gs bc`, `gs stack submit` -> `gs
 
 ## Navigation Commands
 
-| Command | Description |
-|---------|-------------|
-| `gs up` | Check out the branch above current in the stack |
-| `gs down` | Check out the branch below current in the stack |
-| `gs top` | Check out the topmost branch in the stack |
-| `gs bottom` | Check out the bottommost branch (above trunk) |
-| `gs trunk` | Check out the trunk branch |
+| Command     | Description                                     |
+| ----------- | ----------------------------------------------- |
+| `gs up`     | Check out the branch above current in the stack |
+| `gs down`   | Check out the branch below current in the stack |
+| `gs top`    | Check out the topmost branch in the stack       |
+| `gs bottom` | Check out the bottommost branch (above trunk)   |
+| `gs trunk`  | Check out the trunk branch                      |
 
 All navigation commands support `-n` / `--dry-run` to print target branch name without checking out.
 
@@ -35,6 +35,7 @@ All navigation commands support `-n` / `--dry-run` to print target branch name w
 Initialize git-spice for a repository. Sets trunk branch and remote.
 
 **Flags:**
+
 - `--trunk <branch>`: Specify trunk branch (default: prompted)
 - `--remote <remote>`: Specify remote (default: prompted)
 
@@ -54,6 +55,7 @@ Pull latest changes from remote, delete merged branches, prepare for restacking.
 Create a new branch stacked on current branch.
 
 **Flags:**
+
 - `--insert` / `-i`: Insert between current branch and its upstack
 - `--all` / `-a`: Commit all tracked changes (like `git commit -a`)
 - `--message` / `-m`: Commit message for staged changes
@@ -64,6 +66,7 @@ Create a new branch stacked on current branch.
 Check out a tracked branch. Without arguments, shows fuzzy-searchable tree.
 
 **Flags:**
+
 - `-u` / `--untracked`: Also show untracked branches in the prompt
 
 ### gs branch delete (gs bd)
@@ -71,6 +74,7 @@ Check out a tracked branch. Without arguments, shows fuzzy-searchable tree.
 Delete one or more branches. Rebases upstack branches onto next available downstack.
 
 **Flags:**
+
 - `--force` / `-f`: Force delete even if branch has unmerged changes
 
 ### gs branch rename (gs brn)
@@ -90,6 +94,7 @@ Stop tracking a branch without deleting it.
 Move only the current branch to a different base. Upstack stays on original base.
 
 **Flags:**
+
 - `--branch` / `-b`: Target a different branch (not the current one)
 
 ### gs branch restack (gs br)
@@ -121,6 +126,7 @@ Navigate to the branch above/below current in the stack. Also available as top-l
 Commit staged changes and restack all upstack branches automatically. Equivalent to `git commit` + `gs upstack restack`.
 
 **Flags:**
+
 - `-a` / `--all`: Stage all tracked changes before committing
 - `-m` / `--message`: Commit message
 
@@ -189,6 +195,7 @@ Traverse commit graph downward, tracking untracked branches along the way. Usefu
 Short view of the stack showing branch names, relationships, and CR status.
 
 **Flags:**
+
 - `--all` / `-a`: Show all stacks, not just the current one
 - `--json`: Output as JSON
 
@@ -197,6 +204,7 @@ Short view of the stack showing branch names, relationships, and CR status.
 Detailed view including individual commits for each branch.
 
 **Flags:**
+
 - `--all` / `-a`: Show all stacks
 - `--json`: Output as JSON
 
@@ -219,6 +227,7 @@ Abort an ongoing git-spice rebase operation.
 ### gs auth login
 
 Log in to GitHub or GitLab. Prompts for authentication method:
+
 - **OAuth**: Web-based device flow
 - **GitHub App**: Repository-scoped access (GitHub only)
 - **PAT**: Personal Access Token (best for orgs without admin approval, or self-hosted GitLab)
@@ -254,55 +263,55 @@ eval "$(gs shell completion)"        # Auto-detect
 
 These flags apply to all submit commands (`gs branch submit`, `gs stack submit`, `gs upstack submit`, `gs downstack submit`):
 
-| Flag | Description |
-|------|-------------|
-| `--fill` | Populate title and body from commit messages |
-| `--draft` / `--no-draft` | Mark CR as draft or not |
-| `--dry-run` | Print what would be submitted without submitting |
-| `--no-verify` | Bypass pre-push hooks |
-| `--update-only` | Only update existing CRs, don't create new ones |
-| `--nav-comment` | Control navigation comment behavior |
-| `--web` / `-w` | Open browser with submitted CR |
-| `--reviewer` / `-r` | Assign reviewers |
-| `--assignee` / `-a` | Assign assignees |
-| `--label` / `-l` | Add labels |
-| `--template` | Use a specific PR template |
+| Flag                     | Description                                      |
+| ------------------------ | ------------------------------------------------ |
+| `--fill`                 | Populate title and body from commit messages     |
+| `--draft` / `--no-draft` | Mark CR as draft or not                          |
+| `--dry-run`              | Print what would be submitted without submitting |
+| `--no-verify`            | Bypass pre-push hooks                            |
+| `--update-only`          | Only update existing CRs, don't create new ones  |
+| `--nav-comment`          | Control navigation comment behavior              |
+| `--web` / `-w`           | Open browser with submitted CR                   |
+| `--reviewer` / `-r`      | Assign reviewers                                 |
+| `--assignee` / `-a`      | Assign assignees                                 |
+| `--label` / `-l`         | Add labels                                       |
+| `--template`             | Use a specific PR template                       |
 
 ---
 
 ## Complete Shorthand Reference
 
-| Shorthand | Full Command | Category |
-|-----------|-------------|----------|
-| `gs ri` | `gs repo init` | Repository |
-| `gs rs` | `gs repo sync` | Repository |
-| `gs bc` | `gs branch create` | Branch |
-| `gs bco` | `gs branch checkout` | Branch |
-| `gs bd` | `gs branch delete` | Branch |
-| `gs brn` | `gs branch rename` | Branch |
-| `gs bt` | `gs branch track` | Branch |
-| `gs but` | `gs branch untrack` | Branch |
-| `gs bo` | `gs branch onto` | Branch |
-| `gs br` | `gs branch restack` | Branch |
-| `gs bsp` | `gs branch split` | Branch |
-| `gs be` | `gs branch edit` | Branch |
-| `gs bs` | `gs branch submit` | Branch |
-| `gs cc` | `gs commit create` | Commit |
-| `gs ca` | `gs commit amend` | Commit |
-| `gs csp` | `gs commit split` | Commit |
-| `gs ss` | `gs stack submit` | Stack |
-| `gs sr` | `gs stack restack` | Stack |
-| `gs se` | `gs stack edit` | Stack |
-| `gs uss` | `gs upstack submit` | Upstack |
-| `gs ur` | `gs upstack restack` | Upstack |
-| `gs uo` | `gs upstack onto` | Upstack |
-| `gs dss` | `gs downstack submit` | Downstack |
-| `gs dse` | `gs downstack edit` | Downstack |
-| `gs dst` | `gs downstack track` | Downstack |
-| `gs ls` | `gs log short` | Log |
-| `gs ll` | `gs log long` | Log |
-| `gs rbc` | `gs rebase continue` | Rebase |
-| `gs rba` | `gs rebase abort` | Rebase |
+| Shorthand | Full Command          | Category   |
+| --------- | --------------------- | ---------- |
+| `gs ri`   | `gs repo init`        | Repository |
+| `gs rs`   | `gs repo sync`        | Repository |
+| `gs bc`   | `gs branch create`    | Branch     |
+| `gs bco`  | `gs branch checkout`  | Branch     |
+| `gs bd`   | `gs branch delete`    | Branch     |
+| `gs brn`  | `gs branch rename`    | Branch     |
+| `gs bt`   | `gs branch track`     | Branch     |
+| `gs but`  | `gs branch untrack`   | Branch     |
+| `gs bo`   | `gs branch onto`      | Branch     |
+| `gs br`   | `gs branch restack`   | Branch     |
+| `gs bsp`  | `gs branch split`     | Branch     |
+| `gs be`   | `gs branch edit`      | Branch     |
+| `gs bs`   | `gs branch submit`    | Branch     |
+| `gs cc`   | `gs commit create`    | Commit     |
+| `gs ca`   | `gs commit amend`     | Commit     |
+| `gs csp`  | `gs commit split`     | Commit     |
+| `gs ss`   | `gs stack submit`     | Stack      |
+| `gs sr`   | `gs stack restack`    | Stack      |
+| `gs se`   | `gs stack edit`       | Stack      |
+| `gs uss`  | `gs upstack submit`   | Upstack    |
+| `gs ur`   | `gs upstack restack`  | Upstack    |
+| `gs uo`   | `gs upstack onto`     | Upstack    |
+| `gs dss`  | `gs downstack submit` | Downstack  |
+| `gs dse`  | `gs downstack edit`   | Downstack  |
+| `gs dst`  | `gs downstack track`  | Downstack  |
+| `gs ls`   | `gs log short`        | Log        |
+| `gs ll`   | `gs log long`         | Log        |
+| `gs rbc`  | `gs rebase continue`  | Rebase     |
+| `gs rba`  | `gs rebase abort`     | Rebase     |
 
 ---
 
@@ -312,55 +321,55 @@ All configuration uses `git config`. Supports `--global`, `--local`, `--worktree
 
 ### Branch Configuration
 
-| Key | Description | Default |
-|-----|-------------|---------|
-| `spice.branchCreate.prefix` | Prefix for branch names created with `gs bc` | (none) |
-| `spice.branchCreate.generatedBranchNameLimit` | Max length of auto-generated branch names | (unlimited) |
-| `spice.branchCheckout.showUntracked` | Show untracked branches in `gs bco` | `false` |
-| `spice.branchCheckout.trackUntrackedPrompt` | Prompt to track untracked branches during checkout | `true` |
+| Key                                           | Description                                        | Default     |
+| --------------------------------------------- | -------------------------------------------------- | ----------- |
+| `spice.branchCreate.prefix`                   | Prefix for branch names created with `gs bc`       | (none)      |
+| `spice.branchCreate.generatedBranchNameLimit` | Max length of auto-generated branch names          | (unlimited) |
+| `spice.branchCheckout.showUntracked`          | Show untracked branches in `gs bco`                | `false`     |
+| `spice.branchCheckout.trackUntrackedPrompt`   | Prompt to track untracked branches during checkout | `true`      |
 
 ### Submit Configuration
 
-| Key | Description | Default |
-|-----|-------------|---------|
-| `spice.submit.publish` | Create CRs on forge (false = push only) | `true` |
-| `spice.submit.draft` | Default draft status for new CRs | `false` |
-| `spice.submit.web` | Open browser after submitting | `false` |
-| `spice.submit.updateOnly` | Default to `--update-only` | `false` |
-| `spice.submit.reviewers` | Default reviewers (comma-separated) | (none) |
-| `spice.submit.reviewers.addWhen` | When to add reviewers | `always` |
-| `spice.submit.assignees` | Default assignees | (none) |
-| `spice.submit.label` | Default labels | (none) |
-| `spice.submit.template` | Default PR template | (none) |
-| `spice.submit.navigationComment` | Navigation comment behavior | `true` |
-| `spice.submit.navigationComment.downstack` | Which downstack CRs in nav comments | (all) |
-| `spice.submit.navigationCommentStyle.marker` | Marker style for nav comments | (default) |
-| `spice.submit.navigationCommentSync` | Sync nav comments on update | `true` |
-| `spice.submit.listTemplatesTimeout` | Timeout for listing PR templates | (default) |
-| `spice.submit.noVerify` | Default to `--no-verify` | `false` |
+| Key                                          | Description                             | Default   |
+| -------------------------------------------- | --------------------------------------- | --------- |
+| `spice.submit.publish`                       | Create CRs on forge (false = push only) | `true`    |
+| `spice.submit.draft`                         | Default draft status for new CRs        | `false`   |
+| `spice.submit.web`                           | Open browser after submitting           | `false`   |
+| `spice.submit.updateOnly`                    | Default to `--update-only`              | `false`   |
+| `spice.submit.reviewers`                     | Default reviewers (comma-separated)     | (none)    |
+| `spice.submit.reviewers.addWhen`             | When to add reviewers                   | `always`  |
+| `spice.submit.assignees`                     | Default assignees                       | (none)    |
+| `spice.submit.label`                         | Default labels                          | (none)    |
+| `spice.submit.template`                      | Default PR template                     | (none)    |
+| `spice.submit.navigationComment`             | Navigation comment behavior             | `true`    |
+| `spice.submit.navigationComment.downstack`   | Which downstack CRs in nav comments     | (all)     |
+| `spice.submit.navigationCommentStyle.marker` | Marker style for nav comments           | (default) |
+| `spice.submit.navigationCommentSync`         | Sync nav comments on update             | `true`    |
+| `spice.submit.listTemplatesTimeout`          | Timeout for listing PR templates        | (default) |
+| `spice.submit.noVerify`                      | Default to `--no-verify`                | `false`   |
 
 ### Log Configuration
 
-| Key | Description | Default |
-|-----|-------------|---------|
-| `spice.log.all` | Default to `--all` for `gs ls` and `gs ll` | `false` |
-| `spice.log.crFormat` | Format for CR information in log output | (default) |
-| `spice.log.crStatus` | Show CR status in log | `true` |
-| `spice.log.pushStatusFormat` | Push status display format | (default) |
-| `spice.logLong.crFormat` | CR format for `gs ll` | (inherits) |
-| `spice.logShort.crFormat` | CR format for `gs ls` | (inherits) |
+| Key                          | Description                                | Default    |
+| ---------------------------- | ------------------------------------------ | ---------- |
+| `spice.log.all`              | Default to `--all` for `gs ls` and `gs ll` | `false`    |
+| `spice.log.crFormat`         | Format for CR information in log output    | (default)  |
+| `spice.log.crStatus`         | Show CR status in log                      | `true`     |
+| `spice.log.pushStatusFormat` | Push status display format                 | (default)  |
+| `spice.logLong.crFormat`     | CR format for `gs ll`                      | (inherits) |
+| `spice.logShort.crFormat`    | CR format for `gs ls`                      | (inherits) |
 
 ### Navigation Configuration
 
-| Key | Description | Default |
-|-----|-------------|---------|
+| Key                      | Description                           | Default |
+| ------------------------ | ------------------------------------- | ------- |
 | `spice.checkout.verbose` | Print message when switching branches | `false` |
 
 ### Forge Configuration
 
-| Key | Description | Default |
-|-----|-------------|---------|
-| `spice.forge.github.url` | URL for GitHub Enterprise | (github.com) |
+| Key                         | Description                    | Default      |
+| --------------------------- | ------------------------------ | ------------ |
+| `spice.forge.github.url`    | URL for GitHub Enterprise      | (github.com) |
 | `spice.forge.gitlab.apiUrl` | API URL for self-hosted GitLab | (gitlab.com) |
 
 ---
@@ -423,12 +432,12 @@ gs ll --json    # JSON format detailed stack view
 
 ## Comparison with Alternatives
 
-| Tool | Forges | Local-first | Shorthands | Cloud Required |
-|------|--------|-------------|------------|----------------|
-| git-spice (gs) | GitHub, GitLab | Yes | Yes | No |
-| Graphite (gt) | GitHub | No | Yes | Yes |
-| ghstack | GitHub | Yes | No | No |
-| spr | GitHub | Yes | No | No |
+| Tool           | Forges         | Local-first | Shorthands | Cloud Required |
+| -------------- | -------------- | ----------- | ---------- | -------------- |
+| git-spice (gs) | GitHub, GitLab | Yes         | Yes        | No             |
+| Graphite (gt)  | GitHub         | No          | Yes        | Yes            |
+| ghstack        | GitHub         | Yes         | No         | No             |
+| spr            | GitHub         | Yes         | No         | No             |
 
 ---
 
