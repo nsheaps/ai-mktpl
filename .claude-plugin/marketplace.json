@@ -109,6 +109,26 @@
       ]
     },
     {
+      "name": "git-spice",
+      "description": "Skill for managing stacked Git branches with git-spice (gs) CLI tool",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/git-spice",
+      "category": "git",
+      "tags": ["utility", "skill"],
+      "keywords": [
+        "git",
+        "git-spice",
+        "gs",
+        "stacked-branches",
+        "stacked-prs",
+        "branch-management",
+        "pr-management"
+      ]
+    },
+    {
       "name": "github-auth-skill",
       "description": "Skill for authenticating with GitHub using device authorization flow",
       "version": "0.2.24",
@@ -166,6 +186,26 @@
       ]
     },
     {
+      "name": "product-development-and-sdlc",
+      "description": "Iterative PRD and user story writing with structured SDLC workflows. Guides incremental specification development through research, review, and refinement cycles.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/product-development-and-sdlc",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": [
+        "prd",
+        "product-requirements",
+        "user-stories",
+        "sdlc",
+        "specifications",
+        "iterative-development",
+        "product-management"
+      ]
+    },
+    {
       "name": "review-changes",
       "description": "Review code changes with detailed feedback on quality, security, performance, and maintainability",
       "version": "0.2.24",
@@ -204,7 +244,7 @@
     {
       "name": "scm-utils",
       "description": "Source control management utilities for improving interactions with branches and PRs, both locally and in CI environments",
-      "version": "0.1.2",
+      "version": "0.1.5",
       "author": {
         "name": "Nathan Heaps"
       },

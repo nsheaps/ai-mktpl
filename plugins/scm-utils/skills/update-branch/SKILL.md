@@ -1,7 +1,6 @@
 ---
 name: update-branch
 description: This skill should be used when the user asks to "update the PR", "update PR #123", "sync the branch", "update the branch", "merge base into feature branch", "pull and push changes", "get latest from main", "synchronize with upstream", or when working in CI and needing to synchronize a feature branch with its base. Handles local/remote branch synchronization and merge conflict resolution.
-version: 0.1.0
 ---
 
 # Update Branch
