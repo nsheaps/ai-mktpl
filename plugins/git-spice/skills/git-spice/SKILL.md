@@ -207,6 +207,7 @@ For detailed command flags, configuration options, and advanced workflows:
 - **`references/cli-reference.md`** - Complete CLI reference with all commands, flags, shorthands, configuration keys, and advanced workflow examples
 - **`references/worktrees-and-agents.md`** - Guide for using git-spice with Git worktrees in multi-agent workflows, covering setup, parallel branch development, coordination patterns, and best practices
 - **`references/pr-status-and-stack-views.md`** - How to list PRs, get review/CI status, and combine `gs ls` with `gh pr view` for rich stack views
+- **`references/tracking-external-branches.md`** - How to safely stack your branches on top of someone else's PR branch without accidentally pushing to or modifying their branch
 
 ### External Documentation
 
