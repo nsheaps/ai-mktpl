@@ -205,6 +205,7 @@ When acting as an AI assistant using git-spice:
 For detailed command flags, configuration options, and advanced workflows:
 
 - **`references/cli-reference.md`** - Complete CLI reference with all commands, flags, shorthands, configuration keys, and advanced workflow examples
+- **`references/worktrees-and-agents.md`** - Guide for using git-spice with Git worktrees in multi-agent workflows, covering setup, parallel branch development, coordination patterns, and best practices
 
 ### External Documentation
 
