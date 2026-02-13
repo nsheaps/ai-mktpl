@@ -38,9 +38,9 @@ _Who are the primary and secondary users?_
 
 _How do we know this succeeded?_
 
-| Metric             | Current Baseline | Target     | How Measured         |
-| ------------------ | ---------------- | ---------- | -------------------- |
-| [Metric name]      | [Current value]  | [Goal]     | [Measurement method] |
+| Metric        | Current Baseline | Target | How Measured         |
+| ------------- | ---------------- | ------ | -------------------- |
+| [Metric name] | [Current value]  | [Goal] | [Measurement method] |
 
 ### Non-Goals
 
@@ -76,10 +76,10 @@ to specific requirements with acceptance criteria._
 
 #### [Requirement Group 1]
 
-| ID     | Requirement                | Priority    | Acceptance Criteria        |
-| ------ | -------------------------- | ----------- | -------------------------- |
-| FR-001 | [Description]              | Must-have   | [Testable criterion]       |
-| FR-002 | [Description]              | Should-have | [Testable criterion]       |
+| ID     | Requirement   | Priority    | Acceptance Criteria  |
+| ------ | ------------- | ----------- | -------------------- |
+| FR-001 | [Description] | Must-have   | [Testable criterion] |
+| FR-002 | [Description] | Should-have | [Testable criterion] |
 
 #### [Requirement Group 2]
 
@@ -87,11 +87,11 @@ to specific requirements with acceptance criteria._
 
 ### Non-Functional Requirements
 
-| ID      | Requirement                | Target           |
-| ------- | -------------------------- | ---------------- |
-| NFR-001 | Performance                | [Specific target] |
-| NFR-002 | Accessibility              | [Standard/level] |
-| NFR-003 | Security                   | [Requirements]   |
+| ID      | Requirement   | Target            |
+| ------- | ------------- | ----------------- |
+| NFR-001 | Performance   | [Specific target] |
+| NFR-002 | Accessibility | [Standard/level]  |
+| NFR-003 | Security      | [Requirements]    |
 
 ## 6. User Stories
 
@@ -148,10 +148,10 @@ dependencies, and architectural notes._
 
 _Track unresolved questions. Remove or move to resolved as they are answered._
 
-| #  | Question                          | Owner     | Status   | Resolution |
-| -- | --------------------------------- | --------- | -------- | ---------- |
-| 1  | [Question]                        | [Name]    | Open     |            |
-| 2  | [Question]                        | [Name]    | Resolved | [Answer]   |
+| #   | Question   | Owner  | Status   | Resolution |
+| --- | ---------- | ------ | -------- | ---------- |
+| 1   | [Question] | [Name] | Open     |            |
+| 2   | [Question] | [Name] | Resolved | [Answer]   |
 
 ## 10. Next Steps
 
@@ -170,6 +170,6 @@ _Links to related documents, research, prior art, and external sources._
 
 ## Revision History
 
-| Date       | Author   | Changes                    |
-| ---------- | -------- | -------------------------- |
-| [Date]     | [Name]   | Initial draft              |
+| Date   | Author | Changes       |
+| ------ | ------ | ------------- |
+| [Date] | [Name] | Initial draft |

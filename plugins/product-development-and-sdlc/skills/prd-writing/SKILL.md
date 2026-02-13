@@ -54,12 +54,14 @@ Expand the seed into a skeleton PRD using the template structure in
 Mark unknowns explicitly with `[TBD]` or `[NEEDS RESEARCH]`.
 
 Key sections to draft first:
+
 - Problem statement (expand from seed)
 - Target users / personas
 - Success metrics (even rough ones)
 - High-level scope (what's in, what's explicitly out)
 
 Sections to leave sparse:
+
 - Detailed requirements (add in later passes)
 - Technical considerations (add after solution direction is clearer)
 - User stories (add in Phase 3+)
@@ -83,15 +85,16 @@ Document findings inline in the PRD or in a companion research file.
 
 After each research pass, review the draft against these criteria:
 
-| Criterion        | Question to ask                                    |
-| ---------------- | -------------------------------------------------- |
-| Clarity          | Could someone unfamiliar implement from this?      |
-| Completeness     | Are there gaps marked [TBD] that can now be filled?|
-| Consistency      | Do requirements contradict each other?             |
-| Testability      | Can each requirement be verified?                  |
-| Scope discipline | Is anything included that shouldn't be?            |
+| Criterion        | Question to ask                                     |
+| ---------------- | --------------------------------------------------- |
+| Clarity          | Could someone unfamiliar implement from this?       |
+| Completeness     | Are there gaps marked [TBD] that can now be filled? |
+| Consistency      | Do requirements contradict each other?              |
+| Testability      | Can each requirement be verified?                   |
+| Scope discipline | Is anything included that shouldn't be?             |
 
 Refine the document, then decide:
+
 - **More iteration needed?** Return to Phase 3 with specific research goals
 - **Sufficient for next step?** Proceed to Phase 5
 
@@ -152,14 +155,14 @@ process.
 
 ## Anti-Patterns to Avoid
 
-| Anti-Pattern              | Instead                                        |
-| ------------------------- | ---------------------------------------------- |
-| Writing everything at once| Start with seed, iterate to add detail         |
-| Vague requirements        | Use specific, testable acceptance criteria     |
-| Solution-first thinking   | Define the problem before proposing solutions  |
-| Skipping research         | Always investigate before adding detail        |
-| Gold-plating              | Stop when actionable for the next phase        |
-| Orphaned specs            | Always define next steps and ownership         |
+| Anti-Pattern               | Instead                                       |
+| -------------------------- | --------------------------------------------- |
+| Writing everything at once | Start with seed, iterate to add detail        |
+| Vague requirements         | Use specific, testable acceptance criteria    |
+| Solution-first thinking    | Define the problem before proposing solutions |
+| Skipping research          | Always investigate before adding detail       |
+| Gold-plating               | Stop when actionable for the next phase       |
+| Orphaned specs             | Always define next steps and ownership        |
 
 ## Additional Resources
 
@@ -175,6 +178,6 @@ process.
   development methodology
 - [Writing Good User Stories](https://www.mountaingoatsoftware.com/agile/user-stories)
   - Mike Cohn's user story guidance
-- [INVEST Criteria](https://en.wikipedia.org/wiki/INVEST_(mnemonic)) -
+- [INVEST Criteria](<https://en.wikipedia.org/wiki/INVEST_(mnemonic)>) -
   Qualities of good user stories (Independent, Negotiable, Valuable,
   Estimable, Small, Testable)
