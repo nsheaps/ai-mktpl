@@ -186,6 +186,26 @@
       ]
     },
     {
+      "name": "product-development-and-sdlc",
+      "description": "Iterative PRD and user story writing with structured SDLC workflows. Guides incremental specification development through research, review, and refinement cycles.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/product-development-and-sdlc",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": [
+        "prd",
+        "product-requirements",
+        "user-stories",
+        "sdlc",
+        "specifications",
+        "iterative-development",
+        "product-management"
+      ]
+    },
+    {
       "name": "review-changes",
       "description": "Review code changes with detailed feedback on quality, security, performance, and maintainability",
       "version": "0.2.24",
