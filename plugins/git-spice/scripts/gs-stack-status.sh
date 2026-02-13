@@ -12,6 +12,7 @@
 #
 # Requirements: gs, gh, jq, python3
 # Usage: gs-stack-status.sh [--output interactive|markdown] [--no-status]
+#        [--reviewed] [--no-reviewed] [--failing-ci] [--no-failing-ci]
 
 set -euo pipefail
 
@@ -20,6 +21,8 @@ set -euo pipefail
 # ---------------------------------------------------------------------------
 OUTPUT_FORMAT="interactive"
 SHOW_STATUS=1
+FILTER_REVIEWED=""       # "yes" = only reviewed, "no" = only NOT reviewed, "" = no filter
+FILTER_FAILING_CI=""     # "yes" = only failing CI, "no" = only NOT failing CI, "" = no filter
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -39,12 +42,33 @@ while [[ $# -gt 0 ]]; do
       SHOW_STATUS=0
       shift
       ;;
+    --reviewed)
+      FILTER_REVIEWED="yes"
+      shift
+      ;;
+    --no-reviewed)
+      FILTER_REVIEWED="no"
+      shift
+      ;;
+    --failing-ci)
+      FILTER_FAILING_CI="yes"
+      shift
+      ;;
+    --no-failing-ci)
+      FILTER_FAILING_CI="no"
+      shift
+      ;;
     -h|--help)
       echo "Usage: gs-stack-status.sh [--output interactive|markdown] [--no-status]"
+      echo "       [--reviewed] [--no-reviewed] [--failing-ci] [--no-failing-ci]"
       echo ""
       echo "Options:"
       echo "  --output FORMAT   Output format: interactive (default) or markdown"
       echo "  --no-status       Omit review/CI emoji indicators"
+      echo "  --reviewed        Only show PRs that have been reviewed/approved"
+      echo "  --no-reviewed     Only show PRs that have NOT been reviewed/approved"
+      echo "  --failing-ci      Only show PRs where CI is failing"
+      echo "  --no-failing-ci   Only show PRs where CI is NOT failing"
       echo "  -h, --help        Show this help message"
       exit 0
       ;;
@@ -215,6 +239,55 @@ if [[ -n "$repo_owner" && ${#pr_number_to_branch[@]} -gt 0 ]]; then
   done <<< "$lookup"
 fi
 
+# ---------------------------------------------------------------------------
+# Filtering logic
+# ---------------------------------------------------------------------------
+# Determine whether a branch should be filtered out based on --reviewed,
+# --no-reviewed, --failing-ci, --no-failing-ci flags.
+#
+# Returns 0 (true) if the branch should be SHOWN, 1 if it should be HIDDEN.
+# Branches without PRs and the current branch are never filtered.
+branch_passes_filter() {
+  local branch="$1"
+  local current="$2"  # 1 if current branch
+
+  # Current branch is never filtered out
+  if [[ "$current" -eq 1 ]]; then
+    return 0
+  fi
+
+  # Branches without PRs (like main) are never filtered out
+  if [[ -z "${pr_review_raw[$branch]+_}" ]]; then
+    return 0
+  fi
+
+  # No filters active — show everything
+  if [[ -z "$FILTER_REVIEWED" && -z "$FILTER_FAILING_CI" ]]; then
+    return 0
+  fi
+
+  local review_raw="${pr_review_raw[$branch]}"
+  local ci_raw="${pr_ci_raw[$branch]}"
+
+  # Check review filter
+  if [[ "$FILTER_REVIEWED" == "yes" && "$review_raw" != "APPROVED" ]]; then
+    return 1
+  fi
+  if [[ "$FILTER_REVIEWED" == "no" && "$review_raw" == "APPROVED" ]]; then
+    return 1
+  fi
+
+  # Check CI filter
+  if [[ "$FILTER_FAILING_CI" == "yes" && "$ci_raw" != "CI_FAIL" ]]; then
+    return 1
+  fi
+  if [[ "$FILTER_FAILING_CI" == "no" && "$ci_raw" == "CI_FAIL" ]]; then
+    return 1
+  fi
+
+  return 0
+}
+
 # ===========================================================================
 # Output: Markdown format
 # ===========================================================================
@@ -337,9 +410,10 @@ for branch, depth, is_current in reversed(results):
   done <<< "$depth_output"
 
   # -------------------------------------------------------------------------
-  # Generate markdown output
+  # Generate markdown output (with filtering support)
   # -------------------------------------------------------------------------
   # Process lines in the original gs ls order (top-to-bottom)
+  last_was_ellipsis=0
   while IFS= read -r line; do
     [[ -z "$line" ]] && continue
 
@@ -367,6 +441,16 @@ for branch, depth, is_current in reversed(results):
     if (( depth > 1 )); then
       indent=$(printf '%*s' $(( (depth - 1) * 2 )) '')
     fi
+
+    # Check if this branch passes the filter
+    if ! branch_passes_filter "$branch" "$current"; then
+      if [[ "$last_was_ellipsis" -eq 0 ]]; then
+        echo "${indent}- ..."
+        last_was_ellipsis=1
+      fi
+      continue
+    fi
+    last_was_ellipsis=0
 
     # Build the markdown line
     if [[ -n "${pr_title[$branch]+_}" ]]; then
@@ -473,12 +557,26 @@ done <<< "$gs_tree"
 col2_start=$((max_col1_width + 2))
 
 # ---------------------------------------------------------------------------
-# Pass 2: Print with aligned columns
+# Pass 2: Print with aligned columns (with filtering support)
 # ---------------------------------------------------------------------------
 line_idx=0
+last_was_ellipsis=0
 for cleaned in "${cleaned_lines[@]}"; do
   branch="${branches[$line_idx]}"
   current="${is_current[$line_idx]}"
+
+  # Check if this branch should be filtered out
+  if [[ -n "$branch" && -n "${pr_title[$branch]+_}" ]] && ! branch_passes_filter "$branch" "$current"; then
+    if [[ "$last_was_ellipsis" -eq 0 ]]; then
+      # Replace the branch line with "..." preserving tree prefix for context
+      prefix="${cleaned%%"$branch"*}"
+      echo "${prefix}..."
+      last_was_ellipsis=1
+    fi
+    line_idx=$((line_idx + 1))
+    continue
+  fi
+  last_was_ellipsis=0
 
   if [[ -n "$branch" && -n "${pr_title[$branch]+_}" ]]; then
     title="${pr_title[$branch]}"
