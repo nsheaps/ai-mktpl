@@ -198,6 +198,28 @@ When acting as an AI assistant using git-spice:
 - **If `gs` is not installed**, suggest installation: `brew install git-spice`
 - **If repo is not initialized**, run `gs repo init` first
 
+## Post-Task Cleanup: Closed/Merged PRs
+
+After completing branch navigation or manipulation tasks (e.g., `gs bco`, `gs bo`, `gs uo`, `gs ls`, `gs sr`), check if any branches in the stack have closed or merged PRs. If so, prompt the user with `AskUserQuestion` offering these cleanup options:
+
+1. **Untrack only** (`gs branch untrack <name>`) — stop tracking the branch but keep it locally
+2. **Delete branch** (`gs branch delete <name>`) — untrack and delete the local branch; git-spice rebases upstack branches onto the deleted branch's parent
+3. **Full sync** (`gs repo sync`) — detect all merged branches, delete them, and restack
+4. **Skip** — leave as-is for now
+
+### When Each Option Is Appropriate
+
+| Option | When to suggest |
+| --- | --- |
+| Untrack | PR was closed (not merged) and the user may want the local branch for reference |
+| Delete | User is done with the branch entirely |
+| Full sync | Multiple PRs have been merged and the user wants a clean slate |
+| Skip | User is in the middle of other work and doesn't want to disrupt flow |
+
+### Detection
+
+Use `gs ls` output combined with `gh pr view <branch> --json state` (or the `gs-stack-status.sh` script) to identify branches whose PRs are closed or merged. Only prompt when at least one such branch is found.
+
 ## Stack Status Overview
 
 The plugin includes a script at `scripts/gs-stack-status.sh` that produces an annotated stack tree combining `gs ls --all` output with GitHub PR metadata.
