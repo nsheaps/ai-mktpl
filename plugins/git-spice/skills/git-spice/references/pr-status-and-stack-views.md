@@ -3,6 +3,7 @@
 How to list, inspect, and combine PR information for git-spice stacks using `gs` and `gh` CLI tools.
 
 > Sources:
+>
 > - [git-spice CLI Reference](https://abhinav.github.io/git-spice/cli/reference/) -- `gs log short`, `gs log long`
 > - [GitHub CLI Manual: gh pr list](https://cli.github.com/manual/gh_pr_list)
 > - [GitHub CLI Manual: gh pr view](https://cli.github.com/manual/gh_pr_view)
@@ -35,14 +36,14 @@ gs ls --json -a
 
 Each line is a separate JSON object (one per branch). Fields:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `name` | string | Branch name |
+| Field     | Type    | Description                                                             |
+| --------- | ------- | ----------------------------------------------------------------------- |
+| `name`    | string  | Branch name                                                             |
 | `current` | boolean | Whether this is the currently checked-out branch (only present if true) |
-| `down` | object | Downstack (parent) branch: `{ "name": "...", "needsRestack": bool }` |
-| `ups` | array | Upstack (child) branches: `[{ "name": "..." }, ...]` |
-| `change` | object | CR info: `{ "id": "#123", "url": "https://...", "status": "open" }` |
-| `push` | object | Push status: `{ "ahead": 0, "behind": 0 }` |
+| `down`    | object  | Downstack (parent) branch: `{ "name": "...", "needsRestack": bool }`    |
+| `ups`     | array   | Upstack (child) branches: `[{ "name": "..." }, ...]`                    |
+| `change`  | object  | CR info: `{ "id": "#123", "url": "https://...", "status": "open" }`     |
+| `push`    | object  | Push status: `{ "ahead": 0, "behind": 0 }`                              |
 
 Example output (single line, formatted for readability):
 
@@ -89,17 +90,17 @@ gh pr list --state open --json number,title,url,headRefName,isDraft,reviewDecisi
 
 Key JSON fields available for `gh pr list`:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `number` | int | PR number |
-| `title` | string | PR title |
-| `url` | string | Full PR URL |
-| `headRefName` | string | Branch name |
-| `isDraft` | boolean | Whether the PR is a draft |
-| `state` | string | `OPEN`, `CLOSED`, `MERGED` |
-| `reviewDecision` | string | `APPROVED`, `CHANGES_REQUESTED`, `REVIEW_REQUIRED`, or empty |
-| `labels` | array | Label objects with `name` field |
-| `reviewRequests` | array | Pending reviewer objects |
+| Field            | Type    | Description                                                  |
+| ---------------- | ------- | ------------------------------------------------------------ |
+| `number`         | int     | PR number                                                    |
+| `title`          | string  | PR title                                                     |
+| `url`            | string  | Full PR URL                                                  |
+| `headRefName`    | string  | Branch name                                                  |
+| `isDraft`        | boolean | Whether the PR is a draft                                    |
+| `state`          | string  | `OPEN`, `CLOSED`, `MERGED`                                   |
+| `reviewDecision` | string  | `APPROVED`, `CHANGES_REQUESTED`, `REVIEW_REQUIRED`, or empty |
+| `labels`         | array   | Label objects with `name` field                              |
+| `reviewRequests` | array   | Pending reviewer objects                                     |
 
 ### gh pr view
 
@@ -115,15 +116,15 @@ gh pr view feat/auth-middleware --json number,title,url,isDraft,reviewDecision,s
 
 Additional fields available in `gh pr view` (beyond `gh pr list`):
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `statusCheckRollup` | array | CI check results (see below) |
-| `reviews` | array | Review objects with author, state, body |
-| `reviewRequests` | array | Pending reviewer requests |
-| `commits` | array | Commit objects |
-| `additions` | int | Lines added |
-| `deletions` | int | Lines deleted |
-| `changedFiles` | int | Number of files changed |
+| Field               | Type  | Description                             |
+| ------------------- | ----- | --------------------------------------- |
+| `statusCheckRollup` | array | CI check results (see below)            |
+| `reviews`           | array | Review objects with author, state, body |
+| `reviewRequests`    | array | Pending reviewer requests               |
+| `commits`           | array | Commit objects                          |
+| `additions`         | int   | Lines added                             |
+| `deletions`         | int   | Lines deleted                           |
+| `changedFiles`      | int   | Number of files changed                 |
 
 ### CI Status via statusCheckRollup
 
@@ -243,32 +244,32 @@ query($owner: String!, $repo: String!) {
 
 ## Interpreting Review Status
 
-| reviewDecision | Meaning |
-|----------------|---------|
-| `APPROVED` | All required reviewers approved |
-| `CHANGES_REQUESTED` | At least one reviewer requested changes |
-| `REVIEW_REQUIRED` | Awaiting required reviews |
-| `""` (empty) | No required review policy, or no reviews yet |
+| reviewDecision      | Meaning                                      |
+| ------------------- | -------------------------------------------- |
+| `APPROVED`          | All required reviewers approved              |
+| `CHANGES_REQUESTED` | At least one reviewer requested changes      |
+| `REVIEW_REQUIRED`   | Awaiting required reviews                    |
+| `""` (empty)        | No required review policy, or no reviews yet |
 
 ### Mapping to Display Indicators
 
-| Status | Emoji | Text |
-|--------|-------|------|
-| Approved | `✅` | `approved` |
-| Changes requested | `💬` | `changes_requested` |
-| Review pending | `⏳` | `pending` |
-| Draft | `📝` | `draft` |
+| Status            | Emoji | Text                |
+| ----------------- | ----- | ------------------- |
+| Approved          | `✅`  | `approved`          |
+| Changes requested | `💬`  | `changes_requested` |
+| Review pending    | `⏳`  | `pending`           |
+| Draft             | `📝`  | `draft`             |
 
 ### CI Rollup Summary
 
 To summarize CI status from `statusCheckRollup`:
 
-| Overall State | Condition |
-|---------------|-----------|
-| Passing | All checks have `conclusion: SUCCESS` or `SKIPPED` |
-| Failing | Any check has `conclusion: FAILURE` |
-| Pending | Any check has `status: IN_PROGRESS` or `QUEUED` |
-| Cancelled | All non-skipped checks are `CANCELLED` |
+| Overall State | Condition                                          |
+| ------------- | -------------------------------------------------- |
+| Passing       | All checks have `conclusion: SUCCESS` or `SKIPPED` |
+| Failing       | Any check has `conclusion: FAILURE`                |
+| Pending       | Any check has `status: IN_PROGRESS` or `QUEUED`    |
+| Cancelled     | All non-skipped checks are `CANCELLED`             |
 
 ---
 
