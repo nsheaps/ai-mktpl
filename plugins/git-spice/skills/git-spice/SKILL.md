@@ -209,12 +209,12 @@ After completing branch navigation or manipulation tasks (e.g., `gs bco`, `gs bo
 
 ### When Each Option Is Appropriate
 
-| Option | When to suggest |
-| --- | --- |
-| Untrack | PR was closed (not merged) and the user may want the local branch for reference |
-| Delete | User is done with the branch entirely |
-| Full sync | Multiple PRs have been merged and the user wants a clean slate |
-| Skip | User is in the middle of other work and doesn't want to disrupt flow |
+| Option    | When to suggest                                                                 |
+| --------- | ------------------------------------------------------------------------------- |
+| Untrack   | PR was closed (not merged) and the user may want the local branch for reference |
+| Delete    | User is done with the branch entirely                                           |
+| Full sync | Multiple PRs have been merged and the user wants a clean slate                  |
+| Skip      | User is in the middle of other work and doesn't want to disrupt flow            |
 
 ### Detection
 
