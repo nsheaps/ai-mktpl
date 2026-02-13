@@ -71,6 +71,21 @@ Complete CLI reference including:
 - Advanced workflows (inserting, splitting, reorganizing)
 - Tool comparison and limitations
 
+### references/pr-status-and-stack-views.md
+
+How to combine `gs ls` with `gh pr view` for enriched stack views:
+
+- Listing PRs in a git-spice stack using `gs ls --json`
+- Getting PR details (title, URL, review status, CI status) via `gh pr view`
+- Batch-fetching PR data for large stacks
+- Interpreting review decisions and CI rollup status
+- Example commands and output formats
+
+### docs/specs/gs-branch-viewer.md
+
+Product requirements document for the gs-branch-viewer companion tool (`gsv`) that
+provides enriched stack views with PR and CI status in a single command.
+
 ## Related Plugins
 
 - [scm-utils](../scm-utils/) - Source control utilities for branch/PR management
