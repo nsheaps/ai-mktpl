@@ -109,6 +109,26 @@
       ]
     },
     {
+      "name": "git-spice",
+      "description": "Skill for managing stacked Git branches with git-spice (gs) CLI tool",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/git-spice",
+      "category": "git",
+      "tags": ["utility", "skill"],
+      "keywords": [
+        "git",
+        "git-spice",
+        "gs",
+        "stacked-branches",
+        "stacked-prs",
+        "branch-management",
+        "pr-management"
+      ]
+    },
+    {
       "name": "github-auth-skill",
       "description": "Skill for authenticating with GitHub using device authorization flow",
       "version": "0.2.24",
