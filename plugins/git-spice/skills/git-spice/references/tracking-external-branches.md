@@ -244,13 +244,13 @@ If the external branch is untracked, `gs up` / `gs down` / `gs ls` will not show
 
 ## Summary
 
-| Question                                               | Answer                                                   |
-| ------------------------------------------------------ | -------------------------------------------------------- |
-| Can you track an external branch?                      | Yes, but you probably shouldn't                          |
-| Does `gs stack submit` push all branches?              | Yes, all non-trunk tracked branches                      |
-| Can you skip a branch during submit?                   | No built-in mechanism                                    |
-| Can you mark a branch read-only?                       | No                                                       |
-| Will `--force-with-lease` protect the external branch? | Not after a recent fetch                                 |
-| Recommended approach?                                  | Don't track; use `gs upstack onto` + `gs upstack submit` |
-| Can you register the external branch as a second trunk?| No -- `gs repo init --trunk` replaces the trunk globally |
-| What to do when the external PR merges?                | `gs upstack onto main` to move stack back to trunk       |
+| Question                                                | Answer                                                   |
+| ------------------------------------------------------- | -------------------------------------------------------- |
+| Can you track an external branch?                       | Yes, but you probably shouldn't                          |
+| Does `gs stack submit` push all branches?               | Yes, all non-trunk tracked branches                      |
+| Can you skip a branch during submit?                    | No built-in mechanism                                    |
+| Can you mark a branch read-only?                        | No                                                       |
+| Will `--force-with-lease` protect the external branch?  | Not after a recent fetch                                 |
+| Recommended approach?                                   | Don't track; use `gs upstack onto` + `gs upstack submit` |
+| Can you register the external branch as a second trunk? | No -- `gs repo init --trunk` replaces the trunk globally |
+| What to do when the external PR merges?                 | `gs upstack onto main` to move stack back to trunk       |
