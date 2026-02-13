@@ -18,16 +18,16 @@ Repository: [nsheaps/.ai on GitHub](https://github.com/nsheaps/.ai)
 
 The repository relies on these tools, all managed by [mise](https://mise.run) (see `.mise.toml`):
 
-| Tool | Purpose |
-|---|---|
-| `just` | Task runner (justfile recipes) |
-| `mise` | Polyglot tool version manager |
-| `yarn` (v4, via corepack) | JS dependency management (workspace root) |
+| Tool                                | Purpose                                         |
+| ----------------------------------- | ----------------------------------------------- |
+| `just`                              | Task runner (justfile recipes)                  |
+| `mise`                              | Polyglot tool version manager                   |
+| `yarn` (v4, via corepack)           | JS dependency management (workspace root)       |
 | `release-it` + `@release-it/bumper` | Automated SemVer version bumps in `plugin.json` |
-| `prettier` | Linting and formatting |
-| `node` (LTS) | Runtime for yarn/release-it |
-| `jq` | JSON processing in scripts |
-| `gh` | GitHub CLI for CI interactions |
+| `prettier`                          | Linting and formatting                          |
+| `node` (LTS)                        | Runtime for yarn/release-it                     |
+| `jq`                                | JSON processing in scripts                      |
+| `gh`                                | GitHub CLI for CI interactions                  |
 
 Run `just setup` to bootstrap: it calls `mise install -y` then `yarn install`.
 
@@ -64,15 +64,15 @@ Run `just setup` to bootstrap: it calls `mise install -y` then `yarn install`.
 
 ### Local Development
 
-| Recipe | What it does |
-|---|---|
-| `just setup` | Install mise tools + yarn dependencies |
-| `just lint` | Run prettier check; auto-fix if errors found |
-| `just validate` | Validate marketplace.json + every plugin.json via `claude plugin validate` |
-| `just check` | Run `lint` then `validate` (the full local CI equivalent) |
-| `just update-marketplace` | Regenerate `.claude-plugin/marketplace.json` from all `plugins/*/plugin.json` files |
-| `just release --dry-run` | Preview which plugins would get version bumps |
-| `just detect-plugin-changes [base]` | Output JSON listing plugins with code changes vs a base ref |
+| Recipe                              | What it does                                                                        |
+| ----------------------------------- | ----------------------------------------------------------------------------------- |
+| `just setup`                        | Install mise tools + yarn dependencies                                              |
+| `just lint`                         | Run prettier check; auto-fix if errors found                                        |
+| `just validate`                     | Validate marketplace.json + every plugin.json via `claude plugin validate`          |
+| `just check`                        | Run `lint` then `validate` (the full local CI equivalent)                           |
+| `just update-marketplace`           | Regenerate `.claude-plugin/marketplace.json` from all `plugins/*/plugin.json` files |
+| `just release --dry-run`            | Preview which plugins would get version bumps                                       |
+| `just detect-plugin-changes [base]` | Output JSON listing plugins with code changes vs a base ref                         |
 
 ### Version Bumping
 

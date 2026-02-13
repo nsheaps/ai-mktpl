@@ -40,11 +40,11 @@ Claude Code fetches `marketplace.json` from the GitHub repository. Updates propa
 
 Plugin settings can be configured at multiple levels:
 
-| Level | File | Scope |
-|---|---|---|
-| User | `~/.claude/settings.json` | All projects for this user |
+| Level               | File                                     | Scope                                |
+| ------------------- | ---------------------------------------- | ------------------------------------ |
+| User                | `~/.claude/settings.json`                | All projects for this user           |
 | Marketplace project | `~/src/nsheaps/ai/.claude/settings.json` | When working in the marketplace repo |
-| Any project | `<project>/.claude/settings.json` | Specific project |
+| Any project         | `<project>/.claude/settings.json`        | Specific project                     |
 
 The `enabledPlugins` map uses the format `<plugin-name>@<marketplace-name>`:
 

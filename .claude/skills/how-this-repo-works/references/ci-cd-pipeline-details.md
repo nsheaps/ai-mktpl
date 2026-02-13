@@ -4,23 +4,23 @@ Supplementary reference for the `how-this-repo-works` skill. See `../SKILL.md` f
 
 ## Workflow Files
 
-| File | Purpose |
-|---|---|
-| `.github/workflows/ci.yaml` | Lint, validate, block manual version edits |
-| `.github/workflows/cd.yaml` | Version bump + marketplace update on main |
-| `.github/workflows/claude-code-review.yaml` | AI code review on PRs |
-| `.github/workflows/claude-agent.yaml` | Claude agent automation |
-| `.github/workflows/claude-agent-trigger.yaml` | Trigger for claude agent workflow |
+| File                                          | Purpose                                    |
+| --------------------------------------------- | ------------------------------------------ |
+| `.github/workflows/ci.yaml`                   | Lint, validate, block manual version edits |
+| `.github/workflows/cd.yaml`                   | Version bump + marketplace update on main  |
+| `.github/workflows/claude-code-review.yaml`   | AI code review on PRs                      |
+| `.github/workflows/claude-agent.yaml`         | Claude agent automation                    |
+| `.github/workflows/claude-agent-trigger.yaml` | Trigger for claude agent workflow          |
 
 ## Composite Actions
 
-| Action | Location | Used By |
-|---|---|---|
-| `detect-plugin-changes` | `.github/actions/detect-plugin-changes/action.yaml` | cd.yaml |
-| `update-marketplace` | `.github/actions/update-marketplace/action.yaml` | cd.yaml |
-| `lint-files` | `.github/actions/lint-files/action.yaml` | ci.yaml |
-| `validate-plugins` | `.github/actions/validate-plugins/action.yaml` | ci.yaml |
-| `github-app-auth` | `.github/actions/github-app-auth/` | ci.yaml, cd.yaml |
+| Action                  | Location                                            | Used By          |
+| ----------------------- | --------------------------------------------------- | ---------------- |
+| `detect-plugin-changes` | `.github/actions/detect-plugin-changes/action.yaml` | cd.yaml          |
+| `update-marketplace`    | `.github/actions/update-marketplace/action.yaml`    | cd.yaml          |
+| `lint-files`            | `.github/actions/lint-files/action.yaml`            | ci.yaml          |
+| `validate-plugins`      | `.github/actions/validate-plugins/action.yaml`      | ci.yaml          |
+| `github-app-auth`       | `.github/actions/github-app-auth/`                  | ci.yaml, cd.yaml |
 
 ## CI Pipeline Detail (ci.yaml)
 
@@ -37,10 +37,12 @@ Group: `ci-${{ github.ref }}` with cancel-in-progress. Prevents stacking runs on
 ### Job: check-version-files (PRs only)
 
 Prevents manual edits to version-managed files. Diffs the PR against base branch for:
+
 - `plugins/*/.claude-plugin/plugin.json`
 - `.claude-plugin/marketplace.json`
 
 If any are changed, the job fails with instructions to revert:
+
 ```bash
 git checkout origin/<base> -- plugins/*/.claude-plugin/plugin.json .claude-plugin/marketplace.json
 ```
@@ -65,11 +67,13 @@ git checkout origin/<base> -- plugins/*/.claude-plugin/plugin.json .claude-plugi
 ### Triggers
 
 Push to `main` or PR when files in these paths change:
+
 - `plugins/**`
 - `.github/workflows/cd.yaml`
 - `.github/actions/detect-plugin-changes/**`
 
 Explicitly excluded (to prevent infinite loops):
+
 - `plugins/*/.claude-plugin/plugin.json`
 - `.claude-plugin/marketplace.json`
 
@@ -126,6 +130,7 @@ The CD workflow avoids infinite loops through two mechanisms:
 ## release-it Configuration
 
 Base config (`.release-it.base.json`):
+
 - `git.commit: false` -- CI does the committing
 - `git.tag: false` -- No tags created
 - `git.push: false` -- CI does the pushing
@@ -135,6 +140,7 @@ Base config (`.release-it.base.json`):
 - `hooks.after:bump` -- `prettier --write .claude-plugin/plugin.json || true`
 
 Per-plugin config (`.release-it.js`):
+
 - Extends the base config
 - Configures `@release-it/bumper` to read/write `plugin.json`
 
