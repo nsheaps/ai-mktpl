@@ -198,6 +198,49 @@ When acting as an AI assistant using git-spice:
 - **If `gs` is not installed**, suggest installation: `brew install git-spice`
 - **If repo is not initialized**, run `gs repo init` first
 
+## Checking for Remote Changes Before Pushing
+
+`gs stack submit` and `gs branch submit` force-push branches. This **overwrites remote changes** made by CI auto-fixes, collaborators, GitHub bots, or other agents. Always check for remote-only commits before submitting.
+
+### Before Running `gs stack submit` or `gs branch submit`
+
+```bash
+git fetch origin
+git log HEAD..origin/<branch-name> --oneline
+```
+
+If there are remote-only commits, incorporate them before submitting.
+
+### Incorporating Remote Changes
+
+```bash
+git pull --rebase origin <branch-name>
+```
+
+This rebases local commits on top of remote changes. After pulling on a stacked branch, propagate changes to upstack branches before submitting:
+
+```bash
+gs stack restack    # gs sr
+gs stack submit     # gs ss
+```
+
+### When to Expect Remote Changes
+
+Always fetch first when working on a branch that others may have modified:
+
+- **Another agent** pushed a fix to the same branch
+- **CI auto-formatted or auto-fixed** code (e.g., linting, formatting hooks)
+- **A collaborator** pushed directly to the branch
+- **GitHub bots** made commits (e.g., dependency updates, changelog generation)
+
+### Quick Pre-Submit Checklist
+
+1. `git fetch origin`
+2. `git log HEAD..origin/<branch-name> --oneline` -- any remote-only commits?
+3. If yes: `git pull --rebase origin <branch-name>`
+4. If on a stacked branch: `gs stack restack`
+5. Proceed with `gs stack submit` or `gs branch submit`
+
 ## Post-Task Cleanup: Closed/Merged PRs
 
 After completing branch navigation or manipulation tasks (e.g., `gs bco`, `gs bo`, `gs uo`, `gs ls`, `gs sr`), check if any branches in the stack have closed or merged PRs. If so, prompt the user with `AskUserQuestion` offering these cleanup options:
