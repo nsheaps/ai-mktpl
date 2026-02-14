@@ -116,9 +116,11 @@ fi
 # Define color variables conditionally
 if [[ "$USE_COLOR" -eq 1 ]]; then
   BOLD_YELLOW=$'\033[1;33m'
+  RED=$'\033[0;31m'
   RESET=$'\033[0m'
 else
   BOLD_YELLOW=""
+  RED=""
   RESET=""
 fi
 
@@ -175,7 +177,7 @@ done <<< "$gs_tree"
 # ---------------------------------------------------------------------------
 # Build GraphQL query to fetch PR data for exactly the PRs in the stack
 # ---------------------------------------------------------------------------
-declare -A pr_title pr_review pr_ci pr_url pr_review_raw pr_ci_raw
+declare -A pr_title pr_review pr_ci pr_url pr_review_raw pr_ci_raw pr_state
 
 if [[ -n "$repo_owner" && ${#pr_number_to_branch[@]} -gt 0 ]]; then
   # Build the query fragment for each PR using aliases.
@@ -184,6 +186,7 @@ if [[ -n "$repo_owner" && ${#pr_number_to_branch[@]} -gt 0 ]]; then
   # include ALL historical runs, causing false FAILUREs from cancelled runs).
   pr_fragment='
     reviewDecision
+    state
     title
     url
     number
@@ -239,11 +242,11 @@ if [[ -n "$repo_owner" && ${#pr_number_to_branch[@]} -gt 0 ]]; then
       else "CI_PENDING"
       end
     ) as $ci |
-    "\(.headRefName)\t\(.title)\t\($review)\t\($ci)\t\(.url)"
+    "\(.headRefName)\t\(.title)\t\($review)\t\($ci)\t\(.url)\t\(.state)"
   ')
 
   # Load lookup into associative arrays keyed by branch name
-  while IFS=$'\t' read -r branch title review ci url; do
+  while IFS=$'\t' read -r branch title review ci url state; do
     [[ -z "$branch" ]] && continue
 
     case "$review" in
@@ -264,6 +267,7 @@ if [[ -n "$repo_owner" && ${#pr_number_to_branch[@]} -gt 0 ]]; then
     pr_url["$branch"]="$url"
     pr_review_raw["$branch"]="$review"
     pr_ci_raw["$branch"]="$ci"
+    pr_state["$branch"]="$state"
   done <<< "$lookup"
 fi
 
@@ -480,12 +484,18 @@ for branch, depth, is_current in reversed(results):
       url="${pr_url[$branch]}"
       pr_num="${branch_to_pr_number[$branch]}"
 
+      # Prepend ⛔️ for closed/merged PRs
+      closed_prefix=""
+      if [[ "${pr_state[$branch]}" == "CLOSED" || "${pr_state[$branch]}" == "MERGED" ]]; then
+        closed_prefix=$'\xe2\x9b\x94\xef\xb8\x8f '
+      fi
+
       if [[ "$SHOW_STATUS" -eq 1 ]]; then
         review="${pr_review[$branch]}"
         ci="${pr_ci[$branch]}"
-        link_text="${review}${ci} #${pr_num} ${title}"
+        link_text="${closed_prefix}${review}${ci} #${pr_num} ${title}"
       else
-        link_text="#${pr_num} ${title}"
+        link_text="${closed_prefix}#${pr_num} ${title}"
       fi
 
       if [[ "$current" -eq 1 ]]; then
@@ -587,6 +597,12 @@ if [[ "$OUTPUT_FORMAT" == "iterm" ]]; then
       title="${pr_title[$branch]}"
       url="${pr_url[$branch]}"
 
+      # Prepend ⛔️ for closed/merged PRs
+      closed_prefix=""
+      if [[ "${pr_state[$branch]}" == "CLOSED" || "${pr_state[$branch]}" == "MERGED" ]]; then
+        closed_prefix=$'\xe2\x9b\x94\xef\xb8\x8f '
+      fi
+
       # Build OSC 8 hyperlink sequences using literal ESC bytes.
       # Using $'\e' avoids printf escape-sequence interactions that corrupt
       # the ST (String Terminator = ESC \) when embedded in format strings.
@@ -602,13 +618,13 @@ if [[ "$OUTPUT_FORMAT" == "iterm" ]]; then
         pad_str=$(printf '%*s' "$padding" '')
 
         # Link covers branch+title; emojis sit between tree prefix and title
-        visible_text="${cleaned}${pad_str}${review}${ci}  ${title}"
+        visible_text="${cleaned}${pad_str}${closed_prefix}${review}${ci}  ${title}"
       else
         display_width=$(printf '%s' "$cleaned" | wc -m | tr -d ' ')
         padding=$((col2_start - display_width))
         pad_str=$(printf '%*s' "$padding" '')
 
-        visible_text="${cleaned}${pad_str}${title}"
+        visible_text="${cleaned}${pad_str}${closed_prefix}${title}"
       fi
 
       if [[ "$current" -eq 1 ]]; then
@@ -741,15 +757,19 @@ for cleaned in "${cleaned_lines[@]}"; do
     url_line="${indent}${url}"
 
     if [[ "$current" -eq 1 ]]; then
-      # Current branch: bold yellow highlighting
+      # Current branch: bold yellow highlighting (takes priority over closed/merged red)
       printf '%s%s%s\n' "$BOLD_YELLOW" "$output_line" "$RESET"
       printf '%s%s%s\n' "$BOLD_YELLOW" "$url_line" "$RESET"
+    elif [[ "${pr_state[$branch]}" == "CLOSED" || "${pr_state[$branch]}" == "MERGED" ]]; then
+      # Closed/merged PR: red text
+      printf '%s%s%s\n' "$RED" "$output_line" "$RESET"
+      printf '%s%s%s\n' "$RED" "$url_line" "$RESET"
     else
       echo "$output_line"
       echo "$url_line"
     fi
   else
-    # No PR data for this line (trunk, closed PRs, or untracked), print as-is
+    # No PR data for this line (trunk or untracked), print as-is
     if [[ "$current" -eq 1 ]]; then
       printf '%s%s%s\n' "$BOLD_YELLOW" "$cleaned" "$RESET"
     else
