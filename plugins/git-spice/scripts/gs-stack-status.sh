@@ -13,6 +13,7 @@
 # Requirements: gs, gh, jq, python3
 # Usage: gs-stack-status.sh [--output interactive|markdown|iterm] [--no-status]
 #        [--reviewed] [--no-reviewed] [--failing-ci] [--no-failing-ci]
+#        [--color] [--no-color]
 
 set -euo pipefail
 
@@ -23,6 +24,7 @@ OUTPUT_FORMAT="interactive"
 SHOW_STATUS=1
 FILTER_REVIEWED=""       # "yes" = only reviewed, "no" = only NOT reviewed, "" = no filter
 FILTER_FAILING_CI=""     # "yes" = only failing CI, "no" = only NOT failing CI, "" = no filter
+COLOR_OVERRIDE=""        # "yes" = force color, "no" = force no color, "" = auto-detect TTY
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -58,9 +60,18 @@ while [[ $# -gt 0 ]]; do
       FILTER_FAILING_CI="no"
       shift
       ;;
+    --color)
+      COLOR_OVERRIDE="yes"
+      shift
+      ;;
+    --no-color)
+      COLOR_OVERRIDE="no"
+      shift
+      ;;
     -h|--help)
       echo "Usage: gs-stack-status.sh [--output interactive|markdown|iterm] [--no-status]"
       echo "       [--reviewed] [--no-reviewed] [--failing-ci] [--no-failing-ci]"
+      echo "       [--color] [--no-color]"
       echo ""
       echo "Options:"
       echo "  --output FORMAT   Output format: interactive (default), markdown, or iterm"
@@ -69,22 +80,47 @@ while [[ $# -gt 0 ]]; do
       echo "  --no-reviewed     Only show PRs that have NOT been reviewed/approved"
       echo "  --failing-ci      Only show PRs where CI is failing"
       echo "  --no-failing-ci   Only show PRs where CI is NOT failing"
+      echo "  --color           Force color output even when not a TTY"
+      echo "  --no-color        Suppress color/escape codes even when on a TTY"
       echo "  -h, --help        Show this help message"
       exit 0
       ;;
     *)
       echo "ERROR: Unknown option '$1'" >&2
-      echo "Usage: gs-stack-status.sh [--output interactive|markdown|iterm] [--no-status]" >&2
+      echo "Usage: gs-stack-status.sh [--output interactive|markdown|iterm] [--no-status] [--color] [--no-color]" >&2
       exit 1
       ;;
   esac
 done
 
 # ---------------------------------------------------------------------------
-# ANSI color codes
+# TTY detection and color support
 # ---------------------------------------------------------------------------
-BOLD_YELLOW='\033[1;33m'
-RESET='\033[0m'
+# Auto-detect whether to use color based on TTY, allow explicit override.
+if [[ "$COLOR_OVERRIDE" == "yes" ]]; then
+  USE_COLOR=1
+elif [[ "$COLOR_OVERRIDE" == "no" ]]; then
+  USE_COLOR=0
+elif [[ -t 1 ]]; then
+  USE_COLOR=1
+else
+  USE_COLOR=0
+fi
+
+# When --no-color is set and output is iterm, fall back to interactive mode
+# since iterm mode relies on OSC 8 escape codes for hyperlinks.
+if [[ "$USE_COLOR" -eq 0 && "$OUTPUT_FORMAT" == "iterm" ]]; then
+  OUTPUT_FORMAT="interactive"
+fi
+
+# Define color variables conditionally
+if [[ "$USE_COLOR" -eq 1 ]]; then
+  BOLD_YELLOW=$'\033[1;33m'
+  RESET=$'\033[0m'
+else
+  BOLD_YELLOW=""
+  RESET=""
+fi
 
 # ---------------------------------------------------------------------------
 # Dependency checks
@@ -576,14 +612,14 @@ if [[ "$OUTPUT_FORMAT" == "iterm" ]]; then
       fi
 
       if [[ "$current" -eq 1 ]]; then
-        printf '%s%s%s%s%s\n' $'\e[1;33m' "$osc_open" "$visible_text" "$osc_close" $'\e[0m'
+        printf '%s%s%s%s%s\n' "$BOLD_YELLOW" "$osc_open" "$visible_text" "$osc_close" "$RESET"
       else
         printf '%s%s%s\n' "$osc_open" "$visible_text" "$osc_close"
       fi
     else
       # No PR data for this line (trunk, etc.)
       if [[ "$current" -eq 1 ]]; then
-        printf '%s%s%s\n' $'\e[1;33m' "$cleaned" $'\e[0m'
+        printf '%s%s%s\n' "$BOLD_YELLOW" "$cleaned" "$RESET"
       else
         echo "$cleaned"
       fi
@@ -706,8 +742,8 @@ for cleaned in "${cleaned_lines[@]}"; do
 
     if [[ "$current" -eq 1 ]]; then
       # Current branch: bold yellow highlighting
-      printf "${BOLD_YELLOW}%s${RESET}\n" "$output_line"
-      printf "${BOLD_YELLOW}%s${RESET}\n" "$url_line"
+      printf '%s%s%s\n' "$BOLD_YELLOW" "$output_line" "$RESET"
+      printf '%s%s%s\n' "$BOLD_YELLOW" "$url_line" "$RESET"
     else
       echo "$output_line"
       echo "$url_line"
@@ -715,7 +751,7 @@ for cleaned in "${cleaned_lines[@]}"; do
   else
     # No PR data for this line (trunk, closed PRs, or untracked), print as-is
     if [[ "$current" -eq 1 ]]; then
-      printf "${BOLD_YELLOW}%s${RESET}\n" "$cleaned"
+      printf '%s%s%s\n' "$BOLD_YELLOW" "$cleaned" "$RESET"
     else
       echo "$cleaned"
     fi
