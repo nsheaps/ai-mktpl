@@ -97,7 +97,8 @@ done
 # TTY detection and color support
 # ---------------------------------------------------------------------------
 # Auto-detect whether to use color based on TTY, allow explicit override.
-if [[ "$COLOR_OVERRIDE" == "yes" ]]; then
+# Supports FORCE_COLOR=1 env var (common convention, e.g. chalk, jest, etc.)
+if [[ "$COLOR_OVERRIDE" == "yes" ]] || [[ "${FORCE_COLOR:-}" == "1" ]]; then
   USE_COLOR=1
 elif [[ "$COLOR_OVERRIDE" == "no" ]]; then
   USE_COLOR=0
