@@ -731,6 +731,12 @@ for cleaned in "${cleaned_lines[@]}"; do
     title="${pr_title[$branch]}"
     url="${pr_url[$branch]}"
 
+    # Prepend ⛔️ for closed/merged PRs when color is unavailable (fallback indicator)
+    closed_prefix=""
+    if [[ "$USE_COLOR" -eq 0 && ( "${pr_state[$branch]}" == "CLOSED" || "${pr_state[$branch]}" == "MERGED" ) ]]; then
+      closed_prefix=$'\xe2\x9b\x94\xef\xb8\x8f '
+    fi
+
     if [[ "$SHOW_STATUS" -eq 1 ]]; then
       review="${pr_review[$branch]}"
       ci="${pr_ci[$branch]}"
@@ -741,14 +747,14 @@ for cleaned in "${cleaned_lines[@]}"; do
       pad_str=$(printf '%*s' "$padding" '')
 
       # Build the output line: col1 + padding + emojis + title
-      output_line="${cleaned}${pad_str}${review}${ci}  ${title}"
+      output_line="${cleaned}${pad_str}${closed_prefix}${review}${ci}  ${title}"
     else
       # No status — just show title after the tree
       display_width=$(printf '%s' "$cleaned" | wc -m | tr -d ' ')
       padding=$((col2_start - display_width))
       pad_str=$(printf '%*s' "$padding" '')
 
-      output_line="${cleaned}${pad_str}${title}"
+      output_line="${cleaned}${pad_str}${closed_prefix}${title}"
     fi
 
     # Build the URL line with indentation aligned under the branch name
@@ -761,7 +767,7 @@ for cleaned in "${cleaned_lines[@]}"; do
       printf '%s%s%s\n' "$BOLD_YELLOW" "$output_line" "$RESET"
       printf '%s%s%s\n' "$BOLD_YELLOW" "$url_line" "$RESET"
     elif [[ "${pr_state[$branch]}" == "CLOSED" || "${pr_state[$branch]}" == "MERGED" ]]; then
-      # Closed/merged PR: red text
+      # Closed/merged PR: red text (when color available), ⛔️ already in output_line when not
       printf '%s%s%s\n' "$RED" "$output_line" "$RESET"
       printf '%s%s%s\n' "$RED" "$url_line" "$RESET"
     else
