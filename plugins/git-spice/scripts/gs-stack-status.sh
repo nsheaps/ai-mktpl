@@ -11,7 +11,7 @@
 #   - Aligned columns for easy scanning
 #
 # Requirements: gs, gh, jq, python3
-# Usage: gs-stack-status.sh [--output interactive|markdown] [--no-status]
+# Usage: gs-stack-status.sh [--output interactive|markdown|iterm] [--no-status]
 #        [--reviewed] [--no-reviewed] [--failing-ci] [--no-failing-ci]
 
 set -euo pipefail
@@ -32,8 +32,8 @@ while [[ $# -gt 0 ]]; do
         exit 1
       fi
       OUTPUT_FORMAT="$2"
-      if [[ "$OUTPUT_FORMAT" != "interactive" && "$OUTPUT_FORMAT" != "markdown" ]]; then
-        echo "ERROR: --output must be 'interactive' or 'markdown'" >&2
+      if [[ "$OUTPUT_FORMAT" != "interactive" && "$OUTPUT_FORMAT" != "markdown" && "$OUTPUT_FORMAT" != "iterm" ]]; then
+        echo "ERROR: --output must be 'interactive', 'markdown', or 'iterm'" >&2
         exit 1
       fi
       shift 2
@@ -59,11 +59,11 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     -h|--help)
-      echo "Usage: gs-stack-status.sh [--output interactive|markdown] [--no-status]"
+      echo "Usage: gs-stack-status.sh [--output interactive|markdown|iterm] [--no-status]"
       echo "       [--reviewed] [--no-reviewed] [--failing-ci] [--no-failing-ci]"
       echo ""
       echo "Options:"
-      echo "  --output FORMAT   Output format: interactive (default) or markdown"
+      echo "  --output FORMAT   Output format: interactive (default), markdown, or iterm"
       echo "  --no-status       Omit review/CI emoji indicators"
       echo "  --reviewed        Only show PRs that have been reviewed/approved"
       echo "  --no-reviewed     Only show PRs that have NOT been reviewed/approved"
@@ -74,7 +74,7 @@ while [[ $# -gt 0 ]]; do
       ;;
     *)
       echo "ERROR: Unknown option '$1'" >&2
-      echo "Usage: gs-stack-status.sh [--output interactive|markdown] [--no-status]" >&2
+      echo "Usage: gs-stack-status.sh [--output interactive|markdown|iterm] [--no-status]" >&2
       exit 1
       ;;
   esac
@@ -142,7 +142,10 @@ done <<< "$gs_tree"
 declare -A pr_title pr_review pr_ci pr_url pr_review_raw pr_ci_raw
 
 if [[ -n "$repo_owner" && ${#pr_number_to_branch[@]} -gt 0 ]]; then
-  # Build the query fragment for each PR using aliases
+  # Build the query fragment for each PR using aliases.
+  # We use statusCheckRollup.state for CI status — it is the GitHub-computed
+  # rollup that correctly deduplicates re-run checks (the per-context nodes
+  # include ALL historical runs, causing false FAILUREs from cancelled runs).
   pr_fragment='
     reviewDecision
     title
@@ -153,12 +156,7 @@ if [[ -n "$repo_owner" && ${#pr_number_to_branch[@]} -gt 0 ]]; then
       nodes {
         commit {
           statusCheckRollup {
-            contexts(first: 100) {
-              nodes {
-                ... on CheckRun { conclusion status }
-                ... on StatusContext { state }
-              }
-            }
+            state
           }
         }
       }
@@ -193,21 +191,15 @@ if [[ -n "$repo_owner" && ${#pr_number_to_branch[@]} -gt 0 ]]; then
     (if .reviewDecision == "APPROVED" then "APPROVED"
      else "NOT_APPROVED"
      end) as $review |
-    # CI status: summarize statusCheckRollup contexts
+    # CI status: use the GitHub-computed rollup state which correctly handles
+    # re-runs and deduplication (statusCheckRollup.state).
+    # Possible values: SUCCESS, FAILURE, PENDING, ERROR, EXPECTED, null
     (
-      [(.commits.nodes[0].commit.statusCheckRollup.contexts.nodes // [])[] |
-        select(.status != null or .state != null)] |
-      if length == 0 then "NO_CI"
-      elif any(.conclusion == "FAILURE" or .state == "FAILURE" or .state == "ERROR") then "CI_FAIL"
-      elif any(.status == "IN_PROGRESS" or .status == "QUEUED" or .state == "PENDING") then "CI_PENDING"
-      elif all(
-        .conclusion == "SUCCESS" or .conclusion == "SKIPPED" or
-        .conclusion == "NEUTRAL" or .conclusion == "CANCELLED" or
-        .state == "SUCCESS"
-      ) then
-        if any(.conclusion == "SUCCESS" or .state == "SUCCESS") then "CI_PASS"
-        else "CI_PENDING"
-        end
+      (.commits.nodes[0].commit.statusCheckRollup.state // null) |
+      if . == null then "NO_CI"
+      elif . == "SUCCESS" then "CI_PASS"
+      elif . == "FAILURE" or . == "ERROR" then "CI_FAIL"
+      elif . == "PENDING" or . == "EXPECTED" then "CI_PENDING"
       else "CI_PENDING"
       end
     ) as $ci |
@@ -413,7 +405,6 @@ for branch, depth, is_current in reversed(results):
   # Generate markdown output (with filtering support)
   # -------------------------------------------------------------------------
   # Process lines in the original gs ls order (top-to-bottom)
-  last_was_ellipsis=0
   while IFS= read -r line; do
     [[ -z "$line" ]] && continue
 
@@ -442,15 +433,10 @@ for branch, depth, is_current in reversed(results):
       indent=$(printf '%*s' $(( (depth - 1) * 2 )) '')
     fi
 
-    # Check if this branch passes the filter
+    # Filtered branches are silently skipped (no placeholder)
     if ! branch_passes_filter "$branch" "$current"; then
-      if [[ "$last_was_ellipsis" -eq 0 ]]; then
-        echo "${indent}- ..."
-        last_was_ellipsis=1
-      fi
       continue
     fi
-    last_was_ellipsis=0
 
     # Build the markdown line
     if [[ -n "${pr_title[$branch]+_}" ]]; then
@@ -493,6 +479,125 @@ for branch, depth, is_current in reversed(results):
     printf '\xf0\x9f\x94\xb4 changes requested/failing  '
     printf '\xf0\x9f\x9f\xa1 pending  '
     printf '\xe2\x9a\xaa no checks\n'
+  fi
+
+  exit 0
+fi
+
+# ===========================================================================
+# Output: iTerm format (OSC 8 clickable hyperlinks)
+# ===========================================================================
+# Uses iTerm2 OSC 8 escape codes to make branch+title a clickable hyperlink.
+# Same tree structure as interactive mode but no separate URL line beneath.
+# Format: \033]8;;URL\033\\DISPLAY TEXT\033]8;;\033\\
+
+if [[ "$OUTPUT_FORMAT" == "iterm" ]]; then
+  # -------------------------------------------------------------------------
+  # Pass 1: Compute max width of column 1 (tree prefix + branch name)
+  # -------------------------------------------------------------------------
+  max_col1_width=0
+  declare -a iterm_cleaned_lines
+  declare -a iterm_branches
+  declare -a iterm_is_current
+
+  line_idx=0
+  while IFS= read -r line; do
+    branch=""
+    current=0
+
+    if [[ "$line" =~ [□■][[:space:]]([^[:space:]]+) ]]; then
+      branch="${BASH_REMATCH[1]}"
+    elif [[ "$line" =~ ^[[:space:]]*([a-zA-Z0-9_/.-]+)[[:space:]]*$ ]]; then
+      branch="${BASH_REMATCH[1]}"
+    fi
+
+    if [[ "$line" == *"◀"* ]]; then
+      current=1
+    fi
+
+    if [[ -n "$branch" && -n "${pr_title[$branch]+_}" ]]; then
+      cleaned=$(echo "$line" | sed 's| (https://[^)]*)||')
+      display_width=$(printf '%s' "$cleaned" | wc -m | tr -d ' ')
+      if (( display_width > max_col1_width )); then
+        max_col1_width=$display_width
+      fi
+    else
+      cleaned="$line"
+    fi
+
+    iterm_cleaned_lines+=("$cleaned")
+    iterm_branches+=("$branch")
+    iterm_is_current+=("$current")
+    line_idx=$((line_idx + 1))
+  done <<< "$gs_tree"
+
+  col2_start=$((max_col1_width + 2))
+
+  # -------------------------------------------------------------------------
+  # Pass 2: Print with OSC 8 hyperlinks
+  # -------------------------------------------------------------------------
+  line_idx=0
+  for cleaned in "${iterm_cleaned_lines[@]}"; do
+    branch="${iterm_branches[$line_idx]}"
+    current="${iterm_is_current[$line_idx]}"
+
+    # Filtered branches are silently skipped (no placeholder)
+    if [[ -n "$branch" && -n "${pr_title[$branch]+_}" ]] && ! branch_passes_filter "$branch" "$current"; then
+      line_idx=$((line_idx + 1))
+      continue
+    fi
+
+    if [[ -n "$branch" && -n "${pr_title[$branch]+_}" ]]; then
+      title="${pr_title[$branch]}"
+      url="${pr_url[$branch]}"
+
+      # Build OSC 8 hyperlink sequences using literal ESC bytes.
+      # Using $'\e' avoids printf escape-sequence interactions that corrupt
+      # the ST (String Terminator = ESC \) when embedded in format strings.
+      osc_open=$'\e]8;;'"${url}"$'\e\\'
+      osc_close=$'\e]8;;\e\\'
+
+      if [[ "$SHOW_STATUS" -eq 1 ]]; then
+        review="${pr_review[$branch]}"
+        ci="${pr_ci[$branch]}"
+
+        display_width=$(printf '%s' "$cleaned" | wc -m | tr -d ' ')
+        padding=$((col2_start - display_width))
+        pad_str=$(printf '%*s' "$padding" '')
+
+        # Link covers branch+title; emojis sit between tree prefix and title
+        visible_text="${cleaned}${pad_str}${review}${ci}  ${title}"
+      else
+        display_width=$(printf '%s' "$cleaned" | wc -m | tr -d ' ')
+        padding=$((col2_start - display_width))
+        pad_str=$(printf '%*s' "$padding" '')
+
+        visible_text="${cleaned}${pad_str}${title}"
+      fi
+
+      if [[ "$current" -eq 1 ]]; then
+        printf '%s%s%s%s%s\n' $'\e[1;33m' "$osc_open" "$visible_text" "$osc_close" $'\e[0m'
+      else
+        printf '%s%s%s\n' "$osc_open" "$visible_text" "$osc_close"
+      fi
+    else
+      # No PR data for this line (trunk, etc.)
+      if [[ "$current" -eq 1 ]]; then
+        printf '%s%s%s\n' $'\e[1;33m' "$cleaned" $'\e[0m'
+      else
+        echo "$cleaned"
+      fi
+    fi
+
+    line_idx=$((line_idx + 1))
+  done
+
+  # Legend
+  if [[ "$SHOW_STATUS" -eq 1 ]]; then
+    echo ""
+    echo "Legend: [Review][CI] per line"
+    printf '  \xf0\x9f\x9f\xa2 = approved / passing   \xf0\x9f\x94\xb4 = changes requested / failing\n'
+    printf '  \xf0\x9f\x9f\xa1 = pending               \xe2\x9a\xaa = no checks\n'
   fi
 
   exit 0
@@ -560,23 +665,15 @@ col2_start=$((max_col1_width + 2))
 # Pass 2: Print with aligned columns (with filtering support)
 # ---------------------------------------------------------------------------
 line_idx=0
-last_was_ellipsis=0
 for cleaned in "${cleaned_lines[@]}"; do
   branch="${branches[$line_idx]}"
   current="${is_current[$line_idx]}"
 
-  # Check if this branch should be filtered out
+  # Filtered branches are silently skipped (no placeholder)
   if [[ -n "$branch" && -n "${pr_title[$branch]+_}" ]] && ! branch_passes_filter "$branch" "$current"; then
-    if [[ "$last_was_ellipsis" -eq 0 ]]; then
-      # Replace the branch line with "..." preserving tree prefix for context
-      prefix="${cleaned%%"$branch"*}"
-      echo "${prefix}..."
-      last_was_ellipsis=1
-    fi
     line_idx=$((line_idx + 1))
     continue
   fi
-  last_was_ellipsis=0
 
   if [[ -n "$branch" && -n "${pr_title[$branch]+_}" ]]; then
     title="${pr_title[$branch]}"
