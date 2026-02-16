@@ -55,7 +55,7 @@ These conflicts require understanding intent:
 When encountering a non-obvious conflict, delegate to the Explore agent with specific questions:
 
 ```
-Use Explore agent to investigate:
+Use Explore agent with haiku model to investigate:
 1. What is the purpose of the changes on the base branch?
 2. What is the purpose of the changes on the feature branch?
 3. Do these changes have overlapping intent or separate concerns?

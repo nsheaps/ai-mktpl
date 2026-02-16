@@ -10,7 +10,7 @@ When you first receive a user request that:
 - Involves complex edits (more than 2 files), OR
 - Has unclear scope or dependencies
 
-**ALWAYS use the Explore and Plan agents first** to understand the full scope before acting.
+**ALWAYS use the Explore (with haiku) and Plan (with opus) agents first** to understand the full scope before acting.
 
 ### Why This Matters
 
@@ -25,7 +25,7 @@ When you first receive a user request that:
 1. Receive user request
 2. Assess complexity:
    - Simple (1-2 files, clear scope) → Proceed directly
-   - Complex (3+ files, unclear scope) → Use Explore agent
+   - Complex (3+ files, unclear scope) → Use Explore agent with haiku
 3. Explore agent investigates:
    - Related files and dependencies
    - Existing patterns to follow

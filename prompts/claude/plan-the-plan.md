@@ -1,4 +1,4 @@
-use the Explore and Plan agent to come up with a simple step by step plan to iteratively implement each of these tickets.
+use the Explore agent with haiku and Plan agent with opus to come up with a simple step by step plan to iteratively implement each of these tickets.
 
 This plan itself should not have a plan for each ticket, just a high level plan of how to iteratively work on each step.
 

@@ -2,6 +2,21 @@
 
 Standards for writing and reviewing code.
 
+See mantras-and-incremental-development.md for general principles that also affect code quality.
+
+## Quality guidelines
+
+- Smaller files are easier to understand and parse by humans and machines alike. Aim to keep files under 1000 lines.
+- Smaller functions are more comprehensible and help build abstraction. Aim to keep functions under 50 lines.
+- Proper scoping and placement of functions and files in a large repo is very important
+  - Don't duplicate existing functionality. Ever.
+  - Keep scope of PRs small.
+- Track follow ups separately, rather than continuously increasing scope of the same PR.
+- Start as simple as possible.
+- Make sure logging is good, but not too verbose for a production environment.
+- When stuff goes wrong, there should already be logs to help understand what happened. Don't wait until after the fact to add logging.
+- When stuff is going right, to know that we're successful it's important to be able to measure that success.
+
 ## Git Workflow
 
 ### Clean Working Directory Before Starting Tasks

@@ -113,7 +113,7 @@ Resolve directly when the conflict is clearly one of:
 
 For conflicts requiring analysis, delegate to specialized agents:
 
-1. **Use Explore agent** to understand:
+1. **Use Explore agent** with haiku model to understand:
    - What each side of the conflict is trying to accomplish
    - The history of the conflicting changes
    - Related code that might inform the resolution
