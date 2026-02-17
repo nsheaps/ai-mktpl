@@ -29,7 +29,7 @@ FILTER_REVIEWED=""       # "yes" = only reviewed, "no" = only NOT reviewed, "" =
 FILTER_FAILING_CI=""     # "yes" = only failing CI, "no" = only NOT failing CI, "" = no filter
 COLOR_OVERRIDE=""        # "yes" = force color, "no" = force no color, "" = auto-detect TTY
 WATCH_MODE=0
-WATCH_INTERVAL=5
+WATCH_INTERVAL=10
 TRUNCATE_BRANCH=35        # Default: truncate branch names to 35 chars
 TRUNCATE_PR_TITLE=0       # Default: no PR title truncation (0 = disabled)
 ONLY_REQUIRED_CI=1        # Default: CI status only reflects required checks
@@ -136,7 +136,7 @@ while [[ $# -gt 0 ]]; do
       echo "  --no-failing-ci   Only show PRs where CI is NOT failing"
       echo "  --color           Force color output even when not a TTY"
       echo "  --no-color        Suppress color/escape codes even when on a TTY"
-      echo "  --watch [SECS]    Refresh in-place every SECS seconds (default: 5)"
+      echo "  --watch [SECS]    Refresh in-place every SECS seconds (default: 10)"
       echo "  --only-required-ci          CI status reflects only required checks (default)"
       echo "  --no-only-required-ci       CI status reflects all checks"
       echo "  --include-closed            Show closed/merged PRs (default: hidden)"
