@@ -299,12 +299,12 @@ are actively being worked on in parallel.
 
 ### When to Use Worktrees
 
-| Scenario | Approach |
-| --- | --- |
-| Agent fixing a PR while user works on main | Worktree for the agent |
-| Multiple agents fixing different PRs in parallel | One worktree per agent |
-| Quick one-off fix on a different branch | Worktree, fix, cleanup |
-| Long-running work on a feature branch | Worktree (or dedicated clone) |
+| Scenario                                         | Approach                      |
+| ------------------------------------------------ | ----------------------------- |
+| Agent fixing a PR while user works on main       | Worktree for the agent        |
+| Multiple agents fixing different PRs in parallel | One worktree per agent        |
+| Quick one-off fix on a different branch          | Worktree, fix, cleanup        |
+| Long-running work on a feature branch            | Worktree (or dedicated clone) |
 
 ### Anti-Patterns
 
