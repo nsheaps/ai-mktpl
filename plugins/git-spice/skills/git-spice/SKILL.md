@@ -289,12 +289,13 @@ The script requires `gs`, `gh`, and `jq` in PATH.
 
 Each branch line is annotated with two emoji indicators and the PR title:
 
-| Position     | Meaning       | Values                                                                                                  |
-| ------------ | ------------- | ------------------------------------------------------------------------------------------------------- |
-| First emoji  | Review status | `🟢` approved, `🔴` changes requested, `🟡` unreviewed, `⚪` draft, `🔘` draft+approved                |
+| Position     | Meaning       | Values                                                                                                      |
+| ------------ | ------------- | ----------------------------------------------------------------------------------------------------------- |
+| First emoji  | Review status | `🟢` approved, `🔴` changes requested, `🟡` unreviewed, `⚪` draft, `🔘` draft+approved                     |
 | Second emoji | CI status     | `🟢` passing, `🔴` required failed, `🟡` running, `🟠` running+failures, `🟣` optional failures, `⚪` no CI |
 
 Additional indicators:
+
 - `＋` (bold magenta) before branch name = branch is checked out in another worktree
 - `⛔️` prefix = closed/merged PR (only visible with `--include-closed`)
 - Current branch is highlighted in bold yellow
@@ -304,15 +305,15 @@ The PR URL appears on the line below each branch (interactive mode). Branches wi
 
 ### Key Flags
 
-| Flag                   | Effect                                                |
-| ---------------------- | ----------------------------------------------------- |
-| `--include-closed`     | Show closed/merged PRs (hidden by default)            |
-| `--output osc8`        | Clickable hyperlinks (iTerm2, Kitty)                  |
-| `--output markdown`    | Markdown format (for Slack, GitHub comments)          |
-| `--watch [SECS]`       | Auto-refresh in alternate screen buffer               |
-| `--only-required-ci`   | CI status reflects only required checks (default)     |
-| `--reviewed`           | Only show PRs that have been reviewed/approved        |
-| `--failing-ci`         | Only show PRs where CI is failing                     |
+| Flag                 | Effect                                            |
+| -------------------- | ------------------------------------------------- |
+| `--include-closed`   | Show closed/merged PRs (hidden by default)        |
+| `--output osc8`      | Clickable hyperlinks (iTerm2, Kitty)              |
+| `--output markdown`  | Markdown format (for Slack, GitHub comments)      |
+| `--watch [SECS]`     | Auto-refresh in alternate screen buffer           |
+| `--only-required-ci` | CI status reflects only required checks (default) |
+| `--reviewed`         | Only show PRs that have been reviewed/approved    |
+| `--failing-ci`       | Only show PRs where CI is failing                 |
 
 ## Additional Resources
 
