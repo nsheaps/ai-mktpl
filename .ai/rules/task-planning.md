@@ -66,14 +66,14 @@ After exploration (or for moderately complex tasks), use the **Plan agent** to c
 
 ### Standard Locations (IN PROJECT REPO)
 
-| Content Type  | Location                                  |
-| ------------- | ----------------------------------------- |
+| Content Type  | Location                             |
+| ------------- | ------------------------------------ |
 | Task plans    | `.claude/plans/<request-summary>.md` |
-| Task list     | `.claude/scratch/todo.md`                    |
-| Scratch notes | `.claude/scratch/note-<topic>.md`            |
-| temp dir      | `.claude/tmp/` (do not use `/tmp`)        |
-| Research      | `docs/research/<topic>.md`                |
-| Product specs | `docs/specs/draft/<feature>.md`           |
+| Task list     | `.claude/scratch/todo.md`            |
+| Scratch notes | `.claude/scratch/note-<topic>.md`    |
+| temp dir      | `.claude/tmp/` (do not use `/tmp`)   |
+| Research      | `docs/research/<topic>.md`           |
+| Product specs | `docs/specs/draft/<feature>.md`      |
 
 ### Why Persist to Files
 
