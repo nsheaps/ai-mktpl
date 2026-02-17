@@ -3,6 +3,21 @@
 # Based on: stainless-api/stainless/.mise/tasks/claude-statusline
 set -e
 
+# Timing helper using perl for ms precision (portable, no coreutils dependency)
+_now_ms() { perl -MTime::HiRes=time -e 'printf "%.0f\n", time()*1000'; }
+_statusline_start_ms=$(_now_ms)
+_section_start_ms=$_statusline_start_ms
+_section_timings=""
+
+# Record a section's elapsed time and reset for next section
+_record_section() {
+  local label="$1"
+  local now=$(_now_ms)
+  local elapsed=$(( now - _section_start_ms ))
+  _section_timings="${_section_timings}${label}=${elapsed}ms "
+  _section_start_ms=$now
+}
+
 # Prevent git from creating lock files for read-only operations
 export GIT_OPTIONAL_LOCKS=0
 
@@ -62,6 +77,8 @@ if [ -n "$session_id" ]; then
   echo "Session: $session_id"
 fi
 
+_record_section "parse"
+
 PR_URL_OR_EMPTY="$(cd "$project_dir" && gh pr view --json url -q .url 2>/dev/null || echo "")"
 REPO_URL="$(cd "$project_dir" && gh repo view --json url -q .url 2>/dev/null || echo "")"
 PR_OR_BRANCH_OR_REPO_URL_FROM_GH="${PR_URL_OR_EMPTY:-$REPO_URL}"
@@ -72,6 +89,8 @@ if [ "$cwd" = "$project_dir" ]; then
 else
   echo "In: $project_dir_relative_to_home | In: $cwd_relative_to_project | $PR_OR_BRANCH_OR_REPO_URL_FROM_GH"
 fi
+
+_record_section "gh"
 
 # Git status (handles both regular repos and worktrees)
 # Also builds iTerm badge text
@@ -118,11 +137,30 @@ elif [[ "$cwd" == "$HOME/src/"* ]]; then
   badge_text="${cwd#$HOME/src/}"
 fi
 
+_record_section "git"
+
 # Set iTerm2 badge
 iterm2_set_user_var "badge" "$badge_text"
+
+_record_section "badge"
 
 # par-cc-usage statusline (strip project name prefix)
 pccu_status="$(echo "$input" | uvx --from par-cc-usage pccu statusline 2>/dev/null | sed 's/^\[.*\] - //' || true)"
 if [ -n "$pccu_status" ]; then
   echo "$pccu_status"
+fi
+
+_record_section "pccu"
+
+# Calculate and display total render time
+_statusline_end_ms=$(_now_ms)
+_statusline_duration_ms=$(( _statusline_end_ms - _statusline_start_ms ))
+echo "Rendered in ${_statusline_duration_ms}ms [${_section_timings% }]"
+
+# Append render time to session debug log
+if [ -n "$session_id" ]; then
+  _debug_file="$HOME/.claude/debug/${session_id}.txt"
+  mkdir -p "$(dirname "$_debug_file")"
+  _timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")
+  echo "${_timestamp} [DEBUG] [statusline] Rendered in ${_statusline_duration_ms}ms [${_section_timings% }]" >> "$_debug_file"
 fi
