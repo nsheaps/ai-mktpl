@@ -181,6 +181,7 @@ if [[ "$WATCH_MODE" -eq 1 && "${_GS_STATUS_WATCHING:-}" != "1" ]]; then
     output=$("$0" "${child_args[@]}" 2>&1 || true)  # capture output
     printf '\033[H\033[J'                             # cursor home + clear to end
     printf '%s\n' "$output"                           # draw new content
+    printf '\nLast updated: %s\n' "$(date '+%Y-%m-%d %H:%M:%S')"
     sleep "$WATCH_INTERVAL"
   done
 fi
