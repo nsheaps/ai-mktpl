@@ -309,6 +309,8 @@ if [[ -n "$repo_owner" && ${#pr_number_to_branch[@]} -gt 0 ]]; then
               contexts(first: 100) {
                 nodes {
                   ... on CheckRun {
+                    name
+                    databaseId
                     status
                     conclusion
                     isRequired(pullRequestNumber: ${number})
@@ -363,7 +365,22 @@ if [[ -n "$repo_owner" && ${#pr_number_to_branch[@]} -gt 0 ]]; then
       if . == null then "NO_CI"
       else
         (.contexts.nodes // []) as $nodes |
-        ($nodes | map(select(. != null))) as $valid |
+        ($nodes | map(select(. != null))) as $all_valid |
+        # Deduplicate: GitHub returns stale check runs from older workflow
+        # re-runs alongside current ones. Group by name/context and keep
+        # the entry with the highest databaseId (most recent).
+        (
+          # CheckRun nodes: deduplicate by name, keep highest databaseId
+          ([$all_valid[] | select(.name != null)] |
+            group_by(.name) |
+            map(sort_by(.databaseId // 0) | last)
+          ) +
+          # StatusContext nodes: deduplicate by context, keep last
+          ([$all_valid[] | select(.cState != null)] |
+            group_by(.context) |
+            map(last)
+          )
+        ) as $valid |
         if ($valid | length) == 0 then "NO_CI"
         else
           # When only_required=1, filter to only required CheckRun nodes
