@@ -221,6 +221,18 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+# Emoji constants
+# ---------------------------------------------------------------------------
+EMOJI_GREEN=$'\xf0\x9f\x9f\xa2'    # 🟢
+EMOJI_RED=$'\xf0\x9f\x94\xb4'      # 🔴
+EMOJI_YELLOW=$'\xf0\x9f\x9f\xa1'   # 🟡
+EMOJI_ORANGE=$'\xf0\x9f\x9f\xa0'   # 🟠
+EMOJI_PURPLE=$'\xf0\x9f\x9f\xa3'   # 🟣
+EMOJI_WHITE=$'\xe2\x9a\xaa'        # ⚪
+EMOJI_RADIO=$'\xf0\x9f\x94\x98'    # 🔘
+EMOJI_CLOSED=$'\xe2\x9b\x94\xef\xb8\x8f'  # ⛔️
+
+# ---------------------------------------------------------------------------
 # Truncation helper: truncate_str <string> <max_length>
 # Returns the string truncated with "..." if longer than max_length.
 # If max_length is 0, returns the string unchanged.
@@ -350,13 +362,15 @@ if [[ -n "$repo_owner" && ${#pr_number_to_branch[@]} -gt 0 ]]; then
     .data.repository | to_entries[] |
     .value |
 
-    # Review status with draft awareness
+    # Review status from reviewDecision (APPROVED, CHANGES_REQUESTED,
+    # REVIEW_REQUIRED, or null) combined with isDraft
     (if .isDraft then
       if .reviewDecision == "APPROVED" then "DRAFT_APPROVED"
       else "DRAFT"
       end
     elif .reviewDecision == "APPROVED" then "APPROVED"
-    else "NOT_APPROVED"
+    elif .reviewDecision == "CHANGES_REQUESTED" then "CHANGES_REQUESTED"
+    else "UNREVIEWED"
     end) as $review |
 
     # mergeStateStatus: UNSTABLE = required passed but optional failed
@@ -440,19 +454,21 @@ if [[ -n "$repo_owner" && ${#pr_number_to_branch[@]} -gt 0 ]]; then
     [[ -z "$branch" ]] && continue
 
     case "$review" in
-      APPROVED)       review_emoji=$'\xf0\x9f\x9f\xa2' ;;  # 🟢 approved
-      DRAFT)          review_emoji=$'\xe2\x9a\xaa' ;;       # ⚪ draft
-      DRAFT_APPROVED) review_emoji=$'\xf0\x9f\x94\x98' ;;   # 🔘 draft + approved
-      *)              review_emoji=$'\xf0\x9f\x94\xb4' ;;   # 🔴 changes requested / not approved
+      APPROVED)          review_emoji="$EMOJI_GREEN" ;;   # 🟢 approved
+      CHANGES_REQUESTED) review_emoji="$EMOJI_RED" ;;     # 🔴 changes requested
+      UNREVIEWED)        review_emoji="$EMOJI_YELLOW" ;;  # 🟡 open, unreviewed
+      DRAFT)             review_emoji="$EMOJI_WHITE" ;;   # ⚪ draft
+      DRAFT_APPROVED)    review_emoji="$EMOJI_RADIO" ;;   # 🔘 draft + approved
+      *)                 review_emoji="$EMOJI_YELLOW" ;;  # 🟡 default to unreviewed
     esac
     case "$ci" in
-      CI_PASS)         ci_emoji=$'\xf0\x9f\x9f\xa2' ;;      # 🟢 all passing
-      CI_FAIL)         ci_emoji=$'\xf0\x9f\x94\xb4' ;;      # 🔴 required checks failed
-      CI_PENDING)      ci_emoji=$'\xf0\x9f\x9f\xa1' ;;      # 🟡 running, none failed
-      CI_PENDING_FAIL) ci_emoji=$'\xf0\x9f\x9f\xa0' ;;      # 🟠 running + some failed
-      CI_PARTIAL_FAIL) ci_emoji=$'\xf0\x9f\x9f\xa3' ;;      # 🟣 complete, required passed, optional failed
-      NO_CI)           ci_emoji=$'\xe2\x9a\xaa' ;;           # ⚪ no checks
-      *)               ci_emoji=$'\xf0\x9f\x9f\xa1' ;;      # 🟡 default to pending
+      CI_PASS)         ci_emoji="$EMOJI_GREEN" ;;   # 🟢 all passing
+      CI_FAIL)         ci_emoji="$EMOJI_RED" ;;     # 🔴 required checks failed
+      CI_PENDING)      ci_emoji="$EMOJI_YELLOW" ;;  # 🟡 running, none failed
+      CI_PENDING_FAIL) ci_emoji="$EMOJI_ORANGE" ;;  # 🟠 running + some failed
+      CI_PARTIAL_FAIL) ci_emoji="$EMOJI_PURPLE" ;;  # 🟣 complete, required passed, optional failed
+      NO_CI)           ci_emoji="$EMOJI_WHITE" ;;   # ⚪ no checks
+      *)               ci_emoji="$EMOJI_YELLOW" ;;  # 🟡 default to pending
     esac
 
     pr_title["$branch"]="$title"
@@ -698,7 +714,7 @@ for branch, depth, is_current in reversed(results):
 
       closed_prefix=""
       if [[ "${pr_state[$branch]}" == "CLOSED" || "${pr_state[$branch]}" == "MERGED" ]]; then
-        closed_prefix=$'\xe2\x9b\x94\xef\xb8\x8f '
+        closed_prefix="${EMOJI_CLOSED} "
       fi
 
       if [[ "$SHOW_STATUS" -eq 1 ]]; then
@@ -722,9 +738,9 @@ for branch, depth, is_current in reversed(results):
       fi
     fi
 
-    # Worktree indicator: prefix with "+ " for branches in other worktrees
+    # Worktree indicator: insert "+ " before branch/link in the markdown line
     if [[ -n "${worktree_branches[$branch]+_}" ]]; then
-      md_line="+ ${md_line}"
+      md_line="${md_line/- /- + }"
     fi
 
     echo "$md_line"
@@ -733,8 +749,10 @@ for branch, depth, is_current in reversed(results):
   if [[ "$SHOW_STATUS" -eq 1 ]]; then
     echo ""
     printf '**%s/%s** [Review][CI]\n' "$repo_owner" "$repo_name"
-    printf 'Review: \xf0\x9f\x9f\xa2 approved \xf0\x9f\x94\xb4 changes requested \xe2\x9a\xaa draft \xf0\x9f\x94\x98 draft+approved\n'
-    printf 'CI: \xf0\x9f\x9f\xa2 passing \xf0\x9f\x94\xb4 required failed \xf0\x9f\x9f\xa1 running \xf0\x9f\x9f\xa0 running+failures \xf0\x9f\x9f\xa3 optional failures \xe2\x9a\xaa no checks\n'
+    printf 'Review: %s approved %s changes requested %s unreviewed %s draft %s draft+approved\n' \
+      "$EMOJI_GREEN" "$EMOJI_RED" "$EMOJI_YELLOW" "$EMOJI_WHITE" "$EMOJI_RADIO"
+    printf 'CI: %s passing %s required failed %s running %s running+failures %s optional failures %s no checks\n' \
+      "$EMOJI_GREEN" "$EMOJI_RED" "$EMOJI_YELLOW" "$EMOJI_ORANGE" "$EMOJI_PURPLE" "$EMOJI_WHITE"
   fi
 
   exit 0
@@ -769,11 +787,16 @@ if [[ "$OUTPUT_FORMAT" == "osc8" ]]; then
     fi
 
     if [[ -n "$branch" && -n "${pr_title[$branch]+_}" ]]; then
-      cleaned=$(echo "$line" | sed 's| (https://[^)]*)||')
+      cleaned=$(echo "$line" | sed -e 's| (https://[^)]*)||' -e 's| \[wt: [^]]*\]||')
 
       truncated_branch=$(truncate_str "$branch" "$TRUNCATE_BRANCH")
       if [[ "$truncated_branch" != "$branch" ]]; then
         cleaned="${cleaned/$branch/$truncated_branch}"
+      fi
+
+      # Insert worktree indicator before branch name
+      if [[ -n "${worktree_branches[$branch]+_}" ]]; then
+        cleaned="${cleaned/$truncated_branch/+ $truncated_branch}"
       fi
 
       display_width=$(printf '%s' "$cleaned" | wc -m | tr -d ' ')
@@ -788,6 +811,11 @@ if [[ "$OUTPUT_FORMAT" == "osc8" ]]; then
       fi
     else
       cleaned="$line"
+      # Insert worktree indicator for branches without PRs
+      if [[ -n "$branch" && -n "${worktree_branches[$branch]+_}" ]]; then
+        cleaned=$(echo "$cleaned" | sed -e 's| \[wt: [^]]*\]||')
+        cleaned="${cleaned/$branch/+ $branch}"
+      fi
     fi
 
     iterm_cleaned_lines+=("$cleaned")
@@ -815,7 +843,7 @@ if [[ "$OUTPUT_FORMAT" == "osc8" ]]; then
 
       closed_prefix=""
       if [[ "${pr_state[$branch]}" == "CLOSED" || "${pr_state[$branch]}" == "MERGED" ]]; then
-        closed_prefix=$'\xe2\x9b\x94\xef\xb8\x8f '
+        closed_prefix="${EMOJI_CLOSED} "
       fi
 
       osc_open=$'\e]8;;'"${url}"$'\e\\'
@@ -834,28 +862,26 @@ if [[ "$OUTPUT_FORMAT" == "osc8" ]]; then
         visible_text="${cleaned}${pad_str}${closed_prefix}${pr_num_display}  ${title}"
       fi
 
-      # Worktree indicator
-      wt_prefix=""
+      # Colorize the worktree "+" indicator if present
       if [[ -n "${worktree_branches[$branch]+_}" ]]; then
-        wt_prefix="${MAGENTA}+ ${RESET}"
+        visible_text="${visible_text/+ /${MAGENTA}+${RESET} }"
       fi
 
       if [[ "$current" -eq 1 ]]; then
-        printf '%s%s%s%s%s%s\n' "$wt_prefix" "$BOLD_YELLOW" "$osc_open" "$visible_text" "$osc_close" "$RESET"
+        printf '%s%s%s%s%s\n' "$BOLD_YELLOW" "$osc_open" "$visible_text" "$osc_close" "$RESET"
       else
-        printf '%s%s%s%s\n' "$wt_prefix" "$osc_open" "$visible_text" "$osc_close"
+        printf '%s%s%s\n' "$osc_open" "$visible_text" "$osc_close"
       fi
     else
-      # Worktree indicator for branches without PRs
-      wt_prefix=""
-      if [[ -n "${worktree_branches[$branch]+_}" ]]; then
-        wt_prefix="${MAGENTA}+ ${RESET}"
+      # Colorize the worktree "+" indicator if present
+      if [[ -n "$branch" && -n "${worktree_branches[$branch]+_}" ]]; then
+        cleaned="${cleaned/+ /${MAGENTA}+${RESET} }"
       fi
 
       if [[ "$current" -eq 1 ]]; then
-        printf '%s%s%s%s\n' "$wt_prefix" "$BOLD_YELLOW" "$cleaned" "$RESET"
+        printf '%s%s%s\n' "$BOLD_YELLOW" "$cleaned" "$RESET"
       else
-        printf '%s%s\n' "$wt_prefix" "$cleaned"
+        echo "$cleaned"
       fi
     fi
 
@@ -865,9 +891,12 @@ if [[ "$OUTPUT_FORMAT" == "osc8" ]]; then
   if [[ "$SHOW_STATUS" -eq 1 ]]; then
     echo ""
     printf '%s%s/%s%s [Review][CI]\n' "$BOLD" "$repo_owner" "$repo_name" "$RESET"
-    printf '  Review: \xf0\x9f\x9f\xa2 approved  \xf0\x9f\x94\xb4 changes requested  \xe2\x9a\xaa draft  \xf0\x9f\x94\x98 draft+approved\n'
-    printf '  CI:     \xf0\x9f\x9f\xa2 passing   \xf0\x9f\x94\xb4 required failed     \xf0\x9f\x9f\xa1 running\n'
-    printf '          \xf0\x9f\x9f\xa0 running+failures  \xf0\x9f\x9f\xa3 optional failures  \xe2\x9a\xaa no checks\n'
+    printf '  Review: %s approved  %s changes requested  %s unreviewed  %s draft  %s draft+approved\n' \
+      "$EMOJI_GREEN" "$EMOJI_RED" "$EMOJI_YELLOW" "$EMOJI_WHITE" "$EMOJI_RADIO"
+    printf '  CI:     %s passing   %s required failed     %s running\n' \
+      "$EMOJI_GREEN" "$EMOJI_RED" "$EMOJI_YELLOW"
+    printf '          %s running+failures  %s optional failures  %s no checks\n' \
+      "$EMOJI_ORANGE" "$EMOJI_PURPLE" "$EMOJI_WHITE"
   fi
 
   exit 0
@@ -902,12 +931,17 @@ while IFS= read -r line; do
   fi
 
   if [[ -n "$branch" && -n "${pr_title[$branch]+_}" ]]; then
-    cleaned=$(echo "$line" | sed 's| (https://[^)]*)||')
+    cleaned=$(echo "$line" | sed -e 's| (https://[^)]*)||' -e 's| \[wt: [^]]*\]||')
 
     # Apply branch name truncation
     truncated_branch=$(truncate_str "$branch" "$TRUNCATE_BRANCH")
     if [[ "$truncated_branch" != "$branch" ]]; then
       cleaned="${cleaned/$branch/$truncated_branch}"
+    fi
+
+    # Insert worktree indicator ("+ ") before the branch name in the tree line
+    if [[ -n "${worktree_branches[$branch]+_}" ]]; then
+      cleaned="${cleaned/$truncated_branch/+ $truncated_branch}"
     fi
 
     display_width=$(printf '%s' "$cleaned" | wc -m | tr -d ' ')
@@ -923,6 +957,11 @@ while IFS= read -r line; do
     fi
   else
     cleaned="$line"
+    # Insert worktree indicator for branches without PRs
+    if [[ -n "$branch" && -n "${worktree_branches[$branch]+_}" ]]; then
+      cleaned=$(echo "$cleaned" | sed -e 's| \[wt: [^]]*\]||')
+      cleaned="${cleaned/$branch/+ $branch}"
+    fi
   fi
 
   cleaned_lines+=("$cleaned")
@@ -953,7 +992,7 @@ for cleaned in "${cleaned_lines[@]}"; do
 
     closed_prefix=""
     if [[ "$USE_COLOR" -eq 0 && ( "${pr_state[$branch]}" == "CLOSED" || "${pr_state[$branch]}" == "MERGED" ) ]]; then
-      closed_prefix=$'\xe2\x9b\x94\xef\xb8\x8f '
+      closed_prefix="${EMOJI_CLOSED} "
     fi
 
     # Pad column 1 (tree + branch)
@@ -979,33 +1018,31 @@ for cleaned in "${cleaned_lines[@]}"; do
     indent="${prefix//[^ ]/ }"
     url_line="${indent}${url}"
 
-    # Worktree indicator: prefix with magenta "+ " for branches in other worktrees
-    wt_prefix=""
+    # Colorize the worktree "+" indicator if present
     if [[ -n "${worktree_branches[$branch]+_}" ]]; then
-      wt_prefix="${MAGENTA}+ ${RESET}"
+      output_line="${output_line/+ /${MAGENTA}+${RESET} }"
     fi
 
     if [[ "$current" -eq 1 ]]; then
-      printf '%s%s%s%s\n' "$wt_prefix" "$BOLD_YELLOW" "$output_line" "$RESET"
+      printf '%s%s%s\n' "$BOLD_YELLOW" "$output_line" "$RESET"
       printf '%s%s%s\n' "$BOLD_YELLOW" "$url_line" "$RESET"
     elif [[ "${pr_state[$branch]}" == "CLOSED" || "${pr_state[$branch]}" == "MERGED" ]]; then
-      printf '%s%s%s%s\n' "$wt_prefix" "$RED" "$output_line" "$RESET"
+      printf '%s%s%s\n' "$RED" "$output_line" "$RESET"
       printf '%s%s%s\n' "$RED" "$url_line" "$RESET"
     else
-      printf '%s%s\n' "$wt_prefix" "$output_line"
+      echo "$output_line"
       echo "$url_line"
     fi
   else
-    # Worktree indicator for branches without PRs
-    wt_prefix=""
-    if [[ -n "${worktree_branches[$branch]+_}" ]]; then
-      wt_prefix="${MAGENTA}+ ${RESET}"
+    # Colorize the worktree "+" indicator if present
+    if [[ -n "$branch" && -n "${worktree_branches[$branch]+_}" ]]; then
+      cleaned="${cleaned/+ /${MAGENTA}+${RESET} }"
     fi
 
     if [[ "$current" -eq 1 ]]; then
-      printf '%s%s%s%s\n' "$wt_prefix" "$BOLD_YELLOW" "$cleaned" "$RESET"
+      printf '%s%s%s\n' "$BOLD_YELLOW" "$cleaned" "$RESET"
     else
-      printf '%s%s\n' "$wt_prefix" "$cleaned"
+      echo "$cleaned"
     fi
   fi
 
@@ -1018,7 +1055,10 @@ done
 if [[ "$SHOW_STATUS" -eq 1 ]]; then
   echo ""
   printf '%s%s/%s%s [Review][CI]\n' "$BOLD" "$repo_owner" "$repo_name" "$RESET"
-  printf '  Review: \xf0\x9f\x9f\xa2 approved  \xf0\x9f\x94\xb4 changes requested  \xe2\x9a\xaa draft  \xf0\x9f\x94\x98 draft+approved\n'
-  printf '  CI:     \xf0\x9f\x9f\xa2 passing   \xf0\x9f\x94\xb4 required failed     \xf0\x9f\x9f\xa1 running\n'
-  printf '          \xf0\x9f\x9f\xa0 running+failures  \xf0\x9f\x9f\xa3 optional failures  \xe2\x9a\xaa no checks\n'
+  printf '  Review: %s approved  %s changes requested  %s unreviewed  %s draft  %s draft+approved\n' \
+    "$EMOJI_GREEN" "$EMOJI_RED" "$EMOJI_YELLOW" "$EMOJI_WHITE" "$EMOJI_RADIO"
+  printf '  CI:     %s passing   %s required failed     %s running\n' \
+    "$EMOJI_GREEN" "$EMOJI_RED" "$EMOJI_YELLOW"
+  printf '          %s running+failures  %s optional failures  %s no checks\n' \
+    "$EMOJI_ORANGE" "$EMOJI_PURPLE" "$EMOJI_WHITE"
 fi
