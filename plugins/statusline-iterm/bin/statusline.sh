@@ -18,6 +18,17 @@ _record_section() {
   _section_start_ms=$now
 }
 
+# Log a debug message to the session debug file (deferred until session_id is known)
+_debug_queue=""
+_debug_log() {
+  local msg="$1"
+  local ts
+  ts=$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")
+  local line="${ts} [DEBUG] [statusline] ${msg}"
+  _debug_queue="${_debug_queue}${line}
+"
+}
+
 # Prevent git from creating lock files for read-only operations
 export GIT_OPTIONAL_LOCKS=0
 
@@ -38,6 +49,8 @@ iterm2_set_user_var() {
     printf '\033]1337;SetUserVar=%s=%s\007' "$1" "$encoded_value" > /dev/tty 2>/dev/null || true
   fi
 }
+
+_debug_log "starting render..."
 
 # Read JSON input from stdin if available, otherwise empty
 input=""
@@ -144,6 +157,8 @@ iterm2_set_user_var "badge" "$badge_text"
 
 _record_section "badge"
 
+_debug_log "fetching token usage info..."
+
 # par-cc-usage statusline (strip project name prefix)
 pccu_status="$(echo "$input" | timeout 1 uvx --from par-cc-usage pccu statusline 2>/dev/null | sed 's/^\[.*\] - //' || true)"
 if [ -n "$pccu_status" ]; then
@@ -157,10 +172,10 @@ _statusline_end_ms=$(_now_ms)
 _statusline_duration_ms=$(( _statusline_end_ms - _statusline_start_ms ))
 echo "Rendered in ${_statusline_duration_ms}ms [${_section_timings% }]"
 
-# Append render time to session debug log
+# Flush debug log to session debug file
+_debug_log "Rendered in ${_statusline_duration_ms}ms [${_section_timings% }]"
 if [ -n "$session_id" ]; then
   _debug_file="$HOME/.claude/debug/${session_id}.txt"
   mkdir -p "$(dirname "$_debug_file")"
-  _timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")
-  echo "${_timestamp} [DEBUG] [statusline] Rendered in ${_statusline_duration_ms}ms [${_section_timings% }]" >> "$_debug_file"
+  printf '%s' "$_debug_queue" >> "$_debug_file"
 fi
