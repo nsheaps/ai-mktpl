@@ -43,14 +43,14 @@ The plugin runs on **four** hook events:
 Extracted content lives alongside the session transcript, not in a separate backup tree:
 
 ```
-~/.claude/projects/<project-path>/<session-uuid>/extracted-responses/<mini-sha>-<short-description>.txt
+~/.claude/projects/<project-path>/<session-uuid>/extracted-responses/<task-id>-<short-description>.txt
 ```
 
 Where:
 
 - `<project-path>` - the project identifier directory (e.g., `-Users-nathan-heaps-src-stainless-api-stainless`)
 - `<session-uuid>` - the session ID (e.g., `6ecff1b0-eb80-4c6a-8312-8b9d3e86e85d`)
-- `<mini-sha>` - first 7 characters of the line's `uuid` field
+- `<task-id>` - the task ID from Claude Code's internal task tracking (first 7 chars, e.g., `a60a882`)
 - `<short-description>` - derived from the line content: tool name, agent description, or message summary, kebab-cased and truncated to ~50 chars
 
 **Example:**
@@ -98,12 +98,12 @@ tail -n "$lines_to_check" "$SESSION_FILE" | while IFS= read -r line; do
   line_size=$(printf '%s' "$line" | wc -c)
   if [ "$line_size" -gt "$THRESHOLD_BYTES" ]; then
     uuid=$(printf '%s' "$line" | jq -r '.uuid // empty')
-    mini_sha="${uuid:0:7}"
+    task_id=$(printf '%s' "$line" | jq -r '.agentId // .toolUseID // .uuid // empty' | head -c 7)
     description=$(derive_description "$line")  # see "Deriving the Short Description"
 
     # Extract to file
     mkdir -p "$EXTRACT_DIR"
-    extract_path="$EXTRACT_DIR/${mini_sha}-${description}.txt"
+    extract_path="$EXTRACT_DIR/${task_id}-${description}.txt"
     printf '%s' "$line" > "$extract_path"
 
     # Build replacement stub
@@ -166,7 +166,7 @@ dry_run: false # Log but don't modify (for testing)
 - Lines that are large due to legitimate content (still extract, the stub points to the original)
 - Sessions that are already broken/corrupt
 - Race conditions with Claude Code writing to the same file (mitigated by atomic temp-file replacement)
-- Duplicate uuid short prefixes (unlikely with 7 chars, but append line number if collision)
+- Duplicate task ID prefixes (unlikely with 7 chars, but append line number if collision)
 
 ## Plugin Structure
 
