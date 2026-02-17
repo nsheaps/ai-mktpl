@@ -362,8 +362,12 @@ if [[ -n "$repo_owner" && ${#pr_number_to_branch[@]} -gt 0 ]]; then
     }
   }"
 
-  # Execute the GraphQL query
-  graphql_result=$(gh api graphql -f query="$full_query")
+  # Execute the GraphQL query (graceful degradation: if it fails, we still
+  # display the branch tree without PR metadata)
+  graphql_result=$(gh api graphql -f query="$full_query" 2>/dev/null) || {
+    echo "Warning: GitHub API request failed (rate limit or network error). Showing branch tree without PR status." >&2
+    graphql_result=""
+  }
 
   # ---------------------------------------------------------------------------
   # Parse GraphQL response into lookup arrays
@@ -371,6 +375,8 @@ if [[ -n "$repo_owner" && ${#pr_number_to_branch[@]} -gt 0 ]]; then
   # Process each PR alias from the response.
   # Review status now considers isDraft; CI status uses per-check context data
   # for granular states (running, running+failed, required-passed+optional-failed).
+  # Skip parsing if the API call failed (empty result).
+  if [[ -n "$graphql_result" ]]; then
   lookup=$(echo "$graphql_result" | jq -r --argjson only_required "$ONLY_REQUIRED_CI" '
     .data.repository | to_entries[] |
     .value |
@@ -492,6 +498,7 @@ if [[ -n "$repo_owner" && ${#pr_number_to_branch[@]} -gt 0 ]]; then
     pr_ci_raw["$branch"]="$ci"
     pr_state["$branch"]="$state"
   done <<< "$lookup"
+  fi  # end graphql_result guard
 fi
 
 # ---------------------------------------------------------------------------
