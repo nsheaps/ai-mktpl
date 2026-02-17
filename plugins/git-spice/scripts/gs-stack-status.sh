@@ -8,6 +8,7 @@
 #   - CI status emoji (green/red/yellow)
 #   - PR URL on the next line
 #   - Current branch highlighted in bold yellow
+#   - Branches in other worktrees prefixed with magenta "+ "
 #   - Aligned columns for easy scanning
 #
 # Requirements: gs, gh, jq, python3
@@ -209,11 +210,13 @@ if [[ "$USE_COLOR" -eq 1 ]]; then
   BOLD=$'\033[1m'
   BOLD_YELLOW=$'\033[1;33m'
   RED=$'\033[0;31m'
+  MAGENTA=$'\033[0;35m'
   RESET=$'\033[0m'
 else
   BOLD=""
   BOLD_YELLOW=""
   RED=""
+  MAGENTA=""
   RESET=""
 fi
 
@@ -463,6 +466,24 @@ if [[ -n "$repo_owner" && ${#pr_number_to_branch[@]} -gt 0 ]]; then
 fi
 
 # ---------------------------------------------------------------------------
+# Worktree detection: build a set of branches checked out in other worktrees
+# ---------------------------------------------------------------------------
+declare -A worktree_branches
+current_worktree_dir=$(git rev-parse --show-toplevel 2>/dev/null || true)
+while IFS= read -r wt_line; do
+  # porcelain format: "worktree <path>" then "branch refs/heads/<name>"
+  if [[ "$wt_line" == "worktree "* ]]; then
+    wt_path="${wt_line#worktree }"
+  elif [[ "$wt_line" == "branch refs/heads/"* ]]; then
+    wt_branch="${wt_line#branch refs/heads/}"
+    # Only mark branches in OTHER worktrees (not the current one)
+    if [[ "$wt_path" != "$current_worktree_dir" ]]; then
+      worktree_branches["$wt_branch"]=1
+    fi
+  fi
+done < <(git worktree list --porcelain 2>/dev/null)
+
+# ---------------------------------------------------------------------------
 # Filtering logic
 # ---------------------------------------------------------------------------
 # Determine whether a branch should be filtered out based on --reviewed,
@@ -701,6 +722,11 @@ for branch, depth, is_current in reversed(results):
       fi
     fi
 
+    # Worktree indicator: prefix with "+ " for branches in other worktrees
+    if [[ -n "${worktree_branches[$branch]+_}" ]]; then
+      md_line="+ ${md_line}"
+    fi
+
     echo "$md_line"
   done <<< "$gs_tree"
 
@@ -808,16 +834,28 @@ if [[ "$OUTPUT_FORMAT" == "osc8" ]]; then
         visible_text="${cleaned}${pad_str}${closed_prefix}${pr_num_display}  ${title}"
       fi
 
+      # Worktree indicator
+      wt_prefix=""
+      if [[ -n "${worktree_branches[$branch]+_}" ]]; then
+        wt_prefix="${MAGENTA}+ ${RESET}"
+      fi
+
       if [[ "$current" -eq 1 ]]; then
-        printf '%s%s%s%s%s\n' "$BOLD_YELLOW" "$osc_open" "$visible_text" "$osc_close" "$RESET"
+        printf '%s%s%s%s%s%s\n' "$wt_prefix" "$BOLD_YELLOW" "$osc_open" "$visible_text" "$osc_close" "$RESET"
       else
-        printf '%s%s%s\n' "$osc_open" "$visible_text" "$osc_close"
+        printf '%s%s%s%s\n' "$wt_prefix" "$osc_open" "$visible_text" "$osc_close"
       fi
     else
+      # Worktree indicator for branches without PRs
+      wt_prefix=""
+      if [[ -n "${worktree_branches[$branch]+_}" ]]; then
+        wt_prefix="${MAGENTA}+ ${RESET}"
+      fi
+
       if [[ "$current" -eq 1 ]]; then
-        printf '%s%s%s\n' "$BOLD_YELLOW" "$cleaned" "$RESET"
+        printf '%s%s%s%s\n' "$wt_prefix" "$BOLD_YELLOW" "$cleaned" "$RESET"
       else
-        echo "$cleaned"
+        printf '%s%s\n' "$wt_prefix" "$cleaned"
       fi
     fi
 
@@ -941,21 +979,33 @@ for cleaned in "${cleaned_lines[@]}"; do
     indent="${prefix//[^ ]/ }"
     url_line="${indent}${url}"
 
+    # Worktree indicator: prefix with magenta "+ " for branches in other worktrees
+    wt_prefix=""
+    if [[ -n "${worktree_branches[$branch]+_}" ]]; then
+      wt_prefix="${MAGENTA}+ ${RESET}"
+    fi
+
     if [[ "$current" -eq 1 ]]; then
-      printf '%s%s%s\n' "$BOLD_YELLOW" "$output_line" "$RESET"
+      printf '%s%s%s%s\n' "$wt_prefix" "$BOLD_YELLOW" "$output_line" "$RESET"
       printf '%s%s%s\n' "$BOLD_YELLOW" "$url_line" "$RESET"
     elif [[ "${pr_state[$branch]}" == "CLOSED" || "${pr_state[$branch]}" == "MERGED" ]]; then
-      printf '%s%s%s\n' "$RED" "$output_line" "$RESET"
+      printf '%s%s%s%s\n' "$wt_prefix" "$RED" "$output_line" "$RESET"
       printf '%s%s%s\n' "$RED" "$url_line" "$RESET"
     else
-      echo "$output_line"
+      printf '%s%s\n' "$wt_prefix" "$output_line"
       echo "$url_line"
     fi
   else
+    # Worktree indicator for branches without PRs
+    wt_prefix=""
+    if [[ -n "${worktree_branches[$branch]+_}" ]]; then
+      wt_prefix="${MAGENTA}+ ${RESET}"
+    fi
+
     if [[ "$current" -eq 1 ]]; then
-      printf '%s%s%s\n' "$BOLD_YELLOW" "$cleaned" "$RESET"
+      printf '%s%s%s%s\n' "$wt_prefix" "$BOLD_YELLOW" "$cleaned" "$RESET"
     else
-      echo "$cleaned"
+      printf '%s%s\n' "$wt_prefix" "$cleaned"
     fi
   fi
 
