@@ -261,7 +261,9 @@ After completing branch navigation or manipulation tasks (e.g., `gs bco`, `gs bo
 
 ### Detection
 
-Use `gs ls` output combined with `gh pr view <branch> --json state` (or the `gs-stack-status.sh` script) to identify branches whose PRs are closed or merged. Only prompt when at least one such branch is found.
+Use `gs ls` output combined with `gh pr view <branch> --json state` (or the `gs-stack-status.sh` script with `--include-closed`) to identify branches whose PRs are closed or merged. Only prompt when at least one such branch is found.
+
+**Note:** `gs-stack-status.sh` hides closed/merged PRs by default. Use `--include-closed` to see them — they render in red with a ⛔️ prefix. When you see closed PRs in the output, proactively suggest untracking them using the options above.
 
 ## Stack Status Overview
 
@@ -287,12 +289,30 @@ The script requires `gs`, `gh`, and `jq` in PATH.
 
 Each branch line is annotated with two emoji indicators and the PR title:
 
-| Position     | Meaning       | Values                                                           |
-| ------------ | ------------- | ---------------------------------------------------------------- |
-| First emoji  | Review status | `🟢` approved, `🔴` not approved                                 |
-| Second emoji | CI status     | `🟢` passing, `🔴` failing, `🟡` pending/in-progress, `⚪` no CI |
+| Position     | Meaning       | Values                                                                                                  |
+| ------------ | ------------- | ------------------------------------------------------------------------------------------------------- |
+| First emoji  | Review status | `🟢` approved, `🔴` changes requested, `🟡` unreviewed, `⚪` draft, `🔘` draft+approved                |
+| Second emoji | CI status     | `🟢` passing, `🔴` required failed, `🟡` running, `🟠` running+failures, `🟣` optional failures, `⚪` no CI |
 
-The PR URL appears on the line below each branch. Branches without open PRs (trunk, closed/merged PRs) are shown as-is from `gs ls`.
+Additional indicators:
+- `＋` (bold magenta) before branch name = branch is checked out in another worktree
+- `⛔️` prefix = closed/merged PR (only visible with `--include-closed`)
+- Current branch is highlighted in bold yellow
+- Closed PRs render in red text
+
+The PR URL appears on the line below each branch (interactive mode). Branches without PRs (trunk) are shown as-is.
+
+### Key Flags
+
+| Flag                   | Effect                                                |
+| ---------------------- | ----------------------------------------------------- |
+| `--include-closed`     | Show closed/merged PRs (hidden by default)            |
+| `--output osc8`        | Clickable hyperlinks (iTerm2, Kitty)                  |
+| `--output markdown`    | Markdown format (for Slack, GitHub comments)          |
+| `--watch [SECS]`       | Auto-refresh in alternate screen buffer               |
+| `--only-required-ci`   | CI status reflects only required checks (default)     |
+| `--reviewed`           | Only show PRs that have been reviewed/approved        |
+| `--failing-ci`         | Only show PRs where CI is failing                     |
 
 ## Additional Resources
 
