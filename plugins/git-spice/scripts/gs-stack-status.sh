@@ -742,7 +742,7 @@ for branch, depth, is_current in reversed(results):
 
     # Worktree indicator: insert "+ " before branch/link in the markdown line
     if [[ -n "${worktree_branches[$branch]+_}" ]]; then
-      md_line="${md_line/- /- + }"
+      md_line="${md_line/- /- ＋ }"
     fi
 
     echo "$md_line"
@@ -798,7 +798,7 @@ if [[ "$OUTPUT_FORMAT" == "osc8" ]]; then
 
       # Insert worktree indicator before branch name
       if [[ -n "${worktree_branches[$branch]+_}" ]]; then
-        cleaned="${cleaned/$truncated_branch/+ $truncated_branch}"
+        cleaned="${cleaned/$truncated_branch/＋ $truncated_branch}"
       fi
 
       display_width=$(printf '%s' "$cleaned" | wc -m | tr -d ' ')
@@ -816,7 +816,7 @@ if [[ "$OUTPUT_FORMAT" == "osc8" ]]; then
       # Insert worktree indicator for branches without PRs
       if [[ -n "$branch" && -n "${worktree_branches[$branch]+_}" ]]; then
         cleaned=$(echo "$cleaned" | sed -e 's| \[wt: [^]]*\]||')
-        cleaned="${cleaned/$branch/+ $branch}"
+        cleaned="${cleaned/$branch/＋ $branch}"
       fi
     fi
 
@@ -866,7 +866,7 @@ if [[ "$OUTPUT_FORMAT" == "osc8" ]]; then
 
       # Colorize the worktree "+" indicator if present
       if [[ -n "${worktree_branches[$branch]+_}" ]]; then
-        visible_text="${visible_text/+ /${BOLD_MAGENTA}+${RESET} }"
+        visible_text="${visible_text/＋ /${BOLD_MAGENTA}＋${RESET} }"
       fi
 
       if [[ "$current" -eq 1 ]]; then
@@ -877,7 +877,7 @@ if [[ "$OUTPUT_FORMAT" == "osc8" ]]; then
     else
       # Colorize the worktree "+" indicator if present
       if [[ -n "$branch" && -n "${worktree_branches[$branch]+_}" ]]; then
-        cleaned="${cleaned/+ /${BOLD_MAGENTA}+${RESET} }"
+        cleaned="${cleaned/＋ /${BOLD_MAGENTA}＋${RESET} }"
       fi
 
       if [[ "$current" -eq 1 ]]; then
@@ -943,7 +943,7 @@ while IFS= read -r line; do
 
     # Insert worktree indicator ("+ ") before the branch name in the tree line
     if [[ -n "${worktree_branches[$branch]+_}" ]]; then
-      cleaned="${cleaned/$truncated_branch/+ $truncated_branch}"
+      cleaned="${cleaned/$truncated_branch/＋ $truncated_branch}"
     fi
 
     display_width=$(printf '%s' "$cleaned" | wc -m | tr -d ' ')
@@ -962,7 +962,7 @@ while IFS= read -r line; do
     # Insert worktree indicator for branches without PRs
     if [[ -n "$branch" && -n "${worktree_branches[$branch]+_}" ]]; then
       cleaned=$(echo "$cleaned" | sed -e 's| \[wt: [^]]*\]||')
-      cleaned="${cleaned/$branch/+ $branch}"
+      cleaned="${cleaned/$branch/＋ $branch}"
     fi
   fi
 
@@ -1022,7 +1022,7 @@ for cleaned in "${cleaned_lines[@]}"; do
 
     # Colorize the worktree "+" indicator if present
     if [[ -n "${worktree_branches[$branch]+_}" ]]; then
-      output_line="${output_line/+ /${BOLD_MAGENTA}+${RESET} }"
+      output_line="${output_line/＋ /${BOLD_MAGENTA}＋${RESET} }"
     fi
 
     if [[ "$current" -eq 1 ]]; then
@@ -1038,7 +1038,7 @@ for cleaned in "${cleaned_lines[@]}"; do
   else
     # Colorize the worktree "+" indicator if present
     if [[ -n "$branch" && -n "${worktree_branches[$branch]+_}" ]]; then
-      cleaned="${cleaned/+ /${BOLD_MAGENTA}+${RESET} }"
+      cleaned="${cleaned/＋ /${BOLD_MAGENTA}＋${RESET} }"
     fi
 
     if [[ "$current" -eq 1 ]]; then
