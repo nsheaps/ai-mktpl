@@ -210,13 +210,13 @@ if [[ "$USE_COLOR" -eq 1 ]]; then
   BOLD=$'\033[1m'
   BOLD_YELLOW=$'\033[1;33m'
   RED=$'\033[0;31m'
-  MAGENTA=$'\033[0;35m'
+  BOLD_MAGENTA=$'\033[1;35m'
   RESET=$'\033[0m'
 else
   BOLD=""
   BOLD_YELLOW=""
   RED=""
-  MAGENTA=""
+  BOLD_MAGENTA=""
   RESET=""
 fi
 
@@ -864,7 +864,7 @@ if [[ "$OUTPUT_FORMAT" == "osc8" ]]; then
 
       # Colorize the worktree "+" indicator if present
       if [[ -n "${worktree_branches[$branch]+_}" ]]; then
-        visible_text="${visible_text/+ /${MAGENTA}+${RESET} }"
+        visible_text="${visible_text/+ /${BOLD_MAGENTA}+${RESET} }"
       fi
 
       if [[ "$current" -eq 1 ]]; then
@@ -875,7 +875,7 @@ if [[ "$OUTPUT_FORMAT" == "osc8" ]]; then
     else
       # Colorize the worktree "+" indicator if present
       if [[ -n "$branch" && -n "${worktree_branches[$branch]+_}" ]]; then
-        cleaned="${cleaned/+ /${MAGENTA}+${RESET} }"
+        cleaned="${cleaned/+ /${BOLD_MAGENTA}+${RESET} }"
       fi
 
       if [[ "$current" -eq 1 ]]; then
@@ -1020,7 +1020,7 @@ for cleaned in "${cleaned_lines[@]}"; do
 
     # Colorize the worktree "+" indicator if present
     if [[ -n "${worktree_branches[$branch]+_}" ]]; then
-      output_line="${output_line/+ /${MAGENTA}+${RESET} }"
+      output_line="${output_line/+ /${BOLD_MAGENTA}+${RESET} }"
     fi
 
     if [[ "$current" -eq 1 ]]; then
@@ -1036,7 +1036,7 @@ for cleaned in "${cleaned_lines[@]}"; do
   else
     # Colorize the worktree "+" indicator if present
     if [[ -n "$branch" && -n "${worktree_branches[$branch]+_}" ]]; then
-      cleaned="${cleaned/+ /${MAGENTA}+${RESET} }"
+      cleaned="${cleaned/+ /${BOLD_MAGENTA}+${RESET} }"
     fi
 
     if [[ "$current" -eq 1 ]]; then
