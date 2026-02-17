@@ -44,6 +44,7 @@ After exploration (or for moderately complex tasks), use the **Plan agent** to c
 - Refactoring across multiple files
 - Tasks with multiple valid approaches
 - Any task where you'd otherwise use AskUserQuestion to clarify approach
+- CRITICAL: DO NOT SWITCH TO PLAN MODE, Always use the Plan AGENT. Switching to plan mode changes your permission mode from something that allows edits to something that requires user input, which will force you to get stuck. If you need user input, use a tool like AskUserQuestion.
 
 ### Planning Workflow
 
@@ -63,13 +64,14 @@ After exploration (or for moderately complex tasks), use the **Plan agent** to c
 
 **CRITICAL:** Save plans to files in the repository so you can re-visit and check progress.
 
-### Standard Locations
+### Standard Locations (IN PROJECT REPO)
 
 | Content Type  | Location                                  |
 | ------------- | ----------------------------------------- |
-| Task plans    | `docs/scratch/plans/<request-summary>.md` |
-| Task list     | `docs/scratch/todo.md`                    |
-| Scratch notes | `docs/scratch/note-<topic>.md`            |
+| Task plans    | `.claude/plans/<request-summary>.md` |
+| Task list     | `.claude/scratch/todo.md`                    |
+| Scratch notes | `.claude/scratch/note-<topic>.md`            |
+| temp dir      | `.claude/tmp/` (do not use `/tmp`)        |
 | Research      | `docs/research/<topic>.md`                |
 | Product specs | `docs/specs/draft/<feature>.md`           |
 
@@ -82,7 +84,7 @@ After exploration (or for moderately complex tasks), use the **Plan agent** to c
 
 ### Task List File
 
-Maintain `docs/scratch/todo.md` as a persistent task list:
+Maintain `.claude/scratch/todo.md` as a persistent task list:
 
 ```markdown
 # Current Tasks

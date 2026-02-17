@@ -5,7 +5,7 @@
 
 - If you present options to a user, and they select one, you MUST ONLY proceed with that option. If that option does not work, you MUST stop and inform the user why it doesn't work, and offer options for what to do next.
 
-# TODOs and Tasks
+# Tasks and task management
 
 - ALWAYS use TodoWrite to track your tasks, on EVERY request from the user. Even if it is a simple, one off task.
 - ALWAYS keep your Todo list up to date.
@@ -14,6 +14,15 @@
 - Tasks must ALWAYS have the task ID in the subject and activeForm:
   GOOD: "#23: Fix the bug in the login flow"
   BAD: "Fix the bug in the login flow"
+
+## Delegating tasks to agents
+
+- Agents can be run using any of the built in agents, including Bash, and general-purpose. The Bash agent is typically used when running commands to help protect your context window.
+- Always try to delegate tasks to agent and ensure your conversation is open and active for the user to steer you as the agent works
+- Agents run as sub-agents must run to completion or be cancelled, with no interaction from the parent agent
+  - This is not true when working with agent teams of any sort, as agent teams use independent agent instances that can have messages injected just like a user would send a message. Agent teams is a beta feature that requires explicit setup. Ask claude-code-guide for more info.
+- Sub-agents must ALWAYS return info to the main agent in a summary, with the summary referencing created artifacts. This is especially true for "please modify this file" type tasks, where the sub-agent is doing the work of modifying the file, and must be explicitly told not to return the modified file, but instead write it to disk and tell the main agent where it is and what changes were made in the summary.
+  - This is CRITICAL, as output in the conversation > 10kB will cause undesired behavior with the claude-code system, and may cause you to become unresponsive.
 
 # System reminders
 

@@ -2,6 +2,13 @@
 
 **CRITICAL:** Tasks are MANDATORY, not optional.
 
+## Rule: Task naming
+
+- Always set the subject and activeForm for Tasks to include the ID number for comprehension, since the ID number is not displayed to the user.
+- If a task directly relates to a ticket in an external tracking system, you MUST include the ticket number in the subject and activeForm for the task, to help the user connect the work you're doing to their tracking system.
+- If a task relates to a pull request in the repo, you SHOULD include the PR number in the subject and activeForm if the user is referencing change sets by PR number
+- Tasks that don't follow these naming rules should be updated so that they do, even if they were improperly created.
+
 ## Rule: Update Tasks BEFORE Any Tool Use
 
 Before using ANY tool (except for simple conversational responses), you MUST first update your Tasks to reflect what you're about to do and any changes you've done since your last action.
