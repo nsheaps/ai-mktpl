@@ -11,7 +11,7 @@
 #   - Aligned columns for easy scanning
 #
 # Requirements: gs, gh, jq, python3
-# Usage: gs-stack-status.sh [--output interactive|markdown|iterm] [--no-status]
+# Usage: gs-stack-status.sh [--output interactive|markdown|osc8] [--no-status]
 #        [--reviewed] [--no-reviewed] [--failing-ci] [--no-failing-ci]
 #        [--color] [--no-color] [--watch [SECONDS]]
 
@@ -29,6 +29,9 @@ FILTER_FAILING_CI=""     # "yes" = only failing CI, "no" = only NOT failing CI, 
 COLOR_OVERRIDE=""        # "yes" = force color, "no" = force no color, "" = auto-detect TTY
 WATCH_MODE=0
 WATCH_INTERVAL=5
+TRUNCATE_BRANCH=35        # Default: truncate branch names to 35 chars
+TRUNCATE_PR_TITLE=0       # Default: no PR title truncation (0 = disabled)
+ONLY_REQUIRED_CI=1        # Default: CI status only reflects required checks
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -38,8 +41,12 @@ while [[ $# -gt 0 ]]; do
         exit 1
       fi
       OUTPUT_FORMAT="$2"
-      if [[ "$OUTPUT_FORMAT" != "interactive" && "$OUTPUT_FORMAT" != "markdown" && "$OUTPUT_FORMAT" != "iterm" ]]; then
-        echo "ERROR: --output must be 'interactive', 'markdown', or 'iterm'" >&2
+      # Normalize aliases
+      case "$OUTPUT_FORMAT" in
+        iterm|kitty) OUTPUT_FORMAT="osc8" ;;
+      esac
+      if [[ "$OUTPUT_FORMAT" != "interactive" && "$OUTPUT_FORMAT" != "markdown" && "$OUTPUT_FORMAT" != "osc8" ]]; then
+        echo "ERROR: --output must be 'interactive', 'markdown', or 'osc8' (aliases: iterm, kitty)" >&2
         exit 1
       fi
       shift 2
@@ -81,13 +88,37 @@ while [[ $# -gt 0 ]]; do
         shift
       fi
       ;;
+    --only-required-ci)
+      ONLY_REQUIRED_CI=1
+      shift
+      ;;
+    --no-only-required-ci)
+      ONLY_REQUIRED_CI=0
+      shift
+      ;;
+    --truncate-branch-length)
+      if [[ $# -lt 2 ]]; then
+        echo "ERROR: --truncate-branch-length requires a number" >&2
+        exit 1
+      fi
+      TRUNCATE_BRANCH="$2"
+      shift 2
+      ;;
+    --truncate-pr-title)
+      if [[ $# -lt 2 ]]; then
+        echo "ERROR: --truncate-pr-title requires a number" >&2
+        exit 1
+      fi
+      TRUNCATE_PR_TITLE="$2"
+      shift 2
+      ;;
     -h|--help)
-      echo "Usage: gs-stack-status.sh [--output interactive|markdown|iterm] [--no-status]"
+      echo "Usage: gs-stack-status.sh [--output interactive|markdown|osc8] [--no-status]"
       echo "       [--reviewed] [--no-reviewed] [--failing-ci] [--no-failing-ci]"
       echo "       [--color] [--no-color] [--watch [SECONDS]]"
       echo ""
       echo "Options:"
-      echo "  --output FORMAT   Output format: interactive (default), markdown, or iterm"
+      echo "  --output FORMAT   Output format: interactive (default), markdown, or osc8 (aliases: iterm, kitty)"
       echo "  --no-status       Omit review/CI emoji indicators"
       echo "  --reviewed        Only show PRs that have been reviewed/approved"
       echo "  --no-reviewed     Only show PRs that have NOT been reviewed/approved"
@@ -96,12 +127,16 @@ while [[ $# -gt 0 ]]; do
       echo "  --color           Force color output even when not a TTY"
       echo "  --no-color        Suppress color/escape codes even when on a TTY"
       echo "  --watch [SECS]    Refresh in-place every SECS seconds (default: 5)"
+      echo "  --only-required-ci          CI status reflects only required checks (default)"
+      echo "  --no-only-required-ci       CI status reflects all checks"
+      echo "  --truncate-branch-length N  Truncate branch names to N chars (default: 35)"
+      echo "  --truncate-pr-title N       Truncate PR titles to N chars (default: no limit)"
       echo "  -h, --help        Show this help message"
       exit 0
       ;;
     *)
       echo "ERROR: Unknown option '$1'" >&2
-      echo "Usage: gs-stack-status.sh [--output interactive|markdown|iterm] [--no-status] [--color] [--no-color] [--watch [SECS]]" >&2
+      echo "Usage: gs-stack-status.sh [--output interactive|markdown|osc8] [--no-status] [--color] [--no-color] [--watch [SECS]]" >&2
       exit 1
       ;;
   esac
@@ -141,9 +176,9 @@ if [[ "$WATCH_MODE" -eq 1 && "${_GS_STATUS_WATCHING:-}" != "1" ]]; then
   printf '\033[?25l'
 
   while true; do
-    printf '\033[H'                        # cursor to home
-    "$0" "${child_args[@]}" 2>&1 || true   # run script, don't exit on failure
-    printf '\033[J'                        # clear from cursor to end of screen
+    output=$("$0" "${child_args[@]}" 2>&1 || true)  # capture output
+    printf '\033[2J\033[H'                            # clear screen + cursor home
+    printf '%s\n' "$output"                           # draw new content
     sleep "$WATCH_INTERVAL"
   done
 fi
@@ -163,22 +198,39 @@ else
   USE_COLOR=0
 fi
 
-# When --no-color is set and output is iterm, fall back to interactive mode
-# since iterm mode relies on OSC 8 escape codes for hyperlinks.
-if [[ "$USE_COLOR" -eq 0 && "$OUTPUT_FORMAT" == "iterm" ]]; then
+# When --no-color is set and output is osc8, fall back to interactive mode
+# since osc8 mode relies on escape codes for hyperlinks.
+if [[ "$USE_COLOR" -eq 0 && "$OUTPUT_FORMAT" == "osc8" ]]; then
   OUTPUT_FORMAT="interactive"
 fi
 
 # Define color variables conditionally
 if [[ "$USE_COLOR" -eq 1 ]]; then
+  BOLD=$'\033[1m'
   BOLD_YELLOW=$'\033[1;33m'
   RED=$'\033[0;31m'
   RESET=$'\033[0m'
 else
+  BOLD=""
   BOLD_YELLOW=""
   RED=""
   RESET=""
 fi
+
+# ---------------------------------------------------------------------------
+# Truncation helper: truncate_str <string> <max_length>
+# Returns the string truncated with "..." if longer than max_length.
+# If max_length is 0, returns the string unchanged.
+# ---------------------------------------------------------------------------
+truncate_str() {
+  local str="$1"
+  local max="$2"
+  if [[ "$max" -eq 0 ]] || [[ "${#str}" -le "$max" ]]; then
+    printf '%s' "$str"
+  else
+    printf '%s...' "${str:0:$((max - 3))}"
+  fi
+}
 
 # ---------------------------------------------------------------------------
 # Dependency checks
@@ -236,33 +288,41 @@ done <<< "$gs_tree"
 declare -A pr_title pr_review pr_ci pr_url pr_review_raw pr_ci_raw pr_state
 
 if [[ -n "$repo_owner" && ${#pr_number_to_branch[@]} -gt 0 ]]; then
-  # Build the query fragment for each PR using aliases.
-  # We use statusCheckRollup.state for CI status — it is the GitHub-computed
-  # rollup that correctly deduplicates re-run checks (the per-context nodes
-  # include ALL historical runs, causing false FAILUREs from cancelled runs).
-  pr_fragment='
-    reviewDecision
-    state
-    title
-    url
-    number
-    headRefName
-    commits(last: 1) {
-      nodes {
-        commit {
-          statusCheckRollup {
-            state
-          }
-        }
-      }
-    }
-  '
-
+  # Build the query per-PR (isRequired needs pullRequestNumber argument).
   query_body=""
   for number in "${!pr_number_to_branch[@]}"; do
     query_body="${query_body}
     pr${number}: pullRequest(number: ${number}) {
-      ${pr_fragment}
+      reviewDecision
+      isDraft
+      state
+      mergeStateStatus
+      title
+      url
+      number
+      headRefName
+      commits(last: 1) {
+        nodes {
+          commit {
+            statusCheckRollup {
+              state
+              contexts(first: 100) {
+                nodes {
+                  ... on CheckRun {
+                    status
+                    conclusion
+                    isRequired(pullRequestNumber: ${number})
+                  }
+                  ... on StatusContext {
+                    context
+                    cState: state
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }"
   done
 
@@ -278,26 +338,80 @@ if [[ -n "$repo_owner" && ${#pr_number_to_branch[@]} -gt 0 ]]; then
   # ---------------------------------------------------------------------------
   # Parse GraphQL response into lookup arrays
   # ---------------------------------------------------------------------------
-  # Process each PR alias from the response
-  lookup=$(echo "$graphql_result" | jq -r '
+  # Process each PR alias from the response.
+  # Review status now considers isDraft; CI status uses per-check context data
+  # for granular states (running, running+failed, required-passed+optional-failed).
+  lookup=$(echo "$graphql_result" | jq -r --argjson only_required "$ONLY_REQUIRED_CI" '
     .data.repository | to_entries[] |
     .value |
-    # Review status
-    (if .reviewDecision == "APPROVED" then "APPROVED"
-     else "NOT_APPROVED"
-     end) as $review |
-    # CI status: use the GitHub-computed rollup state which correctly handles
-    # re-runs and deduplication (statusCheckRollup.state).
-    # Possible values: SUCCESS, FAILURE, PENDING, ERROR, EXPECTED, null
+
+    # Review status with draft awareness
+    (if .isDraft then
+      if .reviewDecision == "APPROVED" then "DRAFT_APPROVED"
+      else "DRAFT"
+      end
+    elif .reviewDecision == "APPROVED" then "APPROVED"
+    else "NOT_APPROVED"
+    end) as $review |
+
+    # mergeStateStatus: UNSTABLE = required passed but optional failed
+    (.mergeStateStatus // "UNKNOWN") as $merge_state |
+
+    # CI status: compute from per-check context data
     (
-      (.commits.nodes[0].commit.statusCheckRollup.state // null) |
+      (.commits.nodes[0].commit.statusCheckRollup // null) |
       if . == null then "NO_CI"
-      elif . == "SUCCESS" then "CI_PASS"
-      elif . == "FAILURE" or . == "ERROR" then "CI_FAIL"
-      elif . == "PENDING" or . == "EXPECTED" then "CI_PENDING"
-      else "CI_PENDING"
+      else
+        (.contexts.nodes // []) as $nodes |
+        ($nodes | map(select(. != null))) as $valid |
+        if ($valid | length) == 0 then "NO_CI"
+        else
+          # When only_required=1, filter to only required CheckRun nodes
+          # (StatusContext nodes have no isRequired, include them as-is)
+          (if $only_required == 1 then
+            $valid | map(select(
+              (.isRequired == true) or (.cState != null)
+            ))
+          else $valid
+          end) as $filtered |
+
+          # CheckRun nodes: running if status exists and != COMPLETED
+          ($filtered | map(select(
+            .status != null and .status != "COMPLETED"
+          )) | length) as $cr_running |
+          # CheckRun nodes: failed conclusions
+          ($filtered | map(select(
+            .conclusion != null and
+            (.conclusion | IN("FAILURE", "TIMED_OUT", "ERROR", "STARTUP_FAILURE", "ACTION_REQUIRED"))
+          )) | length) as $cr_failed |
+          # StatusContext nodes: running (PENDING/EXPECTED)
+          ($filtered | map(select(
+            .cState != null and (.cState | IN("PENDING", "EXPECTED"))
+          )) | length) as $sc_running |
+          # StatusContext nodes: failed
+          ($filtered | map(select(
+            .cState != null and (.cState | IN("FAILURE", "ERROR"))
+          )) | length) as $sc_failed |
+
+          (($cr_running + $sc_running) > 0) as $any_running |
+          (($cr_failed + $sc_failed) > 0) as $any_failed |
+
+          if $any_running and $any_failed then
+            if $only_required == 1 then "CI_PENDING"
+            else "CI_PENDING_FAIL"
+            end
+          elif $any_running then "CI_PENDING"
+          elif $any_failed then
+            if $only_required == 1 then "CI_FAIL"
+            elif $merge_state == "UNSTABLE" then "CI_PARTIAL_FAIL"
+            else "CI_FAIL"
+            end
+          else "CI_PASS"
+          end
+        end
       end
     ) as $ci |
+
     "\(.headRefName)\t\(.title)\t\($review)\t\($ci)\t\(.url)\t\(.state)"
   ')
 
@@ -306,15 +420,19 @@ if [[ -n "$repo_owner" && ${#pr_number_to_branch[@]} -gt 0 ]]; then
     [[ -z "$branch" ]] && continue
 
     case "$review" in
-      APPROVED)     review_emoji=$'\xf0\x9f\x9f\xa2' ;;  # green circle
-      *)            review_emoji=$'\xf0\x9f\x94\xb4' ;;  # red circle
+      APPROVED)       review_emoji=$'\xf0\x9f\x9f\xa2' ;;  # 🟢 approved
+      DRAFT)          review_emoji=$'\xe2\x9a\xaa' ;;       # ⚪ draft
+      DRAFT_APPROVED) review_emoji=$'\xf0\x9f\x94\x98' ;;   # 🔘 draft + approved
+      *)              review_emoji=$'\xf0\x9f\x94\xb4' ;;   # 🔴 changes requested / not approved
     esac
     case "$ci" in
-      CI_PASS)      ci_emoji=$'\xf0\x9f\x9f\xa2' ;;      # green circle
-      CI_FAIL)      ci_emoji=$'\xf0\x9f\x94\xb4' ;;      # red circle
-      CI_PENDING)   ci_emoji=$'\xf0\x9f\x9f\xa1' ;;      # yellow circle
-      NO_CI)        ci_emoji=$'\xe2\x9a\xaa' ;;           # white circle
-      *)            ci_emoji=$'\xf0\x9f\x9f\xa1' ;;      # yellow circle
+      CI_PASS)         ci_emoji=$'\xf0\x9f\x9f\xa2' ;;      # 🟢 all passing
+      CI_FAIL)         ci_emoji=$'\xf0\x9f\x94\xb4' ;;      # 🔴 required checks failed
+      CI_PENDING)      ci_emoji=$'\xf0\x9f\x9f\xa1' ;;      # 🟡 running, none failed
+      CI_PENDING_FAIL) ci_emoji=$'\xf0\x9f\x9f\xa0' ;;      # 🟠 running + some failed
+      CI_PARTIAL_FAIL) ci_emoji=$'\xf0\x9f\x9f\xa3' ;;      # 🟣 complete, required passed, optional failed
+      NO_CI)           ci_emoji=$'\xe2\x9a\xaa' ;;           # ⚪ no checks
+      *)               ci_emoji=$'\xf0\x9f\x9f\xa1' ;;      # 🟡 default to pending
     esac
 
     pr_title["$branch"]="$title"
@@ -536,11 +654,10 @@ for branch, depth, is_current in reversed(results):
 
     # Build the markdown line
     if [[ -n "${pr_title[$branch]+_}" ]]; then
-      title="${pr_title[$branch]}"
+      title=$(truncate_str "${pr_title[$branch]}" "$TRUNCATE_PR_TITLE")
       url="${pr_url[$branch]}"
       pr_num="${branch_to_pr_number[$branch]}"
 
-      # Prepend ⛔️ for closed/merged PRs
       closed_prefix=""
       if [[ "${pr_state[$branch]}" == "CLOSED" || "${pr_state[$branch]}" == "MERGED" ]]; then
         closed_prefix=$'\xe2\x9b\x94\xef\xb8\x8f '
@@ -560,7 +677,6 @@ for branch, depth, is_current in reversed(results):
         md_line="${indent}- [${link_text}](${url})"
       fi
     else
-      # No PR (trunk branch like main)
       if [[ "$current" -eq 1 ]]; then
         md_line="${indent}- **${branch}**"
       else
@@ -571,33 +687,25 @@ for branch, depth, is_current in reversed(results):
     echo "$md_line"
   done <<< "$gs_tree"
 
-  # -------------------------------------------------------------------------
-  # Legend (only with status)
-  # -------------------------------------------------------------------------
   if [[ "$SHOW_STATUS" -eq 1 ]]; then
     echo ""
-    printf 'Legend: [Review][CI] — '
-    printf '\xf0\x9f\x9f\xa2 approved/passing  '
-    printf '\xf0\x9f\x94\xb4 changes requested/failing  '
-    printf '\xf0\x9f\x9f\xa1 pending  '
-    printf '\xe2\x9a\xaa no checks\n'
+    printf '**%s/%s** [Review][CI]\n' "$repo_owner" "$repo_name"
+    printf 'Review: \xf0\x9f\x9f\xa2 approved \xf0\x9f\x94\xb4 changes requested \xe2\x9a\xaa draft \xf0\x9f\x94\x98 draft+approved\n'
+    printf 'CI: \xf0\x9f\x9f\xa2 passing \xf0\x9f\x94\xb4 required failed \xf0\x9f\x9f\xa1 running \xf0\x9f\x9f\xa0 running+failures \xf0\x9f\x9f\xa3 optional failures \xe2\x9a\xaa no checks\n'
   fi
 
   exit 0
 fi
 
 # ===========================================================================
-# Output: iTerm format (OSC 8 clickable hyperlinks)
+# Output: OSC 8 format (clickable hyperlinks for iTerm2, Kitty, etc.)
 # ===========================================================================
-# Uses iTerm2 OSC 8 escape codes to make branch+title a clickable hyperlink.
+# Uses OSC 8 escape codes to make branch+title a clickable hyperlink.
 # Same tree structure as interactive mode but no separate URL line beneath.
-# Format: \033]8;;URL\033\\DISPLAY TEXT\033]8;;\033\\
 
-if [[ "$OUTPUT_FORMAT" == "iterm" ]]; then
-  # -------------------------------------------------------------------------
-  # Pass 1: Compute max width of column 1 (tree prefix + branch name)
-  # -------------------------------------------------------------------------
+if [[ "$OUTPUT_FORMAT" == "osc8" ]]; then
   max_col1_width=0
+  max_pr_num_width=0
   declare -a iterm_cleaned_lines
   declare -a iterm_branches
   declare -a iterm_is_current
@@ -619,9 +727,21 @@ if [[ "$OUTPUT_FORMAT" == "iterm" ]]; then
 
     if [[ -n "$branch" && -n "${pr_title[$branch]+_}" ]]; then
       cleaned=$(echo "$line" | sed 's| (https://[^)]*)||')
+
+      truncated_branch=$(truncate_str "$branch" "$TRUNCATE_BRANCH")
+      if [[ "$truncated_branch" != "$branch" ]]; then
+        cleaned="${cleaned/$branch/$truncated_branch}"
+      fi
+
       display_width=$(printf '%s' "$cleaned" | wc -m | tr -d ' ')
       if (( display_width > max_col1_width )); then
         max_col1_width=$display_width
+      fi
+
+      pr_num="${branch_to_pr_number[$branch]}"
+      pr_num_width=${#pr_num}
+      if (( pr_num_width + 1 > max_pr_num_width )); then
+        max_pr_num_width=$((pr_num_width + 1))
       fi
     else
       cleaned="$line"
@@ -635,52 +755,40 @@ if [[ "$OUTPUT_FORMAT" == "iterm" ]]; then
 
   col2_start=$((max_col1_width + 2))
 
-  # -------------------------------------------------------------------------
-  # Pass 2: Print with OSC 8 hyperlinks
-  # -------------------------------------------------------------------------
   line_idx=0
   for cleaned in "${iterm_cleaned_lines[@]}"; do
     branch="${iterm_branches[$line_idx]}"
     current="${iterm_is_current[$line_idx]}"
 
-    # Filtered branches are silently skipped (no placeholder)
     if [[ -n "$branch" && -n "${pr_title[$branch]+_}" ]] && ! branch_passes_filter "$branch" "$current"; then
       line_idx=$((line_idx + 1))
       continue
     fi
 
     if [[ -n "$branch" && -n "${pr_title[$branch]+_}" ]]; then
-      title="${pr_title[$branch]}"
+      title=$(truncate_str "${pr_title[$branch]}" "$TRUNCATE_PR_TITLE")
       url="${pr_url[$branch]}"
+      pr_num="${branch_to_pr_number[$branch]}"
 
-      # Prepend ⛔️ for closed/merged PRs
       closed_prefix=""
       if [[ "${pr_state[$branch]}" == "CLOSED" || "${pr_state[$branch]}" == "MERGED" ]]; then
         closed_prefix=$'\xe2\x9b\x94\xef\xb8\x8f '
       fi
 
-      # Build OSC 8 hyperlink sequences using literal ESC bytes.
-      # Using $'\e' avoids printf escape-sequence interactions that corrupt
-      # the ST (String Terminator = ESC \) when embedded in format strings.
       osc_open=$'\e]8;;'"${url}"$'\e\\'
       osc_close=$'\e]8;;\e\\'
+
+      display_width=$(printf '%s' "$cleaned" | wc -m | tr -d ' ')
+      padding=$((col2_start - display_width))
+      pad_str=$(printf '%*s' "$padding" '')
+      pr_num_display=$(printf '%*s' "$max_pr_num_width" "#${pr_num}")
 
       if [[ "$SHOW_STATUS" -eq 1 ]]; then
         review="${pr_review[$branch]}"
         ci="${pr_ci[$branch]}"
-
-        display_width=$(printf '%s' "$cleaned" | wc -m | tr -d ' ')
-        padding=$((col2_start - display_width))
-        pad_str=$(printf '%*s' "$padding" '')
-
-        # Link covers branch+title; emojis sit between tree prefix and title
-        visible_text="${cleaned}${pad_str}${closed_prefix}${review}${ci}  ${title}"
+        visible_text="${cleaned}${pad_str}${closed_prefix}${review}${ci} ${pr_num_display}  ${title}"
       else
-        display_width=$(printf '%s' "$cleaned" | wc -m | tr -d ' ')
-        padding=$((col2_start - display_width))
-        pad_str=$(printf '%*s' "$padding" '')
-
-        visible_text="${cleaned}${pad_str}${closed_prefix}${title}"
+        visible_text="${cleaned}${pad_str}${closed_prefix}${pr_num_display}  ${title}"
       fi
 
       if [[ "$current" -eq 1 ]]; then
@@ -689,7 +797,6 @@ if [[ "$OUTPUT_FORMAT" == "iterm" ]]; then
         printf '%s%s%s\n' "$osc_open" "$visible_text" "$osc_close"
       fi
     else
-      # No PR data for this line (trunk, etc.)
       if [[ "$current" -eq 1 ]]; then
         printf '%s%s%s\n' "$BOLD_YELLOW" "$cleaned" "$RESET"
       else
@@ -700,12 +807,12 @@ if [[ "$OUTPUT_FORMAT" == "iterm" ]]; then
     line_idx=$((line_idx + 1))
   done
 
-  # Legend
   if [[ "$SHOW_STATUS" -eq 1 ]]; then
     echo ""
-    echo "Legend: [Review][CI] per line"
-    printf '  \xf0\x9f\x9f\xa2 = approved / passing   \xf0\x9f\x94\xb4 = changes requested / failing\n'
-    printf '  \xf0\x9f\x9f\xa1 = pending               \xe2\x9a\xaa = no checks\n'
+    printf '%s%s/%s%s [Review][CI]\n' "$BOLD" "$repo_owner" "$repo_name" "$RESET"
+    printf '  Review: \xf0\x9f\x9f\xa2 approved  \xf0\x9f\x94\xb4 changes requested  \xe2\x9a\xaa draft  \xf0\x9f\x94\x98 draft+approved\n'
+    printf '  CI:     \xf0\x9f\x9f\xa2 passing   \xf0\x9f\x94\xb4 required failed     \xf0\x9f\x9f\xa1 running\n'
+    printf '          \xf0\x9f\x9f\xa0 running+failures  \xf0\x9f\x9f\xa3 optional failures  \xe2\x9a\xaa no checks\n'
   fi
 
   exit 0
@@ -716,13 +823,10 @@ fi
 # ===========================================================================
 
 # ---------------------------------------------------------------------------
-# Pass 1: Compute max width of column 1 (tree structure + branch name + marker)
+# Pass 1: Compute max width of column 1 (tree + branch) and max PR number width
 # ---------------------------------------------------------------------------
-# Column 1 is the "cleaned line" - the gs ls line with the URL removed.
-# We need its *display width* (not byte length) since it contains multi-byte
-# box-drawing characters and possibly the ◀ marker.
-
 max_col1_width=0
+max_pr_num_width=0
 declare -a cleaned_lines
 declare -a branches
 declare -a is_current
@@ -732,29 +836,35 @@ while IFS= read -r line; do
   branch=""
   current=0
 
-  # Pattern 1: lines with box-drawing characters (□ or ■ followed by branch name)
   if [[ "$line" =~ [□■][[:space:]]([^[:space:]]+) ]]; then
     branch="${BASH_REMATCH[1]}"
-  # Pattern 2: plain trunk line (just a branch name, possibly with whitespace)
   elif [[ "$line" =~ ^[[:space:]]*([a-zA-Z0-9_/.-]+)[[:space:]]*$ ]]; then
     branch="${BASH_REMATCH[1]}"
   fi
 
-  # Detect current branch marker
   if [[ "$line" == *"◀"* ]]; then
     current=1
   fi
 
   if [[ -n "$branch" && -n "${pr_title[$branch]+_}" ]]; then
-    # Strip the PR URL from the gs ls line (we show it on its own line instead)
     cleaned=$(echo "$line" | sed 's| (https://[^)]*)||')
 
-    # Compute display width using wc -m (character count, not bytes)
-    # This handles multi-byte UTF-8 box-drawing characters correctly.
-    display_width=$(printf '%s' "$cleaned" | wc -m | tr -d ' ')
+    # Apply branch name truncation
+    truncated_branch=$(truncate_str "$branch" "$TRUNCATE_BRANCH")
+    if [[ "$truncated_branch" != "$branch" ]]; then
+      cleaned="${cleaned/$branch/$truncated_branch}"
+    fi
 
+    display_width=$(printf '%s' "$cleaned" | wc -m | tr -d ' ')
     if (( display_width > max_col1_width )); then
       max_col1_width=$display_width
+    fi
+
+    # Track max PR number display width (e.g. "#15762" = 6)
+    pr_num="${branch_to_pr_number[$branch]}"
+    pr_num_width=${#pr_num}
+    if (( pr_num_width + 1 > max_pr_num_width )); then  # +1 for "#"
+      max_pr_num_width=$((pr_num_width + 1))
     fi
   else
     cleaned="$line"
@@ -766,7 +876,6 @@ while IFS= read -r line; do
   line_idx=$((line_idx + 1))
 done <<< "$gs_tree"
 
-# Add a small gutter between column 1 and column 2
 col2_start=$((max_col1_width + 2))
 
 # ---------------------------------------------------------------------------
@@ -777,53 +886,48 @@ for cleaned in "${cleaned_lines[@]}"; do
   branch="${branches[$line_idx]}"
   current="${is_current[$line_idx]}"
 
-  # Filtered branches are silently skipped (no placeholder)
   if [[ -n "$branch" && -n "${pr_title[$branch]+_}" ]] && ! branch_passes_filter "$branch" "$current"; then
     line_idx=$((line_idx + 1))
     continue
   fi
 
   if [[ -n "$branch" && -n "${pr_title[$branch]+_}" ]]; then
-    title="${pr_title[$branch]}"
+    title=$(truncate_str "${pr_title[$branch]}" "$TRUNCATE_PR_TITLE")
     url="${pr_url[$branch]}"
+    pr_num="${branch_to_pr_number[$branch]}"
 
-    # Prepend ⛔️ for closed/merged PRs when color is unavailable (fallback indicator)
     closed_prefix=""
     if [[ "$USE_COLOR" -eq 0 && ( "${pr_state[$branch]}" == "CLOSED" || "${pr_state[$branch]}" == "MERGED" ) ]]; then
       closed_prefix=$'\xe2\x9b\x94\xef\xb8\x8f '
     fi
 
+    # Pad column 1 (tree + branch)
+    display_width=$(printf '%s' "$cleaned" | wc -m | tr -d ' ')
+    padding=$((col2_start - display_width))
+    pad_str=$(printf '%*s' "$padding" '')
+
+    # Right-align PR number within its column
+    pr_num_display=$(printf '%*s' "$max_pr_num_width" "#${pr_num}")
+
     if [[ "$SHOW_STATUS" -eq 1 ]]; then
       review="${pr_review[$branch]}"
       ci="${pr_ci[$branch]}"
-
-      # Compute padding to align column 2
-      display_width=$(printf '%s' "$cleaned" | wc -m | tr -d ' ')
-      padding=$((col2_start - display_width))
-      pad_str=$(printf '%*s' "$padding" '')
-
-      # Build the output line: col1 + padding + emojis + title
-      output_line="${cleaned}${pad_str}${closed_prefix}${review}${ci}  ${title}"
+      output_line="${cleaned}${pad_str}${closed_prefix}${review}${ci} ${pr_num_display}  ${title}"
     else
-      # No status — just show title after the tree
-      display_width=$(printf '%s' "$cleaned" | wc -m | tr -d ' ')
-      padding=$((col2_start - display_width))
-      pad_str=$(printf '%*s' "$padding" '')
-
-      output_line="${cleaned}${pad_str}${closed_prefix}${title}"
+      output_line="${cleaned}${pad_str}${closed_prefix}${pr_num_display}  ${title}"
     fi
 
-    # Build the URL line with indentation aligned under the branch name
-    prefix="${cleaned%%"$branch"*}"
+    # URL line indented under the branch name
+    # Use the truncated branch for prefix matching
+    truncated_branch=$(truncate_str "$branch" "$TRUNCATE_BRANCH")
+    prefix="${cleaned%%"$truncated_branch"*}"
     indent="${prefix//[^ ]/ }"
     url_line="${indent}${url}"
 
     if [[ "$current" -eq 1 ]]; then
-      # Current branch: bold yellow highlighting (takes priority over closed/merged red)
       printf '%s%s%s\n' "$BOLD_YELLOW" "$output_line" "$RESET"
       printf '%s%s%s\n' "$BOLD_YELLOW" "$url_line" "$RESET"
     elif [[ "${pr_state[$branch]}" == "CLOSED" || "${pr_state[$branch]}" == "MERGED" ]]; then
-      # Closed/merged PR: red text (when color available), ⛔️ already in output_line when not
       printf '%s%s%s\n' "$RED" "$output_line" "$RESET"
       printf '%s%s%s\n' "$RED" "$url_line" "$RESET"
     else
@@ -831,7 +935,6 @@ for cleaned in "${cleaned_lines[@]}"; do
       echo "$url_line"
     fi
   else
-    # No PR data for this line (trunk or untracked), print as-is
     if [[ "$current" -eq 1 ]]; then
       printf '%s%s%s\n' "$BOLD_YELLOW" "$cleaned" "$RESET"
     else
@@ -847,7 +950,8 @@ done
 # ---------------------------------------------------------------------------
 if [[ "$SHOW_STATUS" -eq 1 ]]; then
   echo ""
-  echo "Legend: [Review][CI] per line"
-  printf '  \xf0\x9f\x9f\xa2 = approved / passing   \xf0\x9f\x94\xb4 = changes requested / failing\n'
-  printf '  \xf0\x9f\x9f\xa1 = pending               \xe2\x9a\xaa = no checks\n'
+  printf '%s%s/%s%s [Review][CI]\n' "$BOLD" "$repo_owner" "$repo_name" "$RESET"
+  printf '  Review: \xf0\x9f\x9f\xa2 approved  \xf0\x9f\x94\xb4 changes requested  \xe2\x9a\xaa draft  \xf0\x9f\x94\x98 draft+approved\n'
+  printf '  CI:     \xf0\x9f\x9f\xa2 passing   \xf0\x9f\x94\xb4 required failed     \xf0\x9f\x9f\xa1 running\n'
+  printf '          \xf0\x9f\x9f\xa0 running+failures  \xf0\x9f\x9f\xa3 optional failures  \xe2\x9a\xaa no checks\n'
 fi
