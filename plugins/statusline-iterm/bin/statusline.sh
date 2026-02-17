@@ -18,9 +18,8 @@ _record_section() {
   _section_start_ms=$now
 }
 
-# Log a message to statusline output and the session debug file.
+# Log a message to the session debug file only (not to stdout).
 _debug_log() {
-  echo "$1"
   if [ -n "$_debug_file" ]; then
     echo "$(date -u +"%Y-%m-%dT%H:%M:%S.000Z") [DEBUG] [statusline] $1" >> "$_debug_file"
   fi
@@ -174,4 +173,5 @@ _record_section "pccu"
 # Calculate and display total render time
 _statusline_end_ms=$(_now_ms)
 _statusline_duration_ms=$(( _statusline_end_ms - _statusline_start_ms ))
+echo "Rendered in ${_statusline_duration_ms}ms [${_section_timings% }]"
 _debug_log "Rendered in ${_statusline_duration_ms}ms [${_section_timings% }]"
