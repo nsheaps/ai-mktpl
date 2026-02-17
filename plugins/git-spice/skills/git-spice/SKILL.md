@@ -241,6 +241,78 @@ Always fetch first when working on a branch that others may have modified:
 4. If on a stacked branch: `gs stack restack`
 5. Proceed with `gs stack submit` or `gs branch submit`
 
+## Using Worktrees for Parallel Branch Work
+
+Git worktrees allow checking out multiple branches simultaneously in
+separate directories. This is especially useful for agents working on
+multiple PRs in parallel without disrupting the main checkout.
+
+### Creating a Worktree
+
+```bash
+# Create a worktree for an existing branch
+git worktree add /path/to/repo.worktrees/<short-name> <branch-name>
+
+# Convention: use <repo>.worktrees/<description> as the path
+# Example:
+git worktree add /Users/me/src/org/repo.worktrees/fix-auth nate/fix-auth-bug
+```
+
+### Working in a Worktree
+
+- Run all commands from the worktree directory (cd there first)
+- `gs` commands work normally — the worktree shares the same git-spice state
+- `pnpm install` may be needed if dependencies differ from main checkout
+- Type checks and linting work as normal: `cd packages/<pkg> && pnpm lint:tsc`
+
+### Committing and Pushing from a Worktree
+
+```bash
+cd /path/to/repo.worktrees/<short-name>
+# Stage and commit with git-spice
+gs cc -m "fix: description of change"
+# Push and update PR
+gs ss
+```
+
+### Cleaning Up Worktrees
+
+**CRITICAL:** Always clean up worktrees when done. A branch checked out
+in a worktree cannot be checked out elsewhere (git prevents it), which
+blocks other agents and the user from working on that branch.
+
+```bash
+# From the main repo (NOT from inside the worktree)
+cd /path/to/main/repo
+git worktree remove /path/to/repo.worktrees/<short-name>
+```
+
+If the worktree has uncommitted changes, either commit them first or
+use `--force` (only if changes should be discarded).
+
+### Worktree Detection in gs-stack-status
+
+The `gs-stack-status.sh` script automatically detects branches checked
+out in other worktrees and displays them with a bold magenta `＋`
+indicator before the branch name. This helps identify which branches
+are actively being worked on in parallel.
+
+### When to Use Worktrees
+
+| Scenario | Approach |
+| --- | --- |
+| Agent fixing a PR while user works on main | Worktree for the agent |
+| Multiple agents fixing different PRs in parallel | One worktree per agent |
+| Quick one-off fix on a different branch | Worktree, fix, cleanup |
+| Long-running work on a feature branch | Worktree (or dedicated clone) |
+
+### Anti-Patterns
+
+- **Don't leave worktrees around** — they lock branches and confuse `gs ls`
+- **Don't use the main checkout for agent work** if the user is active
+- **Don't forget `pnpm install`** — worktrees share `node_modules` via
+  symlinks but lock files may differ across branches
+
 ## Post-Task Cleanup: Closed/Merged PRs
 
 After completing branch navigation or manipulation tasks (e.g., `gs bco`, `gs bo`, `gs uo`, `gs ls`, `gs sr`), check if any branches in the stack have closed or merged PRs. If so, prompt the user with `AskUserQuestion` offering these cleanup options:
