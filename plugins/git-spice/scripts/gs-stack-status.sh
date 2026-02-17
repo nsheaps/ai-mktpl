@@ -867,9 +867,10 @@ if [[ "$OUTPUT_FORMAT" == "osc8" ]]; then
         visible_text="${cleaned}${pad_str}${closed_prefix}${pr_num_display}  ${title}"
       fi
 
-      # Colorize the worktree "+" indicator if present
+      # Colorize the worktree "+" indicator and branch name in bold magenta
       if [[ -n "${worktree_branches[$branch]+_}" ]]; then
-        visible_text="${visible_text/＋ /${BOLD_MAGENTA}＋${RESET} }"
+        truncated_branch_osc=$(truncate_str "$branch" "$TRUNCATE_BRANCH")
+        visible_text="${visible_text/＋ ${truncated_branch_osc}/${BOLD_MAGENTA}＋ ${truncated_branch_osc}${RESET}}"
       fi
 
       if [[ "$current" -eq 1 ]]; then
@@ -878,9 +879,9 @@ if [[ "$OUTPUT_FORMAT" == "osc8" ]]; then
         printf '%s%s%s\n' "$osc_open" "$visible_text" "$osc_close"
       fi
     else
-      # Colorize the worktree "+" indicator if present
+      # Colorize the worktree "+" indicator and branch name in bold magenta
       if [[ -n "$branch" && -n "${worktree_branches[$branch]+_}" ]]; then
-        cleaned="${cleaned/＋ /${BOLD_MAGENTA}＋${RESET} }"
+        cleaned="${cleaned/＋ ${branch}/${BOLD_MAGENTA}＋ ${branch}${RESET}}"
       fi
 
       if [[ "$current" -eq 1 ]]; then
@@ -1029,9 +1030,9 @@ for cleaned in "${cleaned_lines[@]}"; do
     indent="${prefix//[^ ]/ }"
     url_line="${indent}${url}"
 
-    # Colorize the worktree "+" indicator if present
+    # Colorize the worktree "+" indicator and branch name in bold magenta
     if [[ -n "${worktree_branches[$branch]+_}" ]]; then
-      output_line="${output_line/＋ /${BOLD_MAGENTA}＋${RESET} }"
+      output_line="${output_line/＋ ${truncated_branch}/${BOLD_MAGENTA}＋ ${truncated_branch}${RESET}}"
     fi
 
     if [[ "$current" -eq 1 ]]; then
@@ -1045,9 +1046,9 @@ for cleaned in "${cleaned_lines[@]}"; do
       echo "$url_line"
     fi
   else
-    # Colorize the worktree "+" indicator if present
+    # Colorize the worktree "+" indicator and branch name in bold magenta
     if [[ -n "$branch" && -n "${worktree_branches[$branch]+_}" ]]; then
-      cleaned="${cleaned/＋ /${BOLD_MAGENTA}＋${RESET} }"
+      cleaned="${cleaned/＋ ${branch}/${BOLD_MAGENTA}＋ ${branch}${RESET}}"
     fi
 
     if [[ "$current" -eq 1 ]]; then
