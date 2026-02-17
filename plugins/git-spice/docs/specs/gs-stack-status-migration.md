@@ -184,23 +184,23 @@ GitHub API rate limit consumption, especially in watch mode.
 
 #### Git Hook Integration
 
-| ID     | Requirement                                                       | Priority    | Acceptance Criteria                                         |
-| ------ | ----------------------------------------------------------------- | ----------- | ----------------------------------------------------------- |
-| FR-021 | `gsv hooks install` sets up global post-checkout and post-fetch hooks | Should-have | Hooks installed in `core.hooksPath` or hook manager        |
-| FR-022 | post-checkout hook auto-tracks new branches with git-spice        | Should-have | New branch appears in `gsv` without manual `gs bt`          |
-| FR-023 | post-fetch hook async-updates local cache of branch/PR state      | Should-have | Cache file written to `.git/gsv-cache.json`                 |
-| FR-024 | Hooks configurable via `git config gsv.hooks.*`                   | Should-have | Each hook individually enable/disable-able                  |
-| FR-025 | Hooks integrate with existing hook managers (husky, lefthook)     | Nice-to-have| Appends to existing hooks rather than replacing             |
+| ID     | Requirement                                                           | Priority     | Acceptance Criteria                                 |
+| ------ | --------------------------------------------------------------------- | ------------ | --------------------------------------------------- |
+| FR-021 | `gsv hooks install` sets up global post-checkout and post-fetch hooks | Should-have  | Hooks installed in `core.hooksPath` or hook manager |
+| FR-022 | post-checkout hook auto-tracks new branches with git-spice            | Should-have  | New branch appears in `gsv` without manual `gs bt`  |
+| FR-023 | post-fetch hook async-updates local cache of branch/PR state          | Should-have  | Cache file written to `.git/gsv-cache.json`         |
+| FR-024 | Hooks configurable via `git config gsv.hooks.*`                       | Should-have  | Each hook individually enable/disable-able          |
+| FR-025 | Hooks integrate with existing hook managers (husky, lefthook)         | Nice-to-have | Appends to existing hooks rather than replacing     |
 
 #### Local State Cache
 
-| ID     | Requirement                                                       | Priority    | Acceptance Criteria                                         |
-| ------ | ----------------------------------------------------------------- | ----------- | ----------------------------------------------------------- |
-| FR-026 | Read from local cache when fresh (< TTL)                          | Should-have | No API call when cache is within TTL                        |
-| FR-027 | Show cached data with staleness indicator when cache is expired   | Should-have | User sees data immediately with "stale" marker              |
-| FR-028 | Background refresh updates cache without blocking display         | Should-have | Display returns instantly, cache updates async               |
-| FR-029 | Configurable cache TTL via `git config gsv.cache.ttl`             | Should-have | Default 60s, user-configurable                              |
-| FR-030 | `gsv --no-cache` flag to force fresh API call                     | Should-have | Bypass cache for explicit refresh                           |
+| ID     | Requirement                                                     | Priority    | Acceptance Criteria                            |
+| ------ | --------------------------------------------------------------- | ----------- | ---------------------------------------------- |
+| FR-026 | Read from local cache when fresh (< TTL)                        | Should-have | No API call when cache is within TTL           |
+| FR-027 | Show cached data with staleness indicator when cache is expired | Should-have | User sees data immediately with "stale" marker |
+| FR-028 | Background refresh updates cache without blocking display       | Should-have | Display returns instantly, cache updates async |
+| FR-029 | Configurable cache TTL via `git config gsv.cache.ttl`           | Should-have | Default 60s, user-configurable                 |
+| FR-030 | `gsv --no-cache` flag to force fresh API call                   | Should-have | Bypass cache for explicit refresh              |
 
 #### Testing
 
@@ -353,8 +353,8 @@ gs-branch-viewer features can be implemented in the new codebase.
 
 ## Revision History
 
-| Date       | Author       | Changes                                            |
-| ---------- | ------------ | -------------------------------------------------- |
-| 2026-02-17 | Nathan Heaps | Initial draft — migration spec from bash to Bun/TS |
+| Date       | Author       | Changes                                              |
+| ---------- | ------------ | ---------------------------------------------------- |
+| 2026-02-17 | Nathan Heaps | Initial draft — migration spec from bash to Bun/TS   |
 | 2026-02-17 | Nathan Heaps | Added git hook integration (FR-021–025), local state |
 |            |              | cache (FR-026–030), and updated module structure     |
