@@ -131,6 +131,21 @@ git config gsv.hooks.postFetch false
 Hooks integrate with existing git hook managers (husky, lefthook,
 core.hooksPath) by appending rather than replacing.
 
+#### Enhanced Watch Mode
+
+In the TS version, watch mode should be upgraded beyond simple polling:
+
+- **Live countdown timer** next to "Last updated" showing seconds until
+  next refresh, updating every 1s without redrawing the full output
+- **Key input to refresh now** — pressing a key (e.g., `r` or `space`)
+  triggers an immediate refresh, resetting the countdown
+- **Differential updates** — only redraw changed lines instead of full
+  screen clear (reduces flicker)
+
+These are impractical in bash (requires raw terminal mode, cursor
+positioning, and non-blocking input), but straightforward in TS with
+`process.stdin.setRawMode(true)` and event-driven rendering.
+
 #### Local State Cache
 
 The `post-fetch` hook writes a local cache file (`.git/gsv-cache.json`)
