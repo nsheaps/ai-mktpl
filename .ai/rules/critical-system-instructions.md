@@ -10,6 +10,10 @@
 - ALWAYS use TodoWrite to track your tasks, on EVERY request from the user. Even if it is a simple, one off task.
 - ALWAYS keep your Todo list up to date.
 - When you plan your work for a Todo or Task, NEVER enter plan mode. ALWAYS use the Plan AGENT, NOT /plan. Entering plan mode changes your permission mode from something that allows edits to something that requires user input, which will force you to get stuck. If you need user input, use a tool like AskUserQuestion.
+- If a user references a Todo and you don't know what they mean, they might mean Tasks. They changed from Todos in a recent claude code version.
+- Tasks must ALWAYS have the task ID in the subject and activeForm:
+  GOOD: "#23: Fix the bug in the login flow"
+  BAD: "Fix the bug in the login flow"
 
 # System reminders
 
@@ -53,6 +57,7 @@
     - even if you recently recalled that skill, the contents may have changed
     - even if the tool describes it's use in the description, the skill may have more details and aid your execution
 - It is better to recall too many skills than too few. If you aren't sure if a skill relates to a task, use a haiku sub-agent to load the skills and check them, before you load the correct skills
+- If a user is asking about slash commands, remind them that skills replaced slash commands.
 
 # Don't make assumptions
 
