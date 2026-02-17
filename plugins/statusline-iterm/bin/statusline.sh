@@ -18,16 +18,14 @@ _record_section() {
   _section_start_ms=$now
 }
 
-# Log a debug message to the session debug file (deferred until session_id is known)
-_debug_queue=""
+# Log a message to statusline output and the session debug file.
 _debug_log() {
-  local msg="$1"
-  local ts
-  ts=$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")
-  local line="${ts} [DEBUG] [statusline] ${msg}"
-  _debug_queue="${_debug_queue}${line}
-"
+  echo "$1"
+  if [ -n "$_debug_file" ]; then
+    echo "$(date -u +"%Y-%m-%dT%H:%M:%S.000Z") [DEBUG] [statusline] $1" >> "$_debug_file"
+  fi
 }
+_debug_file=""
 
 # Prevent git from creating lock files for read-only operations
 export GIT_OPTIONAL_LOCKS=0
@@ -49,8 +47,6 @@ iterm2_set_user_var() {
     printf '\033]1337;SetUserVar=%s=%s\007' "$1" "$encoded_value" > /dev/tty 2>/dev/null || true
   fi
 }
-
-_debug_log "starting render..."
 
 # Read JSON input from stdin if available, otherwise empty
 input=""
@@ -84,6 +80,14 @@ session_id=""
 if [ -n "$input" ]; then
   session_id="$(echo "$input" | jq -r '.session_id // empty' 2>/dev/null)"
 fi
+
+# Set up debug file now that session_id is known
+if [ -n "$session_id" ]; then
+  _debug_file="$HOME/.claude/debug/${session_id}.txt"
+  mkdir -p "$(dirname "$_debug_file")"
+fi
+
+_debug_log "starting render..."
 
 # Session ID (if available)
 if [ -n "$session_id" ]; then
@@ -170,12 +174,4 @@ _record_section "pccu"
 # Calculate and display total render time
 _statusline_end_ms=$(_now_ms)
 _statusline_duration_ms=$(( _statusline_end_ms - _statusline_start_ms ))
-echo "Rendered in ${_statusline_duration_ms}ms [${_section_timings% }]"
-
-# Flush debug log to session debug file
 _debug_log "Rendered in ${_statusline_duration_ms}ms [${_section_timings% }]"
-if [ -n "$session_id" ]; then
-  _debug_file="$HOME/.claude/debug/${session_id}.txt"
-  mkdir -p "$(dirname "$_debug_file")"
-  printf '%s' "$_debug_queue" >> "$_debug_file"
-fi
