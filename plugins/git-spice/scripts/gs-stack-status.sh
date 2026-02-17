@@ -13,9 +13,11 @@
 # Requirements: gs, gh, jq, python3
 # Usage: gs-stack-status.sh [--output interactive|markdown|iterm] [--no-status]
 #        [--reviewed] [--no-reviewed] [--failing-ci] [--no-failing-ci]
-#        [--color] [--no-color]
+#        [--color] [--no-color] [--watch [SECONDS]]
 
 set -euo pipefail
+
+ORIGINAL_ARGS=("$@")
 
 # ---------------------------------------------------------------------------
 # Argument parsing
@@ -25,6 +27,8 @@ SHOW_STATUS=1
 FILTER_REVIEWED=""       # "yes" = only reviewed, "no" = only NOT reviewed, "" = no filter
 FILTER_FAILING_CI=""     # "yes" = only failing CI, "no" = only NOT failing CI, "" = no filter
 COLOR_OVERRIDE=""        # "yes" = force color, "no" = force no color, "" = auto-detect TTY
+WATCH_MODE=0
+WATCH_INTERVAL=5
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -68,10 +72,19 @@ while [[ $# -gt 0 ]]; do
       COLOR_OVERRIDE="no"
       shift
       ;;
+    --watch)
+      WATCH_MODE=1
+      if [[ $# -ge 2 && "$2" =~ ^[0-9]+$ ]]; then
+        WATCH_INTERVAL="$2"
+        shift 2
+      else
+        shift
+      fi
+      ;;
     -h|--help)
       echo "Usage: gs-stack-status.sh [--output interactive|markdown|iterm] [--no-status]"
       echo "       [--reviewed] [--no-reviewed] [--failing-ci] [--no-failing-ci]"
-      echo "       [--color] [--no-color]"
+      echo "       [--color] [--no-color] [--watch [SECONDS]]"
       echo ""
       echo "Options:"
       echo "  --output FORMAT   Output format: interactive (default), markdown, or iterm"
@@ -82,16 +95,58 @@ while [[ $# -gt 0 ]]; do
       echo "  --no-failing-ci   Only show PRs where CI is NOT failing"
       echo "  --color           Force color output even when not a TTY"
       echo "  --no-color        Suppress color/escape codes even when on a TTY"
+      echo "  --watch [SECS]    Refresh in-place every SECS seconds (default: 5)"
       echo "  -h, --help        Show this help message"
       exit 0
       ;;
     *)
       echo "ERROR: Unknown option '$1'" >&2
-      echo "Usage: gs-stack-status.sh [--output interactive|markdown|iterm] [--no-status] [--color] [--no-color]" >&2
+      echo "Usage: gs-stack-status.sh [--output interactive|markdown|iterm] [--no-status] [--color] [--no-color] [--watch [SECS]]" >&2
       exit 1
       ;;
   esac
 done
+
+# ---------------------------------------------------------------------------
+# Watch mode: re-invoke self in a loop, replacing screen contents in place.
+# Uses cursor-home + clear-to-end instead of `clear` to avoid flicker,
+# and preserves full terminal capabilities (OSC 8 hyperlinks, etc.).
+# ---------------------------------------------------------------------------
+if [[ "$WATCH_MODE" -eq 1 && "${_GS_STATUS_WATCHING:-}" != "1" ]]; then
+  export _GS_STATUS_WATCHING=1
+  export FORCE_COLOR=1
+
+  # Build args for child invocations: strip --watch and its optional interval
+  child_args=()
+  skip_next=0
+  for arg in "${ORIGINAL_ARGS[@]}"; do
+    if [[ "$skip_next" -eq 1 ]]; then
+      # Only skip if it looks like an interval number (matches parser behavior)
+      if [[ "$arg" =~ ^[0-9]+$ ]]; then
+        skip_next=0
+        continue
+      fi
+      skip_next=0
+    fi
+    if [[ "$arg" == "--watch" ]]; then
+      skip_next=1
+      continue
+    fi
+    child_args+=("$arg")
+  done
+
+  # Hide cursor for cleaner display, restore on exit
+  cleanup() { printf '\033[?25h'; }
+  trap cleanup EXIT INT TERM
+  printf '\033[?25l'
+
+  while true; do
+    printf '\033[H'                        # cursor to home
+    "$0" "${child_args[@]}" 2>&1 || true   # run script, don't exit on failure
+    printf '\033[J'                        # clear from cursor to end of screen
+    sleep "$WATCH_INTERVAL"
+  done
+fi
 
 # ---------------------------------------------------------------------------
 # TTY detection and color support
