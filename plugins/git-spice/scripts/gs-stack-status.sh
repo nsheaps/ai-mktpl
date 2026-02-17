@@ -33,6 +33,7 @@ WATCH_INTERVAL=5
 TRUNCATE_BRANCH=35        # Default: truncate branch names to 35 chars
 TRUNCATE_PR_TITLE=0       # Default: no PR title truncation (0 = disabled)
 ONLY_REQUIRED_CI=1        # Default: CI status only reflects required checks
+INCLUDE_CLOSED=0          # Default: hide closed/merged PRs
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -97,6 +98,14 @@ while [[ $# -gt 0 ]]; do
       ONLY_REQUIRED_CI=0
       shift
       ;;
+    --include-closed)
+      INCLUDE_CLOSED=1
+      shift
+      ;;
+    --no-include-closed)
+      INCLUDE_CLOSED=0
+      shift
+      ;;
     --truncate-branch-length)
       if [[ $# -lt 2 ]]; then
         echo "ERROR: --truncate-branch-length requires a number" >&2
@@ -130,6 +139,8 @@ while [[ $# -gt 0 ]]; do
       echo "  --watch [SECS]    Refresh in-place every SECS seconds (default: 5)"
       echo "  --only-required-ci          CI status reflects only required checks (default)"
       echo "  --no-only-required-ci       CI status reflects all checks"
+      echo "  --include-closed            Show closed/merged PRs (default: hidden)"
+      echo "  --no-include-closed         Hide closed/merged PRs (default)"
       echo "  --truncate-branch-length N  Truncate branch names to N chars (default: 35)"
       echo "  --truncate-pr-title N       Truncate PR titles to N chars (default: no limit)"
       echo "  -h, --help        Show this help message"
@@ -523,7 +534,15 @@ branch_passes_filter() {
     return 0
   fi
 
-  # No filters active — show everything
+  # Filter closed/merged PRs unless --include-closed
+  if [[ "$INCLUDE_CLOSED" -eq 0 ]]; then
+    local state="${pr_state[$branch]:-}"
+    if [[ "$state" == "CLOSED" || "$state" == "MERGED" ]]; then
+      return 1
+    fi
+  fi
+
+  # No other filters active — show everything
   if [[ -z "$FILTER_REVIEWED" && -z "$FILTER_FAILING_CI" ]]; then
     return 0
   fi
