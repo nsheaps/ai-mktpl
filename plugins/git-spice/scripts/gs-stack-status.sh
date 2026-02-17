@@ -144,8 +144,8 @@ while [[ $# -gt 0 ]]; do
 done
 
 # ---------------------------------------------------------------------------
-# Watch mode: re-invoke self in a loop, replacing screen contents in place.
-# Uses cursor-home + clear-to-end instead of `clear` to avoid flicker,
+# Watch mode: re-invoke self in a loop using the alternate screen buffer.
+# Uses alternate screen (like vim/less) to avoid polluting scrollback,
 # and preserves full terminal capabilities (OSC 8 hyperlinks, etc.).
 # ---------------------------------------------------------------------------
 if [[ "$WATCH_MODE" -eq 1 && "${_GS_STATUS_WATCHING:-}" != "1" ]]; then
@@ -171,14 +171,15 @@ if [[ "$WATCH_MODE" -eq 1 && "${_GS_STATUS_WATCHING:-}" != "1" ]]; then
     child_args+=("$arg")
   done
 
-  # Hide cursor for cleaner display, restore on exit
-  cleanup() { printf '\033[?25h'; }
+  # Use alternate screen buffer (like vim/less/htop) to avoid polluting
+  # scrollback history, and hide cursor for cleaner display.
+  cleanup() { printf '\033[?25h\033[?1049l'; }
   trap cleanup EXIT INT TERM
-  printf '\033[?25l'
+  printf '\033[?1049h\033[?25l'
 
   while true; do
     output=$("$0" "${child_args[@]}" 2>&1 || true)  # capture output
-    printf '\033[2J\033[H'                            # clear screen + cursor home
+    printf '\033[H\033[J'                             # cursor home + clear to end
     printf '%s\n' "$output"                           # draw new content
     sleep "$WATCH_INTERVAL"
   done
