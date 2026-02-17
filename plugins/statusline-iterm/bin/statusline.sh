@@ -145,7 +145,7 @@ iterm2_set_user_var "badge" "$badge_text"
 _record_section "badge"
 
 # par-cc-usage statusline (strip project name prefix)
-pccu_status="$(echo "$input" | uvx --from par-cc-usage pccu statusline 2>/dev/null | sed 's/^\[.*\] - //' || true)"
+pccu_status="$(echo "$input" | timeout 1 uvx --from par-cc-usage pccu statusline 2>/dev/null | sed 's/^\[.*\] - //' || true)"
 if [ -n "$pccu_status" ]; then
   echo "$pccu_status"
 fi
