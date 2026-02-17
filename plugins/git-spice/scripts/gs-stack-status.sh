@@ -750,7 +750,7 @@ for branch, depth, is_current in reversed(results):
 
   if [[ "$SHOW_STATUS" -eq 1 ]]; then
     echo ""
-    printf '**%s/%s** [Review][CI]\n' "$repo_owner" "$repo_name"
+    printf '**%s/%s**\n' "$repo_owner" "$repo_name"
     printf 'Review: %s approved %s changes requested %s unreviewed %s draft %s draft+approved\n' \
       "$EMOJI_GREEN" "$EMOJI_RED" "$EMOJI_YELLOW" "$EMOJI_WHITE" "$EMOJI_RADIO"
     printf 'CI: %s passing %s required failed %s running %s running+failures %s optional failures %s no checks\n' \
@@ -802,6 +802,8 @@ if [[ "$OUTPUT_FORMAT" == "osc8" ]]; then
       fi
 
       display_width=$(printf '%s' "$cleaned" | wc -m | tr -d ' ')
+      # Fullwidth ＋ is 2 columns but wc -m counts 1 char; correct for it
+      [[ -n "${worktree_branches[$branch]+_}" ]] && (( display_width++ ))
       if (( display_width > max_col1_width )); then
         max_col1_width=$display_width
       fi
@@ -852,6 +854,7 @@ if [[ "$OUTPUT_FORMAT" == "osc8" ]]; then
       osc_close=$'\e]8;;\e\\'
 
       display_width=$(printf '%s' "$cleaned" | wc -m | tr -d ' ')
+      [[ -n "${worktree_branches[$branch]+_}" ]] && (( display_width++ ))
       padding=$((col2_start - display_width))
       pad_str=$(printf '%*s' "$padding" '')
       pr_num_display=$(printf '%*s' "$max_pr_num_width" "#${pr_num}")
@@ -892,7 +895,10 @@ if [[ "$OUTPUT_FORMAT" == "osc8" ]]; then
 
   if [[ "$SHOW_STATUS" -eq 1 ]]; then
     echo ""
-    printf '%s%s/%s%s [Review][CI]\n' "$BOLD" "$repo_owner" "$repo_name" "$RESET"
+    repo_url="https://github.com/${repo_owner}/${repo_name}"
+    osc_repo_open=$'\e]8;;'"${repo_url}"$'\e\\'
+    osc_repo_close=$'\e]8;;\e\\'
+    printf '%s%s%s/%s%s%s\n' "$BOLD" "$osc_repo_open" "$repo_owner" "$repo_name" "$osc_repo_close" "$RESET"
     printf '  Review: %s approved  %s changes requested  %s unreviewed  %s draft  %s draft+approved\n' \
       "$EMOJI_GREEN" "$EMOJI_RED" "$EMOJI_YELLOW" "$EMOJI_WHITE" "$EMOJI_RADIO"
     printf '  CI:     %s passing   %s required failed     %s running\n' \
@@ -941,12 +947,14 @@ while IFS= read -r line; do
       cleaned="${cleaned/$branch/$truncated_branch}"
     fi
 
-    # Insert worktree indicator ("+ ") before the branch name in the tree line
+    # Insert worktree indicator before the branch name in the tree line
     if [[ -n "${worktree_branches[$branch]+_}" ]]; then
       cleaned="${cleaned/$truncated_branch/＋ $truncated_branch}"
     fi
 
     display_width=$(printf '%s' "$cleaned" | wc -m | tr -d ' ')
+    # Fullwidth ＋ is 2 columns but wc -m counts 1 char; correct for it
+    [[ -n "${worktree_branches[$branch]+_}" ]] && (( display_width++ ))
     if (( display_width > max_col1_width )); then
       max_col1_width=$display_width
     fi
@@ -999,6 +1007,7 @@ for cleaned in "${cleaned_lines[@]}"; do
 
     # Pad column 1 (tree + branch)
     display_width=$(printf '%s' "$cleaned" | wc -m | tr -d ' ')
+    [[ -n "${worktree_branches[$branch]+_}" ]] && (( display_width++ ))
     padding=$((col2_start - display_width))
     pad_str=$(printf '%*s' "$padding" '')
 
@@ -1056,7 +1065,7 @@ done
 # ---------------------------------------------------------------------------
 if [[ "$SHOW_STATUS" -eq 1 ]]; then
   echo ""
-  printf '%s%s/%s%s [Review][CI]\n' "$BOLD" "$repo_owner" "$repo_name" "$RESET"
+  printf '%s%s/%s%s\n' "$BOLD" "$repo_owner" "$repo_name" "$RESET"
   printf '  Review: %s approved  %s changes requested  %s unreviewed  %s draft  %s draft+approved\n' \
     "$EMOJI_GREEN" "$EMOJI_RED" "$EMOJI_YELLOW" "$EMOJI_WHITE" "$EMOJI_RADIO"
   printf '  CI:     %s passing   %s required failed     %s running\n' \
