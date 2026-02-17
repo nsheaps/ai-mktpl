@@ -46,13 +46,13 @@ startup is ~25ms) and distributable as a single-file executable via
 
 ## 3. Goals and Success Metrics
 
-| Metric                  | Current (bash)        | Target (TS/Bun)        | How Measured            |
-| ----------------------- | --------------------- | ---------------------- | ----------------------- |
-| Code maintainability    | Single 1076-line file | Modular TS codebase    | File count, avg length  |
-| Test coverage           | 0%                    | >80% of core logic     | Test runner output      |
-| Startup time            | ~200ms (bash+jq+gh)   | <500ms                 | `time gsv`              |
-| Feature parity          | Full                  | Full on day 1          | Manual comparison       |
-| New feature velocity    | Hours (fragile edits) | Minutes (typed, tested)| Developer experience    |
+| Metric               | Current (bash)        | Target (TS/Bun)         | How Measured           |
+| -------------------- | --------------------- | ----------------------- | ---------------------- |
+| Code maintainability | Single 1076-line file | Modular TS codebase     | File count, avg length |
+| Test coverage        | 0%                    | >80% of core logic      | Test runner output     |
+| Startup time         | ~200ms (bash+jq+gh)   | <500ms                  | `time gsv`             |
+| Feature parity       | Full                  | Full on day 1           | Manual comparison      |
+| New feature velocity | Hours (fragile edits) | Minutes (typed, tested) | Developer experience   |
 
 ### Non-Goals
 
@@ -108,53 +108,53 @@ startup is ~25ms) and distributable as a single-file executable via
 
 #### Architecture
 
-| ID     | Requirement                                                       | Priority  | Acceptance Criteria                                          |
-| ------ | ----------------------------------------------------------------- | --------- | ------------------------------------------------------------ |
-| FR-001 | Modular codebase with clear separation of concerns                | Must-have | Separate modules for: data fetching, rendering, CLI parsing  |
-| FR-002 | All current CLI flags supported with identical behavior           | Must-have | `--output`, `--watch`, `--color`, etc. all work as before    |
-| FR-003 | Single compiled binary via `bun build --compile`                  | Must-have | `gsv` binary runs without Bun installed                      |
-| FR-004 | Homebrew formula for installation                                 | Must-have | `brew install nsheaps/devsetup/gs-stack-status`              |
+| ID     | Requirement                                             | Priority  | Acceptance Criteria                                         |
+| ------ | ------------------------------------------------------- | --------- | ----------------------------------------------------------- |
+| FR-001 | Modular codebase with clear separation of concerns      | Must-have | Separate modules for: data fetching, rendering, CLI parsing |
+| FR-002 | All current CLI flags supported with identical behavior | Must-have | `--output`, `--watch`, `--color`, etc. all work as before   |
+| FR-003 | Single compiled binary via `bun build --compile`        | Must-have | `gsv` binary runs without Bun installed                     |
+| FR-004 | Homebrew formula for installation                       | Must-have | `brew install nsheaps/devsetup/gs-stack-status`             |
 
 #### Data Layer
 
-| ID     | Requirement                                                       | Priority    | Acceptance Criteria                                         |
-| ------ | ----------------------------------------------------------------- | ----------- | ----------------------------------------------------------- |
-| FR-005 | Parse `gs ls --all` output for branch hierarchy                   | Must-have   | Correctly handles all tree characters (┣┏┻┃□■)              |
-| FR-006 | Fetch PR metadata via GitHub GraphQL API                          | Must-have   | Single batched query (not N+1) for all PRs in stack         |
-| FR-007 | Detect worktree branches via `git worktree list --porcelain`      | Must-have   | Excludes current worktree, marks others                     |
-| FR-008 | Deduplicate CI check runs (keep most recent by databaseId)        | Must-have   | No stale check results from workflow re-runs                |
-| FR-009 | Support `--only-required-ci` filtering                            | Must-have   | CI status reflects only required checks when enabled        |
+| ID     | Requirement                                                  | Priority  | Acceptance Criteria                                  |
+| ------ | ------------------------------------------------------------ | --------- | ---------------------------------------------------- |
+| FR-005 | Parse `gs ls --all` output for branch hierarchy              | Must-have | Correctly handles all tree characters (┣┏┻┃□■)       |
+| FR-006 | Fetch PR metadata via GitHub GraphQL API                     | Must-have | Single batched query (not N+1) for all PRs in stack  |
+| FR-007 | Detect worktree branches via `git worktree list --porcelain` | Must-have | Excludes current worktree, marks others              |
+| FR-008 | Deduplicate CI check runs (keep most recent by databaseId)   | Must-have | No stale check results from workflow re-runs         |
+| FR-009 | Support `--only-required-ci` filtering                       | Must-have | CI status reflects only required checks when enabled |
 
 #### Rendering
 
-| ID     | Requirement                                                       | Priority    | Acceptance Criteria                                         |
-| ------ | ----------------------------------------------------------------- | ----------- | ----------------------------------------------------------- |
-| FR-010 | Interactive format with aligned columns                           | Must-have   | Matches current bash output layout                          |
-| FR-011 | OSC 8 format with clickable hyperlinks                            | Must-have   | PR URLs and repo name are clickable                         |
-| FR-012 | Markdown format with proper indentation                           | Must-have   | Valid markdown, renders correctly on GitHub                  |
-| FR-013 | Fullwidth Unicode character width handling                        | Must-have   | `＋` renders correctly at 2 columns                         |
-| FR-014 | Color support with NO_COLOR/FORCE_COLOR/TTY detection             | Must-have   | Follows [no-color.org](https://no-color.org) standard       |
-| FR-015 | Watch mode using alternate screen buffer                          | Must-have   | No scrollback pollution, "Last updated" timestamp           |
-| FR-016 | Worktree indicator (`＋`) and branch name in bold magenta          | Must-have   | Visually distinct from non-worktree branches                |
+| ID     | Requirement                                               | Priority  | Acceptance Criteria                                   |
+| ------ | --------------------------------------------------------- | --------- | ----------------------------------------------------- |
+| FR-010 | Interactive format with aligned columns                   | Must-have | Matches current bash output layout                    |
+| FR-011 | OSC 8 format with clickable hyperlinks                    | Must-have | PR URLs and repo name are clickable                   |
+| FR-012 | Markdown format with proper indentation                   | Must-have | Valid markdown, renders correctly on GitHub           |
+| FR-013 | Fullwidth Unicode character width handling                | Must-have | `＋` renders correctly at 2 columns                   |
+| FR-014 | Color support with NO_COLOR/FORCE_COLOR/TTY detection     | Must-have | Follows [no-color.org](https://no-color.org) standard |
+| FR-015 | Watch mode using alternate screen buffer                  | Must-have | No scrollback pollution, "Last updated" timestamp     |
+| FR-016 | Worktree indicator (`＋`) and branch name in bold magenta | Must-have | Visually distinct from non-worktree branches          |
 
 #### Testing
 
-| ID     | Requirement                                                       | Priority    | Acceptance Criteria                                         |
-| ------ | ----------------------------------------------------------------- | ----------- | ----------------------------------------------------------- |
-| FR-017 | Unit tests for tree parsing logic                                 | Must-have   | Tests cover all tree characters and edge cases              |
-| FR-018 | Unit tests for CI status computation (dedup, required filtering)  | Must-have   | Tests cover all CI state combinations                       |
-| FR-019 | Unit tests for column alignment and width calculation             | Must-have   | Tests cover fullwidth chars, truncation, padding            |
-| FR-020 | Snapshot tests for each output format                             | Should-have | Regression detection on rendering changes                   |
+| ID     | Requirement                                                      | Priority    | Acceptance Criteria                              |
+| ------ | ---------------------------------------------------------------- | ----------- | ------------------------------------------------ |
+| FR-017 | Unit tests for tree parsing logic                                | Must-have   | Tests cover all tree characters and edge cases   |
+| FR-018 | Unit tests for CI status computation (dedup, required filtering) | Must-have   | Tests cover all CI state combinations            |
+| FR-019 | Unit tests for column alignment and width calculation            | Must-have   | Tests cover fullwidth chars, truncation, padding |
+| FR-020 | Snapshot tests for each output format                            | Should-have | Regression detection on rendering changes        |
 
 ### Non-Functional Requirements
 
-| ID      | Requirement     | Target                                                      |
-| ------- | --------------- | ----------------------------------------------------------- |
-| NFR-001 | Startup time    | <500ms for 15 branches including GraphQL call                |
-| NFR-002 | Binary size     | <50MB compiled (Bun compiled binaries are ~40-80MB)         |
-| NFR-003 | Compatibility   | macOS (arm64, x64) and Linux (x64)                          |
-| NFR-004 | Auth            | Uses existing `gh` auth token; no additional setup          |
-| NFR-005 | Dependencies    | Minimal — only `gs` and `git` as external runtime deps      |
+| ID      | Requirement   | Target                                                 |
+| ------- | ------------- | ------------------------------------------------------ |
+| NFR-001 | Startup time  | <500ms for 15 branches including GraphQL call          |
+| NFR-002 | Binary size   | <50MB compiled (Bun compiled binaries are ~40-80MB)    |
+| NFR-003 | Compatibility | macOS (arm64, x64) and Linux (x64)                     |
+| NFR-004 | Auth          | Uses existing `gh` auth token; no additional setup     |
+| NFR-005 | Dependencies  | Minimal — only `gs` and `git` as external runtime deps |
 
 ## 6. Technical Considerations
 
@@ -206,14 +206,14 @@ gs-stack-status/
 
 ### Key Design Decisions
 
-| Decision                      | Choice                  | Rationale                                                        |
-| ----------------------------- | ----------------------- | ---------------------------------------------------------------- |
-| Runtime                       | Bun                     | Fast startup (~25ms), built-in TS support, `--compile` for binary |
-| No framework for CLI parsing  | `minimist` or built-in  | Simple flags, no subcommands — framework is overkill              |
-| GitHub API                    | Direct `fetch` to GraphQL | Avoid `gh` subprocess; use `gh auth token` for auth             |
-| Tree parsing                  | Custom parser (from bash) | `gs ls --json` exists but doesn't include all needed metadata   |
-| Terminal rendering            | Custom (no framework)   | chalk/kleur add deps; ANSI codes are simple enough              |
-| Testing                       | `bun test` (built-in)   | Zero-config, fast, snapshot support                              |
+| Decision                     | Choice                    | Rationale                                                         |
+| ---------------------------- | ------------------------- | ----------------------------------------------------------------- |
+| Runtime                      | Bun                       | Fast startup (~25ms), built-in TS support, `--compile` for binary |
+| No framework for CLI parsing | `minimist` or built-in    | Simple flags, no subcommands — framework is overkill              |
+| GitHub API                   | Direct `fetch` to GraphQL | Avoid `gh` subprocess; use `gh auth token` for auth               |
+| Tree parsing                 | Custom parser (from bash) | `gs ls --json` exists but doesn't include all needed metadata     |
+| Terminal rendering           | Custom (no framework)     | chalk/kleur add deps; ANSI codes are simple enough                |
+| Testing                      | `bun test` (built-in)     | Zero-config, fast, snapshot support                               |
 
 ### Migration Strategy
 
@@ -245,13 +245,13 @@ gs-branch-viewer features can be implemented in the new codebase.
 
 ## 7. Open Questions
 
-| #   | Question                                                          | Owner  | Status | Resolution |
-| --- | ----------------------------------------------------------------- | ------ | ------ | ---------- |
-| 1   | Repo name: `gs-stack-status`, `gsv`, or `git-spice-viewer`?      | Nathan | Open   |            |
-| 2   | Use `gh api` subprocess or direct fetch with `gh auth token`?     | Nathan | Open   | Direct fetch is faster but requires token management |
-| 3   | Should `gs ls --json` be used instead of parsing text output?     | Nathan | Open   | JSON is cleaner but may not include all tree metadata |
-| 4   | Bun compiled binary size acceptable (~50MB)?                      | Nathan | Open   | Compare with Go alternative (~10MB) |
-| 5   | Should the Homebrew formula use the compiled binary or require Bun? | Nathan | Open | Compiled binary is more portable |
+| #   | Question                                                            | Owner  | Status | Resolution                                            |
+| --- | ------------------------------------------------------------------- | ------ | ------ | ----------------------------------------------------- |
+| 1   | Repo name: `gs-stack-status`, `gsv`, or `git-spice-viewer`?         | Nathan | Open   |                                                       |
+| 2   | Use `gh api` subprocess or direct fetch with `gh auth token`?       | Nathan | Open   | Direct fetch is faster but requires token management  |
+| 3   | Should `gs ls --json` be used instead of parsing text output?       | Nathan | Open   | JSON is cleaner but may not include all tree metadata |
+| 4   | Bun compiled binary size acceptable (~50MB)?                        | Nathan | Open   | Compare with Go alternative (~10MB)                   |
+| 5   | Should the Homebrew formula use the compiled binary or require Bun? | Nathan | Open   | Compiled binary is more portable                      |
 
 ## 8. Next Steps
 
@@ -283,6 +283,6 @@ gs-branch-viewer features can be implemented in the new codebase.
 
 ## Revision History
 
-| Date       | Author       | Changes                                          |
-| ---------- | ------------ | ------------------------------------------------ |
+| Date       | Author       | Changes                                            |
+| ---------- | ------------ | -------------------------------------------------- |
 | 2026-02-17 | Nathan Heaps | Initial draft — migration spec from bash to Bun/TS |
