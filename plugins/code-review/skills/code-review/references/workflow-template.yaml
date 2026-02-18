@@ -1,0 +1,154 @@
+# Claude Code Review — GitHub Actions Workflow Template
+#
+# Copy this to .github/workflows/claude-code-review.yaml in your repository.
+# Requires:
+#   - GitHub App with contents:write, pull-requests:write, issues:write permissions
+#   - Secrets: REVIEW_GITHUB_APP_ID, REVIEW_GITHUB_APP_PRIVATE_KEY
+#   - Secrets: REVIEW_ANTHROPIC_API_KEY (or ANTHROPIC_API_KEY, or CLAUDE_CODE_OAUTH_TOKEN)
+#   - Actions: .github/actions/github-app-auth/ and .github/actions/interpolate-prompt/
+#   - Prompt: .github/prompts/claude-code-review.md
+#
+# See the code-review skill for full setup instructions.
+
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, labeled]
+
+concurrency:
+  group: ${{ format('claude-review-{0}', github.event.pull_request.number) }}
+  cancel-in-progress: false
+
+jobs:
+  claude-review:
+    # Run on non-draft PRs, or on draft PRs when 'request-review' label is added
+    if: |
+      github.event.pull_request.draft != true ||
+      (github.event.action == 'labeled' && github.event.label.name == 'request-review')
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+      actions: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          fetch-depth: 50
+
+      - name: Authenticate as GitHub App
+        id: auth
+        uses: ./.github/actions/github-app-auth
+        with:
+          app-id: ${{ secrets.REVIEW_GITHUB_APP_ID }}
+          private-key: ${{ secrets.REVIEW_GITHUB_APP_PRIVATE_KEY }}
+
+      - name: Remove request-review label
+        if: github.event.action == 'labeled' && github.event.label.name == 'request-review'
+        env:
+          GH_TOKEN: ${{ steps.auth.outputs.token }}
+        run: |
+          gh pr edit ${{ github.event.pull_request.number }} --remove-label "request-review"
+
+      - name: Get additional job context
+        uses: qoomon/actions--context@v5
+        if: ${{ !cancelled() }}
+        id: additional-context
+        continue-on-error: true
+
+      - name: Install gh-pr-review extension
+        shell: bash
+        run: |
+          gh extension install agynio/gh-pr-review || echo "gh-pr-review extension already installed"
+
+      - name: Interpolate review prompt
+        id: prompt
+        uses: ./.github/actions/interpolate-prompt
+        env:
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          JOB_CONTEXT: ${{ toJson(steps.additional-context.outputs) }}
+        with:
+          template-file: .github/prompts/claude-code-review.md
+
+      - name: Run Claude Code Review
+        id: claude-review
+        uses: anthropics/claude-code-action@v1
+        env:
+          GH_TOKEN: "${{ steps.auth.outputs.token }}"
+          GITHUB_TOKEN: "${{ steps.auth.outputs.token }}"
+        with:
+          anthropic_api_key: ${{ secrets.REVIEW_ANTHROPIC_API_KEY || secrets.ANTHROPIC_API_KEY || '' }}
+          claude_code_oauth_token: ${{ (secrets.REVIEW_ANTHROPIC_API_KEY || secrets.ANTHROPIC_API_KEY) && '' || secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          show_full_output: true
+          bot_id: ${{ steps.auth.outputs.user-id }}
+          bot_name: ${{ steps.auth.outputs.user-name }}
+          allowed_bots: "github-actions[bot],renovate[bot],claude[bot]"
+          github_token: ${{ steps.auth.outputs.token }}
+          prompt: ${{ steps.prompt.outputs.prompt }}
+          settings: |
+            {
+              "permissions": {
+                "allow": [
+                  "Task", "Glob", "Grep", "LS", "Read", "Edit", "Write",
+                  "ExitPlanMode", "Replace", "MultiEdit",
+                  "NotebookRead", "NotebookEdit", "TodoWrite",
+                  "WebSearch", "WebFetch",
+                  "Bash", "BashOutput", "KillBash",
+                  "ListMcpResourcesTool", "ReadMcpResourceTool",
+                  "SlashCommand", "Skill",
+                  "mcp__github__github_support_docs_search",
+                  "mcp__github__get_pull_request",
+                  "mcp__github__get_pull_request_diff",
+                  "mcp__github__get_pull_request_files",
+                  "mcp__github__get_pull_request_review_comments",
+                  "mcp__github__get_pull_request_reviews",
+                  "mcp__github__get_pull_request_status",
+                  "mcp__github__create_pending_pull_request_review",
+                  "mcp__github__add_comment_to_pending_review",
+                  "mcp__github__submit_pending_pull_request_review",
+                  "Bash(git log:*)", "Bash(git diff:*)", "Bash(git status:*)",
+                  "Bash(git rev-parse:*)", "Bash(git fetch:*)", "Bash(git show:*)",
+                  "Bash(git merge:*)", "Bash(git remote get-url:*)", "Bash(git rm:*)",
+                  "Bash(gh issue view:*)", "Bash(gh search:*)", "Bash(gh issue list:*)",
+                  "Bash(gh pr comment:*)", "Bash(gh pr diff:*)", "Bash(gh pr view:*)",
+                  "Bash(gh pr-review:*)", "Bash(gh pr-review review view:*)",
+                  "Bash(gh pr list:*)", "Bash(gh run list:*)", "Bash(gh run view:*)",
+                  "Bash(gh extension list:*)"
+                ],
+                "deny": [
+                  "mcp__github_ci__get_ci_status",
+                  "mcp__github_ci__get_workflow_run_details",
+                  "mcp__github_ci__download_job_log",
+                  "Bash(gh pr checks:*)",
+                  "Bash(git push:*)"
+                ]
+              },
+              "model": "opus",
+              "env": {
+                "GH_PAGER": "cat",
+                "GH_PROMPT_DISABLED": "true",
+                "GH_BROWSER": "curl",
+                "CLAUDE_CODE_REMOTE": "true"
+              }
+            }
+          additional_permissions: |
+            actions: read
+          claude_args: >-
+            --allowedTools
+            mcp__github__github_support_docs_search,
+            mcp__github__get_pull_request,
+            mcp__github__get_pull_request_diff,
+            mcp__github__get_pull_request_files,
+            mcp__github__get_pull_request_review_comments,
+            mcp__github__get_pull_request_reviews,
+            mcp__github__get_pull_request_status,
+            mcp__github__create_pending_pull_request_review,
+            mcp__github__add_comment_to_pending_review,
+            mcp__github__submit_pending_pull_request_review

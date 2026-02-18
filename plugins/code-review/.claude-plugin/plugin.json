@@ -1,0 +1,22 @@
+{
+  "name": "code-review",
+  "version": "0.1.0",
+  "description": "Automated code review bot using Claude Code Action in GitHub CI, with configurable prompts, labels, and review workflows",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/code-review",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": [
+    "code-review",
+    "review-bot",
+    "ci",
+    "github-actions",
+    "claude-code-action",
+    "pull-request",
+    "pr-review",
+    "automation"
+  ]
+}
