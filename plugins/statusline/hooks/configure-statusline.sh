@@ -15,73 +15,14 @@ STATUSLINE_SCRIPT="${CLAUDE_PLUGIN_ROOT}/bin/statusline.sh"
 # Ensure settings directory exists
 mkdir -p "$(dirname "$SETTINGS_FILE")"
 
-# safe_write_settings: atomically update settings.json with locking + validation
-# Uses mkdir as a portable POSIX lock (atomic on all filesystems).
-# Uses mktemp for unique tmp files to prevent clobbering between processes.
-# Validates jq output is non-empty valid JSON before replacing the original.
-#
-# Usage: safe_write_settings <jq_filter>
-safe_write_settings() {
-  local jq_filter="$1"
-  local lockdir="${SETTINGS_FILE}.lock"
-  local tmpfile
-  local retries=0
-
-  # Acquire lock via mkdir (atomic on POSIX)
-  while ! mkdir "$lockdir" 2>/dev/null; do
-    retries=$((retries + 1))
-    if [ "$retries" -ge 30 ]; then
-      # Stale lock detection: if lock is older than 10 seconds, remove it
-      if [ -d "$lockdir" ]; then
-        local lock_age
-        lock_age=$(( $(date +%s) - $(stat -f %m "$lockdir" 2>/dev/null || stat -c %Y "$lockdir" 2>/dev/null || echo "0") ))
-        if [ "$lock_age" -gt 10 ]; then
-          rmdir "$lockdir" 2>/dev/null || true
-          continue
-        fi
-      fi
-      echo "WARNING: Could not acquire lock on settings.json after 3s, skipping update" >&2
-      return 0
-    fi
-    sleep 0.1
-  done
-
-  # Ensure lock is released on exit (even on error/signal)
-  trap 'rmdir "$lockdir" 2>/dev/null || true' EXIT
-
-  # Ensure settings file exists (inside lock to prevent race)
-  if [ ! -f "$SETTINGS_FILE" ]; then
-    echo "{}" > "$SETTINGS_FILE"
-  fi
-
-  # Create unique tmp file in same directory (for same-filesystem atomic rename)
-  tmpfile=$(mktemp "${SETTINGS_FILE}.XXXXXX")
-
-  # Run jq transformation to tmp file
-  if ! jq --arg script "$STATUSLINE_SCRIPT" "$jq_filter" "$SETTINGS_FILE" > "$tmpfile" 2>/dev/null; then
-    rm -f "$tmpfile"
-    rmdir "$lockdir" 2>/dev/null || true
-    trap - EXIT
-    echo "WARNING: jq transformation failed, skipping update" >&2
-    return 0
-  fi
-
-  # Validate output is non-empty valid JSON
-  if [ ! -s "$tmpfile" ] || ! jq empty "$tmpfile" 2>/dev/null; then
-    rm -f "$tmpfile"
-    rmdir "$lockdir" 2>/dev/null || true
-    trap - EXIT
-    echo "WARNING: jq produced invalid output, skipping update" >&2
-    return 0
-  fi
-
-  # Atomic rename (same filesystem guarantees atomicity)
-  mv "$tmpfile" "$SETTINGS_FILE"
-
-  # Release lock
-  rmdir "$lockdir" 2>/dev/null || true
-  trap - EXIT
-}
+# Source shared atomic settings writer
+# shellcheck source=../../shared/lib/safe-settings-write.sh
+SHARED_LIB="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/shared/lib/safe-settings-write.sh"
+if [ ! -f "$SHARED_LIB" ]; then
+  echo "ERROR: shared lib not found: $SHARED_LIB" >&2
+  exit 2
+fi
+source "$SHARED_LIB"
 
 # Read current statusLine.command value
 current_command=$(jq -r '.statusLine.command // empty' "$SETTINGS_FILE" 2>/dev/null || echo "")
