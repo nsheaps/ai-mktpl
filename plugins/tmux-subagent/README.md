@@ -205,6 +205,14 @@ sudo apt install tmux
 2. Verify AppleScript permissions in System Preferences > Security > Privacy > Automation
 3. Use `--no-iterm` and attach manually: `tmux attach -t session-name`
 
+### Agent unresponsive (stuck mid-turn)
+
+If a teammate agent is stuck mid-turn and not processing messages, send the ESC key via tmux to interrupt its current turn and allow pending messages to propagate:
+
+```bash
+tmux send-keys -t <pane-id> Escape
+```
+
 ### Sub-agent can't access files
 
 Check the workspace settings:

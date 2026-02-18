@@ -168,6 +168,16 @@ For working examples and hook configuration patterns, consult `references/hooks-
 
 **Avoid for**: Sequential dependent tasks, same-file edits, simple/routine tasks, cost-sensitive work (~7x token usage).
 
+## Recovering Unresponsive Teammates
+
+When a teammate agent is unresponsive (stuck mid-turn and not processing messages), send the ESC key via tmux to interrupt its current turn and allow pending messages to propagate:
+
+```bash
+tmux send-keys -t <pane-id> Escape
+```
+
+This works for both tmux mode teammates and tmux sub-agents. It is equivalent to pressing Escape in the teammate's pane (see Keyboard Controls table above).
+
 ## Limitations
 
 - No session resumption for in-process teammates

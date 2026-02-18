@@ -265,6 +265,16 @@ tmux attach -t session-name
 # Check AppleScript permissions in System Preferences > Security > Privacy > Automation
 ```
 
+### Teammate Agent Unresponsive (Stuck Mid-Turn)
+
+If a teammate agent is stuck mid-turn and not processing messages, send the ESC key via tmux to interrupt its current turn and allow pending messages to propagate:
+
+```bash
+tmux send-keys -t <pane-id> Escape
+```
+
+This is equivalent to pressing Escape in the teammate's pane, which interrupts the current turn without killing the session.
+
 ### Sub-Agent Can't Access Files
 
 ```bash
