@@ -21,6 +21,7 @@ A repeatable playbook for investigating undocumented mechanisms, internal behavi
 Start with publicly available information. This is cheap and fast.
 
 **Steps:**
+
 1. **Search GitHub Issues** — Use `gh issue list --repo <repo> --search "<keywords>"` or WebSearch. Issues often contain the most detailed technical descriptions of behavior, including bug reports that reveal internals.
 2. **Search Official Documentation** — Fetch the relevant docs pages. Note what IS documented and what's missing.
 3. **Search Community Sources** — Blog posts, community plugins, Stack Overflow, Discord threads. Use WebSearch with specific technical terms.
@@ -37,12 +38,14 @@ Start with publicly available information. This is cheap and fast.
 When external research leaves gaps, go to the source code.
 
 **When to escalate:**
+
 - External sources contradict each other
 - Multiple feature requests exist for something that might already be implemented
 - Behavior observed doesn't match documentation
 - You need the exact mechanism, not just "what it does"
 
 **Steps:**
+
 1. **Locate source material** — Compiled binaries, decompiled JS, open-source repos, package contents
 2. **Search for entry points** — Start with the user-visible behavior and trace backwards:
    - If investigating a CLI flag: search for the flag name string
@@ -56,6 +59,7 @@ When external research leaves gaps, go to the source code.
 Combine findings and check for consistency.
 
 **Steps:**
+
 1. **Cross-reference Phase 1 and Phase 2** — Do the source findings explain the external observations? If not, keep digging.
 2. **Correct earlier conclusions** — If source analysis contradicts your Phase 1 findings, explicitly call out the correction. Previous research was based on incomplete information — that's expected, not a failure.
 3. **Document confidence levels** — Be explicit about what's confirmed vs. inferred
@@ -92,37 +96,39 @@ Round 4: Read surrounding context (50-100 lines) around each hit
 
 ### What to Search For (by Investigation Type)
 
-| Investigating... | Search for... |
-|:-----------------|:-------------|
+| Investigating...    | Search for...                                                               |
+| :------------------ | :-------------------------------------------------------------------------- |
 | Terminal/tab titles | `\x1B]0;`, `\x1B]1;`, `\x1B]2;`, `process.title`, `setTitle`, `windowTitle` |
-| tmux integration | `tmux`, `split-window`, `send-keys`, `rename-window`, `pane` |
-| Permission modes | `delegate`, `bypassPermissions`, `permission_mode`, `permissionMode` |
-| Hook system | `PreToolUse`, `PostToolUse`, `hookSpecificOutput`, `permissionDecision` |
-| Environment vars | `CLAUDE_CODE_`, `process.env.CLAUDE` |
-| Agent/team system | `CLAUDE_CODE_AGENT`, `teammate`, `team-lead`, `teamContext` |
-| Notification system | `\x1B]9;`, `\x1B]99;`, `\x1B]777;`, `notify` |
-| Process lifecycle | `process.title`, `process.exit`, `process.on("exit"` |
+| tmux integration    | `tmux`, `split-window`, `send-keys`, `rename-window`, `pane`                |
+| Permission modes    | `delegate`, `bypassPermissions`, `permission_mode`, `permissionMode`        |
+| Hook system         | `PreToolUse`, `PostToolUse`, `hookSpecificOutput`, `permissionDecision`     |
+| Environment vars    | `CLAUDE_CODE_`, `process.env.CLAUDE`                                        |
+| Agent/team system   | `CLAUDE_CODE_AGENT`, `teammate`, `team-lead`, `teamContext`                 |
+| Notification system | `\x1B]9;`, `\x1B]99;`, `\x1B]777;`, `notify`                                |
+| Process lifecycle   | `process.title`, `process.exit`, `process.on("exit"`                        |
 
 ## Confidence Level Framework
 
 Use these consistently across all research reports:
 
-| Level | Meaning | Evidence Required |
-|:------|:--------|:-----------------|
-| **Very High** | Confirmed from source code with exact line references | Decompiled source + verified call chain |
-| **High** | Confirmed from multiple independent external sources | 3+ sources agree, or official docs + community confirmation |
-| **Medium-High** | Strong evidence but some inference required | 2 sources agree + logical reasoning |
-| **Medium** | Plausible with supporting evidence | 1 source + consistent with observed behavior |
-| **Low** | Hypothesis based on limited evidence | Inference from related findings only |
+| Level           | Meaning                                               | Evidence Required                                           |
+| :-------------- | :---------------------------------------------------- | :---------------------------------------------------------- |
+| **Very High**   | Confirmed from source code with exact line references | Decompiled source + verified call chain                     |
+| **High**        | Confirmed from multiple independent external sources  | 3+ sources agree, or official docs + community confirmation |
+| **Medium-High** | Strong evidence but some inference required           | 2 sources agree + logical reasoning                         |
+| **Medium**      | Plausible with supporting evidence                    | 1 source + consistent with observed behavior                |
+| **Low**         | Hypothesis based on limited evidence                  | Inference from related findings only                        |
 
 ### When to Revise Previous Findings
 
 **Always revise when:**
+
 - Source analysis contradicts external research
 - A newer version of the tool changes behavior
 - You find that feature requests were for behavior that HAS been implemented
 
 **How to revise:**
+
 1. Don't delete the old report — add a correction section or write a new report
 2. Explicitly state what was wrong and why (e.g., "based on GitHub issues from older versions")
 3. Provide the new evidence with source references
@@ -137,34 +143,44 @@ Use these consistently across all research reports:
 **Question**: <The specific question being investigated>
 
 ## Executive Summary
+
 <2-3 sentence answer>
 
 ## Methodology
+
 <Which phases were used, what sources were consulted>
 
 ## Findings
+
 ### 1. <Finding>
+
 <Detail with source references>
 **Confidence**: <Level> — <evidence summary>
 
 ### 2. <Finding>
+
 ...
 
 ## Corrections to Previous Research
+
 <If applicable — what changed and why>
 
 ## Practical Implications
+
 <How to use these findings>
 
 ## Open Questions
+
 <What remains unanswered>
 
 ## Confidence Levels
+
 | Finding | Confidence |
-|:--------|:-----------|
-| ... | ... |
+| :------ | :--------- |
+| ...     | ...        |
 
 ## Sources
+
 - <Source with link or file:line reference>
 ```
 
@@ -175,6 +191,7 @@ This methodology was developed during the investigation of how Claude Code sets 
 ### Phase 1: External Research
 
 **What we did:**
+
 - Searched 4 GitHub issues (#18326, #20441, #15802, #15082) — all said Claude Code does NOT emit OSC escape sequences
 - Checked official docs — no mention of terminal title management
 - Found community workarounds (claude-code-terminal-title skill, tmux-agent-indicator plugin)
@@ -204,6 +221,7 @@ This methodology was developed during the investigation of how Claude Code sets 
 - Corrected the Phase 1 report and documented the full mechanism
 
 **Full reports:**
+
 - Phase 1: [`.claude/tmp/tab-title-mechanism-research.md`](https://github.com/nsheaps/claude-utils) (in claude-utils)
 - Phase 2: [`.claude/tmp/tab-title-mechanism-source-analysis.md`](https://github.com/nsheaps/claude-utils) (in claude-utils)
 

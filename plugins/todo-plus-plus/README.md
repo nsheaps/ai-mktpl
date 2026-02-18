@@ -16,6 +16,7 @@ Add to your project or user settings.json enabledPlugins.
 ### TaskCompleted Hook
 
 When any task is marked complete (via TaskUpdate), the hook:
+
 1. Checks `git status` for uncommitted changes
 2. Checks for unpushed commits
 3. If either exists, blocks completion with a message telling Claude to commit and push first
@@ -23,6 +24,7 @@ When any task is marked complete (via TaskUpdate), the hook:
 ### SessionStart Hook
 
 On session start, injects a prompt reminding Claude that:
+
 - Tasks are for local session work only
 - Always commit and push before completing tasks
 - Use external systems for persistent project tracking

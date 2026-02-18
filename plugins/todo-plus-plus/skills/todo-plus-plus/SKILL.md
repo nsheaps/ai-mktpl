@@ -23,6 +23,7 @@ Agents frequently complete work but forget to commit. In ephemeral sessions (tea
 ### If Blocked
 
 When task completion is blocked:
+
 1. Run `git status` to see what needs attention
 2. Stage and commit your changes
 3. Push to remote
@@ -53,5 +54,6 @@ No configuration required. Install the plugin and it works automatically.
 ## Disabling
 
 To temporarily disable commit enforcement, you can:
+
 1. Disable the plugin in settings.json
 2. Or remove the plugin from enabledPlugins
