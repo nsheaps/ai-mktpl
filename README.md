@@ -1,434 +1,182 @@
-Use https://github.com/ananddtyagi/claude-code-marketplace as reference and example.
+# ai-mktpl
 
-<hr><hr><hr>
-<strong>below be dragons and vibes</strong>
-<hr>
-# Claude Code Plugin Marketplace
+A curated collection of plugins, rules, agents, and commands for [Claude Code](https://code.claude.com).
 
-A curated collection of high-quality plugins for [Claude Code](https://code.claude.com), focusing on git automation and intelligent development workflows.
+## What is this?
 
-## Available Plugins
+This repo is a **plugin marketplace** for Claude Code — a central place for reusable plugins, organization-wide rules, custom agents, and slash commands. It serves two purposes:
 
-### 🚀 [Commit Command Plugin](./plugins/commit-command)
-
-**Type:** Slash Command
-**Category:** Git Automation
-
-Automate git commits with AI-generated messages that match your repository's commit style and conventions.
-
-- **Usage:** `/commit [optional message prefix]`
-- **Features:**
-  - Analyzes staged and unstaged changes
-  - Learns from your commit history
-  - Generates semantic commit messages
-  - Supports Conventional Commits
-  - Excludes sensitive files
-  - Smart file staging
-
-**Installation:**
-
-```bash
-cd ~/.claude/plugins
-git clone https://github.com/nsheaps/.ai commit-command
-# Or install via Claude Code plugin manager
-```
-
----
-
-### 🧠 [Smart Commit Skill](./plugins/commit-skill)
-
-**Type:** Agent Skill
-**Category:** Git Automation
-
-Enables Claude to automatically analyze git changes and create well-formatted commits during development tasks.
-
-- **Auto-activates when:**
-  - Completing development tasks
-  - Multiple file changes detected
-  - Working in repositories with commit conventions
-  - Preparing code for pull requests
-
-- **Features:**
-  - Intelligent change analysis
-  - Convention detection
-  - Atomic commit strategy
-  - Security-aware (excludes sensitive files)
-  - Adapts to repository style
-
-**Installation:**
-
-```bash
-cd ~/.claude/skills
-git clone https://github.com/nsheaps/.ai commit-skill
-# Or install via Claude Code plugin manager
-```
-
----
-
-### 🧠 [Memory Manager](./plugins/memory-manager)
-
-**Type:** Agent Skill
-**Category:** Productivity
-
-Intelligent memory management for CLAUDE.md files. Automatically detects when you express preferences, rules, or instructions and maintains them in organized memory files.
-
-- **Auto-activates when you say:**
-  - "Always do X"
-  - "Never use Y"
-  - "Don't forget to Z"
-  - "Prefer X over Y"
-  - "Remember to..."
-  - "From now on..."
-
-- **Features:**
-  - Smart scope detection (global vs project-specific)
-  - Hierarchical organization with categories
-  - Supports `@reference` external files
-  - Clear confirmation messages (🧠 and 📝)
-  - Self-updating with version awareness
-
-**Installation:**
-
-```bash
-# Via Claude Code plugin manager
-/plugin marketplace add nsheaps/.ai
-/plugin install memory-manager@claude-code-plugin-marketplace
-
-# Or via CLI
-claude plugin marketplace add nsheaps/.ai
-claude plugin install memory-manager@claude-code-plugin-marketplace
-```
+1. **Plugin distribution**: 27 plugins covering git automation, safety evaluation, status lines, task management, and more
+2. **Organization-wide AI configuration**: Rules, agents, and commands that get synced to `~/.claude/` for consistent behavior across all projects
 
 ## Installation
 
-### Method 1: Claude Code Plugin Manager (Recommended)
+### Installing a plugin
 
-1. Open Claude Code
-2. Run `/plugin marketplace add nsheaps/.ai`
-3. Browse available plugins
-4. Click "Install now" on desired plugin
-5. Restart Claude Code
-
-### Method 2: Manual Installation
-
-#### Installing the Commit Command
-
-```bash
-# Navigate to Claude Code plugins directory
-cd ~/.claude/plugins
-
-# Clone the commit-command plugin
-git clone https://github.com/nsheaps/.ai commit-command
-cd commit-command
-git sparse-checkout init --cone
-git sparse-checkout set plugins/commit-command
-
-# Or copy the plugin directory
-cp -r /path/to/this/repo/plugins/commit-command ~/.claude/plugins/
-
-# Restart Claude Code
-```
-
-#### Installing the Smart Commit Skill
-
-```bash
-# Navigate to Claude Code skills directory
-cd ~/.claude/skills
-
-# Clone the commit-skill plugin
-git clone https://github.com/nsheaps/.ai commit-skill
-cd commit-skill
-git sparse-checkout init --cone
-git sparse-checkout set plugins/commit-skill
-
-# Or copy the skill directory
-cp -r /path/to/this/repo/plugins/commit-skill ~/.claude/skills/
-
-# Restart Claude Code
-```
-
-### Method 3: Add to Team Configuration
-
-For team-wide distribution, add to `.claude/settings.json`:
+Add the plugin path to your project's `.claude.json`:
 
 ```json
 {
-  "extraKnownMarketplaces": ["nsheaps/.ai"]
+  "plugins": [
+    "/path/to/this/repo/plugins/scm-utils",
+    "/path/to/this/repo/plugins/statusline"
+  ]
 }
 ```
 
-## Usage Guide
+### Installing organization-wide rules
 
-### Using the Commit Command
+The `.ai/rules/` directory is synced to `~/.claude/rules/` via automation (symlinks). This makes rules available across all projects without per-project configuration.
 
-After installation, use the `/commit` command in any git repository:
+## Available Plugins
 
-```bash
-# Basic usage - analyzes all changes and creates a commit
-/commit
+### Git & Source Control
 
-# With a message prefix
-/commit feat: add new feature
+| Plugin | Description |
+|:-------|:------------|
+| **[commit-command](./plugins/commit-command)** | `/commit` — AI-generated commit messages matching your repo's style |
+| **[commit-skill](./plugins/commit-skill)** | Auto-analyze changes and create semantic commits during development |
+| **[scm-utils](./plugins/scm-utils)** | `/commit`, `/update-branch` commands + auth-user skill |
+| **[git-spice](./plugins/git-spice)** | Manage stacked Git branches with the `gs` CLI |
 
-# For bug fixes
-/commit fix:
+### Safety & Evaluation
 
-# For documentation
-/commit docs:
+| Plugin | Description |
+|:-------|:------------|
+| **[safety-evaluation-prompt](./plugins/safety-evaluation-prompt)** | Pre-tool-call safety via prompt-style hooks |
+| **[safety-evaluation-script](./plugins/safety-evaluation-script)** | Pre-tool-call safety via script-style hooks (haiku CLI) |
+| **[context-bloat-prevention](./plugins/context-bloat-prevention)** | PostToolUse + PreToolUse hooks to detect and prevent context bloat |
 
-# With ticket reference
-/commit [TASK-123]
-```
+### Status & Monitoring
 
-### Using the Smart Commit Skill
+| Plugin | Description |
+|:-------|:------------|
+| **[statusline](./plugins/statusline)** | Configurable status line showing session info, project context, git status |
+| **[statusline-iterm](./plugins/statusline-iterm)** | Status line with iTerm2 badge integration |
 
-The skill activates automatically during development:
+### Development Workflow
 
-```
-You: "Add user authentication with JWT tokens"
+| Plugin | Description |
+|:-------|:------------|
+| **[review-changes](./plugins/review-changes)** | `/review-changes` — detailed code review feedback |
+| **[code-simplifier](./plugins/code-simplifier)** | `/simplify` — refine code for clarity and maintainability |
+| **[create-command](./plugins/create-command)** | `/create-command` — guided slash command creation |
+| **[correct-behavior](./plugins/correct-behavior)** | `/correct-behavior` — fix AI behavior mistakes and update rules |
+| **[product-development-and-sdlc](./plugins/product-development-and-sdlc)** | Iterative PRD writing with structured SDLC workflows |
 
-Claude: [implements the feature]
-Claude: [automatically creates commit: "feat: add JWT-based user authentication"]
-```
+### Task & Session Management
 
-You can also request commits explicitly:
+| Plugin | Description |
+|:-------|:------------|
+| **[task-parallelization](./plugins/task-parallelization)** | Intelligently parallelize Task tool calls for batch operations |
+| **[todo-sync](./plugins/todo-sync)** | Auto-sync `~/.claude/` todos to project `.claude/` directory |
+| **[self-terminate](./plugins/self-terminate)** | Graceful SIGINT termination for agents |
 
-```
-You: "Commit these changes"
-Claude: [analyzes changes and creates appropriate commit(s)]
-```
+### Agent Teams & Orchestration
 
-## Plugin Categories
+| Plugin | Description |
+|:-------|:------------|
+| **[tmux-subagent](./plugins/tmux-subagent)** | `/subagent` — launch sub-agents in tmux with custom configs |
+| **[agent-teams-skills](./.ai/plugins/agent-teams-skills)** | Reference skill for agent teams: enabling, config, hooks, tmux |
 
-- **Git Automation**: Tools for streamlining git workflows
-- **Development Workflow**: Enhance daily development tasks
-- **Code Quality**: Maintain high code standards
-- **Productivity**: Context management and preference tracking
+### Integrations
 
-## Features
+| Plugin | Description |
+|:-------|:------------|
+| **[linear-mcp-sync](./plugins/linear-mcp-sync)** | Linear MCP with hash validation hooks for safe ticket updates |
+| **[github-auth-skill](./plugins/github-auth-skill)** | GitHub device authorization flow authentication |
+| **[sync-settings](./plugins/sync-settings)** | Sync local Claude Code settings via `syncconfig.yaml` rules |
 
-### Commit Command (`/commit`)
+### Data & Utilities
 
-✅ Intelligent commit message generation
-✅ Learns from repository history
-✅ Supports Conventional Commits
-✅ Excludes sensitive files (.env, credentials, etc.)
-✅ Smart file staging
-✅ Issue reference detection
-✅ Custom message prefixes
+| Plugin | Description |
+|:-------|:------------|
+| **[data-serialization](./plugins/data-serialization)** | YAML/JSON/TOON/XML conversion; TOON reduces tokens 30-60% |
+| **[memory-manager](./plugins/memory-manager)** | Auto-detect and store user preferences in CLAUDE.md |
+| **[command-help-skill](./plugins/command-help-skill)** | Help discover and execute slash commands sent as messages |
+| **[skills-maintenance](./plugins/skills-maintenance)** | Maintain, update, and improve existing Claude Code skills |
+| **[opengraph-image](./plugins/opengraph-image)** | Generate OpenGraph images via html2png.dev API |
 
-### Smart Commit Skill
+## Organization-Wide Rules
 
-✅ Auto-activates during development
-✅ Semantic change analysis
-✅ Atomic commit strategy
-✅ Convention detection and adaptation
-✅ Security-aware file handling
-✅ Multi-commit organization
-✅ Repository style learning
+21 behavioral rules in `.ai/rules/` covering:
 
-## Requirements
+- **Code quality**: DRY, KISS, YAGNI, incremental development
+- **Git workflow**: PR conventions, commit hygiene, branch management
+- **Task management**: Todo tracking, task planning, sub-agent delegation
+- **Communication**: Speech-to-text handling, intellectual honesty, polite correction
+- **Safety**: Verify before blaming, never say done prematurely, error handling
 
-- **Claude Code**: Latest version
-- **Git**: Installed and configured
-- **Repository**: Must be a git repository
-- **Permissions**: Write access to repository
+Rules are symlinked to `~/.claude/rules/` by automation and apply across all projects.
 
-## Configuration
+## Custom Agents
 
-Both plugins work out of the box, but you can customize behavior:
+6 custom agents in `.ai/agents/`:
 
-### Custom Commit Conventions
+| Agent | Purpose |
+|:------|:--------|
+| `conversation-history-search` | Search past Claude Code conversations (haiku model) |
+| `github-issue-creator` | Create GitHub issues for bugs and work items |
+| `internet-researcher` | Deep web research with reference gathering |
+| `research-lead` | Lead and coordinate multi-source research |
+| `research-subagent` | Focused research sub-agent for deep dives |
+| `ui-ux-consultant` | Desktop UI/UX and accessibility expert |
 
-The plugins automatically detect your conventions, but you can guide them:
+## Slash Commands
 
-```
-"Use Conventional Commits format"
-"Include ticket numbers in commits"
-"Keep messages under 50 characters"
-"Use emoji prefixes"
-```
+4 commands in `.ai/commands/`:
 
-### Sensitive File Patterns
+| Command | Purpose |
+|:--------|:--------|
+| `/correct-behavior` | Fix AI behavior mistakes and update rules |
+| `/create-command` | Guided slash command creation |
+| `/review-changes` | Detailed code change review |
+| `/relentlessly-fix` | Persistent fixing until resolved |
 
-By default, these files are excluded:
-
-- `.env*`
-- `credentials.json`
-- `secrets.yml`
-- `*.pem`, `*.key`
-- Private certificates
-- API keys
-
-Add custom patterns via `.gitignore` or specify during commits.
-
-## Examples
-
-### Example 1: Feature Development
-
-```bash
-# Make changes to implement a feature
-# ...
-
-# Create commit
-/commit feat:
-
-# Result: "feat: add user profile page with avatar upload"
-```
-
-### Example 2: Bug Fix
+## Development
 
 ```bash
-# Fix a bug
-# ...
-
-# Create commit with issue reference
-/commit fix: resolve #456
-
-# Result: "fix: handle special characters in login (#456)"
+just lint      # Run all linters
+just validate  # Validate plugin structure
+just check     # Run lint + validate
+just plugins   # List all plugins
 ```
-
-### Example 3: Multiple Commits
-
-```bash
-# Make complex changes across multiple files
-# ...
-
-# Let the skill organize into atomic commits
-/commit
-
-# Results:
-# - "feat: create authentication service"
-# - "test: add auth service unit tests"
-# - "docs: update API documentation"
-```
-
-## Best Practices
-
-### For Commands
-
-1. **Review changes** with `git diff` before committing
-2. **Use argument hints** to guide message generation
-3. **Keep commits atomic** - one logical change per commit
-4. **Unstage unwanted files** before running `/commit`
-
-### For Skills
-
-1. **Let Claude commit naturally** during development
-2. **Provide context** about commit conventions if needed
-3. **Trust the skill** to organize commits logically
-4. **Review commit history** to ensure skill learned your style
-
-## Troubleshooting
-
-### Command not found
-
-- Ensure plugin is installed in `~/.claude/plugins/commit-command`
-- Restart Claude Code
-- Check plugin is enabled in settings
-
-### Skill not activating
-
-- Verify installation in `~/.claude/skills/commit-skill`
-- Ensure you're in a git repository
-- Check there are changes to commit
-
-### Messages don't match style
-
-- Make a few manual commits to establish patterns
-- Provide explicit instructions about your conventions
-- The plugins learn from history over time
-
-### Sensitive files being committed
-
-- Check `.gitignore` configuration
-- Review staged files before commit
-- The plugins automatically exclude common sensitive files
 
 ## Contributing
 
-Contributions are welcome! To add a plugin to this marketplace:
+To add a plugin:
 
-1. Fork this repository
-2. Create a new plugin in `plugins/your-plugin-name/`
-3. Add plugin metadata to `.claude-plugin/marketplace.json`
-4. Include comprehensive documentation
-5. Submit a pull request
+1. Create a directory in `plugins/your-plugin-name/`
+2. Add `.claude-plugin/plugin.json` with name, version, description
+3. Add your commands, skills, hooks, or agents
+4. Submit a pull request
 
 ### Plugin Structure
 
 ```
 plugins/your-plugin-name/
 ├── .claude-plugin/
-│   └── plugin.json
-├── commands/           # For slash commands
-│   └── your-command.md
-├── skills/            # For agent skills
-│   └── your-skill/
-│       └── SKILL.md
-└── README.md
+│   └── plugin.json       # Required: name, version, description
+├── commands/              # Slash commands (*.md)
+├── skills/                # Agent skills (*/SKILL.md)
+├── hooks/                 # Lifecycle hooks
+├── agents/                # Agent definitions
+└── README.md              # Optional
 ```
 
-## Plugin Development
+## Related Projects
 
-### Creating a Slash Command
+- [claude-team](https://github.com/nsheaps/claude-team) — CLI tool for launching agent team sessions
+- [claude-utils](https://github.com/nsheaps/claude-utils) — CLI helper scripts for Claude Code (Homebrew)
+- [agent-team](https://github.com/nsheaps/agent-team) — POC for provider-agnostic agent orchestration
 
-```markdown
----
-name: your-command
-description: Brief description under 100 chars
-argument-hint: "[optional args]"
-allowed-tools: Bash, Read, Write
----
+## References
 
-# Your Command
-
-Documentation and usage instructions...
-```
-
-### Creating a Skill
-
-```markdown
----
-name: your-skill-name
-description: When and how Claude should use this skill
----
-
-# Your Skill
-
-Documentation about activation and capabilities...
-```
-
-## Support
-
-- **Documentation**: [Claude Code Docs](https://code.claude.com/docs)
-- **Issues**: [GitHub Issues](https://github.com/nsheaps/.ai/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/nsheaps/.ai/discussions)
-
-## Roadmap
-
-- [ ] PR review command
-- [ ] Branch management skill
-- [ ] Merge conflict resolver
-- [ ] Changelog generator
-- [ ] Release automation skill
-- [ ] Git history analyzer
-
-## Acknowledgments
-
-Built for the Claude Code community with ❤️
-
-- **Claude Code**: [https://code.claude.com](https://code.claude.com)
-- **Anthropic**: [https://anthropic.com](https://anthropic.com)
-
-## Related Resources
-
-- [Claude Code Documentation](https://code.claude.com/docs)
+- [Claude Code Documentation](https://code.claude.com)
 - [Plugin Development Guide](https://code.claude.com/docs/en/plugins)
-- [Slash Commands Guide](https://code.claude.com/docs/en/slash-commands)
-- [Agent Skills Guide](https://code.claude.com/docs/en/skills)
+- [Agent Skills Standard](https://agentskills.io)
 - [Conventional Commits](https://www.conventionalcommits.org/)
 
----
+## License
 
-**Made with Claude Code** | **Star this repo** ⭐ if you find it useful!
+Proprietary. All rights reserved.
