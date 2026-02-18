@@ -14,6 +14,8 @@
 # or you can use any valid jq expression.
 #
 # Requires: jq, SETTINGS_FILE must be set before sourcing.
+# Note: Callers locate this lib via relative path from plugins/<name>/hooks/.
+# This assumes all plugins and shared/ are siblings under the same plugins/ tree.
 
 safe_write_settings() {
   local jq_filter="$1"
@@ -59,7 +61,8 @@ safe_write_settings() {
   fi
 
   # Run jq transformation to tmp file
-  if ! jq "${jq_args[@]}" "$jq_filter" "$SETTINGS_FILE" > "$tmpfile" 2>/dev/null; then
+  # Note: ${jq_args[@]+"${jq_args[@]}"} avoids "unbound variable" on bash 3.2 (macOS default) with set -u
+  if ! jq ${jq_args[@]+"${jq_args[@]}"} "$jq_filter" "$SETTINGS_FILE" > "$tmpfile" 2>/dev/null; then
     rm -f "$tmpfile"
     rmdir "$lockdir" 2>/dev/null || true
     trap - EXIT
