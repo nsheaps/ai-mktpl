@@ -186,8 +186,20 @@
       ]
     },
     {
+      "name": "plugin-management",
+      "description": "Skill for installing, updating, and managing Claude Code plugins — including what requires a restart and what hot-reloads.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/plugin-management",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": ["plugin", "install", "update", "reload", "management"]
+    },
+    {
       "name": "product-development-and-sdlc",
-      "description": "Iterative PRD and user story writing with structured SDLC workflows. Guides incremental specification development through research, review, and refinement cycles.",
+      "description": "Iterative spec and user story writing with structured SDLC workflows. Guides incremental specification development through research, review, and refinement cycles.",
       "version": "0.1.0",
       "author": {
         "name": "Nathan Heaps"
@@ -196,11 +208,10 @@
       "category": "utility",
       "tags": ["utility", "skill"],
       "keywords": [
-        "prd",
-        "product-requirements",
+        "spec",
+        "specifications",
         "user-stories",
         "sdlc",
-        "specifications",
         "iterative-development",
         "product-management"
       ]
