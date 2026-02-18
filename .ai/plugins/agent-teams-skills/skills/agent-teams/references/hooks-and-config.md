@@ -17,11 +17,11 @@ Detailed reference for configuring agent teams, team-specific hooks, spawn backe
 
 ### teammateMode Values
 
-| Value | Behavior |
-|:------|:---------|
-| `"auto"` | Auto-detect: uses tmux if available, otherwise in-process |
+| Value          | Behavior                                                             |
+| :------------- | :------------------------------------------------------------------- |
+| `"auto"`       | Auto-detect: uses tmux if available, otherwise in-process            |
 | `"in-process"` | Hidden sessions within the same process. Navigate with Shift+Up/Down |
-| `"tmux"` | Visible split panes. Requires tmux session or iTerm2 with `it2` CLI |
+| `"tmux"`       | Visible split panes. Requires tmux session or iTerm2 with `it2` CLI  |
 
 ### CLI Override
 
@@ -32,10 +32,10 @@ claude --teammate-mode tmux
 
 ### Environment Variables for Enabling
 
-| Variable | Description |
-|:---------|:------------|
-| `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` | Set to `1` to enable |
-| `CLAUDE_CODE_SPAWN_BACKEND` | Force spawn backend: `in-process`, `tmux` |
+| Variable                               | Description                               |
+| :------------------------------------- | :---------------------------------------- |
+| `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` | Set to `1` to enable                      |
+| `CLAUDE_CODE_SPAWN_BACKEND`            | Force spawn backend: `in-process`, `tmux` |
 
 ## Spawn Backend Details
 
@@ -219,19 +219,19 @@ exit 0
 
 Communication between teammates uses these message types:
 
-| Type | Purpose | Typical Sender |
-|:-----|:--------|:---------------|
-| `message` | Direct peer-to-peer | Any teammate |
-| `broadcast` | Send to all teammates | Lead |
-| `shutdown_request` | Initiate exit | Lead |
-| `shutdown_approved` | Confirm termination | Teammate |
-| `shutdown_response` | Response to shutdown | Teammate |
-| `idle_notification` | Report going idle | Teammate |
-| `task_completed` | Notify of completion | Teammate |
-| `plan_approval_request` | Request strategy review | Teammate |
-| `plan_approval_response` | Approve/reject plan | Lead |
-| `join_request` | Request team membership | Potential member |
-| `permission_request` | Request tool auth | Teammate |
+| Type                     | Purpose                 | Typical Sender   |
+| :----------------------- | :---------------------- | :--------------- |
+| `message`                | Direct peer-to-peer     | Any teammate     |
+| `broadcast`              | Send to all teammates   | Lead             |
+| `shutdown_request`       | Initiate exit           | Lead             |
+| `shutdown_approved`      | Confirm termination     | Teammate         |
+| `shutdown_response`      | Response to shutdown    | Teammate         |
+| `idle_notification`      | Report going idle       | Teammate         |
+| `task_completed`         | Notify of completion    | Teammate         |
+| `plan_approval_request`  | Request strategy review | Teammate         |
+| `plan_approval_response` | Approve/reject plan     | Lead             |
+| `join_request`           | Request team membership | Potential member |
+| `permission_request`     | Request tool auth       | Teammate         |
 
 ## Permissions
 
@@ -243,6 +243,7 @@ Communication between teammates uses these message types:
 ## Context Loading for Teammates
 
 Teammates load the same project context as a regular session:
+
 - CLAUDE.md files from their working directory
 - MCP servers
 - Skills
@@ -253,6 +254,7 @@ The lead's conversation history does NOT carry over.
 ## Token Usage
 
 Agent teams use significantly more tokens than solo sessions:
+
 - Solo session: ~200k tokens
 - Three subagents: ~440k tokens
 - Three-person team: ~800k tokens

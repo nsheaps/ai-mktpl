@@ -30,11 +30,11 @@ ct --mode tmux                 # Direct tmux mode
 
 ## Teammate Display Modes
 
-| Mode | Description | Requirements |
-|:-----|:------------|:-------------|
-| `auto` | Auto-detect best backend | Default |
-| `in-process` | Hidden sessions, Shift+Up/Down to switch | None |
-| `tmux` | Visible split panes, survives leader exit | tmux or iTerm2 + `it2` CLI |
+| Mode         | Description                               | Requirements               |
+| :----------- | :---------------------------------------- | :------------------------- |
+| `auto`       | Auto-detect best backend                  | Default                    |
+| `in-process` | Hidden sessions, Shift+Up/Down to switch  | None                       |
+| `tmux`       | Visible split panes, survives leader exit | tmux or iTerm2 + `it2` CLI |
 
 Configure in `settings.json` or per-session:
 
@@ -66,13 +66,14 @@ Sources: Binary analysis of Claude Code v2.1.39, [GitHub #24301](https://github.
 
 The `"tmux"` setting uses tmux as the backend in **all cases** -- including when iTerm2 is the terminal. The difference is presentation:
 
-| Scenario | What Happens |
-|:---------|:-------------|
-| Inside tmux session | Standard tmux split panes (green status bar, prefix keys) |
+| Scenario             | What Happens                                                            |
+| :------------------- | :---------------------------------------------------------------------- |
+| Inside tmux session  | Standard tmux split panes (green status bar, prefix keys)               |
 | iTerm2 (not in tmux) | `tmux -CC` control mode -- teammates appear as native iTerm2 tabs/panes |
-| Other terminal | Falls back to in-process mode |
+| Other terminal       | Falls back to in-process mode                                           |
 
 **tmux -CC (control mode)** is a text-based protocol where tmux sends structured messages instead of rendering a terminal UI. iTerm2 intercepts these and renders native macOS windows/tabs. Benefits over raw tmux:
+
 - Native trackpad scrolling, Cmd+C/V, Cmd+F search
 - Click-to-interact with teammate panes
 - No tmux keybinding learning curve
@@ -88,13 +89,13 @@ Describe the task and team structure in natural language. Claude will propose th
 
 ## Keyboard Controls
 
-| Control | Function |
-|:--------|:---------|
-| Shift+Up/Down | Cycle through teammates (in-process) |
-| Ctrl+T | Toggle task list |
-| Ctrl+O | Toggle verbose transcript (shows detailed tool usage and execution) |
-| Shift+Tab | Toggle delegate mode (lead coordination only) |
-| Escape | Interrupt teammate's turn |
+| Control       | Function                                                            |
+| :------------ | :------------------------------------------------------------------ |
+| Shift+Up/Down | Cycle through teammates (in-process)                                |
+| Ctrl+T        | Toggle task list                                                    |
+| Ctrl+O        | Toggle verbose transcript (shows detailed tool usage and execution) |
+| Shift+Tab     | Toggle delegate mode (lead coordination only)                       |
+| Escape        | Interrupt teammate's turn                                           |
 
 ## Core Architecture
 
@@ -116,14 +117,14 @@ The shared task list supports dependency tracking with automatic unblocking. Fil
 
 ## Environment Variables (Set Automatically for Teammates)
 
-| Variable | Description |
-|:---------|:------------|
-| `CLAUDE_CODE_TEAM_NAME` | Team name |
-| `CLAUDE_CODE_AGENT_ID` | Unique agent ID |
-| `CLAUDE_CODE_AGENT_NAME` | Display name |
-| `CLAUDE_CODE_AGENT_TYPE` | Agent type |
+| Variable                         | Description                       |
+| :------------------------------- | :-------------------------------- |
+| `CLAUDE_CODE_TEAM_NAME`          | Team name                         |
+| `CLAUDE_CODE_AGENT_ID`           | Unique agent ID                   |
+| `CLAUDE_CODE_AGENT_NAME`         | Display name                      |
+| `CLAUDE_CODE_AGENT_TYPE`         | Agent type                        |
 | `CLAUDE_CODE_PLAN_MODE_REQUIRED` | Whether plan approval is required |
-| `CLAUDE_CODE_PARENT_SESSION_ID` | Parent session ID |
+| `CLAUDE_CODE_PARENT_SESSION_ID`  | Parent session ID                 |
 
 ## File Storage
 
@@ -178,6 +179,7 @@ For working examples and hook configuration patterns, consult `references/hooks-
 ### Reference Files
 
 For detailed configuration, hooks, and advanced patterns:
+
 - **`references/hooks-and-config.md`** -- Hook examples, settings.json config, spawn backends, env vars
 
 ### Official Documentation
