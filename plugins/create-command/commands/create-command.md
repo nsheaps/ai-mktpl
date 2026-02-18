@@ -12,7 +12,7 @@ This command creates new slash commands. It uses a sub-agent to preserve convers
 ## Skill Reference
 
 For detailed syntax and best practices, see:
-@~/src/nsheaps/ai/plugins/create-command/skills/slash-command-writing/SKILL.md
+@~/src/nsheaps/ai-mktpl/plugins/create-command/skills/slash-command-writing/SKILL.md
 
 ## Arguments
 
