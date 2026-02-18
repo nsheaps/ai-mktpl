@@ -12,11 +12,11 @@ This document catalogs cleanup work needed in the ai-mktpl repo (`nsheaps/ai`). 
 
 ## Priority 1: Broken or Incomplete Plugins
 
-### P1-1: `fix-pr` plugin has no plugin.json
+### P1-1: `fix-pr` plugin is completely orphaned
 
-- **Path**: `plugins/fix-pr/.claude-plugin/` (empty directory)
-- **Issue**: Plugin directory exists with `commands/` and `skills/` but `.claude-plugin/plugin.json` is missing. Claude Code cannot load it.
-- **Action**: Either create a valid `plugin.json` or remove the plugin if it was abandoned.
+- **Path**: `plugins/fix-pr/`
+- **Issue**: Plugin directory exists but is entirely empty — `.claude-plugin/` has no plugin.json, `commands/` is empty, `skills/fix-pr/` is empty. No README, no CHANGELOG. Claude Code cannot load it.
+- **Action**: Either populate with real content or remove entirely if abandoned.
 - **Effort**: Small
 
 ### P1-2: `context-bloat-prevention` plugin is untracked
@@ -162,11 +162,25 @@ This document catalogs cleanup work needed in the ai-mktpl repo (`nsheaps/ai`). 
 
 ## Priority 6: Config and Tooling Cleanup
 
-### P6-1: `.claude/plans/.DS_Store` tracked in git
+### P6-1: Multiple `.DS_Store` files in repo
 
-- **Path**: `.claude/plans/.DS_Store`
-- **Issue**: macOS artifact tracked in git. Should be in `.gitignore`.
-- **Action**: Remove from git, add to `.gitignore`.
+- **Paths**: `.DS_Store`, `.claude/plans/.DS_Store`, `docs/.DS_Store`, `docs/research/.DS_Store`
+- **Issue**: macOS artifacts tracked in git (at least 4 instances). Should be globally gitignored.
+- **Action**: Remove all from git, add `**/.DS_Store` to `.gitignore`.
+- **Effort**: Trivial
+
+### P6-4: 8 plugins missing CHANGELOG.md despite having `.release-it.js`
+
+- **Plugins**: code-simplifier, context-bloat-prevention, fix-pr, git-spice, product-development-and-sdlc, review-changes, scm-utils, todo-sync
+- **Issue**: These plugins have `.release-it.js` for per-plugin versioning but no CHANGELOG.md. The release-it workflow expects one.
+- **Action**: Create empty CHANGELOG.md files or generate from git history.
+- **Effort**: Small
+
+### P6-5: `data-serialization/.deps/` contains lock/marker files
+
+- **Path**: `plugins/data-serialization/.deps/`
+- **Issue**: Contains `.lock`, `REQUESTED`, and `py.typed` marker files from a Python dependency install. These are build artifacts, not source files.
+- **Action**: Add `.deps/` to `.gitignore` or plugin-level ignore, remove from git.
 - **Effort**: Trivial
 
 ### P6-2: `.gitignore` completeness check
