@@ -2,34 +2,41 @@
 # Configure statusLine.command in user's settings.json to use this plugin's script
 set -euo pipefail
 
+# Skip configuration for agent team teammates to avoid race conditions
+# on the shared settings.json file. Only the lead or solo sessions configure.
+if [ -n "${CLAUDE_CODE_PARENT_SESSION_ID:-}" ]; then
+  echo '{}'
+  exit 0
+fi
+
 SETTINGS_FILE="$HOME/.claude/settings.json"
 STATUSLINE_SCRIPT="${CLAUDE_PLUGIN_ROOT}/bin/statusline.sh"
 
-# Ensure settings file exists
-if [ ! -f "$SETTINGS_FILE" ]; then
-  echo "{}" > "$SETTINGS_FILE"
-fi
+# Ensure settings directory exists
+mkdir -p "$(dirname "$SETTINGS_FILE")"
 
-# Read current statusLine.command value
+# Source shared atomic settings writer (symlinked into plugin, resolved on install)
+# shellcheck source=../lib/safe-settings-write.sh
+SHARED_LIB="${CLAUDE_PLUGIN_ROOT}/lib/safe-settings-write.sh"
+if [ ! -f "$SHARED_LIB" ]; then
+  echo "ERROR: shared lib not found: $SHARED_LIB" >&2
+  exit 2
+fi
+source "$SHARED_LIB"
+
+# Read current statusLine.command value (no lock needed for read-only)
 current_command=$(jq -r '.statusLine.command // empty' "$SETTINGS_FILE" 2>/dev/null || echo "")
 
 # Case 1: Not present - set it
 if [ -z "$current_command" ]; then
-  jq --arg script "$STATUSLINE_SCRIPT" \
-    '.statusLine.type = "command" | .statusLine.command = $script' \
-    "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp"
-  mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
+  safe_write_settings '.statusLine.type = "command" | .statusLine.command = $script'
   exit 0
 fi
 
 # Case 2: Present and matches this plugin or the original statusline plugin - update silently
 # Match if path contains "plugins/statusline-iterm" or "plugins/statusline/" (original plugin)
 if [[ "$current_command" == *"plugins/statusline-iterm"* ]] || [[ "$current_command" == *"plugins/statusline/"* ]]; then
-  # Update to current resolved path
-  jq --arg script "$STATUSLINE_SCRIPT" \
-    '.statusLine.command = $script' \
-    "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp"
-  mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
+  safe_write_settings '.statusLine.command = $script'
   exit 0
 fi
 
