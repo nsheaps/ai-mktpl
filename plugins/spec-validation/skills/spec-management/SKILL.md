@@ -8,6 +8,7 @@ description: Manages spec files for requirements capture and validation
 ## When Claude Activates This Skill
 
 This skill activates when:
+
 - User requests a new feature or implementation
 - User asks to modify existing functionality
 - A task requires planning before implementation
@@ -16,16 +17,19 @@ This skill activates when:
 ## What This Skill Enables
 
 ### 1. Requirements Capture
+
 - Extract requirements from user prompts
 - Create minimal, focused spec files
 - Avoid scope creep and assumptions
 
 ### 2. Spec File Management
+
 - Create specs in `docs/specs/`
 - Move existing specs to `docs/specs/draft/` before updates
 - Maintain spec version history
 
 ### 3. Implementation Validation
+
 - Verify changes against spec requirements
 - Ensure acceptance criteria are met
 - Track completion status
@@ -56,12 +60,15 @@ This skill activates when:
 # Feature Name
 
 ## Requirements
+
 - [User's direct requirements]
 
 ## Acceptance Criteria
+
 - [Testable conditions]
 
 ## Notes
+
 - [Clarifications only]
 ```
 

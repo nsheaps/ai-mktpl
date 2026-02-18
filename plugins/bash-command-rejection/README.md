@@ -13,19 +13,19 @@ Chained commands are impossible to properly handle permissions for:
 
 ## What Gets Blocked
 
-| Pattern | Example | Reason |
-|---------|---------|--------|
-| `&&` | `npm install && npm build` | Conditional chaining |
-| `\|` | `cat file \| grep pattern` | Output piping |
-| `;` | `cmd1; cmd2` | Sequential execution |
+| Pattern | Example                    | Reason               |
+| ------- | -------------------------- | -------------------- |
+| `&&`    | `npm install && npm build` | Conditional chaining |
+| `\|`    | `cat file \| grep pattern` | Output piping        |
+| `;`     | `cmd1; cmd2`               | Sequential execution |
 
 ## What's Allowed
 
-| Pattern | Example | Reason |
-|---------|---------|--------|
-| `\|\|` | `cmd1 \|\| echo "failed"` | Error handling/fallback |
-| Single commands | `npm install` | Can be properly reviewed |
-| Redirects | `cmd > file.txt` | Output goes to reviewable file |
+| Pattern         | Example                   | Reason                         |
+| --------------- | ------------------------- | ------------------------------ |
+| `\|\|`          | `cmd1 \|\| echo "failed"` | Error handling/fallback        |
+| Single commands | `npm install`             | Can be properly reviewed       |
+| Redirects       | `cmd > file.txt`          | Output goes to reviewable file |
 
 ## Installation
 
@@ -33,9 +33,7 @@ This plugin is part of the nsheaps/.ai plugin marketplace. Add it to your Claude
 
 ```json
 {
-  "plugins": [
-    "nsheaps/.ai/plugins/bash-command-rejection"
-  ]
+  "plugins": ["nsheaps/.ai/plugins/bash-command-rejection"]
 }
 ```
 

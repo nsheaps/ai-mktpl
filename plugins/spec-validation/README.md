@@ -47,12 +47,15 @@ When you make a feature request, the plugin:
 # Feature Name
 
 ## Requirements
+
 - [Direct requirements from user]
 
 ## Acceptance Criteria
+
 - [Testable conditions]
 
 ## Notes
+
 - [Clarifications from conversation]
 ```
 

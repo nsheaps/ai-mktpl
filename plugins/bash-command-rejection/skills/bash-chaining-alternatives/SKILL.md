@@ -6,11 +6,11 @@ This skill teaches you how to work around the bash command chaining restriction 
 
 The `bash-command-rejection` plugin blocks these operators:
 
-| Operator | Name | Why Blocked |
-|----------|------|-------------|
-| `&&` | AND chain | Runs cmd2 only if cmd1 succeeds - can't check permissions for conditional execution |
-| `\|` | Pipe | Streams output to another command - can't review what the receiving command does |
-| `;` | Sequential | Runs multiple commands - each should be reviewed separately |
+| Operator | Name       | Why Blocked                                                                         |
+| -------- | ---------- | ----------------------------------------------------------------------------------- |
+| `&&`     | AND chain  | Runs cmd2 only if cmd1 succeeds - can't check permissions for conditional execution |
+| `\|`     | Pipe       | Streams output to another command - can't review what the receiving command does    |
+| `;`      | Sequential | Runs multiple commands - each should be reviewed separately                         |
 
 **Allowed:** `||` (OR/fallback) is permitted because it's error handling, not output chaining.
 
@@ -19,15 +19,19 @@ The `bash-command-rejection` plugin blocks these operators:
 ### 1. Run Commands Separately
 
 Instead of:
+
 ```bash
 npm install && npm run build
 ```
 
 Do:
+
 ```bash
 npm install
 ```
+
 Then in a separate call:
+
 ```bash
 npm run build
 ```
@@ -35,17 +39,21 @@ npm run build
 ### 2. Redirect Output to File
 
 Instead of:
+
 ```bash
 cat file.txt | grep "pattern"
 ```
 
 Do:
+
 ```bash
 cat file.txt > /tmp/output.txt
 ```
+
 Then use the **Grep tool** or **Read tool** to examine the output.
 
 Or if you must use bash:
+
 ```bash
 grep "pattern" /tmp/output.txt
 ```
@@ -54,12 +62,12 @@ grep "pattern" /tmp/output.txt
 
 Claude Code has dedicated tools that are safer than bash pipes:
 
-| Instead of | Use |
-|------------|-----|
-| `cat file \| grep pattern` | **Grep tool** with file path |
-| `find . -name "*.js"` | **Glob tool** with pattern |
-| `cat file.txt` | **Read tool** |
-| `sed -i 's/old/new/g' file` | **Edit tool** |
+| Instead of                  | Use                          |
+| --------------------------- | ---------------------------- |
+| `cat file \| grep pattern`  | **Grep tool** with file path |
+| `find . -name "*.js"`       | **Glob tool** with pattern   |
+| `cat file.txt`              | **Read tool**                |
+| `sed -i 's/old/new/g' file` | **Edit tool**                |
 
 ### 4. Write a Reviewable Script
 
@@ -82,6 +90,7 @@ rsync -av ./dist/ server:/var/www/app/
 ```
 
 Save the script, let the user review it, then:
+
 ```bash
 bash deploy.sh
 ```
@@ -96,6 +105,7 @@ docker build -t myapp . && docker run myapp
 ```
 
 **Only use this when:**
+
 - Commands must run atomically
 - You can explain why it's safe
 - The user understands the combined behavior
@@ -113,17 +123,21 @@ docker build -t myapp . && docker run myapp
 ### Git Operations
 
 Instead of:
+
 ```bash
 git add . && git commit -m "message" && git push
 ```
 
 Do each step separately:
+
 ```bash
 git add .
 ```
+
 ```bash
 git commit -m "message"
 ```
+
 ```bash
 git push
 ```
@@ -131,15 +145,19 @@ git push
 ### Testing and Building
 
 Instead of:
+
 ```bash
 npm test && npm run build
 ```
 
 Run tests:
+
 ```bash
 npm test
 ```
+
 If tests pass, build:
+
 ```bash
 npm run build
 ```
@@ -147,12 +165,15 @@ npm run build
 ### Checking Command Output
 
 Instead of:
+
 ```bash
 ls -la | grep "\.js$"
 ```
 
 Use the Glob tool with pattern `*.js`, or:
+
 ```bash
 ls -la > /tmp/files.txt
 ```
+
 Then use Grep tool to search `/tmp/files.txt`.

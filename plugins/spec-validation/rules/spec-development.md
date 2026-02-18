@@ -23,12 +23,14 @@ When receiving a new feature request:
 **Location**: `docs/specs/<feature-name>.md`
 
 **Before updating an existing spec**:
+
 ```bash
 # Move existing spec to draft
 mv docs/specs/feature.md docs/specs/draft/feature.md
 ```
 
 **Spec content rules**:
+
 - Include ONLY requirements from the user's prompt or clarifications
 - Keep it concise and minimal
 - No assumptions or scope creep
@@ -40,13 +42,16 @@ mv docs/specs/feature.md docs/specs/draft/feature.md
 # Feature Name
 
 ## Requirements
+
 - [Direct requirements from user prompt]
 - [Clarifications from conversation]
 
 ## Acceptance Criteria
+
 - [Testable conditions for completion]
 
 ## Notes
+
 - [Any relevant context or constraints]
 ```
 
@@ -63,6 +68,7 @@ Before marking any task complete:
 ### 5. Unit Tests
 
 Most changes should include unit tests that:
+
 - Cover the acceptance criteria from the spec
 - Run automatically in CI
 - Validate the implementation works as specified
