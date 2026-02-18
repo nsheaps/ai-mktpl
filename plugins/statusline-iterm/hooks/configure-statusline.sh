@@ -2,6 +2,13 @@
 # Configure statusLine.command in user's settings.json to use this plugin's script
 set -euo pipefail
 
+# Skip configuration for agent team teammates to avoid race conditions
+# on the shared settings.json file. Only the lead or solo sessions configure.
+if [ -n "${CLAUDE_CODE_PARENT_SESSION_ID:-}" ]; then
+  echo '{}'
+  exit 0
+fi
+
 SETTINGS_FILE="$HOME/.claude/settings.json"
 STATUSLINE_SCRIPT="${CLAUDE_PLUGIN_ROOT}/bin/statusline.sh"
 
@@ -15,10 +22,12 @@ current_command=$(jq -r '.statusLine.command // empty' "$SETTINGS_FILE" 2>/dev/n
 
 # Case 1: Not present - set it
 if [ -z "$current_command" ]; then
-  jq --arg script "$STATUSLINE_SCRIPT" \
+  new_content=$(jq --arg script "$STATUSLINE_SCRIPT" \
     '.statusLine.type = "command" | .statusLine.command = $script' \
-    "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp"
-  mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
+    "$SETTINGS_FILE")
+  if [ -n "$new_content" ]; then
+    printf '%s\n' "$new_content" > "$SETTINGS_FILE"
+  fi
   exit 0
 fi
 
@@ -26,10 +35,12 @@ fi
 # Match if path contains "plugins/statusline-iterm" or "plugins/statusline/" (original plugin)
 if [[ "$current_command" == *"plugins/statusline-iterm"* ]] || [[ "$current_command" == *"plugins/statusline/"* ]]; then
   # Update to current resolved path
-  jq --arg script "$STATUSLINE_SCRIPT" \
+  new_content=$(jq --arg script "$STATUSLINE_SCRIPT" \
     '.statusLine.command = $script' \
-    "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp"
-  mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
+    "$SETTINGS_FILE")
+  if [ -n "$new_content" ]; then
+    printf '%s\n' "$new_content" > "$SETTINGS_FILE"
+  fi
   exit 0
 fi
 
