@@ -3,15 +3,17 @@ name: Daily Summary Report
 description: >
   This skill should be used when the user asks to "generate a session report",
   "write a daily summary", "create a team report", "summarize today's work",
-  "write up what we did", "generate end-of-session report", or when an agent
-  team session is wrapping up and deliverables need to be documented. Guides
-  the structured creation of comprehensive session reports covering agent
-  roster, commits, issues, PRs, failures, and executive summary.
+  "write up what we did", "generate end-of-session report", "update the report",
+  "add my work to the report", or when an agent team session is starting,
+  in progress, or wrapping up. Guides the full lifecycle of session reports:
+  creation, incremental updates throughout the day, and final review.
 ---
 
 # Daily Summary Report
 
-Generate a comprehensive session report documenting all work delivered by an agent team. The report serves as a permanent record of the session's output, a selling point for agent teams, and an honest accounting of what went well and what didn't.
+A living document maintained throughout an agent team session. The report is created at session start, updated incrementally as agents work, and finalized through a review process at session end.
+
+This is NOT a one-shot end-of-day generation. Every agent contributes to the report as they work.
 
 **Origin**: Developed during the looney-tunes team's 2026-02-17 session. Process refined through 3 reviewer sign-offs and 14 revision items. See [session report](https://github.com/nsheaps/ai-mktpl/pull/164) for the context that drove this skill's creation.
 
@@ -35,48 +37,97 @@ Appendix B: Session Timeline
 Appendix C: Complete Commit Log
 ```
 
-## Authoring Process
+## Report Lifecycle
 
-The report is a collaborative deliverable requiring three roles:
+The report has three phases: **Create**, **Update** (repeated), and **Finalize**.
 
-### Step 1: Engineer Drafts
+### Phase 1: Create (Session Start)
 
-The **Software Engineer** (or designated author) produces the initial draft by gathering data from all sources (see [Data Sources](#data-sources)).
+When a team session starts, check if a report exists for today:
 
-**Draft checklist**:
+```
+File: ~/Documents/YYYY-MM-DD-claude-team-report.md
+```
 
-- [ ] Agent roster with all fields populated (see [Agent Roster Format](#agent-roster-format))
-- [ ] Complete commit log from all repos touched during the session
-- [ ] All GitHub Issues listed with state (OPEN / CLOSED (completed) / CLOSED (not_planned))
-- [ ] All PRs listed with state and merge status
-- [ ] Failure descriptions copied from the failure log (not paraphrased)
-- [ ] Timeline reconstructed from commit timestamps
-- [ ] Executive summary left as placeholder for Coach
+- **If no report exists** → Create it from the template structure (see [Report Structure](#report-structure)). Populate the agent roster from team config. Leave all other sections as empty tables/placeholders.
+- **If a report already exists** (e.g., resumed session, multiple sessions in one day) → Read it. Do NOT overwrite. Proceed to Phase 2.
 
-### Step 2: Coach Reviews
+**Who creates**: The team lead or PM at session start.
 
-The **AI Agent Engineer / Coach** reviews for:
+### Phase 2: Incremental Updates (Throughout the Day)
 
-- **Accuracy**: Cross-reference commit hashes, failure descriptions, and issue states against source data
-- **Completeness**: Identify missing failures, untracked action items, or uncredited work
-- **Attribution**: Verify contributions are correctly attributed to the right agent
-- **Executive summary**: Draft or co-write the executive summary
+Each agent is responsible for noting their own work in the report as they complete it. This is not optional — it's part of task completion.
 
-**Coach review output**: A review document listing corrections, additions, and the executive summary draft. Save to `.claude/tmp/session-report-review.md`.
+#### What Each Role Updates
 
-### Step 3: Docs Writer Reviews
+| Role | What to add | When |
+|------|-------------|------|
+| **Software Engineer** | Commits (hash, message, repo), PRs created/merged | After each commit or PR action |
+| **Coach** | Failures logged, rules/behaviors created, review results | After each failure entry or review |
+| **PM** | Issues created/closed, task status changes | After each issue batch or audit |
+| **Docs Writer** | Docs updated, contradictions found | After each docs task |
+| **Researcher** | Research reports saved, key findings | After each research deliverable |
+| **QA** | Defects found, test results, QA reports | After each QA pass |
+| **Ops** | Pipeline fixes, release actions, infra changes | After each ops task |
 
-The **Technical Writer** reviews for:
+#### Update Rules
 
-- **Writing quality**: Section titles match content, consistent terminology
-- **Structure**: All sections present, table of contents accurate
-- **Links**: All URLs clickable, all references resolvable
-- **Completeness**: No placeholder text remaining, metrics match actual counts
+1. **Append, never overwrite**: Add new rows to existing tables. Never replace content another agent wrote.
+2. **Use the right section**: Commits go in Section 5, issues in Section 6, failures in Section 8. Don't dump everything in one place.
+3. **Include links immediately**: Every commit hash, issue number, and PR must be a clickable link when first added. Don't leave "will link later" placeholders.
+4. **Keep metrics approximate until finalization**: Section 9 (Metrics) can use `~` prefixed numbers during the day. Exact counts come in Phase 3.
+5. **Conflict resolution**: If two agents update the same section simultaneously, the later writer must read the current state first and merge, not overwrite.
 
-### Step 4: Reconciliation and Sign-Off
+#### Lightweight Update Pattern
 
-- All three reviewers' feedback is consolidated into a single change set
-- Author incorporates all changes
+For agents that produce lots of small updates (e.g., engineer making commits), batch updates are acceptable:
+
+```
+# After completing a logical unit of work (e.g., a PR iteration):
+1. Read the report's current state for your section
+2. Append your new entries
+3. Update the report file
+```
+
+Don't update after every single command — update after each meaningful deliverable.
+
+### Phase 3: Finalize (End of Session)
+
+At session end, the report transitions from a living document to a reviewed deliverable.
+
+#### Step 3a: PM Compiles and Validates
+
+The **PM** (or designated compiler) does a full pass:
+- Verify all sections have content (no empty placeholders remaining)
+- Cross-reference commit counts against `git log` for each repo
+- Verify all issues listed match `gh issue list` output
+- Ensure all PRs are listed with correct state
+- Check that failure descriptions match the failure log
+- Fill in the timeline from commit timestamps
+- Calculate exact metrics for Section 9
+
+#### Step 3b: Coach Reviews for Accuracy
+
+The **Coach** reviews:
+- Cross-reference commit hashes, failure descriptions, and issue states against source data
+- Identify missing failures, untracked action items, or uncredited work
+- Verify contributions are correctly attributed to the right agent
+- Draft or co-write the executive summary
+
+**Coach review output**: Save to `.claude/tmp/session-report-review.md`.
+
+#### Step 3c: Docs Writer Reviews for Quality
+
+The **Technical Writer** reviews:
+- Writing quality: section titles match content, consistent terminology
+- Structure: all sections present, table of contents accurate
+- Links: all URLs clickable, all references resolvable
+- No placeholder text remaining, metrics match actual counts
+
+#### Step 3d: Reconciliation and Sign-Off
+
+- All reviewers' feedback is consolidated into a single change set
+- Compiler incorporates all changes
 - Each reviewer does a final pass and signs off
 - Report is delivered to the team lead for user presentation
 
@@ -209,6 +260,9 @@ These were discovered during the first report generation and should be avoided:
 | Valuable `.claude/tmp/` artifacts not preserved    | Move important artifacts to `docs/research/` before session ends |
 | Commit count mismatch between summary and appendix | Count from the appendix, update summary to match                 |
 | Section titles don't match content                 | "Work Delivered" = commits, "GitHub Issues" = issues             |
+| Report generated only at end of session            | Use incremental updates throughout; end-of-session is just finalization |
+| One agent writes the whole report                  | Each agent notes their own work; compiler validates at end       |
+| Overwrote another agent's entries                  | Always read current state before writing; append, never replace  |
 
 ## Output Locations
 
