@@ -42,7 +42,7 @@ Simple conversational responses that don't use tools are exempt. Everything else
 
 ```
 1. User requests work
-2. Update TaskWrite with planned tasks
+2. Use TaskCreate to add planned tasks
 3. Mark first task in_progress
 4. Do the work (using tools)
 5. Mark task completed
@@ -59,7 +59,7 @@ Simple conversational responses that don't use tools are exempt. Everything else
 
 ## Rule: Capture User Messages Mid-Task
 
-**CRITICAL:** When the user sends a message while you are "churning" (executing multiple tool calls), you MUST immediately add it to your TodoWrite.
+**CRITICAL:** When the user sends a message while you are "churning" (executing multiple tool calls), you MUST immediately capture it using TaskCreate.
 
 ### Why This Matters
 

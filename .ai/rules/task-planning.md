@@ -69,7 +69,7 @@ After exploration (or for moderately complex tasks), use the **Plan agent** to c
 | Content Type  | Location                             |
 | ------------- | ------------------------------------ |
 | Task plans    | `.claude/plans/<request-summary>.md` |
-| Task list     | `.claude/scratch/todo.md`            |
+| Task list     | `.claude/scratch/tasks.md`           |
 | Scratch notes | `.claude/scratch/note-<topic>.md`    |
 | temp dir      | `.claude/tmp/` (do not use `/tmp`)   |
 | Research      | `docs/research/<topic>.md`           |
@@ -84,7 +84,7 @@ After exploration (or for moderately complex tasks), use the **Plan agent** to c
 
 ### Task List File
 
-Maintain `.claude/scratch/todo.md` as a persistent task list:
+Maintain `.claude/scratch/tasks.md` as a persistent task list:
 
 ```markdown
 # Current Tasks
@@ -130,7 +130,7 @@ Apply scientific rigor to problem-solving:
 Your conversation context can be summarized, truncated, or reset. Important details belong in:
 
 1. Repository files (permanent)
-2. TodoWrite tool (session-persistent)
+2. TaskCreate/TaskUpdate tools (session-persistent)
 3. Both (for critical items)
 
 If you'd be upset losing the information, write it to a file.
@@ -159,5 +159,5 @@ You must:
    </requirements-change>
    ```
 2. Review any plans or notes you've made to ensure they reflect the updated requirements.
-3. Update your Tasks (using TodoWrite) to have a new task at the end to handle implementing or changing to guarantee the new requirement is met.
+3. Use TaskCreate to add a new task to handle implementing or changing to guarantee the new requirement is met.
 4. When the Task is executed on, review the original message from the user, your requirements, and the updated plan to ensure it's in the best state, giving more priority to more recent messages and changes (as more recent messages may have further iterated on the original requirements)

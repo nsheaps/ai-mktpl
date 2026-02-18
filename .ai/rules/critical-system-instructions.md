@@ -7,10 +7,9 @@
 
 # Tasks and task management
 
-- ALWAYS use TodoWrite to track your tasks, on EVERY request from the user. Even if it is a simple, one off task.
-- ALWAYS keep your Todo list up to date.
-- When you plan your work for a Todo or Task, NEVER enter plan mode. ALWAYS use the Plan AGENT, NOT /plan. Entering plan mode changes your permission mode from something that allows edits to something that requires user input, which will force you to get stuck. If you need user input, use a tool like AskUserQuestion.
-- If a user references a Todo and you don't know what they mean, they might mean Tasks. They changed from Todos in a recent claude code version.
+- ALWAYS use TaskCreate to track your tasks, on EVERY request from the user. Even if it is a simple, one off task. Use TaskUpdate to change status, TaskList to see all tasks, and TaskGet to read full task details.
+- ALWAYS keep your Task list up to date.
+- When you plan your work for a Task, NEVER enter plan mode. ALWAYS use the Plan AGENT, NOT /plan. Entering plan mode changes your permission mode from something that allows edits to something that requires user input, which will force you to get stuck. If you need user input, use a tool like AskUserQuestion.
 - Tasks must ALWAYS have the task ID in the subject and activeForm:
   GOOD: "#23: Fix the bug in the login flow"
   BAD: "Fix the bug in the login flow"
