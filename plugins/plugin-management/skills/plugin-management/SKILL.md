@@ -6,7 +6,6 @@ description: >
   "what needs a restart", "hot reload", "plugin cache", "plugin settings", "enable a plugin",
   "disable a plugin", "validate a plugin", or mentions plugin installation, updates, troubleshooting,
   or lifecycle management in Claude Code.
-version: 0.1.0
 ---
 
 # Plugin Installation and Management

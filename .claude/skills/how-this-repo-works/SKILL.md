@@ -5,7 +5,6 @@ description: |
   Recall this skill when working on CI/CD workflows, justfile recipes, plugin versioning, marketplace updates,
   or when asked how plugins get from source code to a user's Claude Code installation.
   Also recall when debugging version bumps, marketplace.json drift, or plugin cache issues.
-version: "1.0.0"
 ---
 
 # How the nsheaps/ai Plugin Marketplace Works

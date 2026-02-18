@@ -7,7 +7,6 @@ description: >
   "navigate branch stack", "submit stack", "restack", or mentions git-spice,
   stacked branches, stacked PRs, or the gs CLI tool. Provides comprehensive
   guidance for managing stacked Git branches with git-spice.
-version: 0.1.0
 ---
 
 # git-spice (gs) - Stacked Branch Management
