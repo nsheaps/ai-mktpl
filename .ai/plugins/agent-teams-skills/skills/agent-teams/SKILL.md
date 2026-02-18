@@ -158,6 +158,7 @@ For working examples and hook configuration patterns, consult `references/hooks-
 5. **Require plan approval** for risky or architectural work
 6. **Use meaningful agent names** -- `security-reviewer` beats `worker-1`
 7. **Pre-approve common operations** to reduce permission prompt interruptions
+8. **ALWAYS run sub-agents in the background** -- Orchestrators/leads must use `run_in_background: true` on every Task tool call. Foreground agents block the lead from responding to teammate messages and user input, creating a coordination bottleneck
 
 ## When to Use vs Avoid
 
