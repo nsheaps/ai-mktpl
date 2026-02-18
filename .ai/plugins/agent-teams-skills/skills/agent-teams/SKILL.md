@@ -115,6 +115,8 @@ Teammates communicate via a shared mailbox system with direct peer-to-peer messa
 
 The shared task list supports dependency tracking with automatic unblocking. File locking prevents race conditions on task claiming.
 
+**Note**: Agents may repeat messages twice if they finish a task and then an async operation completes that triggers them again. This is normal behavior -- no action is needed from the lead or other teammates.
+
 ## Environment Variables (Set Automatically for Teammates)
 
 | Variable                         | Description                       |
