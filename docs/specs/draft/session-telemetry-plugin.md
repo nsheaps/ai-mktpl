@@ -25,18 +25,18 @@ This information exists ephemerally in the conversation transcript, but extracti
 
 ### Requirements
 
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| R1 | Track every directory the agent visits, with timestamps | Must |
-| R2 | Track every tool invocation with name, argument summary, timestamp, and success/failure | Must |
-| R3 | Track task lifecycle (create, status changes) with timestamps | Must |
-| R4 | Store all data as structured JSONL files on disk, one set per session | Must |
-| R5 | Expose each data stream via an MCP tool queryable by the agent | Must |
-| R6 | Provide a CLI script for human-readable display of session data | Must |
-| R7 | CLI supports filtering by session ID, latest session, data stream, and raw JSON output | Must |
-| R8 | Hooks must be fast (<100ms) to avoid impacting agent responsiveness | Must |
-| R9 | Data files must not grow unboundedly for very long sessions (consider rotation or caps) | Should |
-| R10 | Plugin must not interfere with other plugins' hooks | Must |
+| ID  | Requirement                                                                             | Priority |
+| --- | --------------------------------------------------------------------------------------- | -------- |
+| R1  | Track every directory the agent visits, with timestamps                                 | Must     |
+| R2  | Track every tool invocation with name, argument summary, timestamp, and success/failure | Must     |
+| R3  | Track task lifecycle (create, status changes) with timestamps                           | Must     |
+| R4  | Store all data as structured JSONL files on disk, one set per session                   | Must     |
+| R5  | Expose each data stream via an MCP tool queryable by the agent                          | Must     |
+| R6  | Provide a CLI script for human-readable display of session data                         | Must     |
+| R7  | CLI supports filtering by session ID, latest session, data stream, and raw JSON output  | Must     |
+| R8  | Hooks must be fast (<100ms) to avoid impacting agent responsiveness                     | Must     |
+| R9  | Data files must not grow unboundedly for very long sessions (consider rotation or caps) | Should   |
+| R10 | Plugin must not interfere with other plugins' hooks                                     | Must     |
 
 ### Non-Goals
 
@@ -82,7 +82,15 @@ plugins/session-telemetry/
   },
   "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/session-telemetry",
   "repository": "https://github.com/nsheaps/ai-mktpl",
-  "keywords": ["telemetry", "session", "hooks", "mcp", "observability", "tool-tracking", "task-tracking"]
+  "keywords": [
+    "telemetry",
+    "session",
+    "hooks",
+    "mcp",
+    "observability",
+    "tool-tracking",
+    "task-tracking"
+  ]
 }
 ```
 
@@ -138,6 +146,7 @@ All hooks fire on **PostToolUse**. Directory tracking may additionally use **Pre
 ```
 
 **Note on matcher overlap:** The `Bash` matcher fires both `track-directory.sh` and `track-tool-call.sh`. The `.*` matcher fires `track-tool-call.sh` for all tools. The deduplication concern here is that Bash tool calls would log twice to `track-tool-call.sh`. The implementation must either:
+
 - Use the `Bash` matcher exclusively for Bash (and exclude it from `.*`), or
 - Have `track-tool-call.sh` accept all matchers and let the `.*` entry handle everything, removing the duplicate Bash entry for tool-call tracking.
 
@@ -323,33 +332,33 @@ The MCP server is registered via `claude mcp add` during plugin installation, or
 
 ##### get_session_directories
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| session_id | string | No | Session ID to query. Defaults to current session (from `CLAUDE_SESSION_ID` env var). |
-| limit | number | No | Max entries to return. Default: all. |
-| since | string | No | ISO timestamp; return only entries after this time. |
+| Parameter  | Type   | Required | Description                                                                          |
+| ---------- | ------ | -------- | ------------------------------------------------------------------------------------ |
+| session_id | string | No       | Session ID to query. Defaults to current session (from `CLAUDE_SESSION_ID` env var). |
+| limit      | number | No       | Max entries to return. Default: all.                                                 |
+| since      | string | No       | ISO timestamp; return only entries after this time.                                  |
 
 Returns: Array of directory entries from `directories.jsonl`.
 
 ##### get_session_tool_calls
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| session_id | string | No | Session ID to query. Defaults to current session. |
-| tool_name | string | No | Filter by tool name (exact match or regex). |
-| limit | number | No | Max entries to return. Default: all. |
-| since | string | No | ISO timestamp; return only entries after this time. |
-| success_only | boolean | No | If true, return only successful calls. |
+| Parameter    | Type    | Required | Description                                         |
+| ------------ | ------- | -------- | --------------------------------------------------- |
+| session_id   | string  | No       | Session ID to query. Defaults to current session.   |
+| tool_name    | string  | No       | Filter by tool name (exact match or regex).         |
+| limit        | number  | No       | Max entries to return. Default: all.                |
+| since        | string  | No       | ISO timestamp; return only entries after this time. |
+| success_only | boolean | No       | If true, return only successful calls.              |
 
 Returns: Array of tool call entries from `tool-calls.jsonl`.
 
 ##### get_session_tasks
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| session_id | string | No | Session ID to query. Defaults to current session. |
-| task_id | string | No | Filter by specific task ID. |
-| status | string | No | Filter by current status. |
+| Parameter  | Type   | Required | Description                                       |
+| ---------- | ------ | -------- | ------------------------------------------------- |
+| session_id | string | No       | Session ID to query. Defaults to current session. |
+| task_id    | string | No       | Filter by specific task ID.                       |
+| status     | string | No       | Filter by current status.                         |
 
 Returns: Array of task entries from `tasks.jsonl`. When `task_id` is provided, returns the full history for that task.
 
@@ -437,6 +446,7 @@ Tasks:
 ### 2.8 Session ID Discovery
 
 The hook scripts receive session ID from the hook input JSON on stdin. The MCP server receives it from:
+
 1. The `CLAUDE_SESSION_ID` environment variable (if Claude Code sets this for MCP servers), or
 2. An explicit `session_id` parameter on each tool call.
 
@@ -454,21 +464,22 @@ The CLI discovers sessions by listing directories under `~/.claude/telemetry/`.
 ### 2.10 Cleanup and Retention
 
 Telemetry files accumulate over time. The plugin does not implement automatic cleanup in v0.1. Future versions should add:
+
 - A `--clean` CLI flag to remove telemetry older than N days
 - A `SessionStart` hook that prunes old session directories
 - Configurable retention period (default: 30 days)
 
 ## 3. Open Questions
 
-| # | Question | Impact | Notes |
-|---|----------|--------|-------|
-| 1 | Is `CLAUDE_SESSION_ID` available to MCP server processes as an env var? | MCP tool design | If not, agents must pass it explicitly. Either way works; just affects ergonomics. |
-| 2 | What fields does the PostToolUse hook input JSON contain? | Hook script design | Need to verify: does it include tool arguments, exit code, duration, and working directory? The [hooks docs](https://code.claude.com/docs/en/hooks) should specify this. |
-| 3 | Should the `.*` matcher on PostToolUse fire for MCP tool calls too? | Completeness | MCP tools have names like `mcp__server__tool`. The `.*` regex should match them, but verify. |
-| 4 | Should telemetry data be queryable across sessions? | CLI scope | v0.1 queries one session at a time. Cross-session queries (e.g., "show all sessions for this project") could be a future enhancement. |
-| 5 | Should the MCP server be stdio-based or HTTP? | MCP design | stdio is simpler and matches existing patterns (e.g., `linear-mcp-sync`). HTTP would allow external tool access but adds complexity. |
-| 6 | File size cap for very long sessions? | Storage | A 10K-tool-call session produces ~2MB of JSONL. Probably fine, but consider log rotation for sessions lasting many hours. |
-| 7 | Should `track-directory.sh` also fire on `Read`, `Edit`, `Write`, `Glob`, `Grep` to capture their target paths? | Directory tracking accuracy | These tools operate on specific file paths. Logging their target directory (dirname of the file path) would give richer directory data beyond just Bash `cd` commands. |
+| #   | Question                                                                                                        | Impact                      | Notes                                                                                                                                                                    |
+| --- | --------------------------------------------------------------------------------------------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | Is `CLAUDE_SESSION_ID` available to MCP server processes as an env var?                                         | MCP tool design             | If not, agents must pass it explicitly. Either way works; just affects ergonomics.                                                                                       |
+| 2   | What fields does the PostToolUse hook input JSON contain?                                                       | Hook script design          | Need to verify: does it include tool arguments, exit code, duration, and working directory? The [hooks docs](https://code.claude.com/docs/en/hooks) should specify this. |
+| 3   | Should the `.*` matcher on PostToolUse fire for MCP tool calls too?                                             | Completeness                | MCP tools have names like `mcp__server__tool`. The `.*` regex should match them, but verify.                                                                             |
+| 4   | Should telemetry data be queryable across sessions?                                                             | CLI scope                   | v0.1 queries one session at a time. Cross-session queries (e.g., "show all sessions for this project") could be a future enhancement.                                    |
+| 5   | Should the MCP server be stdio-based or HTTP?                                                                   | MCP design                  | stdio is simpler and matches existing patterns (e.g., `linear-mcp-sync`). HTTP would allow external tool access but adds complexity.                                     |
+| 6   | File size cap for very long sessions?                                                                           | Storage                     | A 10K-tool-call session produces ~2MB of JSONL. Probably fine, but consider log rotation for sessions lasting many hours.                                                |
+| 7   | Should `track-directory.sh` also fire on `Read`, `Edit`, `Write`, `Glob`, `Grep` to capture their target paths? | Directory tracking accuracy | These tools operate on specific file paths. Logging their target directory (dirname of the file path) would give richer directory data beyond just Bash `cd` commands.   |
 
 ## 4. References
 

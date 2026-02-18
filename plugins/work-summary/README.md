@@ -26,12 +26,12 @@ Produces a markdown report of all work done by an entity (person or agent) acros
 
 **Supported platforms** (when plugin/MCP is available):
 
-| Platform | Data Collected |
-|----------|---------------|
-| GitHub | PRs opened/merged/reviewed, commits, issues, comments |
-| Linear | Issues created/completed/updated, comments |
-| Slack | Messages sent, threads participated in |
-| Notion | Pages created/updated |
+| Platform | Data Collected                                        |
+| -------- | ----------------------------------------------------- |
+| GitHub   | PRs opened/merged/reviewed, commits, issues, comments |
+| Linear   | Issues created/completed/updated, comments            |
+| Slack    | Messages sent, threads participated in                |
+| Notion   | Pages created/updated                                 |
 
 ## Installation
 

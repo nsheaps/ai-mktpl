@@ -9,5 +9,14 @@
   },
   "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/work-summary",
   "repository": "https://github.com/nsheaps/ai-mktpl",
-  "keywords": ["work-summary", "standup", "report", "activity", "github", "linear", "slack", "notion"]
+  "keywords": [
+    "work-summary",
+    "standup",
+    "report",
+    "activity",
+    "github",
+    "linear",
+    "slack",
+    "notion"
+  ]
 }

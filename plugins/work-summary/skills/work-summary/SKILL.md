@@ -9,11 +9,13 @@ argument-hint: [entity] [time range] [format]
 Generate a comprehensive report of work performed by an entity across all available platforms.
 
 **Arguments** ($ARGUMENTS): optional entity, time range, and output format.
+
 - Entity defaults to the current authenticated user
 - Time range defaults to "today" (since midnight local time)
 - Format defaults to a grouped report; specify "standup" for did/will do/blockers format
 
 Examples:
+
 - `/work-summary` — your work today
 - `/work-summary last week` — your work in the last 7 days
 - `/work-summary @ericmorphis last 3 days` — another user's work
@@ -24,6 +26,7 @@ Examples:
 ### Step 1: Parse Inputs
 
 From $ARGUMENTS, determine:
+
 1. **Entity**: a username, email, or "me" (default: current user)
 2. **Time range**: natural language like "today", "last week", "last 3 days", "this sprint" (default: today)
 3. **Output format**: "standup", "report", or other requested format (default: report)
@@ -36,22 +39,28 @@ Create a report file at `.claude/tmp/work-summary-<entity>-<date>.md` with a pla
 
 ```markdown
 # Work Summary: <entity>
+
 **Period:** <time range>
 **Generated:** <timestamp>
 
 ## Summary
+
 _Collecting data..._
 
 ## GitHub
+
 _Querying..._
 
 ## Linear
+
 _Querying..._
 
 ## Slack
+
 _Querying..._
 
 ## Notion
+
 _Querying..._
 ```
 
@@ -61,16 +70,17 @@ Update the file incrementally as data arrives from each platform — do not wait
 
 For each available platform, resolve the entity's identity:
 
-| Platform | How to Resolve |
-|----------|---------------|
-| GitHub | `gh api user` for self, or `gh api users/<username>` for others. Note the login and name. |
-| Linear | Use Linear MCP `list_users` tool, match by name or email |
-| Slack | Use Slack MCP `slack_search_users` tool, match by name or email |
-| Notion | Use Notion MCP if available, match by name |
+| Platform | How to Resolve                                                                            |
+| -------- | ----------------------------------------------------------------------------------------- |
+| GitHub   | `gh api user` for self, or `gh api users/<username>` for others. Note the login and name. |
+| Linear   | Use Linear MCP `list_users` tool, match by name or email                                  |
+| Slack    | Use Slack MCP `slack_search_users` tool, match by name or email                           |
+| Notion   | Use Notion MCP if available, match by name                                                |
 
 **IMPORTANT:** Only query platforms for which a plugin, MCP server, or CLI tool is actually available. Skip platforms that are not configured — do not error on missing platforms.
 
 To check availability:
+
 - **GitHub**: run `which gh` — if available, GitHub data can be collected
 - **Linear**: check if Linear MCP tools are available via ToolSearch (search "linear")
 - **Slack**: check if Slack MCP tools are available via ToolSearch (search "slack")
@@ -110,16 +120,20 @@ Format GitHub section as:
 ## GitHub
 
 ### Pull Requests
+
 - [PR #123: Add feature X](https://github.com/org/repo/pull/123) — **merged** into main
 - [PR #456: Fix bug Y](https://github.com/org/repo/pull/456) — **open**, 3 comments
 
 ### Reviews
+
 - Reviewed [PR #789: Refactor Z](https://github.com/org/repo/pull/789)
 
 ### Issues
+
 - Opened [#101: Track performance regression](https://github.com/org/repo/issues/101)
 
 ### Commits
+
 - `abc1234` Fix null pointer in auth handler (org/repo)
 - `def5678` Add unit tests for parser (org/repo)
 ```
@@ -137,12 +151,15 @@ Format Linear section as:
 ## Linear
 
 ### Issues Completed
+
 - [TEAM-123: Implement OAuth flow](https://linear.app/team/issue/TEAM-123) — completed
 
 ### Issues In Progress
+
 - [TEAM-456: Add rate limiting](https://linear.app/team/issue/TEAM-456) — in progress, updated today
 
 ### Comments
+
 - Commented on [TEAM-789: API redesign](https://linear.app/team/issue/TEAM-789)
 ```
 
@@ -159,10 +176,12 @@ Format Slack section as:
 ## Slack
 
 ### #engineering (5 messages)
+
 - Discussed deployment strategy for v2.0
 - Shared PR link for auth refactor
 
 ### #incidents (2 messages)
+
 - Reported API latency spike
 - Updated incident timeline
 ```
@@ -179,9 +198,11 @@ Format Notion section as:
 ## Notion
 
 ### Pages Created
+
 - [Q1 Planning Doc](https://notion.so/...)
 
 ### Pages Updated
+
 - [Engineering Runbook](https://notion.so/...)
 ```
 
@@ -193,18 +214,21 @@ After all platform data is collected, write a summary section at the top of the 
 ## Summary
 
 **<entity>** had an active day across <N> platforms:
+
 - **GitHub**: Merged 2 PRs, reviewed 3, made 12 commits across 3 repos
 - **Linear**: Completed 3 issues, updated 2 in progress
 - **Slack**: Sent 15 messages across 4 channels
 - **Notion**: Created 1 page, updated 2
 
 Key highlights:
+
 - Shipped the OAuth integration ([PR #123](url))
 - Resolved the API latency incident
 - Completed sprint planning for Q1
 ```
 
 The summary should:
+
 - Quantify activity per platform
 - Highlight the most significant items (merged PRs, completed issues, incident responses)
 - Be 5-10 lines maximum
@@ -219,14 +243,17 @@ If the user requested a specific format, reformat the summary section accordingl
 ## Standup
 
 ### What I Did
+
 - Merged PR for OAuth integration ([#123](url))
 - Completed 3 Linear issues (TEAM-123, TEAM-456, TEAM-789)
 - Reviewed 2 PRs from teammates
 
 ### What I'll Do Next
+
 - _(User should fill in, or leave blank)_
 
 ### Blockers
+
 - _(User should fill in, or leave blank)_
 ```
 
