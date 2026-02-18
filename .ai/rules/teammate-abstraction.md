@@ -15,11 +15,11 @@ Teammates are black boxes. When reporting on a teammate's status, progress, or w
 
 Report on the teammate as a single entity doing work:
 
-| Bad | Good |
-|-----|------|
-| "Wile E.'s background agents are wrapping up" | "Wile E. is finishing up" |
-| "Road Runner spawned a sub-agent to research X" | "Road Runner is researching X" |
-| "Tweety delegated the audit to a haiku agent" | "Tweety is running the audit" |
+| Bad                                                | Good                                    |
+| -------------------------------------------------- | --------------------------------------- |
+| "Wile E.'s background agents are wrapping up"      | "Wile E. is finishing up"               |
+| "Road Runner spawned a sub-agent to research X"    | "Road Runner is researching X"          |
+| "Tweety delegated the audit to a haiku agent"      | "Tweety is running the audit"           |
 | "Bugs has three parallel tasks running internally" | "Bugs is working on the implementation" |
 
 ## The Principle
