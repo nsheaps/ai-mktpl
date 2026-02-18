@@ -1,0 +1,13 @@
+{
+  "name": "work-summary",
+  "version": "0.1.0",
+  "description": "Generate comprehensive work summaries across platforms (GitHub, Linear, Slack, Notion) for a person or agent over a time period",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/work-summary",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": ["work-summary", "standup", "report", "activity", "github", "linear", "slack", "notion"]
+}
