@@ -60,15 +60,15 @@ Each agent is responsible for noting their own work in the report as they comple
 
 #### What Each Role Updates
 
-| Role | What to add | When |
-|------|-------------|------|
-| **Software Engineer** | Commits (hash, message, repo), PRs created/merged | After each commit or PR action |
-| **Coach** | Failures logged, rules/behaviors created, review results | After each failure entry or review |
-| **PM** | Issues created/closed, task status changes | After each issue batch or audit |
-| **Docs Writer** | Docs updated, contradictions found | After each docs task |
-| **Researcher** | Research reports saved, key findings | After each research deliverable |
-| **QA** | Defects found, test results, QA reports | After each QA pass |
-| **Ops** | Pipeline fixes, release actions, infra changes | After each ops task |
+| Role                  | What to add                                              | When                               |
+| --------------------- | -------------------------------------------------------- | ---------------------------------- |
+| **Software Engineer** | Commits (hash, message, repo), PRs created/merged        | After each commit or PR action     |
+| **Coach**             | Failures logged, rules/behaviors created, review results | After each failure entry or review |
+| **PM**                | Issues created/closed, task status changes               | After each issue batch or audit    |
+| **Docs Writer**       | Docs updated, contradictions found                       | After each docs task               |
+| **Researcher**        | Research reports saved, key findings                     | After each research deliverable    |
+| **QA**                | Defects found, test results, QA reports                  | After each QA pass                 |
+| **Ops**               | Pipeline fixes, release actions, infra changes           | After each ops task                |
 
 #### Update Rules
 
@@ -98,6 +98,7 @@ At session end, the report transitions from a living document to a reviewed deli
 #### Step 3a: PM Compiles and Validates
 
 The **PM** (or designated compiler) does a full pass:
+
 - Verify all sections have content (no empty placeholders remaining)
 - Cross-reference commit counts against `git log` for each repo
 - Verify all issues listed match `gh issue list` output
@@ -109,6 +110,7 @@ The **PM** (or designated compiler) does a full pass:
 #### Step 3b: Coach Reviews for Accuracy
 
 The **Coach** reviews:
+
 - Cross-reference commit hashes, failure descriptions, and issue states against source data
 - Identify missing failures, untracked action items, or uncredited work
 - Verify contributions are correctly attributed to the right agent
@@ -119,6 +121,7 @@ The **Coach** reviews:
 #### Step 3c: Docs Writer Reviews for Quality
 
 The **Technical Writer** reviews:
+
 - Writing quality: section titles match content, consistent terminology
 - Structure: all sections present, table of contents accurate
 - Links: all URLs clickable, all references resolvable
@@ -250,19 +253,19 @@ gh issue list -R owner/repo -s all --json number,title,state,stateReason,url -L 
 
 These were discovered during the first report generation and should be avoided:
 
-| Pitfall                                            | Fix                                                              |
-| -------------------------------------------------- | ---------------------------------------------------------------- |
-| Links not clickable (plain text references)        | Every issue, PR, and commit must be a markdown link              |
-| "Key commits" shown but full log missing           | Always include complete commit log as appendix                   |
-| Internal Task references in report                 | Map all `Task #NNN` to GitHub Issue URLs                         |
-| No issue state differentiation                     | Query `state_reason` and show completed vs not_planned           |
-| Executive summary has wrong counts                 | Verify totals by counting actual data, not estimating            |
-| Valuable `.claude/tmp/` artifacts not preserved    | Move important artifacts to `docs/research/` before session ends |
-| Commit count mismatch between summary and appendix | Count from the appendix, update summary to match                 |
-| Section titles don't match content                 | "Work Delivered" = commits, "GitHub Issues" = issues             |
+| Pitfall                                            | Fix                                                                     |
+| -------------------------------------------------- | ----------------------------------------------------------------------- |
+| Links not clickable (plain text references)        | Every issue, PR, and commit must be a markdown link                     |
+| "Key commits" shown but full log missing           | Always include complete commit log as appendix                          |
+| Internal Task references in report                 | Map all `Task #NNN` to GitHub Issue URLs                                |
+| No issue state differentiation                     | Query `state_reason` and show completed vs not_planned                  |
+| Executive summary has wrong counts                 | Verify totals by counting actual data, not estimating                   |
+| Valuable `.claude/tmp/` artifacts not preserved    | Move important artifacts to `docs/research/` before session ends        |
+| Commit count mismatch between summary and appendix | Count from the appendix, update summary to match                        |
+| Section titles don't match content                 | "Work Delivered" = commits, "GitHub Issues" = issues                    |
 | Report generated only at end of session            | Use incremental updates throughout; end-of-session is just finalization |
-| One agent writes the whole report                  | Each agent notes their own work; compiler validates at end       |
-| Overwrote another agent's entries                  | Always read current state before writing; append, never replace  |
+| One agent writes the whole report                  | Each agent notes their own work; compiler validates at end              |
+| Overwrote another agent's entries                  | Always read current state before writing; append, never replace         |
 
 ## Output Locations
 
