@@ -31,7 +31,7 @@ If the folder does not already exist, it should be created with such a structure
 
 Specifications are living documents and should be updated as necessary throughout the development process to reflect changes in requirements or understanding. DO NOT OVERCOMPLICATE THEM - keep them concise and focused on the essential and ONLY approved and reviewed details needed to guide development.
 
-**Combined format**: Each spec should contain both *Problem & Requirements* (what and why) and *Technical Design* (how) in a single document. Do not separate these into distinct "PRD" and "spec" documents — use the unified term "spec" for all specification documents.
+**Combined format**: Each spec should contain both _Problem & Requirements_ (what and why) and _Technical Design_ (how) in a single document. Do not separate these into distinct "PRD" and "spec" documents — use the unified term "spec" for all specification documents.
 
 **Size guidance**: Aim to keep specs under ~500 lines. If a spec grows beyond that, split it into a parent spec (scope/requirements) and child specs (technical details per component).
 
@@ -61,12 +61,14 @@ The incremental approach applies to operational tasks, not just feature developm
 2. **Phase 2 — Improvements**: Only after the pure move is verified, make enhancements, refactors, or fixes in the new location.
 
 **Why this matters:**
+
 - Mixing relocation with modification makes it impossible to tell whether breakage comes from the move or the change
 - Pure moves are easy to review — "does it still work the same?" is a simple yes/no question
 - Improvements on top of a verified move have a known-good baseline to compare against
 - If the move fails, you can revert cleanly without losing improvement work (and vice versa)
 
 **This pattern applies to:**
+
 - Extracting code into a new repo or package
 - Migrating files between directories or modules
 - Splitting monoliths into separate services

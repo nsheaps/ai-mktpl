@@ -15,8 +15,8 @@ version: 0.2.0
 # Spec Writing
 
 Write specifications and user stories through iterative refinement. Each spec
-is a combined document covering both *Problem & Requirements* (what and why) and
-*Technical Design* (how). Never attempt to produce a complete specification in
+is a combined document covering both _Problem & Requirements_ (what and why) and
+_Technical Design_ (how). Never attempt to produce a complete specification in
 one pass. Instead, start with the smallest meaningful definition and expand
 through repeated cycles of research, drafting, review, and refinement.
 
