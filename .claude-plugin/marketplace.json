@@ -365,6 +365,18 @@
       "keywords": ["tmux", "subagent", "parallel", "iterm", "terminal", "isolation", "delegation"]
     },
     {
+      "name": "todo-plus-plus",
+      "description": "Enforces commit-on-complete for tasks and reminds about ephemeral session awareness",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/todo-plus-plus",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": ["tasks", "commit", "workflow", "ephemeral", "agent-teams"]
+    },
+    {
       "name": "todo-sync",
       "description": "Automatically syncs todos and plans from ~/.claude/ to the current project's .claude/ directory",
       "version": "0.2.0",
