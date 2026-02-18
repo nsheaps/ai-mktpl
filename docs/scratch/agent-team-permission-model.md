@@ -17,6 +17,7 @@ Two shell scripts for launching Claude Code as an agent team orchestrator, appen
 - **`run-claude-team-persistent.sh`** — Keeps teammates alive for the session. Each role has a single long-lived instance that handles multiple tasks via internal sub-agents. Best for ongoing collaboration where teammates build context over time.
 
 Both scripts:
+
 - Set `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` to enable the teams feature.
 - Launch with `--permission-mode=delegate` and `--dangerously-skip-permissions` so the orchestrator can freely spawn and coordinate teammates.
 - Enforce that the orchestrator only coordinates — it does not perform tasks directly.
