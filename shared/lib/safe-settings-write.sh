@@ -16,6 +16,20 @@
 # Requires: jq, SETTINGS_FILE must be set before sourcing.
 # Note: Plugins symlink this file into their own lib/ directory.
 # Symlinked content is resolved and copied on plugin install.
+#
+# EXIT trap contract: safe_write_settings sets and clears an EXIT trap
+# internally for lock cleanup. Callers must not rely on their own EXIT
+# traps surviving a call to this function — any previously set EXIT trap
+# will be overwritten. Both success and error paths clear the trap via
+# `trap - EXIT` before returning, so subsequent caller traps set after
+# the call will work normally.
+#
+# Known limitation: The STATUSLINE_SCRIPT global variable is checked to
+# conditionally pass `--arg script "$STATUSLINE_SCRIPT"` to jq. This
+# couples the "shared" library to the statusline plugins' convention.
+# Current consumers (statusline, statusline-iterm) both use this pattern.
+# TODO: When a 3rd consumer appears, refactor to accept extra jq args as
+# function parameters instead (e.g., safe_write_settings '.key = $v' --arg v "val").
 
 safe_write_settings() {
   local jq_filter="$1"
