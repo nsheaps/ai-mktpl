@@ -15,9 +15,9 @@ STATUSLINE_SCRIPT="${CLAUDE_PLUGIN_ROOT}/bin/statusline.sh"
 # Ensure settings directory exists
 mkdir -p "$(dirname "$SETTINGS_FILE")"
 
-# Source shared atomic settings writer
-# shellcheck source=../../shared/lib/safe-settings-write.sh
-SHARED_LIB="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/shared/lib/safe-settings-write.sh"
+# Source shared atomic settings writer (symlinked into plugin, resolved on install)
+# shellcheck source=../lib/safe-settings-write.sh
+SHARED_LIB="${CLAUDE_PLUGIN_ROOT}/lib/safe-settings-write.sh"
 if [ ! -f "$SHARED_LIB" ]; then
   echo "ERROR: shared lib not found: $SHARED_LIB" >&2
   exit 2
