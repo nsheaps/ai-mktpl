@@ -79,6 +79,7 @@ plugins/task-management/
 #### `session-start.md` (SessionStart, prompt)
 
 Migrated from todo-plus-plus. Injects system prompt reminding agent that:
+
 - Tasks are ephemeral and scoped to the session
 - Important work should be persisted to files
 - Use TaskCreate before starting non-trivial work
@@ -86,12 +87,14 @@ Migrated from todo-plus-plus. Injects system prompt reminding agent that:
 #### `task-completed.sh` (TaskCompleted, command)
 
 Migrated from todo-plus-plus. On task completion:
+
 - Checks if there are uncommitted changes related to the completed task
 - If so, prompts for commit (via output message, not interactive)
 
 #### `pre-tool-use-task-check.md` (PreToolUse, prompt)
 
 New hook. Triggers on tool use when no in_progress tasks exist:
+
 - Fires on: Edit, Write, Bash (tools that make changes)
 - Skips: Read, Grep, Glob, WebFetch (read-only tools)
 - Output: Gentle reminder to create/activate a task before proceeding
@@ -100,6 +103,7 @@ New hook. Triggers on tool use when no in_progress tasks exist:
 #### `stop-active-tasks-guard.md` (Stop, prompt)
 
 New hook. Triggers when agent attempts to stop with active tasks:
+
 - Checks for any tasks with status `in_progress`
 - If found: reminds agent to mark them complete or explicitly defer with notes
 - Does NOT block the stop — advisory only
