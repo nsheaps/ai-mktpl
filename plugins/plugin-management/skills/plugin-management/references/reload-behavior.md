@@ -62,8 +62,8 @@ These components are cached and only refreshed on `/clear`, `/compact`, or plugi
 
 - **Mechanism**: Cleared when plugin cache is invalidated
 - **Practical effect**: Adding a new hook event to `hooks.json` requires plugin reload
-- **Note**: The hook *script itself* runs fresh each invocation (it's a file on disk).
-  Only the *configuration* (which events trigger which hooks) is cached.
+- **Note**: The hook _script itself_ runs fresh each invocation (it's a file on disk).
+  Only the _configuration_ (which events trigger which hooks) is cached.
 
 ### Restart Required
 
@@ -94,15 +94,15 @@ These components are loaded once at startup and not refreshed during a session.
 
 ## Summary Matrix
 
-| Component | Mechanism | Refresh Trigger | Upstream Issue |
-|-----------|-----------|----------------|---------------|
-| `settings.json` | Chokidar watcher | Immediate | — |
-| Plugin install/uninstall | `Qq()` cache clear | Immediate | — |
-| Plugin enable/disable | Settings change | Immediate | — |
-| Skills (SKILL.md) | Memoized | `/clear` or `/compact` | — |
-| CLAUDE.md / rules | Memoized | `/clear` or `/compact` | [#22085](https://github.com/anthropics/claude-code/issues/22085) |
-| Hook configs | Plugin cache | Plugin reload | [#22679](https://github.com/anthropics/claude-code/issues/22679) |
-| MCP servers | Startup only | **Restart** | [#24057](https://github.com/anthropics/claude-code/issues/24057) |
-| Plugin code/manifest | Install-time cache | **Reinstall + restart** | — |
-| `--plugin-dir` code | Session start | **Restart** | — |
-| Agent files | Not watched | **Restart** | — |
+| Component                | Mechanism          | Refresh Trigger         | Upstream Issue                                                   |
+| ------------------------ | ------------------ | ----------------------- | ---------------------------------------------------------------- |
+| `settings.json`          | Chokidar watcher   | Immediate               | —                                                                |
+| Plugin install/uninstall | `Qq()` cache clear | Immediate               | —                                                                |
+| Plugin enable/disable    | Settings change    | Immediate               | —                                                                |
+| Skills (SKILL.md)        | Memoized           | `/clear` or `/compact`  | —                                                                |
+| CLAUDE.md / rules        | Memoized           | `/clear` or `/compact`  | [#22085](https://github.com/anthropics/claude-code/issues/22085) |
+| Hook configs             | Plugin cache       | Plugin reload           | [#22679](https://github.com/anthropics/claude-code/issues/22679) |
+| MCP servers              | Startup only       | **Restart**             | [#24057](https://github.com/anthropics/claude-code/issues/24057) |
+| Plugin code/manifest     | Install-time cache | **Reinstall + restart** | —                                                                |
+| `--plugin-dir` code      | Session start      | **Restart**             | —                                                                |
+| Agent files              | Not watched        | **Restart**             | —                                                                |

@@ -22,6 +22,7 @@ A single skill (`plugin-management`) that covers:
 ## Sources
 
 Research based on:
+
 - Claude Code v2.1.39–2.1.45 binary analysis
 - Official Claude Code plugin documentation
 - GitHub issue tracking for known bugs

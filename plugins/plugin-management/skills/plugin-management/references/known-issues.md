@@ -14,6 +14,7 @@ instead of pointing to the new version.
 entry referencing `${CLAUDE_PLUGIN_ROOT}` resolves to the old path.
 
 **Workaround**:
+
 1. Uninstall and reinstall the plugin
 2. Or manually update the path in settings.json
 3. Restart Claude Code after the change

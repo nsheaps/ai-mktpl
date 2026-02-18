@@ -26,11 +26,11 @@ Install from a configured marketplace:
 
 Scopes control where the plugin entry is stored:
 
-| Scope | Settings File | Persists For |
-|-------|--------------|--------------|
-| `user` | `~/.claude/settings.json` | All projects for this user |
-| `project` | `.claude/settings.json` (repo root) | All users of this project |
-| `local` | `.claude/settings.local.json` | This user in this project only |
+| Scope     | Settings File                       | Persists For                   |
+| --------- | ----------------------------------- | ------------------------------ |
+| `user`    | `~/.claude/settings.json`           | All projects for this user     |
+| `project` | `.claude/settings.json` (repo root) | All users of this project      |
+| `local`   | `.claude/settings.local.json`       | This user in this project only |
 
 The plugin is downloaded and cached at `~/.claude/plugins/cache/`.
 
@@ -80,18 +80,18 @@ This is the most critical knowledge for plugin management. The rule is simple:
 
 ### Quick Reference
 
-| Component | Hot-Reloads? | Notes |
-|-----------|-------------|-------|
-| `settings.json` changes | Immediate | Chokidar file watcher + event bus |
-| Plugin install/uninstall | Immediate (v2.1.45+) | Cache invalidation on install |
-| Plugin enable/disable | Immediate | Settings change triggers cache clear |
-| Skills (SKILL.md content) | On `/clear` or `/compact` | Memoized, not file-watched |
-| CLAUDE.md / rules files | On `/clear` or `/compact` | Same memoization pattern |
-| Hook configs | On plugin reload | Cleared when plugin cache invalidated |
-| MCP server configs | **Restart required** | Not file-watched, connections persist |
-| Plugin code/manifest | **Restart required** | Cached at install time |
-| `--plugin-dir` code changes | **Restart required** | Explicitly documented |
-| Agent file changes | **Restart required** | Not watched |
+| Component                   | Hot-Reloads?              | Notes                                 |
+| --------------------------- | ------------------------- | ------------------------------------- |
+| `settings.json` changes     | Immediate                 | Chokidar file watcher + event bus     |
+| Plugin install/uninstall    | Immediate (v2.1.45+)      | Cache invalidation on install         |
+| Plugin enable/disable       | Immediate                 | Settings change triggers cache clear  |
+| Skills (SKILL.md content)   | On `/clear` or `/compact` | Memoized, not file-watched            |
+| CLAUDE.md / rules files     | On `/clear` or `/compact` | Same memoization pattern              |
+| Hook configs                | On plugin reload          | Cleared when plugin cache invalidated |
+| MCP server configs          | **Restart required**      | Not file-watched, connections persist |
+| Plugin code/manifest        | **Restart required**      | Cached at install time                |
+| `--plugin-dir` code changes | **Restart required**      | Explicitly documented                 |
+| Agent file changes          | **Restart required**      | Not watched                           |
 
 For the full breakdown with source references, see `references/reload-behavior.md`.
 
@@ -99,7 +99,7 @@ For the full breakdown with source references, see `references/reload-behavior.m
 
 - **Editing a SKILL.md?** Run `/clear` to pick up changes.
 - **Changed a hook script?** The script itself runs fresh each time (it's a file on disk), but
-  hook *configuration* (which hooks fire on which events) requires a plugin reload or restart.
+  hook _configuration_ (which hooks fire on which events) requires a plugin reload or restart.
 - **Added an MCP server?** Must restart Claude Code.
 - **Changed `settings.json`?** Takes effect immediately.
 
@@ -112,6 +112,7 @@ For the full breakdown with source references, see `references/reload-behavior.m
 ```
 
 The plugin UI shows:
+
 - **Installed tab**: All loaded plugins with version and source
 - **Errors tab**: Plugins that failed to load (manifest issues, missing files)
 
@@ -160,14 +161,14 @@ optionally delete the cache at `~/.claude/plugins/cache/<plugin-hash>/`.
 
 ## Troubleshooting
 
-| Symptom | Likely Cause | Fix |
-|---------|-------------|-----|
-| Plugin not appearing in `/plugin` | Not in `enabledPlugins` or marketplace not configured | Check settings files for correct entries |
-| Skill not triggering | SKILL.md loaded before latest change | Run `/clear` to refresh memoized cache |
-| Hook not firing after update | `${CLAUDE_PLUGIN_ROOT}` pointing to old path | See `references/known-issues.md` |
-| MCP server not connecting | Config not reloaded | Restart Claude Code |
-| "Plugin failed to load" error | Invalid `plugin.json` manifest | Run `claude plugin validate` |
-| Plugin works with `--plugin-dir` but not installed | Cache stale or settings misconfigured | Uninstall, reinstall, restart |
+| Symptom                                            | Likely Cause                                          | Fix                                      |
+| -------------------------------------------------- | ----------------------------------------------------- | ---------------------------------------- |
+| Plugin not appearing in `/plugin`                  | Not in `enabledPlugins` or marketplace not configured | Check settings files for correct entries |
+| Skill not triggering                               | SKILL.md loaded before latest change                  | Run `/clear` to refresh memoized cache   |
+| Hook not firing after update                       | `${CLAUDE_PLUGIN_ROOT}` pointing to old path          | See `references/known-issues.md`         |
+| MCP server not connecting                          | Config not reloaded                                   | Restart Claude Code                      |
+| "Plugin failed to load" error                      | Invalid `plugin.json` manifest                        | Run `claude plugin validate`             |
+| Plugin works with `--plugin-dir` but not installed | Cache stale or settings misconfigured                 | Uninstall, reinstall, restart            |
 
 ## Additional Resources
 
