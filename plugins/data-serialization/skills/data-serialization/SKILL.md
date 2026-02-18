@@ -474,5 +474,5 @@ This skill is part of the `data-serialization` plugin.
 
 **Sources:**
 
-- **GitHub**: `https://github.com/nsheaps/.ai`
+- **GitHub**: `https://github.com/nsheaps/ai-mktpl`
 - **Local Path**: `~/src/nsheaps/ai/plugins/data-serialization`

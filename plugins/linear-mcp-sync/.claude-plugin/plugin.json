@@ -7,7 +7,7 @@
     "email": "nsheaps@gmail.com",
     "url": "https://github.com/nsheaps"
   },
-  "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/linear-mcp-sync",
-  "repository": "https://github.com/nsheaps/.ai",
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/linear-mcp-sync",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
   "keywords": ["linear", "mcp", "hooks", "sync", "issue-tracking", "conflict-detection"]
 }

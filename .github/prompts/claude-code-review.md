@@ -373,8 +373,8 @@ Another aspect
 - The error message could be more descriptive (not a blocker)
 
 Notes:[^1][^2]
-[^1]: Workflow Run: [https://github.com/nsheaps/.ai/actions/runs.....](https://github.com/nsheaps/.ai/actions/runs.....)
-[^2]: PR: [nsheaps/.ai#123](https://github.com/nsheaps/.ai/pull/123)
+[^1]: Workflow Run: [https://github.com/nsheaps/ai-mktpl/actions/runs.....](https://github.com/nsheaps/ai-mktpl/actions/runs.....)
+[^2]: PR: [nsheaps/ai-mktpl#123](https://github.com/nsheaps/ai-mktpl/pull/123)
 ...
 
 or if you think there's an issue with the changes...
@@ -409,8 +409,8 @@ And a suggestion with how you may want to fix it.
 - Documentation could be updated to explain the admin permission model
 
 Notes:[^1][^2]
-[^1]: Workflow Run: [https://github.com/nsheaps/.ai/actions/runs.....](https://github.com/nsheaps/.ai/actions/runs.....)
-[^2]: PR: [nsheaps/.ai#123](https://github.com/nsheaps/.ai/pull/123)
+[^1]: Workflow Run: [https://github.com/nsheaps/ai-mktpl/actions/runs.....](https://github.com/nsheaps/ai-mktpl/actions/runs.....)
+[^2]: PR: [nsheaps/ai-mktpl#123](https://github.com/nsheaps/ai-mktpl/pull/123)
 ...
 
 ## Restrictions, guidelines, and critical rules:

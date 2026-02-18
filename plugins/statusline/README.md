@@ -14,6 +14,15 @@ This plugin provides an informative status line that displays at the top of your
 ✅ **Usage tracking** - Integrates with par-cc-usage (optional)
 ✅ **Auto-configuration** - Hooks automatically update settings.json
 ✅ **Worktree support** - Handles git worktrees correctly
+✅ **Agent team aware** - Automatically disabled for teammates to prevent API rate limit exhaustion
+
+## Agent Teams
+
+When running with [Claude Code agent teams](https://code.claude.com/docs/en/agent-teams), the statusline is automatically disabled for spawned teammates. Only the team lead and solo sessions display the statusline.
+
+**Why**: The statusline makes GitHub API calls (`gh pr view`, `gh repo view`) on every refresh. With 7+ teammates, these calls multiply and exhaust the GitHub API rate limit (~5,000/hour). Since teammates don't have a visible status bar anyway, disabling the script prevents unnecessary API consumption.
+
+**Detection**: Uses `CLAUDE_CODE_PARENT_SESSION_ID`, which Claude Code sets for spawned teammates but not for the lead or solo sessions.
 
 ## Installation
 
@@ -26,7 +35,7 @@ See [Installation Guide](../../docs/installation.md) for all installation method
 # Follow marketplace setup: ../../docs/manual-installation.md
 
 # Or via GitHub
-claude plugins install github:nsheaps/.ai/plugins/statusline
+claude plugins install github:nsheaps/ai-mktpl/plugins/statusline
 
 # Or locally for testing
 cc --plugin-dir /path/to/plugins/statusline
@@ -245,7 +254,7 @@ Look for statusline hook execution logs.
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/nsheaps/.ai/issues)
+- **Issues**: [GitHub Issues](https://github.com/nsheaps/ai-mktpl/issues)
 - **Documentation**: [Main README](../../README.md)
 - **Claude Code Docs**: [https://code.claude.com/docs](https://code.claude.com/docs)
 

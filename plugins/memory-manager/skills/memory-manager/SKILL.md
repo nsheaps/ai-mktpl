@@ -176,8 +176,8 @@ OR for "never" statements:
 This skill is part of the `memory-manager` plugin from the `nsheaps-claude-plugins` marketplace.
 
 **Sources:**
-- **GitHub**: `https://github.com/nsheaps/.ai`
-- **Local Development**: `$HOME/src/nsheaps/.ai`
+- **GitHub**: `https://github.com/nsheaps/ai-mktpl`
+- **Local Development**: `$HOME/src/nsheaps/ai-mktpl`
 
 ### Updating This Plugin
 
@@ -221,7 +221,7 @@ Current version: `1.0.0`
 
 To check for updates, suggest the user visit:
 
-- GitHub: https://github.com/nsheaps/.ai
+- GitHub: https://github.com/nsheaps/ai-mktpl
 - Or run: `/plugin marketplace update nsheaps-claude-plugins`
 
 ### Proactive Update Suggestions

@@ -43,7 +43,7 @@ If your `settings.json` doesn't have a `marketplaces` field, add it:
   "marketplaces": [
     {
       "name": "nsheaps",
-      "url": "https://raw.githubusercontent.com/nsheaps/.ai/main/.claude-plugin/marketplace.json"
+      "url": "https://raw.githubusercontent.com/nsheaps/ai-mktpl/main/.claude-plugin/marketplace.json"
     }
   ],
   "enabledPlugins": {
@@ -63,7 +63,7 @@ If you already have marketplaces, add the nsheaps marketplace to the array:
     },
     {
       "name": "nsheaps",
-      "url": "https://raw.githubusercontent.com/nsheaps/.ai/main/.claude-plugin/marketplace.json"
+      "url": "https://raw.githubusercontent.com/nsheaps/ai-mktpl/main/.claude-plugin/marketplace.json"
     }
   ]
 }
@@ -89,7 +89,7 @@ Enable a plugin directly from GitHub:
 ```json
 {
   "enabledPlugins": {
-    "plugin-name@github:nsheaps/.ai": true
+    "plugin-name@github:nsheaps/ai-mktpl": true
   }
 }
 ```
@@ -132,13 +132,13 @@ Here's a complete example `settings.json` with marketplace and plugins:
     },
     {
       "name": "nsheaps",
-      "url": "https://raw.githubusercontent.com/nsheaps/.ai/main/.claude-plugin/marketplace.json"
+      "url": "https://raw.githubusercontent.com/nsheaps/ai-mktpl/main/.claude-plugin/marketplace.json"
     }
   ],
   "enabledPlugins": {
     "commit-skill@nsheaps": true,
     "data-serialization@nsheaps": true,
-    "statusline@github:nsheaps/.ai": true
+    "statusline@github:nsheaps/ai-mktpl": true
   },
   "model": "sonnet",
   "permissions": {
@@ -163,7 +163,7 @@ For plugins in subdirectories:
 ```json
 {
   "enabledPlugins": {
-    "commit-skill@github:nsheaps/.ai/plugins/commit-skill": true
+    "commit-skill@github:nsheaps/ai-mktpl/plugins/commit-skill": true
   }
 }
 ```
@@ -282,4 +282,4 @@ ajv validate -s https://json.schemastore.org/claude-code-settings.json -d ~/.cla
 - [Installation Guide](./installation.md) - Other installation methods
 - [Claude Code Settings Schema](https://json.schemastore.org/claude-code-settings.json)
 - [Claude Code Documentation](https://code.claude.com/docs)
-- [Plugin Marketplace](https://github.com/nsheaps/.ai)
+- [Plugin Marketplace](https://github.com/nsheaps/ai-mktpl)

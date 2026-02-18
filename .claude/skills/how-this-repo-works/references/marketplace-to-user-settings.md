@@ -28,7 +28,7 @@ Claude Code reads `<path>/.claude-plugin/marketplace.json` directly from the fil
   "nsheaps-claude-plugins": {
     "source": {
       "source": "github",
-      "repo": "nsheaps/.ai"
+      "repo": "nsheaps/ai-mktpl"
     }
   }
 }

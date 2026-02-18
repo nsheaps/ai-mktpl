@@ -1,6 +1,6 @@
 # Plugin Installation Guide
 
-Complete guide for installing plugins from the nsheaps/.ai plugin marketplace.
+Complete guide for installing plugins from the nsheaps/ai-mktpl plugin marketplace.
 
 ## Installation Methods
 
@@ -18,7 +18,7 @@ Once the marketplace is configured, plugins can be installed via Claude Code:
 Or use the GitHub path:
 
 ```bash
-claude plugins install github:nsheaps/.ai/plugins/plugin-name
+claude plugins install github:nsheaps/ai-mktpl/plugins/plugin-name
 ```
 
 ### Method 2: Via GitHub URL
@@ -26,7 +26,7 @@ claude plugins install github:nsheaps/.ai/plugins/plugin-name
 Install directly from GitHub without configuring the marketplace:
 
 ```bash
-claude plugins install github:nsheaps/.ai/plugins/plugin-name
+claude plugins install github:nsheaps/ai-mktpl/plugins/plugin-name
 ```
 
 ### Method 3: Local Development
@@ -40,7 +40,7 @@ cc --plugin-dir /path/to/plugins/plugin-name
 Or clone the repository and point to a plugin:
 
 ```bash
-git clone https://github.com/nsheaps/.ai.git
+git clone https://github.com/nsheaps/ai-mktpl.git
 cc --plugin-dir ~/.ai/plugins/plugin-name
 ```
 
@@ -124,6 +124,6 @@ Or manually edit `~/.claude/settings.json` to remove from `enabledPlugins`.
 
 ## Getting Help
 
-- Plugin issues: [GitHub Issues](https://github.com/nsheaps/.ai/issues)
+- Plugin issues: [GitHub Issues](https://github.com/nsheaps/ai-mktpl/issues)
 - Claude Code docs: [https://code.claude.com/docs](https://code.claude.com/docs)
-- Marketplace repo: [nsheaps/.ai](https://github.com/nsheaps/.ai)
+- Marketplace repo: [nsheaps/ai-mktpl](https://github.com/nsheaps/ai-mktpl)

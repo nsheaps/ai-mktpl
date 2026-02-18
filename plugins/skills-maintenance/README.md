@@ -60,7 +60,7 @@ See [Installation Guide](../../docs/installation.md) for all installation method
 # Follow marketplace setup: ../../docs/manual-installation.md
 
 # Or via GitHub
-claude plugins install github:nsheaps/.ai/plugins/skills-maintenance
+claude plugins install github:nsheaps/ai-mktpl/plugins/skills-maintenance
 
 # Or locally for testing
 cc --plugin-dir /path/to/plugins/skills-maintenance
@@ -236,8 +236,8 @@ Follow the same maintenance workflow described in the skill itself!
 ## Support
 
 - **Documentation**: [Claude Code Docs](https://code.claude.com/docs)
-- **Issues**: [GitHub Issues](https://github.com/nsheaps/.ai/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/nsheaps/.ai/discussions)
+- **Issues**: [GitHub Issues](https://github.com/nsheaps/ai-mktpl/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/nsheaps/ai-mktpl/discussions)
 
 ## License
 

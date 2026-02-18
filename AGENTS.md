@@ -18,7 +18,7 @@
 | **Name**       | Claude Code Plugin Marketplace  |
 | **Purpose**    | Curated plugins for Claude Code |
 | **Owner**      | @nsheaps                        |
-| **Repository** | https://github.com/nsheaps/.ai  |
+| **Repository** | https://github.com/nsheaps/ai-mktpl  |
 
 ## Key Directories
 

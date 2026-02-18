@@ -15,7 +15,7 @@ See [Installation Guide](../../docs/installation.md) for all installation method
 # Follow marketplace setup: ../../docs/manual-installation.md
 
 # Or via GitHub
-claude plugins install github:nsheaps/.ai/plugins/self-terminate
+claude plugins install github:nsheaps/ai-mktpl/plugins/self-terminate
 
 # Or locally for testing
 cc --plugin-dir /path/to/plugins/self-terminate

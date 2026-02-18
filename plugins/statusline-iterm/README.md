@@ -48,7 +48,7 @@ Or use Dynamic Profiles with:
 
 ```bash
 # Via GitHub
-claude plugins install github:nsheaps/.ai/plugins/statusline-iterm
+claude plugins install github:nsheaps/ai-mktpl/plugins/statusline-iterm
 
 # Or locally for testing
 cc --plugin-dir /path/to/plugins/statusline-iterm
@@ -135,7 +135,7 @@ echo '{"session_id": "test", "workspace": {"project_dir": "'"$PWD"'"}}' | \
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/nsheaps/.ai/issues)
+- **Issues**: [GitHub Issues](https://github.com/nsheaps/ai-mktpl/issues)
 - **Documentation**: [Main README](../../README.md)
 
 ## License

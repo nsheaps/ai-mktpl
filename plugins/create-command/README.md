@@ -21,7 +21,7 @@ See [Installation Guide](../../docs/installation.md) for all installation method
 # Follow marketplace setup: ../../docs/manual-installation.md
 
 # Or via GitHub
-claude plugins install github:nsheaps/.ai/plugins/create-command
+claude plugins install github:nsheaps/ai-mktpl/plugins/create-command
 
 # Or locally for testing
 cc --plugin-dir /path/to/plugins/create-command

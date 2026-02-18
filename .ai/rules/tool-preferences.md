@@ -109,7 +109,7 @@ Prefer capturing reusable commands in script files:
 1. Anything more than a single command should be a script file
 2. This improves consistency and allows iteration on task completion
 3. Where possible, accompany scripts with a skill that documents usage
-4. Skills should be captured in installable plugins at github.com/nsheaps/.ai
+4. Skills should be captured in installable plugins at github.com/nsheaps/ai-mktpl
 
 ## Data Storage
 

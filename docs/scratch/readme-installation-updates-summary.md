@@ -57,7 +57,7 @@ See [Installation Guide](../../docs/installation.md) for all installation method
 
 # Or via GitHub
 
-claude plugins install github:nsheaps/.ai/plugins/PLUGIN-NAME
+claude plugins install github:nsheaps/ai-mktpl/plugins/PLUGIN-NAME
 
 # Or locally for testing
 

@@ -91,6 +91,6 @@ This pattern is ideal for CI/CD integration where a GitHub Action can invoke sim
 
 ## References
 
-- [PR #84 - Plugin Implementation](https://github.com/nsheaps/.ai/pull/84)
+- [PR #84 - Plugin Implementation](https://github.com/nsheaps/ai-mktpl/pull/84)
 - [pr-review-toolkit Plugin](https://github.com/anthropics/claude-plugins-official)
 - [Claude Code Plugin Development Guide](https://docs.anthropic.com/en/docs/claude-code/plugins)

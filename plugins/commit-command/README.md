@@ -27,7 +27,7 @@ See [Installation Guide](../../docs/installation.md) for all installation method
 # Follow marketplace setup: ../../docs/manual-installation.md
 
 # Or via GitHub
-claude plugins install github:nsheaps/.ai/plugins/commit-command
+claude plugins install github:nsheaps/ai-mktpl/plugins/commit-command
 
 # Or locally for testing
 cc --plugin-dir /path/to/plugins/commit-command
@@ -313,7 +313,7 @@ The command only commits:
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/nsheaps/.ai/issues)
+- **Issues**: [GitHub Issues](https://github.com/nsheaps/ai-mktpl/issues)
 - **Documentation**: [Main README](../../README.md)
 - **Claude Code Docs**: [https://code.claude.com/docs](https://code.claude.com/docs)
 

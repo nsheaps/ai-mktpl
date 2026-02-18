@@ -30,7 +30,7 @@ See [Installation Guide](../../docs/installation.md) for all installation method
 # Follow marketplace setup: ../../docs/manual-installation.md
 
 # Or via GitHub
-claude plugins install github:nsheaps/.ai/plugins/github-auth-skill
+claude plugins install github:nsheaps/ai-mktpl/plugins/github-auth-skill
 
 # Or locally for testing
 cc --plugin-dir /path/to/plugins/github-auth-skill
@@ -181,7 +181,7 @@ winget install GitHub.cli
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/nsheaps/.ai/issues)
+- **Issues**: [GitHub Issues](https://github.com/nsheaps/ai-mktpl/issues)
 - **Documentation**: [Main README](../../README.md)
 
 ## Changelog

@@ -13,7 +13,7 @@ See [Installation Guide](../../docs/installation.md) for all installation method
 # Follow marketplace setup: ../../docs/manual-installation.md
 
 # Or via GitHub
-claude plugins install github:nsheaps/.ai/plugins/correct-behavior
+claude plugins install github:nsheaps/ai-mktpl/plugins/correct-behavior
 
 # Or locally for testing
 cc --plugin-dir /path/to/plugins/correct-behavior

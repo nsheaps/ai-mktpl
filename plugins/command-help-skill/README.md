@@ -43,7 +43,7 @@ See [Installation Guide](../../docs/installation.md) for all installation method
 # Follow marketplace setup: ../../docs/manual-installation.md
 
 # Or via GitHub
-claude plugins install github:nsheaps/.ai/plugins/command-help-skill
+claude plugins install github:nsheaps/ai-mktpl/plugins/command-help-skill
 
 # Or locally for testing
 cc --plugin-dir /path/to/plugins/command-help-skill
@@ -580,7 +580,7 @@ Claude: [Proceeds to analyze changes and create commit]
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/nsheaps/.ai/issues)
+- **Issues**: [GitHub Issues](https://github.com/nsheaps/ai-mktpl/issues)
 - **Documentation**: [Main README](../../README.md)
 - **Claude Code Docs**: [https://code.claude.com/docs](https://code.claude.com/docs)
 

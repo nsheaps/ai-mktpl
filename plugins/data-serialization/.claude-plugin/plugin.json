@@ -23,6 +23,6 @@
     "accessibility",
     "data-transformation"
   ],
-  "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/data-serialization",
-  "repository": "https://github.com/nsheaps/.ai"
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/data-serialization",
+  "repository": "https://github.com/nsheaps/ai-mktpl"
 }

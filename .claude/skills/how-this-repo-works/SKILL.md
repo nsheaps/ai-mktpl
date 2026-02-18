@@ -10,9 +10,9 @@ version: "1.0.0"
 
 # How the nsheaps/ai Plugin Marketplace Works
 
-This skill documents the full lifecycle of a Claude Code plugin in the `nsheaps/.ai` repository (local clone at `~/src/nsheaps/ai/`), from source code to installation on a user's machine.
+This skill documents the full lifecycle of a Claude Code plugin in the `nsheaps/ai-mktpl` repository (local clone at `~/src/nsheaps/ai/`), from source code to installation on a user's machine.
 
-Repository: [nsheaps/.ai on GitHub](https://github.com/nsheaps/.ai)
+Repository: [nsheaps/ai-mktpl on GitHub](https://github.com/nsheaps/ai-mktpl)
 
 ## Tooling Stack
 
@@ -151,7 +151,7 @@ Nathan's `~/.claude/settings.json` registers the marketplace as a **directory-ty
 
 Because the source type is `"directory"`, Claude Code reads `marketplace.json` directly from the local filesystem at `~/src/nsheaps/ai/.claude-plugin/marketplace.json`. A `git pull` on that clone is sufficient to get the latest marketplace state.
 
-For remote users, the marketplace can also be configured as a GitHub source (`"source": "github", "repo": "nsheaps/.ai"`), and Claude Code fetches the marketplace.json from the repo.
+For remote users, the marketplace can also be configured as a GitHub source (`"source": "github", "repo": "nsheaps/ai-mktpl"`), and Claude Code fetches the marketplace.json from the repo.
 
 ### Plugin Enable/Disable
 

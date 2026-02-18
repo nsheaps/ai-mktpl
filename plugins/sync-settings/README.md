@@ -34,7 +34,7 @@ See [Installation Guide](../../docs/installation.md) for all installation method
 # Follow marketplace setup: ../../docs/manual-installation.md
 
 # Or via GitHub
-claude plugins install github:nsheaps/.ai/plugins/sync-settings
+claude plugins install github:nsheaps/ai-mktpl/plugins/sync-settings
 
 # Or locally for testing
 cc --plugin-dir /path/to/plugins/sync-settings
@@ -276,7 +276,7 @@ The hook uses these Claude Code environment variables:
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/nsheaps/.ai/issues)
+- **Issues**: [GitHub Issues](https://github.com/nsheaps/ai-mktpl/issues)
 - **Documentation**: [Main README](../../README.md)
 - **Claude Code Docs**: [https://docs.anthropic.com/en/docs/claude-code](https://docs.anthropic.com/en/docs/claude-code)
 

@@ -23,7 +23,7 @@ See [Installation Guide](../../docs/installation.md) for all installation method
 # Follow marketplace setup: ../../docs/manual-installation.md
 
 # Or via GitHub
-claude plugins install github:nsheaps/.ai/plugins/linear-mcp-sync
+claude plugins install github:nsheaps/ai-mktpl/plugins/linear-mcp-sync
 
 # Or locally for testing
 cc --plugin-dir /path/to/plugins/linear-mcp-sync
@@ -151,7 +151,7 @@ linear-mcp-sync/
 
 ## Contributing
 
-Issues and pull requests welcome at: https://github.com/nsheaps/.ai
+Issues and pull requests welcome at: https://github.com/nsheaps/ai-mktpl
 
 ## License
 

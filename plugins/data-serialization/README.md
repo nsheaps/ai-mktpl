@@ -27,7 +27,7 @@ See [Installation Guide](../../docs/installation.md) for all installation method
 # Follow marketplace setup: ../../docs/manual-installation.md
 
 # Or via GitHub
-claude plugins install github:nsheaps/.ai/plugins/data-serialization
+claude plugins install github:nsheaps/ai-mktpl/plugins/data-serialization
 
 # Or locally for testing
 cc --plugin-dir /path/to/plugins/data-serialization
