@@ -335,7 +335,7 @@ After completing branch navigation or manipulation tasks (e.g., `gs bco`, `gs bo
 
 Use `gs ls` output combined with `gh pr view <branch> --json state` (or the `gs-stack-status.sh` script with `--include-closed`) to identify branches whose PRs are closed or merged. Only prompt when at least one such branch is found.
 
-**Note:** `gs-stack-status.sh` hides closed/merged PRs by default. Use `--include-closed` to see them — they render in red with a ⛔️ prefix. When you see closed PRs in the output, proactively suggest untracking them using the options above.
+**Note:** `gs-stack-status.sh` hides closed/merged PRs by default. Use `--include-closed` to see them — merged PRs render in green text, closed PRs render in red text, both with a ⛔️ prefix. When you see closed/merged PRs in the output, proactively suggest untracking them using the options above.
 
 ## Stack Status Overview
 
@@ -371,6 +371,7 @@ Additional indicators:
 - `＋` (bold magenta) before branch name = branch is checked out in another worktree
 - `⛔️` prefix = closed/merged PR (only visible with `--include-closed`)
 - Current branch is highlighted in bold yellow
+- Merged PRs render in green text
 - Closed PRs render in red text
 
 The PR URL appears on the line below each branch (interactive mode). Branches without PRs (trunk) are shown as-is.
