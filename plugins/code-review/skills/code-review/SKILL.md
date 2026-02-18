@@ -22,25 +22,26 @@ An automated PR review system powered by [claude-code-action](https://github.com
 
 ## Trigger Conditions
 
-| Condition | Behavior |
-|-----------|----------|
-| Non-draft PR opened/updated | Automatic review |
+| Condition                    | Behavior                             |
+| ---------------------------- | ------------------------------------ |
+| Non-draft PR opened/updated  | Automatic review                     |
 | `request-review` label added | One-time review (label auto-removed) |
-| `always-review` label on PR | Review on every push, even drafts |
-| Draft PR (no label) | Skipped |
+| `always-review` label on PR  | Review on every push, even drafts    |
+| Draft PR (no label)          | Skipped                              |
 
 ## Required Secrets
 
-| Secret | Purpose |
-|--------|---------|
-| `REVIEW_GITHUB_APP_ID` | GitHub App ID for posting reviews |
-| `REVIEW_GITHUB_APP_PRIVATE_KEY` | GitHub App private key |
-| `REVIEW_ANTHROPIC_API_KEY` or `ANTHROPIC_API_KEY` | Anthropic API key for Claude |
-| `CLAUDE_CODE_OAUTH_TOKEN` | Alternative: Claude Code OAuth token (used if no API key) |
+| Secret                                            | Purpose                                                   |
+| ------------------------------------------------- | --------------------------------------------------------- |
+| `REVIEW_GITHUB_APP_ID`                            | GitHub App ID for posting reviews                         |
+| `REVIEW_GITHUB_APP_PRIVATE_KEY`                   | GitHub App private key                                    |
+| `REVIEW_ANTHROPIC_API_KEY` or `ANTHROPIC_API_KEY` | Anthropic API key for Claude                              |
+| `CLAUDE_CODE_OAUTH_TOKEN`                         | Alternative: Claude Code OAuth token (used if no API key) |
 
 ## Required GitHub App Permissions
 
 The GitHub App needs:
+
 - **Contents**: Write (checkout, read files)
 - **Pull requests**: Write (post reviews, manage labels)
 - **Issues**: Write (comment management)
@@ -70,15 +71,16 @@ The bot follows a structured review process:
 
 ### Review Verdicts
 
-| Verdict | When |
-|---------|------|
-| `APPROVE` | No outstanding issues, ready to merge |
-| `COMMENT` | Suggestions but not blocking (won't break if merged) |
+| Verdict           | When                                                            |
+| ----------------- | --------------------------------------------------------------- |
+| `APPROVE`         | No outstanding issues, ready to merge                           |
+| `COMMENT`         | Suggestions but not blocking (won't break if merged)            |
 | `REQUEST_CHANGES` | Must fix before merge (security, correctness, breaking changes) |
 
 ### Review Summary Format
 
 Reviews use a collapsible `<details>/<summary>` format with:
+
 - Shields.io badges for quality, security, simplicity, and confidence scores
 - Emoji indicators: `✅` checked, `❔` question, `⚠️` warning, `❌` problem
 - Footnotes with workflow run link and external references
@@ -101,6 +103,7 @@ concurrency:
 ### Modifying the prompt
 
 Edit `.github/prompts/claude-code-review.md`. Environment variables available for interpolation:
+
 - `${REPO}` — repository full name (owner/repo)
 - `${PR_NUMBER}` — pull request number
 - `${JOB_CONTEXT}` — JSON with job metadata (run URL, etc.)
@@ -108,6 +111,7 @@ Edit `.github/prompts/claude-code-review.md`. Environment variables available fo
 ### Adjusting permissions
 
 The workflow's `settings` JSON controls which tools the bot can use. Key sections:
+
 - `permissions.allow` — tools and bash commands the bot can use
 - `permissions.deny` — explicitly blocked tools (e.g., CI status checks, git push)
 - `env` — environment variables for the claude-code session
@@ -118,11 +122,11 @@ The `allowed_bots` input controls which bot accounts the review bot recognizes w
 
 ## Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| Bot doesn't review draft PRs | Add `request-review` label, or use `always-review` label |
-| Bot can't post reviews | Check GitHub App permissions and secrets |
-| Reviews are too verbose | Adjust the prompt template in `.github/prompts/claude-code-review.md` |
+| Issue                                | Solution                                                                                 |
+| ------------------------------------ | ---------------------------------------------------------------------------------------- |
+| Bot doesn't review draft PRs         | Add `request-review` label, or use `always-review` label                                 |
+| Bot can't post reviews               | Check GitHub App permissions and secrets                                                 |
+| Reviews are too verbose              | Adjust the prompt template in `.github/prompts/claude-code-review.md`                    |
 | Bot reviews its own workflow changes | This is by design for security — consider using copilot instructions to handle this case |
 
 ## Reference Files
