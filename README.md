@@ -17,10 +17,7 @@ Add the plugin path to your project's `.claude.json`:
 
 ```json
 {
-  "plugins": [
-    "/path/to/this/repo/plugins/scm-utils",
-    "/path/to/this/repo/plugins/statusline"
-  ]
+  "plugins": ["/path/to/this/repo/plugins/scm-utils", "/path/to/this/repo/plugins/statusline"]
 }
 ```
 
@@ -32,70 +29,70 @@ The `.ai/rules/` directory is synced to `~/.claude/rules/` via automation (symli
 
 ### Git & Source Control
 
-| Plugin | Description |
-|:-------|:------------|
+| Plugin                                         | Description                                                         |
+| :--------------------------------------------- | :------------------------------------------------------------------ |
 | **[commit-command](./plugins/commit-command)** | `/commit` — AI-generated commit messages matching your repo's style |
-| **[commit-skill](./plugins/commit-skill)** | Auto-analyze changes and create semantic commits during development |
-| **[scm-utils](./plugins/scm-utils)** | `/commit`, `/update-branch` commands + auth-user skill |
-| **[git-spice](./plugins/git-spice)** | Manage stacked Git branches with the `gs` CLI |
+| **[commit-skill](./plugins/commit-skill)**     | Auto-analyze changes and create semantic commits during development |
+| **[scm-utils](./plugins/scm-utils)**           | `/commit`, `/update-branch` commands + auth-user skill              |
+| **[git-spice](./plugins/git-spice)**           | Manage stacked Git branches with the `gs` CLI                       |
 
 ### Safety & Evaluation
 
-| Plugin | Description |
-|:-------|:------------|
-| **[safety-evaluation-prompt](./plugins/safety-evaluation-prompt)** | Pre-tool-call safety via prompt-style hooks |
-| **[safety-evaluation-script](./plugins/safety-evaluation-script)** | Pre-tool-call safety via script-style hooks (haiku CLI) |
+| Plugin                                                             | Description                                                        |
+| :----------------------------------------------------------------- | :----------------------------------------------------------------- |
+| **[safety-evaluation-prompt](./plugins/safety-evaluation-prompt)** | Pre-tool-call safety via prompt-style hooks                        |
+| **[safety-evaluation-script](./plugins/safety-evaluation-script)** | Pre-tool-call safety via script-style hooks (haiku CLI)            |
 | **[context-bloat-prevention](./plugins/context-bloat-prevention)** | PostToolUse + PreToolUse hooks to detect and prevent context bloat |
 
 ### Status & Monitoring
 
-| Plugin | Description |
-|:-------|:------------|
-| **[statusline](./plugins/statusline)** | Configurable status line showing session info, project context, git status |
-| **[statusline-iterm](./plugins/statusline-iterm)** | Status line with iTerm2 badge integration |
+| Plugin                                             | Description                                                                |
+| :------------------------------------------------- | :------------------------------------------------------------------------- |
+| **[statusline](./plugins/statusline)**             | Configurable status line showing session info, project context, git status |
+| **[statusline-iterm](./plugins/statusline-iterm)** | Status line with iTerm2 badge integration                                  |
 
 ### Development Workflow
 
-| Plugin | Description |
-|:-------|:------------|
-| **[review-changes](./plugins/review-changes)** | `/review-changes` — detailed code review feedback |
-| **[code-simplifier](./plugins/code-simplifier)** | `/simplify` — refine code for clarity and maintainability |
-| **[create-command](./plugins/create-command)** | `/create-command` — guided slash command creation |
-| **[correct-behavior](./plugins/correct-behavior)** | `/correct-behavior` — fix AI behavior mistakes and update rules |
-| **[product-development-and-sdlc](./plugins/product-development-and-sdlc)** | Iterative PRD writing with structured SDLC workflows |
+| Plugin                                                                     | Description                                                     |
+| :------------------------------------------------------------------------- | :-------------------------------------------------------------- |
+| **[review-changes](./plugins/review-changes)**                             | `/review-changes` — detailed code review feedback               |
+| **[code-simplifier](./plugins/code-simplifier)**                           | `/simplify` — refine code for clarity and maintainability       |
+| **[create-command](./plugins/create-command)**                             | `/create-command` — guided slash command creation               |
+| **[correct-behavior](./plugins/correct-behavior)**                         | `/correct-behavior` — fix AI behavior mistakes and update rules |
+| **[product-development-and-sdlc](./plugins/product-development-and-sdlc)** | Iterative PRD writing with structured SDLC workflows            |
 
 ### Task & Session Management
 
-| Plugin | Description |
-|:-------|:------------|
+| Plugin                                                     | Description                                                    |
+| :--------------------------------------------------------- | :------------------------------------------------------------- |
 | **[task-parallelization](./plugins/task-parallelization)** | Intelligently parallelize Task tool calls for batch operations |
-| **[todo-sync](./plugins/todo-sync)** | Auto-sync `~/.claude/` todos to project `.claude/` directory |
-| **[self-terminate](./plugins/self-terminate)** | Graceful SIGINT termination for agents |
+| **[todo-sync](./plugins/todo-sync)**                       | Auto-sync `~/.claude/` todos to project `.claude/` directory   |
+| **[self-terminate](./plugins/self-terminate)**             | Graceful SIGINT termination for agents                         |
 
 ### Agent Teams & Orchestration
 
-| Plugin | Description |
-|:-------|:------------|
-| **[tmux-subagent](./plugins/tmux-subagent)** | `/subagent` — launch sub-agents in tmux with custom configs |
+| Plugin                                                     | Description                                                    |
+| :--------------------------------------------------------- | :------------------------------------------------------------- |
+| **[tmux-subagent](./plugins/tmux-subagent)**               | `/subagent` — launch sub-agents in tmux with custom configs    |
 | **[agent-teams-skills](./.ai/plugins/agent-teams-skills)** | Reference skill for agent teams: enabling, config, hooks, tmux |
 
 ### Integrations
 
-| Plugin | Description |
-|:-------|:------------|
-| **[linear-mcp-sync](./plugins/linear-mcp-sync)** | Linear MCP with hash validation hooks for safe ticket updates |
-| **[github-auth-skill](./plugins/github-auth-skill)** | GitHub device authorization flow authentication |
-| **[sync-settings](./plugins/sync-settings)** | Sync local Claude Code settings via `syncconfig.yaml` rules |
+| Plugin                                               | Description                                                   |
+| :--------------------------------------------------- | :------------------------------------------------------------ |
+| **[linear-mcp-sync](./plugins/linear-mcp-sync)**     | Linear MCP with hash validation hooks for safe ticket updates |
+| **[github-auth-skill](./plugins/github-auth-skill)** | GitHub device authorization flow authentication               |
+| **[sync-settings](./plugins/sync-settings)**         | Sync local Claude Code settings via `syncconfig.yaml` rules   |
 
 ### Data & Utilities
 
-| Plugin | Description |
-|:-------|:------------|
+| Plugin                                                 | Description                                               |
+| :----------------------------------------------------- | :-------------------------------------------------------- |
 | **[data-serialization](./plugins/data-serialization)** | YAML/JSON/TOON/XML conversion; TOON reduces tokens 30-60% |
-| **[memory-manager](./plugins/memory-manager)** | Auto-detect and store user preferences in CLAUDE.md |
+| **[memory-manager](./plugins/memory-manager)**         | Auto-detect and store user preferences in CLAUDE.md       |
 | **[command-help-skill](./plugins/command-help-skill)** | Help discover and execute slash commands sent as messages |
 | **[skills-maintenance](./plugins/skills-maintenance)** | Maintain, update, and improve existing Claude Code skills |
-| **[opengraph-image](./plugins/opengraph-image)** | Generate OpenGraph images via html2png.dev API |
+| **[opengraph-image](./plugins/opengraph-image)**       | Generate OpenGraph images via html2png.dev API            |
 
 ## Organization-Wide Rules
 
@@ -113,25 +110,25 @@ Rules are symlinked to `~/.claude/rules/` by automation and apply across all pro
 
 6 custom agents in `.ai/agents/`:
 
-| Agent | Purpose |
-|:------|:--------|
+| Agent                         | Purpose                                             |
+| :---------------------------- | :-------------------------------------------------- |
 | `conversation-history-search` | Search past Claude Code conversations (haiku model) |
-| `github-issue-creator` | Create GitHub issues for bugs and work items |
-| `internet-researcher` | Deep web research with reference gathering |
-| `research-lead` | Lead and coordinate multi-source research |
-| `research-subagent` | Focused research sub-agent for deep dives |
-| `ui-ux-consultant` | Desktop UI/UX and accessibility expert |
+| `github-issue-creator`        | Create GitHub issues for bugs and work items        |
+| `internet-researcher`         | Deep web research with reference gathering          |
+| `research-lead`               | Lead and coordinate multi-source research           |
+| `research-subagent`           | Focused research sub-agent for deep dives           |
+| `ui-ux-consultant`            | Desktop UI/UX and accessibility expert              |
 
 ## Slash Commands
 
 4 commands in `.ai/commands/`:
 
-| Command | Purpose |
-|:--------|:--------|
+| Command             | Purpose                                   |
+| :------------------ | :---------------------------------------- |
 | `/correct-behavior` | Fix AI behavior mistakes and update rules |
-| `/create-command` | Guided slash command creation |
-| `/review-changes` | Detailed code change review |
-| `/relentlessly-fix` | Persistent fixing until resolved |
+| `/create-command`   | Guided slash command creation             |
+| `/review-changes`   | Detailed code change review               |
+| `/relentlessly-fix` | Persistent fixing until resolved          |
 
 ## Development
 

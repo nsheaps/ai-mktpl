@@ -13,12 +13,12 @@
 
 ## Repository Overview
 
-| Field          | Value                           |
-| -------------- | ------------------------------- |
-| **Name**       | Claude Code Plugin Marketplace  |
-| **Purpose**    | Curated plugins for Claude Code |
-| **Owner**      | @nsheaps                        |
-| **Repository** | https://github.com/nsheaps/ai-mktpl  |
+| Field          | Value                               |
+| -------------- | ----------------------------------- |
+| **Name**       | Claude Code Plugin Marketplace      |
+| **Purpose**    | Curated plugins for Claude Code     |
+| **Owner**      | @nsheaps                            |
+| **Repository** | https://github.com/nsheaps/ai-mktpl |
 
 ## Key Directories
 
