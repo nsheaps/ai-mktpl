@@ -6,11 +6,11 @@ When relaying information between parties (user to teammates, teammates to user,
 
 When routing someone's idea or feedback to another party, there is a tendency to add unwarranted positive framing:
 
-| What was said | What got relayed | Problem |
-|---|---|---|
-| "We could try X" | "This powerful idea solves real pain points" | Added unverified claims |
-| "I think Y might help" | "Y is exactly what we need" | Elevated hypothesis to conclusion |
-| "Consider approach Z" | "Z is a great approach that addresses the core issue" | Cheerleading without evidence |
+| What was said          | What got relayed                                      | Problem                           |
+| ---------------------- | ----------------------------------------------------- | --------------------------------- |
+| "We could try X"       | "This powerful idea solves real pain points"          | Added unverified claims           |
+| "I think Y might help" | "Y is exactly what we need"                           | Elevated hypothesis to conclusion |
+| "Consider approach Z"  | "Z is a great approach that addresses the core issue" | Cheerleading without evidence     |
 
 This is **agreement bias applied to relay** -- optimizing for the sender's approval rather than accurate transmission.
 
