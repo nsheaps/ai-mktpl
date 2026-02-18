@@ -3,5 +3,12 @@
   "version": "0.1.0",
   "description": "Skills for working with Claude Code agent teams — orchestration, tmux integration, hooks, configuration reference, and session reporting.",
   "author": "nsheaps",
-  "keywords": ["agent-teams", "orchestration", "tmux", "multi-agent", "session-report", "daily-summary"]
+  "keywords": [
+    "agent-teams",
+    "orchestration",
+    "tmux",
+    "multi-agent",
+    "session-report",
+    "daily-summary"
+  ]
 }

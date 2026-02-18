@@ -44,6 +44,7 @@ The report is a collaborative deliverable requiring three roles:
 The **Software Engineer** (or designated author) produces the initial draft by gathering data from all sources (see [Data Sources](#data-sources)).
 
 **Draft checklist**:
+
 - [ ] Agent roster with all fields populated (see [Agent Roster Format](#agent-roster-format))
 - [ ] Complete commit log from all repos touched during the session
 - [ ] All GitHub Issues listed with state (OPEN / CLOSED (completed) / CLOSED (not_planned))
@@ -55,6 +56,7 @@ The **Software Engineer** (or designated author) produces the initial draft by g
 ### Step 2: Coach Reviews
 
 The **AI Agent Engineer / Coach** reviews for:
+
 - **Accuracy**: Cross-reference commit hashes, failure descriptions, and issue states against source data
 - **Completeness**: Identify missing failures, untracked action items, or uncredited work
 - **Attribution**: Verify contributions are correctly attributed to the right agent
@@ -65,6 +67,7 @@ The **AI Agent Engineer / Coach** reviews for:
 ### Step 3: Docs Writer Reviews
 
 The **Technical Writer** reviews for:
+
 - **Writing quality**: Section titles match content, consistent terminology
 - **Structure**: All sections present, table of contents accurate
 - **Links**: All URLs clickable, all references resolvable
@@ -85,11 +88,13 @@ Every reference MUST be a clickable markdown link:
 
 ```markdown
 <!-- GOOD -->
+
 [PR #164](https://github.com/nsheaps/ai-mktpl/pull/164)
 [agent-team #59](https://github.com/nsheaps/agent-team/issues/59)
 [`af6f0bf6`](https://github.com/nsheaps/ai-mktpl/commit/af6f0bf6)
 
 <!-- BAD -->
+
 PR #164
 agent-team #59
 af6f0bf6
@@ -99,10 +104,10 @@ af6f0bf6
 
 Differentiate closed issue states:
 
-| State | Meaning |
-|-------|---------|
-| `OPEN` | Not yet resolved |
-| `CLOSED (completed)` | Resolved as intended |
+| State                  | Meaning                       |
+| ---------------------- | ----------------------------- |
+| `OPEN`                 | Not yet resolved              |
+| `CLOSED (completed)`   | Resolved as intended          |
 | `CLOSED (not_planned)` | Won't fix / duplicate / stale |
 
 Query state reason: `gh api repos/OWNER/REPO/issues/N --jq '.state_reason'`
@@ -121,9 +126,11 @@ Never use internal `Task #NNN` references in the report. Map them to GitHub Issu
 
 ```markdown
 <!-- BAD -->
+
 Task #136 (statusline-iterm fix)
 
 <!-- GOOD -->
+
 [ai-mktpl #161](https://github.com/nsheaps/ai-mktpl/issues/161)
 ```
 
@@ -131,17 +138,17 @@ Task #136 (statusline-iterm fix)
 
 Each agent entry includes:
 
-| Field | Description |
-|-------|-------------|
-| Agent ID | As shown in team config |
-| subagent_type | general-purpose, Bash, team-lead, etc. |
-| Model | claude-opus-4-6, opus, haiku, etc. |
-| Role | One-line description |
-| Launched | When spawned (session number or timestamp) |
-| Shut Down | How/when terminated |
-| Status | Successful / Failed / Partial |
-| CWD | Working directory |
-| tmux Pane | (If applicable) Pane ID |
+| Field         | Description                                |
+| ------------- | ------------------------------------------ |
+| Agent ID      | As shown in team config                    |
+| subagent_type | general-purpose, Bash, team-lead, etc.     |
+| Model         | claude-opus-4-6, opus, haiku, etc.         |
+| Role          | One-line description                       |
+| Launched      | When spawned (session number or timestamp) |
+| Shut Down     | How/when terminated                        |
+| Status        | Successful / Failed / Partial              |
+| CWD           | Working directory                          |
+| tmux Pane     | (If applicable) Pane ID                    |
 
 Followed by: Notable Contributions (bulleted), Key Artifacts (file paths), Failures Attributed.
 
@@ -151,28 +158,28 @@ Followed by: Notable Contributions (bulleted), Key Artifacts (file paths), Failu
 
 This section lists OPEN issues that need the **user's** decision, action, or awareness. Group by type:
 
-| Category | What qualifies |
-|----------|---------------|
-| **Decisions Needed** | Strategic choices, license decisions, architectural direction |
-| **Secrets / Manual Setup** | Credentials, repo settings, admin-only actions |
-| **Security** | Vulnerabilities the user should know about |
-| **Open Risks** | Known issues that could cause problems |
-| **Repo Cleanup** | Destructive operations requiring user approval |
-| **Upstream / External** | Issues in repos the team doesn't control |
+| Category                   | What qualifies                                                |
+| -------------------------- | ------------------------------------------------------------- |
+| **Decisions Needed**       | Strategic choices, license decisions, architectural direction |
+| **Secrets / Manual Setup** | Credentials, repo settings, admin-only actions                |
+| **Security**               | Vulnerabilities the user should know about                    |
+| **Open Risks**             | Known issues that could cause problems                        |
+| **Repo Cleanup**           | Destructive operations requiring user approval                |
+| **Upstream / External**    | Issues in repos the team doesn't control                      |
 
 **Rule**: If an action item isn't tracked as a GitHub Issue, create the issue first, then list it.
 
 ## Data Sources
 
-| Source | What to extract |
-|--------|----------------|
-| `git log --all --oneline` (per repo) | Commits, authors, timestamps |
-| `gh issue list -s all --json number,title,state,url` | Issues with state |
-| `gh pr list -s all --json number,title,state,url` | PRs with state |
-| `.claude/tmp/` | Failure logs, review artifacts, research reports, audit files |
-| `~/.claude/teams/{team-name}/config.json` | Agent roster, IDs, pane assignments |
-| TaskList / TaskGet | Internal task state (map to GitHub Issues for report) |
-| Failure log (`.claude/tmp/*-failure-log.md`) | Failure entries with root cause analysis |
+| Source                                               | What to extract                                               |
+| ---------------------------------------------------- | ------------------------------------------------------------- |
+| `git log --all --oneline` (per repo)                 | Commits, authors, timestamps                                  |
+| `gh issue list -s all --json number,title,state,url` | Issues with state                                             |
+| `gh pr list -s all --json number,title,state,url`    | PRs with state                                                |
+| `.claude/tmp/`                                       | Failure logs, review artifacts, research reports, audit files |
+| `~/.claude/teams/{team-name}/config.json`            | Agent roster, IDs, pane assignments                           |
+| TaskList / TaskGet                                   | Internal task state (map to GitHub Issues for report)         |
+| Failure log (`.claude/tmp/*-failure-log.md`)         | Failure entries with root cause analysis                      |
 
 ### Gathering Commits
 
@@ -192,16 +199,16 @@ gh issue list -R owner/repo -s all --json number,title,state,stateReason,url -L 
 
 These were discovered during the first report generation and should be avoided:
 
-| Pitfall | Fix |
-|---------|-----|
-| Links not clickable (plain text references) | Every issue, PR, and commit must be a markdown link |
-| "Key commits" shown but full log missing | Always include complete commit log as appendix |
-| Internal Task references in report | Map all `Task #NNN` to GitHub Issue URLs |
-| No issue state differentiation | Query `state_reason` and show completed vs not_planned |
-| Executive summary has wrong counts | Verify totals by counting actual data, not estimating |
-| Valuable `.claude/tmp/` artifacts not preserved | Move important artifacts to `docs/research/` before session ends |
-| Commit count mismatch between summary and appendix | Count from the appendix, update summary to match |
-| Section titles don't match content | "Work Delivered" = commits, "GitHub Issues" = issues |
+| Pitfall                                            | Fix                                                              |
+| -------------------------------------------------- | ---------------------------------------------------------------- |
+| Links not clickable (plain text references)        | Every issue, PR, and commit must be a markdown link              |
+| "Key commits" shown but full log missing           | Always include complete commit log as appendix                   |
+| Internal Task references in report                 | Map all `Task #NNN` to GitHub Issue URLs                         |
+| No issue state differentiation                     | Query `state_reason` and show completed vs not_planned           |
+| Executive summary has wrong counts                 | Verify totals by counting actual data, not estimating            |
+| Valuable `.claude/tmp/` artifacts not preserved    | Move important artifacts to `docs/research/` before session ends |
+| Commit count mismatch between summary and appendix | Count from the appendix, update summary to match                 |
+| Section titles don't match content                 | "Work Delivered" = commits, "GitHub Issues" = issues             |
 
 ## Output Locations
 
@@ -214,6 +221,7 @@ These were discovered during the first report generation and should be avoided:
 The executive summary is written last (after all data is gathered) but placed first in the report.
 
 **Structure**:
+
 1. **Opening line**: Team size, duration, scope (e.g., "A 10-agent team ran for ~5 hours across 5 repos")
 2. **Headline deliverable**: The single most important thing shipped, with link
 3. **By the numbers**: Commits, issues, PRs, releases, failures — all exact counts
