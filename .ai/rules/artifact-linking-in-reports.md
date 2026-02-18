@@ -6,14 +6,14 @@
 
 When reporting that a task is complete, you MUST include **every applicable** item from this checklist:
 
-| Artifact Type | Format |
-|---|---|
-| GitHub Issue | `[#123](https://github.com/org/repo/issues/123)` |
-| Pull Request | `[PR #456](https://github.com/org/repo/pull/456)` |
-| Commit | `abc1234` (short hash) |
-| File created/modified | Absolute path: `/path/to/file.md` |
-| External URL | Full URL as markdown link |
-| Branch | Branch name |
+| Artifact Type         | Format                                            |
+| --------------------- | ------------------------------------------------- |
+| GitHub Issue          | `[#123](https://github.com/org/repo/issues/123)`  |
+| Pull Request          | `[PR #456](https://github.com/org/repo/pull/456)` |
+| Commit                | `abc1234` (short hash)                            |
+| File created/modified | Absolute path: `/path/to/file.md`                 |
+| External URL          | Full URL as markdown link                         |
+| Branch                | Branch name                                       |
 
 ## Why This Matters
 
