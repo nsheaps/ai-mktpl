@@ -1,0 +1,10 @@
+{
+  "name": "todo-plus-plus",
+  "version": "0.1.0",
+  "description": "Enforces commit-on-complete for tasks and reminds about ephemeral session awareness",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com"
+  },
+  "keywords": ["tasks", "commit", "workflow", "ephemeral", "agent-teams"]
+}
