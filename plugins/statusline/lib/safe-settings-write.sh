@@ -1,1 +1,1 @@
-../../shared/lib/safe-settings-write.sh
+../../../shared/lib/safe-settings-write.sh
