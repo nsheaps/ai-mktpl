@@ -1,7 +1,7 @@
 {
   "name": "product-development-and-sdlc",
   "version": "0.1.0",
-  "description": "Iterative PRD and user story writing with structured SDLC workflows. Guides incremental specification development through research, review, and refinement cycles.",
+  "description": "Iterative spec and user story writing with structured SDLC workflows. Guides incremental specification development through research, review, and refinement cycles.",
   "author": {
     "name": "Nathan Heaps",
     "email": "nsheaps@gmail.com",
@@ -10,11 +10,10 @@
   "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/product-development-and-sdlc",
   "repository": "https://github.com/nsheaps/ai-mktpl",
   "keywords": [
-    "prd",
-    "product-requirements",
+    "spec",
+    "specifications",
     "user-stories",
     "sdlc",
-    "specifications",
     "iterative-development",
     "product-management"
   ]

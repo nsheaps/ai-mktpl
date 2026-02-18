@@ -1,27 +1,29 @@
 ---
-name: PRD and User Story Writing
+name: Spec Writing
 description: >
-  This skill should be used when the user asks to "write a PRD", "create a
-  product requirements document", "write user stories", "create a spec",
-  "define requirements", "write a product spec", "create a feature spec",
-  "draft requirements", "iterate on a PRD", "refine a spec", "flesh out
-  requirements", or mentions PRDs, product specifications, user stories, or
-  feature requirements. Guides iterative specification development through
-  research, review, and refinement cycles rather than one-shot generation.
-version: 0.1.0
+  This skill should be used when the user asks to "write a spec", "create a
+  specification", "write user stories", "define requirements", "write a
+  product spec", "create a feature spec", "draft requirements", "iterate on
+  a spec", "refine a spec", "flesh out requirements", "write a PRD", "create
+  a product requirements document", or mentions specifications, product
+  requirements, user stories, or feature requirements. Guides iterative
+  specification development through research, review, and refinement cycles
+  rather than one-shot generation.
+version: 0.2.0
 ---
 
-# PRD and User Story Writing
+# Spec Writing
 
-Write product requirements documents and user stories through iterative
-refinement. Never attempt to produce a complete specification in one pass.
-Instead, start with the smallest meaningful definition and expand through
-repeated cycles of research, drafting, review, and refinement.
+Write specifications and user stories through iterative refinement. Each spec
+is a combined document covering both *Problem & Requirements* (what and why) and
+*Technical Design* (how). Never attempt to produce a complete specification in
+one pass. Instead, start with the smallest meaningful definition and expand
+through repeated cycles of research, drafting, review, and refinement.
 
 ## Core Principle: Iterative Over One-Shot
 
 Specifications written in one pass suffer from blind spots, unstated
-assumptions, and missing edge cases. The iterative approach treats a PRD as a
+assumptions, and missing edge cases. The iterative approach treats a spec as a
 living document that grows in fidelity through deliberate cycles.
 
 **The cycle:**
@@ -49,8 +51,8 @@ The seed exists to anchor all future iteration.
 
 ### Phase 2: First Draft (Skeleton)
 
-Expand the seed into a skeleton PRD using the template structure in
-`references/prd-template.md`. Fill in only what is known with confidence.
+Expand the seed into a skeleton spec using the template structure in
+`references/spec-template.md`. Fill in only what is known with confidence.
 Mark unknowns explicitly with `[TBD]` or `[NEEDS RESEARCH]`.
 
 Key sections to draft first:
@@ -79,7 +81,7 @@ Before adding detail, investigate:
 4. **Competitive/industry patterns** - Use web search to find how others
    solve the same problem
 
-Document findings inline in the PRD or in a companion research file.
+Document findings inline in the spec or in a companion research file.
 
 ### Phase 4: Review and Refine
 
@@ -100,7 +102,7 @@ Refine the document, then decide:
 
 ### Phase 5: User Stories
 
-Once the PRD has enough fidelity, decompose requirements into user stories.
+Once the spec has enough fidelity, decompose requirements into user stories.
 Follow the format:
 
 ```
@@ -118,17 +120,16 @@ epic/theme grouping. Keep stories small enough to implement in a single PR.
 
 ### Phase 6: Next Steps
 
-After the PRD and stories are drafted, define explicit next steps:
+After the spec and stories are drafted, define explicit next steps:
 
 1. **Stakeholder review** - Who needs to approve this?
 2. **Design phase** - What designs or prototypes are needed?
-3. **Technical design** - Is an architecture doc needed?
-4. **Implementation plan** - Break stories into tasks with ordering
-5. **Open questions** - What remains unresolved?
+3. **Implementation plan** - Break stories into tasks with ordering
+4. **Open questions** - What remains unresolved?
 
 ## File Organization
 
-Store PRDs according to the project's spec conventions:
+Store specs according to the project's spec conventions:
 
 ```
 docs/specs/draft/<spec-name>.md       # Initial drafts
@@ -145,7 +146,7 @@ process.
 
 ## Iteration Guidelines
 
-- **Minimum 2 passes** before considering a PRD "ready for review"
+- **Minimum 2 passes** before considering a spec "ready for review"
 - **Each pass should have a specific goal** (e.g., "flesh out error cases",
   "add technical constraints", "define metrics")
 - **Ask questions early and often** rather than assuming
@@ -168,9 +169,9 @@ process.
 
 ### Reference Files
 
-- **`references/prd-template.md`** - Complete PRD template with all sections
+- **`references/spec-template.md`** - Complete spec template with all sections
   and guidance for filling each one. Copy this as a starting point for new
-  PRDs.
+  specs.
 
 ### External References
 

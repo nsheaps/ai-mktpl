@@ -1,7 +1,12 @@
-# PRD Template
+# Spec Template
 
-Copy this template as the starting point for a new PRD. Fill in sections
+Copy this template as the starting point for a new spec. Fill in sections
 iteratively -- do not attempt to complete everything in one pass.
+
+Each spec is a combined document with two major halves: **Problem & Requirements**
+(what and why) and **Technical Design** (how). Keep specs under ~500 lines. If a
+spec grows beyond that, split it into a parent spec (scope/requirements) and
+child specs (technical details per component).
 
 ---
 
@@ -13,28 +18,34 @@ iteratively -- do not attempt to complete everything in one pass.
 **Last Updated:** [Date]
 **Reviewers:** [Names]
 
-## 1. Problem Statement
+---
+
+## Part 1: Problem & Requirements
+
+_What are we building and why?_
+
+### 1. Problem Statement
 
 _What problem exists? Who has it? Why does it matter now?_
 
 [Start with 1-2 sentences. Expand in later iterations.]
 
-## 2. Target Users
+### 2. Target Users
 
 _Who are the primary and secondary users?_
 
-### Primary Persona
+#### Primary Persona
 
 - **Who:** [Role/description]
 - **Context:** [When/where they encounter the problem]
 - **Current workaround:** [How they solve it today]
 - **Pain level:** [Low / Medium / High / Blocking]
 
-### Secondary Persona(s)
+#### Secondary Persona(s)
 
 [Add as identified through research]
 
-## 3. Goals and Success Metrics
+### 3. Goals and Success Metrics
 
 _How do we know this succeeded?_
 
@@ -42,50 +53,50 @@ _How do we know this succeeded?_
 | ------------- | ---------------- | ------ | -------------------- |
 | [Metric name] | [Current value]  | [Goal] | [Measurement method] |
 
-### Non-Goals
+#### Non-Goals
 
 _What is explicitly out of scope?_
 
 - [Non-goal 1]
 - [Non-goal 2]
 
-## 4. Scope
+### 4. Scope
 
-### In Scope
+#### In Scope
 
 - [Feature/capability 1]
 - [Feature/capability 2]
 
-### Out of Scope
+#### Out of Scope
 
 - [Explicitly excluded item 1]
 - [Explicitly excluded item 2]
 
-### Future Considerations
+#### Future Considerations
 
 _Things intentionally deferred but worth noting for future work._
 
 - [Future item 1]
 
-## 5. Requirements
+### 5. Requirements
 
-### Functional Requirements
+#### Functional Requirements
 
 _What the system must do. Add iteratively -- start with high-level, refine
 to specific requirements with acceptance criteria._
 
-#### [Requirement Group 1]
+##### [Requirement Group 1]
 
 | ID     | Requirement   | Priority    | Acceptance Criteria  |
 | ------ | ------------- | ----------- | -------------------- |
 | FR-001 | [Description] | Must-have   | [Testable criterion] |
 | FR-002 | [Description] | Should-have | [Testable criterion] |
 
-#### [Requirement Group 2]
+##### [Requirement Group 2]
 
 [Add as requirements become clear]
 
-### Non-Functional Requirements
+#### Non-Functional Requirements
 
 | ID      | Requirement   | Target            |
 | ------- | ------------- | ----------------- |
@@ -93,14 +104,14 @@ to specific requirements with acceptance criteria._
 | NFR-002 | Accessibility | [Standard/level]  |
 | NFR-003 | Security      | [Requirements]    |
 
-## 6. User Stories
+### 6. User Stories
 
-_Decompose requirements into implementable stories. Add after the PRD has
+_Decompose requirements into implementable stories. Add after the spec has
 sufficient fidelity (Phase 5 of the iterative process)._
 
-### Epic: [Group Name]
+#### Epic: [Group Name]
 
-#### Story 1: [Title]
+##### Story 1: [Title]
 
 **As a** [persona], **I want to** [action] **so that** [benefit].
 
@@ -114,37 +125,52 @@ sufficient fidelity (Phase 5 of the iterative process)._
 
 [Repeat for each story]
 
-## 7. User Flows
+### 7. User Flows
 
 _Describe key user journeys. Add diagrams or step-by-step flows._
 
-### Flow 1: [Name]
+#### Flow 1: [Name]
 
 1. User [action]
 2. System [response]
 3. User [action]
 4. ...
 
-## 8. Technical Considerations
+---
 
-_Add after solution direction is established. Include constraints,
-dependencies, and architectural notes._
+## Part 2: Technical Design
 
-### Dependencies
+_How will we build it?_
+
+### 8. Architecture
+
+_High-level technical approach and system design._
+
+#### Dependencies
 
 - [Dependency 1]
 - [Dependency 2]
 
-### Constraints
+#### Constraints
 
 - [Technical constraint 1]
 - [Platform constraint 1]
 
-### Architecture Notes
+#### Design Decisions
 
-[High-level technical approach, if known]
+_Key architectural choices and their rationale._
 
-## 9. Open Questions
+| Decision | Options Considered | Chosen | Rationale |
+| -------- | ------------------ | ------ | --------- |
+| [Area]   | [A, B, C]          | [B]    | [Why]     |
+
+#### Implementation Notes
+
+[Component design, data flows, API contracts, etc.]
+
+---
+
+## Open Questions
 
 _Track unresolved questions. Remove or move to resolved as they are answered._
 
@@ -153,15 +179,15 @@ _Track unresolved questions. Remove or move to resolved as they are answered._
 | 1   | [Question] | [Name] | Open     |            |
 | 2   | [Question] | [Name] | Resolved | [Answer]   |
 
-## 10. Next Steps
+## Next Steps
 
-_What happens after this PRD is reviewed/approved?_
+_What happens after this spec is reviewed/approved?_
 
 1. [ ] [Next step with owner]
 2. [ ] [Next step with owner]
 3. [ ] [Next step with owner]
 
-## 11. References
+## References
 
 _Links to related documents, research, prior art, and external sources._
 
