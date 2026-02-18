@@ -428,25 +428,21 @@ if [[ -n "$repo_owner" && ${#pr_number_to_branch[@]} -gt 0 ]]; then
           else $valid
           end) as $filtered |
 
-          # CheckRun nodes: running if status exists and != COMPLETED
-          ($filtered | map(select(
-            .status != null and .status != "COMPLETED"
-          )) | length) as $cr_running |
-          # CheckRun nodes: failed conclusions
+          # any_running: use ALL checks (not just filtered/required) so
+          # non-required in-progress checks keep overall status as pending
+          (([$valid[] | select(
+            (.status != null and .status != "COMPLETED") or
+            (.cState != null and (.cState | IN("PENDING", "EXPECTED")))
+          )] | length) > 0) as $any_running |
+          # Failed: only from filtered (required) checks
           ($filtered | map(select(
             .conclusion != null and
             (.conclusion | IN("FAILURE", "TIMED_OUT", "ERROR", "STARTUP_FAILURE", "ACTION_REQUIRED"))
           )) | length) as $cr_failed |
-          # StatusContext nodes: running (PENDING/EXPECTED)
-          ($filtered | map(select(
-            .cState != null and (.cState | IN("PENDING", "EXPECTED"))
-          )) | length) as $sc_running |
-          # StatusContext nodes: failed
           ($filtered | map(select(
             .cState != null and (.cState | IN("FAILURE", "ERROR"))
           )) | length) as $sc_failed |
 
-          (($cr_running + $sc_running) > 0) as $any_running |
           (($cr_failed + $sc_failed) > 0) as $any_failed |
 
           if $any_running and $any_failed then
