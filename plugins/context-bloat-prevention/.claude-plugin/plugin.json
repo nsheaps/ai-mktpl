@@ -1,0 +1,20 @@
+{
+  "name": "context-bloat-prevention",
+  "version": "0.1.0",
+  "description": "Prevents context window bloat from large tool outputs. PostToolUse hook detects oversized results and instructs Claude to save to file instead of keeping in context. PreToolUse hook redirects Bash commands that are likely to produce large output.",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/context-bloat-prevention",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "license": "MIT",
+  "keywords": [
+    "context-management",
+    "performance",
+    "agent-teams",
+    "hooks",
+    "output-management"
+  ]
+}
