@@ -46,9 +46,6 @@ cd ~/project/ && git checkout feature-part-1
 
 This is actually a safety feature for agents -- it prevents two agents from accidentally working on the same branch.
 
-> **Important: Local branch names must match remote branch names.**
-> When checking out a PR into a worktree, always use the exact branch name from the remote (e.g., `git worktree add ../worktrees/fix-auth fix-auth`, not a descriptive alias like `pr-123-fix`). If the local branch name differs from the remote branch name, Git's worktree protection does not apply -- Git will happily allow a second worktree to check out the same remote branch under a different local name, leading to conflicts when both worktrees push to the same remote ref.
-
 ## Agent Workflow Patterns
 
 ### Parallel Stack Development
