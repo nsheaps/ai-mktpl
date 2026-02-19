@@ -177,6 +177,8 @@ For the complete configuration reference, see `references/cli-reference.md`.
 
 ## Worktree Considerations
 
+In multi-agent or multi-member workflows, worktrees are essential for parallel branch work without disrupting each other's checkouts. Incorrect branch naming in worktrees can silently bypass git's checkout protection, leading to conflicting pushes and lost work. For full guidance on branch naming rules and PR checkout procedures, recall the `scm-utils` plugin's `git-worktree` skill.
+
 git-spice supports Git worktrees:
 
 - `gs repo sync` skips branches checked out in other worktrees
