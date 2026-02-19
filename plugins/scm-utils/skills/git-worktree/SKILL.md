@@ -73,11 +73,11 @@ git worktree add ../repo.worktrees/pr-42 -b "$BRANCH" "origin/$BRANCH"
 
 The **worktree directory name** can be anything descriptive -- it does not need to match the branch. Common conventions:
 
-| Convention | Example |
-|---|---|
-| PR number | `repo.worktrees/pr-42` |
-| Short description | `repo.worktrees/fix-auth` |
-| Agent name | `repo.worktrees/agent-tweety` |
+| Convention        | Example                       |
+| ----------------- | ----------------------------- |
+| PR number         | `repo.worktrees/pr-42`        |
+| Short description | `repo.worktrees/fix-auth`     |
+| Agent name        | `repo.worktrees/agent-tweety` |
 
 The directory name is just a filesystem path. The **branch name inside** is what must match the remote.
 
