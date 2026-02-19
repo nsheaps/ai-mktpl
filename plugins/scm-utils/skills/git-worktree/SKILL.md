@@ -10,6 +10,7 @@ description: Best practices for using Git worktrees, especially when checking ou
 When checking out a PR (or any remote branch) into a worktree, the local branch name **MUST** match the remote branch name exactly.
 
 **Correct:**
+
 ```bash
 # PR branch is "feature/my-change"
 git worktree add ../worktrees/pr-42 feature/my-change
@@ -18,6 +19,7 @@ gh pr checkout 42  # automatically uses the correct branch name
 ```
 
 **Wrong:**
+
 ```bash
 # PR branch is "feature/my-change" but you use a different local name
 git worktree add -b pr-review ../worktrees/pr-42 origin/feature/my-change
@@ -34,6 +36,7 @@ If you create a local branch `pr-review` tracking `origin/feature/my-change`, Gi
 - **Confusing state**: `git status` looks clean in both worktrees, hiding the conflict entirely.
 
 When local names match the remote name, Git blocks the second checkout:
+
 ```
 fatal: 'feature/my-change' is already checked out at '/path/to/other/worktree'
 ```
@@ -43,20 +46,26 @@ This is the protection you want.
 ## How to Check Out PRs Correctly
 
 **Preferred -- use `gh pr checkout`:**
+
 ```bash
 # From within any worktree for the repo
 gh pr checkout 42
 ```
+
 This automatically creates a local branch with the correct name matching the remote.
 
 **Manual checkout:**
+
 ```bash
 git checkout -b feature/my-change origin/feature/my-change
 ```
+
 Or when creating a new worktree:
+
 ```bash
 git worktree add ../worktrees/pr-42 -b feature/my-change origin/feature/my-change
 ```
+
 The key is that the `-b` name matches the remote branch name exactly.
 
 ## Worktree Directory Naming
