@@ -34,16 +34,16 @@ Add `<!-- word-vomit -->` to the top of any markdown file to mark it for process
 
 ## Categories
 
-| Category | Destination | Example |
-|----------|-------------|---------|
-| Bug | GitHub issue + `bug` label | "auth returns 500" |
-| Task | GitHub issue or TaskCreate | "update README" |
-| Feature | GitHub issue + `enhancement` label | "add dark mode" |
-| Research | GitHub issue + `research` label | "how does Stripe retry?" |
-| Decision | Flag for user | "Redis vs Memcached?" |
-| Observation | Append to doc | "deploy takes 3 min now" |
-| Reminder | TaskCreate | "check CI after deploy" |
-| Duplicate | Link to existing | Link if already filed |
+| Category    | Destination                        | Example                  |
+| ----------- | ---------------------------------- | ------------------------ |
+| Bug         | GitHub issue + `bug` label         | "auth returns 500"       |
+| Task        | GitHub issue or TaskCreate         | "update README"          |
+| Feature     | GitHub issue + `enhancement` label | "add dark mode"          |
+| Research    | GitHub issue + `research` label    | "how does Stripe retry?" |
+| Decision    | Flag for user                      | "Redis vs Memcached?"    |
+| Observation | Append to doc                      | "deploy takes 3 min now" |
+| Reminder    | TaskCreate                         | "check CI after deploy"  |
+| Duplicate   | Link to existing                   | Link if already filed    |
 
 ## Companion Agent
 

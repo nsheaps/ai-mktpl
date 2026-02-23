@@ -19,18 +19,21 @@ Process unstructured user thoughts into organized, actionable items.
 ### Step 1: Capture
 
 If the user hasn't already written their thoughts to a file, save them to:
+
 ```
 .claude/scratch/word-vomit-<date>.md
 ```
 
 Add the marker at the top of the file:
+
 ```markdown
 <!-- word-vomit -->
+
 # Brain Dump — <date>
 
 - thought 1
 - thought 2
-...
+  ...
 ```
 
 ### Step 2: Process
@@ -40,16 +43,16 @@ For each item in the file:
 1. **Parse**: Split into discrete thoughts (one per bullet or paragraph)
 2. **Categorize** using this table:
 
-| Category | Destination | Labels |
-|----------|-------------|--------|
-| Bug | GitHub issue | `bug` |
-| Task | GitHub issue or TaskCreate | none |
-| Feature idea | GitHub issue | `enhancement` |
-| Research question | GitHub issue | `research` |
-| Decision needed | Present to user with options | none |
-| Observation/note | Append to relevant doc | none |
-| Reminder | TaskCreate with context | none |
-| Duplicate | Link to existing issue | none |
+| Category          | Destination                  | Labels        |
+| ----------------- | ---------------------------- | ------------- |
+| Bug               | GitHub issue                 | `bug`         |
+| Task              | GitHub issue or TaskCreate   | none          |
+| Feature idea      | GitHub issue                 | `enhancement` |
+| Research question | GitHub issue                 | `research`    |
+| Decision needed   | Present to user with options | none          |
+| Observation/note  | Append to relevant doc       | none          |
+| Reminder          | TaskCreate with context      | none          |
+| Duplicate         | Link to existing issue       | none          |
 
 3. **Deduplicate**: Search existing issues with `gh issue list` before creating new ones
 4. **File**: Create issues, tasks, or doc entries as appropriate
@@ -60,13 +63,16 @@ After filing each item, update the original file:
 
 ```markdown
 # Before
+
 - fix the auth endpoint returning 500
 
 # After
+
 - ~~fix the auth endpoint returning 500~~ → [nsheaps/agent-team#42](https://github.com/nsheaps/agent-team/issues/42)
 ```
 
 Rules:
+
 - Strikethrough original text with `~~text~~`
 - Add link to filed item
 - Never delete original text
@@ -79,12 +85,13 @@ Provide a structured summary:
 ```markdown
 ## Processed Items
 
-| # | Original | Category | Filed As | Priority |
-|---|----------|----------|----------|----------|
-| 1 | "fix auth 500" | Bug | nsheaps/repo#42 | p1 |
-| 2 | "add dark mode" | Feature | nsheaps/repo#43 | p3 |
+| #   | Original        | Category | Filed As        | Priority |
+| --- | --------------- | -------- | --------------- | -------- |
+| 1   | "fix auth 500"  | Bug      | nsheaps/repo#42 | p1       |
+| 2   | "add dark mode" | Feature  | nsheaps/repo#43 | p3       |
 
 ## Decisions Needed
+
 - Redis vs Memcached — need user input on requirements
 ```
 
