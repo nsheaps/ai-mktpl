@@ -10,12 +10,6 @@
   "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/skill-required",
   "repository": "https://github.com/nsheaps/ai-mktpl",
   "license": "MIT",
-  "keywords": [
-    "skill-enforcement",
-    "hooks",
-    "workflow",
-    "quality",
-    "tool-gating"
-  ],
+  "keywords": ["skill-enforcement", "hooks", "workflow", "quality", "tool-gating"],
   "hooks": "./hooks/hooks.json"
 }

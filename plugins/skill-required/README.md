@@ -28,13 +28,13 @@ skill-required:
 
 ### Config Fields
 
-| Field | Description | Default |
-|-------|-------------|---------|
-| `enabled` | Enable/disable enforcement | `true` |
-| `skills[].name` | Skill name to require | required |
-| `skills[].required_before` | Tool name(s) to gate (pipe-separated) | required |
-| `skills[].command_pattern` | Regex pattern for Bash commands (pipe-separated) | none (all commands) |
-| `skills[].max_tool_uses_before_reset` | Max tool uses before skill must be reloaded | `10` |
+| Field                                 | Description                                      | Default             |
+| ------------------------------------- | ------------------------------------------------ | ------------------- |
+| `enabled`                             | Enable/disable enforcement                       | `true`              |
+| `skills[].name`                       | Skill name to require                            | required            |
+| `skills[].required_before`            | Tool name(s) to gate (pipe-separated)            | required            |
+| `skills[].command_pattern`            | Regex pattern for Bash commands (pipe-separated) | none (all commands) |
+| `skills[].max_tool_uses_before_reset` | Max tool uses before skill must be reloaded      | `10`                |
 
 ### Environment Override
 
