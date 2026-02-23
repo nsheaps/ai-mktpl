@@ -15,7 +15,7 @@ A living document maintained throughout a work session. The report is created at
 
 This is NOT a one-shot end-of-day generation. Contributions should be added to the report as work is completed — not all at the end.
 
-**Origin**: Developed during the looney-tunes agent team's 2026-02-17 session. Process refined through 3 reviewer sign-offs and 14 revision items. See [session report](https://github.com/nsheaps/ai-mktpl/pull/164) for the context that drove this skill's creation.
+**Origin**: Developed during the looney-tunes agent team's 2026-02-17 session. Process refined through 3 reviewer sign-offs and 14 revision items. See [ai-mktpl#175](https://github.com/nsheaps/ai-mktpl/pull/175) for the PR that created this skill.
 
 ## Report Structure
 
@@ -63,7 +63,7 @@ Each contributor is responsible for noting their own work in the report as they 
 | Role                  | What to add                                              | When                               |
 | --------------------- | -------------------------------------------------------- | ---------------------------------- |
 | **Software Engineer** | Commits (hash, message, repo), PRs created/merged        | After each commit or PR action     |
-| **Coach**             | Failures logged, rules/behaviors created, review results | After each failure entry or review |
+| **AI Agent Eng**      | Failures logged, rules/behaviors created, review results | After each failure entry or review |
 | **PM**                | Issues created/closed, task status changes               | After each issue batch or audit    |
 | **Docs Writer**       | Docs updated, contradictions found                       | After each docs task               |
 | **Researcher**        | Research reports saved, key findings                     | After each research deliverable    |
@@ -190,13 +190,13 @@ Task #136 (statusline-iterm fix)
 
 Each contributor entry includes:
 
-| Field         | Description                                |
-| ------------- | ------------------------------------------ |
-| Name / ID     | Agent name or person's name                |
-| Role          | One-line description                       |
-| Started       | When work began (timestamp or session #)   |
-| Finished      | How/when work ended                        |
-| Status        | Successful / Failed / Partial              |
+| Field     | Description                              |
+| --------- | ---------------------------------------- |
+| Name / ID | Agent name or person's name              |
+| Role      | One-line description                     |
+| Started   | When work began (timestamp or session #) |
+| Finished  | How/when work ended                      |
+| Status    | Successful / Failed / Partial            |
 
 Followed by: Notable Contributions (bulleted), Key Artifacts (file paths), Failures Attributed.
 
