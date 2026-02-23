@@ -1,0 +1,21 @@
+# datadog-otel-setup plugin configuration
+#
+# This file provides defaults for the Datadog OTEL plugin.
+# Override per-project via ${CLAUDE_PROJECT_DIR}/.claude/plugins.settings.yaml
+# or per-user via ~/.claude/plugins.settings.yaml under the "datadog-otel-setup" key.
+#
+# API key resolution order:
+#   1. Environment variable: ${DD_API_KEY}
+#   2. 1Password reference: op://vault/item/field (requires `op` CLI)
+#   3. Literal value (only if settings file is gitignored)
+#
+# Set enabled: false to disable OTEL without uninstalling the plugin.
+
+datadog-otel-setup:
+  enabled: true
+  endpoint: "https://otel.datadoghq.com:4317"
+  metrics_exporter: "otlp"
+  logs_exporter: "otlp"
+  # API key — prefer env var or 1Password ref over literals
+  # api_key: "${DD_API_KEY}"
+  # api_key: "op://Engineering/datadog-api-key/credential"

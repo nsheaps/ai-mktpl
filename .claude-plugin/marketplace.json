@@ -109,6 +109,26 @@
       ]
     },
     {
+      "name": "datadog-otel-setup",
+      "description": "Configure Claude Code's native OTEL integration for Datadog. Sets environment variables in settings.local.json on session start.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/datadog-otel-setup",
+      "category": "utility",
+      "tags": ["utility"],
+      "keywords": [
+        "otel",
+        "opentelemetry",
+        "datadog",
+        "telemetry",
+        "observability",
+        "tracing",
+        "metrics"
+      ]
+    },
+    {
       "name": "git-spice",
       "description": "Skill for managing stacked Git branches with git-spice (gs) CLI tool",
       "version": "0.1.0",

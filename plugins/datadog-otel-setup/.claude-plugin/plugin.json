@@ -1,0 +1,21 @@
+{
+  "name": "datadog-otel-setup",
+  "version": "0.1.0",
+  "description": "Configure Claude Code's native OTEL integration for Datadog. Sets environment variables in settings.local.json on session start.",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/datadog-otel-setup",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": [
+    "otel",
+    "opentelemetry",
+    "datadog",
+    "telemetry",
+    "observability",
+    "tracing",
+    "metrics"
+  ]
+}
