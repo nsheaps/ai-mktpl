@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
-# safe-settings-write.sh — Atomic, concurrent-safe settings.json writer
+# safe-settings-write.sh — Atomic, concurrent-safe settings file writer
 #
-# Shared library for plugins that need to modify ~/.claude/settings.json.
+# Shared library for plugins that need to modify Claude settings files.
+# Typically used with settings.local.json to avoid corrupting user-managed settings.json.
 # Uses mkdir-based POSIX lock (portable, works on macOS where flock is absent),
 # mktemp for unique tmp files, jq output validation, and atomic rename.
 #
 # Usage:
-#   SETTINGS_FILE="$HOME/.claude/settings.json"
+#   SETTINGS_FILE="$HOME/.claude/settings.local.json"
 #   source "path/to/safe-settings-write.sh"
 #   safe_write_settings '.some.key = "value"'
 #
