@@ -1,0 +1,17 @@
+{
+  "description": "Detects writes to word-vomit scratch files and prompts exec-assist processing",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/detect-word-vomit.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
