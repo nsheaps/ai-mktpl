@@ -32,7 +32,7 @@ This plan outlines the conversion of the `agent-config` shell scripts to a TypeS
 │           └── paths.ts       # Path resolution utilities
 ├── package.json               # Project dependencies
 ├── tsconfig.json              # TypeScript configuration
-└── .mise.toml                 # Already has bun = "latest"
+└── mise.toml                  # Already has bun = "latest"
 ```
 
 ### Key Constraints
@@ -295,7 +295,7 @@ uninstall-agent-config:
     rm -f "$HOME/.local/bin/agent-config"
 ```
 
-### .mise.toml tasks
+### mise.toml tasks
 
 ```toml
 [tasks.install-agent-config]
