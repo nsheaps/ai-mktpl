@@ -58,6 +58,18 @@
       "keywords": ["git", "commit", "skill", "automation", "ai", "smart-commit"]
     },
     {
+      "name": "context-bloat-prevention",
+      "description": "Prevents context window bloat from large tool outputs. PostToolUse hook detects oversized results and instructs Claude to save to file instead of keeping in context.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/context-bloat-prevention",
+      "category": "utility",
+      "tags": ["utility"],
+      "keywords": ["context-management", "performance", "agent-teams", "hooks", "output-management"]
+    },
+    {
       "name": "correct-behavior",
       "description": "Command to correct AI behavior mistakes and update rules to prevent recurrence",
       "version": "0.2.24",
