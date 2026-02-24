@@ -79,6 +79,7 @@ The plugin has two components working together:
 ### Component 1: SessionStart Hook
 
 **Trigger**: `SessionStart` event, when all of these env vars are set:
+
 - `GITHUB_APP_ID` — The GitHub App's ID
 - `GITHUB_APP_PRIVATE_KEY_PATH` — Path to PEM file (e.g., `~/.config/agent/github-app.pem`)
 - `GITHUB_INSTALLATION_ID` — The installation ID for the target account/org
@@ -139,6 +140,7 @@ echo "GitHub App token generated (expires: ${EXPIRES_AT})"
 **Implementation**: Lightweight stdio MCP server in bash (or TypeScript).
 
 **Refresh loop**: The MCP server's initialization spawns a background refresh process that:
+
 1. Sleeps for 50 minutes (tokens are valid for 60 minutes, refresh with 10-minute buffer)
 2. Regenerates JWT and exchanges for new installation token
 3. Writes new token to the shared file
@@ -146,11 +148,11 @@ echo "GitHub App token generated (expires: ${EXPIRES_AT})"
 
 **Exposed tools**:
 
-| Tool | Description | Parameters | Returns |
-|:-----|:-----------|:-----------|:--------|
-| `get-github-token` | Get the current valid GitHub App token | none | Token string |
-| `refresh-github-token` | Force an immediate token refresh | none | New token + expiry |
-| `token-status` | Check token health and expiry | none | `{ valid: bool, expires_at: string, app_id: string, minutes_remaining: number }` |
+| Tool                   | Description                            | Parameters | Returns                                                                          |
+| :--------------------- | :------------------------------------- | :--------- | :------------------------------------------------------------------------------- |
+| `get-github-token`     | Get the current valid GitHub App token | none       | Token string                                                                     |
+| `refresh-github-token` | Force an immediate token refresh       | none       | New token + expiry                                                               |
+| `token-status`         | Check token health and expiry          | none       | `{ valid: bool, expires_at: string, app_id: string, minutes_remaining: number }` |
 
 **Why an MCP server instead of just a hook?**
 
@@ -163,11 +165,13 @@ echo "GitHub App token generated (expires: ${EXPIRES_AT})"
 **For agent teams** (tmux panes), the token must be accessible to all agents:
 
 **Option A: Shared file** (recommended)
+
 - Token written to `~/.config/agent/github-token`
 - Git credential helper reads from this file
 - `gh` CLI configured via `GH_TOKEN` pointing to file: `export GH_TOKEN=$(cat ~/.config/agent/github-token)`
 
 **Option B: Environment variable**
+
 - Less ideal because env vars are set at process start and can't be updated
 - Would require agents to re-read from file anyway
 
@@ -243,6 +247,7 @@ refresh_interval_minutes: 50
 ```
 
 Or via environment variables (higher priority):
+
 - `GITHUB_APP_ID`
 - `GITHUB_APP_PRIVATE_KEY_PATH`
 - `GITHUB_INSTALLATION_ID`
@@ -250,12 +255,12 @@ Or via environment variables (higher priority):
 
 ### Phases
 
-| Phase | Scope | Deliverable |
-|:------|:------|:------------|
-| **v0.1** | SessionStart hook generates initial token, writes to file | Token available at session start |
-| **v0.2** | MCP server with background refresh loop + `token-status` tool | Continuous token freshness |
-| **v0.3** | Git credential helper, `gh` CLI integration, agent team distribution | Seamless git/gh auth |
-| **v0.4** | Multiple token sources (PAT rotation, org-level apps), per-agent scoping | Advanced identity management |
+| Phase    | Scope                                                                    | Deliverable                      |
+| :------- | :----------------------------------------------------------------------- | :------------------------------- |
+| **v0.1** | SessionStart hook generates initial token, writes to file                | Token available at session start |
+| **v0.2** | MCP server with background refresh loop + `token-status` tool            | Continuous token freshness       |
+| **v0.3** | Git credential helper, `gh` CLI integration, agent team distribution     | Seamless git/gh auth             |
+| **v0.4** | Multiple token sources (PAT rotation, org-level apps), per-agent scoping | Advanced identity management     |
 
 ### Open Questions
 

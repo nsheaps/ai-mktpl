@@ -7,6 +7,7 @@ Relentlessly fix a PR until CI passes. Iterates through review, fix, push cycles
 ### `/relentlessly-fix [pr or instructions]`
 
 Continuously iterates on a PR:
+
 1. Fetches PR comments and CI status
 2. Plans fixes using Explore and Plan agents
 3. Implements fixes via sub-agents

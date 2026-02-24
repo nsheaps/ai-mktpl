@@ -11,6 +11,7 @@
 Agent roles (orchestrator, software-eng, QA, etc.) are currently defined as standalone `.claude/agents/*.md` files with embedded system prompts, tool lists, and behavioral instructions. There's no mechanism to give different agents different **plugins** — all agents in a repo share the same `enabledPlugins` from `settings.json`.
 
 This means:
+
 - A QA agent gets the same commit command as the software engineer
 - An orchestrator that should never write code still has access to code-related skills
 - Behavioral plugins (context-bloat-prevention, safety-evaluation) can't be selectively applied per role
@@ -51,6 +52,7 @@ disallowed_tools:
 ### Plugin Structure (nsheaps/ai repo)
 
 27 plugins in `nsheaps/ai/plugins/`, each containing some combination of:
+
 - `.claude-plugin/plugin.json` — manifest (name, version, description, keywords)
 - `commands/` — slash commands
 - `skills/` — SKILL.md files
@@ -128,7 +130,7 @@ profiles:
       - context-bloat-prevention
       - safety-evaluation-prompt
       - correct-behavior
-      - commit-command  # needed for /correct-behavior which commits fixes directly
+      - commit-command # needed for /correct-behavior which commits fixes directly
 
   project-manager:
     description: "Task management, no implementation"
@@ -166,18 +168,18 @@ Global enabledPlugins (settings.json)
 
 ### 3.4 Shared vs Exclusive Plugins
 
-| Plugin | All Agents | Specific Roles |
-|:-------|:-----------|:---------------|
-| `context-bloat-prevention` | Yes (but role-specific thresholds — researchers need larger context than PMs) | — |
-| `safety-evaluation-prompt` | Yes | — |
-| `scm-utils` | — | software-eng, ops-eng, docs-writer |
-| `commit-command` | — | software-eng, ops-eng |
-| `code-simplifier` | — | software-eng |
-| `review-changes` | — | quality-assurance |
-| `product-development-and-sdlc` | — | project-manager, docs-writer |
-| `correct-behavior` | — | ai-agent-eng |
-| `git-spice` | — | ops-eng |
-| `task-parallelization` | — | orchestrator |
+| Plugin                         | All Agents                                                                    | Specific Roles                     |
+| :----------------------------- | :---------------------------------------------------------------------------- | :--------------------------------- |
+| `context-bloat-prevention`     | Yes (but role-specific thresholds — researchers need larger context than PMs) | —                                  |
+| `safety-evaluation-prompt`     | Yes                                                                           | —                                  |
+| `scm-utils`                    | —                                                                             | software-eng, ops-eng, docs-writer |
+| `commit-command`               | —                                                                             | software-eng, ops-eng              |
+| `code-simplifier`              | —                                                                             | software-eng                       |
+| `review-changes`               | —                                                                             | quality-assurance                  |
+| `product-development-and-sdlc` | —                                                                             | project-manager, docs-writer       |
+| `correct-behavior`             | —                                                                             | ai-agent-eng                       |
+| `git-spice`                    | —                                                                             | ops-eng                            |
+| `task-parallelization`         | —                                                                             | orchestrator                       |
 
 ## 4. Implementation Approaches
 
@@ -186,14 +188,19 @@ Global enabledPlugins (settings.json)
 Since Claude Code doesn't currently support per-agent plugin selection, this approach uses **agent file body instructions** to simulate exclusive plugins.
 
 Each agent's body includes instructions like:
+
 ```markdown
 ## Available Skills
+
 You have access to these skills and should use them:
+
 - /commit (scm-utils) — for committing changes
 - /update-branch (scm-utils) — for syncing branches
 
 ## Unavailable Skills
+
 Do NOT use these skills — they are not part of your role:
+
 - /review-changes — this is the QA agent's responsibility
 ```
 
@@ -201,6 +208,7 @@ Do NOT use these skills — they are not part of your role:
 **Cons**: Soft enforcement only — agent can still technically use any installed skill
 
 > **Compaction risk**: Body text instructions are vulnerable to loss during context compaction (see team Failures #4, #9). To mitigate:
+>
 > - Place skill restrictions in the `<system-message>` block (survives compaction)
 > - Or reference an external file (e.g., `@.claude/plugin-profiles.yaml`) that the agent re-reads after compaction
 > - Make refusal instructions extremely explicit: "You MUST refuse to use /commit. It is not part of your role. Redirect the requester to the software-eng agent."
@@ -227,10 +235,12 @@ Create a plugin that reads `.claude/plugin-profiles.yaml` and uses hooks to enfo
 {
   "name": "plugin-profiles",
   "hooks": {
-    "PreToolUse": [{
-      "type": "prompt",
-      "prompt": "Check if the current agent's role allows use of this tool/skill..."
-    }]
+    "PreToolUse": [
+      {
+        "type": "prompt",
+        "prompt": "Check if the current agent's role allows use of this tool/skill..."
+      }
+    ]
   }
 }
 ```
@@ -257,26 +267,26 @@ enabledPlugins:
 
 ### Recommended Phased Approach
 
-| Phase | Approach | When |
-|:------|:---------|:-----|
-| **Now** | A (convention-based) | Immediate — add skill guidance to agent files |
-| **Soon** | B (launcher for lead) + C (meta-plugin for teammates) | When agent-team launcher is built |
-| **Later** | D (native support) | When/if Claude Code adds per-agent plugin control |
+| Phase     | Approach                                              | When                                              |
+| :-------- | :---------------------------------------------------- | :------------------------------------------------ |
+| **Now**   | A (convention-based)                                  | Immediate — add skill guidance to agent files     |
+| **Soon**  | B (launcher for lead) + C (meta-plugin for teammates) | When agent-team launcher is built                 |
+| **Later** | D (native support)                                    | When/if Claude Code adds per-agent plugin control |
 
 ## 5. Role-to-Plugin Mapping (Full)
 
 Based on the 8 roles defined in `.claude/agents/` and the 27 plugins in `nsheaps/ai/plugins/`:
 
-| Role | Must Have | Nice to Have | Must NOT Have |
-|:-----|:----------|:-------------|:--------------|
-| **orchestrator** | context-bloat-prevention, task-parallelization | safety-evaluation-prompt | scm-utils, commit-command, code-simplifier |
-| **software-eng** | scm-utils, commit-command, context-bloat-prevention | code-simplifier, git-spice | — |
-| **quality-assurance** | review-changes, context-bloat-prevention | safety-evaluation-prompt | commit-command |
-| **docs-writer** | scm-utils, context-bloat-prevention, product-development-and-sdlc | skills-maintenance | — |
-| **deep-researcher** | context-bloat-prevention | — | scm-utils, commit-command |
-| **ops-eng** | scm-utils, commit-command, git-spice, context-bloat-prevention | statusline-iterm | — |
-| **ai-agent-eng** | correct-behavior, context-bloat-prevention, safety-evaluation-prompt | skills-maintenance, commit-command (for /correct-behavior commits) | — |
-| **project-manager** | context-bloat-prevention, product-development-and-sdlc | todo-sync | scm-utils, commit-command |
+| Role                  | Must Have                                                            | Nice to Have                                                       | Must NOT Have                              |
+| :-------------------- | :------------------------------------------------------------------- | :----------------------------------------------------------------- | :----------------------------------------- |
+| **orchestrator**      | context-bloat-prevention, task-parallelization                       | safety-evaluation-prompt                                           | scm-utils, commit-command, code-simplifier |
+| **software-eng**      | scm-utils, commit-command, context-bloat-prevention                  | code-simplifier, git-spice                                         | —                                          |
+| **quality-assurance** | review-changes, context-bloat-prevention                             | safety-evaluation-prompt                                           | commit-command                             |
+| **docs-writer**       | scm-utils, context-bloat-prevention, product-development-and-sdlc    | skills-maintenance                                                 | —                                          |
+| **deep-researcher**   | context-bloat-prevention                                             | —                                                                  | scm-utils, commit-command                  |
+| **ops-eng**           | scm-utils, commit-command, git-spice, context-bloat-prevention       | statusline-iterm                                                   | —                                          |
+| **ai-agent-eng**      | correct-behavior, context-bloat-prevention, safety-evaluation-prompt | skills-maintenance, commit-command (for /correct-behavior commits) | —                                          |
+| **project-manager**   | context-bloat-prevention, product-development-and-sdlc               | todo-sync                                                          | scm-utils, commit-command                  |
 
 ## 6. Open Questions
 
