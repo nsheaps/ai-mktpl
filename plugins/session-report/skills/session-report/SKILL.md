@@ -46,7 +46,7 @@ The report has three phases: **Create**, **Update** (repeated), and **Finalize**
 When a session starts, check if a report exists for today:
 
 ```
-File: ~/Documents/YYYY-MM-DD-session-report.md
+File: ~/src/nsheaps/obsidian-vaults/Daily Notes/YYYY-MM-DD-session-report.md
 ```
 
 - **If no report exists** → Create it from the template structure (see [Report Structure](#report-structure)). Populate the contributors section. Leave all other sections as empty tables/placeholders.
@@ -263,9 +263,31 @@ These were discovered during the first report generation and should be avoided:
 
 ## Output Locations
 
-1. **Primary**: `~/Documents/YYYY-MM-DD-session-report.md`
-2. **Backup**: Google Drive or other cloud storage copy
-3. **Status file**: `.claude/tmp/report-update-status.md` — tracks what's been incorporated
+1. **Primary**: `~/src/nsheaps/obsidian-vaults/Daily Notes/YYYY-MM-DD-session-report.md`
+2. **Status file**: `.claude/tmp/report-update-status.md` — tracks what's been incorporated
+
+## Security Check (Before Committing)
+
+Before committing the report to git, scan for sensitive data:
+
+```bash
+grep -iE "(api[_-]?key|token|password|secret|Bearer\s+\S{20,}|sk-[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{36})" "Daily Notes/YYYY-MM-DD-session-report.md"
+```
+
+- If matches are found: redact the sensitive value (replace with `[REDACTED]`) before committing
+- References to tools by name (e.g., "1Password", "API key management") are fine — only redact actual credential values
+- Report any findings to the user before proceeding
+
+## Committing to Obsidian Vault
+
+After finalizing and passing the security check:
+
+```bash
+cd ~/src/nsheaps/obsidian-vaults
+git add "Daily Notes/YYYY-MM-DD-session-report.md"
+git commit -m "docs: add YYYY-MM-DD session report"
+git push
+```
 
 ## Executive Summary Guidelines
 
