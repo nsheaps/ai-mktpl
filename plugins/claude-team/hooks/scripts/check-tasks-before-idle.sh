@@ -12,6 +12,7 @@ input="$(cat)"
 
 teammate_name="$(echo "$input" | jq -r '.teammate_name // empty' 2>/dev/null || true)"
 team_name="$(echo "$input" | jq -r '.team_name // empty' 2>/dev/null || true)"
+session_id="$(echo "$input" | jq -r '.session_id // empty' 2>/dev/null || true)"
 
 # If we can't determine the teammate or team, allow idle
 if [ -z "$teammate_name" ] || [ -z "$team_name" ]; then
@@ -26,8 +27,8 @@ fi
 
 # Find in_progress tasks owned by this teammate
 in_progress_tasks=()
+shopt -s nullglob
 for task_file in "$task_dir"/*.json; do
-  [ -f "$task_file" ] || continue
 
   task_owner="$(jq -r '.owner // empty' "$task_file" 2>/dev/null || true)"
   task_status="$(jq -r '.status // empty' "$task_file" 2>/dev/null || true)"
@@ -43,7 +44,7 @@ done
 if [ ${#in_progress_tasks[@]} -eq 0 ]; then
   # Reset rejection counter on clean idle
   cache_dir="$HOME/.claude/cache/plugins/claude-team"
-  cache_file="${cache_dir}/${team_name}_${teammate_name}_idle_rejections"
+  cache_file="${cache_dir}/${team_name}_${teammate_name}_${session_id:-nosession}_idle_rejections"
   rm -f "$cache_file" 2>/dev/null || true
   exit 0
 fi
@@ -51,7 +52,7 @@ fi
 # Has in_progress tasks — check escape hatch counter
 cache_dir="$HOME/.claude/cache/plugins/claude-team"
 mkdir -p "$cache_dir"
-cache_file="${cache_dir}/${team_name}_${teammate_name}_idle_rejections"
+cache_file="${cache_dir}/${team_name}_${teammate_name}_${session_id:-nosession}_idle_rejections"
 
 rejection_count=0
 if [ -f "$cache_file" ]; then
