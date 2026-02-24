@@ -73,14 +73,14 @@ EOF
       chmod +x "$HOME/.local/bin/mise"
       success "mise installed successfully"
     else
-      failed "mise installation failed (network restricted)\n   Tools from .mise.toml will not be available"
+      failed "mise installation failed (network restricted)\n   Tools from mise.toml will not be available"
     fi
   else
     # TODO cleanup with 01-mise-activate.sh
     mise self-update || warn "mise self-update failed"
   fi
-  # Activate mise and install tools from .mise.toml (if mise is available)
-  if command -v mise &> /dev/null && [ -f "$PROJECT_DIR/.mise.toml" ]; then
+  # Activate mise and install tools from mise.toml (if mise is available)
+  if command -v mise &> /dev/null && [ -f "$PROJECT_DIR/mise.toml" ]; then
     cd "$PROJECT_DIR"
     pbe mise trust
     pbe mise install -y

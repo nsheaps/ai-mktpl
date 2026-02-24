@@ -15,7 +15,7 @@ Repository: [nsheaps/ai-mktpl on GitHub](https://github.com/nsheaps/ai-mktpl)
 
 ## Tooling Stack
 
-The repository relies on these tools, all managed by [mise](https://mise.run) (see `.mise.toml`):
+The repository relies on these tools, all managed by [mise](https://mise.run) (see `mise.toml`):
 
 | Tool                                | Purpose                                         |
 | ----------------------------------- | ----------------------------------------------- |
@@ -35,7 +35,7 @@ Run `just setup` to bootstrap: it calls `mise install -y` then `yarn install`.
 ```
 ~/src/nsheaps/ai/
   .claude-plugin/marketplace.json   # Central plugin registry (auto-generated)
-  .mise.toml                        # Tool versions
+  mise.toml                         # Tool versions
   .release-it.base.json             # Shared release-it config (no git ops, patch increment)
   justfile                          # Build recipes
   package.json                      # Root workspace (yarn 4, release-it devDeps)
