@@ -58,7 +58,9 @@ File: ~/Library/CloudStorage/GoogleDrive-*/My Drive/Documents/YYYY-MM-DD-session
 
 ### Phase 2: Incremental Updates (Throughout the Day)
 
-Each contributor is responsible for noting their own work in the report as they complete it. This is not optional — it's part of task completion.
+Each contributor is responsible for noting their own work in the report as they complete it. This is not optional — it's part of task completion. A task is not done until the report reflects it.
+
+**Update cadence**: The report should be updated after every meaningful deliverable — each task completion, each PR created or merged, each commit pushed, each failure logged. The goal is a continuously accurate document, not a batch dump at the end of the day.
 
 #### What Each Role Updates
 
@@ -80,10 +82,11 @@ Each contributor is responsible for noting their own work in the report as they 
 3. **Include links immediately**: Every commit hash, issue number, and PR must be a clickable link when first added. Don't leave "will link later" placeholders.
 4. **Keep metrics approximate until finalization**: Section 9 (Metrics) can use `~` prefixed numbers during the day. Exact counts come in Phase 3.
 5. **Conflict resolution**: If two agents update the same section simultaneously, the later writer must read the current state first and merge, not overwrite.
+6. **Update immediately, not later**: Update the report as part of the task itself — not as a separate follow-up step. If you just created a PR, add it to the report before moving to your next task.
 
-#### Lightweight Update Pattern
+#### Batched Update Pattern (Exception Only)
 
-For situations that produce lots of small updates (e.g., making many commits), batch updates are acceptable:
+When a burst of closely related deliverables happens in rapid succession (e.g., 5 commits in 10 minutes on the same PR), batching is acceptable as an exception:
 
 ```
 # After completing a logical unit of work (e.g., a PR iteration):
@@ -92,7 +95,7 @@ For situations that produce lots of small updates (e.g., making many commits), b
 3. Update the report file
 ```
 
-Don't update after every single command — update after each meaningful deliverable.
+The default is to update after each deliverable. Only batch when individual updates would be redundant (e.g., multiple commits that will be summarized together anyway). When in doubt, update immediately.
 
 ### Phase 3: Finalize (End of Session)
 
