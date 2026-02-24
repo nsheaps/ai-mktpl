@@ -14,7 +14,7 @@
     ],
     "PostToolUseFailure": [
       {
-        "matcher": "",
+        "matcher": "*",
         "hooks": [
           {
             "type": "command",
