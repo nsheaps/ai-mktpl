@@ -35,11 +35,11 @@ datadog-otel-setup:
 
 The `api_key` field supports three formats:
 
-| Format | Example | How It Works |
-|--------|---------|--------------|
-| Env var reference | `${DD_API_KEY}` | Expanded from shell environment |
-| 1Password ref | `op://Engineering/dd-key/credential` | Resolved via `op read` |
-| Literal | `abc123...` | Used as-is (only for gitignored configs) |
+| Format            | Example                              | How It Works                             |
+| ----------------- | ------------------------------------ | ---------------------------------------- |
+| Env var reference | `${DD_API_KEY}`                      | Expanded from shell environment          |
+| 1Password ref     | `op://Engineering/dd-key/credential` | Resolved via `op read`                   |
+| Literal           | `abc123...`                          | Used as-is (only for gitignored configs) |
 
 **Recommended**: Use `${DD_API_KEY}` and set the env var in your shell profile.
 
@@ -49,13 +49,13 @@ Set `enabled: false` in any config file to disable OTEL without uninstalling.
 
 ## Environment Variables Written
 
-| Variable | Value |
-|----------|-------|
-| `CLAUDE_CODE_ENABLE_TELEMETRY` | `1` |
-| `OTEL_METRICS_EXPORTER` | `otlp` (configurable) |
-| `OTEL_LOGS_EXPORTER` | `otlp` (configurable) |
-| `OTEL_EXPORTER_OTLP_ENDPOINT` | `https://otel.datadoghq.com:4317` (configurable) |
-| `OTEL_EXPORTER_OTLP_HEADERS` | `DD-API-KEY=<resolved_key>` |
+| Variable                       | Value                                            |
+| ------------------------------ | ------------------------------------------------ |
+| `CLAUDE_CODE_ENABLE_TELEMETRY` | `1`                                              |
+| `OTEL_METRICS_EXPORTER`        | `otlp` (configurable)                            |
+| `OTEL_LOGS_EXPORTER`           | `otlp` (configurable)                            |
+| `OTEL_EXPORTER_OTLP_ENDPOINT`  | `https://otel.datadoghq.com:4317` (configurable) |
+| `OTEL_EXPORTER_OTLP_HEADERS`   | `DD-API-KEY=<resolved_key>`                      |
 
 ## Dependencies
 
