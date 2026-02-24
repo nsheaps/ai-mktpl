@@ -163,14 +163,17 @@ If you have `gh` access and the PR exists:
    - Dismiss previous automated review iterations with "Superseded by review vN"
    - Never resolve or dismiss human reviewer comments
 2. Post inline comments for significant findings as individual comment-only reviews
-   - Include the finding code (e.g., `C1`, `M3`) for cross-referencing with the overall report
-   - Prefix each with category: `**Security [C1]**: [comment]`, `**Simplicity [M3]**: [comment]`
-   - Use 🔕 prefix for non-blocking comments
+   - Use the format: `**P2 - High** (security-3): [comment]`
+   - Include severity (P1-P4), label, and finding ID for cross-referencing with the overall report
+   - Use 🔕 prefix for non-blocking comments (P3-P4)
    - Use ℹ️ prefix for info-only comments (validated/checked items)
 3. Post a final review with the compiled overall assessment
    - Use `<details><summary>` elements for collapsible detail sections
    - Use shields.io badges for visual score display (see Output Format)
    - If overall > 95%, keep the final review to just the score table
+4. **Apply or remove "ready" label** based on scores:
+   - All categories 85%+: `gh pr edit $PR --add-label "ready"`
+   - Any category below 85%: `gh pr edit $PR --remove-label "ready"`
 
 #### Interactive CLI Mode
 
@@ -211,6 +214,19 @@ Each category scored 0-100:
 
 **Overall score**: Weighted average of category scores. Weight each category equally unless the focus area argument shifts emphasis.
 
+**Ready label**: When ALL categories score 85%+, automatically add a `ready` label to the PR. This signals the PR has passed the quality threshold and is ready for merge or human review.
+
+```bash
+# Add "ready" label when all categories pass
+gh pr edit $PR_NUMBER --add-label "ready"
+```
+
+If any category drops below 85% in a subsequent review, remove the label:
+
+```bash
+gh pr edit $PR_NUMBER --remove-label "ready"
+```
+
 ## Per-Category Report Format
 
 Each category report (in thorough mode) follows this structure:
@@ -226,7 +242,7 @@ Each category report (in thorough mode) follows this structure:
 
 [Description with file:line references]
 
-**Severity**: Critical | High | Medium | Low
+**Severity**: P1 (Critical) | P2 (High) | P3 (Medium) | P4 (Info)
 **References**: [links to docs, other files, standards]
 
 ### [Next Finding]
@@ -266,13 +282,13 @@ Each category report (in thorough mode) follows this structure:
 
 [2-3 paragraph summary]
 
-### Critical Issues (Must Fix)
+### P1 — Critical (Must Fix)
 
-1. **[Category]: [Issue]** (`file:line`) — [Description]
+1. **P1** (security-1): [Issue] (`file:line`) — [Description]
 
-### Important Issues (Should Fix)
+### P2 — High (Should Fix)
 
-1. **[Category]: [Issue]** (`file:line`) — [Description]
+1. **P2** (simplicity-3): [Issue] (`file:line`) — [Description]
 
 ### What's Done Well
 
@@ -312,16 +328,16 @@ When posting to GitHub as a PR review:
 </details>
 
 <details>
-<summary>Critical Issues (X found)</summary>
+<summary>P1 — Critical (X found)</summary>
 
-[Critical issues list]
+1. **P1** (security-1): [Issue] — [Description]
 
 </details>
 
 <details>
-<summary>Important Issues (X found)</summary>
+<summary>P2 — High (X found)</summary>
 
-[Important issues list]
+1. **P2** (simplicity-3): [Issue] — [Description]
 
 </details>
 
@@ -343,20 +359,28 @@ When posting to GitHub as a PR review:
 
 - Spaces in labels become underscores: `Best_Practices`
 
-## Finding Codes
+## Severity Levels
 
-Each finding in inline comments gets a unique code for cross-referencing between the overall report and individual comments. The format is `{severity}{sequence}`:
+Findings use P1-P4 severity levels:
 
-| Prefix | Severity | Description                                |
-| ------ | -------- | ------------------------------------------ |
-| `C`    | Critical | Must fix before merge                      |
-| `H`    | High     | Should fix before merge                    |
-| `M`    | Medium   | Improve if possible, acceptable to defer   |
-| `N`    | Note     | Nice-to-have, informational, or suggestion |
+| Level | Severity | Description                                |
+| ----- | -------- | ------------------------------------------ |
+| `P1`  | Critical | Must fix before merge                      |
+| `P2`  | High     | Should fix before merge                    |
+| `P3`  | Medium   | Improve if possible, acceptable to defer   |
+| `P4`  | Info     | Nice-to-have, informational, or suggestion |
 
-**Examples**: `C1` (first critical finding), `M3` (third medium finding), `N2` (second note)
+## Finding IDs
 
-Finding codes are stable within a review iteration. They appear in both the overall report and inline comments so reviewers can cross-reference. When a finding is resolved in a subsequent iteration, reference the original code: "C1 from v2 — resolved."
+Each finding gets a unique ID for cross-referencing between the overall report and inline comments. The format is `{category}-{number}`, sequential within each category per review.
+
+**Examples**: `security-1`, `simplicity-4`, `usability-23`
+
+**Inline comment format**: `**P2 - High** (security-3): Input injection risk in...`
+
+Finding IDs are stable within a review iteration. They appear in both the overall report and inline comments so reviewers can cross-reference precisely. Instead of "mentioned in security", the report says "Addressed security-3 and security-7."
+
+When a finding is resolved in a subsequent iteration, reference the original ID: "security-3 from v2 — resolved."
 
 ## Inline Comment Prefixes
 
