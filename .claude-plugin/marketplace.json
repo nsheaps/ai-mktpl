@@ -10,6 +10,18 @@
   },
   "plugins": [
     {
+      "name": "agent-tab-titles",
+      "description": "Set tmux/iTerm2 tab titles to agent roles in agent team sessions. Disables Claude Code's LLM-generated titles and uses SessionStart hook to set role-based names.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/agent-tab-titles",
+      "category": "utility",
+      "tags": ["utility"],
+      "keywords": ["tmux", "iterm2", "tab-title", "agent-teams", "pane-title"]
+    },
+    {
       "name": "code-simplifier",
       "description": "Simplify and refine code for clarity, consistency, and maintainability. Requires pr-review-toolkit plugin.",
       "version": "0.1.0",
@@ -56,18 +68,6 @@
       "category": "git",
       "tags": ["utility", "skill"],
       "keywords": ["git", "commit", "skill", "automation", "ai", "smart-commit"]
-    },
-    {
-      "name": "context-bloat-prevention",
-      "description": "Prevents context window bloat from large tool outputs. PostToolUse hook detects oversized results and instructs Claude to save to file instead of keeping in context.",
-      "version": "0.1.0",
-      "author": {
-        "name": "Nathan Heaps"
-      },
-      "source": "./plugins/context-bloat-prevention",
-      "category": "utility",
-      "tags": ["utility"],
-      "keywords": ["context-management", "performance", "agent-teams", "hooks", "output-management"]
     },
     {
       "name": "correct-behavior",
@@ -143,7 +143,7 @@
     {
       "name": "git-spice",
       "description": "Skill for managing stacked Git branches with git-spice (gs) CLI tool",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -249,6 +249,18 @@
       ]
     },
     {
+      "name": "remote-config",
+      "description": "Sync upstream Claude config repo on session start. Pulls latest from a configured git repo to ~/.claude-remote/ and reports update status.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/remote-config",
+      "category": "utility",
+      "tags": ["utility"],
+      "keywords": ["remote-config", "sync", "dotfiles", "claude-config"]
+    },
+    {
       "name": "review-changes",
       "description": "Review code changes with detailed feedback on quality, security, performance, and maintainability",
       "version": "0.2.24",
@@ -342,7 +354,7 @@
     {
       "name": "statusline",
       "description": "Configurable status line for Claude Code showing session info, project context, and git status",
-      "version": "0.1.21",
+      "version": "0.1.20",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -354,7 +366,7 @@
     {
       "name": "statusline-iterm",
       "description": "Status line for Claude Code with iTerm2 badge integration - shows session info, project context, git status, and updates iTerm2 badge",
-      "version": "0.1.24",
+      "version": "0.1.23",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -459,8 +471,15 @@
       },
       "source": "./plugins/word-vomit",
       "category": "utility",
-      "tags": ["utility", "hooks", "skill"],
-      "keywords": ["word-vomit", "exec-assist", "thought-capture", "categorization", "workflow"]
+      "tags": ["utility", "skill"],
+      "keywords": [
+        "word-vomit",
+        "exec-assist",
+        "thought-capture",
+        "categorization",
+        "workflow",
+        "hooks"
+      ]
     }
   ]
 }
