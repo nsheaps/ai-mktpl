@@ -449,6 +449,18 @@
       "category": "utility",
       "tags": ["utility", "skill"],
       "keywords": ["todos", "plans", "sync", "workflow", "productivity"]
+    },
+    {
+      "name": "word-vomit",
+      "description": "Hook-based workflow for capturing unstructured thoughts and triggering the exec-assist agent to categorize them into actionable items (issues, tasks, docs).",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/word-vomit",
+      "category": "utility",
+      "tags": ["utility", "hooks", "skill"],
+      "keywords": ["word-vomit", "exec-assist", "thought-capture", "categorization", "workflow"]
     }
   ]
 }

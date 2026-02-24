@@ -1,0 +1,22 @@
+{
+  "name": "word-vomit",
+  "version": "0.1.0",
+  "description": "Hook-based workflow for capturing unstructured thoughts and triggering the exec-assist agent to categorize them into actionable items (issues, tasks, docs).",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/word-vomit",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "license": "MIT",
+  "keywords": [
+    "word-vomit",
+    "exec-assist",
+    "thought-capture",
+    "categorization",
+    "workflow",
+    "hooks"
+  ],
+  "hooks": "./hooks/hooks.json"
+}
