@@ -1,29 +1,67 @@
 ---
 name: review-changes
-description: Review code changes with detailed feedback, similar to CI code review
-argument-hint: "[focus area or file pattern]"
+description: Review code changes with detailed feedback across multiple quality dimensions
+argument-hint: "[--thorough] [focus area or file pattern]"
 allowed-tools: Bash(git:*), Bash(gh:*), Read, Glob, Grep, Edit, Write, Task, AskUserQuestion, TodoWrite
 ---
 
 # Code Review
 
-Review the current changes with detailed feedback on code quality, security, performance, and maintainability.
+Review the current changes with detailed feedback across multiple quality dimensions: simplicity, flexibility, usability, documentation, security, pattern adherence, best practices, and engineering quality.
 
 ## Arguments
 
-**Format:** `[focus area or file pattern]`
+**Format:** `[--thorough] [focus area or file pattern]`
 
-| Argument     | Required | Description                                    |
-| ------------ | -------- | ---------------------------------------------- |
-| focus area   | No       | Specific aspect to focus on (e.g., "security") |
-| file pattern | No       | Specific files to review (e.g., "src/api/")    |
+| Argument     | Required | Description                                             |
+| ------------ | -------- | ------------------------------------------------------- |
+| `--thorough` | No       | Launch parallel per-category sub-agents for deep review |
+| focus area   | No       | Specific aspect to focus on (e.g., "security")          |
+| file pattern | No       | Specific files to review (e.g., "src/api/")             |
 
 **Examples:**
 
-- `/review-changes` - Review all uncommitted changes
-- `/review-changes security` - Focus review on security aspects
-- `/review-changes src/api/` - Review changes in specific directory
-- `/review-changes performance src/utils/` - Focus on performance in utils
+- `/review-changes` — Quick review of all uncommitted changes
+- `/review-changes --thorough` — Deep parallel review across all 8 categories
+- `/review-changes security` — Focus review on security aspects
+- `/review-changes --thorough src/api/` — Deep review of changes in specific directory
+- `/review-changes performance src/utils/` — Focus on performance in utils
+
+## Review Categories
+
+All reviews evaluate these 8 dimensions. In default (quick) mode, a single agent covers all. In `--thorough` mode, each gets a dedicated parallel sub-agent.
+
+### 1. Simplicity
+
+Is the code as simple as it can be while still correct? Unnecessary complexity, over-engineering, functions doing too many things, overly clever code, unnecessary abstractions, cyclomatic complexity.
+
+### 2. Flexibility
+
+How well does this code adapt to different use cases? Hardcoded values that should be configurable, missing inputs, assumptions about structure, edge case handling, extensibility, feature completeness, sensible defaults.
+
+### 3. Usability
+
+How easy is it for a developer to use? Input/API name clarity, error message quality, required vs optional clarity, sensible defaults, output usefulness, logging quality, discoverability, first-use experience.
+
+### 4. Documentation & Comments (with Discoverability)
+
+Is the code well-documented and discoverable? Inline comments (WHY not WHAT), function-level docs, README completeness, usage examples (realistic and copy-pasteable), input descriptions, consistency between docs and behavior. Are things findable?
+
+### 5. Security
+
+Are there vulnerabilities or risks? Secret handling, input injection, URL validation, credential leakage, API auth security, shell injection, dependency security, OWASP top 10 where applicable.
+
+### 6. Pattern Matching
+
+Does the PR match existing repo patterns or properly introduce new ones? File structure conventions, language/framework conventions, project-specific conventions, README format consistency, commit message format. Are new patterns improvements or unintentional deviations?
+
+### 7. Best Practices
+
+Industry best practices adherence? Language-specific conventions (shellcheck, linting, quoting, error handling), framework conventions, API integration (retry logic, timeouts, idempotency), git (conventional commits), defensive coding, observability.
+
+### 8. Quality Assurance & Engineering
+
+Is the engineering sound? Correctness, edge cases, error handling, race conditions, resource leaks, testability, code smell, regression risk, missing validation at boundaries.
 
 ## Process
 
@@ -35,66 +73,44 @@ Collect information about the current state:
 
 1. **Current branch**: `git branch --show-current`
 2. **Git status**: `git status --short`
-3. **Check for PR**: `gh pr view --json number,title,state,url,body 2>/dev/null`
+3. **Check for PR**: `gh pr view --json number,title,state,url,body,baseRefName 2>/dev/null`
 4. **Get the diff**:
    - If PR exists: `gh pr diff`
    - If no PR: `git diff HEAD` or `git diff origin/main...HEAD`
 5. **Recent commits**: `git log --oneline -10`
+6. **Commit history relation to base branch**: `git log --oneline $(git merge-base HEAD origin/main)..HEAD`
+7. **PR title and body**: Extract from step 3 — these are review inputs, not just metadata
+8. **Commit messages**: `git log --format="%h %s" $(git merge-base HEAD origin/main)..HEAD`
 
-### Step 2: Create Review Tracking Document
+### Step 2: Determine Output Location
 
-Create a local document at `/tmp/review-notes-$(date +%s).md` to track:
+Determine where to save review artifacts:
 
-- Summary of findings
-- Specific comments with file:line references
-- Questions or clarifications needed
-- Links to relevant documentation
+- **In a repo with a PR**: `.claude/pr-reviews/$org/$repo/$prNumber/$epochTime/`
+- **In a repo without a PR**: `.claude/pr-reviews/$org/$repo/local/$epochTime/`
+- **Outside a repo**: `/tmp/review-notes-$epochTime.md` (fallback only)
 
-**CRITICAL:** Update this doc after reviewing each piece, since context is volatile.
+The epoch timestamp (`date +%s`) ensures each review run is unique and comparable to previous runs.
 
 ### Step 3: Review the Changes
 
-Evaluate the changes against these criteria:
+#### Quick Mode (default)
 
-#### Code Quality and Best Practices
+Evaluate the changes against all 8 categories in a single pass. Create a consolidated review document.
 
-- Is the code readable and self-documenting?
-- Does it follow project conventions?
-- Are there any code smells?
+#### Thorough Mode (`--thorough`)
 
-#### Potential Bugs or Issues
+Launch 8 parallel sub-agents (`run_in_background: true` Task tool), one per category. Each agent:
 
-- Are edge cases handled?
-- Is error handling appropriate?
-- Are there race conditions or concurrency issues?
+1. Receives the full diff, commit history, PR metadata, and its specific category criteria
+2. Evaluates the changes ONLY through its category lens
+3. Scores the category 0-100
+4. Writes findings to `$outputDir/$category/REPORT.md`
+5. May identify inline comments to post
 
-#### Performance Considerations
+After all 8 complete, compile the overall report.
 
-- Are there inefficient algorithms or data structures?
-- Are there unnecessary operations or allocations?
-- Could caching improve performance?
-
-#### Security Concerns
-
-- Are inputs validated and sanitized?
-- Are there potential injection vulnerabilities?
-- Are secrets handled properly?
-
-#### Maintainability
-
-- Is the code modular and testable?
-- Are dependencies appropriate?
-- Is the code complexity manageable?
-
-#### Test Coverage
-
-- Are there adequate tests for the changes?
-- Do tests cover edge cases?
-
-#### Documentation
-
-- Are comments accurate and helpful?
-- Is the PR description accurate vs code changes?
+**All findings must cite evidence** — file paths with line numbers, links to external documentation, references to other files in the codebase or org repos, relevant standards or specifications. Unsupported claims are not actionable.
 
 ### Step 4: Apply Design Principles
 
@@ -128,28 +144,38 @@ Encapsulate logic within objects rather than querying for data externally.
 Create a detailed review with:
 
 1. **Overall assessment** - High-level summary of the changes
-2. **Scores** (0-100%):
-   - Quality score
-   - Security score (or N/A if not applicable)
-   - Simplicity score (if below 90%, suggest how to simplify)
-   - Confidence score (how confident you are in assessment)
-3. **Issues found** with file:line references
-4. **Suggestions for improvement**
+2. **Score table** with emoji-coded indicators (see Scoring System below)
+3. **Executive summary** with Critical/Important/Well-Done sections
+4. **Issues found** with file:line references and severity ratings
+5. **Suggestions for improvement**
+6. **Links to individual category reports** (thorough mode)
 
-Use these indicators:
+### Step 6: Post Review or Present Results
 
-- ✅ Something correct or well-done
-- ❔ Something requiring clarification
-- ⚠️ Potential problem
-- ❌ Definite problem that should be addressed
+**Detect execution context and route output accordingly:**
 
-**Score Guidelines:**
+#### Agentic Mode (can post to GitHub)
 
-- 85%+ = Green (good)
-- 65-84% = Yellow (needs attention)
-- Below 65% = Red (failure/must fix)
+If you have `gh` access and the PR exists:
 
-### Step 6: Ask User About Next Steps
+1. Post inline comments for significant findings as individual comment-only reviews
+   - Prefix each with category: `**Security**: [comment]`, `**Simplicity**: [comment]`
+   - Use 🔕 prefix for non-blocking comments
+   - Use ℹ️ prefix for info-only comments (validated/checked items)
+2. Post a final review with the compiled overall assessment
+   - Use `<details><summary>` elements for collapsible detail sections
+   - Use shields.io badges for visual score display (see Output Format)
+   - If overall > 95%, keep the final review to just the score table
+
+#### Interactive CLI Mode
+
+Provide file paths to the saved reports so the user can open them:
+
+- Link to local report files
+- Link to files on GitHub if on a pushed branch
+- Offer to open specific reports
+
+### Step 7: Ask User About Next Steps
 
 After completing the review, use AskUserQuestion to ask:
 
@@ -157,10 +183,172 @@ After completing the review, use AskUserQuestion to ask:
 
 **Options** (based on issues found):
 
-1. Fix critical issues (❌) - Address definite problems
+1. Fix critical issues (🚨) - Address definite problems
 2. Address warnings (⚠️) - Fix potential problems
 3. Improve based on suggestions - Apply recommended changes
 4. No changes needed - Review is complete
+
+## Scoring System
+
+Each category scored 0-100:
+
+| Range  | Rating               | Indicator               |
+| ------ | -------------------- | ----------------------- |
+| 90-100 | Exceptional          | ✅ `:white_check_mark:` |
+| 85-89  | Good                 | ✅ `:white_check_mark:` |
+| 70-84  | Adequate, needs work | ⚠️ `:warning:`          |
+| 60-69  | Notable issues       | 🚨 `:rotating_light:`   |
+| < 60   | Significant problems | 🚨 `:rotating_light:`   |
+
+**Cap rule**: If ⚠️ appears in ANY category, the maximum overall score is 94% — a PR cannot be "green" overall while any individual dimension needs attention.
+
+**Brevity rule**: If the overall score is > 95%, keep the final review to just the score table. Excellent PRs don't need verbose explanations.
+
+**Overall score**: Weighted average of category scores. Weight each category equally unless the focus area argument shifts emphasis.
+
+## Per-Category Report Format
+
+Each category report (in thorough mode) follows this structure:
+
+```markdown
+# {Category} Review — Score: XX/100
+
+[Opening paragraph explaining the score — what drives it up or down]
+
+## Detailed Findings
+
+### [Finding Title]
+
+[Description with file:line references]
+
+**Severity**: Critical | High | Medium | Low
+**References**: [links to docs, other files, standards]
+
+### [Next Finding]
+
+...
+
+## Comparison Summary (if applicable)
+
+[Table comparing this code against similar code in the repo or org]
+
+## References
+
+- [file:line] — Description
+- [external link] — Why it's relevant
+```
+
+## Overall Report Format
+
+```markdown
+# Overall PR Review: [PR Title]
+
+## Score Summary
+
+| Category          | Score      | Status  |
+| ----------------- | ---------- | ------- |
+| Simplicity        | XX/100     | [emoji] |
+| Flexibility       | XX/100     | [emoji] |
+| Usability         | XX/100     | [emoji] |
+| Documentation     | XX/100     | [emoji] |
+| Security          | XX/100     | [emoji] |
+| Patterns          | XX/100     | [emoji] |
+| Best Practices    | XX/100     | [emoji] |
+| Quality Assurance | XX/100     | [emoji] |
+| **Overall**       | **XX/100** | [emoji] |
+
+## Executive Summary
+
+[2-3 paragraph summary]
+
+### Critical Issues (Must Fix)
+
+1. **[Category]: [Issue]** (`file:line`) — [Description]
+
+### Important Issues (Should Fix)
+
+1. **[Category]: [Issue]** (`file:line`) — [Description]
+
+### What's Done Well
+
+- [Positive finding with specific reference]
+
+## Detailed Category Reports
+
+- [Simplicity](./simplicity/REPORT.md)
+- [Flexibility](./flexibility/REPORT.md)
+- ...
+```
+
+## GitHub PR Review Format
+
+When posting to GitHub as a PR review:
+
+```markdown
+# PR Review: [Title]
+
+![Simplicity](https://img.shields.io/badge/Simplicity-XX%25-color)
+![Flexibility](https://img.shields.io/badge/Flexibility-XX%25-color)
+![Usability](https://img.shields.io/badge/Usability-XX%25-color)
+![Documentation](https://img.shields.io/badge/Documentation-XX%25-color)
+![Security](https://img.shields.io/badge/Security-XX%25-color)
+![Patterns](https://img.shields.io/badge/Patterns-XX%25-color)
+![Best Practices](https://img.shields.io/badge/Best_Practices-XX%25-color)
+![QA](https://img.shields.io/badge/QA-XX%25-color)
+![Overall](https://img.shields.io/badge/Overall-XX%25-color)
+
+[Score table]
+
+<details>
+<summary>Executive Summary</summary>
+
+[Full executive summary]
+
+</details>
+
+<details>
+<summary>Critical Issues (X found)</summary>
+
+[Critical issues list]
+
+</details>
+
+<details>
+<summary>Important Issues (X found)</summary>
+
+[Important issues list]
+
+</details>
+
+<details>
+<summary>What's Done Well</summary>
+
+[Positive findings]
+
+</details>
+```
+
+**Badge colors** (shields.io):
+
+- Score >= 85: `brightgreen`
+- Score 70-84: `yellow`
+- Score < 70: `red`
+
+**URL format**: `https://img.shields.io/badge/{label}-{score}%25-{color}`
+
+- Spaces in labels become underscores: `Best_Practices`
+
+## Inline Comment Prefixes
+
+When posting inline PR comments:
+
+| Prefix | Meaning                                         |
+| ------ | ----------------------------------------------- |
+| (none) | Blocking issue — should be fixed before merge   |
+| 🔕     | Non-blocking — nice to fix but not required     |
+| ℹ️     | Info only — validated/checked, no action needed |
+
+Limit "additional validation" info comments unless they cover mission-critical items. Sub-agent reference docs should still track them verbosely.
 
 ## Focus Area
 
@@ -172,51 +360,11 @@ When a focus area is specified:
 - Still note other issues but don't deep-dive on them
 - Organize findings by relevance to the focus area
 
-## Review Output Format
-
-```markdown
-# Code Review Summary
-
-## Overall Assessment
-
-[1-2 sentence summary]
-
-## Scores
-
-| Metric     | Score | Notes |
-| ---------- | ----- | ----- |
-| Quality    | XX%   | ...   |
-| Security   | XX%   | ...   |
-| Simplicity | XX%   | ...   |
-| Confidence | XX%   | ...   |
-
-## Findings
-
-### Critical Issues (❌)
-
-- [file:line] Description of issue
-
-### Warnings (⚠️)
-
-- [file:line] Description of concern
-
-### Questions (❔)
-
-- [file:line] Clarification needed
-
-### Positive Notes (✅)
-
-- What was done well
-
-## Suggestions
-
-1. Specific improvement suggestion
-2. ...
-```
-
 ## Important Notes
 
 - **Test after review:** If changes are made, re-run review to verify fixes
 - **Iterative refinement:** Multiple review passes may be needed
 - **Don't over-engineer:** Focus on real issues, not hypothetical ones
 - **Trust the code:** Don't add unnecessary fallbacks or validation
+- **Evidence-based:** All findings should cite specific file:line references, external docs, or org standards. Unsupported claims are noise.
+- **Incremental reviews:** Previous review results (in `.claude/pr-reviews/`) enable comparison across review runs
