@@ -1,0 +1,17 @@
+{
+  "description": "Sync upstream Claude config repo on session start",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/sync-remote.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

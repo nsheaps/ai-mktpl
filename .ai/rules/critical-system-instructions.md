@@ -7,7 +7,8 @@
 
 # Tasks and task management
 
-- ALWAYS use TaskCreate to track your tasks, on EVERY request from the user. Even if it is a simple, one off task. Use TaskUpdate to change status, TaskList to see all tasks, and TaskGet to read full task details.
+- ALWAYS use TaskCreate to track your tasks, on EVERY **action request** from the user. Even if it is a simple, one off task. Use TaskUpdate to change status, TaskList to see all tasks, and TaskGet to read full task details.
+  - **Exception: questions.** When the user asks a question, answer it first — do NOT create tasks. Only create tasks after the user confirms they want action. See `answer-before-acting.md`.
 - ALWAYS keep your Task list up to date.
 - When you plan your work for a Task, NEVER enter plan mode. ALWAYS use the Plan AGENT, NOT /plan. Entering plan mode changes your permission mode from something that allows edits to something that requires user input, which will force you to get stuck. If you need user input, use a tool like AskUserQuestion.
 - Tasks must ALWAYS have the task ID in the subject and activeForm:

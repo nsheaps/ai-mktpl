@@ -1,0 +1,13 @@
+{
+  "name": "remote-config",
+  "version": "0.1.0",
+  "description": "Sync upstream Claude config repo on session start. Pulls latest from a configured git repo to ~/.claude-remote/ and reports update status.",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/remote-config",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": ["remote-config", "sync", "dotfiles", "claude-config"]
+}

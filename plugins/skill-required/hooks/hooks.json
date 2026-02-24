@@ -1,0 +1,29 @@
+{
+  "description": "Skill-required enforcement: tracks skill reads and blocks tool use if required skill not recently loaded",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/cache-skill-read.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/check-skill-required.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

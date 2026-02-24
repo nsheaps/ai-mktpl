@@ -1,0 +1,20 @@
+{
+  "name": "session-report",
+  "version": "0.1.0",
+  "description": "Skill for generating structured session reports — fact-finding across git history, GitHub issues and PRs, tasks, and agent contributions to produce a comprehensive work summary. Works for solo agents and agent teams alike.",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/session-report",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": [
+    "session-report",
+    "daily-summary",
+    "work-summary",
+    "reporting",
+    "fact-finding",
+    "git-history"
+  ]
+}
