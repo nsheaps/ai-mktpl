@@ -46,8 +46,10 @@ The report has three phases: **Create**, **Update** (repeated), and **Finalize**
 When a session starts, check if a report exists for today:
 
 ```
-File: ~/Documents/YYYY-MM-DD-session-report.md
+File: ~/Library/CloudStorage/GoogleDrive-*/My Drive/Documents/YYYY-MM-DD-session-report.md
 ```
+
+> **Path resolution**: Use `ls -d ~/Library/CloudStorage/GoogleDrive-*/My\ Drive/Documents/` to resolve the Google Drive path. If Google Drive is not available, fall back to `~/Documents/`.
 
 - **If no report exists** → Create it from the template structure (see [Report Structure](#report-structure)). Populate the contributors section. Leave all other sections as empty tables/placeholders.
 - **If a report already exists** (e.g., resumed session, multiple sessions in one day) → Read it. Do NOT overwrite. Proceed to Phase 2.
@@ -263,8 +265,8 @@ These were discovered during the first report generation and should be avoided:
 
 ## Output Locations
 
-1. **Primary**: `~/Documents/YYYY-MM-DD-session-report.md`
-2. **Backup**: Google Drive or other cloud storage copy
+1. **Primary**: `~/Library/CloudStorage/GoogleDrive-*/My Drive/Documents/YYYY-MM-DD-session-report.md`
+2. **Fallback**: `~/Documents/YYYY-MM-DD-session-report.md` (if Google Drive is unavailable)
 3. **Status file**: `.claude/tmp/report-update-status.md` — tracks what's been incorporated
 
 ## Executive Summary Guidelines
