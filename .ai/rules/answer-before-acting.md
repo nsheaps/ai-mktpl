@@ -15,12 +15,12 @@ The "ALWAYS use TaskCreate on EVERY request" rule creates a bias toward treating
 
 ## Examples
 
-| User Says | Classification | Correct Response |
-|-----------|---------------|-----------------|
-| "What's with the letter prefixes on comments?" | Question | Explain what they are and why they exist |
-| "Why does the build fail on ARM?" | Question | Explain the root cause |
-| "Remove the letter prefixes from comments" | Action request | Create tasks, proceed |
-| "Can you fix the ARM build issue?" | Action request | Create tasks, proceed |
+| User Says                                      | Classification | Correct Response                         |
+| ---------------------------------------------- | -------------- | ---------------------------------------- |
+| "What's with the letter prefixes on comments?" | Question       | Explain what they are and why they exist |
+| "Why does the build fail on ARM?"              | Question       | Explain the root cause                   |
+| "Remove the letter prefixes from comments"     | Action request | Create tasks, proceed                    |
+| "Can you fix the ARM build issue?"             | Action request | Create tasks, proceed                    |
 
 ## Ambiguous Messages
 
