@@ -158,11 +158,16 @@ Create a detailed review with:
 
 If you have `gh` access and the PR exists:
 
-1. Post inline comments for significant findings as individual comment-only reviews
-   - Prefix each with category: `**Security**: [comment]`, `**Simplicity**: [comment]`
+1. **Manage previous iterations** (see Review Lifecycle Management):
+   - Resolve old inline comments where the underlying finding has been fixed
+   - Dismiss previous automated review iterations with "Superseded by review vN"
+   - Never resolve or dismiss human reviewer comments
+2. Post inline comments for significant findings as individual comment-only reviews
+   - Include the finding code (e.g., `C1`, `M3`) for cross-referencing with the overall report
+   - Prefix each with category: `**Security [C1]**: [comment]`, `**Simplicity [M3]**: [comment]`
    - Use 🔕 prefix for non-blocking comments
    - Use ℹ️ prefix for info-only comments (validated/checked items)
-2. Post a final review with the compiled overall assessment
+3. Post a final review with the compiled overall assessment
    - Use `<details><summary>` elements for collapsible detail sections
    - Use shields.io badges for visual score display (see Output Format)
    - If overall > 95%, keep the final review to just the score table
@@ -338,6 +343,21 @@ When posting to GitHub as a PR review:
 
 - Spaces in labels become underscores: `Best_Practices`
 
+## Finding Codes
+
+Each finding in inline comments gets a unique code for cross-referencing between the overall report and individual comments. The format is `{severity}{sequence}`:
+
+| Prefix | Severity | Description                                |
+| ------ | -------- | ------------------------------------------ |
+| `C`    | Critical | Must fix before merge                      |
+| `H`    | High     | Should fix before merge                    |
+| `M`    | Medium   | Improve if possible, acceptable to defer   |
+| `N`    | Note     | Nice-to-have, informational, or suggestion |
+
+**Examples**: `C1` (first critical finding), `M3` (third medium finding), `N2` (second note)
+
+Finding codes are stable within a review iteration. They appear in both the overall report and inline comments so reviewers can cross-reference. When a finding is resolved in a subsequent iteration, reference the original code: "C1 from v2 — resolved."
+
 ## Inline Comment Prefixes
 
 When posting inline PR comments:
@@ -349,6 +369,54 @@ When posting inline PR comments:
 | ℹ️     | Info only — validated/checked, no action needed |
 
 Limit "additional validation" info comments unless they cover mission-critical items. Sub-agent reference docs should still track them verbosely.
+
+## Review Lifecycle Management
+
+When posting iterative reviews on the same PR (v2, v3, etc.), manage the review timeline to keep it clean and actionable.
+
+### Resolve Old Inline Comments
+
+When posting a new review iteration, check each previous inline comment:
+
+1. **Read the old comment's finding** — what was the issue?
+2. **Check the current code at that location** — is the issue still present?
+3. **If fixed**: Resolve/hide the old comment. Optionally add a reply: "Resolved in [commit hash]"
+4. **If still present**: Leave the comment open. Do NOT resolve comments for findings that haven't been addressed.
+
+**Implementation** (GitHub API via `gh`):
+
+```bash
+# List review comments on a PR
+gh api repos/{owner}/{repo}/pulls/{pr}/comments --jq '.[] | {id, path, body, line}'
+
+# Resolve a comment thread (minimize/hide)
+gh api graphql -f query='mutation { minimizeComment(input: {subjectId: "<node_id>", classifier: OUTDATED}) { minimizedComment { isMinimized } } }'
+```
+
+**Rules:**
+
+- Only resolve comments from YOUR previous review iterations (identified by the bot user or review format)
+- Never resolve comments from human reviewers
+- When in doubt, leave the comment open
+
+### Dismiss Previous Review Iterations
+
+When posting a v3 review, dismiss the v2 review to reduce timeline noise:
+
+```bash
+# List reviews on a PR
+gh api repos/{owner}/{repo}/pulls/{pr}/reviews --jq '.[] | {id, state, body}'
+
+# Dismiss a previous review
+gh api repos/{owner}/{repo}/pulls/{pr}/reviews/{review_id}/dismissals -f message="Superseded by review v3" -f event="DISMISS"
+```
+
+**Rules:**
+
+- Only dismiss YOUR previous automated reviews (match by format/author)
+- Never dismiss human reviews
+- Include a clear dismissal message: "Superseded by review vN"
+- The dismissed review remains visible (collapsed) in the timeline — it's not deleted
 
 ## Focus Area
 
