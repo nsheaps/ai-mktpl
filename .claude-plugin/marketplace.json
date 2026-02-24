@@ -340,6 +340,18 @@
       ]
     },
     {
+      "name": "skill-required",
+      "description": "Enforces that specified skills are loaded before certain tools can be used. Tracks skill reads via PostToolUse and blocks tool use via PreToolUse if the required skill hasn't been recently loaded.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/skill-required",
+      "category": "utility",
+      "tags": ["utility", "hooks"],
+      "keywords": ["skill-enforcement", "hooks", "workflow", "quality", "tool-gating"]
+    },
+    {
       "name": "skills-maintenance",
       "description": "Agent skill for maintaining, updating, and improving existing Claude Code skills",
       "version": "0.2.24",
