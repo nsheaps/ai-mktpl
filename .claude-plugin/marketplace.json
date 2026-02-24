@@ -70,6 +70,27 @@
       "keywords": ["git", "commit", "skill", "automation", "ai", "smart-commit"]
     },
     {
+      "name": "claude-team",
+      "description": "Patterns, pitfalls, and operational hooks for working effectively with Claude Code agent teams. Includes TeammateIdle quality gates and teammate lifecycle management.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/claude-team",
+      "category": "utility",
+      "tags": ["utility", "skill", "hooks"],
+      "keywords": [
+        "agent-teams",
+        "orchestration",
+        "multi-agent",
+        "coordination",
+        "claude-code",
+        "teammate",
+        "lifecycle",
+        "quality-gates"
+      ]
+    },
+    {
       "name": "correct-behavior",
       "description": "Command to correct AI behavior mistakes and update rules to prevent recurrence",
       "version": "0.2.24",
