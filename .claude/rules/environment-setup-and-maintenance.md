@@ -13,7 +13,7 @@ CRITICAL: The hooks are a last-ditch effort to ensure a consistent environment b
 
 ## Configuration Files
 
-### `.mise.toml`
+### `mise.toml`
 
 Defines tool versions for the project:
 
@@ -31,11 +31,11 @@ Runs automatically when a Claude Code session starts:
 
 1. Fetches git updates and shows status
 2. Installs mise if not available (web sessions only)
-3. Installs tools from `.mise.toml`
+3. Installs tools from `mise.toml`
 
 ## Adding New Tools
 
-1. Add the tool to `.mise.toml`:
+1. Add the tool to `mise.toml`:
 
    ```toml
    [tools]
@@ -87,7 +87,7 @@ Web environments may have network restrictions. The hook gracefully handles this
 
 ```
 ⚠️  mise installation failed (network restricted)
-   Tools from .mise.toml will not be available
+   Tools from mise.toml will not be available
 ```
 
 ### Tools not available

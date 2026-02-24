@@ -10,6 +10,18 @@
   },
   "plugins": [
     {
+      "name": "agent-tab-titles",
+      "description": "Set tmux/iTerm2 tab titles to agent roles in agent team sessions. Disables Claude Code's LLM-generated titles and uses SessionStart hook to set role-based names.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/agent-tab-titles",
+      "category": "utility",
+      "tags": ["utility"],
+      "keywords": ["tmux", "iterm2", "tab-title", "agent-teams", "pane-title"]
+    },
+    {
       "name": "code-simplifier",
       "description": "Simplify and refine code for clarity, consistency, and maintainability. Requires pr-review-toolkit plugin.",
       "version": "0.1.0",
@@ -109,9 +121,29 @@
       ]
     },
     {
+      "name": "datadog-otel-setup",
+      "description": "Configure Claude Code's native OTEL integration for Datadog. Sets environment variables in settings.local.json on session start.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/datadog-otel-setup",
+      "category": "utility",
+      "tags": ["utility"],
+      "keywords": [
+        "otel",
+        "opentelemetry",
+        "datadog",
+        "telemetry",
+        "observability",
+        "tracing",
+        "metrics"
+      ]
+    },
+    {
       "name": "git-spice",
       "description": "Skill for managing stacked Git branches with git-spice (gs) CLI tool",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -217,6 +249,18 @@
       ]
     },
     {
+      "name": "remote-config",
+      "description": "Sync upstream Claude config repo on session start. Pulls latest from a configured git repo to ~/.claude-remote/ and reports update status.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/remote-config",
+      "category": "utility",
+      "tags": ["utility"],
+      "keywords": ["remote-config", "sync", "dotfiles", "claude-config"]
+    },
+    {
       "name": "review-changes",
       "description": "Review code changes with detailed feedback on quality, security, performance, and maintainability",
       "version": "0.2.24",
@@ -275,6 +319,25 @@
       "category": "utility",
       "tags": ["utility", "skill"],
       "keywords": ["terminate", "exit", "sigint", "process", "self-destruct"]
+    },
+    {
+      "name": "session-report",
+      "description": "Skill for generating structured session reports — fact-finding across git history, GitHub issues and PRs, tasks, and agent contributions to produce a comprehensive work summary. Works for solo agents and agent teams alike.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/session-report",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": [
+        "session-report",
+        "daily-summary",
+        "work-summary",
+        "reporting",
+        "fact-finding",
+        "git-history"
+      ]
     },
     {
       "name": "skill-required",
@@ -410,6 +473,25 @@
       "category": "utility",
       "tags": ["utility", "skill"],
       "keywords": ["todos", "plans", "sync", "workflow", "productivity"]
+    },
+    {
+      "name": "word-vomit",
+      "description": "Hook-based workflow for capturing unstructured thoughts and triggering the exec-assist agent to categorize them into actionable items (issues, tasks, docs).",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/word-vomit",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": [
+        "word-vomit",
+        "exec-assist",
+        "thought-capture",
+        "categorization",
+        "workflow",
+        "hooks"
+      ]
     }
   ]
 }
