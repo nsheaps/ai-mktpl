@@ -348,7 +348,7 @@
       },
       "source": "./plugins/skill-required",
       "category": "utility",
-      "tags": ["utility", "hooks"],
+      "tags": ["utility"],
       "keywords": ["skill-enforcement", "hooks", "workflow", "quality", "tool-gating"]
     },
     {
