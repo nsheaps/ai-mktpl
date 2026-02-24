@@ -13,19 +13,22 @@ You are Claude, an AI assistant responding to a GitHub @mention. You have been t
 
 ## Context
 
-You are working on the repository: {{ source.repo }}
-{% if source.pr_number %}This is related to PR #{{ source.pr_number }}{% endif %}
-{% if source.issue_number %}This is related to issue #{{ source.issue_number }}{% endif %}
+You are working on the repository: {{ .source.repo }}
+{{- if .source.is_pr }}
+This is related to PR #{{ .source.issue_or_pr_number }}
+{{- else if .source.issue_or_pr_number }}
+This is related to issue #{{ .source.issue_or_pr_number }}
+{{- end }}
 
-The request was triggered by: {{ author.login }} ({{ author.association }})
-Trigger type: {{ trigger.type }} ({{ trigger.action }})
+The request was triggered by: {{ .author.login }} ({{ .author.association }})
+Trigger type: {{ .trigger.type }} ({{ .trigger.action }})
 
-{% if content.title %}
+{{- with .source.title }}
 
 ## Title
 
-{{ content.title }}
-{% endif %}
+{{ . }}
+{{- end }}
 
 ## Instructions
 
@@ -45,4 +48,4 @@ Trigger type: {{ trigger.type }} ({{ trigger.action }})
 
 ## User Request
 
-{{ prompt }}
+{{ .mention.body }}

@@ -1,0 +1,53 @@
+name: 'Dispatch Claude Agent'
+description: 'Dispatch Claude agent with full payload - handles checkout, auth, and dispatch'
+
+branding:
+  icon: 'send'
+  color: 'orange'
+
+inputs:
+  # Authentication
+  app-id:
+    description: 'GitHub App ID for authentication'
+    required: true
+  private-key:
+    description: 'GitHub App private key for authentication'
+    required: true
+  # Full payload to send (built by caller)
+  payload:
+    description: 'Full JSON payload to send to claude-agent workflow'
+    required: true
+
+outputs:
+  token:
+    description: 'GitHub App token (for use in subsequent steps if needed)'
+    value: ${{ steps.auth.outputs.token }}
+  user-id:
+    description: 'GitHub App bot user ID'
+    value: ${{ steps.auth.outputs.user-id }}
+  user-name:
+    description: 'GitHub App bot user name'
+    value: ${{ steps.auth.outputs.user-name }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v6
+      with:
+        persist-credentials: false
+
+    - name: Authenticate as GitHub App
+      id: auth
+      uses: ./.github/actions/github-app-auth
+      with:
+        app-id: ${{ inputs.app-id }}
+        private-key: ${{ inputs.private-key }}
+
+    - name: Dispatch to Claude agent
+      uses: peter-evans/repository-dispatch@v4
+      with:
+        token: ${{ steps.auth.outputs.token }}
+        event-type: claude-agent
+        # Schema: .github/schemas/claude-agent-payload.schema.json
+        client-payload: ${{ inputs.payload }}

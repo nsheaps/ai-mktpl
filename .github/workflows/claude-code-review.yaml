@@ -76,15 +76,20 @@ jobs:
         run: |
           gh extension install agynio/gh-pr-review || echo "gh-pr-review extension already installed"
 
+      - name: Install mise tools (for gomplate)
+        uses: jdx/mise-action@v2
+
       - name: Interpolate review prompt
         id: prompt
         uses: ./.github/actions/interpolate-prompt
-        env:
-          REPO: ${{ github.repository }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          JOB_CONTEXT: ${{ toJson(steps.additional-context.outputs) }}
         with:
           template-file: .github/prompts/claude-code-review.md
+          payload: |
+            {
+              "repo": "${{ github.repository }}",
+              "pr_number": ${{ github.event.pull_request.number }},
+              "job_context": ${{ toJson(steps.additional-context.outputs) }}
+            }
 
       - name: Run Claude Code Review
         id: claude-review

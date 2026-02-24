@@ -2,6 +2,9 @@ name: Claude Agent
 
 # This workflow runs Claude Code in agent mode when triggered by repository_dispatch
 # Agent mode is automatically enabled for repository_dispatch triggers
+#
+# The system prompt template is specified in the payload - no detection logic needed here
+# All context for the agent is included in the prompt itself
 
 on:
   repository_dispatch:
@@ -35,70 +38,28 @@ jobs:
           app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
           private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
 
-      - name: Build prompt from dispatch payload
-        id: prompt
-        env:
-          PAYLOAD: ${{ toJson(github.event.client_payload) }}
+      - name: Select prompt template based on trigger event
+        id: template
         run: |
-          # Extract values from payload
-          PROMPT=$(echo "$PAYLOAD" | jq -r '.prompt // ""')
-          REPO=$(echo "$PAYLOAD" | jq -r '.source.repo // ""')
-          PR_NUM=$(echo "$PAYLOAD" | jq -r '.source.pr_number // ""')
-          ISSUE_NUM=$(echo "$PAYLOAD" | jq -r '.source.issue_number // ""')
-          COMMENT_ID=$(echo "$PAYLOAD" | jq -r '.source.comment_id // ""')
-          AUTHOR=$(echo "$PAYLOAD" | jq -r '.author.login // ""')
-          ASSOCIATION=$(echo "$PAYLOAD" | jq -r '.author.association // ""')
-          TRIGGER_TYPE=$(echo "$PAYLOAD" | jq -r '.trigger.type // ""')
-          TRIGGER_ACTION=$(echo "$PAYLOAD" | jq -r '.trigger.action // ""')
-          TITLE=$(echo "$PAYLOAD" | jq -r '.content.title // ""')
+          EVENT="${{ github.event.client_payload.trigger.event }}"
+          case "$EVENT" in
+            "mention")
+              echo "file=.ai/prompts/claude-agent-system.md" >> $GITHUB_OUTPUT
+              ;;
+            "issueCreated")
+              echo "file=.ai/prompts/issue-planner-system.md" >> $GITHUB_OUTPUT
+              ;;
+            *)
+              echo "file=.ai/prompts/claude-agent-system.md" >> $GITHUB_OUTPUT
+              ;;
+          esac
 
-          # Read system prompt template
-          SYSTEM_PROMPT=$(cat .ai/prompts/claude-agent-system.md)
-
-          # Build context section
-          CONTEXT="You are Claude, responding to a GitHub @mention.\n\n"
-          CONTEXT+="## CRITICAL: How to Respond\n\n"
-          CONTEXT+="Your text output is NOT visible to the user. You MUST use the GitHub MCP tools to post your response.\n\n"
-
-          # Determine the target for the response
-          if [ "$PR_NUM" != "null" ] && [ -n "$PR_NUM" ]; then
-            CONTEXT+="**To respond, use \`mcp__github__add_issue_comment\` with:**\n"
-            CONTEXT+="- owner: $(echo $REPO | cut -d/ -f1)\n"
-            CONTEXT+="- repo: $(echo $REPO | cut -d/ -f2)\n"
-            CONTEXT+="- issue_number: $PR_NUM\n\n"
-          elif [ "$ISSUE_NUM" != "null" ] && [ -n "$ISSUE_NUM" ]; then
-            CONTEXT+="**To respond, use \`mcp__github__add_issue_comment\` with:**\n"
-            CONTEXT+="- owner: $(echo $REPO | cut -d/ -f1)\n"
-            CONTEXT+="- repo: $(echo $REPO | cut -d/ -f2)\n"
-            CONTEXT+="- issue_number: $ISSUE_NUM\n\n"
-          fi
-
-          CONTEXT+="## Context\n"
-          CONTEXT+="- Repository: $REPO\n"
-          if [ "$PR_NUM" != "null" ] && [ -n "$PR_NUM" ]; then
-            CONTEXT+="- Related to PR #$PR_NUM\n"
-          fi
-          if [ "$ISSUE_NUM" != "null" ] && [ -n "$ISSUE_NUM" ]; then
-            CONTEXT+="- Related to issue #$ISSUE_NUM\n"
-          fi
-          CONTEXT+="- Triggered by: $AUTHOR ($ASSOCIATION)\n"
-          CONTEXT+="- Trigger: $TRIGGER_TYPE ($TRIGGER_ACTION)\n"
-          if [ "$TITLE" != "null" ] && [ -n "$TITLE" ]; then
-            CONTEXT+="\n## Title\n$TITLE\n"
-          fi
-          CONTEXT+="\n## User Request\n$PROMPT"
-
-          # Output the full prompt (escape for multiline)
-          {
-            echo "prompt<<EOF"
-            echo -e "$CONTEXT"
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
-
-          # Also output source info for potential use
-          echo "pr_number=$PR_NUM" >> "$GITHUB_OUTPUT"
-          echo "issue_number=$ISSUE_NUM" >> "$GITHUB_OUTPUT"
-          echo "comment_id=$COMMENT_ID" >> "$GITHUB_OUTPUT"
+      - name: Interpolate system prompt
+        id: prompt
+        uses: ./.github/actions/interpolate-prompt
+        with:
+          template-file: ${{ steps.template.outputs.file }}
+          payload: ${{ toJson(github.event.client_payload) }}
 
       - name: Run Claude Code
         id: claude
@@ -259,7 +220,7 @@ jobs:
           claude_code_oauth_token: ${{
             secrets.CLAUDE_API_KEY && '' ||
             ( secrets.ANTHROPIC_API_KEY && '' || secrets.CLAUDE_CODE_OAUTH_TOKEN ) }}
-          # Claude default bot identity for git commits
+          # Bot identity for git commits (from GitHub App auth)
           bot_id: ${{ steps.auth.outputs.user-id }}
           bot_name: '@claude via ${{ steps.auth.outputs.user-name }}'
           allowed_bots: 'github-actions[bot],automation-nsheaps[bot]'

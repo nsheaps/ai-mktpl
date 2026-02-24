@@ -1,5 +1,5 @@
-REPO: ${REPO}
-PR_NUMBER: ${PR_NUMBER}
+REPO: {{ .repo }}
+PR_NUMBER: {{ .pr_number }}
 
 Please review this PR and provide inline feedback using the GitHub review system.
 You must provide feedback on:
@@ -443,5 +443,5 @@ Notes:[^1][^2]
 ## Extra info to help you
 
 <job-context>
-${JOB_CONTEXT}
+{{ .job_context | toJSON }}
 </job-context>

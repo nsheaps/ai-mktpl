@@ -22,7 +22,7 @@ allow() {
   if [ -n "$reason" ]; then
     echo "{\"hookSpecificOutput\":{\"permissionDecision\":\"allow\",\"permissionDecisionReason\":$(echo "$reason" | jq -Rs .)}}"
   else
-    echo '{"hookSpecificOutput":{"permissionDecision":"allow"}}'
+    echo '{"hookSpecificOutput":{"permissionDecision":"allow"},"suppressOutput":true}'
   fi
   exit 0
 }
@@ -31,8 +31,8 @@ allow() {
 # Usage: deny "Reason for denial"
 deny() {
   local reason="$1"
-  echo "{\"hookSpecificOutput\":{\"permissionDecision\":\"deny\",\"permissionDecisionReason\":$(echo "$reason" | jq -Rs .)}}"
-  exit 0
+  echo "{\"hookSpecificOutput\":{\"permissionDecision\":\"deny\",\"permissionDecisionReason\":$(echo "$reason" | jq -Rs .)}}" >&2
+  exit 2
 }
 
 # Ask user for confirmation before proceeding
@@ -40,21 +40,5 @@ deny() {
 ask() {
   local reason="${1:-Confirm this operation?}"
   echo "{\"hookSpecificOutput\":{\"permissionDecision\":\"ask\",\"permissionDecisionReason\":$(echo "$reason" | jq -Rs .)}}"
-  exit 0
-}
-
-# Allow with modified input parameters
-# Usage: allow_with_input '{"file_path": "/new/path"}'
-allow_with_input() {
-  local updated_input="$1"
-  echo "{\"hookSpecificOutput\":{\"permissionDecision\":\"allow\",\"updatedInput\":$updated_input}}"
-  exit 0
-}
-
-# Allow with additional context for Claude
-# Usage: allow_with_context "Current environment: production"
-allow_with_context() {
-  local context="$1"
-  echo "{\"hookSpecificOutput\":{\"permissionDecision\":\"allow\",\"additionalContext\":$(echo "$context" | jq -Rs .)}}"
   exit 0
 }
