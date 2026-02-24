@@ -13,9 +13,12 @@
 
 Before using ANY tool (except for simple conversational responses), you MUST first update your Tasks to reflect what you're about to do and any changes you've done since your last action.
 
-### The Only Exception
+### Exceptions
 
-Simple conversational responses that don't use tools are exempt. Everything else requires Task tracking.
+- **Simple conversational responses** that don't use tools are exempt.
+- **Answering questions** — when the user asks a question, answer it first. Do not create tasks for questions. See `answer-before-acting.md`.
+
+Everything else requires Task tracking.
 
 ### What This Means
 
