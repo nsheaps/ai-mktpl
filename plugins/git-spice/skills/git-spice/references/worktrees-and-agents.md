@@ -229,6 +229,7 @@ gs branch submit    # push immediately
 ```
 
 Benefits of push-per-branch:
+
 - **CI starts sooner** — each branch's CI pipeline begins as soon as it's pushed, rather than waiting for the entire stack
 - **Incremental progress** — if a later branch has conflicts, earlier branches are already updated on the remote
 - **Smaller blast radius** — issues are isolated to individual branches rather than a single large push
