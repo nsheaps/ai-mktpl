@@ -1,7 +1,6 @@
 {
   "description": "Reminds about uncommitted changes when session stops",
   "hooks": {
-    "Stop": [
-    ]
+    "Stop": []
   }
 }
