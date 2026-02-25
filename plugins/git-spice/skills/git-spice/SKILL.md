@@ -190,6 +190,7 @@ git-spice supports Git worktrees:
 - `gs repo sync` skips branches checked out in other worktrees
 - `gs branch delete` handles cross-worktree branches gracefully
 - Restacking skips branches checked out in other worktrees
+- For coordinated multi-agent restacking (restack coordinator pattern, per-branch push, conflict ownership), see `references/worktrees-and-agents.md`
 - Use `--worktree` config scope for worktree-specific settings
 
 ## Claude Code Integration Notes

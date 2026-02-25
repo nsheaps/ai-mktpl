@@ -186,7 +186,7 @@ Only one agent should run `gs stack submit` (`gs ss`) at a time. Recommended pat
 
 1. **Designated submitter**: One agent (or the orchestrator) is responsible for all `gs ss` calls
 2. **Sequential submission**: Agents signal when they are done, and submission happens after all agents have committed and restacked
-3. **Branch-level submission**: Each agent submits only their own branch with `gs branch submit` (`gs bs`) instead of submitting the whole stack
+3. **Branch-level submission** (preferred for multi-agent setups): Each agent submits only their own branch with `gs branch submit` (`gs bs`) instead of submitting the whole stack. This avoids force-pushing branches owned by other agents and allows CI to start per-branch. See the "Coordinated Restack Workflow" section for the full pattern including restack coordination and conflict ownership.
 
 ### Handling Merge Conflicts During Restack
 
@@ -198,6 +198,91 @@ When Agent B runs `gs sr` and encounters a conflict caused by Agent A's changes:
 4. Verify with `gs ls` that the stack looks correct
 
 If the conflict is too complex, abort with `gs rebase abort` (`gs rba`) and coordinate with the other agent or the user.
+
+## Coordinated Restack Workflow
+
+When multiple agents have branches checked out in separate worktrees across a stack, restacking requires explicit coordination. The standard `gs stack restack` skips branches in other worktrees, so a dedicated restack coordinator must orchestrate the process.
+
+### Restack Coordinator Pattern
+
+A dedicated agent or coordinator runs the restack from the bottom of the stack and then visits each worktree sequentially:
+
+1. **Start from the bottom branch** of the stack
+2. Run `gs stack restack` — this restacks any branches NOT checked out in other worktrees
+3. For each branch checked out in a worktree (bottom to top), cd into that worktree and run:
+   ```bash
+   cd /path/to/repo.worktrees/<branch-worktree>
+   gs branch restack  # restacks just this branch onto its updated parent
+   ```
+4. After each branch is restacked, immediately push it (see below)
+
+The coordinator must process worktrees **bottom to top** — a branch cannot be restacked until its parent has been restacked and pushed.
+
+### Push After Each Restack, Not at the End
+
+Do NOT batch all pushes with a single `gs stack submit` at the end. Instead, each branch should be pushed individually as soon as it's restacked:
+
+```bash
+cd /path/to/repo.worktrees/<branch-worktree>
+gs branch restack   # restack this branch
+gs branch submit    # push immediately
+```
+
+Benefits of push-per-branch:
+- **CI starts sooner** — each branch's CI pipeline begins as soon as it's pushed, rather than waiting for the entire stack
+- **Incremental progress** — if a later branch has conflicts, earlier branches are already updated on the remote
+- **Smaller blast radius** — issues are isolated to individual branches rather than a single large push
+
+### Conflict Resolution Ownership
+
+Each branch's owning agent is responsible for resolving conflicts on their branch:
+
+1. The restack coordinator runs `gs branch restack` in a worktree
+2. If a conflict occurs, the coordinator **does not resolve it** — they flag it to the branch owner
+3. The branch owner resolves the conflict:
+   ```bash
+   # In the branch's worktree
+   # ... resolve conflicts in affected files ...
+   git add <resolved-files>
+   gs rebase continue   # gs rbc
+   ```
+4. The branch owner then pushes their branch: `gs branch submit`
+5. The coordinator continues restacking the next branch up the stack
+
+If the branch owner is unavailable, the coordinator may resolve simple conflicts (e.g., trivial merge markers), but complex conflicts should always be handled by the agent with context on those changes.
+
+### Example: Coordinated Restack
+
+```
+Stack:  main → part-1 (Agent A) → part-2 (Agent B) → part-3 (Agent C)
+```
+
+After `main` is updated (e.g., via `gs repo sync`):
+
+```bash
+# === Restack Coordinator ===
+
+# Step 1: Run stack restack from bottom (skips worktree branches)
+cd /path/to/main-checkout
+gs stack restack
+
+# Step 2: Restack part-1 in its worktree
+cd /path/to/repo.worktrees/part-1
+gs branch restack
+gs branch submit    # push immediately
+
+# Step 3: Restack part-2 in its worktree
+cd /path/to/repo.worktrees/part-2
+gs branch restack
+gs branch submit    # push immediately
+
+# Step 4: Restack part-3 in its worktree
+cd /path/to/repo.worktrees/part-3
+gs branch restack
+gs branch submit    # push immediately
+```
+
+If step 3 encounters a conflict, the coordinator notifies Agent B, who resolves it in their worktree before the coordinator proceeds to step 4.
 
 ## Example: Full Multi-Agent Workflow
 
@@ -234,9 +319,21 @@ gs sr  # restack to pick up changes from A and B
 gs cc -m "Implement part 3"
 gs ls  # verify stack state
 
-# === Submit (one agent or orchestrator) ===
-cd ~/project  # or any worktree
-gs ss --fill  # submit entire stack as PRs
+# === Submit (each agent pushes their own branch) ===
+# Agent A:
+cd ~/project.worktrees/part-1
+gs bs --fill  # submit just this branch
+
+# Agent B:
+cd ~/project.worktrees/part-2
+gs bs --fill  # submit just this branch
+
+# Agent C:
+cd ~/project.worktrees/part-3
+gs bs --fill  # submit just this branch
+
+# Or: a coordinator can restack and submit each branch sequentially
+# See "Coordinated Restack Workflow" section above
 ```
 
 ## References
