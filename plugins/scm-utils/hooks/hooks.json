@@ -2,16 +2,6 @@
   "description": "Reminds about uncommitted changes when session stops",
   "hooks": {
     "Stop": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/check-uncommitted-on-stop.sh",
-            "timeout": 10
-          }
-        ]
-      }
     ]
   }
 }
