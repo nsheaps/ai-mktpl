@@ -120,6 +120,12 @@ When git-spice is initialized in a repository, prefer `gs` commands over raw `gi
 - **Use `gs branch create`** instead of `git checkout -b` -- it tracks the branch in the stack
 - **Use `gs branch delete`** instead of `git branch -d` -- it rebases upstack onto the next downstack
 
+> **CRITICAL: ALWAYS use `gs stack submit` or `gs branch submit` to push changes. NEVER use `git push`.**
+>
+> `git push` bypasses git-spice's tracking and **breaks PR linkage** -- branches pushed with `git push` will not have their PRs tracked by git-spice. This means git-spice won't know about the PR, won't update it on subsequent submits, and stack-wide operations like `gs stack submit` will skip the unlinked branch.
+>
+> **If a branch was accidentally pushed with `git push`**, run `gs stack submit` or `gs branch submit` to fix the linkage and re-associate the branch with its PR.
+
 Never use `git rebase`, `git cherry-pick`, or `git merge` on tracked branches -- these bypass git-spice's dependency tracking and leave the stack in an inconsistent state requiring manual recovery. If the stack gets out of sync, run `gs stack restack` to reconcile.
 
 ## Submit Flags
@@ -190,6 +196,7 @@ git-spice supports Git worktrees:
 
 When acting as an AI assistant using git-spice:
 
+- **CRITICAL: ALWAYS use `gs stack submit` (`gs ss`) or `gs branch submit` (`gs bs`) to push changes. NEVER use `git push`.** Using `git push` breaks git-spice's PR tracking -- the branch will not be linked to its PR and will be skipped by future stack-wide submit operations. If this happens accidentally, run `gs stack submit` or `gs branch submit` to repair the linkage.
 - **Never run interactive gs commands** (`gs bco`, `gs branch split`, `gs stack edit`, `gs commit split`) without user confirmation -- these require TTY interaction
 - **Prefer shorthand commands** for efficiency (`gs cc`, `gs ss`, `gs rs`)
 - **Always check stack state** with `gs ls` before and after operations
