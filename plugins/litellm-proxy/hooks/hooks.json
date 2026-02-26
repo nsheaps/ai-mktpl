@@ -1,0 +1,17 @@
+{
+  "description": "Detect and configure LiteLLM proxy on session start, set ANTHROPIC_BASE_URL if proxy is available",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/session-start.sh",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}

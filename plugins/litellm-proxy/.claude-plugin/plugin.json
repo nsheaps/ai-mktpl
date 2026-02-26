@@ -1,0 +1,24 @@
+{
+  "name": "litellm-proxy",
+  "version": "0.1.0",
+  "description": "Auto-configure LiteLLM proxy for Claude Code with multi-provider routing, observability, and remote gateway support",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/litellm-proxy",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": [
+    "litellm",
+    "proxy",
+    "llm-gateway",
+    "multi-provider",
+    "anthropic",
+    "openai",
+    "observability",
+    "opentelemetry",
+    "langfuse",
+    "cloudflare-ai-gateway"
+  ]
+}
