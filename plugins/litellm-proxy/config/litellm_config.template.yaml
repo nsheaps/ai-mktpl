@@ -10,9 +10,9 @@
 
 model_list:
   # Anthropic (Claude) — wildcard routes all anthropic/* models
-  - model_name: "anthropic/*"
+  - model_name: 'anthropic/*'
     litellm_params:
-      model: "anthropic/*"
+      model: 'anthropic/*'
       api_key: os.environ/ANTHROPIC_API_KEY
 
   # OpenAI — wildcard routes all openai/* models
@@ -91,11 +91,11 @@ general_settings:
   master_key: os.environ/LITELLM_MASTER_KEY
   # Uncomment to enable the /anthropic pass-through endpoint
   pass_through_endpoints:
-    - path: "/anthropic/{endpoint:path}"
-      target: "https://api.anthropic.com/{endpoint}"
+    - path: '/anthropic/{endpoint:path}'
+      target: 'https://api.anthropic.com/{endpoint}'
       headers:
         x-api-key: os.environ/ANTHROPIC_API_KEY
-        anthropic-version: "2023-06-01"
+        anthropic-version: '2023-06-01'
 
 # --- Litellm Settings ---
 litellm_settings:

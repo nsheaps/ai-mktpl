@@ -76,47 +76,47 @@ Configuration is resolved in order (first match wins):
 
 ```yaml
 litellm-proxy:
-  enabled: true                    # Enable/disable the plugin
-  mode: auto                       # auto | local | remote | gateway | disabled
-  proxy_host: "http://localhost"   # Local proxy host
-  proxy_port: "4000"               # Local proxy port
-  master_key: "${LITELLM_MASTER_KEY}"  # Proxy authentication
-  remote_url: ""                   # Remote proxy or gateway URL
-  anthropic_pass_through: true     # Use /anthropic pass-through endpoint
-  config_path: "~/.litellm/config.yaml"  # LiteLLM config file path
+  enabled: true # Enable/disable the plugin
+  mode: auto # auto | local | remote | gateway | disabled
+  proxy_host: "http://localhost" # Local proxy host
+  proxy_port: "4000" # Local proxy port
+  master_key: "${LITELLM_MASTER_KEY}" # Proxy authentication
+  remote_url: "" # Remote proxy or gateway URL
+  anthropic_pass_through: true # Use /anthropic pass-through endpoint
+  config_path: "~/.litellm/config.yaml" # LiteLLM config file path
 ```
 
 ### Modes
 
-| Mode | Behavior |
-|------|----------|
-| `auto` | Detect running proxy, configure if found |
-| `local` | Always point at local proxy (proxy_host:proxy_port) |
-| `remote` | Point at a remote LiteLLM proxy (remote_url) |
-| `gateway` | Point at an external gateway like Cloudflare AI Gateway |
-| `disabled` | Remove proxy settings, connect directly to Anthropic |
+| Mode       | Behavior                                                |
+| ---------- | ------------------------------------------------------- |
+| `auto`     | Detect running proxy, configure if found                |
+| `local`    | Always point at local proxy (proxy_host:proxy_port)     |
+| `remote`   | Point at a remote LiteLLM proxy (remote_url)            |
+| `gateway`  | Point at an external gateway like Cloudflare AI Gateway |
+| `disabled` | Remove proxy settings, connect directly to Anthropic    |
 
 ### Secret Resolution
 
 The `master_key` field supports three formats:
 
-| Format | Example | How It Works |
-|--------|---------|--------------|
-| Env var reference | `${LITELLM_MASTER_KEY}` | Expanded from shell environment |
-| 1Password ref | `op://vault/item/field` | Resolved via `op read` |
-| Literal | `sk-litellm-abc123` | Used as-is (gitignored configs only) |
+| Format            | Example                 | How It Works                         |
+| ----------------- | ----------------------- | ------------------------------------ |
+| Env var reference | `${LITELLM_MASTER_KEY}` | Expanded from shell environment      |
+| 1Password ref     | `op://vault/item/field` | Resolved via `op read`               |
+| Literal           | `sk-litellm-abc123`     | Used as-is (gitignored configs only) |
 
 ## Skills
 
 This plugin includes comprehensive skills for interactive configuration:
 
-| Skill | Purpose |
-|-------|---------|
-| **setup-litellm** | Install LiteLLM, create config, start proxy, verify connectivity |
-| **configure-providers** | Add/manage LLM providers, API keys, load balancing, fallbacks |
-| **configure-observability** | Set up traces, logs, metrics (Langfuse, OTEL, Datadog, Prometheus) |
-| **configure-remote-proxy** | Connect to remote LiteLLM, Cloudflare AI Gateway, custom gateways |
-| **configure-claude-code** | Wire Claude Code to use the proxy, pass-through vs unified endpoints |
+| Skill                       | Purpose                                                              |
+| --------------------------- | -------------------------------------------------------------------- |
+| **setup-litellm**           | Install LiteLLM, create config, start proxy, verify connectivity     |
+| **configure-providers**     | Add/manage LLM providers, API keys, load balancing, fallbacks        |
+| **configure-observability** | Set up traces, logs, metrics (Langfuse, OTEL, Datadog, Prometheus)   |
+| **configure-remote-proxy**  | Connect to remote LiteLLM, Cloudflare AI Gateway, custom gateways    |
+| **configure-claude-code**   | Wire Claude Code to use the proxy, pass-through vs unified endpoints |
 
 ## Architecture
 
