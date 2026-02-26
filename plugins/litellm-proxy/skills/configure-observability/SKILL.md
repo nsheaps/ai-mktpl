@@ -23,13 +23,13 @@ This skill helps set up observability for a LiteLLM proxy, covering traces, logs
 
 LiteLLM supports multiple observability backends. Ask the user which they prefer:
 
-| Backend | Best For | Self-Hosted? | Traces | Logs | Metrics |
-|---------|----------|--------------|--------|------|---------|
-| Langfuse | LLM-specific observability | Yes (or cloud) | Yes | Yes | Yes |
-| OpenTelemetry | Standard, vendor-agnostic | Collector needed | Yes | Yes | Yes |
-| Datadog | Enterprise monitoring | No (SaaS) | Yes | Yes | Yes |
-| Prometheus | Metrics-focused | Yes | No | No | Yes |
-| Custom Webhook | DIY logging | Yes | No | Yes | No |
+| Backend        | Best For                   | Self-Hosted?     | Traces | Logs | Metrics |
+| -------------- | -------------------------- | ---------------- | ------ | ---- | ------- |
+| Langfuse       | LLM-specific observability | Yes (or cloud)   | Yes    | Yes  | Yes     |
+| OpenTelemetry  | Standard, vendor-agnostic  | Collector needed | Yes    | Yes  | Yes     |
+| Datadog        | Enterprise monitoring      | No (SaaS)        | Yes    | Yes  | Yes     |
+| Prometheus     | Metrics-focused            | Yes              | No     | No   | Yes     |
+| Custom Webhook | DIY logging                | Yes              | No     | Yes  | No      |
 
 ## Interactive Setup Flow
 
@@ -225,10 +225,10 @@ Add to your `prometheus.yml`:
 
 ```yaml
 scrape_configs:
-  - job_name: 'litellm'
+  - job_name: "litellm"
     scrape_interval: 15s
     static_configs:
-      - targets: ['localhost:4000']
+      - targets: ["localhost:4000"]
 ```
 
 ### Grafana Dashboard

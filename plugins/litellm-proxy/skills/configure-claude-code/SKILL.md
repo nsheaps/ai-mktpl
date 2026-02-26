@@ -23,12 +23,12 @@ This skill helps configure Claude Code to route its API calls through a LiteLLM 
 
 Claude Code uses these environment variables (in priority order):
 
-| Variable | Purpose |
-|----------|---------|
-| `ANTHROPIC_BASE_URL` | API endpoint URL (default: `https://api.anthropic.com`) |
-| `ANTHROPIC_AUTH_TOKEN` | Bearer token sent as `Authorization: Bearer <token>` |
-| `ANTHROPIC_API_KEY` | API key sent as `x-api-key` header |
-| `ANTHROPIC_CUSTOM_HEADERS` | Additional headers (newline-separated `Name: Value`) |
+| Variable                   | Purpose                                                 |
+| -------------------------- | ------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`       | API endpoint URL (default: `https://api.anthropic.com`) |
+| `ANTHROPIC_AUTH_TOKEN`     | Bearer token sent as `Authorization: Bearer <token>`    |
+| `ANTHROPIC_API_KEY`        | API key sent as `x-api-key` header                      |
+| `ANTHROPIC_CUSTOM_HEADERS` | Additional headers (newline-separated `Name: Value`)    |
 
 When using a LiteLLM proxy:
 
@@ -46,7 +46,7 @@ The litellm-proxy plugin's session-start hook automatically configures Claude Co
 # In ~/.claude/plugins.settings.yaml
 litellm-proxy:
   enabled: true
-  mode: local  # or remote, gateway
+  mode: local # or remote, gateway
   proxy_host: "http://localhost"
   proxy_port: "4000"
   master_key: "${LITELLM_MASTER_KEY}"

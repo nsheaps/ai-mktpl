@@ -24,11 +24,11 @@ This skill helps configure Claude Code to route through a remote LiteLLM proxy o
 
 Ask the user which type of remote proxy they want to configure:
 
-| Type | Description | Example URL |
-|------|-------------|-------------|
-| Remote LiteLLM | LiteLLM proxy running on another machine | `https://litellm.company.com:4000` |
-| Cloudflare AI Gateway | Cloudflare's managed AI proxy | `https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_id}` |
-| Custom Gateway | Any Anthropic Messages API compatible gateway | `https://ai-proxy.internal.com` |
+| Type                  | Description                                   | Example URL                                                      |
+| --------------------- | --------------------------------------------- | ---------------------------------------------------------------- |
+| Remote LiteLLM        | LiteLLM proxy running on another machine      | `https://litellm.company.com:4000`                               |
+| Cloudflare AI Gateway | Cloudflare's managed AI proxy                 | `https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_id}` |
+| Custom Gateway        | Any Anthropic Messages API compatible gateway | `https://ai-proxy.internal.com`                                  |
 
 ---
 

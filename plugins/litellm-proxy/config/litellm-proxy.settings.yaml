@@ -24,8 +24,8 @@ litellm-proxy:
   mode: auto
 
   # Local proxy settings
-  proxy_host: "http://localhost"
-  proxy_port: "4000"
+  proxy_host: 'http://localhost'
+  proxy_port: '4000'
 
   # Master key for proxy authentication
   # Supports: env var (${LITELLM_MASTER_KEY}), 1Password (op://...), or literal

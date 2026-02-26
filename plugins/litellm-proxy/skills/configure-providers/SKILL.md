@@ -25,21 +25,21 @@ This skill helps configure LLM providers in a LiteLLM proxy. It covers obtaining
 
 Prompt the user for which providers they want to configure. Common options:
 
-| Provider | Prefix | API Key Env Var |
-|----------|--------|-----------------|
-| Anthropic | `anthropic/` | `ANTHROPIC_API_KEY` |
-| OpenAI | `openai/` | `OPENAI_API_KEY` |
-| Google Gemini | `gemini/` | `GEMINI_API_KEY` |
-| Google Vertex AI | `vertex_ai/` | (service account) |
-| AWS Bedrock | `bedrock/` | `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY` |
-| Azure OpenAI | `azure/` | `AZURE_API_KEY` |
-| Groq | `groq/` | `GROQ_API_KEY` |
-| DeepSeek | `deepseek/` | `DEEPSEEK_API_KEY` |
-| Ollama | `ollama/` | (none, local) |
-| Cohere | `cohere/` | `COHERE_API_KEY` |
-| Mistral | `mistral/` | `MISTRAL_API_KEY` |
-| Together AI | `together_ai/` | `TOGETHERAI_API_KEY` |
-| Fireworks AI | `fireworks_ai/` | `FIREWORKS_AI_API_KEY` |
+| Provider         | Prefix          | API Key Env Var                               |
+| ---------------- | --------------- | --------------------------------------------- |
+| Anthropic        | `anthropic/`    | `ANTHROPIC_API_KEY`                           |
+| OpenAI           | `openai/`       | `OPENAI_API_KEY`                              |
+| Google Gemini    | `gemini/`       | `GEMINI_API_KEY`                              |
+| Google Vertex AI | `vertex_ai/`    | (service account)                             |
+| AWS Bedrock      | `bedrock/`      | `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY` |
+| Azure OpenAI     | `azure/`        | `AZURE_API_KEY`                               |
+| Groq             | `groq/`         | `GROQ_API_KEY`                                |
+| DeepSeek         | `deepseek/`     | `DEEPSEEK_API_KEY`                            |
+| Ollama           | `ollama/`       | (none, local)                                 |
+| Cohere           | `cohere/`       | `COHERE_API_KEY`                              |
+| Mistral          | `mistral/`      | `MISTRAL_API_KEY`                             |
+| Together AI      | `together_ai/`  | `TOGETHERAI_API_KEY`                          |
+| Fireworks AI     | `fireworks_ai/` | `FIREWORKS_AI_API_KEY`                        |
 
 ### Step 2: Obtain API Keys
 
@@ -187,7 +187,7 @@ model_list:
       aws_region_name: "us-east-1"
 
 router_settings:
-  routing_strategy: "least-busy"  # Options: simple-shuffle, least-busy, usage-based-routing, latency-based-routing
+  routing_strategy: "least-busy" # Options: simple-shuffle, least-busy, usage-based-routing, latency-based-routing
   num_retries: 3
   timeout: 120
   retry_after: 5
