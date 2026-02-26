@@ -5,11 +5,6 @@
 # environment variables to settings.local.json so Claude Code enables
 # native OpenTelemetry export to Datadog.
 #
-# Config resolution order:
-#   1. Project-level: ${CLAUDE_PROJECT_DIR}/.claude/plugins.settings.yaml → datadog-otel-setup
-#   2. User-level:    ~/.claude/plugins.settings.yaml → datadog-otel-setup
-#   3. Plugin-level:  ${CLAUDE_PLUGIN_ROOT}/datadog-otel-setup.settings.yaml → datadog-otel-setup
-#
 # API key resolution:
 #   - env var reference: ${DD_API_KEY} → expanded from environment
 #   - 1Password ref:     op://vault/item/field → resolved via `op read`
@@ -18,116 +13,41 @@ set -euo pipefail
 
 SETTINGS_FILE="$HOME/.claude/settings.local.json"
 
-# Source shared atomic settings writer
-SHARED_LIB="${CLAUDE_PLUGIN_ROOT}/lib/safe-settings-write.sh"
-if [ ! -f "$SHARED_LIB" ]; then
-  echo "ERROR: shared lib not found: $SHARED_LIB" >&2
+# --- Source shared libs ---
+
+PLUGIN_NAME="datadog-otel-setup"
+
+CONFIG_LIB="${CLAUDE_PLUGIN_ROOT}/lib/plugin-config.sh"
+if [ ! -f "$CONFIG_LIB" ]; then
+  echo "ERROR: shared lib not found: $CONFIG_LIB" >&2
   exit 2
 fi
-source "$SHARED_LIB"
+source "$CONFIG_LIB"
 
-# --- Config resolution ---
-
-read_config_key() {
-  local file="$1"
-  local key="$2"
-  if [ -f "$file" ] && command -v yq &>/dev/null; then
-    local val
-    val="$(yq -r ".datadog-otel-setup.${key}" "$file" 2>/dev/null || true)"
-    if [ -n "$val" ] && [ "$val" != "null" ]; then
-      echo "$val"
-      return 0
-    fi
-  fi
-  return 1
-}
-
-get_config() {
-  local key="$1"
-  local default="$2"
-
-  # 1. Project-level
-  local project_config="${CLAUDE_PROJECT_DIR:-.}/.claude/plugins.settings.yaml"
-  local val
-  if val="$(read_config_key "$project_config" "$key")"; then
-    echo "$val"
-    return
-  fi
-
-  # 2. User-level
-  local user_config="$HOME/.claude/plugins.settings.yaml"
-  if val="$(read_config_key "$user_config" "$key")"; then
-    echo "$val"
-    return
-  fi
-
-  # 3. Plugin-level defaults
-  local plugin_config="${CLAUDE_PLUGIN_ROOT}/datadog-otel-setup.settings.yaml"
-  if val="$(read_config_key "$plugin_config" "$key")"; then
-    echo "$val"
-    return
-  fi
-
-  # 4. Hardcoded default
-  echo "$default"
-}
+SETTINGS_LIB="${CLAUDE_PLUGIN_ROOT}/lib/safe-settings-write.sh"
+if [ ! -f "$SETTINGS_LIB" ]; then
+  echo "ERROR: shared lib not found: $SETTINGS_LIB" >&2
+  exit 2
+fi
+source "$SETTINGS_LIB"
 
 # --- Check if enabled ---
 
-enabled="$(get_config "enabled" "true")"
-if [ "$enabled" = "false" ]; then
+if ! plugin_is_enabled; then
   echo '{}'
   exit 0
 fi
 
 # --- Read config values ---
 
-endpoint="$(get_config "endpoint" "https://otel.datadoghq.com:4317")"
-metrics_exporter="$(get_config "metrics_exporter" "otlp")"
-logs_exporter="$(get_config "logs_exporter" "otlp")"
-api_key_raw="$(get_config "api_key" '${DD_API_KEY}')"
+endpoint="$(plugin_config "endpoint" "https://otel.datadoghq.com:4317")"
+metrics_exporter="$(plugin_config "metrics_exporter" "otlp")"
+logs_exporter="$(plugin_config "logs_exporter" "otlp")"
+api_key_raw="$(plugin_config "api_key" '${DD_API_KEY}')"
 
 # --- Resolve API key ---
 
-resolve_api_key() {
-  local raw="$1"
-
-  # env var reference: ${VAR_NAME}
-  if [[ "$raw" =~ ^\$\{([A-Za-z_][A-Za-z0-9_]*)\}$ ]]; then
-    local var_name="${BASH_REMATCH[1]}"
-    local resolved="${!var_name:-}"
-    if [ -z "$resolved" ]; then
-      echo "WARNING: datadog-otel-setup: env var $var_name is not set, OTEL headers will be empty" >&2
-      echo ""
-      return
-    fi
-    echo "$resolved"
-    return
-  fi
-
-  # 1Password reference: op://vault/item/field
-  if [[ "$raw" == op://* ]]; then
-    if ! command -v op &>/dev/null; then
-      echo "WARNING: datadog-otel-setup: 1Password CLI (op) not found, cannot resolve $raw" >&2
-      echo ""
-      return
-    fi
-    local resolved
-    resolved="$(op read "$raw" 2>/dev/null || true)"
-    if [ -z "$resolved" ]; then
-      echo "WARNING: datadog-otel-setup: failed to resolve 1Password ref $raw" >&2
-      echo ""
-      return
-    fi
-    echo "$resolved"
-    return
-  fi
-
-  # Literal value
-  echo "$raw"
-}
-
-api_key="$(resolve_api_key "$api_key_raw")"
+api_key="$(plugin_resolve_secret "$api_key_raw" "api_key")"
 
 # --- Build OTEL headers ---
 
@@ -140,12 +60,10 @@ fi
 
 mkdir -p "$(dirname "$SETTINGS_FILE")"
 
-# Ensure file exists
 if [ ! -f "$SETTINGS_FILE" ]; then
   echo '{}' > "$SETTINGS_FILE"
 fi
 
-# Export values so jq can access them via $ENV
 export OTEL_PLUGIN_METRICS_EXP="$metrics_exporter"
 export OTEL_PLUGIN_LOGS_EXP="$logs_exporter"
 export OTEL_PLUGIN_ENDPOINT="$endpoint"

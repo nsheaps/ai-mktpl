@@ -1,0 +1,43 @@
+# litellm-proxy plugin configuration
+#
+# This file provides defaults for the litellm-proxy plugin.
+# Override per-project via ${CLAUDE_PROJECT_DIR}/.claude/plugins.settings.yaml
+# or per-user via ~/.claude/plugins.settings.yaml under the "litellm-proxy" key.
+#
+# Secret resolution order (for master_key and other secrets):
+#   1. Environment variable: ${LITELLM_MASTER_KEY}
+#   2. 1Password reference: op://vault/item/field (requires `op` CLI)
+#   3. Literal value (only if settings file is gitignored)
+#
+# Set enabled: false to disable the proxy hook without uninstalling the plugin.
+
+litellm-proxy:
+  # Whether the plugin is active
+  enabled: true
+
+  # Mode: auto | local | remote | gateway | disabled
+  #   auto     - detect running proxy, configure if found
+  #   local    - always point at local proxy (proxy_host:proxy_port)
+  #   remote   - point at a remote LiteLLM proxy (remote_url)
+  #   gateway  - point at an external gateway like Cloudflare AI Gateway (remote_url)
+  #   disabled - remove proxy settings, connect directly to Anthropic
+  mode: auto
+
+  # Local proxy settings
+  proxy_host: 'http://localhost'
+  proxy_port: '4000'
+
+  # Master key for proxy authentication
+  # Supports: env var (${LITELLM_MASTER_KEY}), 1Password (op://...), or literal
+  # master_key: "${LITELLM_MASTER_KEY}"
+
+  # Path to litellm config.yaml (for starting the proxy)
+  # config_path: "~/.litellm/config.yaml"
+
+  # Remote proxy or gateway URL (used when mode is remote or gateway)
+  # remote_url: "https://my-litellm-proxy.example.com:4000"
+  # remote_url: "https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_id}/anthropic"
+
+  # Whether to use the /anthropic pass-through endpoint (true) or unified endpoint (false)
+  # Pass-through preserves the native Anthropic Messages API format
+  anthropic_pass_through: true

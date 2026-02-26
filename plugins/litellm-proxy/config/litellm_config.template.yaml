@@ -1,0 +1,145 @@
+# LiteLLM Proxy Configuration Template
+#
+# Copy this to ~/.litellm/config.yaml and customize.
+# Start proxy with: litellm --config ~/.litellm/config.yaml
+#
+# Docs: https://docs.litellm.ai/docs/proxy/configs
+
+# --- Model List ---
+# Define models and their providers. Use wildcard routing for simplicity.
+
+model_list:
+  # Anthropic (Claude) — wildcard routes all anthropic/* models
+  - model_name: 'anthropic/*'
+    litellm_params:
+      model: 'anthropic/*'
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+  # OpenAI — wildcard routes all openai/* models
+  # - model_name: "openai/*"
+  #   litellm_params:
+  #     model: "openai/*"
+  #     api_key: os.environ/OPENAI_API_KEY
+
+  # Google Gemini
+  # - model_name: "gemini/*"
+  #   litellm_params:
+  #     model: "gemini/*"
+  #     api_key: os.environ/GEMINI_API_KEY
+
+  # AWS Bedrock
+  # - model_name: "bedrock/*"
+  #   litellm_params:
+  #     model: "bedrock/*"
+  #     aws_access_key_id: os.environ/AWS_ACCESS_KEY_ID
+  #     aws_secret_access_key: os.environ/AWS_SECRET_ACCESS_KEY
+  #     aws_region_name: "us-east-1"
+
+  # Google Vertex AI
+  # - model_name: "vertex_ai/*"
+  #   litellm_params:
+  #     model: "vertex_ai/*"
+  #     vertex_project: os.environ/GOOGLE_CLOUD_PROJECT
+  #     vertex_location: "us-central1"
+
+  # Azure OpenAI
+  # - model_name: "azure/*"
+  #   litellm_params:
+  #     model: "azure/<your-deployment-name>"
+  #     api_base: os.environ/AZURE_API_BASE
+  #     api_key: os.environ/AZURE_API_KEY
+  #     api_version: "2024-02-01"
+
+  # Groq (fast inference)
+  # - model_name: "groq/*"
+  #   litellm_params:
+  #     model: "groq/*"
+  #     api_key: os.environ/GROQ_API_KEY
+
+  # DeepSeek
+  # - model_name: "deepseek/*"
+  #   litellm_params:
+  #     model: "deepseek/*"
+  #     api_key: os.environ/DEEPSEEK_API_KEY
+
+  # Ollama (local models)
+  # - model_name: "ollama/*"
+  #   litellm_params:
+  #     model: "ollama/*"
+  #     api_base: "http://localhost:11434"
+
+# --- Load Balancing (optional) ---
+# Multiple deployments of the same model_name enables automatic load balancing.
+# Uncomment to add a second Anthropic deployment for redundancy:
+#
+# - model_name: "anthropic/*"
+#   litellm_params:
+#     model: "anthropic/*"
+#     api_key: os.environ/ANTHROPIC_API_KEY_2
+
+# --- Router Settings (optional) ---
+# router_settings:
+#   routing_strategy: "least-busy"   # simple-shuffle, least-busy, usage-based-routing
+#   num_retries: 3
+#   timeout: 60
+#   retry_after: 5
+#   allowed_fails: 3
+#   cooldown_time: 60
+
+# --- General Settings ---
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+  # Uncomment to enable the /anthropic pass-through endpoint
+  pass_through_endpoints:
+    - path: '/anthropic/{endpoint:path}'
+      target: 'https://api.anthropic.com/{endpoint}'
+      headers:
+        x-api-key: os.environ/ANTHROPIC_API_KEY
+        anthropic-version: '2023-06-01'
+
+# --- Litellm Settings ---
+litellm_settings:
+  # Drop unsupported params instead of erroring
+  drop_params: true
+  # Enable request/response logging
+  set_verbose: false
+  # Cache responses (optional)
+  # cache: true
+  # cache_params:
+  #   type: "redis"
+  #   host: "localhost"
+  #   port: 6379
+
+# --- Observability (uncomment to enable) ---
+
+# Langfuse — open-source LLM observability
+# litellm_settings:
+#   success_callback: ["langfuse"]
+#   failure_callback: ["langfuse"]
+# environment_variables:
+#   LANGFUSE_PUBLIC_KEY: os.environ/LANGFUSE_PUBLIC_KEY
+#   LANGFUSE_SECRET_KEY: os.environ/LANGFUSE_SECRET_KEY
+#   LANGFUSE_HOST: "https://cloud.langfuse.com"  # or self-hosted URL
+
+# OpenTelemetry (OTEL)
+# litellm_settings:
+#   success_callback: ["otel"]
+#   failure_callback: ["otel"]
+# environment_variables:
+#   OTEL_EXPORTER_OTLP_ENDPOINT: "http://localhost:4317"
+#   OTEL_EXPORTER_OTLP_HEADERS: ""  # e.g. "DD-API-KEY=xxx"
+
+# Datadog
+# litellm_settings:
+#   success_callback: ["datadog"]
+#   failure_callback: ["datadog"]
+# environment_variables:
+#   DD_API_KEY: os.environ/DD_API_KEY
+#   DD_SITE: "datadoghq.com"
+
+# Custom webhook logging
+# litellm_settings:
+#   success_callback: ["custom_callback_api"]
+#   failure_callback: ["custom_callback_api"]
+# environment_variables:
+#   GENERIC_LOGGER_ENDPOINT: "https://your-webhook.example.com/log"
