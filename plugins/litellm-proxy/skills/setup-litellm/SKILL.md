@@ -168,14 +168,14 @@ litellm-proxy:
 After setup, restart Claude Code (or start a new session). The session-start hook will:
 
 1. Detect the running proxy
-2. Set `ANTHROPIC_BASE_URL` to point at the proxy
-3. Set `ANTHROPIC_AUTH_TOKEN` if a master key is configured
+2. Set `ANTHROPIC_BASE_URL` via `CLAUDE_ENV_FILE`
+3. Set `ANTHROPIC_AUTH_TOKEN` via `CLAUDE_ENV_FILE` if a master key is configured
 
 You can verify by checking:
 
 ```bash
-# Check settings.local.json
-cat ~/.claude/settings.local.json | jq '.env.ANTHROPIC_BASE_URL'
+# Check the environment variable is set
+echo "$ANTHROPIC_BASE_URL"
 ```
 
 ## Troubleshooting

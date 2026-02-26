@@ -2,7 +2,7 @@
 name: configure-claude-code
 description: >
   Wire Claude Code to use a LiteLLM proxy or AI gateway. Covers environment
-  variable configuration, settings.json and settings.local.json setup,
+  variable configuration via CLAUDE_ENV_FILE, shell profile setup,
   API key helpers, pass-through vs unified endpoints, and verification.
 allowed-tools: Bash, Read, Write, Edit, AskUserQuestion
 ---
@@ -53,25 +53,9 @@ litellm-proxy:
   anthropic_pass_through: true
 ```
 
-The hook writes to `~/.claude/settings.local.json` on each session start.
+The hook writes env vars via `CLAUDE_ENV_FILE` on each session start.
 
-### Method 2: Manual settings.local.json
-
-Write directly to the local settings file:
-
-```bash
-# Create/update settings.local.json
-cat > ~/.claude/settings.local.json << 'EOF'
-{
-  "env": {
-    "ANTHROPIC_BASE_URL": "http://localhost:4000/anthropic",
-    "ANTHROPIC_AUTH_TOKEN": "sk-litellm-your-master-key"
-  }
-}
-EOF
-```
-
-### Method 3: Environment Variables
+### Method 2: Environment Variables
 
 Set in your shell profile:
 
@@ -81,7 +65,7 @@ export ANTHROPIC_BASE_URL="http://localhost:4000/anthropic"
 export ANTHROPIC_AUTH_TOKEN="sk-litellm-your-master-key"
 ```
 
-### Method 4: API Key Helper (for rotating keys)
+### Method 3: API Key Helper (for rotating keys)
 
 For dynamic key management:
 
@@ -200,10 +184,7 @@ For Bedrock and Vertex AI through LiteLLM:
 ### Step 1: Check Current Configuration
 
 ```bash
-# Check settings.local.json
-cat ~/.claude/settings.local.json | jq '.env'
-
-# Check environment
+# Check environment (set by the session-start hook via CLAUDE_ENV_FILE)
 echo "BASE_URL: $ANTHROPIC_BASE_URL"
 echo "AUTH_TOKEN: ${ANTHROPIC_AUTH_TOKEN:+set (hidden)}"
 ```
@@ -245,16 +226,7 @@ litellm-proxy:
   mode: disabled
 ```
 
-**Option B: Remove settings manually**
-
-```bash
-# Remove proxy env vars from settings.local.json
-jq 'del(.env.ANTHROPIC_BASE_URL) | del(.env.ANTHROPIC_AUTH_TOKEN)' \
-  ~/.claude/settings.local.json > /tmp/settings.tmp && \
-  mv /tmp/settings.tmp ~/.claude/settings.local.json
-```
-
-**Option C: Unset environment variables**
+**Option B: Unset environment variables**
 
 ```bash
 unset ANTHROPIC_BASE_URL
@@ -277,8 +249,8 @@ lsof -i :4000
 ```bash
 # Check master key
 curl -H "Authorization: Bearer $LITELLM_MASTER_KEY" http://localhost:4000/health
-# Verify settings match
-cat ~/.claude/settings.local.json | jq '.env.ANTHROPIC_AUTH_TOKEN'
+# Verify env var is set
+echo "${ANTHROPIC_AUTH_TOKEN:+set (hidden)}"
 ```
 
 ### "Model not found" errors
@@ -294,17 +266,15 @@ grep -A3 'anthropic' ~/.litellm/config.yaml
 
 ```bash
 # Verify BASE_URL
-cat ~/.claude/settings.local.json | jq '.env.ANTHROPIC_BASE_URL'
-# Check if env var is overriding
+echo "$ANTHROPIC_BASE_URL"
+# Check all Anthropic env vars
 env | grep ANTHROPIC
 ```
 
-## Settings File Precedence
+## How CLAUDE_ENV_FILE Works
 
-Claude Code merges settings from multiple sources (later overrides earlier):
+The session-start hook writes `export VAR=value` lines to `$CLAUDE_ENV_FILE`. Claude Code sources this file, making the variables available to all subsequent tool calls in the session. Variables set this way:
 
-1. `~/.claude/settings.json` — User defaults
-2. `.claude/settings.json` — Project settings (committed)
-3. `.claude/settings.local.json` — Project local overrides
-4. `~/.claude/settings.local.json` — User local overrides (where this plugin writes)
-5. Environment variables — Highest priority
+- Are scoped to the current session (not persisted to disk settings)
+- Override settings.json/settings.local.json env values
+- Are cleared when the session ends

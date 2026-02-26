@@ -76,8 +76,8 @@ litellm-proxy:
 Restart Claude Code and check:
 
 ```bash
-cat ~/.claude/settings.local.json | jq '.env.ANTHROPIC_BASE_URL'
-# Should show: "https://litellm.company.com:4000/anthropic"
+echo "$ANTHROPIC_BASE_URL"
+# Should show: https://litellm.company.com:4000/anthropic
 ```
 
 ---
