@@ -3,20 +3,25 @@
 #
 # Detects LiteLLM proxy availability and configures Claude Code to route
 # through it via CLAUDE_ENV_FILE. Handles four modes:
-#   1. auto     — detect running proxy, configure if found
-#   2. local    — always point at local proxy
-#   3. remote   — point at a remote LiteLLM proxy
-#   4. gateway  — point at an external gateway (Cloudflare AI Gateway, etc.)
-#
-# Config resolution order:
-#   1. Project-level: ${CLAUDE_PROJECT_DIR}/.claude/plugins.settings.yaml → litellm-proxy
-#   2. User-level:    ~/.claude/plugins.settings.yaml → litellm-proxy
-#   3. Plugin-level:  ${CLAUDE_PLUGIN_ROOT}/config/litellm-proxy.settings.yaml
+#   auto     — detect running proxy, configure if found
+#   local    — always point at local proxy
+#   remote   — point at a remote LiteLLM proxy
+#   gateway  — point at an external gateway (Cloudflare AI Gateway, etc.)
 #
 # Environment variable outputs (via CLAUDE_ENV_FILE):
 #   - ANTHROPIC_BASE_URL: Points Claude Code at the proxy
 #   - ANTHROPIC_AUTH_TOKEN: Master key for proxy authentication (if configured)
 set -euo pipefail
+
+# --- Source shared config lib ---
+
+PLUGIN_NAME="litellm-proxy"
+SHARED_LIB="${CLAUDE_PLUGIN_ROOT}/lib/plugin-config.sh"
+if [ ! -f "$SHARED_LIB" ]; then
+  echo "ERROR: shared lib not found: $SHARED_LIB" >&2
+  exit 2
+fi
+source "$SHARED_LIB"
 
 # --- Write env var to CLAUDE_ENV_FILE ---
 
@@ -28,124 +33,31 @@ write_env() {
   fi
 }
 
-# --- Config resolution ---
-
-read_config_key() {
-  local file="$1"
-  local key="$2"
-  if [ -f "$file" ] && command -v yq &>/dev/null; then
-    local val
-    val="$(yq -r ".litellm-proxy.${key}" "$file" 2>/dev/null || true)"
-    if [ -n "$val" ] && [ "$val" != "null" ]; then
-      echo "$val"
-      return 0
-    fi
-  fi
-  return 1
-}
-
-get_config() {
-  local key="$1"
-  local default="$2"
-
-  # 1. Project-level
-  local project_config="${CLAUDE_PROJECT_DIR:-.}/.claude/plugins.settings.yaml"
-  local val
-  if val="$(read_config_key "$project_config" "$key")"; then
-    echo "$val"
-    return
-  fi
-
-  # 2. User-level
-  local user_config="$HOME/.claude/plugins.settings.yaml"
-  if val="$(read_config_key "$user_config" "$key")"; then
-    echo "$val"
-    return
-  fi
-
-  # 3. Plugin-level defaults
-  local plugin_config="${CLAUDE_PLUGIN_ROOT}/config/litellm-proxy.settings.yaml"
-  if val="$(read_config_key "$plugin_config" "$key")"; then
-    echo "$val"
-    return
-  fi
-
-  # 4. Hardcoded default
-  echo "$default"
-}
-
-# --- Resolve secret values (env var, 1Password, literal) ---
-
-resolve_secret() {
-  local raw="$1"
-  local label="$2"
-
-  # Empty/null
-  if [ -z "$raw" ] || [ "$raw" = "null" ]; then
-    echo ""
-    return
-  fi
-
-  # env var reference: ${VAR_NAME}
-  if [[ "$raw" =~ ^\$\{([A-Za-z_][A-Za-z0-9_]*)\}$ ]]; then
-    local var_name="${BASH_REMATCH[1]}"
-    local resolved="${!var_name:-}"
-    if [ -z "$resolved" ]; then
-      echo "INFO: litellm-proxy: env var $var_name is not set ($label)" >&2
-    fi
-    echo "$resolved"
-    return
-  fi
-
-  # 1Password reference: op://vault/item/field
-  if [[ "$raw" == op://* ]]; then
-    if ! command -v op &>/dev/null; then
-      echo "WARNING: litellm-proxy: 1Password CLI (op) not found, cannot resolve $label" >&2
-      echo ""
-      return
-    fi
-    local resolved
-    resolved="$(op read "$raw" 2>/dev/null || true)"
-    if [ -z "$resolved" ]; then
-      echo "WARNING: litellm-proxy: failed to resolve 1Password ref for $label" >&2
-    fi
-    echo "$resolved"
-    return
-  fi
-
-  # Literal value
-  echo "$raw"
-}
-
 # --- Check if enabled ---
 
-enabled="$(get_config "enabled" "true")"
-if [ "$enabled" = "false" ]; then
+if ! plugin_is_enabled; then
   exit 0
 fi
 
 # --- Read config values ---
 
-mode="$(get_config "mode" "auto")"
-proxy_host="$(get_config "proxy_host" "http://localhost")"
-proxy_port="$(get_config "proxy_port" "4000")"
-master_key_raw="$(get_config "master_key" "")"
-config_path="$(get_config "config_path" "")"
-remote_url="$(get_config "remote_url" "")"
-anthropic_pass_through="$(get_config "anthropic_pass_through" "true")"
+mode="$(plugin_config "mode" "auto")"
+proxy_host="$(plugin_config "proxy_host" "http://localhost")"
+proxy_port="$(plugin_config "proxy_port" "4000")"
+master_key_raw="$(plugin_config "master_key" "")"
+remote_url="$(plugin_config "remote_url" "")"
+anthropic_pass_through="$(plugin_config "anthropic_pass_through" "true")"
 
 # Resolve master key
-master_key="$(resolve_secret "$master_key_raw" "master_key")"
+master_key="$(plugin_resolve_secret "$master_key_raw" "master_key")"
 
 # --- Determine proxy URL ---
 
 get_proxy_url() {
-  # If remote_url is set, use it directly (remote proxy or gateway)
   if [ -n "$remote_url" ] && [ "$remote_url" != "null" ]; then
     echo "$remote_url"
     return
   fi
-  # Local proxy
   echo "${proxy_host}:${proxy_port}"
 }
 
@@ -226,7 +138,6 @@ case "$mode" in
     base_url="$remote_url"
     ;;
   disabled)
-    # Nothing to write — env vars won't be set, Claude Code uses defaults
     exit 0
     ;;
   *)
