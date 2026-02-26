@@ -2,30 +2,31 @@
 # session-start.sh — SessionStart hook for litellm-proxy plugin
 #
 # Detects LiteLLM proxy availability and configures Claude Code to route
-# through it. Handles three modes:
-#   1. Local LiteLLM proxy (running on localhost)
-#   2. Remote LiteLLM proxy (running on another host)
-#   3. Remote gateway (Cloudflare AI Gateway, etc.)
+# through it via CLAUDE_ENV_FILE. Handles four modes:
+#   1. auto     — detect running proxy, configure if found
+#   2. local    — always point at local proxy
+#   3. remote   — point at a remote LiteLLM proxy
+#   4. gateway  — point at an external gateway (Cloudflare AI Gateway, etc.)
 #
 # Config resolution order:
 #   1. Project-level: ${CLAUDE_PROJECT_DIR}/.claude/plugins.settings.yaml → litellm-proxy
 #   2. User-level:    ~/.claude/plugins.settings.yaml → litellm-proxy
 #   3. Plugin-level:  ${CLAUDE_PLUGIN_ROOT}/config/litellm-proxy.settings.yaml
 #
-# Environment variable outputs (via settings.local.json):
+# Environment variable outputs (via CLAUDE_ENV_FILE):
 #   - ANTHROPIC_BASE_URL: Points Claude Code at the proxy
 #   - ANTHROPIC_AUTH_TOKEN: Master key for proxy authentication (if configured)
 set -euo pipefail
 
-SETTINGS_FILE="$HOME/.claude/settings.local.json"
+# --- Write env var to CLAUDE_ENV_FILE ---
 
-# Source shared atomic settings writer
-SHARED_LIB="${CLAUDE_PLUGIN_ROOT}/lib/safe-settings-write.sh"
-if [ ! -f "$SHARED_LIB" ]; then
-  echo "ERROR: shared lib not found: $SHARED_LIB" >&2
-  exit 2
-fi
-source "$SHARED_LIB"
+write_env() {
+  local name="$1"
+  local value="$2"
+  if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
+    echo "export ${name}=\"${value}\"" >> "$CLAUDE_ENV_FILE"
+  fi
+}
 
 # --- Config resolution ---
 
@@ -120,7 +121,6 @@ resolve_secret() {
 
 enabled="$(get_config "enabled" "true")"
 if [ "$enabled" = "false" ]; then
-  echo '{}'
   exit 0
 fi
 
@@ -153,7 +153,6 @@ get_proxy_url() {
 
 check_proxy_health() {
   local url="$1"
-  # Try the /health endpoint (LiteLLM standard)
   if command -v curl &>/dev/null; then
     local status
     status="$(curl -s -o /dev/null -w '%{http_code}' --connect-timeout 2 "${url}/health" 2>/dev/null || echo "000")"
@@ -167,15 +166,12 @@ check_proxy_health() {
 # --- Check if LiteLLM is installed ---
 
 check_litellm_installed() {
-  # Check pip/pipx
   if command -v litellm &>/dev/null; then
     return 0
   fi
-  # Check if available as python module
   if python3 -m litellm --help &>/dev/null 2>&1; then
     return 0
   fi
-  # Check Docker
   if command -v docker &>/dev/null && docker image inspect ghcr.io/berriai/litellm:main-latest &>/dev/null 2>&1; then
     return 0
   fi
@@ -187,10 +183,8 @@ check_litellm_installed() {
 get_claude_base_url() {
   local url="$1"
   if [ "$anthropic_pass_through" = "true" ]; then
-    # Use the /anthropic pass-through endpoint for native Anthropic Messages API
     echo "${url}/anthropic"
   else
-    # Use the unified endpoint (LiteLLM translates the format)
     echo "${url}"
   fi
 }
@@ -201,82 +195,50 @@ proxy_url="$(get_proxy_url)"
 
 case "$mode" in
   auto)
-    # Auto-detect: check if proxy is running, configure if so
     if check_proxy_health "$proxy_url"; then
       base_url="$(get_claude_base_url "$proxy_url")"
     elif [ -n "$remote_url" ] && [ "$remote_url" != "null" ]; then
-      # Remote URL configured but not reachable — warn but still set it
       echo "WARNING: litellm-proxy: remote proxy at $remote_url is not reachable" >&2
       base_url="$(get_claude_base_url "$proxy_url")"
     elif check_litellm_installed; then
       echo "INFO: litellm-proxy: LiteLLM is installed but proxy is not running" >&2
       echo "INFO: litellm-proxy: Use the setup-litellm skill to start the proxy" >&2
-      echo '{}'
       exit 0
     else
-      # Not installed, not configured — do nothing
-      echo '{}'
       exit 0
     fi
     ;;
   local)
-    # Force local mode — always point at local proxy
     base_url="$(get_claude_base_url "$proxy_url")"
     ;;
   remote)
-    # Force remote mode — use remote_url
     if [ -z "$remote_url" ] || [ "$remote_url" = "null" ]; then
       echo "ERROR: litellm-proxy: mode=remote but remote_url is not set" >&2
-      echo '{}'
       exit 0
     fi
     base_url="$(get_claude_base_url "$remote_url")"
     ;;
   gateway)
-    # Gateway mode — point directly at an external gateway (Cloudflare, etc.)
-    # No /anthropic suffix — gateways have their own routing
     if [ -z "$remote_url" ] || [ "$remote_url" = "null" ]; then
       echo "ERROR: litellm-proxy: mode=gateway but remote_url is not set" >&2
-      echo '{}'
       exit 0
     fi
     base_url="$remote_url"
     ;;
   disabled)
-    # Explicitly disabled — remove any previously set proxy env vars
-    mkdir -p "$(dirname "$SETTINGS_FILE")"
-    if [ ! -f "$SETTINGS_FILE" ]; then
-      echo '{}' > "$SETTINGS_FILE"
-    fi
-    safe_write_settings 'del(.env.ANTHROPIC_BASE_URL) | del(.env.ANTHROPIC_AUTH_TOKEN)'
-    echo '{}'
+    # Nothing to write — env vars won't be set, Claude Code uses defaults
     exit 0
     ;;
   *)
     echo "WARNING: litellm-proxy: unknown mode '$mode', skipping" >&2
-    echo '{}'
     exit 0
     ;;
 esac
 
-# --- Write settings ---
+# --- Write env vars via CLAUDE_ENV_FILE ---
 
-mkdir -p "$(dirname "$SETTINGS_FILE")"
-if [ ! -f "$SETTINGS_FILE" ]; then
-  echo '{}' > "$SETTINGS_FILE"
-fi
-
-export LITELLM_PLUGIN_BASE_URL="$base_url"
-export LITELLM_PLUGIN_AUTH_TOKEN="${master_key}"
+write_env "ANTHROPIC_BASE_URL" "$base_url"
 
 if [ -n "$master_key" ]; then
-  safe_write_settings \
-    '.env.ANTHROPIC_BASE_URL = $ENV.LITELLM_PLUGIN_BASE_URL
-     | .env.ANTHROPIC_AUTH_TOKEN = $ENV.LITELLM_PLUGIN_AUTH_TOKEN'
-else
-  safe_write_settings \
-    '.env.ANTHROPIC_BASE_URL = $ENV.LITELLM_PLUGIN_BASE_URL
-     | del(.env.ANTHROPIC_AUTH_TOKEN)'
+  write_env "ANTHROPIC_AUTH_TOKEN" "$master_key"
 fi
-
-echo '{}'

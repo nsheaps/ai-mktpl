@@ -17,8 +17,8 @@ On **SessionStart**, the plugin:
 
 1. Reads configuration from YAML config files (project → user → plugin defaults)
 2. Checks if a LiteLLM proxy is running (local or remote)
-3. Writes `ANTHROPIC_BASE_URL` and `ANTHROPIC_AUTH_TOKEN` to `~/.claude/settings.local.json`
-4. Claude Code then routes all API calls through the proxy
+3. Writes `ANTHROPIC_BASE_URL` and `ANTHROPIC_AUTH_TOKEN` to `CLAUDE_ENV_FILE`
+4. Claude Code picks up the env vars and routes all API calls through the proxy
 
 ## Quick Start
 
@@ -152,7 +152,6 @@ Claude Code
 
 ## Dependencies
 
-- `jq` — JSON processing
 - `yq` — YAML config parsing ([mikefarah/yq](https://github.com/mikefarah/yq))
 - `curl` — Health checks
 - `op` — 1Password CLI (optional, for `op://` secret references)
@@ -160,6 +159,6 @@ Claude Code
 ## Security
 
 - API keys and master keys are never committed to plugin source
-- Writes to `settings.local.json` which should be gitignored
+- Environment variables are set via `CLAUDE_ENV_FILE` (session-scoped, not persisted to disk)
 - Prefer env var or 1Password references over literal keys
 - The master key authenticates Claude Code to the proxy; provider API keys stay in the proxy config
