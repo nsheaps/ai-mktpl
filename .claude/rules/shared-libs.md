@@ -54,13 +54,13 @@ add_permission_to_allow "Bash(tool:*)" "user"          # user-level
 
 ### safe-settings-write.sh
 
-Atomic, concurrent-safe JSON settings writer using POSIX mkdir-based locking.
+Simple jq-based settings writer.
 
 ```bash
 SETTINGS_FILE="/path/to/settings.local.json"
 source "${CLAUDE_PLUGIN_ROOT}/lib/safe-settings-write.sh"
 
-safe_write_settings '.some.key = "value"'  # jq filter applied atomically
+safe_write_settings '.some.key = "value"'  # jq filter applied to file
 ```
 
 ## Adding a New Shared Library
