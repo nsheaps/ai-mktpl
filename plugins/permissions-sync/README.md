@@ -52,17 +52,21 @@ permissions-sync:
 ### Source Formats
 
 **GitHub repository reference:**
+
 ```
 github:owner/repo:path/to/settings.json
 ```
+
 Uses `gh api` to fetch the file contents. Requires `gh` to be authenticated.
 
 **Local file path:**
+
 ```
 $CLAUDE_PROJECT_DIR/.claude/settings.json
 $HOME/.claude/settings.json
 ~/other-project/.claude/settings.json
 ```
+
 Supports `$HOME`, `$CLAUDE_PROJECT_DIR`, and `~` expansion.
 
 ## Installation Modes

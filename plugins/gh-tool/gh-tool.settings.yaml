@@ -18,7 +18,7 @@ gh-tool:
 
   # Specific gh version to install (default: latest)
   # version: "2.87.3"
-  version: "latest"
+  version: 'latest'
 
   # Auto-run `gh auth status` after install to verify authentication
   auto_auth_check: true

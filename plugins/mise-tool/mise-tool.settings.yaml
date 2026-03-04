@@ -18,7 +18,7 @@ mise-tool:
 
   # Specific mise version to install (default: latest)
   # version: "2024.12.16"
-  version: "latest"
+  version: 'latest'
 
   # Auto-run `mise install` after mise is available
   auto_install_tools: true

@@ -46,18 +46,18 @@ mise activate fish | source
 
 ### Core Commands
 
-| Command | Description |
-|---------|-------------|
-| `mise install` | Install all tools from mise.toml |
-| `mise install <tool>@<version>` | Install specific tool version |
-| `mise use <tool>@<version>` | Add tool to mise.toml and install |
-| `mise ls` | List installed tool versions |
-| `mise ls-remote <tool>` | List available remote versions |
-| `mise trust` | Trust the current directory's config |
-| `mise self-update` | Update mise itself |
-| `mise doctor` | Check mise health and configuration |
-| `mise env` | Show environment variables mise would set |
-| `mise exec -- <command>` | Run command with mise-managed tools |
+| Command                         | Description                               |
+| ------------------------------- | ----------------------------------------- |
+| `mise install`                  | Install all tools from mise.toml          |
+| `mise install <tool>@<version>` | Install specific tool version             |
+| `mise use <tool>@<version>`     | Add tool to mise.toml and install         |
+| `mise ls`                       | List installed tool versions              |
+| `mise ls-remote <tool>`         | List available remote versions            |
+| `mise trust`                    | Trust the current directory's config      |
+| `mise self-update`              | Update mise itself                        |
+| `mise doctor`                   | Check mise health and configuration       |
+| `mise env`                      | Show environment variables mise would set |
+| `mise exec -- <command>`        | Run command with mise-managed tools       |
 
 ## Configuration (mise.toml)
 
@@ -258,32 +258,37 @@ This plugin supports configuration via `plugins.settings.yaml`:
 ```yaml
 mise-tool:
   enabled: true
-  install_to_project: true      # Install to $project/bin/.local
-  background_install: false     # Install in background
-  version: "latest"             # Specific version or "latest"
-  auto_install_tools: true      # Run mise install after setup
-  auto_trust: true              # Auto-trust project mise.toml
+  install_to_project: true # Install to $project/bin/.local
+  background_install: false # Install in background
+  version: "latest" # Specific version or "latest"
+  auto_install_tools: true # Run mise install after setup
+  auto_trust: true # Auto-trust project mise.toml
 ```
 
 Place in:
+
 - `$CLAUDE_PROJECT_DIR/.claude/plugins.settings.yaml` (project-level)
 - `~/.claude/plugins.settings.yaml` (user-level)
 
 ## Troubleshooting
 
 ### "command not found" after install
+
 Ensure mise is activated in your shell. Run `eval "$(mise activate bash)"`.
 
 ### Tools not installing
+
 1. Check `mise doctor` for configuration issues
 2. Ensure `mise.toml` is trusted: `mise trust`
 3. Check network connectivity for downloads
 
 ### Version conflicts with system tools
+
 mise shims take precedence when activated. Use `mise which <tool>` to verify
 which version is being used.
 
 ### Web session specifics
+
 In Claude Code web sessions, mise is auto-installed by this plugin to
 `$CLAUDE_PROJECT_DIR/bin/.local/mise`. The PATH is updated via `CLAUDE_ENV_FILE`.
 If tools aren't available, check that the session start hook completed.

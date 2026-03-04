@@ -33,20 +33,20 @@ gh auth switch
 
 ### Core Commands
 
-| Command | Description |
-|---------|-------------|
-| `gh pr create` | Create a pull request |
-| `gh pr view` | View PR details |
-| `gh pr list` | List pull requests |
-| `gh pr merge` | Merge a pull request |
-| `gh pr checkout` | Checkout a PR branch |
-| `gh issue create` | Create an issue |
-| `gh issue list` | List issues |
-| `gh issue view` | View issue details |
-| `gh repo clone` | Clone a repository |
-| `gh run list` | List workflow runs |
-| `gh run view` | View workflow run details |
-| `gh api` | Make authenticated API calls |
+| Command           | Description                  |
+| ----------------- | ---------------------------- |
+| `gh pr create`    | Create a pull request        |
+| `gh pr view`      | View PR details              |
+| `gh pr list`      | List pull requests           |
+| `gh pr merge`     | Merge a pull request         |
+| `gh pr checkout`  | Checkout a PR branch         |
+| `gh issue create` | Create an issue              |
+| `gh issue list`   | List issues                  |
+| `gh issue view`   | View issue details           |
+| `gh repo clone`   | Clone a repository           |
+| `gh run list`     | List workflow runs           |
+| `gh run view`     | View workflow run details    |
+| `gh api`          | Make authenticated API calls |
 
 ## Pull Request Workflows
 
@@ -379,31 +379,33 @@ This plugin supports configuration via `plugins.settings.yaml`:
 ```yaml
 gh-tool:
   enabled: true
-  install_to_project: true    # Install to $project/bin/.local
-  background_install: false   # Install in background
-  version: "latest"           # Specific version or "latest"
-  auto_auth_check: true       # Check auth on session start
+  install_to_project: true # Install to $project/bin/.local
+  background_install: false # Install in background
+  version: "latest" # Specific version or "latest"
+  auto_auth_check: true # Check auth on session start
 ```
 
 Place in:
+
 - `$CLAUDE_PROJECT_DIR/.claude/plugins.settings.yaml` (project-level)
 - `~/.claude/plugins.settings.yaml` (user-level)
 
 ## Environment Variables
 
-| Variable | Description |
-|----------|-------------|
-| `GH_TOKEN` | Authentication token (overrides `gh auth login`) |
-| `GH_HOST` | GitHub hostname (for GitHub Enterprise) |
-| `GH_REPO` | Default repo in `owner/repo` format |
-| `GH_EDITOR` | Editor for interactive commands |
-| `GH_BROWSER` | Browser for `--web` commands |
-| `GH_DEBUG` | Set to enable debug logging |
-| `NO_COLOR` | Disable color output |
+| Variable     | Description                                      |
+| ------------ | ------------------------------------------------ |
+| `GH_TOKEN`   | Authentication token (overrides `gh auth login`) |
+| `GH_HOST`    | GitHub hostname (for GitHub Enterprise)          |
+| `GH_REPO`    | Default repo in `owner/repo` format              |
+| `GH_EDITOR`  | Editor for interactive commands                  |
+| `GH_BROWSER` | Browser for `--web` commands                     |
+| `GH_DEBUG`   | Set to enable debug logging                      |
+| `NO_COLOR`   | Disable color output                             |
 
 ## Troubleshooting
 
 ### Authentication issues
+
 ```bash
 # Verify auth
 gh auth status
@@ -416,17 +418,21 @@ gh auth status -t
 ```
 
 ### "gh: command not found" in web sessions
+
 This plugin auto-installs gh to `$CLAUDE_PROJECT_DIR/bin/.local/gh`.
 Check that the session start hook ran successfully.
 
 ### Rate limiting
+
 Use authenticated requests (default with `gh`) to get 5,000 req/hour
 instead of 60. For heavy API usage, check remaining:
+
 ```bash
 gh api rate_limit --jq '.rate'
 ```
 
 ### Working with GitHub Enterprise
+
 ```bash
 GH_HOST=github.mycompany.com gh auth login
 ```

@@ -31,11 +31,11 @@ Create or update `plugins.settings.yaml` at project or user level:
 # or ~/.claude/plugins.settings.yaml
 
 gh-tool:
-  enabled: true              # Enable/disable the plugin
-  install_to_project: true   # Install to $project/bin/.local (vs ~/.local/bin)
-  background_install: false  # Run install in background
-  version: "latest"          # Pin a specific version or use "latest"
-  auto_auth_check: true      # Run `gh auth status` after install
+  enabled: true # Enable/disable the plugin
+  install_to_project: true # Install to $project/bin/.local (vs ~/.local/bin)
+  background_install: false # Run install in background
+  version: "latest" # Pin a specific version or use "latest"
+  auto_auth_check: true # Run `gh auth status` after install
 ```
 
 ## Authentication
@@ -58,6 +58,7 @@ This plugin follows the **project-local binary** pattern for web sessions:
 4. Each web session gets fresh installs (no persistent state assumed)
 
 This pattern ensures:
+
 - No system-level modifications needed
 - No conflicts between projects using different versions
 - Clean git state (binaries are gitignored)

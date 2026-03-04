@@ -13,7 +13,7 @@ permissions-sync:
   #   "user"    - writes to ~/.claude/settings.local.json
   # When installed at user level, "user" is recommended.
   # When installed at project level, "project" is recommended.
-  target: "project"
+  target: 'project'
 
   # Sources to merge permissions from (in order, later sources take priority).
   # Each source can be:
@@ -22,7 +22,7 @@ permissions-sync:
   #
   # Only the "permissions" key is extracted from each source.
   sources:
-    - "github:nsheaps/cept:.claude/settings.json"
+    - 'github:nsheaps/cept:.claude/settings.json'
     # - "$CLAUDE_PROJECT_DIR/.claude/settings.json"
     # - "$HOME/.claude/settings.json"
     # - "github:myorg/shared-config:.claude/settings.json"
@@ -36,4 +36,4 @@ permissions-sync:
   # Merge strategy:
   #   "union"   - combine all permissions from all sources (deduplicated)
   #   "replace" - last source wins entirely for each category
-  strategy: "union"
+  strategy: 'union'
