@@ -181,7 +181,7 @@ echo "[plugins] Installation complete"
 | Simplify code      | `code-simplifier`                                                | N/A                                |
 | Task parallelism   | `task-parallelization`                                           | N/A                                |
 | Spec writing       | `product-development-and-sdlc` (spec writing with template)      | `feature-dev`                      |
-| Quality loop       | `scm-utils`'s iterate-until-good skill                           | `ralph-wiggum`                       |
+| Quality loop       | `scm-utils`'s iterate-until-good skill                           | `ralph-wiggum`                     |
 | Sub-agents         | `tmux-subagent` + `claude-team`                                  | N/A                                |
 | Context management | `context-bloat-prevention`                                       | N/A                                |
 
