@@ -419,6 +419,25 @@
       "keywords": ["terminate", "exit", "sigint", "process", "self-destruct"]
     },
     {
+      "name": "sequential-thinking",
+      "description": "Set up the sequential-thinking MCP server and auto-configure permissions for its tools on session start.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/sequential-thinking",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": [
+        "sequential-thinking",
+        "mcp",
+        "structured-thinking",
+        "problem-solving",
+        "chain-of-thought",
+        "reasoning"
+      ]
+    },
+    {
       "name": "session-report",
       "description": "Skill for generating structured session reports — fact-finding across git history, GitHub issues and PRs, tasks, and agent contributions to produce a comprehensive work summary. Works for solo agents and agent teams alike.",
       "version": "0.1.0",

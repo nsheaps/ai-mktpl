@@ -1,0 +1,21 @@
+{
+  "name": "sequential-thinking",
+  "version": "0.1.0",
+  "description": "Set up the sequential-thinking MCP server and auto-configure permissions for its tools on session start.",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/sequential-thinking",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": [
+    "sequential-thinking",
+    "mcp",
+    "structured-thinking",
+    "problem-solving",
+    "chain-of-thought",
+    "reasoning"
+  ],
+  "hooks": "./hooks/hooks.json"
+}
