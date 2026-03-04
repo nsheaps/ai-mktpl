@@ -1,0 +1,24 @@
+{
+  "name": "permissions-sync",
+  "version": "0.1.0",
+  "description": "Merge permission scopes from configurable source settings.json files into settings.local.json on session start. Supports project-level and user-level installation.",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/permissions-sync",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": [
+    "permissions",
+    "settings",
+    "sync",
+    "merge",
+    "security",
+    "session-start",
+    "allow",
+    "deny",
+    "ask"
+  ],
+  "hooks": "./hooks/hooks.json"
+}
