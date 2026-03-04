@@ -60,8 +60,10 @@ validate-marketplace:
 
 validate-plugin PLUGIN_PATH:
     #!/usr/bin/env bash
-    OUTPUT="$({{claude}} plugin validate {{PLUGIN_PATH}})"
-    if [ $? -ne 0 ]; then
+    OUTPUT="$({{claude}} plugin validate {{PLUGIN_PATH}} 2>&1)"
+    EC=$?
+    if [ $EC -ne 0 ]; then
+        echo "❌ {{PLUGIN_PATH}}"
         echo "$OUTPUT"
         exit 1
     else
