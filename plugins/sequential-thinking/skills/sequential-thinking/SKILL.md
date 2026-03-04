@@ -30,17 +30,17 @@ it supports revision, branching, and adaptive depth.
 
 Each call represents one thought step. Key parameters:
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `thought` | string | Your current thinking step |
-| `thoughtNumber` | int | Current step number (1-based) |
-| `totalThoughts` | int | Estimated total steps (adjustable) |
-| `nextThoughtNeeded` | bool | `true` if more thinking needed |
-| `isRevision` | bool | Whether this revises a prior thought |
-| `revisesThought` | int | Which thought number is being revised |
-| `branchFromThought` | int | Which thought to branch from |
-| `branchId` | string | Identifier for the branch |
-| `needsMoreThoughts` | bool | Signal that you need more steps |
+| Parameter           | Type   | Description                           |
+| ------------------- | ------ | ------------------------------------- |
+| `thought`           | string | Your current thinking step            |
+| `thoughtNumber`     | int    | Current step number (1-based)         |
+| `totalThoughts`     | int    | Estimated total steps (adjustable)    |
+| `nextThoughtNeeded` | bool   | `true` if more thinking needed        |
+| `isRevision`        | bool   | Whether this revises a prior thought  |
+| `revisesThought`    | int    | Which thought number is being revised |
+| `branchFromThought` | int    | Which thought to branch from          |
+| `branchId`          | string | Identifier for the branch             |
+| `needsMoreThoughts` | bool   | Signal that you need more steps       |
 
 ## Workflow Patterns
 
@@ -149,6 +149,7 @@ Thought 5: Break into atomic, shippable steps
 ## Integration Notes
 
 This plugin:
+
 - Declares the MCP server via `.mcp.json` (auto-registered on install)
 - Auto-adds `mcp__sequential-thinking__*` to permissions.allow on session start
 - No manual configuration needed after plugin installation
