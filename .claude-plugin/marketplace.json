@@ -177,27 +177,6 @@
       "keywords": ["pr", "ci", "fix", "review", "iteration", "relentless"]
     },
     {
-      "name": "gh-tool",
-      "description": "Install and manage GitHub CLI (gh) in Claude Code sessions. Provides session-start auto-install for web sessions and comprehensive workflow skills.",
-      "version": "0.1.0",
-      "author": {
-        "name": "Nathan Heaps"
-      },
-      "source": "./plugins/gh-tool",
-      "category": "utility",
-      "tags": ["utility", "skill"],
-      "keywords": [
-        "github",
-        "gh",
-        "cli",
-        "session-start",
-        "web-session",
-        "auto-install",
-        "pull-requests",
-        "issues"
-      ]
-    },
-    {
       "name": "git-spice",
       "description": "Skill for managing stacked Git branches with git-spice (gs) CLI tool",
       "version": "0.2.0",
@@ -242,25 +221,6 @@
       "keywords": ["linear", "mcp", "hooks", "sync", "issue-tracking", "conflict-detection"]
     },
     {
-      "name": "mise-tool",
-      "description": "Install and manage mise (tool version manager) in Claude Code sessions. Provides session-start auto-install for web sessions and comprehensive workflow skills.",
-      "version": "0.1.0",
-      "author": {
-        "name": "Nathan Heaps"
-      },
-      "source": "./plugins/mise-tool",
-      "category": "utility",
-      "tags": ["utility", "skill"],
-      "keywords": [
-        "mise",
-        "tool-manager",
-        "version-manager",
-        "session-start",
-        "web-session",
-        "auto-install"
-      ]
-    },
-    {
       "name": "memory-manager",
       "description": "Intelligent memory management for CLAUDE.md files. Automatically detects and stores user preferences, rules, and instructions with smart scope detection and hierarchical organization.",
       "version": "0.2.24",
@@ -291,28 +251,6 @@
         "png",
         "html",
         "svg"
-      ]
-    },
-    {
-      "name": "permissions-sync",
-      "description": "Merge permission scopes from configurable source settings.json files into settings.local.json on session start. Supports project-level and user-level installation.",
-      "version": "0.1.0",
-      "author": {
-        "name": "Nathan Heaps"
-      },
-      "source": "./plugins/permissions-sync",
-      "category": "utility",
-      "tags": ["utility"],
-      "keywords": [
-        "permissions",
-        "settings",
-        "sync",
-        "merge",
-        "security",
-        "session-start",
-        "allow",
-        "deny",
-        "ask"
       ]
     },
     {
@@ -417,25 +355,6 @@
       "category": "utility",
       "tags": ["utility", "skill"],
       "keywords": ["terminate", "exit", "sigint", "process", "self-destruct"]
-    },
-    {
-      "name": "sequential-thinking",
-      "description": "Set up the sequential-thinking MCP server and auto-configure permissions for its tools on session start.",
-      "version": "0.1.0",
-      "author": {
-        "name": "Nathan Heaps"
-      },
-      "source": "./plugins/sequential-thinking",
-      "category": "utility",
-      "tags": ["utility", "skill"],
-      "keywords": [
-        "sequential-thinking",
-        "mcp",
-        "structured-thinking",
-        "problem-solving",
-        "chain-of-thought",
-        "reasoning"
-      ]
     },
     {
       "name": "session-report",
