@@ -8,9 +8,13 @@
 gh-tool:
   enabled: true
 
-  # Install gh to $CLAUDE_PROJECT_DIR/bin/.local on web sessions
-  # When true, installs gh binary to project-local bin/.local directory
-  # which is gitignored and added to PATH by session start hooks.
+  # Download and install the gh binary if not already on PATH.
+  # Set to false when gh is managed externally (e.g. via mise with gh in mise.toml).
+  # When false, the plugin still runs auto_auth_check if configured.
+  auto_install: true
+
+  # Install gh to $CLAUDE_PROJECT_DIR/bin/.local on web sessions.
+  # Only used when auto_install is true.
   install_to_project: true
 
   # Run installation in the background (non-blocking session start)

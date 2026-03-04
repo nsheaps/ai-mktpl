@@ -1,0 +1,16 @@
+# Project-level plugin configuration overrides.
+# These settings take precedence over plugin defaults.
+# See each plugin's <plugin-name>.settings.yaml for available options.
+
+gh-tool:
+  # gh is managed by mise (see mise.toml: gh = "latest").
+  # The plugin still runs gh auth status to verify authentication.
+  auto_install: false
+
+mise-tool:
+  # mise binary is installed by the workspace hook (00-setup-workspace.sh).
+  auto_install: false
+  # mise trust and mise install are run by the workspace hook after mise is
+  # available, so the plugin should not duplicate them.
+  auto_install_tools: false
+  auto_trust: false

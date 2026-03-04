@@ -79,25 +79,15 @@ EOF
     # TODO cleanup with 01-mise-activate.sh
     mise self-update || warn "mise self-update failed"
   fi
-  # Activate mise and install tools from mise.toml (if mise is available)
+  # Trust and install tools from mise.toml (if mise is available).
+  # Activation and CLAUDE_ENV_FILE persistence is handled by the mise-tool plugin.
+  # gh auth check is handled by the gh-tool plugin.
   if command -v mise &> /dev/null && [ -f "$PROJECT_DIR/mise.toml" ]; then
     cd "$PROJECT_DIR"
     pbe mise trust
     # GH_TOKEN provides GITHUB_TOKEN for mise to fetch tools from GitHub releases
     GITHUB_TOKEN="${GITHUB_TOKEN:-${GH_TOKEN:-}}" pbe mise install -y
   fi
-
-  # Activate mise and persist to CLAUDE_ENV_FILE so all subsequent Bash tool
-  # calls have access to mise-managed tools (gh, jq, just, bun, etc.)
-  MISE_BIN="$(command -v mise)"
-  eval "$("$MISE_BIN" activate bash)"
-  if [ -n "$CLAUDE_ENV_FILE" ]; then
-    echo "export PATH=\"\$PATH:$HOME/.local/bin\"" >> "$CLAUDE_ENV_FILE"
-    echo 'eval "$('"$MISE_BIN"' activate bash)"' >> "$CLAUDE_ENV_FILE"
-    success "Persisted mise activation to CLAUDE_ENV_FILE"
-  fi
-
-  pbe gh auth status
 
 fi
 
