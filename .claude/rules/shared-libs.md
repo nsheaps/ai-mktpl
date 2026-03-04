@@ -20,6 +20,7 @@ plugin_get_config_array "key"                  # one value per line
 ```
 
 Resolution order:
+
 1. `${CLAUDE_PROJECT_DIR}/.claude/plugins.settings.yaml` → `my-plugin.key`
 2. `~/.claude/plugins.settings.yaml` → `my-plugin.key`
 3. `${CLAUDE_PLUGIN_ROOT}/my-plugin.settings.yaml` → `my-plugin.key`
