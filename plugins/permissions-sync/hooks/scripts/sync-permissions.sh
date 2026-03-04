@@ -7,96 +7,30 @@
 # Sources can be:
 #   - Local file paths (with env var expansion)
 #   - GitHub repo references: "github:owner/repo:path"
-#
-# Config resolution order:
-#   1. Project-level: ${CLAUDE_PROJECT_DIR}/.claude/plugins.settings.yaml → permissions-sync
-#   2. User-level:    ~/.claude/plugins.settings.yaml → permissions-sync
-#   3. Plugin-level:  ${CLAUDE_PLUGIN_ROOT}/permissions-sync.settings.yaml → permissions-sync
 set -euo pipefail
 
-# --- Config reading ---
-
-read_config_key() {
-  local file="$1" key="$2"
-  if [ -f "$file" ]; then
-    if command -v yq &>/dev/null; then
-      local val
-      val="$(yq -r ".permissions-sync.${key}" "$file" 2>/dev/null || true)"
-      if [ -n "$val" ] && [ "$val" != "null" ]; then
-        echo "$val"
-        return 0
-      fi
-    fi
-  fi
-  return 1
-}
-
-read_config_array() {
-  local file="$1" key="$2"
-  if [ -f "$file" ] && command -v yq &>/dev/null; then
-    local val
-    val="$(yq -r ".permissions-sync.${key}[]?" "$file" 2>/dev/null || true)"
-    if [ -n "$val" ]; then
-      echo "$val"
-      return 0
-    fi
-  fi
-  return 1
-}
-
-get_config() {
-  local key="$1" default="$2"
-  local val
-
-  if val="$(read_config_key "${CLAUDE_PROJECT_DIR:-.}/.claude/plugins.settings.yaml" "$key")"; then
-    echo "$val"; return
-  fi
-  if val="$(read_config_key "$HOME/.claude/plugins.settings.yaml" "$key")"; then
-    echo "$val"; return
-  fi
-  if val="$(read_config_key "${CLAUDE_PLUGIN_ROOT}/permissions-sync.settings.yaml" "$key")"; then
-    echo "$val"; return
-  fi
-  echo "$default"
-}
-
-get_sources() {
-  local sources
-
-  if sources="$(read_config_array "${CLAUDE_PROJECT_DIR:-.}/.claude/plugins.settings.yaml" "sources")"; then
-    echo "$sources"; return
-  fi
-  if sources="$(read_config_array "$HOME/.claude/plugins.settings.yaml" "sources")"; then
-    echo "$sources"; return
-  fi
-  if sources="$(read_config_array "${CLAUDE_PLUGIN_ROOT}/permissions-sync.settings.yaml" "sources")"; then
-    echo "$sources"; return
-  fi
-}
+PLUGIN_NAME="permissions-sync"
+source "${CLAUDE_PLUGIN_ROOT}/lib/plugin-config-read.sh"
 
 # --- Check if enabled ---
 
-enabled="$(get_config "enabled" "true")"
-if [ "$enabled" = "false" ]; then
-  echo '{}'
-  exit 0
-fi
+plugin_is_enabled || { echo '{}'; exit 0; }
 
 # --- Check for jq ---
 
 if ! command -v jq &>/dev/null; then
-  echo "permissions-sync: jq required but not found" >&2
+  echo "${PLUGIN_NAME}: jq required but not found" >&2
   echo '{}'
   exit 0
 fi
 
 # --- Read config ---
 
-target="$(get_config "target" "project")"
-sync_allow="$(get_config "sync_allow" "true")"
-sync_deny="$(get_config "sync_deny" "true")"
-sync_ask="$(get_config "sync_ask" "true")"
-strategy="$(get_config "strategy" "union")"
+target="$(plugin_get_config "target" "project")"
+sync_allow="$(plugin_get_config "sync_allow" "true")"
+sync_deny="$(plugin_get_config "sync_deny" "true")"
+sync_ask="$(plugin_get_config "sync_ask" "true")"
+strategy="$(plugin_get_config "strategy" "union")"
 
 # Determine target file
 if [ "$target" = "user" ]; then
@@ -106,20 +40,12 @@ else
 fi
 
 # Source shared lib
-SHARED_LIB="${CLAUDE_PLUGIN_ROOT}/lib/safe-settings-write.sh"
-if [ -f "$SHARED_LIB" ]; then
-  source "$SHARED_LIB"
-else
-  echo "permissions-sync: shared lib not found at $SHARED_LIB" >&2
-  echo '{}'
-  exit 0
-fi
+source "${CLAUDE_PLUGIN_ROOT}/lib/safe-settings-write.sh"
 
 # --- Fetch permissions from a source ---
 
 expand_path() {
   local p="$1"
-  # Expand ~ and environment variables
   p="${p/#\~/$HOME}"
   eval "p=\"$p\"" 2>/dev/null || true
   echo "$p"
@@ -152,7 +78,7 @@ fetch_source_permissions() {
       return
     fi
 
-    echo "permissions-sync: Could not fetch from github:${repo}:${path}" >&2
+    echo "${PLUGIN_NAME}: Could not fetch from github:${repo}:${path}" >&2
     return
   fi
 
@@ -162,69 +88,47 @@ fetch_source_permissions() {
   if [ -f "$filepath" ]; then
     jq '.permissions // empty' "$filepath" 2>/dev/null || true
   else
-    echo "permissions-sync: Source file not found: $filepath" >&2
+    echo "${PLUGIN_NAME}: Source file not found: $filepath" >&2
   fi
 }
 
 # --- Collect sources ---
 
-sources="$(get_sources)"
+sources="$(plugin_get_config_array "sources")"
 if [ -z "$sources" ]; then
-  echo "permissions-sync: No sources configured" >&2
+  echo "${PLUGIN_NAME}: No sources configured" >&2
   echo '{}'
   exit 0
 fi
 
 # --- Merge permissions ---
 
-# Start with empty permissions object
 merged='{"allow":[],"deny":[],"ask":[]}'
 
 while IFS= read -r source; do
   [ -z "$source" ] && continue
-  echo "permissions-sync: Reading permissions from: $source" >&2
+  echo "${PLUGIN_NAME}: Reading permissions from: $source" >&2
 
   perms="$(fetch_source_permissions "$source")"
   if [ -z "$perms" ] || [ "$perms" = "null" ]; then
-    echo "permissions-sync: No permissions found in $source" >&2
+    echo "${PLUGIN_NAME}: No permissions found in $source" >&2
     continue
   fi
 
-  if [ "$strategy" = "union" ]; then
-    # Union: combine arrays, deduplicate
-    if [ "$sync_allow" = "true" ]; then
-      merged="$(echo "$merged" | jq --argjson src "$perms" '
-        .allow = (.allow + ($src.allow // []) | unique)
+  for cat in allow deny ask; do
+    eval "local sync_flag=\$sync_${cat}"
+    [ "$sync_flag" != "true" ] && continue
+
+    if [ "$strategy" = "union" ]; then
+      merged="$(echo "$merged" | jq --argjson src "$perms" --arg c "$cat" '
+        .[$c] = (.[$c] + ($src[$c] // []) | unique)
+      ' 2>/dev/null || echo "$merged")"
+    else
+      merged="$(echo "$merged" | jq --argjson src "$perms" --arg c "$cat" '
+        .[$c] = ($src[$c] // .[$c])
       ' 2>/dev/null || echo "$merged")"
     fi
-    if [ "$sync_deny" = "true" ]; then
-      merged="$(echo "$merged" | jq --argjson src "$perms" '
-        .deny = (.deny + ($src.deny // []) | unique)
-      ' 2>/dev/null || echo "$merged")"
-    fi
-    if [ "$sync_ask" = "true" ]; then
-      merged="$(echo "$merged" | jq --argjson src "$perms" '
-        .ask = (.ask + ($src.ask // []) | unique)
-      ' 2>/dev/null || echo "$merged")"
-    fi
-  else
-    # Replace: last source wins
-    if [ "$sync_allow" = "true" ]; then
-      merged="$(echo "$merged" | jq --argjson src "$perms" '
-        .allow = ($src.allow // .allow)
-      ' 2>/dev/null || echo "$merged")"
-    fi
-    if [ "$sync_deny" = "true" ]; then
-      merged="$(echo "$merged" | jq --argjson src "$perms" '
-        .deny = ($src.deny // .deny)
-      ' 2>/dev/null || echo "$merged")"
-    fi
-    if [ "$sync_ask" = "true" ]; then
-      merged="$(echo "$merged" | jq --argjson src "$perms" '
-        .ask = ($src.ask // .ask)
-      ' 2>/dev/null || echo "$merged")"
-    fi
-  fi
+  done
 done <<< "$sources"
 
 # --- Remove empty arrays ---
@@ -234,7 +138,7 @@ merged="$(echo "$merged" | jq 'with_entries(select(.value | length > 0))' 2>/dev
 # --- Check if there's anything to write ---
 
 if [ "$merged" = "{}" ] || [ -z "$merged" ]; then
-  echo "permissions-sync: No permissions to sync" >&2
+  echo "${PLUGIN_NAME}: No permissions to sync" >&2
   echo '{}'
   exit 0
 fi
@@ -252,6 +156,6 @@ safe_write_settings '.permissions = (
 count_allow="$(echo "$merged" | jq '.allow // [] | length' 2>/dev/null || echo "0")"
 count_deny="$(echo "$merged" | jq '.deny // [] | length' 2>/dev/null || echo "0")"
 count_ask="$(echo "$merged" | jq '.ask // [] | length' 2>/dev/null || echo "0")"
-echo "permissions-sync: Synced permissions to $SETTINGS_FILE (allow: $count_allow, deny: $count_deny, ask: $count_ask)" >&2
+echo "${PLUGIN_NAME}: Synced permissions to $SETTINGS_FILE (allow: $count_allow, deny: $count_deny, ask: $count_ask)" >&2
 
 echo '{}'
