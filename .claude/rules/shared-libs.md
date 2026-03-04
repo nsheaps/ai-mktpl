@@ -8,7 +8,7 @@ Reusable bash libraries live in `shared/lib/` and are symlinked into each plugin
 
 ### plugin-config-read.sh
 
-3-tier YAML config resolution for plugin settings.
+3-tier config resolution for plugin settings. Supports both YAML and JSON formats.
 
 ```bash
 PLUGIN_NAME="my-plugin"  # MUST be set before sourcing
@@ -19,11 +19,13 @@ plugin_get_config "key" "default"              # single value
 plugin_get_config_array "key"                  # one value per line
 ```
 
-Resolution order:
+Resolution order (at each tier, checks `.yaml` then `.yml` then `.json`):
 
-1. `${CLAUDE_PROJECT_DIR}/.claude/plugins.settings.yaml` → `my-plugin.key`
-2. `~/.claude/plugins.settings.yaml` → `my-plugin.key`
-3. `${CLAUDE_PLUGIN_ROOT}/my-plugin.settings.yaml` → `my-plugin.key`
+1. `${CLAUDE_PROJECT_DIR}/.claude/plugins.settings.{yaml,yml,json}` → `my-plugin.key`
+2. `~/.claude/plugins.settings.{yaml,yml,json}` → `my-plugin.key`
+3. `${CLAUDE_PLUGIN_ROOT}/my-plugin.settings.{yaml,yml,json}` → `my-plugin.key`
+
+YAML files are read via `yq` (with grep fallback), JSON files via `jq`.
 
 ### tool-install.sh
 
