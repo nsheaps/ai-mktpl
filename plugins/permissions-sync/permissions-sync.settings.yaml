@@ -1,0 +1,39 @@
+# permissions-sync plugin configuration
+#
+# Override per-project via ${CLAUDE_PROJECT_DIR}/.claude/plugins.settings.yaml
+# or per-user via ~/.claude/plugins.settings.yaml under the "permissions-sync" key.
+#
+# Set enabled: false to disable sync without uninstalling the plugin.
+
+permissions-sync:
+  enabled: true
+
+  # Where to write merged permissions:
+  #   "project" - writes to $CLAUDE_PROJECT_DIR/.claude/settings.local.json
+  #   "user"    - writes to ~/.claude/settings.local.json
+  # When installed at user level, "user" is recommended.
+  # When installed at project level, "project" is recommended.
+  target: 'project'
+
+  # Sources to merge permissions from (in order, later sources take priority).
+  # Each source can be:
+  #   - A local file path (supports $HOME, $CLAUDE_PROJECT_DIR, ~ expansion)
+  #   - A GitHub repo reference: "github:owner/repo:path" (uses gh API)
+  #
+  # Only the "permissions" key is extracted from each source.
+  sources:
+    - 'github:nsheaps/cept:.claude/settings.json'
+    # - "$CLAUDE_PROJECT_DIR/.claude/settings.json"
+    # - "$HOME/.claude/settings.json"
+    # - "github:myorg/shared-config:.claude/settings.json"
+
+  # Which permission categories to sync (allow, deny, ask)
+  # Set to false to skip a category
+  sync_allow: true
+  sync_deny: true
+  sync_ask: true
+
+  # Merge strategy:
+  #   "union"   - combine all permissions from all sources (deduplicated)
+  #   "replace" - last source wins entirely for each category
+  strategy: 'union'

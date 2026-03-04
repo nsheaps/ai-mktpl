@@ -76,6 +76,9 @@ ehthumbs_vista.db
 # Linux
 *~
 
+# Local tool binaries (installed by plugins for web sessions)
+bin/.local/
+
 # Backup files
 *.bak
 *.backup

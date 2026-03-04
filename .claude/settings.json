@@ -134,7 +134,11 @@
     "pr-review-toolkit@claude-plugins-official": true,
     "plugin-dev@claude-plugins-official": true,
     "data-serialization@nsheaps-claude-plugins": true,
-    "todo-sync@nsheaps-claude-plugins": true
+    "todo-sync@nsheaps-claude-plugins": true,
+    "mise-tool@nsheaps-claude-plugins": true,
+    "gh-tool@nsheaps-claude-plugins": true,
+    "permissions-sync@nsheaps-claude-plugins": true,
+    "sequential-thinking@nsheaps-claude-plugins": true
   },
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
@@ -145,8 +149,8 @@
     },
     "nsheaps-claude-plugins": {
       "source": {
-        "source": "directory",
-        "path": "/Users/nathan.heaps/src/nsheaps/ai-mktpl"
+        "source": "github",
+        "path": "nsheaps/ai-mktpl"
       }
     }
   }

@@ -1,0 +1,1 @@
+../../../shared/lib/add-permission.sh
