@@ -1,0 +1,21 @@
+{
+  "name": "prompt-engineer",
+  "version": "0.1.0",
+  "description": "Generate comprehensive autonomous agent prompts for Claude Code that turn a project idea into a fully-specified, self-executing development plan with quality gates, plugin infrastructure, stacked changes, and iterative quality loops.",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/prompt-engineer",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": [
+    "prompt-engineering",
+    "autonomous-agent",
+    "claude-code",
+    "project-bootstrap",
+    "init-prompt",
+    "specification",
+    "agent-prompt"
+  ]
+}
