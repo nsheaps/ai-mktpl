@@ -142,7 +142,7 @@ Read these BEFORE generating the prompt. They contain the patterns and templates
    Every change gets multi-layer review. No exceptions.
 
 4. **The Ralph Wiggum loop is mandatory.** At the end of every phase, the agent must run
-   `/ralph-loop` to iteratively re-examine all code until no issues remain.
+   `/ralph-wiggum` to iteratively re-examine all code until no issues remain.
 
 5. **Sub-agents run in parallel.** The generated prompt must instruct the agent to dispatch
    independent work concurrently — planning + test writing, implementation + docs, etc.

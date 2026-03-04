@@ -4,7 +4,7 @@
 
 When choosing plugins for the generated prompt, follow this strict priority order:
 
-1. **`nsheaps/ai-mktpl`** — First choice. Always check here first. 36 plugins available.
+1. **`nsheaps/ai-mktpl`** — First choice. Always check here first.
 2. **`anthropics/claude-plugins-official`** — Second choice. Anthropic's curated directory.
 3. **`anthropics/claude-code`** — Third choice. Bundled with Claude Code itself.
 4. **Custom (project-defined)** — Last resort. Only for project-specific logic no plugin covers.
@@ -93,7 +93,9 @@ Every generated `.claude/settings.json` must include all three marketplaces:
 
 ## Default enabledPlugins
 
-At minimum, every generated prompt must enable:
+These are the **Always-Include** tier plugins. Every generated prompt must enable them.
+The `claude-code-config.md` settings.json template includes these in `enabledPlugins`.
+For the **Strongly Recommended** tier, see below — add those for most projects.
 
 ```json
 {
@@ -105,7 +107,7 @@ At minimum, every generated prompt must enable:
     "fix-pr@nsheaps-ai-mktpl": true,
     "commit-skill@nsheaps-ai-mktpl": true,
     "commit-command@nsheaps-ai-mktpl": true,
-    "ralph-loop@anthropics-claude-code": true
+    "ralph-wiggum@anthropics-claude-code": true
   }
 }
 ```
@@ -162,7 +164,7 @@ claude plugin marketplace add anthropics/claude-plugins-official 2>/dev/null || 
 
 # Priority 3: anthropics/claude-code
 claude plugin marketplace add anthropics/claude-code 2>/dev/null || true
-claude plugin install ralph-loop@anthropics-claude-code 2>/dev/null || true
+claude plugin install ralph-wiggum@anthropics-claude-code 2>/dev/null || true
 [ADDITIONAL_BUNDLED_PLUGINS]
 
 echo "[plugins] Installation complete"
@@ -179,14 +181,14 @@ echo "[plugins] Installation complete"
 | Simplify code      | `code-simplifier`                                                | N/A                                |
 | Task parallelism   | `task-parallelization`                                           | N/A                                |
 | Spec writing       | `product-development-and-sdlc` (spec writing with template)      | `feature-dev`                      |
-| Quality loop       | `scm-utils`'s iterate-until-good skill                           | `ralph-loop`                       |
+| Quality loop       | `scm-utils`'s iterate-until-good skill                           | `ralph-wiggum`                       |
 | Sub-agents         | `tmux-subagent` + `claude-team`                                  | N/A                                |
 | Context management | `context-bloat-prevention`                                       | N/A                                |
 
-Note: `ralph-loop` from `anthropics/claude-code` is still included because it provides
+Note: `ralph-wiggum` from `anthropics/claude-code` is still included because it provides
 the self-referential stop-hook pattern that `iterate-until-good` doesn't replicate.
 The two are complementary: `iterate-until-good` for per-task review cycles,
-`ralph-loop` for end-of-phase comprehensive sweeps.
+`ralph-wiggum` for end-of-phase comprehensive sweeps.
 
 ## What NOT to Do
 

@@ -12,17 +12,16 @@ Every generated `.claude/prompts/init.md` MUST follow this structure. Sections m
 1.  Project Overview (required)
 2.  Architecture (required)
 3.  Monorepo / Package Structure (required)
-4.  Feature Specifications (required)
-5.  Detailed Feature Sections (required, one per major feature area)
-6.  End-to-End Test Plan (required)
-7.  UI/UX Guidelines (if applicable — skip for CLIs, libraries)
-8.  Data Model / Schema (if applicable)
-9.  API Design (if applicable)
-10. Security & Auth (if applicable)
-11. Deployment & CI/CD (required)
-12. Claude Code Integration (required — this is the agent infrastructure)
-13. Task Breakdown (required — the master task list)
-14. Final Notes (required)
+4.  Feature Specifications & Detailed Feature Sections (required)
+5.  End-to-End Test Plan (required)
+6.  UI/UX Guidelines (if applicable — skip for CLIs, libraries)
+7.  Data Model / Schema (if applicable)
+8.  API Design (if applicable)
+9.  Security & Auth (if applicable)
+10. Deployment & CI/CD (required)
+11. Claude Code Integration (required — this is the agent infrastructure)
+12. Task Breakdown (required — the master task list)
+13. Final Notes (required)
 ```
 
 ---
@@ -97,12 +96,12 @@ packages/
 Adapt this to the project. Not everything needs a monorepo — a single-package project
 is fine for CLIs or small tools. But the structure must be clear.
 
-### 5. Feature Sections
+### 4. Feature Specifications & Detailed Feature Sections
 
 For each major feature area, include:
 
 ```markdown
-## 5.X Feature: [Name]
+## 4.X Feature: [Name]
 
 ### What It Does
 
@@ -125,10 +124,10 @@ For each major feature area, include:
 [Specific, testable conditions that prove the feature works]
 ```
 
-### 6. E2E Test Plan
+### 5. E2E Test Plan
 
 ```markdown
-## 6. End-to-End Test Plan
+## 5. End-to-End Test Plan
 
 ### Test Strategy
 
@@ -146,10 +145,10 @@ For each major feature area, include:
 | ... | ...           | ...         | ...      |
 ```
 
-### 11. Deployment & CI/CD
+### 10. Deployment & CI/CD
 
 ```markdown
-## 11. Deployment
+## 10. Deployment
 
 ### CI Pipeline
 
@@ -166,58 +165,58 @@ For each major feature area, include:
 [PR previews, staging environments]
 ```
 
-### 12. Claude Code Integration (CRITICAL SECTION)
+### 11. Claude Code Integration (CRITICAL SECTION)
 
 This is the most important section. It tells the agent HOW to work. Include ALL of these:
 
 ```markdown
-## 12. Claude Code Integration
+## 11. Claude Code Integration
 
-### 12.1 Repository & Branch Rules
+### 11.1 Repository & Branch Rules
 
 [Repo URL, branch strategy]
 
-### 12.2 CLAUDE.md
+### 11.2 CLAUDE.md
 
 [Complete CLAUDE.md content — project summary, architecture rules,
 key commands, installed plugins & workflow, session resume protocol,
 testing requirements]
 
-### 12.3 Session Start Script
+### 11.3 Session Start Script
 
 [Complete session-start.sh — tool installation, dependency install,
 plugin verification, branch enforcement, validation]
 
-### 12.4 Claude Code Settings
+### 11.4 Claude Code Settings
 
 [Complete .claude/settings.json — permissions, env, marketplaces,
 enabled plugins]
 
-### 12.5 Custom Slash Commands
+### 11.5 Custom Slash Commands
 
 [/continue, /validate, /status, /phase-gate, plus project-specific]
 
-### 12.6 Sub-Agents
+### 11.6 Sub-Agents
 
 [test-writer, reviewer, doc-writer, plus project-specific agents]
 
-### 12.7 Environment Notes
+### 11.7 Environment Notes
 
 [Claude Code Web considerations, ephemeral container handling]
 
-### 12.8 Session 1 Output Checklist
+### 11.8 Session 1 Output Checklist
 
 [Everything that must exist after bootstrap]
 
-### 12.9 Multi-Session Workflow
+### 11.9 Multi-Session Workflow
 
 [How sessions chain together, WIP branches, handoff protocol]
 ```
 
-### 13. Task Breakdown
+### 12. Task Breakdown
 
 ```markdown
-## 13. Task Breakdown
+## 12. Task Breakdown
 
 ### Phase -1: Claude Code Bootstrap (Session 1 ONLY)
 
@@ -243,10 +242,10 @@ enabled plugins]
 [Each phase builds on the previous. Each task is small and reviewable.]
 ```
 
-### 14. Final Notes
+### 13. Final Notes
 
 ```markdown
-## 14. Final Notes
+## 13. Final Notes
 
 ### Startup Prompts
 
@@ -281,7 +280,7 @@ enabled plugins]
 4. **Phase -1 is always the same pattern.** Bootstrap Claude Code config, install plugins,
    create TASKS.md, push to git. The only things that change are project-specific details.
 
-5. **The Claude Code Integration section (12) is ~40% of the prompt by size.** This is
+5. **The Claude Code Integration section (11) is ~40% of the prompt by size.** This is
    intentional. The agent infrastructure IS the product — features are built on top of it.
 
 6. **Include non-goals.** Telling the agent what NOT to build is as important as what to build.

@@ -52,21 +52,21 @@ of plain Markdown files. No proprietary format, no cloud lock-in.
 
 [... modules: cli, core, storage, search, sync ...]
 
-## 5. Features
+## 4. Features
 
 [... note CRUD, tagging, search, git sync ...]
 
-## 6. E2E Test Plan
+## 5. E2E Test Plan
 
 [... test scenarios for each command ...]
 
-## 12. Claude Code Integration
+## 11. Claude Code Integration
 
-### 12.2 CLAUDE.md
+### 11.2 CLAUDE.md
 
 [Full CLAUDE.md with plugin workflow, review protocol, git-spice stack workflow]
 
-### 12.4 Settings
+### 11.4 Settings
 
 {
 "permissions": { "allow": ["bash(cargo *)", "bash(gs *)", "bash(git *)", ...] },
@@ -78,20 +78,20 @@ of plain Markdown files. No proprietary format, no cloud lock-in.
 "enabledPlugins": {
 "scm-utils@nsheaps-ai-mktpl": true,
 "git-spice@nsheaps-ai-mktpl": true,
-"ralph-loop@anthropics-claude-code": true
+"ralph-wiggum@anthropics-claude-code": true
 }
 }
 
-### 12.5 Commands
+### 11.5 Commands
 
 [/continue with stacked changes + review + Ralph Wiggum]
 [/validate, /status, /phase-gate]
 
-### 12.6 Sub-Agents
+### 11.6 Sub-Agents
 
 [test-writer (Rust-specific), reviewer (architecture-specific), doc-writer]
 
-## 13. Task Breakdown
+## 12. Task Breakdown
 
 Phase -1: Bootstrap
 
@@ -139,14 +139,14 @@ Phase 4: Polish
 - T4.3: `nv init` onboarding command
 - T4.4: cargo-dist / GitHub release workflow
 
-## 14. Final Notes
+## 13. Final Notes
 
 ### Startup Prompts
 
 **Session 1:**
 @.claude/prompts/init.md Read this entire spec. Execute Phase -1.
 Install plugins from nsheaps/ai-mktpl first (scm-utils, git-spice),
-then anthropics/claude-plugins-official, then anthropics/claude-code (ralph-loop).
+then anthropics/claude-plugins-official, then anthropics/claude-code (ralph-wiggum).
 All work via git-spice stacked branches. Commit after each task.
 When done, print what's complete and remind to type "continue".
 
@@ -154,7 +154,7 @@ When done, print what's complete and remind to type "continue".
 @.claude/prompts/init.md Re-read spec. gs repo sync && gs repo restack.
 Read TASKS.md. For each task: create stacked branch, implement with TDD,
 mandatory review (reviewer sub-agent + scm-utils + plugin review),
-gs branch submit --fill. At phase end: /ralph-loop then /phase-gate.
+gs branch submit --fill. At phase end: /ralph-wiggum then /phase-gate.
 Complete as many tasks as you can.
 ```
 

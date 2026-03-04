@@ -81,7 +81,7 @@ examines its own work, finding and fixing issues until nothing remains.
 
 ### How It Works
 
-The agent uses the `/ralph-loop` plugin (from `anthropics/claude-code`). This plugin:
+The agent uses the `/ralph-wiggum` plugin (from `anthropics/claude-code`). This plugin:
 
 1. Examines all code produced in the current scope (phase, feature, etc.)
 2. Identifies issues: missed edge cases, dead code, inconsistent patterns,
@@ -99,7 +99,7 @@ Include this in the `/continue` command:
 ```markdown
 ## Ralph Wiggum Quality Loop
 
-At the END of each phase (all tasks in a phase complete), use `/ralph-loop`:
+At the END of each phase (all tasks in a phase complete), use `/ralph-wiggum`:
 
 - The loop iteratively re-examines all code produced in the phase
 - It looks for: missed edge cases, dead code, inconsistent patterns, missing tests, doc gaps
@@ -110,7 +110,7 @@ At the END of each phase (all tasks in a phase complete), use `/ralph-loop`:
 Include this in the `/phase-gate` command:
 
 ```markdown
-**Prerequisite:** The Ralph Wiggum loop (`/ralph-loop`) MUST have been run on the
+**Prerequisite:** The Ralph Wiggum loop (`/ralph-wiggum`) MUST have been run on the
 phase's code and completed cleanly. If it hasn't, run it now before proceeding.
 ```
 
@@ -135,7 +135,7 @@ Before starting a new phase, the agent runs `/phase-gate` which verifies:
 ```markdown
 # /phase-gate — Phase Completion Verification
 
-**Prerequisite:** `/ralph-loop` must have completed cleanly.
+**Prerequisite:** `/ralph-wiggum` must have completed cleanly.
 
 1. Verify all tasks in current phase are `[x]` in TASKS.md
 2. Run full validation suite (`/validate`)

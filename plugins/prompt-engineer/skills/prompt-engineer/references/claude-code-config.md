@@ -73,7 +73,12 @@ Adapt these to each project's needs.
   "enabledPlugins": {
     "scm-utils@nsheaps-ai-mktpl": true,
     "git-spice@nsheaps-ai-mktpl": true,
-    "ralph-loop@anthropics-claude-code": true
+    "ralph-wiggum@anthropics-claude-code": true,
+    "review-changes@nsheaps-ai-mktpl": true,
+    "task-parallelization@nsheaps-ai-mktpl": true,
+    "fix-pr@nsheaps-ai-mktpl": true,
+    "commit-skill@nsheaps-ai-mktpl": true,
+    "commit-command@nsheaps-ai-mktpl": true
   }
 }
 ```
@@ -83,7 +88,8 @@ Adapt these to each project's needs.
 - Add project-specific `bash()` permissions (e.g., `bash(docker *)`, `bash(cargo *)`)
 - Add project-specific `env` vars
 - Add project-specific `enabledPlugins` (discovered during Phase -1)
-- The three marketplaces and two nsheaps plugins are ALWAYS present
+- The three marketplaces and "Always-Include" plugins (see `plugin-hierarchy.md`) are ALWAYS present
+- For most projects, also add "Strongly Recommended" plugins from `plugin-hierarchy.md`
 
 ---
 
@@ -145,7 +151,7 @@ if command -v claude &>/dev/null; then
 
   # Priority 3: anthropics/claude-code
   claude plugin marketplace add anthropics/claude-code 2>/dev/null || true
-  claude plugin install ralph-loop@anthropics-claude-code 2>/dev/null || true
+  claude plugin install ralph-wiggum@anthropics-claude-code 2>/dev/null || true
   [ADDITIONAL_BUNDLED_PLUGINS]
 
   echo "[plugins] Installation complete"
@@ -160,12 +166,17 @@ CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
 git fetch origin 2>/dev/null || true
 
 # If on a WIP branch, handle it
+# WARNING: This block performs destructive branch operations (rebase, delete, push).
+# Review and adapt for your project. Consider `git stash` before rebase if the
+# WIP branch may have uncommitted work. The ff-only merge will fail safely if
+# the rebase doesn't produce a clean fast-forward.
 if [[ "$CURRENT_BRANCH" == wip/* ]]; then
   echo "[branch] WIP branch detected: $CURRENT_BRANCH"
   echo "[branch] Rebasing onto main..."
+  git stash 2>/dev/null || true
   git checkout main
   git pull origin main --rebase
-  git rebase main "$CURRENT_BRANCH"
+  git rebase main "$CURRENT_BRANCH" || { echo "[branch] Rebase failed — resolve manually"; exit 1; }
   git checkout main
   git merge --ff-only "$CURRENT_BRANCH"
   git branch -d "$CURRENT_BRANCH"
@@ -261,7 +272,7 @@ Read TASKS.md and determine current phase and next incomplete task.
 
 ## Ralph Wiggum Quality Loop
 
-At END of each phase, run `/ralph-loop` for iterative quality sweep.
+At END of each phase, run `/ralph-wiggum` for iterative quality sweep.
 Only after clean completion, run `/phase-gate`.
 ```
 
@@ -293,7 +304,7 @@ Do NOT proceed with new feature work until all checks pass.
 ```markdown
 # /phase-gate — Phase Completion Verification
 
-Prerequisite: `/ralph-loop` must have completed cleanly.
+Prerequisite: `/ralph-wiggum` must have completed cleanly.
 
 1. All tasks in phase marked [x] in TASKS.md
 2. Ralph Wiggum loop verified clean
@@ -420,7 +431,7 @@ Plugins installed from three marketplaces (nsheaps/ai-mktpl priority):
 
 - `scm-utils` (nsheaps/ai-mktpl) — SCM patterns, code review
 - `git-spice` (nsheaps/ai-mktpl) — stacked branch management
-- `ralph-loop` (anthropics/claude-code) — iterative quality loops
+- `ralph-wiggum` (anthropics/claude-code) — iterative quality loops
   [Additional project-specific plugins]
 
 **Per-task workflow:**
@@ -434,7 +445,7 @@ Plugins installed from three marketplaces (nsheaps/ai-mktpl priority):
 **Per-phase workflow:**
 
 1. Complete all tasks
-2. `/ralph-loop` for quality sweep
+2. `/ralph-wiggum` for quality sweep
 3. `/phase-gate` for formal verification
 
 ## Task Tracking
