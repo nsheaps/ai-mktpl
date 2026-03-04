@@ -172,6 +172,7 @@ Task: reference to the task in TASKS.md
 ```
 
 Examples:
+
 ```
 feat(core): implement StorageBackend interface [T1.1]
 test(core): unit tests for BrowserFsBackend [T1.1]
@@ -194,6 +195,7 @@ This project uses git-spice for stacked changes. The scm-utils and git-spice plu
 from nsheaps/ai-mktpl are installed and provide detailed guidance.
 
 **Per-task workflow:**
+
 1. `gs branch create T<X>.<Y>-<short-description>`
 2. Make atomic commits with conventional commit messages
 3. Run reviews (sub-agent + plugin review)
@@ -203,6 +205,7 @@ from nsheaps/ai-mktpl are installed and provide detailed guidance.
 **Commit convention:** `<type>(<scope>): <description> [T<X>.<Y>]`
 
 **Key commands:**
+
 - `gs branch create <name>` — create a stacked branch
 - `gs upstack restack` — rebase dependent branches after changes
 - `gs stack submit` — submit all branches in stack as PRs
@@ -227,6 +230,7 @@ fi
 
 ```markdown
 ### Commit & Submit
+
 1. Commit with conventional message: `feat(<scope>): <description> [T<X>.<Y>]`
 2. Submit PR: `gs branch submit --fill`
 3. If independent next task: `gs branch create T<X>.<Y+1>-<name>`

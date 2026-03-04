@@ -21,68 +21,80 @@ Use this as a structural reference, not a copy-paste template.
 ## 1. Project Overview
 
 ### 1.1 What We're Building
+
 NoteVault is a CLI tool for managing personal notes stored as Markdown files.
 It provides tagging, full-text search, and git-based sync.
 
 ### 1.2 Core Value Proposition
+
 Local-first, git-native note management with the speed of Rust and the simplicity
 of plain Markdown files. No proprietary format, no cloud lock-in.
 
 ### 1.3 Non-Goals (v1)
+
 - No GUI / TUI (CLI only)
 - No real-time collaboration
 - No encryption at rest
 - No mobile app
 
 ### 1.4 Tech Stack
-| Layer | Technology | Why |
-|-------|-----------|-----|
-| Language | Rust | Performance, safety, single binary |
-| CLI framework | clap | Mature, derive-based API |
-| Search | tantivy | Rust-native full-text search |
-| Git | git2-rs | libgit2 bindings |
-| Test | cargo test + assert_cmd | Standard + CLI integration |
-| Build | cargo | Standard |
+
+| Layer         | Technology              | Why                                |
+| ------------- | ----------------------- | ---------------------------------- |
+| Language      | Rust                    | Performance, safety, single binary |
+| CLI framework | clap                    | Mature, derive-based API           |
+| Search        | tantivy                 | Rust-native full-text search       |
+| Git           | git2-rs                 | libgit2 bindings                   |
+| Test          | cargo test + assert_cmd | Standard + CLI integration         |
+| Build         | cargo                   | Standard                           |
 
 ## 2. Architecture
+
 [... modules: cli, core, storage, search, sync ...]
 
 ## 5. Features
+
 [... note CRUD, tagging, search, git sync ...]
 
 ## 6. E2E Test Plan
+
 [... test scenarios for each command ...]
 
 ## 12. Claude Code Integration
 
 ### 12.2 CLAUDE.md
+
 [Full CLAUDE.md with plugin workflow, review protocol, git-spice stack workflow]
 
 ### 12.4 Settings
+
 {
-  "permissions": { "allow": ["bash(cargo *)", "bash(gs *)", "bash(git *)", ...] },
-  "extraKnownMarketplaces": {
-    "nsheaps-ai-mktpl": { ... },
-    "claude-plugins-official": { ... },
-    "anthropics-claude-code": { ... }
-  },
-  "enabledPlugins": {
-    "scm-utils@nsheaps-ai-mktpl": true,
-    "git-spice@nsheaps-ai-mktpl": true,
-    "ralph-loop@anthropics-claude-code": true
-  }
+"permissions": { "allow": ["bash(cargo *)", "bash(gs *)", "bash(git *)", ...] },
+"extraKnownMarketplaces": {
+"nsheaps-ai-mktpl": { ... },
+"claude-plugins-official": { ... },
+"anthropics-claude-code": { ... }
+},
+"enabledPlugins": {
+"scm-utils@nsheaps-ai-mktpl": true,
+"git-spice@nsheaps-ai-mktpl": true,
+"ralph-loop@anthropics-claude-code": true
+}
 }
 
 ### 12.5 Commands
+
 [/continue with stacked changes + review + Ralph Wiggum]
 [/validate, /status, /phase-gate]
 
 ### 12.6 Sub-Agents
+
 [test-writer (Rust-specific), reviewer (architecture-specific), doc-writer]
 
 ## 13. Task Breakdown
 
 Phase -1: Bootstrap
+
 - T-1.1: settings.json + plugin config
 - T-1.2: session-start.sh
 - T-1.3: slash commands + sub-agents
@@ -93,30 +105,35 @@ Phase -1: Bootstrap
 - T-1.8: Bootstrap complete
 
 Phase 0: Foundation
+
 - T0.1: Cargo workspace, workspace members, shared types
 - T0.2: CI workflow (clippy + test)
 - T0.3: clap CLI skeleton (--help works)
 - T0.4: assert_cmd integration test harness
 
 Phase 1: Core Storage
+
 - T1.1: Note struct + Markdown file read/write
 - T1.2: Note metadata (YAML frontmatter)
 - T1.3: Tag system (in frontmatter)
 - T1.4: `nv new`, `nv edit`, `nv list`, `nv show`, `nv delete`
 
 Phase 2: Search
+
 - T2.1: tantivy index setup
 - T2.2: Index on write (auto-index when notes change)
 - T2.3: `nv search <query>` with ranked results
 - T2.4: Tag-based filtering: `nv list --tag=rust`
 
 Phase 3: Git Sync
+
 - T3.1: git2-rs integration (init, commit, push, pull)
 - T3.2: Auto-commit on note changes
 - T3.3: `nv sync` (pull + push)
 - T3.4: Conflict detection and resolution UX
 
 Phase 4: Polish
+
 - T4.1: Shell completions (bash, zsh, fish)
 - T4.2: Man page generation
 - T4.3: `nv init` onboarding command

@@ -79,6 +79,7 @@ Adapt these to each project's needs.
 ```
 
 **Customization points:**
+
 - Add project-specific `bash()` permissions (e.g., `bash(docker *)`, `bash(cargo *)`)
 - Add project-specific `env` vars
 - Add project-specific `enabledPlugins` (discovered during Phase -1)
@@ -199,6 +200,7 @@ echo "========================"
 ```
 
 **Customization points marked with [BRACKETS]:**
+
 - `[PROJECT_NAME]` — project name
 - `[PACKAGE_INSTALL_COMMAND]` — e.g., `bun install`, `npm ci`, `cargo build`
 - `[ADDITIONAL_*_PLUGINS]` — project-specific plugins
@@ -216,41 +218,49 @@ echo "========================"
 Read TASKS.md and determine current phase and next incomplete task.
 
 ## Pre-flight
+
 1. Ensure git-spice stack is synced: `gs repo sync && gs repo restack`
 2. Run validation. Fix failures before starting new work.
 
 ## Task Execution Loop (per task)
 
 ### 1. Plan (use sub-agents in parallel)
+
 - Dispatch sub-agents to analyze files and design approach (in parallel)
 - Write/update the BDD feature file for this task
 - Create stacked branch: `gs branch create T<X>.<Y>-<description>`
 
 ### 2. Implement (parallelize independent work)
+
 - Write failing tests first (Red)
 - Implement minimum code to pass (Green)
 - Refactor while keeping tests green
 - Make atomic commits for each logical sub-step
 
 ### 3. Review (MANDATORY — never skip)
+
 - Dispatch **reviewer** sub-agent on changed files
 - Run plugin-based review (prefer scm-utils from nsheaps/ai-mktpl, fallback to other review plugins)
 - Fix all 🔴 Critical issues. Re-review until APPROVE with zero criticals.
 
 ### 4. Validate
+
 - Full validation suite must pass
 - BDD scenarios for this feature must pass
 
 ### 5. Submit
+
 - `gs branch submit --fill` to create/update PR
 - If next task depends on this: create stacked branch on top
 - If next task is independent: create branch from appropriate base
 
 ### 6. Continue or Report
+
 - If context/time remaining: next task, repeat from step 1
 - If running low: print summary
 
 ## Ralph Wiggum Quality Loop
+
 At END of each phase, run `/ralph-loop` for iterative quality sweep.
 Only after clean completion, run `/phase-gate`.
 ```
@@ -308,15 +318,18 @@ Prerequisite: `/ralph-loop` must have completed cleanly.
 You write comprehensive tests for [PROJECT_NAME].
 
 ## Inputs
+
 - File path or module name to test
 - Source code of that module
 - Testing framework: [TEST_FRAMEWORK]
 
 ## Outputs
+
 - Complete test files: normal cases, edge cases, error cases
 - BDD step definitions where applicable
 
 ## Rules
+
 - Descriptive test names
 - Group in describe blocks
 - Use fixtures when available
@@ -332,9 +345,11 @@ You write comprehensive tests for [PROJECT_NAME].
 You review code for [PROJECT_NAME]-specific concerns that generic reviewers miss.
 
 ## Inputs
+
 - Changed files or diff
 
 ## Checklist
+
 1. Architecture compliance — abstraction boundaries respected?
 2. TypeScript/language quality — no escape hatches?
 3. Error handling — graceful, user-friendly?
@@ -346,6 +361,7 @@ You review code for [PROJECT_NAME]-specific concerns that generic reviewers miss
 9. Security — no secrets? Input sanitized?
 
 ## Output
+
 Per issue: File:line, Severity (🔴/🟡/🔵), Issue, Fix
 Summary: "X critical, Y warnings, Z suggestions. [APPROVE/REQUEST CHANGES]"
 ```
@@ -358,14 +374,17 @@ Summary: "X critical, Y warnings, Z suggestions. [APPROVE/REQUEST CHANGES]"
 You write clear documentation for [PROJECT_NAME].
 
 ## Inputs
+
 - Feature or module + source code
 
 ## Outputs
+
 - Markdown docs with examples, prerequisites, troubleshooting
 - API reference for developer-facing modules
 - User guides for end-user features
 
 ## Rules
+
 - Every guide: "What you'll learn" + "Prerequisites"
 - Short paragraphs (3-4 sentences)
 - Cross-link related docs
@@ -382,26 +401,30 @@ You write clear documentation for [PROJECT_NAME].
 [One paragraph project description]
 
 ## Architecture
+
 [Key architecture rules the agent must follow]
 
 ## Key Commands
-| Command | What it does |
-|---------|-------------|
-| [DEV_COMMAND] | Start dev server / watch mode |
-| [VALIDATE_COMMAND] | Full lint + typecheck + test |
-| [TEST_COMMAND] | Run all tests |
-| `gs log short` | View git-spice branch stack |
-| `gs repo sync` | Sync with remote, clean merged branches |
+
+| Command            | What it does                            |
+| ------------------ | --------------------------------------- |
+| [DEV_COMMAND]      | Start dev server / watch mode           |
+| [VALIDATE_COMMAND] | Full lint + typecheck + test            |
+| [TEST_COMMAND]     | Run all tests                           |
+| `gs log short`     | View git-spice branch stack             |
+| `gs repo sync`     | Sync with remote, clean merged branches |
 
 ## Installed Plugins & Workflow
 
 Plugins installed from three marketplaces (nsheaps/ai-mktpl priority):
+
 - `scm-utils` (nsheaps/ai-mktpl) — SCM patterns, code review
 - `git-spice` (nsheaps/ai-mktpl) — stacked branch management
 - `ralph-loop` (anthropics/claude-code) — iterative quality loops
-[Additional project-specific plugins]
+  [Additional project-specific plugins]
 
 **Per-task workflow:**
+
 1. Create stacked branch: `gs branch create T<X>.<Y>-<desc>`
 2. Implement with atomic commits
 3. Review: reviewer sub-agent → plugin review → validate
@@ -409,15 +432,18 @@ Plugins installed from three marketplaces (nsheaps/ai-mktpl priority):
 5. Submit: `gs branch submit --fill`
 
 **Per-phase workflow:**
+
 1. Complete all tasks
 2. `/ralph-loop` for quality sweep
 3. `/phase-gate` for formal verification
 
 ## Task Tracking
+
 Current progress in TASKS.md. Follow task execution protocol.
 Never skip reviews. Never skip Ralph Wiggum loop at phase end.
 
 ## Session Resume
+
 1. `gs repo sync && gs repo restack` (sync stack with remote)
 2. Read TASKS.md for current progress
 3. Validate repo health

@@ -43,6 +43,7 @@ implement → self-review → reviewer agent → plugin review → validate
 ```
 
 The loop continues until:
+
 - Reviewer agent returns APPROVE with zero 🔴 Critical issues
 - Plugin review passes
 - Full validation suite passes
@@ -54,7 +55,9 @@ to include in every generated prompt's `/continue` command:
 
 ```markdown
 ### Review (MANDATORY — never skip)
+
 After implementation, run ALL of these reviews:
+
 1. Self-review: re-read all changed files, check for obvious issues
 2. Dispatch the **reviewer** sub-agent on all changed files
 3. Run plugin-based review (prefer scm-utils, fallback to /pr-review-toolkit or /code-review)
@@ -95,7 +98,9 @@ Include this in the `/continue` command:
 
 ```markdown
 ## Ralph Wiggum Quality Loop
+
 At the END of each phase (all tasks in a phase complete), use `/ralph-loop`:
+
 - The loop iteratively re-examines all code produced in the phase
 - It looks for: missed edge cases, dead code, inconsistent patterns, missing tests, doc gaps
 - It fixes issues, re-validates, and repeats until clean
@@ -221,13 +226,13 @@ Run the complete validation suite:
 
 Produce a summary table:
 
-| Check | Status | Details |
-|---|---|---|
-| Lint | ✅/❌ | X warnings, Y errors |
-| Typecheck | ✅/❌ | X errors |
-| Unit Tests | ✅/❌ | X passed, Y failed, Z skipped |
-| Integration Tests | ✅/❌ | X passed, Y failed |
-| E2E Tests | ✅/❌ | X passed, Y failed |
+| Check             | Status | Details                       |
+| ----------------- | ------ | ----------------------------- |
+| Lint              | ✅/❌  | X warnings, Y errors          |
+| Typecheck         | ✅/❌  | X errors                      |
+| Unit Tests        | ✅/❌  | X passed, Y failed, Z skipped |
+| Integration Tests | ✅/❌  | X passed, Y failed            |
+| E2E Tests         | ✅/❌  | X passed, Y failed            |
 
 If any check fails, list specific failures and propose fixes.
 Do NOT proceed with new work until all checks pass.

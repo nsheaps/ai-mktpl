@@ -35,22 +35,26 @@ Every generated `.claude/prompts/init.md` MUST follow this structure. Sections m
 ## 1. Project Overview
 
 ### 1.1 What We're Building
+
 [1-3 paragraphs describing the project, its purpose, target audience]
 
 ### 1.2 Core Value Proposition
+
 [What makes this different? Why build it?]
 
 ### 1.3 Non-Goals
+
 [Explicitly list what this project does NOT do in v1]
 
 ### 1.4 Tech Stack
-| Layer | Technology | Why |
-|-------|-----------|-----|
-| Language | ... | ... |
-| Framework | ... | ... |
-| Build | ... | ... |
-| Test | ... | ... |
-| Deploy | ... | ... |
+
+| Layer     | Technology | Why |
+| --------- | ---------- | --- |
+| Language  | ...        | ... |
+| Framework | ...        | ... |
+| Build     | ...        | ... |
+| Test      | ...        | ... |
+| Deploy    | ...        | ... |
 ```
 
 ### 2. Architecture
@@ -59,16 +63,20 @@ Every generated `.claude/prompts/init.md` MUST follow this structure. Sections m
 ## 2. Architecture
 
 ### 2.1 High-Level Architecture
+
 [Diagram or description of major components and how they connect]
 
 ### 2.2 Package / Module Structure
+
 [How the code is organized — monorepo packages, directories, etc.]
 
 ### 2.3 Abstraction Layers
+
 [Key interfaces that decouple components. The agent must code to
 interfaces, not implementations.]
 
 ### 2.4 Platform Targets
+
 [Web, mobile, CLI, server, etc. How platform-specific code is isolated.]
 ```
 
@@ -78,12 +86,12 @@ interfaces, not implementations.]
 ## 3. Monorepo Structure
 
 packages/
-├── core/          # Business logic, no UI, no platform code
-├── ui/            # UI components (if applicable)
-├── web/           # Web entry point (if applicable)
-├── cli/           # CLI entry point (if applicable)
-├── server/        # Server entry point (if applicable)
-└── shared/        # Shared types, utilities
+├── core/ # Business logic, no UI, no platform code
+├── ui/ # UI components (if applicable)
+├── web/ # Web entry point (if applicable)
+├── cli/ # CLI entry point (if applicable)
+├── server/ # Server entry point (if applicable)
+└── shared/ # Shared types, utilities
 ```
 
 Adapt this to the project. Not everything needs a monorepo — a single-package project
@@ -97,18 +105,23 @@ For each major feature area, include:
 ## 5.X Feature: [Name]
 
 ### What It Does
+
 [User-facing description]
 
 ### Key Behaviors
+
 [Bullet list of specific behaviors the feature exhibits]
 
 ### Technical Approach
+
 [How it's implemented — algorithms, libraries, data flow]
 
 ### Edge Cases
+
 [What happens when things go wrong? Empty states? Conflicts?]
 
 ### Acceptance Criteria
+
 [Specific, testable conditions that prove the feature works]
 ```
 
@@ -118,17 +131,19 @@ For each major feature area, include:
 ## 6. End-to-End Test Plan
 
 ### Test Strategy
+
 - Unit tests: [framework] — every function/class
 - Integration tests: [framework] — cross-module interactions
 - E2E tests: [framework] — complete user flows
 - BDD: feature files in `features/` with step definitions
 
 ### Critical Test Scenarios
-| # | Scenario | Type | Priority |
-|---|----------|------|----------|
-| 1 | [Description] | E2E | P0 |
-| 2 | [Description] | Integration | P0 |
-| ... | ... | ... | ... |
+
+| #   | Scenario      | Type        | Priority |
+| --- | ------------- | ----------- | -------- |
+| 1   | [Description] | E2E         | P0       |
+| 2   | [Description] | Integration | P0       |
+| ... | ...           | ...         | ...      |
 ```
 
 ### 11. Deployment & CI/CD
@@ -137,14 +152,17 @@ For each major feature area, include:
 ## 11. Deployment
 
 ### CI Pipeline
+
 - Lint → Typecheck → Unit Tests → Integration Tests → E2E Tests
 - Runs on every push to main
 - Must pass before any merge
 
 ### Deployment Target
+
 [Where it deploys — Vercel, AWS, npm, Docker Hub, etc.]
 
 ### Preview Deployments (if applicable)
+
 [PR previews, staging environments]
 ```
 
@@ -156,34 +174,43 @@ This is the most important section. It tells the agent HOW to work. Include ALL 
 ## 12. Claude Code Integration
 
 ### 12.1 Repository & Branch Rules
+
 [Repo URL, branch strategy]
 
 ### 12.2 CLAUDE.md
+
 [Complete CLAUDE.md content — project summary, architecture rules,
 key commands, installed plugins & workflow, session resume protocol,
 testing requirements]
 
 ### 12.3 Session Start Script
+
 [Complete session-start.sh — tool installation, dependency install,
 plugin verification, branch enforcement, validation]
 
 ### 12.4 Claude Code Settings
+
 [Complete .claude/settings.json — permissions, env, marketplaces,
 enabled plugins]
 
 ### 12.5 Custom Slash Commands
+
 [/continue, /validate, /status, /phase-gate, plus project-specific]
 
 ### 12.6 Sub-Agents
+
 [test-writer, reviewer, doc-writer, plus project-specific agents]
 
 ### 12.7 Environment Notes
+
 [Claude Code Web considerations, ephemeral container handling]
 
 ### 12.8 Session 1 Output Checklist
+
 [Everything that must exist after bootstrap]
 
 ### 12.9 Multi-Session Workflow
+
 [How sessions chain together, WIP branches, handoff protocol]
 ```
 
@@ -193,6 +220,7 @@ enabled plugins]
 ## 13. Task Breakdown
 
 ### Phase -1: Claude Code Bootstrap (Session 1 ONLY)
+
 - T-1.1: Create .claude/settings.json with permissions + plugin config
 - T-1.2: Create session-start.sh
 - T-1.3: Create slash commands
@@ -207,9 +235,11 @@ enabled plugins]
 - T-1.12: Print bootstrap complete
 
 ### Phase 0: Foundation
+
 [Infrastructure tasks — build system, CI, type stubs, test framework]
 
 ### Phase 1-N: Feature Phases
+
 [Each phase builds on the previous. Each task is small and reviewable.]
 ```
 
@@ -227,6 +257,7 @@ enabled plugins]
 [Copy-paste prompt that continues from TASKS.md with full quality workflow]
 
 ### Key Reminders
+
 - All work on main (or stacked branches via git-spice if using PR workflow)
 - Every task gets multi-layer review
 - Ralph Wiggum loop at every phase boundary

@@ -106,6 +106,7 @@ produces a working project with minimal human intervention.
 ### Phase 5: Deliver
 
 Output:
+
 1. The complete `.claude/prompts/init.md` file
 2. Session 1 bootstrap prompt (copy-paste ready)
 3. Session 2+ continuation prompt (copy-paste ready)
@@ -117,14 +118,14 @@ Output:
 
 Read these BEFORE generating the prompt. They contain the patterns and templates.
 
-| File | When to Read | What It Contains |
-|------|-------------|-----------------|
-| `references/prompt-structure.md` | Phase 2-3 | Full template for the generated prompt with all sections |
-| `references/plugin-hierarchy.md` | Phase 2 | Plugin selection rules, known plugins per marketplace |
-| `references/quality-gates.md` | Phase 2-3 | Review workflow, Ralph Wiggum loop, sub-agent patterns |
-| `references/claude-code-config.md` | Phase 3 | Settings.json, commands, agents, session-start templates |
-| `references/scm-strategy.md` | Phase 2-3 | Git-spice stacked changes workflow and SCM patterns |
-| `references/example-output.md` | Phase 3 (optional) | Condensed example of a generated prompt for reference |
+| File                               | When to Read       | What It Contains                                         |
+| ---------------------------------- | ------------------ | -------------------------------------------------------- |
+| `references/prompt-structure.md`   | Phase 2-3          | Full template for the generated prompt with all sections |
+| `references/plugin-hierarchy.md`   | Phase 2            | Plugin selection rules, known plugins per marketplace    |
+| `references/quality-gates.md`      | Phase 2-3          | Review workflow, Ralph Wiggum loop, sub-agent patterns   |
+| `references/claude-code-config.md` | Phase 3            | Settings.json, commands, agents, session-start templates |
+| `references/scm-strategy.md`       | Phase 2-3          | Git-spice stacked changes workflow and SCM patterns      |
+| `references/example-output.md`     | Phase 3 (optional) | Condensed example of a generated prompt for reference    |
 
 ---
 
