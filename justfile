@@ -13,7 +13,6 @@
 
 set unstable
 
-claude := which("claude") || 'mise exec npm:@anthropic-ai/claude-code -- claude'
 # By default, just runs from the directory where the justfile is defined.
 # https://just.systems/man/en/working-directory.html
 root_dir := justfile_directory()
@@ -55,45 +54,67 @@ lint-check FILE='.':
     command -v prettier >/dev/null 2>&1 || { just setup ; }
     prettier --check "{{FILE}}"
 
-validate-marketplace:
-    @just validate-plugin .claude-plugin/marketplace.json
-
+# Validate a plugin.json or marketplace.json file using jq
 validate-plugin PLUGIN_PATH:
     #!/usr/bin/env bash
-    OUTPUT="$({{claude}} plugin validate {{PLUGIN_PATH}})"
-    if [ $? -ne 0 ]; then
-        echo "$OUTPUT"
+    FILE="{{PLUGIN_PATH}}"
+    if [ ! -f "$FILE" ]; then
+        echo "❌ $FILE (not found)"
         exit 1
-    else
-        echo "✅ {{PLUGIN_PATH}}"
     fi
+    # Check valid JSON
+    if ! jq empty "$FILE" 2>/dev/null; then
+        echo "❌ $FILE (invalid JSON)"
+        exit 1
+    fi
+    ERRORS=""
+    if [[ "$FILE" == *"marketplace.json" ]]; then
+        # Marketplace validation: require name and plugins array
+        for field in name plugins; do
+            val=$(jq -r ".$field // empty" "$FILE")
+            if [ -z "$val" ]; then
+                ERRORS="${ERRORS}\n  - missing required field: $field"
+            fi
+        done
+        if ! jq -e '.plugins | type == "array"' "$FILE" >/dev/null 2>&1; then
+            ERRORS="${ERRORS}\n  - 'plugins' must be an array"
+        fi
+    else
+        # Plugin validation: require name, version, description
+        for field in name version description; do
+            val=$(jq -r ".$field // empty" "$FILE")
+            if [ -z "$val" ]; then
+                ERRORS="${ERRORS}\n  - missing required field: $field"
+            fi
+        done
+        # Validate version is semver-like
+        ver=$(jq -r '.version // ""' "$FILE")
+        if [ -n "$ver" ] && ! echo "$ver" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+'; then
+            ERRORS="${ERRORS}\n  - version '$ver' is not valid semver"
+        fi
+    fi
+    if [ -n "$ERRORS" ]; then
+        echo "❌ $FILE"
+        printf "$ERRORS\n"
+        exit 1
+    fi
+    echo "✅ $FILE"
 
 # Validate plugin structure
 validate:
     #!/usr/bin/env bash
-    set -e
-    just validate-marketplace
-
     VALID=true
-    FAILED_PLUGINS=( )
-    for plugin_dir in plugins/*/.claude-plugin/plugin.json; do
-        just validate-plugin "$plugin_dir" || { VALID=false; FAILED_PLUGINS+=($plugin_dir) ; }
+    FAILED=( )
+    # Validate marketplace
+    just validate-plugin .claude-plugin/marketplace.json || { VALID=false; FAILED+=(".claude-plugin/marketplace.json"); }
+    # Validate each plugin
+    for pj in plugins/*/.claude-plugin/plugin.json; do
+        just validate-plugin "$pj" || { VALID=false; FAILED+=("$pj"); }
     done
-
-    # if the path to the claude binary is in */.local/share/mise/installs/* then mise prune in case it was installed at runtime
-    if [[ "$(command -v claude)" == *".local/share/mise/installs/"* ]]; then
-        echo "Pruning mise installs..."
-        mise prune -y
-    fi
-
     if [ "$VALID" = true ]; then
         echo "All plugins validated successfully!"
     else
-        echo "Validation failed!"
-        echo "Failed plugins:"
-        for p in "${FAILED_PLUGINS[@]}"; do
-            echo " - $p"
-        done
+        echo "Validation failed for: ${FAILED[*]}"
         exit 1
     fi
 

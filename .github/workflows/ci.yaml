@@ -30,16 +30,25 @@ jobs:
         shell: bash
         run: |
           # Check if any plugin.json or marketplace.json files were changed
+          # but allow brand-new files (new plugins) - only block modifications to existing files
           CHANGED_VERSION_FILES=$(git diff --name-only "origin/${{ github.base_ref }}..HEAD" -- \
             'plugins/*/.claude-plugin/plugin.json' \
             '.claude-plugin/marketplace.json' \
           )
 
-          if [ -n "$CHANGED_VERSION_FILES" ]; then
+          MODIFIED_FILES=""
+          for f in $CHANGED_VERSION_FILES; do
+            # If the file exists on the base branch, it's a modification (not allowed)
+            if git show "origin/${{ github.base_ref }}:$f" >/dev/null 2>&1; then
+              MODIFIED_FILES="${MODIFIED_FILES}${f}\n"
+            fi
+          done
+
+          if [ -n "$MODIFIED_FILES" ]; then
             echo "❌ ERROR: Version files should not be manually changed in PRs!"
             echo ""
             echo "The following version files were modified:"
-            echo "$CHANGED_VERSION_FILES"
+            printf "$MODIFIED_FILES"
             echo ""
             echo "Version bumps happen automatically when PRs are merged to main."
             echo "Please revert these changes:"
