@@ -83,11 +83,19 @@ EOF
   if command -v mise &> /dev/null && [ -f "$PROJECT_DIR/mise.toml" ]; then
     cd "$PROJECT_DIR"
     pbe mise trust
-    pbe mise install -y
+    # GH_TOKEN provides GITHUB_TOKEN for mise to fetch tools from GitHub releases
+    GITHUB_TOKEN="${GITHUB_TOKEN:-${GH_TOKEN:-}}" pbe mise install -y
   fi
-  
-  eval "$(mise activate bash)"
 
+  # Activate mise and persist to CLAUDE_ENV_FILE so all subsequent Bash tool
+  # calls have access to mise-managed tools (gh, jq, just, bun, etc.)
+  MISE_BIN="$(command -v mise)"
+  eval "$("$MISE_BIN" activate bash)"
+  if [ -n "$CLAUDE_ENV_FILE" ]; then
+    echo "export PATH=\"\$PATH:$HOME/.local/bin\"" >> "$CLAUDE_ENV_FILE"
+    echo 'eval "$('"$MISE_BIN"' activate bash)"' >> "$CLAUDE_ENV_FILE"
+    success "Persisted mise activation to CLAUDE_ENV_FILE"
+  fi
 
   pbe gh auth status
 
