@@ -149,8 +149,8 @@
     },
     "nsheaps-claude-plugins": {
       "source": {
-        "source": "directory",
-        "path": "/Users/nathan.heaps/src/nsheaps/ai-mktpl"
+        "source": "github",
+        "path": "nsheaps/ai-mktpl"
       }
     }
   }
