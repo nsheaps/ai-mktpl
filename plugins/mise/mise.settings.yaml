@@ -1,11 +1,11 @@
-# mise-tool plugin configuration
+# mise plugin configuration
 #
 # Override per-project via ${CLAUDE_PROJECT_DIR}/.claude/plugins.settings.yaml
-# or per-user via ~/.claude/plugins.settings.yaml under the "mise-tool" key.
+# or per-user via ~/.claude/plugins.settings.yaml under the "mise" key.
 #
 # Set enabled: false to disable auto-install without uninstalling the plugin.
 
-mise-tool:
+mise:
   enabled: true
 
   # Download and install the mise binary if not already on PATH.

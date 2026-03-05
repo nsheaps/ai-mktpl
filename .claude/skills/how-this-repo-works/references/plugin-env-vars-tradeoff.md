@@ -16,7 +16,7 @@ A SessionStart hook uses `jq` (via `safe-settings-write.sh`) to write env vars i
 
 ### Approach B: Writing to `CLAUDE_ENV_FILE`
 
-Used by: `mise-tool`, `gh-tool`
+Used by: `mise`, `gh-tool`
 
 A SessionStart hook appends `export` statements to the file at `$CLAUDE_ENV_FILE`. Claude Code sources this file before each Bash tool invocation.
 
@@ -99,7 +99,7 @@ The cleanup and conflict concerns make the settings file approach the higher-ris
 | Plugin               | Mechanism              | Why                                                      |
 | -------------------- | ---------------------- | -------------------------------------------------------- |
 | `datadog-otel-setup` | `settings.local.json`  | OTEL config must reach Claude's own telemetry process    |
-| `mise-tool`          | `CLAUDE_ENV_FILE`      | PATH manipulation and `mise activate` shell expressions  |
+| `mise`               | `CLAUDE_ENV_FILE`      | PATH manipulation and `mise activate` shell expressions  |
 | `gh-tool`            | `CLAUDE_ENV_FILE`      | PATH manipulation for project-local binary install       |
 
 ## Related
