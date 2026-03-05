@@ -55,7 +55,7 @@ Instead of auto-install, this repo manages op and op-exec via mise:
 ```toml
 # mise.toml
 [tools]
-"aqua:1password/cli" = "latest"
+"vfox:mise-plugins/vfox-1password" = "latest"
 # op-exec once available via GitHub releases:
 # "ubi:nsheaps/op-exec" = "latest"
 ```
