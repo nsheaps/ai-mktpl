@@ -1,0 +1,21 @@
+{
+  "name": "daily-report",
+  "version": "0.1.0",
+  "description": "Skill for generating daily organization-wide reports covering commits, PRs, branches, and issue changes across all repositories in a GitHub org. Designed for scheduled CI workflows and on-demand reporting.",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/daily-report",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": [
+    "daily-report",
+    "org-report",
+    "activity-summary",
+    "commits",
+    "pull-requests",
+    "issues",
+    "github-org"
+  ]
+}
