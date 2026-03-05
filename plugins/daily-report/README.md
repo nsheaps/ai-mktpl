@@ -33,7 +33,7 @@ Generates a full daily activity report across all repositories in a GitHub organ
 
 The `daily-report.yaml` workflow runs this skill:
 
-- **Schedule**: Daily at 4:00 AM ET (9:00 AM UTC)
+- **Schedule**: Daily at 4:00 AM EST / 5:00 AM EDT (9:00 AM UTC)
 - **Manual dispatch**: With configurable time scope and subject scope inputs
 - **Output**: GitHub issue titled `YYYY-MM-DD Daily Report` with label `daily-report`
 

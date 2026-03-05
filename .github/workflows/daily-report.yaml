@@ -1,13 +1,13 @@
 name: Daily Report
 
 # Generates a daily activity report for the nsheaps GitHub org
-# Runs at 4:00 AM ET (9:00 AM UTC) and covers the previous calendar day (Eastern Time)
+# Runs at 4:00 AM EST / 5:00 AM EDT (9:00 AM UTC) and covers the previous calendar day (Eastern Time)
 # Can also be triggered manually with custom time and subject scopes
 
 on:
   schedule:
-    # 4:00 AM ET = 9:00 AM UTC (during EDT)
-    # During EST this runs at 4:00 AM EST = 9:00 AM UTC
+    # 4:00 AM EST / 5:00 AM EDT = 9:00 AM UTC
+    # During EST (winter) this runs at 4:00 AM, during EDT (summer) at 5:00 AM
     - cron: '0 9 * * *'
   workflow_dispatch:
     inputs:
@@ -32,7 +32,7 @@ jobs:
   generate-report:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
       pull-requests: read
       issues: write
       id-token: write
@@ -186,6 +186,20 @@ jobs:
           additional_permissions: |
             actions: read
           settings: ${{ env.INPUT_SETTINGS_JSON }}
+          # Bash + GH_TOKEN is intentionally allowed for gh CLI data gathering
+          # per the daily-report SKILL.md instructions
           claude_args: >-
             --allowedTools
-            mcp__github__*
+            mcp__github__create_issue
+            mcp__github__add_issue_comment
+            mcp__github__get_issue
+            mcp__github__list_issues
+            mcp__github__search_issues
+            mcp__github__list_commits
+            mcp__github__get_commit
+            mcp__github__list_pull_requests
+            mcp__github__get_pull_request
+            mcp__github__list_branches
+            mcp__github__search_repositories
+            mcp__github__get_file_contents
+            mcp__github__get_me
