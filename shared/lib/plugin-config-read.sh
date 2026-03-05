@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
-# plugin-config-read.sh — Shared library for reading plugin settings from YAML
+# plugin-config-read.sh — Shared library for reading plugin settings from YAML or JSON
 #
 # Provides a standard 3-tier config resolution pattern for plugin hooks:
-#   1. Project-level: ${CLAUDE_PROJECT_DIR}/.claude/plugins.settings.yaml
-#   2. User-level:    ~/.claude/plugins.settings.yaml
-#   3. Plugin-level:  ${CLAUDE_PLUGIN_ROOT}/<plugin-name>.settings.yaml
+#   1. Project-level: ${CLAUDE_PROJECT_DIR}/.claude/plugins.settings.{yaml,json}
+#   2. User-level:    ~/.claude/plugins.settings.{yaml,json}
+#   3. Plugin-level:  ${CLAUDE_PLUGIN_ROOT}/<plugin-name>.settings.{yaml,json}
+#
+# At each tier, YAML is checked first, then JSON. First match wins.
 #
 # Usage:
 #   PLUGIN_NAME="my-plugin"  # Required: set before sourcing
@@ -29,49 +31,110 @@ if [ -z "${PLUGIN_NAME:-}" ]; then
   return 1 2>/dev/null || exit 1
 fi
 
-# Read a single key from a YAML settings file under the plugin's namespace.
+# Detect file format and read a single key from a settings file.
+# Supports both YAML (via yq) and JSON (via jq).
 # Args: $1=file_path $2=key_name
 # Returns: value via stdout, exit 0 on success, exit 1 if not found
 _plugin_read_config_key() {
   local file="$1" key="$2"
-  if [ -f "$file" ]; then
-    if command -v yq &>/dev/null; then
-      local val
-      val="$(yq -r ".${PLUGIN_NAME}.${key}" "$file" 2>/dev/null || true)"
-      if [ -n "$val" ] && [ "$val" != "null" ]; then
-        echo "$val"
-        return 0
+  if [ ! -f "$file" ]; then
+    return 1
+  fi
+
+  local val=""
+  case "$file" in
+    *.json)
+      if command -v jq &>/dev/null; then
+        val="$(jq -r ".[\"${PLUGIN_NAME}\"].${key} // empty" "$file" 2>/dev/null || true)"
       fi
-    else
-      # Fallback: grep for simple key: value (single-level only)
-      local val
-      val="$(grep -A1 "${PLUGIN_NAME}:" "$file" 2>/dev/null \
-        | grep -E "^\s+${key}:" \
-        | sed "s/.*${key}:\s*//" \
-        | sed 's/^["'\'']//' \
-        | sed 's/["'\'']$//' \
-        | head -1 || true)"
-      if [ -n "$val" ]; then
-        echo "$val"
-        return 0
+      ;;
+    *.yaml|*.yml)
+      if command -v yq &>/dev/null; then
+        val="$(yq -r ".[\"${PLUGIN_NAME}\"].${key}" "$file" 2>/dev/null || true)"
+        [ "$val" = "null" ] && val=""
+      else
+        # Fallback: grep for simple key: value (single-level only)
+        val="$(grep -A1 "${PLUGIN_NAME}:" "$file" 2>/dev/null \
+          | grep -E "^\s+${key}:" \
+          | sed "s/.*${key}:\s*//" \
+          | sed 's/^["'\'']//' \
+          | sed 's/["'\'']$//' \
+          | head -1 || true)"
       fi
-    fi
+      ;;
+  esac
+
+  if [ -n "$val" ]; then
+    echo "$val"
+    return 0
   fi
   return 1
 }
 
-# Read an array key from a YAML settings file under the plugin's namespace.
+# Detect file format and read an array key from a settings file.
+# Supports both YAML (via yq) and JSON (via jq).
 # Args: $1=file_path $2=key_name
 # Returns: one value per line via stdout, exit 0 on success, exit 1 if not found
 _plugin_read_config_array() {
   local file="$1" key="$2"
-  if [ -f "$file" ] && command -v yq &>/dev/null; then
-    local val
-    val="$(yq -r ".${PLUGIN_NAME}.${key}[]?" "$file" 2>/dev/null || true)"
-    if [ -n "$val" ]; then
-      echo "$val"
-      return 0
-    fi
+  if [ ! -f "$file" ]; then
+    return 1
+  fi
+
+  local val=""
+  case "$file" in
+    *.json)
+      if command -v jq &>/dev/null; then
+        val="$(jq -r ".[\"${PLUGIN_NAME}\"].${key}[]? // empty" "$file" 2>/dev/null || true)"
+      fi
+      ;;
+    *.yaml|*.yml)
+      if command -v yq &>/dev/null; then
+        val="$(yq -r ".[\"${PLUGIN_NAME}\"].${key}[]?" "$file" 2>/dev/null || true)"
+        [ "$val" = "null" ] && val=""
+      fi
+      ;;
+  esac
+
+  if [ -n "$val" ]; then
+    echo "$val"
+    return 0
+  fi
+  return 1
+}
+
+# Try reading a config key from a base path, checking YAML then JSON extensions.
+# Args: $1=base_path (without extension) $2=key_name
+# Returns: value via stdout, exit 0 on success, exit 1 if not found
+_plugin_try_config_key() {
+  local base="$1" key="$2"
+  local val
+  if val="$(_plugin_read_config_key "${base}.yaml" "$key")"; then
+    echo "$val"; return 0
+  fi
+  if val="$(_plugin_read_config_key "${base}.yml" "$key")"; then
+    echo "$val"; return 0
+  fi
+  if val="$(_plugin_read_config_key "${base}.json" "$key")"; then
+    echo "$val"; return 0
+  fi
+  return 1
+}
+
+# Try reading a config array from a base path, checking YAML then JSON extensions.
+# Args: $1=base_path (without extension) $2=key_name
+# Returns: one value per line via stdout, exit 0 on success, exit 1 if not found
+_plugin_try_config_array() {
+  local base="$1" key="$2"
+  local val
+  if val="$(_plugin_read_config_array "${base}.yaml" "$key")"; then
+    echo "$val"; return 0
+  fi
+  if val="$(_plugin_read_config_array "${base}.yml" "$key")"; then
+    echo "$val"; return 0
+  fi
+  if val="$(_plugin_read_config_array "${base}.json" "$key")"; then
+    echo "$val"; return 0
   fi
   return 1
 }
@@ -84,15 +147,15 @@ plugin_get_config() {
   local val
 
   # 1. Project-level
-  if val="$(_plugin_read_config_key "${CLAUDE_PROJECT_DIR:-.}/.claude/plugins.settings.yaml" "$key")"; then
+  if val="$(_plugin_try_config_key "${CLAUDE_PROJECT_DIR:-.}/.claude/plugins.settings" "$key")"; then
     echo "$val"; return
   fi
   # 2. User-level
-  if val="$(_plugin_read_config_key "$HOME/.claude/plugins.settings.yaml" "$key")"; then
+  if val="$(_plugin_try_config_key "$HOME/.claude/plugins.settings" "$key")"; then
     echo "$val"; return
   fi
   # 3. Plugin-level defaults
-  if val="$(_plugin_read_config_key "${CLAUDE_PLUGIN_ROOT:-.}/${PLUGIN_NAME}.settings.yaml" "$key")"; then
+  if val="$(_plugin_try_config_key "${CLAUDE_PLUGIN_ROOT:-.}/${PLUGIN_NAME}.settings" "$key")"; then
     echo "$val"; return
   fi
   echo "$default"
@@ -105,13 +168,13 @@ plugin_get_config_array() {
   local key="$1"
   local val
 
-  if val="$(_plugin_read_config_array "${CLAUDE_PROJECT_DIR:-.}/.claude/plugins.settings.yaml" "$key")"; then
+  if val="$(_plugin_try_config_array "${CLAUDE_PROJECT_DIR:-.}/.claude/plugins.settings" "$key")"; then
     echo "$val"; return
   fi
-  if val="$(_plugin_read_config_array "$HOME/.claude/plugins.settings.yaml" "$key")"; then
+  if val="$(_plugin_try_config_array "$HOME/.claude/plugins.settings" "$key")"; then
     echo "$val"; return
   fi
-  if val="$(_plugin_read_config_array "${CLAUDE_PLUGIN_ROOT:-.}/${PLUGIN_NAME}.settings.yaml" "$key")"; then
+  if val="$(_plugin_try_config_array "${CLAUDE_PLUGIN_ROOT:-.}/${PLUGIN_NAME}.settings" "$key")"; then
     echo "$val"; return
   fi
 }

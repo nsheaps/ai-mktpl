@@ -116,7 +116,7 @@ while IFS= read -r source; do
   fi
 
   for cat in allow deny ask; do
-    eval "local sync_flag=\$sync_${cat}"
+    eval "sync_flag=\$sync_${cat}"
     [ "$sync_flag" != "true" ] && continue
 
     if [ "$strategy" = "union" ]; then

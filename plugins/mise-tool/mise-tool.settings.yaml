@@ -8,9 +8,14 @@
 mise-tool:
   enabled: true
 
-  # Install mise to $CLAUDE_PROJECT_DIR/bin/.local on web sessions
-  # When true, installs mise binary to project-local bin/.local directory
-  # which is gitignored and added to PATH by session start hooks.
+  # Download and install the mise binary if not already on PATH.
+  # Set to false when mise is managed externally (e.g. by a workspace hook or
+  # container image). The plugin will still activate mise and write to
+  # CLAUDE_ENV_FILE when mise is found on PATH.
+  auto_install: true
+
+  # Install mise to $CLAUDE_PROJECT_DIR/bin/.local on web sessions.
+  # Only used when auto_install is true.
   install_to_project: true
 
   # Run installation in the background (non-blocking session start)
