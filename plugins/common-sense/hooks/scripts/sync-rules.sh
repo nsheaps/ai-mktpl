@@ -58,16 +58,8 @@ setup_symlink() {
 
 # --- Main ---
 
-# Always set up in project-level .claude/rules/
+# Always set up in both project-level and user-level .claude/rules/
 setup_symlink "$PROJECT_RULES_DIR"
-
-# Also set up in user-level if the plugin is installed at user scope
-# (detected by checking if CLAUDE_PLUGIN_ROOT is under ~/.claude/)
-if [[ "${CLAUDE_PLUGIN_ROOT}" == "${HOME}/.claude/"* ]]; then
-  # User-level install: also ensure project rules get the symlink
-  # (already handled above since we always do project-level)
-  # Additionally create the user-level symlink for global access
-  setup_symlink "$USER_RULES_DIR"
-fi
+setup_symlink "$USER_RULES_DIR"
 
 echo '{}'
