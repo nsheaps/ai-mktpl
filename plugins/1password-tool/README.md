@@ -31,13 +31,13 @@ Create or update `plugins.settings.yaml` at project or user level:
 # or ~/.claude/plugins.settings.yaml
 
 1password-tool:
-  enabled: true                # Enable/disable the plugin
-  auto_install: false          # Download op if not on PATH (default: false)
-  install_to_project: true     # Install to $project/bin/.local (vs ~/.local/bin)
-  background_install: false    # Run install in background
-  op_version: "latest"         # Pin a specific op version or use "latest"
-  install_op_exec: false       # Also install op-exec (default: false)
-  op_exec_version: "latest"    # Pin a specific op-exec version or use "latest"
+  enabled: true # Enable/disable the plugin
+  auto_install: false # Download op if not on PATH (default: false)
+  install_to_project: true # Install to $project/bin/.local (vs ~/.local/bin)
+  background_install: false # Run install in background
+  op_version: "latest" # Pin a specific op version or use "latest"
+  install_op_exec: false # Also install op-exec (default: false)
+  op_exec_version: "latest" # Pin a specific op-exec version or use "latest"
 ```
 
 ## Authentication

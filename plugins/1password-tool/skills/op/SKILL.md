@@ -35,20 +35,20 @@ op account list
 
 ### Core Commands
 
-| Command              | Description                        |
-| -------------------- | ---------------------------------- |
-| `op item list`       | List items in a vault              |
-| `op item get`        | Get item details                   |
-| `op item create`     | Create a new item                  |
-| `op item edit`       | Edit an existing item              |
-| `op item delete`     | Delete an item                     |
-| `op vault list`      | List vaults                        |
-| `op vault get`       | Get vault details                  |
-| `op read`            | Read a secret reference            |
-| `op inject`          | Inject secrets into a template     |
-| `op run`             | Run a command with secrets injected |
-| `op whoami`          | Show current user/account          |
-| `op document get`    | Download a document                |
+| Command           | Description                         |
+| ----------------- | ----------------------------------- |
+| `op item list`    | List items in a vault               |
+| `op item get`     | Get item details                    |
+| `op item create`  | Create a new item                   |
+| `op item edit`    | Edit an existing item               |
+| `op item delete`  | Delete an item                      |
+| `op vault list`   | List vaults                         |
+| `op vault get`    | Get vault details                   |
+| `op read`         | Read a secret reference             |
+| `op inject`       | Inject secrets into a template      |
+| `op run`          | Run a command with secrets injected |
+| `op whoami`       | Show current user/account           |
+| `op document get` | Download a document                 |
 
 ## Secret References
 
@@ -203,6 +203,7 @@ op run -- my-command
 ```
 
 Service account limitations:
+
 - Can only access vaults explicitly granted
 - Cannot create/delete vaults
 - Cannot manage users or groups
@@ -248,12 +249,12 @@ This plugin supports configuration via `plugins.settings.yaml`:
 ```yaml
 1password-tool:
   enabled: true
-  auto_install: false        # Download op if not on PATH
-  install_to_project: true   # Install to $project/bin/.local
-  background_install: false  # Install in background
-  op_version: "latest"       # Specific op version or "latest"
-  install_op_exec: false     # Also install op-exec
-  op_exec_version: "latest"  # Specific op-exec version
+  auto_install: false # Download op if not on PATH
+  install_to_project: true # Install to $project/bin/.local
+  background_install: false # Install in background
+  op_version: "latest" # Specific op version or "latest"
+  install_op_exec: false # Also install op-exec
+  op_exec_version: "latest" # Specific op-exec version
 ```
 
 Place in:
@@ -263,13 +264,13 @@ Place in:
 
 ## Environment Variables
 
-| Variable                    | Description                                  |
-| --------------------------- | -------------------------------------------- |
-| `OP_SERVICE_ACCOUNT_TOKEN`  | Service account token for authentication     |
-| `OP_CONNECT_HOST`           | 1Password Connect server URL                 |
-| `OP_CONNECT_TOKEN`          | 1Password Connect API token                  |
-| `OP_ACCOUNT`                | Default account shorthand                    |
-| `OP_VAULT`                  | Default vault                                |
+| Variable                   | Description                              |
+| -------------------------- | ---------------------------------------- |
+| `OP_SERVICE_ACCOUNT_TOKEN` | Service account token for authentication |
+| `OP_CONNECT_HOST`          | 1Password Connect server URL             |
+| `OP_CONNECT_TOKEN`         | 1Password Connect API token              |
+| `OP_ACCOUNT`               | Default account shorthand                |
+| `OP_VAULT`                 | Default vault                            |
 
 ## Troubleshooting
 
@@ -300,6 +301,7 @@ echo $OP_SERVICE_ACCOUNT_TOKEN | head -c 10
 ### "You are not currently signed in"
 
 In CI/web sessions, use a service account token:
+
 ```bash
 export OP_SERVICE_ACCOUNT_TOKEN="ops_..."
 ```

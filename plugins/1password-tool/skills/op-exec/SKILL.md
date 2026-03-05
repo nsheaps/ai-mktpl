@@ -102,6 +102,7 @@ Install via mise, Homebrew, or enable auto-install in the plugin settings.
 ### Secrets not resolving
 
 Ensure `op` is authenticated:
+
 ```bash
 op whoami
 ```
