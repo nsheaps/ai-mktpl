@@ -36,7 +36,7 @@ Do NOT create issues for:
 **CRITICAL:** All labels are defined in `.github/labels.yaml` and synced automatically by the `sync-labels.yml` workflow. This is the single source of truth.
 
 - **NEVER** create labels inline in workflows, scripts, or via `gh label create`
-- To add a new label: add it to `.github/labels.yaml` ��� it will be synced on merge to main
+- To add a new label: add it to `.github/labels.yaml` — it will be synced on merge to main
 - The sync workflow uses `skip-delete: true`, so labels not in the YAML are preserved
 
 ## Labels for Workflow State
