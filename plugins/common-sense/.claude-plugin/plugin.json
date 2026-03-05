@@ -1,0 +1,21 @@
+{
+  "name": "common-sense",
+  "version": "1.0.0",
+  "description": "Common-sense rules for AI assistant behavior. On session start, symlinks bundled rules into the project's .claude/rules/common-sense directory so they are automatically loaded as context.",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/common-sense",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": [
+    "rules",
+    "common-sense",
+    "behavior",
+    "best-practices",
+    "session-start",
+    "symlink"
+  ],
+  "hooks": "./hooks/hooks.json"
+}

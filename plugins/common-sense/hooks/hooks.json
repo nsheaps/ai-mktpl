@@ -1,0 +1,17 @@
+{
+  "description": "Sync common-sense rules into project .claude/rules/ via symlink",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/sync-rules.sh",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}
