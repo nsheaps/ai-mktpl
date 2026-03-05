@@ -43,3 +43,12 @@
 - name: chore
   description: Maintenance, refactoring, cleanup tasks
   color: 'fef2c0'
+
+# Stale issue management
+- name: stale
+  description: Issue has not had recent activity
+  color: 'ededed'
+
+- name: daily-report
+  description: Automated daily report issue (auto-closed when stale)
+  color: 'd4c5f9'
