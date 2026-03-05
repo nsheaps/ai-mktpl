@@ -8,10 +8,44 @@
 github-app:
   enabled: true
 
-  # GitHub App credentials (can also be set via environment variables)
+  # --- Secret Sources ---
+  #
+  # Secrets can be provided three ways (in order of priority):
+  #
+  # 1. op_item: Fetch ALL secrets from a single 1Password item.
+  #    Uses nsheaps/op-exec to render item fields as env vars.
+  #    Field labels are converted to env var names (e.g., "GITHUB_APP_ID" stays as-is).
+  #    Example: op_item: "op://vault/github-app--repo--my-repo"
+  #
+  # 2. secrets.*: Individual secret references. Each value can be:
+  #    - A literal value:         secrets.github_app_id: "12345"
+  #    - An env var reference:    secrets.github_app_id: "${GITHUB_APP_ID}"
+  #    - A 1Password field ref:   secrets.github_app_id: "op://vault/item/GITHUB_APP_ID"
+  #    Individual secrets override op_item values for the same field.
+  #
+  # 3. Environment variables: GITHUB_APP_ID, GITHUB_APP_PRIVATE_KEY_PATH, etc.
+  #    Set before the session starts. Lowest priority.
+  #
+  # 4. Legacy flat settings: github_app_id, private_key_path, github_installation_id
+  #    Kept for backwards compatibility. Lowest priority.
+
+  # --- Option 1: Entire 1Password item ---
+  # op_item: "op://vault/github-app--repo--my-repo"
+
+  # --- Option 2: Individual secrets ---
+  # secrets:
+  #   github_app_id: "op://vault/item/GITHUB_APP_ID"
+  #   github_app_client_id: "op://vault/item/GITHUB_APP_CLIENT_ID"
+  #   github_app_client_secret: "op://vault/item/GITHUB_APP_CLIENT_SECRET"
+  #   github_app_private_key: "op://vault/item/GITHUB_APP_PRIVATE_KEY"
+  #   github_installation_id: "${GITHUB_INSTALLATION_ID}"
+
+  # --- Option 3: Legacy flat settings ---
   # github_app_id: "12345"
   # private_key_path: "~/.config/agent/github-app.pem"
   # github_installation_id: "67890"
+
+  # --- Other settings ---
 
   # Where to write the token (default: ~/.config/agent/github-token)
   # token_file: "~/.config/agent/github-token"

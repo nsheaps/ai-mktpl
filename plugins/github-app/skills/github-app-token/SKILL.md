@@ -61,7 +61,31 @@ Session Start
 
 ### Configuration
 
-Set environment variables before starting the session:
+The plugin supports multiple secret sources. Each value can be a literal, `${ENV_VAR}`, or `op://vault/item/field`.
+
+#### Option A: 1Password Item (recommended)
+
+Store all secrets in one 1Password item and reference the whole item:
+
+```yaml
+# In $CLAUDE_PROJECT_DIR/.claude/plugins.settings.yaml
+github-app:
+  op_item: "op://vault/github-app--repo--my-repo"
+```
+
+Uses `op-exec` (from `nsheaps/op-exec`) to fetch all item fields as env vars. Expected field names: `GITHUB_APP_ID`, `GITHUB_APP_CLIENT_ID`, `GITHUB_APP_CLIENT_SECRET`, `GITHUB_APP_PRIVATE_KEY`, `GITHUB_INSTALLATION_ID`.
+
+#### Option B: Individual Secret References
+
+```yaml
+github-app:
+  secrets:
+    github_app_id: "op://vault/item/GITHUB_APP_ID"
+    github_app_private_key: "op://vault/item/GITHUB_APP_PRIVATE_KEY"
+    github_installation_id: "${GITHUB_INSTALLATION_ID}"
+```
+
+#### Option C: Environment Variables
 
 ```bash
 export GITHUB_APP_ID="12345"
@@ -69,17 +93,12 @@ export GITHUB_APP_PRIVATE_KEY_PATH="~/.config/agent/github-app.pem"
 export GITHUB_INSTALLATION_ID="67890"
 ```
 
-Or configure via plugin settings:
+### Private Key Handling
 
-```yaml
-# In $CLAUDE_PROJECT_DIR/.claude/plugins.settings.yaml
-github-app:
-  enabled: true
-  github_app_id: "12345"
-  private_key_path: "~/.config/agent/github-app.pem"
-  github_installation_id: "67890"
-  token_file: "~/.config/agent/github-token"
-```
+The private key can be provided as:
+
+- **File path** (`private_key_path` / `GITHUB_APP_PRIVATE_KEY_PATH`): PEM file on disk
+- **Key content** (`secrets.github_app_private_key` / `GITHUB_APP_PRIVATE_KEY`): PEM content directly (e.g., from 1Password). Written to a secure temp file automatically.
 
 ### PEM Key Security
 

@@ -28,7 +28,46 @@ GitHub App installation tokens expire after 1 hour. This plugin generates tokens
 
 ### 3. Configure Credentials
 
-Set environment variables:
+The plugin supports multiple ways to provide secrets, in order of priority:
+
+#### Option A: 1Password Item (recommended)
+
+Store all credentials in a single 1Password item and reference it with `op_item`.
+Uses `nsheaps/op-exec` to fetch all fields and export them as environment variables.
+
+```yaml
+# In $CLAUDE_PROJECT_DIR/.claude/plugins.settings.yaml
+github-app:
+  op_item: "op://vault/github-app--repo--my-repo"
+```
+
+The 1Password item should have fields named:
+
+- `GITHUB_APP_ID`
+- `GITHUB_APP_CLIENT_ID`
+- `GITHUB_APP_CLIENT_SECRET`
+- `GITHUB_APP_PRIVATE_KEY`
+- `GITHUB_INSTALLATION_ID` (optional, can be set per-project)
+
+#### Option B: Individual Secret References
+
+Each secret can independently reference an env var, a 1Password field, or a literal:
+
+```yaml
+github-app:
+  secrets:
+    github_app_id: "op://vault/item/GITHUB_APP_ID"
+    github_app_client_id: "${GITHUB_APP_CLIENT_ID}"
+    github_app_client_secret: "op://vault/item/GITHUB_APP_CLIENT_SECRET"
+    github_app_private_key: "op://vault/item/GITHUB_APP_PRIVATE_KEY"
+    github_installation_id: "12345"
+```
+
+Individual `secrets.*` values override `op_item` values for the same field.
+
+#### Option C: Environment Variables
+
+Set before the session starts:
 
 ```bash
 export GITHUB_APP_ID="12345"
@@ -36,17 +75,23 @@ export GITHUB_APP_PRIVATE_KEY_PATH="~/.config/agent/github-app.pem"
 export GITHUB_INSTALLATION_ID="67890"
 ```
 
-Or use plugin settings:
+#### Option D: Legacy Flat Settings
 
 ```yaml
-# In $CLAUDE_PROJECT_DIR/.claude/plugins.settings.yaml
 github-app:
   github_app_id: "12345"
   private_key_path: "~/.config/agent/github-app.pem"
   github_installation_id: "67890"
 ```
 
-### 4. Secure the PEM key
+### Private Key Handling
+
+The private key can be provided as:
+
+- **File path** (`private_key_path` or `GITHUB_APP_PRIVATE_KEY_PATH`): Points to a PEM file on disk
+- **Key content** (`secrets.github_app_private_key` or `GITHUB_APP_PRIVATE_KEY`): The PEM content directly (e.g., from 1Password). The plugin writes it to a secure temp file automatically.
+
+When using a PEM file directly, ensure correct permissions:
 
 ```bash
 chmod 600 ~/.config/agent/github-app.pem
@@ -73,12 +118,32 @@ chmod 600 ~/.config/agent/github-app.pem
 ```yaml
 github-app:
   enabled: true
-  github_app_id: "12345"
-  private_key_path: "~/.config/agent/github-app.pem"
-  github_installation_id: "67890"
+
+  # Option A: All secrets from one 1Password item (uses op-exec)
+  op_item: "op://vault/github-app--repo--my-repo"
+
+  # Option B: Individual secrets (override op_item for specific fields)
+  # Each value: literal, ${ENV_VAR}, or op://vault/item/field
+  secrets:
+    github_app_id: "op://vault/item/GITHUB_APP_ID"
+    github_app_client_id: "op://vault/item/GITHUB_APP_CLIENT_ID"
+    github_app_client_secret: "op://vault/item/GITHUB_APP_CLIENT_SECRET"
+    github_app_private_key: "op://vault/item/GITHUB_APP_PRIVATE_KEY"
+    github_installation_id: "${GITHUB_INSTALLATION_ID}"
+
+  # Other settings
   token_file: "~/.config/agent/github-token"
   refresh_interval: 3000 # seconds (50 minutes)
 ```
+
+### Secret Reference Syntax
+
+| Syntax          | Example                            | Resolution                      |
+| --------------- | ---------------------------------- | ------------------------------- |
+| Literal         | `"12345"`                          | Used as-is                      |
+| Env var         | `"${GITHUB_APP_ID}"`               | Expanded from shell environment |
+| 1Password field | `"op://vault/item/field"`          | Resolved via `op read`          |
+| 1Password item  | `"op://vault/item"` (op_item only) | All fields via `op-exec`        |
 
 ## Plugin Structure
 
