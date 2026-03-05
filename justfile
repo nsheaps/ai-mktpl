@@ -189,6 +189,21 @@ _preview-version-bumps format='--format=raw':
         esac
     fi
 
+# Check if a plugin directory has symlink targets that changed vs a base ref
+# Returns 0 (true) if symlink targets changed, 1 (false) otherwise
+_has-symlink-changes PLUGIN_DIR BASE_REF:
+    #!/usr/bin/env bash
+    for symlink in $(find "{{PLUGIN_DIR}}" -type l 2>/dev/null); do
+        target=$(readlink -f "$symlink" 2>/dev/null || true)
+        if [[ -n "$target" && "$target" == "$PWD/"* ]]; then
+            rel_target="${target#$PWD/}"
+            if git diff --name-only "{{BASE_REF}}..HEAD" -- "$rel_target" 2>/dev/null | grep -q .; then
+                exit 0
+            fi
+        fi
+    done
+    exit 1
+
 # Detect plugins with code changes and output JSON for CI/CD
 # Usage: just detect-plugin-changes [base-ref]
 # Output: JSON with has_changes, plugins array, and report_md
@@ -219,7 +234,21 @@ detect-plugin-changes base_ref='main':
         PLUGIN_JSON="$plugin_dir/.claude-plugin/plugin.json"
 
         # Check if plugin has code changes (excluding plugin.json and CHANGELOG.md)
-        if ! git diff --name-only "$BASE_REF..HEAD" -- "$plugin_dir" 2>/dev/null | grep -v 'CHANGELOG.md$' | grep -v 'plugin.json$' | grep -q .; then
+        HAS_DIRECT_CHANGES=false
+        if git diff --name-only "$BASE_REF..HEAD" -- "$plugin_dir" 2>/dev/null | grep -v 'CHANGELOG.md$' | grep -v 'plugin.json$' | grep -q .; then
+            HAS_DIRECT_CHANGES=true
+        fi
+
+        # Also check if any symlink targets within the plugin have changed
+        # This catches changes to shared/ content that plugins symlink to
+        HAS_SYMLINK_CHANGES=false
+        if [ "$HAS_DIRECT_CHANGES" = "false" ]; then
+            if just _has-symlink-changes "$plugin_dir" "$BASE_REF" 2>/dev/null; then
+                HAS_SYMLINK_CHANGES=true
+            fi
+        fi
+
+        if [ "$HAS_DIRECT_CHANGES" = "false" ] && [ "$HAS_SYMLINK_CHANGES" = "false" ]; then
             continue
         fi
 
@@ -322,7 +351,15 @@ _bump-changed-plugins BASE_REF='origin/main':
         PLUGIN_NAME=$(basename "$plugin_dir")
 
         # Check if plugin has changes (excluding CHANGELOG.md and plugin.json)
+        # Also check symlink targets (shared/ content) for changes
+        HAS_CHANGES=false
         if git diff --name-only "{{BASE_REF}}..HEAD" -- "$plugin_dir" | grep -v 'CHANGELOG.md$' | grep -v 'plugin.json$' | grep -q .; then
+            HAS_CHANGES=true
+        elif just _has-symlink-changes "$plugin_dir" "{{BASE_REF}}" 2>/dev/null; then
+            HAS_CHANGES=true
+        fi
+
+        if [ "$HAS_CHANGES" = "true" ]; then
             echo "=== Bumping version for $PLUGIN_NAME (has changes) ==="
             cd "$plugin_dir"
             yarn exec release-it --ci

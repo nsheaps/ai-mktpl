@@ -2,10 +2,20 @@
 # These settings take precedence over plugin defaults.
 # See each plugin's <plugin-name>.settings.yaml for available options.
 
-gh-tool:
+github:
   # gh is managed by mise (see mise.toml: gh = "latest").
   # The plugin still runs gh auth status to verify authentication.
   auto_install: false
+
+github-app:
+  # Fetch all GitHub App secrets from a single 1Password item.
+  # Uses bin/op-exec to render item fields as environment variables.
+  ref: 'op://heapsinfra/github-app--repo--ai-mktpl'
+  # Item fields expected:
+  #   GITHUB_APP_ID
+  #   GITHUB_APP_CLIENT_ID
+  #   GITHUB_APP_CLIENT_SECRET
+  #   GITHUB_APP_PRIVATE_KEY
 
 mise:
   auto_install_tools: true

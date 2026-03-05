@@ -1,0 +1,29 @@
+{
+  "description": "GitHub App token lifecycle: generate on session start, refresh before expiry via PreToolUse hook",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/github-token-init.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/github-token-check.sh",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}

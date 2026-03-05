@@ -1,0 +1,24 @@
+{
+  "name": "github-app",
+  "version": "0.1.0",
+  "description": "Automatic GitHub App token lifecycle for Claude Code sessions. Generates installation tokens on session start, monitors expiry via PreToolUse hook, and refreshes transparently before commands that need authentication.",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/github-app",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": [
+    "github",
+    "github-app",
+    "token-refresh",
+    "authentication",
+    "installation-token",
+    "jwt",
+    "hooks",
+    "agent-teams",
+    "credential-helper"
+  ],
+  "hooks": "./hooks/hooks.json"
+}

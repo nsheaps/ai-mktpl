@@ -100,7 +100,7 @@ The cleanup and conflict concerns make the settings file approach the higher-ris
 | -------------------- | --------------------- | ------------------------------------------------------- |
 | `datadog-otel-setup` | `settings.local.json` | OTEL config must reach Claude's own telemetry process   |
 | `mise`               | `CLAUDE_ENV_FILE`     | PATH manipulation and `mise activate` shell expressions |
-| `gh-tool`            | `CLAUDE_ENV_FILE`     | PATH manipulation for project-local binary install      |
+| `github`             | `CLAUDE_ENV_FILE`     | PATH manipulation for project-local binary install      |
 
 ## Related
 

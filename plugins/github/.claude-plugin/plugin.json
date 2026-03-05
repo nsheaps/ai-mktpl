@@ -1,0 +1,27 @@
+{
+  "name": "github",
+  "version": "0.1.0",
+  "description": "GitHub CLI installation, authentication, and workflow skill for Claude Code sessions. Consolidates gh-tool and github-auth-skill into a single plugin.",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/github",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": [
+    "github",
+    "gh",
+    "cli",
+    "authentication",
+    "device-auth",
+    "pat",
+    "fine-grained-token",
+    "pull-requests",
+    "issues",
+    "session-start",
+    "web-session",
+    "auto-install"
+  ],
+  "hooks": "./hooks/hooks.json"
+}

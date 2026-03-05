@@ -31,6 +31,31 @@ echo "$GH_TOKEN" | gh auth login --with-token
 gh auth switch
 ```
 
+### Git Identity Setup
+
+After authenticating with `gh`, configure git user identity from the GitHub profile:
+
+```bash
+# Set git user.name and user.email from the authenticated GitHub account
+gh auth setup-git
+gh api user --jq '.name'  | xargs git config user.name
+gh api user --jq '.email // .login + "@users.noreply.github.com"' | xargs git config user.email
+```
+
+For GitHub App bot accounts (automated/CI), the identity follows the convention:
+
+```bash
+# App bot identity: <app-name>[bot] with ID-based noreply email
+git config user.name "my-app[bot]"
+git config user.email "12345+my-app[bot]@users.noreply.github.com"
+```
+
+To find the App's bot user ID:
+
+```bash
+gh api users/my-app[bot] --jq '.id'
+```
+
 ### Core Commands
 
 | Command           | Description                  |
@@ -377,7 +402,7 @@ gh issue view 42 --web
 This plugin supports configuration via `plugins.settings.yaml`:
 
 ```yaml
-gh-tool:
+github:
   enabled: true
   install_to_project: true # Install to $project/bin/.local
   background_install: false # Install in background
