@@ -1,5 +1,5 @@
 {
-  "name": "1password-tool",
+  "name": "1pass",
   "version": "0.1.0",
   "description": "Install and manage 1Password CLI (op) and op-exec in Claude Code sessions. Provides session-start auto-install for web sessions and comprehensive workflow skills.",
   "author": {
@@ -7,7 +7,7 @@
     "email": "nsheaps@gmail.com",
     "url": "https://github.com/nsheaps"
   },
-  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/1password-tool",
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/1pass",
   "repository": "https://github.com/nsheaps/ai-mktpl",
   "keywords": [
     "1password",

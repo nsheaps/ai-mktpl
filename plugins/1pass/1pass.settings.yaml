@@ -1,11 +1,11 @@
-# 1password-tool plugin configuration
+# 1pass plugin configuration
 #
 # Override per-project via ${CLAUDE_PROJECT_DIR}/.claude/plugins.settings.yaml
-# or per-user via ~/.claude/plugins.settings.yaml under the "1password-tool" key.
+# or per-user via ~/.claude/plugins.settings.yaml under the "1pass" key.
 #
 # Set enabled: false to disable auto-install without uninstalling the plugin.
 
-1password-tool:
+1pass:
   enabled: true
 
   # Download and install the op binary if not already on PATH.

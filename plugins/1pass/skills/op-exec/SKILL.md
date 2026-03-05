@@ -85,10 +85,10 @@ op-exec ./ci-script.sh
 
 ## Plugin Settings
 
-This tool is installed by the `1password-tool` plugin when `install_op_exec: true`:
+This tool is installed by the `1pass` plugin when `install_op_exec: true`:
 
 ```yaml
-1password-tool:
+1pass:
   install_op_exec: true
   op_exec_version: "latest"
 ```

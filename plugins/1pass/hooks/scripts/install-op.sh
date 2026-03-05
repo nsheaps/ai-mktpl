@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# install-op.sh — SessionStart hook for 1password-tool plugin
+# install-op.sh — SessionStart hook for 1pass plugin
 #
 # Installs or updates 1Password CLI (op) and op-exec for Claude Code web sessions.
 # When install_to_project is true, installs to $CLAUDE_PROJECT_DIR/bin/.local/
 # which is gitignored and added to PATH.
 set -euo pipefail
 
-PLUGIN_NAME="1password-tool"
+PLUGIN_NAME="1pass"
 source "${CLAUDE_PLUGIN_ROOT}/lib/plugin-config-read.sh"
 source "${CLAUDE_PLUGIN_ROOT}/lib/tool-install.sh"
 

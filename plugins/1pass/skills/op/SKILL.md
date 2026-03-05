@@ -247,7 +247,7 @@ op item create --category password \
 This plugin supports configuration via `plugins.settings.yaml`:
 
 ```yaml
-1password-tool:
+1pass:
   enabled: true
   auto_install: false # Download op if not on PATH
   install_to_project: true # Install to $project/bin/.local

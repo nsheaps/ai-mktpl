@@ -1,4 +1,4 @@
-# 1password-tool
+# 1pass
 
 Install and manage [1Password CLI](https://developer.1password.com/docs/cli/) (op) and [op-exec](https://github.com/nsheaps/op-exec) in Claude Code sessions.
 
@@ -30,7 +30,7 @@ Create or update `plugins.settings.yaml` at project or user level:
 # In $CLAUDE_PROJECT_DIR/.claude/plugins.settings.yaml
 # or ~/.claude/plugins.settings.yaml
 
-1password-tool:
+1pass:
   enabled: true # Enable/disable the plugin
   auto_install: false # Download op if not on PATH (default: false)
   install_to_project: true # Install to $project/bin/.local (vs ~/.local/bin)
