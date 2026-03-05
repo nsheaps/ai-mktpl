@@ -30,18 +30,28 @@ GitHub App installation tokens expire after 1 hour. This plugin generates tokens
 
 The plugin supports multiple ways to provide secrets, in order of priority:
 
-#### Option A: 1Password Item (recommended)
+#### Option A: Bulk Secret Reference (`ref`)
 
-Store all credentials in a single 1Password item and reference it with `op_item`.
-Uses `nsheaps/op-exec` to fetch all fields and export them as environment variables.
+The `ref` setting loads all secrets at once from a single source.
+
+**1Password item** (recommended) — uses `nsheaps/op-exec`:
 
 ```yaml
 # In $CLAUDE_PROJECT_DIR/.claude/plugins.settings.yaml
 github-app:
-  op_item: "op://vault/github-app--repo--my-repo"
+  ref: "op://vault/github-app--repo--my-repo"
 ```
 
-The 1Password item should have fields named:
+**Env file** — sources `KEY=VALUE` pairs from a file:
+
+```yaml
+github-app:
+  ref: "env-file://./.env.github-app" # relative to project
+  # or
+  ref: "env-file://~/.config/agent/github-app.env" # absolute
+```
+
+The source should provide fields named:
 
 - `GITHUB_APP_ID`
 - `GITHUB_APP_CLIENT_ID`
@@ -63,7 +73,7 @@ github-app:
     github_installation_id: "12345"
 ```
 
-Individual `secrets.*` values override `op_item` values for the same field.
+Individual `secrets.*` values override `ref` values for the same field.
 
 #### Option C: Environment Variables
 
@@ -119,10 +129,11 @@ chmod 600 ~/.config/agent/github-app.pem
 github-app:
   enabled: true
 
-  # Option A: All secrets from one 1Password item (uses op-exec)
-  op_item: "op://vault/github-app--repo--my-repo"
+  # Option A: Bulk secret reference (op:// or env-file://)
+  ref: "op://vault/github-app--repo--my-repo"
+  # ref: "env-file://./.env.github-app"
 
-  # Option B: Individual secrets (override op_item for specific fields)
+  # Option B: Individual secrets (override ref for specific fields)
   # Each value: literal, ${ENV_VAR}, or op://vault/item/field
   secrets:
     github_app_id: "op://vault/item/GITHUB_APP_ID"
@@ -138,12 +149,13 @@ github-app:
 
 ### Secret Reference Syntax
 
-| Syntax          | Example                            | Resolution                      |
-| --------------- | ---------------------------------- | ------------------------------- |
-| Literal         | `"12345"`                          | Used as-is                      |
-| Env var         | `"${GITHUB_APP_ID}"`               | Expanded from shell environment |
-| 1Password field | `"op://vault/item/field"`          | Resolved via `op read`          |
-| 1Password item  | `"op://vault/item"` (op_item only) | All fields via `op-exec`        |
+| Syntax          | Example                          | Resolution                       |
+| --------------- | -------------------------------- | -------------------------------- |
+| Literal         | `"12345"`                        | Used as-is                       |
+| Env var         | `"${GITHUB_APP_ID}"`             | Expanded from shell environment  |
+| 1Password field | `"op://vault/item/field"`        | Resolved via `op read`           |
+| 1Password item  | `"op://vault/item"` (ref only)   | All fields via `op-exec`         |
+| Env file        | `"env-file://./path"` (ref only) | Source KEY=VALUE pairs from file |
 
 ## Plugin Structure
 

@@ -2,11 +2,13 @@
 # github-token-init.sh — SessionStart hook for github-app plugin
 #
 # Generates a GitHub App installation token on session start.
-# Supports multiple secret sources:
-#   - Literal values in settings
-#   - Environment variable references: ${VAR_NAME}
-#   - 1Password field references: op://vault/item/field
-#   - 1Password item reference (via op_item): fetches all fields as env vars
+# Supports multiple secret sources via the `ref` setting:
+#   - op://vault/item         → fetch all fields via op-exec
+#   - env-file://path/to/file → source KEY=VALUE pairs from a file
+# Individual secrets via `secrets.*`:
+#   - Literal values
+#   - ${VAR_NAME}             → expand from environment
+#   - op://vault/item/field   → resolve via `op read`
 #
 # Writes token to a shared file readable by gh CLI, git, and MCP server.
 set -euo pipefail
@@ -65,50 +67,100 @@ resolve_secret() {
   echo "$raw"
 }
 
-# --- Load secrets ---
+# Resolve an env-file:// path to an absolute path.
+# Relative paths (env-file://./...) are resolved relative to CLAUDE_PROJECT_DIR.
+resolve_env_file_path() {
+  local raw="$1"
+  local path="${raw#env-file://}"
 
-# Strategy 1: op_item — fetch all secrets from a single 1Password item via op-exec
-# The item fields are converted to env vars (GITHUB_APP_ID, GITHUB_APP_PRIVATE_KEY, etc.)
-OP_ITEM="$(plugin_get_config "op_item" "")"
+  # Relative path: resolve against project dir
+  if [[ "$path" == ./* || "$path" == ../* ]]; then
+    path="${CLAUDE_PROJECT_DIR:-.}/${path}"
+  fi
 
-if [[ -n "$OP_ITEM" ]]; then
-  if [[ "$OP_ITEM" != op://* ]]; then
-    echo "${PLUGIN_NAME}: op_item must be an op:// reference, got: $OP_ITEM" >&2
+  # Expand tilde
+  path="${path/#\~/$HOME}"
+
+  # Canonicalize
+  realpath "$path" 2>/dev/null || echo "$path"
+}
+
+# --- Load secrets from ref ---
+
+REF="$(plugin_get_config "ref" "")"
+
+if [[ -n "$REF" ]]; then
+  if [[ "$REF" == op://* ]]; then
+    # 1Password item reference — fetch all fields via op-exec
+    OP_EXEC=""
+    if command -v op-exec &>/dev/null; then
+      OP_EXEC="$(command -v op-exec)"
+    elif [[ -x "${CLAUDE_PROJECT_DIR:-}/bin/op-exec" ]]; then
+      OP_EXEC="${CLAUDE_PROJECT_DIR}/bin/op-exec"
+    fi
+
+    if [[ -z "$OP_EXEC" ]]; then
+      echo "${PLUGIN_NAME}: op-exec not found (needed for op:// ref), install nsheaps/op-exec" >&2
+      echo '{}'
+      exit 0
+    fi
+
+    if ! command -v op &>/dev/null; then
+      echo "${PLUGIN_NAME}: 1Password CLI (op) not found, cannot resolve ref" >&2
+      echo '{}'
+      exit 0
+    fi
+
+    # Source the env vars from the 1Password item
+    eval "$("$OP_EXEC" "$REF")" || {
+      echo "${PLUGIN_NAME}: Failed to fetch secrets from $REF" >&2
+      echo '{}'
+      exit 0
+    }
+
+    echo "${PLUGIN_NAME}: Loaded secrets from 1Password item" >&2
+
+  elif [[ "$REF" == env-file://* ]]; then
+    # Env file reference — source KEY=VALUE pairs
+    ENV_FILE_PATH="$(resolve_env_file_path "$REF")"
+
+    if [[ ! -f "$ENV_FILE_PATH" ]]; then
+      echo "${PLUGIN_NAME}: env file not found: $ENV_FILE_PATH" >&2
+      echo '{}'
+      exit 0
+    fi
+
+    # Source only lines matching KEY=VALUE (skip comments and blanks)
+    while IFS= read -r line || [[ -n "$line" ]]; do
+      # Skip comments and blank lines
+      [[ "$line" =~ ^[[:space:]]*# ]] && continue
+      [[ "$line" =~ ^[[:space:]]*$ ]] && continue
+      # Strip optional 'export ' prefix
+      line="${line#export }"
+      # Only process lines with =
+      if [[ "$line" == *=* ]]; then
+        local key="${line%%=*}"
+        local value="${line#*=}"
+        # Strip surrounding quotes from value
+        value="${value#\"}"
+        value="${value%\"}"
+        value="${value#\'}"
+        value="${value%\'}"
+        export "$key"="$value"
+      fi
+    done < "$ENV_FILE_PATH"
+
+    echo "${PLUGIN_NAME}: Loaded secrets from env file: $ENV_FILE_PATH" >&2
+
+  else
+    echo "${PLUGIN_NAME}: ref must be an op:// or env-file:// reference, got: $REF" >&2
     echo '{}'
     exit 0
   fi
-
-  # Find op-exec: check PATH, then common locations
-  OP_EXEC=""
-  if command -v op-exec &>/dev/null; then
-    OP_EXEC="$(command -v op-exec)"
-  elif [[ -x "${CLAUDE_PROJECT_DIR:-}/bin/op-exec" ]]; then
-    OP_EXEC="${CLAUDE_PROJECT_DIR}/bin/op-exec"
-  fi
-
-  if [[ -z "$OP_EXEC" ]]; then
-    echo "${PLUGIN_NAME}: op-exec not found (needed for op_item), install nsheaps/op-exec" >&2
-    echo '{}'
-    exit 0
-  fi
-
-  if ! command -v op &>/dev/null; then
-    echo "${PLUGIN_NAME}: 1Password CLI (op) not found, cannot resolve op_item" >&2
-    echo '{}'
-    exit 0
-  fi
-
-  # Source the env vars from the 1Password item
-  eval "$("$OP_EXEC" "$OP_ITEM")" || {
-    echo "${PLUGIN_NAME}: Failed to fetch secrets from $OP_ITEM" >&2
-    echo '{}'
-    exit 0
-  }
-
-  echo "${PLUGIN_NAME}: Loaded secrets from 1Password item" >&2
 fi
 
-# Strategy 2: Individual secret settings (override env vars if present)
+# --- Load individual secret overrides ---
+
 # Each secrets.* value can be a literal, ${ENV_VAR}, or op://vault/item/field
 SECRETS_APP_ID="$(plugin_get_config "secrets.github_app_id" "")"
 SECRETS_CLIENT_ID="$(plugin_get_config "secrets.github_app_client_id" "")"
@@ -116,7 +168,7 @@ SECRETS_CLIENT_SECRET="$(plugin_get_config "secrets.github_app_client_secret" ""
 SECRETS_PRIVATE_KEY="$(plugin_get_config "secrets.github_app_private_key" "")"
 SECRETS_INSTALLATION_ID="$(plugin_get_config "secrets.github_installation_id" "")"
 
-# Resolve individual secrets if configured (these take priority over op_item env vars)
+# Resolve individual secrets if configured (these take priority over ref env vars)
 if [[ -n "$SECRETS_APP_ID" ]]; then
   GITHUB_APP_ID="$(resolve_secret "$SECRETS_APP_ID" "github_app_id")"
 fi

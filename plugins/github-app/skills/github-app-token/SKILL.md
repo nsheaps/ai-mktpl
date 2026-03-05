@@ -63,17 +63,20 @@ Session Start
 
 The plugin supports multiple secret sources. Each value can be a literal, `${ENV_VAR}`, or `op://vault/item/field`.
 
-#### Option A: 1Password Item (recommended)
+#### Option A: Bulk Secret Reference (`ref`)
 
-Store all secrets in one 1Password item and reference the whole item:
+Use `ref` to load all secrets from one source:
 
 ```yaml
 # In $CLAUDE_PROJECT_DIR/.claude/plugins.settings.yaml
 github-app:
-  op_item: "op://vault/github-app--repo--my-repo"
+  # 1Password item (uses op-exec from nsheaps/op-exec)
+  ref: "op://vault/github-app--repo--my-repo"
+  # Or an env file with KEY=VALUE pairs
+  # ref: "env-file://./.env.github-app"
 ```
 
-Uses `op-exec` (from `nsheaps/op-exec`) to fetch all item fields as env vars. Expected field names: `GITHUB_APP_ID`, `GITHUB_APP_CLIENT_ID`, `GITHUB_APP_CLIENT_SECRET`, `GITHUB_APP_PRIVATE_KEY`, `GITHUB_INSTALLATION_ID`.
+Expected field names: `GITHUB_APP_ID`, `GITHUB_APP_CLIENT_ID`, `GITHUB_APP_CLIENT_SECRET`, `GITHUB_APP_PRIVATE_KEY`, `GITHUB_INSTALLATION_ID`.
 
 #### Option B: Individual Secret References
 
