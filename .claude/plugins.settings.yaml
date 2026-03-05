@@ -10,7 +10,7 @@ github:
 github-app:
   # Fetch all GitHub App secrets from a single 1Password item.
   # Uses bin/op-exec to render item fields as environment variables.
-  ref: "op://heapsinfra/github-app--repo--ai-mktpl"
+  ref: 'op://heapsinfra/github-app--repo--ai-mktpl'
   # Item fields expected:
   #   GITHUB_APP_ID
   #   GITHUB_APP_CLIENT_ID
