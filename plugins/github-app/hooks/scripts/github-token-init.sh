@@ -139,8 +139,8 @@ if [[ -n "$REF" ]]; then
       line="${line#export }"
       # Only process lines with =
       if [[ "$line" == *=* ]]; then
-        local key="${line%%=*}"
-        local value="${line#*=}"
+        key="${line%%=*}"
+        value="${line#*=}"
         # Strip surrounding quotes from value
         value="${value#\"}"
         value="${value%\"}"

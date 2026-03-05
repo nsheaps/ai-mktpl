@@ -189,6 +189,21 @@ _preview-version-bumps format='--format=raw':
         esac
     fi
 
+# Check if a plugin directory has symlink targets that changed vs a base ref
+# Returns 0 (true) if symlink targets changed, 1 (false) otherwise
+_has-symlink-changes PLUGIN_DIR BASE_REF:
+    #!/usr/bin/env bash
+    for symlink in $(find "{{PLUGIN_DIR}}" -type l 2>/dev/null); do
+        target=$(readlink -f "$symlink" 2>/dev/null || true)
+        if [[ -n "$target" && "$target" == "$PWD/"* ]]; then
+            rel_target="${target#$PWD/}"
+            if git diff --name-only "{{BASE_REF}}..HEAD" -- "$rel_target" 2>/dev/null | grep -q .; then
+                exit 0
+            fi
+        fi
+    done
+    exit 1
+
 # Detect plugins with code changes and output JSON for CI/CD
 # Usage: just detect-plugin-changes [base-ref]
 # Output: JSON with has_changes, plugins array, and report_md
@@ -228,16 +243,9 @@ detect-plugin-changes base_ref='main':
         # This catches changes to shared/ content that plugins symlink to
         HAS_SYMLINK_CHANGES=false
         if [ "$HAS_DIRECT_CHANGES" = "false" ]; then
-            for symlink in $(find "$plugin_dir" -type l 2>/dev/null); do
-                target=$(readlink -f "$symlink" 2>/dev/null || true)
-                if [[ -n "$target" && "$target" == "$PWD/"* ]]; then
-                    rel_target="${target#$PWD/}"
-                    if git diff --name-only "$BASE_REF..HEAD" -- "$rel_target" 2>/dev/null | grep -q .; then
-                        HAS_SYMLINK_CHANGES=true
-                        break
-                    fi
-                fi
-            done
+            if just _has-symlink-changes "$plugin_dir" "$BASE_REF" 2>/dev/null; then
+                HAS_SYMLINK_CHANGES=true
+            fi
         fi
 
         if [ "$HAS_DIRECT_CHANGES" = "false" ] && [ "$HAS_SYMLINK_CHANGES" = "false" ]; then
@@ -347,17 +355,8 @@ _bump-changed-plugins BASE_REF='origin/main':
         HAS_CHANGES=false
         if git diff --name-only "{{BASE_REF}}..HEAD" -- "$plugin_dir" | grep -v 'CHANGELOG.md$' | grep -v 'plugin.json$' | grep -q .; then
             HAS_CHANGES=true
-        else
-            for symlink in $(find "$plugin_dir" -type l 2>/dev/null); do
-                target=$(readlink -f "$symlink" 2>/dev/null || true)
-                if [[ -n "$target" && "$target" == "$PWD/"* ]]; then
-                    rel_target="${target#$PWD/}"
-                    if git diff --name-only "{{BASE_REF}}..HEAD" -- "$rel_target" 2>/dev/null | grep -q .; then
-                        HAS_CHANGES=true
-                        break
-                    fi
-                fi
-            done
+        elif just _has-symlink-changes "$plugin_dir" "{{BASE_REF}}" 2>/dev/null; then
+            HAS_CHANGES=true
         fi
 
         if [ "$HAS_CHANGES" = "true" ]; then
