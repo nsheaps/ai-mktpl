@@ -55,7 +55,7 @@ Instead of auto-install, this repo manages op and op-exec via mise:
 ```toml
 # mise.toml
 [tools]
-"ubi:1Password/cli" = "latest"
+"aqua:1password/cli" = "latest"
 # op-exec once available via GitHub releases:
 # "ubi:nsheaps/op-exec" = "latest"
 ```
