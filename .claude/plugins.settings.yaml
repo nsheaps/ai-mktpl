@@ -8,9 +8,7 @@ gh-tool:
   auto_install: false
 
 mise-tool:
-  # mise binary is installed by the workspace hook (00-setup-workspace.sh).
-  auto_install: false
-  # mise trust and mise install are run by the workspace hook after mise is
-  # available, so the plugin should not duplicate them.
-  auto_install_tools: false
+  # Defer mise trust and mise install to the project's own process.
+  # mise activates via CLAUDE_ENV_FILE; tools are installed lazily via shims.
   auto_trust: false
+  auto_install_tools: false

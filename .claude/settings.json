@@ -56,7 +56,9 @@
       "Bash(readlink:*)",
       "mcp__memory__*"
     ],
-    "deny": ["Bash(rm -rf /:*)"],
+    "deny": [
+      "Bash(rm -rf /:*)"
+    ],
     "ask": [
       "Bash(gh pr view --web:*)",
       "Bash(rm -rf:*)",
@@ -85,44 +87,6 @@
           {
             "type": "command",
             "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/run-hook.sh post-tool-use"
-          }
-        ]
-      }
-    ],
-    "SessionStart": [
-      {
-        "matcher": "startup",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/run-hook.sh session-start start"
-          }
-        ]
-      },
-      {
-        "matcher": "resume",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/run-hook.sh session-start resume"
-          }
-        ]
-      },
-      {
-        "matcher": "clear",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/run-hook.sh session-start clear"
-          }
-        ]
-      },
-      {
-        "matcher": "compact",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/run-hook.sh session-start compact"
           }
         ]
       }
