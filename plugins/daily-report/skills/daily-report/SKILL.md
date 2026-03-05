@@ -18,11 +18,11 @@ branches, issue changes, and force-push tracking.
 
 The following environment variables or prompt context control behavior:
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `REPORT_TIME_SCOPE` | `1 day` | Free-form time scope, e.g. "1 day", "3 days", "1 week" |
-| `REPORT_SUBJECT_SCOPE` | `nsheaps` | Free-form subject scope, e.g. org name, specific repo, or email filter |
-| `REPORT_DATE` | Yesterday (Eastern Time) | The date the report covers, format YYYY-MM-DD |
+| Variable               | Default                  | Description                                                            |
+| ---------------------- | ------------------------ | ---------------------------------------------------------------------- |
+| `REPORT_TIME_SCOPE`    | `1 day`                  | Free-form time scope, e.g. "1 day", "3 days", "1 week"                 |
+| `REPORT_SUBJECT_SCOPE` | `nsheaps`                | Free-form subject scope, e.g. org name, specific repo, or email filter |
+| `REPORT_DATE`          | Yesterday (Eastern Time) | The date the report covers, format YYYY-MM-DD                          |
 
 ## Data Gathering
 
@@ -84,6 +84,7 @@ gh api "repos/${OWNER}/${REPO}/events" \
 ```
 
 When a force push is detected:
+
 1. Record the `before` SHA (the previous HEAD)
 2. Record the `after` SHA (the new HEAD)
 3. Use `gh api repos/${OWNER}/${REPO}/compare/${BEFORE}...${AFTER}` to show what changed
@@ -126,12 +127,14 @@ gh issue list -R "${OWNER}/${REPO}" \
 ```
 
 Filter to issues with `updatedAt` within the time window. Also track:
+
 - Newly opened issues
 - Closed issues (with state reason: completed vs not_planned)
 - Label changes
 - Assignee changes
 
 For issue timeline events:
+
 ```bash
 gh api "repos/${OWNER}/${REPO}/issues/${ISSUE_NUMBER}/timeline" --paginate \
   -q '.[] | select(.created_at >= "'${SINCE_ISO}'")'
@@ -167,44 +170,44 @@ issues opened/closed, repos with activity, notable force pushes.
 
 #### Commits ({count})
 
-| SHA | Author | Branch | Message | Time (ET) |
-|-----|--------|--------|---------|-----------|
-| [`abc1234`](https://github.com/{owner}/{repo}/commit/abc1234) | Author Name | main | Commit message | 2:30 PM |
+| SHA                                                           | Author      | Branch | Message        | Time (ET) |
+| ------------------------------------------------------------- | ----------- | ------ | -------------- | --------- |
+| [`abc1234`](https://github.com/{owner}/{repo}/commit/abc1234) | Author Name | main   | Commit message | 2:30 PM   |
 
 #### Pull Requests ({count})
 
-| # | Title | State | Author | Branch | +/- | Updated |
-|---|-------|-------|--------|--------|-----|---------|
-| [#42](url) | PR title | merged | author | feature->main | +10/-5 | time |
+| #          | Title    | State  | Author | Branch        | +/-    | Updated |
+| ---------- | -------- | ------ | ------ | ------------- | ------ | ------- |
+| [#42](url) | PR title | merged | author | feature->main | +10/-5 | time    |
 
 #### Branch Activity
 
-| Branch | Event | Actor | Time |
-|--------|-------|-------|------|
-| feature/x | created | author | time |
+| Branch     | Event   | Actor  | Time |
+| ---------- | ------- | ------ | ---- |
+| feature/x  | created | author | time |
 | old-branch | deleted | author | time |
 
 #### Issue Changes ({count})
 
-| # | Title | Change | State | Labels |
-|---|-------|--------|-------|--------|
-| [#10](url) | Issue title | opened | OPEN | bug, priority:high |
-| [#8](url) | Issue title | closed (completed) | CLOSED | enhancement |
+| #          | Title       | Change             | State  | Labels             |
+| ---------- | ----------- | ------------------ | ------ | ------------------ |
+| [#10](url) | Issue title | opened             | OPEN   | bug, priority:high |
+| [#8](url)  | Issue title | closed (completed) | CLOSED | enhancement        |
 
 #### Force Push History
 
 _Only include this section if force pushes were detected for this repo._
 
-| Branch | Actor | Time | Before | After | Commits Lost | Commits Added |
-|--------|-------|------|--------|-------|--------------|---------------|
-| main | actor | time | [`old123`](url) | [`new456`](url) | 3 | 5 |
+| Branch | Actor | Time | Before          | After           | Commits Lost | Commits Added |
+| ------ | ----- | ---- | --------------- | --------------- | ------------ | ------------- |
+| main   | actor | time | [`old123`](url) | [`new456`](url) | 3            | 5             |
 
 <details>
 <summary>Previous commit tree (before force push)</summary>
 
 | SHA | Author | Message | Time |
-|-----|--------|---------|------|
-| ... | ... | ... | ... |
+| --- | ------ | ------- | ---- |
+| ... | ...    | ...     | ...  |
 
 </details>
 
@@ -217,8 +220,8 @@ _(repeat for each active repository)_
 ### By Author
 
 | Author | Commits | PRs | Issues |
-|--------|---------|-----|--------|
-| Name | 15 | 3 | 2 |
+| ------ | ------- | --- | ------ |
+| Name   | 15      | 3   | 2      |
 
 ### Activity Timeline
 
@@ -254,6 +257,7 @@ Chronological list of significant events across all repos, in Eastern Time.
 ## Output
 
 The final report content should be posted as a GitHub issue in the triggering repository with:
+
 - Title: `YYYY-MM-DD Daily Report`
 - Label: `daily-report`
 - The full markdown report as the issue body
