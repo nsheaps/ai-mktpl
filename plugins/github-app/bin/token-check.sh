@@ -104,6 +104,7 @@ export GITHUB_TOKEN_FILE="$TOKEN_FILE"
 export GITHUB_APP_ID="${GITHUB_APP_ID:-}"
 export GITHUB_APP_PRIVATE_KEY_PATH="${GITHUB_APP_PRIVATE_KEY_PATH:-}"
 export GITHUB_INSTALLATION_ID="${GITHUB_INSTALLATION_ID:-}"
+export GITHUB_APP_ENV_FILE="$ENV_RUNTIME_FILE"
 ENVEOF
   [[ -n "${GITHUB_APP_CLIENT_ID:-}" ]] && echo "export GITHUB_APP_CLIENT_ID=\"$GITHUB_APP_CLIENT_ID\"" >> "$ENV_RUNTIME_FILE"
   [[ -n "${GITHUB_APP_CLIENT_SECRET:-}" ]] && echo "export GITHUB_APP_CLIENT_SECRET=\"$GITHUB_APP_CLIENT_SECRET\"" >> "$ENV_RUNTIME_FILE"
@@ -223,9 +224,7 @@ case "$MINUTES" in
     trap 'release_lock' EXIT
 
     if [[ "$SYNC" == "true" ]]; then
-      log "token valid, but close to expiration, refreshing in the background"
-      # Even in sync mode, if token is still valid we can continue
-      # but we still refresh synchronously to ensure it's done
+      log "token valid but close to expiration, refreshing synchronously"
       if do_refresh_with_retries; then
         : # silent on success
       else
