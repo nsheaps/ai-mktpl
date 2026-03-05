@@ -1,8 +1,8 @@
-# GitHub Token Refresh Plugin
+# GitHub App Token Lifecycle Plugin
 
-**Status**: Draft
+**Status**: Implemented (v0.1.0)
 **Created**: 2026-02-18
-**Author**: Road Runner (Researcher)
+**Updated**: 2026-03-05
 
 ---
 
@@ -10,26 +10,25 @@
 
 ### Problem
 
-GitHub App installation tokens expire after **1 hour**. In agent team sessions that run for hours, tokens go stale and API calls (creating PRs, pushing commits, opening issues) start failing silently or with auth errors. The agent has no way to refresh the token mid-session.
-
-Today, if a user sets `GITHUB_TOKEN` at session start, it remains static for the entire session. For long-lived personal access tokens this is fine, but for GitHub App installation tokens (the recommended approach for agent identity), token refresh is essential.
+GitHub App installation tokens expire after **1 hour**. In agent sessions that run for hours, tokens go stale and API calls (creating PRs, pushing commits, opening issues) fail with auth errors. The agent has no way to refresh the token mid-session.
 
 Additionally, there's no standard way to ensure a Claude Code session starts with a valid GitHub App token. Users must manually generate tokens before launching.
 
 ### Requirements
 
-1. **Automatic token refresh**: The plugin must refresh GitHub App installation tokens before they expire, ensuring `GITHUB_TOKEN` (or equivalent) always contains a valid token.
-2. **SessionStart initialization**: When the session starts and GitHub App env vars are present (`GITHUB_APP_ID`, `GITHUB_APP_PRIVATE_KEY_PATH`, `GITHUB_INSTALLATION_ID`), automatically generate an initial token.
-3. **Transparent to agents**: Agents should not need to know about token refresh. `gh` CLI and `git push` should just work.
-4. **Configurable**: Support multiple token sources (GitHub App, fine-grained PAT rotation, etc.) via plugin config.
-5. **Fail-safe**: If token refresh fails, warn the user but don't crash the session.
-6. **No external dependencies**: Should work with just the GitHub API — no Redis, no database, no external token service.
+1. **Automatic token generation**: On session start, generate a valid installation token from GitHub App credentials.
+2. **Proactive refresh**: Before any tool call that uses git/gh, verify the token is still valid and refresh if needed.
+3. **Transparent to agents**: `gh` CLI and `git push` should just work without agent awareness of token lifecycle.
+4. **Flexible secret sourcing**: Support 1Password (`op://`), env files (`env-file://`), environment variables, and literal values.
+5. **Fail-safe**: If token refresh fails, warn but don't block the session.
+6. **No external dependencies beyond GitHub API**: No Redis, no database, no external token service.
 
 ### Non-Requirements
 
-- **Token vault/secrets management**: This plugin manages ephemeral runtime tokens, not long-lived secrets. PEM keys are stored by the user.
-- **Multi-provider support**: GitHub only for v1. Other providers (GitLab, Bitbucket) are future work.
-- **OAuth flows**: No interactive browser-based auth. This plugin uses pre-configured GitHub App credentials.
+- **Token vault/secrets management**: This plugin manages ephemeral runtime tokens, not long-lived secrets.
+- **Multi-provider support**: GitHub only for v1.
+- **OAuth flows**: No interactive browser-based auth. Uses pre-configured GitHub App credentials.
+- **MCP server**: Considered but rejected — a PreToolUse hook provides the same refresh guarantees with less complexity.
 
 ---
 
@@ -37,248 +36,208 @@ Additionally, there's no standard way to ensure a Claude Code session starts wit
 
 ### Architecture
 
-The plugin has two components working together:
+The plugin uses two hooks and a set of CLI scripts:
 
 ```
-┌─────────────────────────────────────────────────┐
-│ Claude Code Session                              │
-│                                                  │
-│  ┌──────────────────────────────────────────┐   │
-│  │ Component 1: SessionStart Hook            │   │
-│  │                                           │   │
-│  │ On session start:                         │   │
-│  │ 1. Check for GITHUB_APP_ID env var        │   │
-│  │ 2. Generate JWT from PEM key              │   │
-│  │ 3. Exchange JWT for installation token    │   │
-│  │ 4. Write token to shared file             │   │
-│  │ 5. Set GITHUB_TOKEN in environment        │   │
-│  └──────────────────────────────────────────┘   │
-│                                                  │
-│  ┌──────────────────────────────────────────┐   │
-│  │ Component 2: MCP Server (background)      │   │
-│  │                                           │   │
-│  │ Runs continuously:                        │   │
-│  │ - Refreshes token every 50 minutes        │   │
-│  │ - Writes new token to shared file         │   │
-│  │ - Exposes tools:                          │   │
-│  │   • get-github-token (returns current)    │   │
-│  │   • refresh-github-token (force refresh)  │   │
-│  │   • token-status (expiry, app info)       │   │
-│  └──────────────────────────────────────────┘   │
-│                                                  │
-│  ┌──────────────────────────────────────────┐   │
-│  │ Token File: ~/.config/agent/github-token  │   │
-│  │                                           │   │
-│  │ Read by: gh CLI, git credential helper,   │   │
-│  │          agents via MCP tool              │   │
-│  └──────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────┐
+│ Claude Code Session                                    │
+│                                                        │
+│  ┌────────────────────────────────────────────────┐   │
+│  │ Component 1: SessionStart Hook                  │   │
+│  │ (hooks/scripts/github-token-init.sh)            │   │
+│  │                                                 │   │
+│  │ 1. Resolve secrets (op://, env-file://, env)    │   │
+│  │ 2. Generate JWT from PEM key                    │   │
+│  │ 3. Exchange JWT for installation token          │   │
+│  │ 4. Write token to shared file                   │   │
+│  │ 5. Write runtime env file → CLAUDE_ENV_FILE     │   │
+│  │ 6. Configure git identity from App bot account  │   │
+│  └────────────────────────────────────────────────┘   │
+│                                                        │
+│  ┌────────────────────────────────────────────────┐   │
+│  │ Component 2: PreToolUse Hook                    │   │
+│  │ (hooks/scripts/github-token-check.sh)           │   │
+│  │                                                 │   │
+│  │ Before each tool call:                          │   │
+│  │ - Bash (gh/git): synchronous check              │   │
+│  │   - Expired → sync refresh, then allow          │   │
+│  │   - ≤30 min left → allow + background refresh   │   │
+│  │   - Valid → silent allow                        │   │
+│  │ - Other tools: debounced async check            │   │
+│  │ Debounced to avoid excessive checks (30s)       │   │
+│  └────────────────────────────────────────────────┘   │
+│                                                        │
+│  ┌────────────────────────────────────────────────┐   │
+│  │ Shared Files                                    │   │
+│  │                                                 │   │
+│  │ ~/.config/agent/github-token      (token)       │   │
+│  │ ~/.config/agent/github-token.meta (expiry/meta) │   │
+│  │ ~/.config/agent/github-app-env    (runtime env) │   │
+│  │                                                 │   │
+│  │ Read by: gh CLI ($GH_TOKEN), git credential     │   │
+│  │ helper, CLAUDE_ENV_FILE (re-sourced each cmd)   │   │
+│  └────────────────────────────────────────────────┘   │
+└───────────────────────────────────────────────────────┘
 ```
+
+### Why PreToolUse Instead of MCP Server
+
+The original spec proposed a background MCP server for continuous refresh. The implementation uses a PreToolUse hook instead because:
+
+1. **Simpler lifecycle**: No long-running process to manage, crash, or restart.
+2. **Demand-driven**: Only refreshes when a tool call actually needs a token, avoiding unnecessary API calls.
+3. **Same guarantee**: Every git/gh command is preceded by a freshness check, so stale tokens never reach GitHub.
+4. **Debounced**: Non-token-using tools get async checks at most every 30 seconds, preventing overhead.
 
 ### Component 1: SessionStart Hook
 
-**Trigger**: `SessionStart` event, when all of these env vars are set:
+**Trigger**: `SessionStart` event (all matchers).
 
-- `GITHUB_APP_ID` — The GitHub App's ID
-- `GITHUB_APP_PRIVATE_KEY_PATH` — Path to PEM file (e.g., `~/.config/agent/github-app.pem`)
-- `GITHUB_INSTALLATION_ID` — The installation ID for the target account/org
+**Secret Resolution** (in priority order):
 
-**Hook script** (`hooks/github-token-init.sh`):
+1. **`ref`** — Bulk secret loading:
+   - `op://vault/item` — Fetches all fields via `op-exec`, labels become env vars
+   - `env-file://path` — Sources `KEY=VALUE` pairs from a file (relative paths resolve against `CLAUDE_PROJECT_DIR`)
 
-```bash
-#!/usr/bin/env bash
-set -euo pipefail
+2. **`secrets.*`** — Individual overrides (take priority over ref):
+   - `${VAR_NAME}` — Expand from environment
+   - `op://vault/item/field` — Resolve via `op read`
+   - Literal value — Use as-is
 
-# Skip if GitHub App not configured
-[[ -z "${GITHUB_APP_ID:-}" ]] && exit 0
-[[ -z "${GITHUB_APP_PRIVATE_KEY_PATH:-}" ]] && exit 0
-[[ -z "${GITHUB_INSTALLATION_ID:-}" ]] && exit 0
+3. **Environment variables** — `GITHUB_APP_ID`, `GITHUB_APP_PRIVATE_KEY_PATH`, `GITHUB_INSTALLATION_ID`
 
-TOKEN_FILE="${GITHUB_TOKEN_FILE:-$HOME/.config/agent/github-token}"
-mkdir -p "$(dirname "$TOKEN_FILE")"
+4. **Legacy flat settings** — `github_app_id`, `private_key_path`, `github_installation_id` in plugin config
 
-# Generate JWT (10-minute validity)
-NOW=$(date +%s)
-IAT=$((NOW - 60))
-EXP=$((NOW + 540))
+**Private key handling**: If `GITHUB_APP_PRIVATE_KEY` contains key content (e.g., from 1Password) but no `GITHUB_APP_PRIVATE_KEY_PATH` is set, the key content is written to a secure temp file (`~/.config/agent/github-app-<app_id>.pem`, chmod 600).
 
-HEADER=$(echo -n '{"alg":"RS256","typ":"JWT"}' | base64 | tr -d '=' | tr '/+' '_-' | tr -d '\n')
-PAYLOAD=$(echo -n "{\"iss\":\"${GITHUB_APP_ID}\",\"iat\":${IAT},\"exp\":${EXP}}" | base64 | tr -d '=' | tr '/+' '_-' | tr -d '\n')
-SIGNATURE=$(echo -n "${HEADER}.${PAYLOAD}" | openssl dgst -sha256 -sign "$GITHUB_APP_PRIVATE_KEY_PATH" | base64 | tr -d '=' | tr '/+' '_-' | tr -d '\n')
-JWT="${HEADER}.${PAYLOAD}.${SIGNATURE}"
+**Token generation** (`bin/generate-token.sh`):
 
-# Exchange JWT for installation token
-RESPONSE=$(curl -s -X POST \
-  -H "Authorization: Bearer ${JWT}" \
-  -H "Accept: application/vnd.github+json" \
-  "https://api.github.com/app/installations/${GITHUB_INSTALLATION_ID}/access_tokens")
+1. Generate JWT (RS256, 10-minute validity) from the PEM key
+2. Exchange JWT for installation token via `POST /app/installations/{id}/access_tokens`
+3. Write token to file (chmod 600)
+4. Write metadata to `.meta` file (expiry, app_id, installation_id, permissions)
 
-TOKEN=$(echo "$RESPONSE" | jq -r '.token // empty')
-EXPIRES_AT=$(echo "$RESPONSE" | jq -r '.expires_at // empty')
+**Runtime env file**: Written to `~/.config/agent/github-app-env` and registered via `CLAUDE_ENV_FILE` as a `source` command. This file is re-sourced before each Bash command, so token refreshes by the PreToolUse hook are picked up automatically.
 
-if [[ -z "$TOKEN" ]]; then
-  echo "WARNING: Failed to generate GitHub App token" >&2
-  echo "$RESPONSE" >&2
-  exit 0  # Fail-safe: don't block session
-fi
+**Git identity**: If `auto_git_config: true` (default) and git user.name/email aren't already set, the hook fetches the App's slug from the API and configures git identity as `app-slug[bot] <id+app-slug[bot]@users.noreply.github.com>`.
 
-# Write token to file (readable only by user)
-echo "$TOKEN" > "$TOKEN_FILE"
-chmod 600 "$TOKEN_FILE"
+### Component 2: PreToolUse Hook
 
-# Write metadata
-echo "$EXPIRES_AT" > "${TOKEN_FILE}.meta"
+**Trigger**: `PreToolUse` event (all matchers).
 
-echo "GitHub App token generated (expires: ${EXPIRES_AT})"
-```
+**Guards**: Skips entirely if GitHub App credentials aren't in the environment or no token file exists.
 
-### Component 2: MCP Server
+**For Bash commands using gh/git** (synchronous path):
+- Checks `get_minutes_remaining()` from shared `lib/token-utils.sh`
+- **expired/missing**: Synchronous refresh via `bin/token-check.sh --sync --quiet`, then allow
+- **≤30 minutes**: Allow immediately, background refresh via `bin/token-check.sh --quiet &`
+- **>30 minutes**: Silent allow
 
-**Purpose**: Keeps the token fresh by running a background refresh loop, and exposes tools for agents to check token status.
+**For other tools** (async path):
+- Debounced to 30-second intervals
+- Background refresh if needed, never blocks
 
-**Implementation**: Lightweight stdio MCP server in bash (or TypeScript).
+### Token Check Script (`bin/token-check.sh`)
 
-**Refresh loop**: The MCP server's initialization spawns a background refresh process that:
+Standalone script invoked by both the PreToolUse hook (sync or background) and potentially by users directly.
 
-1. Sleeps for 50 minutes (tokens are valid for 60 minutes, refresh with 10-minute buffer)
-2. Regenerates JWT and exchanges for new installation token
-3. Writes new token to the shared file
-4. Repeats until the MCP server is stopped
+**Features**:
+- Retry with exponential backoff (3 attempts, 2s/4s/8s)
+- Cooldown period (5 minutes) after hard failure to avoid hammering the API
+- File-based locking to prevent concurrent refresh races
+- Updates the runtime env file on successful refresh
 
-**Exposed tools**:
+**Exit codes**: 0 (valid), 1 (refresh failed), 2 (not configured), 3 (in cooldown)
 
-| Tool                   | Description                            | Parameters | Returns                                                                          |
-| :--------------------- | :------------------------------------- | :--------- | :------------------------------------------------------------------------------- |
-| `get-github-token`     | Get the current valid GitHub App token | none       | Token string                                                                     |
-| `refresh-github-token` | Force an immediate token refresh       | none       | New token + expiry                                                               |
-| `token-status`         | Check token health and expiry          | none       | `{ valid: bool, expires_at: string, app_id: string, minutes_remaining: number }` |
+### Token Distribution
 
-**Why an MCP server instead of just a hook?**
+**Primary mechanism**: Shared file at `~/.config/agent/github-token`
 
-1. **Continuous refresh**: Hooks only fire on events. There's no periodic hook. An MCP server runs continuously alongside the session.
-2. **Tools for agents**: Agents can check token status or force refresh when they get auth errors.
-3. **Shared state**: The MCP server owns the token file, preventing race conditions from multiple refresh attempts.
+Consumers:
+- **`gh` CLI**: Via `$GH_TOKEN` environment variable (set by runtime env file)
+- **`git push/pull`**: Via git credential helper (`bin/git-credential-github-app.sh`)
+- **Direct reads**: Scripts can `cat $GITHUB_TOKEN_FILE`
 
-### Token Distribution to Agents
+The runtime env file (`~/.config/agent/github-app-env`) is sourced via `CLAUDE_ENV_FILE` before each Bash command, ensuring `$GH_TOKEN` and `$GITHUB_TOKEN` always reflect the latest token.
 
-**For agent teams** (tmux panes), the token must be accessible to all agents:
-
-**Option A: Shared file** (recommended)
-
-- Token written to `~/.config/agent/github-token`
-- Git credential helper reads from this file
-- `gh` CLI configured via `GH_TOKEN` pointing to file: `export GH_TOKEN=$(cat ~/.config/agent/github-token)`
-
-**Option B: Environment variable**
-
-- Less ideal because env vars are set at process start and can't be updated
-- Would require agents to re-read from file anyway
-
-**Git credential helper** (`~/.config/agent/git-credential-github-app.sh`):
-
-```bash
-#!/usr/bin/env bash
-# Git credential helper that reads from the token file
-TOKEN_FILE="${GITHUB_TOKEN_FILE:-$HOME/.config/agent/github-token}"
-if [[ -f "$TOKEN_FILE" ]]; then
-  echo "protocol=https"
-  echo "host=github.com"
-  echo "username=x-access-token"
-  echo "password=$(cat "$TOKEN_FILE")"
-fi
-```
-
-Configure via: `git config --global credential.https://github.com.helper '!~/.config/agent/git-credential-github-app.sh'`
+**Git credential helper** (`bin/git-credential-github-app.sh`):
+- Responds to `get` requests by reading the token file
+- No-ops on `store`/`erase` (lifecycle managed by hooks)
+- Configure via: `git config --global credential.https://github.com.helper '!/path/to/git-credential-github-app.sh'`
 
 ### Plugin Structure
 
 ```
-plugins/github-token-refresh/
+plugins/github-app/
 ├── .claude-plugin/
-│   └── plugin.json
+│   └── plugin.json                    # Plugin manifest
 ├── hooks/
-│   └── github-token-init.sh          # SessionStart hook
-├── mcp/
-│   └── token-refresh-server.sh       # MCP server (bash stdio)
+│   ├── hooks.json                     # Hook registration (SessionStart + PreToolUse)
+│   └── scripts/
+│       ├── github-token-init.sh       # SessionStart: secret resolution + token generation
+│       └── github-token-check.sh      # PreToolUse: token freshness check + refresh
 ├── bin/
-│   ├── generate-jwt.sh               # JWT generation helper
-│   ├── refresh-token.sh              # Token refresh helper
+│   ├── generate-token.sh             # JWT generation + token exchange
+│   ├── token-check.sh                # Token validation + refresh with retries/locking
+│   ├── token-status.sh               # JSON status report (used by diagnostics)
 │   └── git-credential-github-app.sh  # Git credential helper
+├── lib/
+│   └── token-utils.sh                # Shared: get_minutes_remaining()
+├── skills/
+│   └── github-app-token/
+│       └── SKILL.md                   # Agent skill documentation
+├── docs/
+│   └── token-refresh-spec.md          # This file
+├── github-app.settings.yaml           # Default plugin configuration
 └── README.md
-```
-
-**`plugin.json`**:
-
-```json
-{
-  "name": "github-token-refresh",
-  "version": "0.1.0",
-  "description": "Automatic GitHub App token refresh for long-running Claude Code sessions",
-  "hooks": {
-    "SessionStart": [
-      {
-        "type": "command",
-        "command": "${CLAUDE_PLUGIN_ROOT}/hooks/github-token-init.sh"
-      }
-    ]
-  },
-  "mcpServers": {
-    "github-token": {
-      "command": "${CLAUDE_PLUGIN_ROOT}/mcp/token-refresh-server.sh",
-      "args": []
-    }
-  }
-}
 ```
 
 ### Configuration
 
-Plugin config via `.claude/github-token-refresh.local.md`:
+Plugin config via `plugins.settings.yaml` (project, user, or plugin-level):
 
 ```yaml
----
-github_app_id: "12345"
-github_installation_id: "67890"
-private_key_path: "~/.config/agent/github-app.pem"
-token_file: "~/.config/agent/github-token"
-refresh_interval_minutes: 50
----
+github-app:
+  enabled: true
+
+  # Option 1: Bulk secret reference
+  # ref: "op://vault/github-app--repo--my-repo"
+  # ref: "env-file://./.env.github-app"
+
+  # Option 2: Individual secrets
+  # secrets:
+  #   github_app_id: "op://vault/item/GITHUB_APP_ID"
+  #   github_app_client_id: "${GITHUB_APP_CLIENT_ID}"
+  #   github_app_private_key: "op://vault/item/GITHUB_APP_PRIVATE_KEY"
+  #   github_installation_id: "67890"
+
+  # Option 3: Legacy flat settings
+  # github_app_id: "12345"
+  # private_key_path: "~/.config/agent/github-app.pem"
+  # github_installation_id: "67890"
+
+  # Auto-configure git identity from App bot account (default: true)
+  auto_git_config: true
+
+  # Token file location (default: ~/.config/agent/github-token)
+  # token_file: "~/.config/agent/github-token"
 ```
 
-Or via environment variables (higher priority):
+Or via environment variables: `GITHUB_APP_ID`, `GITHUB_APP_PRIVATE_KEY_PATH`, `GITHUB_INSTALLATION_ID`, `GITHUB_TOKEN_FILE`.
 
-- `GITHUB_APP_ID`
-- `GITHUB_APP_PRIVATE_KEY_PATH`
-- `GITHUB_INSTALLATION_ID`
-- `GITHUB_TOKEN_FILE`
+### Open Questions (Resolved)
 
-### Phases
+1. **Can a SessionStart hook set environment variables?** — Yes, via `CLAUDE_ENV_FILE`. The hook writes a `source` command that re-reads the runtime env file on each Bash invocation.
 
-| Phase    | Scope                                                                    | Deliverable                      |
-| :------- | :----------------------------------------------------------------------- | :------------------------------- |
-| **v0.1** | SessionStart hook generates initial token, writes to file                | Token available at session start |
-| **v0.2** | MCP server with background refresh loop + `token-status` tool            | Continuous token freshness       |
-| **v0.3** | Git credential helper, `gh` CLI integration, agent team distribution     | Seamless git/gh auth             |
-| **v0.4** | Multiple token sources (PAT rotation, org-level apps), per-agent scoping | Advanced identity management     |
+2. **Race conditions**: File-based locking in `token-check.sh` prevents concurrent refresh attempts. The lock includes PID-based stale detection.
 
-### Open Questions
+3. **PEM key security**: The hook validates file permissions (must be 600 or 400) and warns if too permissive.
 
-1. **Can a SessionStart hook set environment variables for the session?** If hooks run in a subprocess, `export GITHUB_TOKEN=...` won't affect the parent Claude Code process. May need to rely on the file-based approach exclusively.
-
-2. **MCP server lifecycle**: Does Claude Code keep MCP servers running for the entire session? If the MCP server crashes, does it restart? Need to verify reliability for the background refresh loop.
-
-3. **Race conditions in team mode**: Multiple agents might try to use the token file simultaneously. File reads are atomic on most filesystems, but the write-during-read case needs consideration. A `.lock` file or atomic rename pattern may be needed.
-
-4. **PEM key security**: The PEM file is the most sensitive credential. Should the plugin validate file permissions (must be 600)? Should it support encrypted PEM files with passphrase?
-
-5. **Should this integrate with the agent-github-auth spec?** The auth spec defines Tier 2 (GitHub App). This plugin implements the runtime token management for that tier. They should cross-reference each other.
-
-6. **Fallback behavior**: If GitHub App auth fails, should the plugin fall back to the user's existing `GITHUB_TOKEN` or `gh auth` token? Or should it warn and let the user decide?
+4. **Fallback behavior**: If GitHub App auth fails, the plugin warns on stderr and allows the command to proceed. The command will fail with a 401, which is more informative than silently blocking.
 
 ### References
 
-- [GitHub App Installation Tokens — GitHub Docs](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app)
-- [GitHub App JWT Authentication — GitHub Docs](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-json-web-token-jwt-for-a-github-app)
-- [Git Credential Helpers — Git Docs](https://git-scm.com/docs/gitcredentials)
+- [GitHub App Installation Tokens](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app)
+- [GitHub App JWT Authentication](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-json-web-token-jwt-for-a-github-app)
+- [Git Credential Helpers](https://git-scm.com/docs/gitcredentials)
 - [Claude Code Hooks Reference](https://code.claude.com/docs/en/hooks)
-- [Claude Code Plugins Reference](https://code.claude.com/docs/en/plugins-reference)
