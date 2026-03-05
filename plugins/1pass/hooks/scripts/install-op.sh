@@ -90,7 +90,7 @@ resolve_op_bin() {
     if [ "$op_version" = "latest" ]; then
       local current_version latest_version
       current_version="$("$op_bin" --version 2>/dev/null || echo "unknown")"
-      latest_version="$(tool_resolve_github_version "1Password/connect" "2.30.0")"
+      latest_version="$(tool_resolve_github_version "1Password/cli" "2.30.0")"
       if [ "$current_version" = "$latest_version" ]; then
         echo "${PLUGIN_NAME}: op $current_version is already latest" >&2
         echo "$op_bin"
@@ -108,7 +108,7 @@ resolve_op_bin() {
     echo "${PLUGIN_NAME}: Installing op to $INSTALL_DIR" >&2
     local install_version="$op_version"
     if [ "$install_version" = "latest" ]; then
-      install_version="$(tool_resolve_github_version "1Password/connect" "2.30.0")"
+      install_version="$(tool_resolve_github_version "1Password/cli" "2.30.0")"
     fi
     download_op "$install_version"
   fi

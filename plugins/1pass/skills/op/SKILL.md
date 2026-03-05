@@ -282,7 +282,7 @@ when `auto_install: true`. Alternatively, install via mise:
 ```toml
 # mise.toml
 [tools]
-"ubi:1Password/cli" = "latest"
+"vfox:mise-plugins/vfox-1password" = "latest"
 ```
 
 ### Authentication errors
