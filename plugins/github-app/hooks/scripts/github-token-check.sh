@@ -150,7 +150,7 @@ if uses_token; then
     missing|expired)
       # Token is invalid — must refresh synchronously
       echo "github-app: token is ${MINUTES}, refreshing synchronously..." >&2
-      if "$BIN_DIR/token-check.sh" --sync --quiet 2>&2; then
+      if "$BIN_DIR/token-check.sh" --sync --quiet; then
         # Refresh succeeded — read the updated token for injection
         # The runtime env file is already updated by token-check.sh
         allow_silent
