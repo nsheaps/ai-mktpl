@@ -100,17 +100,6 @@ allow_silent() {
   exit 0
 }
 
-allow_with_message() {
-  local msg="$1"
-  jq -n --arg msg "$msg" '{
-    hookSpecificOutput: {
-      permissionDecision: "allow",
-      additionalContext: $msg
-    }
-  }'
-  exit 0
-}
-
 # --- Main logic ---
 
 # Skip debounce if this is a token-using command (always check for those)
