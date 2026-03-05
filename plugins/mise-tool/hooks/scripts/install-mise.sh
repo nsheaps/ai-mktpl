@@ -51,7 +51,7 @@ resolve_mise_bin() {
         echo "${PLUGIN_NAME}: mise v${version} installed successfully" >&2
       else
         echo "${PLUGIN_NAME}: Failed to download mise v${version}" >&2
-        echo '{}'; exit 0
+        return 1
       fi
     fi
     tool_ensure_path "$INSTALL_DIR"
@@ -62,7 +62,7 @@ resolve_mise_bin() {
       echo "${PLUGIN_NAME}: auto_install=false, using mise from PATH at $mise_bin" >&2
     else
       echo "${PLUGIN_NAME}: auto_install=false and mise not on PATH, skipping" >&2
-      echo '{}'; exit 0
+      return 1
     fi
   fi
 
@@ -73,7 +73,7 @@ resolve_mise_bin() {
 
 do_setup() {
   local mise_bin
-  mise_bin="$(resolve_mise_bin)"
+  mise_bin="$(resolve_mise_bin)" || { echo '{}'; exit 0; }
 
   # Always activate mise and persist to CLAUDE_ENV_FILE
   if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
