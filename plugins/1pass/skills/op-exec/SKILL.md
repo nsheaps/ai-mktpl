@@ -26,8 +26,7 @@ by providing a simpler interface than `op run` for common use cases.
 ```toml
 # mise.toml
 [tools]
-# Once available via GitHub releases:
-"ubi:nsheaps/op-exec" = "latest"
+"github:nsheaps/op-exec" = "latest"
 ```
 
 ### Via Homebrew
