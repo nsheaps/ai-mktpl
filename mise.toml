@@ -11,6 +11,12 @@ just = "latest"
 "npm:eslint" = "latest"
 yarn = "latest"
 
+# 1Password CLI and op-exec
+"ubi:1Password/cli" = "latest"
+# TODO: op-exec is currently distributed via Homebrew; once available via GitHub
+# releases, uncomment the line below to install via mise
+# "ubi:nsheaps/op-exec" = "latest"
+
 [settings]
 # Use shorter paths for tools
 legacy_version_file = false
