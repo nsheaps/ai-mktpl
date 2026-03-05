@@ -4,8 +4,6 @@
 **Created**: 2026-02-18
 **Author**: Road Runner (Researcher)
 
-<!-- TODO: Link to agent-github-auth spec once migrated from claude-utils -->
-
 ---
 
 ## Problem & Requirements
@@ -284,5 +282,3 @@ Or via environment variables (higher priority):
 - [Git Credential Helpers — Git Docs](https://git-scm.com/docs/gitcredentials)
 - [Claude Code Hooks Reference](https://code.claude.com/docs/en/hooks)
 - [Claude Code Plugins Reference](https://code.claude.com/docs/en/plugins-reference)
-  <!-- TODO: Link to agent-github-auth spec once migrated from claude-utils -->
-  <!-- TODO: Link to plugin hot-reload research once migrated from claude-utils -->
