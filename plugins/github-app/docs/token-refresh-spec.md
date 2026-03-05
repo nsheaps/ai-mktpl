@@ -128,12 +128,14 @@ The original spec proposed a background MCP server for continuous refresh. The i
 **Guards**: Skips entirely if GitHub App credentials aren't in the environment or no token file exists.
 
 **For Bash commands using gh/git** (synchronous path):
+
 - Checks `get_minutes_remaining()` from shared `lib/token-utils.sh`
 - **expired/missing**: Synchronous refresh via `bin/token-check.sh --sync --quiet`, then allow
 - **≤30 minutes**: Allow immediately, background refresh via `bin/token-check.sh --quiet &`
 - **>30 minutes**: Silent allow
 
 **For other tools** (async path):
+
 - Debounced to 30-second intervals
 - Background refresh if needed, never blocks
 
@@ -142,6 +144,7 @@ The original spec proposed a background MCP server for continuous refresh. The i
 Standalone script invoked by both the PreToolUse hook (sync or background) and potentially by users directly.
 
 **Features**:
+
 - Retry with exponential backoff (3 attempts, 2s/4s/8s)
 - Cooldown period (5 minutes) after hard failure to avoid hammering the API
 - File-based locking to prevent concurrent refresh races
@@ -154,6 +157,7 @@ Standalone script invoked by both the PreToolUse hook (sync or background) and p
 **Primary mechanism**: Shared file at `~/.config/agent/github-token`
 
 Consumers:
+
 - **`gh` CLI**: Via `$GH_TOKEN` environment variable (set by runtime env file)
 - **`git push/pull`**: Via git credential helper (`bin/git-credential-github-app.sh`)
 - **Direct reads**: Scripts can `cat $GITHUB_TOKEN_FILE`
@@ -161,6 +165,7 @@ Consumers:
 The runtime env file (`~/.config/agent/github-app-env`) is sourced via `CLAUDE_ENV_FILE` before each Bash command, ensuring `$GH_TOKEN` and `$GITHUB_TOKEN` always reflect the latest token.
 
 **Git credential helper** (`bin/git-credential-github-app.sh`):
+
 - Responds to `get` requests by reading the token file
 - No-ops on `store`/`erase` (lifecycle managed by hooks)
 - Configure via: `git config --global credential.https://github.com.helper '!/path/to/git-credential-github-app.sh'`
