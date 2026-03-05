@@ -8,7 +8,5 @@ gh-tool:
   auto_install: false
 
 mise-tool:
-  # Defer mise trust and mise install to the project's own process.
-  # mise activates via CLAUDE_ENV_FILE; tools are installed lazily via shims.
-  auto_trust: false
-  auto_install_tools: false
+  auto_install_tools: true
+  auto_trust: true
