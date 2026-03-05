@@ -1,0 +1,43 @@
+name: Stale Issues
+
+on:
+  schedule:
+    - cron: '0 6 * * *' # daily at 6am UTC
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      # Step 1: Label all stale issues, but never auto-close
+      - uses: actions/stale@v9
+        with:
+          stale-issue-message: >
+            This issue has been automatically marked as stale because it has not had
+            recent activity.
+          stale-issue-label: stale
+          days-before-stale: 30
+          days-before-close: -1
+          # Disable PR staleness
+          days-before-pr-stale: -1
+          days-before-pr-close: -1
+          exempt-issue-labels: status:in-progress,status:blocked,status:on-hold,priority:high
+          operations-per-run: 100
+
+      # Step 2: Close stale daily-report issues
+      - uses: actions/stale@v9
+        with:
+          only-issue-labels: daily-report
+          stale-issue-label: stale
+          close-issue-message: >
+            This stale daily-report issue has been automatically closed due to inactivity.
+          days-before-stale: 30
+          days-before-close: 7
+          # Disable PR staleness
+          days-before-pr-stale: -1
+          days-before-pr-close: -1
+          exempt-issue-labels: status:in-progress,status:blocked,status:on-hold,priority:high
+          operations-per-run: 50
