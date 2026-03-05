@@ -64,7 +64,3 @@ github-app:
 
   # Where to write the token (default: ~/.config/agent/github-token)
   # token_file: "~/.config/agent/github-token"
-
-  # Token refresh interval in seconds (default: 3000 = 50 minutes)
-  # Tokens expire after 3600s (1 hour), so refresh with buffer
-  # refresh_interval: 3000

@@ -28,18 +28,25 @@ This skill covers managing GitHub App installation tokens in Claude Code session
 ```
 Session Start
   │
-  ├─ SessionStart Hook
+  ├─ SessionStart Hook (github-token-init.sh)
   │   ├─ Reads GITHUB_APP_ID, PRIVATE_KEY_PATH, INSTALLATION_ID
   │   ├─ Generates JWT from PEM key
   │   ├─ Exchanges JWT for installation token (1 hour validity)
   │   ├─ Writes token to ~/.config/agent/github-token
-  │   └─ Sets GH_TOKEN and GITHUB_TOKEN env vars
+  │   ├─ Creates runtime env file (~/.config/agent/github-app-env)
+  │   ├─ Sources env file via CLAUDE_ENV_FILE
+  │   ├─ Configures git identity (bot user)
+  │   └─ Prints: app name, expiry time, env var names
   │
-  └─ MCP Server (background)
-      ├─ Refreshes token every 50 minutes
-      ├─ Exposes token-status tool
-      ├─ Exposes refresh-github-token tool
-      └─ Exposes get-github-token tool
+  └─ PreToolUse Hook (github-token-check.sh)
+      ├─ Debounced: checks at most every 30 seconds
+      ├─ For gh/git commands: synchronous check
+      │   ├─ Valid + >30min: silent allow
+      │   ├─ Valid + <30min: allow + background refresh
+      │   └─ Expired: synchronous refresh, then allow
+      ├─ For other tools: async background check
+      ├─ Retries up to 3x with exponential backoff
+      └─ 5-minute cooldown after all retries fail
 ```
 
 ### Token Lifecycle
@@ -47,8 +54,9 @@ Session Start
 1. **Generation**: JWT created from App private key (10-min validity)
 2. **Exchange**: JWT exchanged for installation token via GitHub API
 3. **Storage**: Token written to `~/.config/agent/github-token` (permissions 600)
-4. **Refresh**: Background loop regenerates every 50 minutes
-5. **Expiry**: Tokens valid for 1 hour; refreshed with 10-minute buffer
+4. **Monitoring**: PreToolUse hook checks expiry before each tool call (debounced)
+5. **Refresh**: When within 30 min of expiry, token is regenerated
+6. **Expiry**: Tokens valid for 1 hour; refreshed with 30-minute buffer
 
 ## Setup
 
@@ -113,33 +121,25 @@ chmod 600 ~/.config/agent/github-app.pem
 openssl rsa -in ~/.config/agent/github-app.pem -check -noout
 ```
 
-## MCP Tools
+## Checking Token Status
 
-### token-status
+Run the token status script directly:
 
-Check current token health:
-
-```
-Tool: token-status
-Returns: { valid, expires_at, app_id, installation_id, minutes_remaining }
+```bash
+~/.config/agent/github-app-env  # source to get vars
+$CLAUDE_PLUGIN_ROOT/bin/token-status.sh
 ```
 
-### refresh-github-token
+Or check the metadata file:
 
-Force immediate token refresh (useful after auth errors):
-
-```
-Tool: refresh-github-token
-Returns: New token expiry information
+```bash
+cat ~/.config/agent/github-token.meta | jq .
 ```
 
-### get-github-token
+## Forcing a Token Refresh
 
-Retrieve the current token value:
-
-```
-Tool: get-github-token
-Returns: The current installation access token string
+```bash
+$CLAUDE_PLUGIN_ROOT/bin/token-check.sh --sync
 ```
 
 ## Git Credential Helper
@@ -160,8 +160,8 @@ For agent teams (tmux panes), all agents share the same token file:
 
 - Token file: `~/.config/agent/github-token`
 - All agents read from the same file
-- MCP server in the primary session handles refresh
-- File reads are atomic — no locking needed for reads
+- PreToolUse hook in each agent monitors and refreshes as needed
+- File-based locking prevents concurrent refresh races
 
 ## Troubleshooting
 
@@ -189,13 +189,29 @@ The JWT is invalid. Common causes:
 
 The installation ID is wrong or the App is no longer installed on the target account.
 
-### "Token expired" despite refresh loop
+### "Token expired" or auth errors despite PreToolUse hook
 
-The MCP server may have stopped. Check:
+Check that the runtime env file exists and is being sourced:
 
-1. Is the MCP server process running?
-2. Are the environment variables still set?
-3. Try manual refresh via the `refresh-github-token` tool
+```bash
+cat ~/.config/agent/github-app-env
+```
+
+If missing, the SessionStart hook may have failed. Check stderr output from session start.
+
+### "in cooldown period"
+
+The plugin failed to refresh 3 times consecutively and is backing off for 5 minutes. Check:
+
+1. Network connectivity
+2. GitHub API status
+3. App credentials validity
+
+To clear the cooldown manually:
+
+```bash
+rm ~/.config/agent/github-token.cooldown
+```
 
 ### Permissions Issues
 

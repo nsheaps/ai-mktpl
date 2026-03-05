@@ -1,13 +1,13 @@
 # github-app
 
-Automatic GitHub App token refresh for long-running Claude Code sessions.
+Automatic GitHub App token lifecycle for Claude Code sessions.
 
-GitHub App installation tokens expire after 1 hour. This plugin generates tokens on session start and refreshes them continuously via a background MCP server, ensuring `gh` CLI and `git push` always have valid credentials.
+GitHub App installation tokens expire after 1 hour. This plugin generates tokens on session start and monitors their validity via a PreToolUse hook, refreshing transparently before commands that need authentication.
 
 ## Features
 
-- **SessionStart hook**: Generates initial installation token from GitHub App credentials
-- **MCP server**: Background refresh loop every 50 minutes with token management tools
+- **SessionStart hook**: Generates initial installation token, configures git identity, exports credentials via runtime env file
+- **PreToolUse hook**: Debounced/throttled token validity checks with smart sync/async refresh
 - **Git credential helper**: Seamless `git push` / `gh` auth via shared token file
 - **Agent team support**: Token file shared across all agents in a team session
 - **Authentication skill**: Shared with `github` plugin — covers all auth methods (device code, PATs, fine-grained tokens, GitHub App auth)
@@ -112,19 +112,25 @@ chmod 600 ~/.config/agent/github-app.pem
 1. **Session starts**: Hook reads App credentials, generates JWT, exchanges for installation token
 2. **Token stored**: Written to `~/.config/agent/github-token` with 600 permissions
 3. **Git identity configured**: Sets `git config user.name` and `user.email` to the App's bot identity (e.g., `my-app[bot]` / `12345+my-app[bot]@users.noreply.github.com`)
-4. **Environment set**: `GH_TOKEN` and `GITHUB_TOKEN` exported via `CLAUDE_ENV_FILE`
-5. **Background refresh**: MCP server regenerates token every 50 minutes
-6. **Git integration**: Credential helper reads from token file for `git push`
+4. **Runtime env file**: `GH_TOKEN` and `GITHUB_TOKEN` written to `~/.config/agent/github-app-env`, sourced by `CLAUDE_ENV_FILE`
+5. **PreToolUse monitoring**: Before each tool call, checks token expiry (debounced to every 30s)
+6. **Smart refresh**: Commands using `gh`/`git push` get synchronous checks; others get async background refresh
+7. **Retry with backoff**: Failed refreshes retry up to 3 times, then back off for 5 minutes
+8. **Git integration**: Credential helper reads from token file for `git push`
 
 Git identity is only configured if `user.name`/`user.email` are not already set. Disable with `auto_git_config: false` in plugin settings.
 
-## MCP Tools
+### Token Refresh Behavior
 
-| Tool                   | Description                                         |
-| ---------------------- | --------------------------------------------------- |
-| `token-status`         | Check token validity, expiry, and minutes remaining |
-| `refresh-github-token` | Force immediate token refresh                       |
-| `get-github-token`     | Get the current token value                         |
+| Scenario                                          | Behavior                                  |
+| ------------------------------------------------- | ----------------------------------------- |
+| Token valid, >30 min remaining                    | Silent, no action                         |
+| Token valid, <30 min remaining, non-token command | Background refresh, prints status         |
+| Token valid, <30 min remaining, gh/git command    | Allow + background refresh, prints status |
+| Token expired, gh/git command                     | Synchronous refresh before allowing       |
+| Token expired, non-token command                  | Background refresh                        |
+| Refresh fails                                     | Retry up to 3x with exponential backoff   |
+| All retries fail                                  | 5-minute cooldown, then retry             |
 
 ## Configuration
 
@@ -147,7 +153,7 @@ github-app:
 
   # Other settings
   token_file: "~/.config/agent/github-token"
-  refresh_interval: 3000 # seconds (50 minutes)
+  auto_git_config: true
 ```
 
 ### Secret Reference Syntax
@@ -166,19 +172,22 @@ github-app:
 plugins/github-app/
 ├── .claude-plugin/plugin.json
 ├── hooks/
-│   └── scripts/github-token-init.sh    # SessionStart: initial token
-├── mcp/
-│   └── token-refresh-server.sh         # Background refresh + MCP tools
+│   ├── hooks.json
+│   └── scripts/
+│       ├── github-token-init.sh     # SessionStart: initial token + env setup
+│       └── github-token-check.sh    # PreToolUse: debounced validity check
 ├── skills/
-│   ├── github-auth/SKILL.md            # Shared auth skill (symlink)
-│   └── github-app-token/SKILL.md       # Token management skill
+│   ├── github-auth/SKILL.md         # Shared auth skill (symlink)
+│   └── github-app-token/SKILL.md    # Token management skill
 ├── bin/
-│   ├── generate-token.sh               # JWT generation + token exchange
-│   ├── git-credential-github-app.sh    # Git credential helper
-��   └── token-status.sh                 # Token status checker
-├── lib/                                # Shared libraries (symlinks)
+│   ├── generate-token.sh            # JWT generation + token exchange
+│   ├── token-check.sh               # Token validity check + refresh logic
+│   ├── token-status.sh              # Token status JSON output
+│   └── git-credential-github-app.sh # Git credential helper
+├── lib/                             # Shared libraries (symlinks)
 ├── docs/
-│   └── token-refresh-spec.md           # Original design spec
+│   ├── token-refresh-spec.md        # Original design spec
+│   └── reference/                   # Archived implementations
 └── README.md
 ```
 
@@ -190,6 +199,7 @@ plugins/github-app/
 ## Security
 
 - PEM private keys must have 600 or 400 permissions (plugin warns if not)
-- Token file is written with 600 permissions
+- Token file and runtime env file are written with 600 permissions
 - Installation tokens are scoped to the App's configured permissions
 - Tokens expire after 1 hour (non-extensible) and are refreshed automatically
+- File-based locking prevents concurrent refresh races

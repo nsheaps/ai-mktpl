@@ -27,6 +27,6 @@ case "${1:-}" in
     fi
     ;;
   store|erase)
-    # No-op: token lifecycle is managed by the MCP server
+    # No-op: token lifecycle is managed by the plugin hooks
     ;;
 esac
