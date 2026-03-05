@@ -16,7 +16,7 @@ A SessionStart hook uses `jq` (via `safe-settings-write.sh`) to write env vars i
 
 ### Approach B: Writing to `CLAUDE_ENV_FILE`
 
-Used by: `mise-tool`, `gh-tool`
+Used by: `mise`, `gh-tool`
 
 A SessionStart hook appends `export` statements to the file at `$CLAUDE_ENV_FILE`. Claude Code sources this file before each Bash tool invocation.
 
@@ -29,29 +29,29 @@ echo 'eval "$(mise activate bash)"' >> "$CLAUDE_ENV_FILE"
 
 Understanding what Claude Code hot-reloads mid-session is critical to choosing the right mechanism.
 
-| Config type                        | Hot-reloaded mid-session?                                     |
-| ---------------------------------- | ------------------------------------------------------------- |
-| `settings.local.json` (incl. env)  | **Yes** — hot-reloaded on file change (v1.0.90+)              |
-| `CLAUDE.md` / `.claude/rules/`     | **No** — cached at session start (re-injected on `/compact`)  |
-| Skills (`SKILL.md`)                | **No** — cached at session start                              |
-| Plugins (`plugin.json`, hooks)     | **No** — tool list locked at startup for cache preservation   |
-| `CLAUDE_ENV_FILE`                  | **N/A** — written at session start, sourced before Bash calls |
+| Config type                       | Hot-reloaded mid-session?                                     |
+| --------------------------------- | ------------------------------------------------------------- |
+| `settings.local.json` (incl. env) | **Yes** — hot-reloaded on file change (v1.0.90+)              |
+| `CLAUDE.md` / `.claude/rules/`    | **No** — cached at session start (re-injected on `/compact`)  |
+| Skills (`SKILL.md`)               | **No** — cached at session start                              |
+| Plugins (`plugin.json`, hooks)    | **No** — tool list locked at startup for cache preservation   |
+| `CLAUDE_ENV_FILE`                 | **N/A** — written at session start, sourced before Bash calls |
 
 Settings files are the **only** hot-reloadable config in Claude Code. Everything else (rules, skills, plugins) is frozen at session start.
 
 ## Detailed Tradeoff
 
-| Dimension              | `settings.local.json` `.env`                                          | `CLAUDE_ENV_FILE`                                       |
-| ---------------------- | --------------------------------------------------------------------- | ------------------------------------------------------- |
-| **Scope**              | Claude process + all tool calls (Bash, MCP, etc.)                     | Bash tool calls only                                    |
-| **Hot-reload**         | **Yes** — changes picked up mid-session                               | **No** — written once at session start                  |
-| **Persistence**        | Permanent on disk, survives across sessions                           | Session-scoped temp file, auto-cleaned                  |
-| **Shell expressions**  | No — static string values only                                        | Yes — `eval`, conditional PATH, etc.                    |
-| **Conflict risk**      | Higher — multiple plugins writing same file need atomic writes         | Low — append-only (`>>`)                                |
-| **Cleanup**            | Manual — values persist until explicitly removed                      | Automatic with session                                  |
-| **Security (secrets)** | Secrets persist on disk permanently                                   | Secrets scoped to session lifetime                      |
-| **Reliability**        | Solid                                                                 | `CLAUDE_ENV_FILE` can sometimes be empty (GH #15840)    |
-| **Appropriate for**    | Config Claude itself needs (telemetry, OTEL, feature flags)           | PATH mods, shell tool activation                        |
+| Dimension              | `settings.local.json` `.env`                                   | `CLAUDE_ENV_FILE`                                    |
+| ---------------------- | -------------------------------------------------------------- | ---------------------------------------------------- |
+| **Scope**              | Claude process + all tool calls (Bash, MCP, etc.)              | Bash tool calls only                                 |
+| **Hot-reload**         | **Yes** — changes picked up mid-session                        | **No** — written once at session start               |
+| **Persistence**        | Permanent on disk, survives across sessions                    | Session-scoped temp file, auto-cleaned               |
+| **Shell expressions**  | No — static string values only                                 | Yes — `eval`, conditional PATH, etc.                 |
+| **Conflict risk**      | Higher — multiple plugins writing same file need atomic writes | Low — append-only (`>>`)                             |
+| **Cleanup**            | Manual — values persist until explicitly removed               | Automatic with session                               |
+| **Security (secrets)** | Secrets persist on disk permanently                            | Secrets scoped to session lifetime                   |
+| **Reliability**        | Solid                                                          | `CLAUDE_ENV_FILE` can sometimes be empty (GH #15840) |
+| **Appropriate for**    | Config Claude itself needs (telemetry, OTEL, feature flags)    | PATH mods, shell tool activation                     |
 
 ## When to Use Which
 
@@ -96,11 +96,11 @@ The cleanup and conflict concerns make the settings file approach the higher-ris
 
 ## Examples in This Repository
 
-| Plugin               | Mechanism              | Why                                                      |
-| -------------------- | ---------------------- | -------------------------------------------------------- |
-| `datadog-otel-setup` | `settings.local.json`  | OTEL config must reach Claude's own telemetry process    |
-| `mise-tool`          | `CLAUDE_ENV_FILE`      | PATH manipulation and `mise activate` shell expressions  |
-| `gh-tool`            | `CLAUDE_ENV_FILE`      | PATH manipulation for project-local binary install       |
+| Plugin               | Mechanism             | Why                                                     |
+| -------------------- | --------------------- | ------------------------------------------------------- |
+| `datadog-otel-setup` | `settings.local.json` | OTEL config must reach Claude's own telemetry process   |
+| `mise`               | `CLAUDE_ENV_FILE`     | PATH manipulation and `mise activate` shell expressions |
+| `gh-tool`            | `CLAUDE_ENV_FILE`     | PATH manipulation for project-local binary install      |
 
 ## Related
 

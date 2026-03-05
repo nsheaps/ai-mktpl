@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# install-mise.sh — SessionStart hook for mise-tool plugin
+# install-mise.sh — SessionStart hook for mise plugin
 #
 # Installs or updates mise (tool version manager) for Claude Code web sessions.
 # When install_to_project is true, installs to $CLAUDE_PROJECT_DIR/bin/.local/
 # which is gitignored and added to PATH.
 set -euo pipefail
 
-PLUGIN_NAME="mise-tool"
+PLUGIN_NAME="mise"
 source "${CLAUDE_PLUGIN_ROOT}/lib/plugin-config-read.sh"
 source "${CLAUDE_PLUGIN_ROOT}/lib/tool-install.sh"
 

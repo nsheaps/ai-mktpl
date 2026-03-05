@@ -1,4 +1,4 @@
-# mise-tool
+# mise
 
 Install and manage [mise](https://mise.run) (tool version manager) in Claude Code sessions.
 
@@ -30,7 +30,7 @@ Create or update `plugins.settings.yaml` at project or user level:
 # In $CLAUDE_PROJECT_DIR/.claude/plugins.settings.yaml
 # or ~/.claude/plugins.settings.yaml
 
-mise-tool:
+mise:
   enabled: true # Enable/disable the plugin
   install_to_project: true # Install to $project/bin/.local (vs ~/.local/bin)
   background_install: false # Run install in background

@@ -97,7 +97,7 @@
     "plugin-dev@claude-plugins-official": true,
     "data-serialization@nsheaps-claude-plugins": true,
     "todo-sync@nsheaps-claude-plugins": true,
-    "mise-tool@nsheaps-claude-plugins": true,
+    "mise@nsheaps-claude-plugins": true,
     "gh-tool@nsheaps-claude-plugins": true,
     "permissions-sync@nsheaps-claude-plugins": true,
     "sequential-thinking@nsheaps-claude-plugins": true

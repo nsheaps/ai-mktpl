@@ -256,7 +256,7 @@ mise unset NODE_ENV
 This plugin supports configuration via `plugins.settings.yaml`:
 
 ```yaml
-mise-tool:
+mise:
   enabled: true
   install_to_project: true # Install to $project/bin/.local
   background_install: false # Install in background
