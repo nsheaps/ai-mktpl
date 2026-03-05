@@ -2,7 +2,7 @@
 # install-gh.sh — SessionStart hook for github plugin
 #
 # Installs or updates GitHub CLI (gh) for Claude Code web sessions.
-# When install_to_project is true, installs to $CLAUDE_PROJECT_DIR/bin/.local/
+# When installToProject is true, installs to $CLAUDE_PROJECT_DIR/bin/.local/
 # which is gitignored and added to PATH.
 set -euo pipefail
 
@@ -18,8 +18,8 @@ tool_is_web_session || { echo '{}'; exit 0; }
 # --- Read config ---
 
 version="$(plugin_get_config "version" "latest")"
-auto_install="$(plugin_get_config "auto_install" "true")"
-auto_auth_check="$(plugin_get_config "auto_auth_check" "true")"
+auto_install="$(plugin_get_config "autoInstall" "true")"
+auto_auth_check="$(plugin_get_config "autoAuthCheck" "true")"
 
 tool_resolve_install_dir
 
@@ -56,10 +56,10 @@ download_gh() {
 resolve_gh_bin() {
   if [ "$auto_install" = "false" ]; then
     if tool_is_available gh; then
-      echo "${PLUGIN_NAME}: auto_install=false, using gh from PATH" >&2
+      echo "${PLUGIN_NAME}: autoInstall=false, using gh from PATH" >&2
       command -v gh
     else
-      echo "${PLUGIN_NAME}: auto_install=false and gh not on PATH, skipping" >&2
+      echo "${PLUGIN_NAME}: autoInstall=false and gh not on PATH, skipping" >&2
       return 1
     fi
     return

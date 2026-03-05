@@ -26,9 +26,9 @@ plugin_is_enabled || { echo '{}'; exit 0; }
 # --- Read config values ---
 
 endpoint="$(plugin_get_config "endpoint" "https://otel.datadoghq.com:4317")"
-metrics_exporter="$(plugin_get_config "metrics_exporter" "otlp")"
-logs_exporter="$(plugin_get_config "logs_exporter" "otlp")"
-api_key_raw="$(plugin_get_config "api_key" '${DD_API_KEY}')"
+metrics_exporter="$(plugin_get_config "metricsExporter" "otlp")"
+logs_exporter="$(plugin_get_config "logsExporter" "otlp")"
+api_key_raw="$(plugin_get_config "apiKey" '${DD_API_KEY}')"
 
 # --- Resolve API key ---
 

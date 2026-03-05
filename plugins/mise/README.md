@@ -32,11 +32,11 @@ Create or update `plugins.settings.yaml` at project or user level:
 
 mise:
   enabled: true # Enable/disable the plugin
-  install_to_project: true # Install to $project/bin/.local (vs ~/.local/bin)
-  background_install: false # Run install in background
+  installToProject: true # Install to $project/bin/.local (vs ~/.local/bin)
+  backgroundInstall: false # Run install in background
   version: "latest" # Pin a specific version or use "latest"
-  auto_install_tools: true # Run `mise install` after setup
-  auto_trust: true # Run `mise trust` for project config
+  autoInstallTools: true # Run `mise install` after setup
+  autoTrust: true # Run `mise trust` for project config
 ```
 
 ## Local Sessions

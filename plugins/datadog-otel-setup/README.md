@@ -26,14 +26,14 @@ Configuration is resolved in order (first match wins):
 datadog-otel-setup:
   enabled: true
   endpoint: "https://otel.datadoghq.com:4317"
-  metrics_exporter: "otlp"
-  logs_exporter: "otlp"
-  api_key: "${DD_API_KEY}"
+  metricsExporter: "otlp"
+  logsExporter: "otlp"
+  apiKey: "${DD_API_KEY}"
 ```
 
 ### API Key Resolution
 
-The `api_key` field supports three formats:
+The `apiKey` field supports three formats:
 
 | Format            | Example                              | How It Works                             |
 | ----------------- | ------------------------------------ | ---------------------------------------- |

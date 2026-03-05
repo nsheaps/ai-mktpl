@@ -41,9 +41,9 @@ permissions-sync:
     # - "github:myorg/shared-config:.claude/settings.json"
 
   # Which categories to sync
-  sync_allow: true
-  sync_deny: true
-  sync_ask: true
+  syncAllow: true
+  syncDeny: true
+  syncAsk: true
 
   # Merge strategy: "union" (combine all) or "replace" (last source wins)
   strategy: "union"

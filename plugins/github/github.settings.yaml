@@ -10,19 +10,19 @@ github:
 
   # Download and install the gh binary if not already on PATH.
   # Set to false when gh is managed externally (e.g. via mise with gh in mise.toml).
-  # When false, the plugin still runs auto_auth_check if configured.
-  auto_install: true
+  # When false, the plugin still runs autoAuthCheck if configured.
+  autoInstall: true
 
   # Install gh to $CLAUDE_PROJECT_DIR/bin/.local on web sessions.
-  # Only used when auto_install is true.
-  install_to_project: true
+  # Only used when autoInstall is true.
+  installToProject: true
 
   # Run installation in the background (non-blocking session start)
-  background_install: false
+  backgroundInstall: false
 
   # Specific gh version to install (default: latest)
   # version: "2.87.3"
   version: 'latest'
 
   # Auto-run `gh auth status` after install to verify authentication
-  auto_auth_check: true
+  autoAuthCheck: true

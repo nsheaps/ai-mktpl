@@ -5,9 +5,9 @@
 # rules/ directory. Respects plugin configuration for scope and cross-repo sync.
 #
 # Config keys (via plugins.settings.yaml):
-#   also_sync_to_user    — true/false: also symlink into ~/.claude/rules/
-#   also_add_to_repos    — "": disabled, "org-name": repos in org, "*": all repos
-#   sync_settings_target — "local" or "shared": which settings file to write to
+#   alsoSyncToUser    — true/false: also symlink into ~/.claude/rules/
+#   alsoAddToRepos    — "": disabled, "org-name": repos in org, "*": all repos
+#   syncSettingsTarget — "local" or "shared": which settings file to write to
 set -euo pipefail
 
 PLUGIN_NAME="common-sense"
@@ -18,15 +18,15 @@ LINK_NAME="common-sense"
 # shellcheck source=../../lib/plugin-config-read.sh
 source "${CLAUDE_PLUGIN_ROOT}/lib/plugin-config-read.sh"
 
-# Source settings writer (needed for also_add_to_repos)
+# Source settings writer (needed for alsoAddToRepos)
 # shellcheck source=../../lib/safe-settings-write.sh
 source "${CLAUDE_PLUGIN_ROOT}/lib/safe-settings-write.sh"
 
 # --- Read config ---
 
-ALSO_SYNC_TO_USER="$(plugin_get_config "also_sync_to_user" "false")"
-ALSO_ADD_TO_REPOS="$(plugin_get_config "also_add_to_repos" "")"
-SYNC_SETTINGS_TARGET="$(plugin_get_config "sync_settings_target" "local")"
+ALSO_SYNC_TO_USER="$(plugin_get_config "alsoSyncToUser" "false")"
+ALSO_ADD_TO_REPOS="$(plugin_get_config "alsoAddToRepos" "")"
+SYNC_SETTINGS_TARGET="$(plugin_get_config "syncSettingsTarget" "local")"
 
 # --- Determine target directories ---
 

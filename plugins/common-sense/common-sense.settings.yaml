@@ -9,15 +9,15 @@ common-sense:
   # Where to also sync rule symlinks beyond the scope the plugin is installed in.
   #   false  — only sync to the installed scope (default)
   #   true   — also sync to user-level ~/.claude/rules/
-  also_sync_to_user: false
+  alsoSyncToUser: false
 
   # Auto-add the plugin to other repos' settings files.
   #   ""          — don't add to other repos (default)
   #   "org-name"  — add to projects cloned from that GitHub org
   #   "*"         — add to any git project
-  also_add_to_repos: ''
+  alsoAddToRepos: ""
 
   # Which settings file to write enabledPlugins entries into:
   #   "local"    — settings.local.json (gitignored, personal preference)
   #   "shared"   — settings.json (committed, shared with team)
-  sync_settings_target: 'local'
+  syncSettingsTarget: "local"
