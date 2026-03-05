@@ -87,38 +87,11 @@ uses_token() {
 
 # --- Token status check ---
 
-get_minutes_remaining() {
-  if [[ ! -f "$META_FILE" ]]; then
-    echo "missing"
-    return
-  fi
+# Resolve the bin/lib directories relative to this script (handles both plugin and symlink cases)
+PLUGIN_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
+source "$PLUGIN_DIR/lib/token-utils.sh"
 
-  local expires_at
-  expires_at=$(jq -r '.expires_at // empty' "$META_FILE" 2>/dev/null)
-  if [[ -z "$expires_at" ]]; then
-    echo "unknown"
-    return
-  fi
-
-  local now expiry
-  now=$(date +%s)
-  expiry=$(date -d "$expires_at" +%s 2>/dev/null || date -jf "%Y-%m-%dT%H:%M:%SZ" "$expires_at" +%s 2>/dev/null || echo 0)
-
-  if (( expiry == 0 )); then
-    echo "unknown"
-    return
-  fi
-
-  local remaining=$(( (expiry - now) / 60 ))
-  if (( remaining <= 0 )); then
-    echo "expired"
-  else
-    echo "$remaining"
-  fi
-}
-
-# Resolve the bin directory relative to this script (handles both plugin and symlink cases)
-BIN_DIR="$(cd "$(dirname "$0")/../../bin" && pwd)"
+BIN_DIR="$PLUGIN_DIR/bin"
 
 # --- Allow helper ---
 

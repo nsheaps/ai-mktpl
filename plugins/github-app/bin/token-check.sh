@@ -88,36 +88,9 @@ release_lock() {
   rm -f "$LOCKFILE"
 }
 
-# Get token minutes remaining (returns number or "unknown" or "expired" or "missing")
-get_minutes_remaining() {
-  if [[ ! -f "$META_FILE" ]]; then
-    echo "missing"
-    return
-  fi
-
-  local expires_at
-  expires_at=$(jq -r '.expires_at // empty' "$META_FILE" 2>/dev/null)
-  if [[ -z "$expires_at" ]]; then
-    echo "unknown"
-    return
-  fi
-
-  local now expiry
-  now=$(date +%s)
-  expiry=$(date -d "$expires_at" +%s 2>/dev/null || date -jf "%Y-%m-%dT%H:%M:%SZ" "$expires_at" +%s 2>/dev/null || echo 0)
-
-  if (( expiry == 0 )); then
-    echo "unknown"
-    return
-  fi
-
-  local remaining=$(( (expiry - now) / 60 ))
-  if (( remaining <= 0 )); then
-    echo "expired"
-  else
-    echo "$remaining"
-  fi
-}
+# Get token minutes remaining (shared utility)
+PLUGIN_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+source "$PLUGIN_DIR/lib/token-utils.sh"
 
 # Update the runtime env file with current token
 update_runtime_env() {
