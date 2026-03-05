@@ -56,6 +56,12 @@ github-app:
 
   # --- Other settings ---
 
+  # Automatically configure git user.name and user.email from the
+  # GitHub App's bot identity (e.g., "my-app[bot]" with noreply email).
+  # Skipped if git user.name/email are already configured.
+  # Set to false to disable.
+  auto_git_config: true
+
   # Where to write the token (default: ~/.config/agent/github-token)
   # token_file: "~/.config/agent/github-token"
 

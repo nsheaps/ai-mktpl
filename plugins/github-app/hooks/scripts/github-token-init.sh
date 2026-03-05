@@ -248,6 +248,59 @@ TOKEN_OUTPUT=$("${CLAUDE_PLUGIN_ROOT}/bin/generate-token.sh" \
 
 echo "${PLUGIN_NAME}: $TOKEN_OUTPUT" >&2
 
+# --- Configure git identity from GitHub App bot account ---
+
+configure_git_identity() {
+  local token="$1"
+  local app_id="$2"
+  local auto_git_config
+  auto_git_config="$(plugin_get_config "auto_git_config" "true")"
+  [[ "$auto_git_config" == "true" ]] || return 0
+
+  # Skip if git user.name is already configured (don't override user's settings)
+  if git config user.name &>/dev/null && git config user.email &>/dev/null; then
+    echo "${PLUGIN_NAME}: git user.name/email already configured, skipping" >&2
+    return 0
+  fi
+
+  # Fetch the App's slug (name) from the API
+  local app_info app_slug bot_id
+  app_info=$(curl -s \
+    -H "Authorization: token $token" \
+    -H "Accept: application/vnd.github+json" \
+    -H "X-GitHub-Api-Version: 2022-11-28" \
+    "https://api.github.com/app" 2>/dev/null) || return 0
+
+  app_slug=$(echo "$app_info" | jq -r '.slug // empty' 2>/dev/null)
+  [[ -n "$app_slug" ]] || return 0
+
+  # Get the bot user ID for the noreply email
+  local bot_login="${app_slug}[bot]"
+  local bot_user
+  bot_user=$(curl -s \
+    -H "Authorization: token $token" \
+    -H "Accept: application/vnd.github+json" \
+    -H "X-GitHub-Api-Version: 2022-11-28" \
+    "https://api.github.com/users/${bot_login}" 2>/dev/null) || true
+
+  bot_id=$(echo "$bot_user" | jq -r '.id // empty' 2>/dev/null)
+
+  local bot_name="${app_slug}[bot]"
+  local bot_email
+  if [[ -n "$bot_id" ]]; then
+    bot_email="${bot_id}+${app_slug}[bot]@users.noreply.github.com"
+  else
+    bot_email="${app_id}+${app_slug}[bot]@users.noreply.github.com"
+  fi
+
+  git config user.name "$bot_name"
+  git config user.email "$bot_email"
+  echo "${PLUGIN_NAME}: Configured git identity: $bot_name <$bot_email>" >&2
+}
+
+TOKEN=$(cat "$TOKEN_FILE")
+configure_git_identity "$TOKEN" "$GITHUB_APP_ID"
+
 # Export token and related vars for this session via CLAUDE_ENV_FILE
 if [[ -n "${CLAUDE_ENV_FILE:-}" && -f "$TOKEN_FILE" ]]; then
   TOKEN=$(cat "$TOKEN_FILE")

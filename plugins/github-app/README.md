@@ -111,9 +111,12 @@ chmod 600 ~/.config/agent/github-app.pem
 
 1. **Session starts**: Hook reads App credentials, generates JWT, exchanges for installation token
 2. **Token stored**: Written to `~/.config/agent/github-token` with 600 permissions
-3. **Environment set**: `GH_TOKEN` and `GITHUB_TOKEN` exported via `CLAUDE_ENV_FILE`
-4. **Background refresh**: MCP server regenerates token every 50 minutes
-5. **Git integration**: Credential helper reads from token file for `git push`
+3. **Git identity configured**: Sets `git config user.name` and `user.email` to the App's bot identity (e.g., `my-app[bot]` / `12345+my-app[bot]@users.noreply.github.com`)
+4. **Environment set**: `GH_TOKEN` and `GITHUB_TOKEN` exported via `CLAUDE_ENV_FILE`
+5. **Background refresh**: MCP server regenerates token every 50 minutes
+6. **Git integration**: Credential helper reads from token file for `git push`
+
+Git identity is only configured if `user.name`/`user.email` are not already set. Disable with `auto_git_config: false` in plugin settings.
 
 ## MCP Tools
 
