@@ -402,7 +402,7 @@ gh issue view 42 --web
 This plugin supports configuration via `plugins.settings.yaml`:
 
 ```yaml
-gh-tool:
+github:
   enabled: true
   install_to_project: true # Install to $project/bin/.local
   background_install: false # Install in background

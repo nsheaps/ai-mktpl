@@ -3,7 +3,8 @@
 **Status**: Draft
 **Created**: 2026-02-18
 **Author**: Road Runner (Researcher)
-**Related**: [Agent GitHub Auth Spec](../../../claude-utils/docs/specs/draft/agent-github-auth.md), [GitHub Auth Research](../../../claude-utils/.claude/tmp/github-auth-research.md)
+
+<!-- TODO: Link to agent-github-auth spec once migrated from claude-utils -->
 
 ---
 
@@ -13,7 +14,7 @@
 
 GitHub App installation tokens expire after **1 hour**. In agent team sessions that run for hours, tokens go stale and API calls (creating PRs, pushing commits, opening issues) start failing silently or with auth errors. The agent has no way to refresh the token mid-session.
 
-Today, if a user sets `GITHUB_TOKEN` at session start, it remains static for the entire session. For long-lived personal access tokens this is fine, but for GitHub App installation tokens (the recommended approach for agent identity per the [agent-github-auth spec](../../../claude-utils/docs/specs/draft/agent-github-auth.md)), token refresh is essential.
+Today, if a user sets `GITHUB_TOKEN` at session start, it remains static for the entire session. For long-lived personal access tokens this is fine, but for GitHub App installation tokens (the recommended approach for agent identity), token refresh is essential.
 
 Additionally, there's no standard way to ensure a Claude Code session starts with a valid GitHub App token. Users must manually generate tokens before launching.
 
@@ -283,5 +284,5 @@ Or via environment variables (higher priority):
 - [Git Credential Helpers — Git Docs](https://git-scm.com/docs/gitcredentials)
 - [Claude Code Hooks Reference](https://code.claude.com/docs/en/hooks)
 - [Claude Code Plugins Reference](https://code.claude.com/docs/en/plugins-reference)
-- [Agent GitHub Auth Spec](../../../claude-utils/docs/specs/draft/agent-github-auth.md)
-- [Plugin Hot-Reload Research](../../../claude-utils/.claude/tmp/plugin-install-research-source.md) — MCP servers not hot-reloaded
+  <!-- TODO: Link to agent-github-auth spec once migrated from claude-utils -->
+  <!-- TODO: Link to plugin hot-reload research once migrated from claude-utils -->
