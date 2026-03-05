@@ -72,17 +72,6 @@ jobs:
           SUBJECT_SCOPE="${{ inputs.subject_scope || 'nsheaps' }}"
           echo "subject_scope=${SUBJECT_SCOPE}" >> "$GITHUB_OUTPUT"
 
-      - name: Ensure daily-report label exists
-        shell: bash
-        env:
-          GH_TOKEN: ${{ steps.auth.outputs.token }}
-        run: |
-          gh label create daily-report \
-            --description "Auto-generated daily activity report" \
-            --color "0e8a16" \
-            --force \
-            -R "${{ github.repository }}"
-
       - name: Build prompt
         id: prompt
         shell: bash

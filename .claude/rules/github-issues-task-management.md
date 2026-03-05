@@ -31,6 +31,14 @@ Do NOT create issues for:
 - Acceptance criteria (if applicable)
 - Related files or code references
 
+## Label Management
+
+**CRITICAL:** All labels are defined in `.github/labels.yaml` and synced automatically by the `sync-labels.yml` workflow. This is the single source of truth.
+
+- **NEVER** create labels inline in workflows, scripts, or via `gh label create`
+- To add a new label: add it to `.github/labels.yaml` ��� it will be synced on merge to main
+- The sync workflow uses `skip-delete: true`, so labels not in the YAML are preserved
+
 ## Labels for Workflow State
 
 Use labels to indicate issue state beyond open/closed:
