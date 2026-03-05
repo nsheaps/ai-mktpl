@@ -1,0 +1,21 @@
+# github-app plugin configuration
+#
+# Override per-project via ${CLAUDE_PROJECT_DIR}/.claude/plugins.settings.yaml
+# or per-user via ~/.claude/plugins.settings.yaml under the "github-app" key.
+#
+# Set enabled: false to disable token management without uninstalling.
+
+github-app:
+  enabled: true
+
+  # GitHub App credentials (can also be set via environment variables)
+  # github_app_id: "12345"
+  # private_key_path: "~/.config/agent/github-app.pem"
+  # github_installation_id: "67890"
+
+  # Where to write the token (default: ~/.config/agent/github-token)
+  # token_file: "~/.config/agent/github-token"
+
+  # Token refresh interval in seconds (default: 3000 = 50 minutes)
+  # Tokens expire after 3600s (1 hour), so refresh with buffer
+  # refresh_interval: 3000

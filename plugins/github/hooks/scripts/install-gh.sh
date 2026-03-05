@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# install-gh.sh — SessionStart hook for gh-tool plugin
+# install-gh.sh — SessionStart hook for github plugin
 #
 # Installs or updates GitHub CLI (gh) for Claude Code web sessions.
 # When install_to_project is true, installs to $CLAUDE_PROJECT_DIR/bin/.local/
 # which is gitignored and added to PATH.
 set -euo pipefail
 
-PLUGIN_NAME="gh-tool"
+PLUGIN_NAME="github"
 source "${CLAUDE_PLUGIN_ROOT}/lib/plugin-config-read.sh"
 source "${CLAUDE_PLUGIN_ROOT}/lib/tool-install.sh"
 

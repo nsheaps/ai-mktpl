@@ -1,0 +1,1 @@
+../../../../shared/skills/github-auth/SKILL.md

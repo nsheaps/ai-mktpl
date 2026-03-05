@@ -1,11 +1,11 @@
-# gh-tool plugin configuration
+# github plugin configuration
 #
 # Override per-project via ${CLAUDE_PROJECT_DIR}/.claude/plugins.settings.yaml
-# or per-user via ~/.claude/plugins.settings.yaml under the "gh-tool" key.
+# or per-user via ~/.claude/plugins.settings.yaml under the "github" key.
 #
 # Set enabled: false to disable auto-install without uninstalling the plugin.
 
-gh-tool:
+github:
   enabled: true
 
   # Download and install the gh binary if not already on PATH.
