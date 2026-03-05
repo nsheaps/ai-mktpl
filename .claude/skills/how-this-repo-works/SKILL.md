@@ -241,3 +241,11 @@ git push
 - Justfile: `justfile` (repo root)
 - Base release config: `.release-it.base.json`
 - Marketplace manifest: `.claude-plugin/marketplace.json`
+
+## Deep-Dive References
+
+These reference documents provide detailed analysis on specific design decisions:
+
+- [Plugin Env Vars Tradeoff](./references/plugin-env-vars-tradeoff.md) — Tradeoffs between writing env vars to `settings.local.json` vs `CLAUDE_ENV_FILE` in SessionStart hooks, including dynamic reloading behavior, scope, persistence, security, and when to use each approach.
+- [Marketplace to User Settings](./references/marketplace-to-user-settings.md) — How plugins propagate from marketplace.json to user installations.
+- [CI/CD Pipeline Details](./references/ci-cd-pipeline-details.md) — Detailed CI/CD pipeline behavior and conventions.
