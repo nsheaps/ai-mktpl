@@ -44,14 +44,14 @@ trap "kill $REFRESH_PID 2>/dev/null; exit 0" EXIT INT TERM
 send_response() {
   local id="$1"
   local result="$2"
-  printf '{"jsonrpc":"2.0","id":%s,"result":%s}\n' "$id" "$result"
+  printf '{"jsonrpc":"2.0","id":%s,"result":%s}' "$id" "$result" | jq -c .
 }
 
 send_error() {
   local id="$1"
   local code="$2"
   local message="$3"
-  printf '{"jsonrpc":"2.0","id":%s,"error":{"code":%s,"message":%s}}\n' "$id" "$code" "$(echo "$message" | jq -Rsa .)"
+  printf '{"jsonrpc":"2.0","id":%s,"error":{"code":%s,"message":%s}}' "$id" "$code" "$(echo "$message" | jq -Rsa .)" | jq -c .
 }
 
 handle_initialize() {
@@ -96,8 +96,7 @@ handle_tool_call() {
       status=$("$PLUGIN_ROOT/bin/token-status.sh" 2>&1) || status='{"valid":false,"reason":"status check failed"}'
       local escaped
       escaped=$(echo "$status" | jq -Rsa .)
-      printf '{"jsonrpc":"2.0","id":%s,"result":{"content":[{"type":"text","text":%s}]}}\n' "$id" "$escaped"
-      return
+      send_response "$id" "$(printf '{"content":[{"type":"text","text":%s}]}' "$escaped")"
       ;;
     refresh-github-token)
       if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_APP_PRIVATE_KEY_PATH:-}" || -z "${GITHUB_INSTALLATION_ID:-}" ]]; then
@@ -112,8 +111,7 @@ handle_tool_call() {
         "$TOKEN_FILE" 2>&1) || output="Refresh failed: $output"
       local escaped_output
       escaped_output=$(echo "$output" | jq -Rsa .)
-      printf '{"jsonrpc":"2.0","id":%s,"result":{"content":[{"type":"text","text":%s}]}}\n' "$id" "$escaped_output"
-      return
+      send_response "$id" "$(printf '{"content":[{"type":"text","text":%s}]}' "$escaped_output")"
       ;;
     get-github-token)
       if [[ -f "$TOKEN_FILE" ]]; then
@@ -121,8 +119,7 @@ handle_tool_call() {
         token=$(cat "$TOKEN_FILE")
         local escaped_token
         escaped_token=$(echo "$token" | jq -Rsa .)
-        printf '{"jsonrpc":"2.0","id":%s,"result":{"content":[{"type":"text","text":%s}]}}\n' "$id" "$escaped_token"
-        return
+        send_response "$id" "$(printf '{"content":[{"type":"text","text":%s}]}' "$escaped_token")"
       else
         send_response "$id" '{"content":[{"type":"text","text":"No token file found"}]}'
       fi
