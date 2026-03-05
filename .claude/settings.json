@@ -100,7 +100,8 @@
     "mise@nsheaps-claude-plugins": true,
     "gh-tool@nsheaps-claude-plugins": true,
     "permissions-sync@nsheaps-claude-plugins": true,
-    "sequential-thinking@nsheaps-claude-plugins": true
+    "sequential-thinking@nsheaps-claude-plugins": true,
+    "correct-behavior@nsheaps-claude-plugins": true
   },
   "extraKnownMarketplaces": {
     "claude-plugins-official": {

@@ -145,3 +145,4 @@ gh api repos/nsheaps/ai-mktpl/pulls/<PR_NUMBER> --hostname github.com
 
 - [Plugin Development](../plugin-development.md) - Plugin structure requirements
 - [Versioning Rules](../versioning.md) - When version bumps are required
+- [GitHub Issues & Labels](../github-issues-task-management.md) - Label management rules (labels MUST go through `.github/labels.yaml`)
