@@ -27,9 +27,9 @@ fi
 # --- Read config ---
 
 target="$(plugin_get_config "target" "project")"
-syncAllow="$(plugin_get_config "syncAllow" "true")"
-syncDeny="$(plugin_get_config "syncDeny" "true")"
-syncAsk="$(plugin_get_config "syncAsk" "true")"
+sync_allow="$(plugin_get_config "syncAllow" "true")"
+sync_deny="$(plugin_get_config "syncDeny" "true")"
+sync_ask="$(plugin_get_config "syncAsk" "true")"
 strategy="$(plugin_get_config "strategy" "union")"
 
 # Determine target file
@@ -117,9 +117,9 @@ while IFS= read -r source; do
 
   for cat in allow deny ask; do
     case "$cat" in
-      allow) sync_flag="$syncAllow" ;;
-      deny)  sync_flag="$syncDeny" ;;
-      ask)   sync_flag="$syncAsk" ;;
+      allow) sync_flag="$sync_allow" ;;
+      deny)  sync_flag="$sync_deny" ;;
+      ask)   sync_flag="$sync_ask" ;;
     esac
     [ "$sync_flag" != "true" ] && continue
 

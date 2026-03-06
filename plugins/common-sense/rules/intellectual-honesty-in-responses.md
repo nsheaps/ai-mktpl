@@ -29,7 +29,7 @@ Admit the gap honestly:
 
 Then actually search for or re-read the relevant context before proceeding.
 If you CAN'T find it, stop and ask the user for help in figuring out what was said originally and why you can't find it.
-If you CAN, stop and reflect on why the instruction was not followed, then use SlashCommand:/upstream--src-nsheaps-ai:correct-behavior to fix the underlying reason.
+If you CAN, stop and reflect on why the instruction was not followed, then use the `correct-behavior` skill (if available) to fix the underlying reason.
 
 ## Why This Matters
 

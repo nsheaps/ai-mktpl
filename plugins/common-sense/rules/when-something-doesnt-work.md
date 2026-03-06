@@ -10,7 +10,7 @@ Do NOT proceed until you have answered these questions for yourself. If there is
 
 When you are sure how to perform that task correctly, update rules/skills/plugins/scripts/configurations as needed.
 
-Strongly consider using SlashCommand:/correct-behavior to help with correcting your behavior.
+Strongly consider using the `correct-behavior` skill (if available) to help with correcting your behavior.
 
 Ensure your previous execution is cleaned up if necessary.
 
