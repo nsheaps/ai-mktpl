@@ -1,0 +1,33 @@
+# 1pass plugin configuration
+#
+# Override per-project via ${CLAUDE_PROJECT_DIR}/.claude/plugins.settings.yaml
+# or per-user via ~/.claude/plugins.settings.yaml under the "1pass" key.
+#
+# Set enabled: false to disable auto-install without uninstalling the plugin.
+
+1pass:
+  enabled: true
+
+  # Download and install the op binary if not already on PATH.
+  # Set to false when op is managed externally (e.g. via mise with op in mise.toml).
+  # When false, the plugin still validates that op is available.
+  auto_install: false
+
+  # Install op to $CLAUDE_PROJECT_DIR/bin/.local on web sessions.
+  # Only used when auto_install is true.
+  install_to_project: true
+
+  # Run installation in the background (non-blocking session start)
+  background_install: false
+
+  # Specific op CLI version to install (default: latest)
+  # version: "2.30.0"
+  op_version: 'latest'
+
+  # Also install op-exec (from nsheaps/op-exec)
+  # Set to false to skip op-exec installation.
+  install_op_exec: false
+
+  # Specific op-exec version to install (default: latest)
+  # op_exec_version: "1.0.0"
+  op_exec_version: 'latest'
