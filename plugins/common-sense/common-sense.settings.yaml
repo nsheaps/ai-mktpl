@@ -15,9 +15,9 @@ common-sense:
   #   ""          — don't add to other repos (default)
   #   "org-name"  — add to projects cloned from that GitHub org
   #   "*"         — add to any git project
-  alsoAddToRepos: ""
+  alsoAddToRepos: ''
 
   # Which settings file to write enabledPlugins entries into:
   #   "local"    — settings.local.json (gitignored, personal preference)
   #   "shared"   — settings.json (committed, shared with team)
-  syncSettingsTarget: "local"
+  syncSettingsTarget: 'local'
