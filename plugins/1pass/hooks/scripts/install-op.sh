@@ -24,6 +24,31 @@ op_exec_version="$(plugin_get_config "op_exec_version" "latest")"
 
 tool_resolve_install_dir
 
+# --- Platform detection ---
+
+detect_platform() {
+  local os arch
+  os="$(uname -s | tr '[:upper:]' '[:lower:]')"
+  arch="$(uname -m)"
+
+  case "$arch" in
+    x86_64)  arch="amd64" ;;
+    aarch64|arm64) arch="arm64" ;;
+    i386|i686) arch="386" ;;
+    *) echo "${PLUGIN_NAME}: Unsupported architecture: $arch" >&2; return 1 ;;
+  esac
+
+  case "$os" in
+    linux|darwin) ;;
+    *) echo "${PLUGIN_NAME}: Unsupported OS: $os" >&2; return 1 ;;
+  esac
+
+  DETECTED_OS="$os"
+  DETECTED_ARCH="$arch"
+}
+
+detect_platform || { echo '{}'; exit 0; }
+
 # --- Version resolution ---
 
 # Resolve the latest op CLI version from 1Password's update endpoint.
@@ -48,7 +73,7 @@ download_op() {
   local op_bin="$INSTALL_DIR/op"
   local tmp_dir
   tmp_dir="$(mktemp -d)"
-  local archive="op_linux_amd64_v${target_version}.zip"
+  local archive="op_${DETECTED_OS}_${DETECTED_ARCH}_v${target_version}.zip"
   local url="https://cache.agilebits.com/dist/1P/op2/pkg/v${target_version}/${archive}"
 
   if curl -fsSL "$url" -o "$tmp_dir/$archive" 2>/dev/null; then
@@ -74,7 +99,7 @@ download_op() {
 download_op_exec() {
   local target_version="$1"
   local op_exec_bin="$INSTALL_DIR/op-exec"
-  local url="https://github.com/nsheaps/op-exec/releases/download/v${target_version}/op-exec-linux-amd64"
+  local url="https://github.com/nsheaps/op-exec/releases/download/v${target_version}/op-exec-${DETECTED_OS}-${DETECTED_ARCH}"
 
   if curl -fsSL "$url" -o "$op_exec_bin" 2>/dev/null; then
     chmod +x "$op_exec_bin"
