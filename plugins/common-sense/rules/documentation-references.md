@@ -37,4 +37,4 @@ Include references to external sources that validate claims, provide context, or
 
 ## How-To Guide
 
-See `.ai/docs/how-to-write-references-in-docs.md` for detailed examples and formatting guidance.
+<!-- TODO: Create .ai/docs/how-to-write-references-in-docs.md with detailed examples and formatting guidance -->

@@ -42,7 +42,7 @@ setup_symlink() {
   mkdir -p "$target_dir"
 
   # Clean up stale symlinks pointing into any ai-mktpl plugin path
-  local ai_mktpl_pattern="ai-mktpl/plugins/"
+  local ai_mktpl_pattern="ai-mktpl/plugins/common-sense/"
   for entry in "$target_dir"/*; do
     [ -e "$entry" ] || [ -L "$entry" ] || continue
     if [ -L "$entry" ]; then

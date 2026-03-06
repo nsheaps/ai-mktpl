@@ -1,5 +1,4 @@
-<system-reminder>
-  <CRITICAL>
+> **CRITICAL**
 
 # User requests
 
@@ -81,5 +80,3 @@
   - If posting to slack or github as a message or inline comment, prefix the message with 🤖, like "🤖 I'll look into this right away!"
   - If posting to github with a more thorough comment, like a review or PR description, follow the attribution instructions in your settings.
 
-    </CRITICAL>
-  </system-reminder>

@@ -113,8 +113,8 @@
     },
     "nsheaps-claude-plugins": {
       "source": {
-        "source": "directory",
-        "directory": "/home/user/ai-mktpl"
+        "source": "github",
+        "path": "nsheaps/ai-mktpl"
       }
     }
   }

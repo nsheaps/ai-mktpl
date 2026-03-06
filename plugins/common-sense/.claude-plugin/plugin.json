@@ -1,6 +1,6 @@
 {
   "name": "common-sense",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Common-sense rules for AI assistant behavior. On session start, symlinks bundled rules into the project's .claude/rules/common-sense directory so they are automatically loaded as context.",
   "author": {
     "name": "Nathan Heaps",
