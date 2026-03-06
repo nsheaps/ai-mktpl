@@ -5,9 +5,6 @@ name: Daily Report
 # Can also be triggered manually with custom time and subject scopes
 
 on:
-  push:
-    branches:
-      - claude/fix-daily-report-workflow-u0Y02
   schedule:
     # 4:00 AM EST / 5:00 AM EDT = 9:00 AM UTC
     # During EST (winter) this runs at 4:00 AM, during EDT (summer) at 5:00 AM
