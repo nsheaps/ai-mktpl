@@ -98,23 +98,10 @@ jobs:
                   "TodoWrite",
                   "WebSearch",
                   "WebFetch",
-                  "Bash",
+                  "Bash(gh:*)",
                   "BashOutput",
                   "Skill",
-                  "mcp__github__create_issue",
-                  "mcp__github__add_issue_comment",
-                  "mcp__github__get_issue",
-                  "mcp__github__list_issues",
-                  "mcp__github__search_issues",
-                  "mcp__github__list_commits",
-                  "mcp__github__get_commit",
-                  "mcp__github__list_pull_requests",
-                  "mcp__github__get_pull_request",
-                  "mcp__github__list_branches",
-                  "mcp__github__search_repositories",
-                  "mcp__github__get_file_contents",
-                  "mcp__github__get_me",
-                  "Bash(gh:*)"
+                  "mcp__github__*"
                 ]
               },
               "model": "opus",
@@ -137,33 +124,8 @@ jobs:
           additional_permissions: |
             actions: read
           settings: ${{ env.INPUT_SETTINGS_JSON }}
-          # Bash + GH_TOKEN is intentionally allowed for gh CLI data gathering
-          # per the daily-report SKILL.md instructions.
-          # MCP tools listed here to enable the GitHub MCP server in the action.
+          # Bash restricted to gh CLI for least-privilege data gathering.
+          # MCP tools use wildcard to enable the GitHub MCP server in the action.
           # See: https://github.com/anthropics/claude-code-action/issues/723#issuecomment-3716307305
-          claude_args: >-
-            --allowedTools
-            Bash,
-            BashOutput,
-            Task,
-            Glob,
-            Grep,
-            LS,
-            Read,
-            TodoWrite,
-            WebSearch,
-            WebFetch,
-            Skill,
-            mcp__github__create_issue,
-            mcp__github__add_issue_comment,
-            mcp__github__get_issue,
-            mcp__github__list_issues,
-            mcp__github__search_issues,
-            mcp__github__list_commits,
-            mcp__github__get_commit,
-            mcp__github__list_pull_requests,
-            mcp__github__get_pull_request,
-            mcp__github__list_branches,
-            mcp__github__search_repositories,
-            mcp__github__get_file_contents,
-            mcp__github__get_me
+          claude_args: |
+            --allowedTools "Bash(gh:*),BashOutput,Task,Glob,Grep,LS,Read,TodoWrite,WebSearch,WebFetch,Skill,mcp__github__*"
