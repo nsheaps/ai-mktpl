@@ -24,6 +24,23 @@ op_exec_version="$(plugin_get_config "op_exec_version" "latest")"
 
 tool_resolve_install_dir
 
+# --- Version resolution ---
+
+# Resolve the latest op CLI version from 1Password's update endpoint.
+# 1Password/cli is not a public GitHub repo, so we can't use tool_resolve_github_version.
+# Falls back to a hardcoded version on failure.
+resolve_latest_op_version() {
+  local fallback="2.32.1"
+  local version=""
+  version="$(curl -fsSL "https://app-updates.agilebits.com/check/1/0/CLI2/en/2.0.0/N" 2>/dev/null \
+    | grep -o '"version":"[^"]*"' | sed 's/"version":"//;s/"//' || true)"
+  if [ -z "$version" ]; then
+    echo "${PLUGIN_NAME}: Could not determine latest op version, using fallback $fallback" >&2
+    version="$fallback"
+  fi
+  echo "$version"
+}
+
 # --- Download helpers ---
 
 download_op() {
@@ -90,7 +107,7 @@ resolve_op_bin() {
     if [ "$op_version" = "latest" ]; then
       local current_version latest_version
       current_version="$("$op_bin" --version 2>/dev/null || echo "unknown")"
-      latest_version="$(tool_resolve_github_version "1Password/cli" "2.30.0")"
+      latest_version="$(resolve_latest_op_version)"
       if [ "$current_version" = "$latest_version" ]; then
         echo "${PLUGIN_NAME}: op $current_version is already latest" >&2
         echo "$op_bin"
@@ -108,7 +125,7 @@ resolve_op_bin() {
     echo "${PLUGIN_NAME}: Installing op to $INSTALL_DIR" >&2
     local install_version="$op_version"
     if [ "$install_version" = "latest" ]; then
-      install_version="$(tool_resolve_github_version "1Password/cli" "2.30.0")"
+      install_version="$(resolve_latest_op_version)"
     fi
     download_op "$install_version"
   fi
@@ -134,7 +151,7 @@ resolve_op_exec_bin() {
     if [ "$op_exec_version" = "latest" ]; then
       local current_version latest_version
       current_version="$("$op_exec_bin" --version 2>/dev/null || echo "unknown")"
-      latest_version="$(tool_resolve_github_version "nsheaps/op-exec" "0.1.0")"
+      latest_version="$(tool_resolve_github_version "nsheaps/op-exec" "0.0.1")"
       if [ "$current_version" = "$latest_version" ]; then
         echo "${PLUGIN_NAME}: op-exec $current_version is already latest" >&2
         echo "$op_exec_bin"
@@ -152,7 +169,7 @@ resolve_op_exec_bin() {
     echo "${PLUGIN_NAME}: Installing op-exec to $INSTALL_DIR" >&2
     local install_version="$op_exec_version"
     if [ "$install_version" = "latest" ]; then
-      install_version="$(tool_resolve_github_version "nsheaps/op-exec" "0.1.0")"
+      install_version="$(tool_resolve_github_version "nsheaps/op-exec" "0.0.1")"
     fi
     download_op_exec "$install_version"
   fi
