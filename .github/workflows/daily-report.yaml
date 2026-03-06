@@ -5,6 +5,9 @@ name: Daily Report
 # Can also be triggered manually with custom time and subject scopes
 
 on:
+  push:
+    branches:
+      - claude/fix-daily-report-workflow-u0Y02
   schedule:
     # 4:00 AM EST / 5:00 AM EDT = 9:00 AM UTC
     # During EST (winter) this runs at 4:00 AM, during EDT (summer) at 5:00 AM
@@ -74,59 +77,13 @@ jobs:
 
       - name: Build prompt
         id: prompt
-        shell: bash
-        run: |
-          REPORT_DATE="${{ steps.params.outputs.report_date }}"
-          TIME_SCOPE="${{ steps.params.outputs.time_scope }}"
-          SUBJECT_SCOPE="${{ steps.params.outputs.subject_scope }}"
-
-          PROMPT=$(cat <<'PROMPT_EOF'
-          You are generating a daily activity report. Use the daily-report skill from the daily-report plugin.
-
-          ## Parameters
-
-          - **Report Date**: REPORT_DATE_PLACEHOLDER
-          - **Time Scope**: TIME_SCOPE_PLACEHOLDER
-          - **Subject Scope**: SUBJECT_SCOPE_PLACEHOLDER
-
-          ## Instructions
-
-          1. Use `gh` CLI to gather data from all repositories in the scope. The GH_TOKEN is already configured.
-          2. Follow the daily-report skill instructions exactly for data gathering:
-             - List active repos in the org/scope
-             - Gather commits across all branches per repo
-             - Detect force pushes and trace previous commit trees (try audit log first, fall back to events API)
-             - Gather PR activity (opened, merged, closed, updated)
-             - Track branch creation and deletion
-             - Report issue changes with state reasons (completed vs not_planned)
-          3. Generate the full report in GitHub-flavored Markdown following the skill's report format
-          4. Post the report as a GitHub issue using `mcp__github__create_issue` with:
-             - owner: "nsheaps"
-             - repo: "ai-mktpl"
-             - title: "REPORT_DATE_PLACEHOLDER Daily Report"
-             - labels: ["daily-report"]
-             - body: the full report markdown
-
-          ## Important
-
-          - All times should be displayed in US Eastern Time
-          - All SHAs, issue numbers, and PR numbers must be clickable markdown links
-          - Sort repos alphabetically, commits chronologically
-          - Skip repos with zero activity
-          - If any API calls fail or are rate-limited, note it in the Methodology section
-          - Do NOT include repos that had no activity in the time window
-          PROMPT_EOF
-
-          # Substitute placeholders
-          PROMPT="${PROMPT//REPORT_DATE_PLACEHOLDER/$REPORT_DATE}"
-          PROMPT="${PROMPT//TIME_SCOPE_PLACEHOLDER/$TIME_SCOPE}"
-          PROMPT="${PROMPT//SUBJECT_SCOPE_PLACEHOLDER/$SUBJECT_SCOPE}"
-
-          {
-            echo "prompt<<EOF"
-            echo "$PROMPT"
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
+        uses: ./.github/actions/interpolate-prompt
+        env:
+          REPORT_DATE: ${{ steps.params.outputs.report_date }}
+          TIME_SCOPE: ${{ steps.params.outputs.time_scope }}
+          SUBJECT_SCOPE: ${{ steps.params.outputs.subject_scope }}
+        with:
+          template-file: .github/prompts/daily-report.md
 
       - name: Run Claude Code
         id: claude
@@ -159,7 +116,8 @@ jobs:
                   "mcp__github__list_branches",
                   "mcp__github__search_repositories",
                   "mcp__github__get_file_contents",
-                  "mcp__github__get_me"
+                  "mcp__github__get_me",
+                  "Bash(gh:*)"
                 ]
               },
               "model": "opus",
@@ -171,12 +129,8 @@ jobs:
               }
             }
         with:
-          anthropic_api_key: ${{
-            secrets.CLAUDE_API_KEY && secrets.CLAUDE_API_KEY ||
-            ( secrets.ANTHROPIC_API_KEY && secrets.ANTHROPIC_API_KEY || '' ) }}
-          claude_code_oauth_token: ${{
-            secrets.CLAUDE_API_KEY && '' ||
-            ( secrets.ANTHROPIC_API_KEY && '' || secrets.CLAUDE_CODE_OAUTH_TOKEN ) }}
+          anthropic_api_key: ${{ secrets.CLAUDE_API_KEY || secrets.ANTHROPIC_API_KEY || '' }}
+          claude_code_oauth_token: ${{ (secrets.CLAUDE_API_KEY || secrets.ANTHROPIC_API_KEY) && '' || secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           bot_id: ${{ steps.auth.outputs.user-id }}
           bot_name: '@claude via ${{ steps.auth.outputs.user-name }}'
           allowed_bots: 'github-actions[bot],automation-nsheaps[bot]'
@@ -187,19 +141,32 @@ jobs:
             actions: read
           settings: ${{ env.INPUT_SETTINGS_JSON }}
           # Bash + GH_TOKEN is intentionally allowed for gh CLI data gathering
-          # per the daily-report SKILL.md instructions
+          # per the daily-report SKILL.md instructions.
+          # MCP tools listed here to enable the GitHub MCP server in the action.
+          # See: https://github.com/anthropics/claude-code-action/issues/723#issuecomment-3716307305
           claude_args: >-
             --allowedTools
-            mcp__github__create_issue
-            mcp__github__add_issue_comment
-            mcp__github__get_issue
-            mcp__github__list_issues
-            mcp__github__search_issues
-            mcp__github__list_commits
-            mcp__github__get_commit
-            mcp__github__list_pull_requests
-            mcp__github__get_pull_request
-            mcp__github__list_branches
-            mcp__github__search_repositories
-            mcp__github__get_file_contents
+            Bash,
+            BashOutput,
+            Task,
+            Glob,
+            Grep,
+            LS,
+            Read,
+            TodoWrite,
+            WebSearch,
+            WebFetch,
+            Skill,
+            mcp__github__create_issue,
+            mcp__github__add_issue_comment,
+            mcp__github__get_issue,
+            mcp__github__list_issues,
+            mcp__github__search_issues,
+            mcp__github__list_commits,
+            mcp__github__get_commit,
+            mcp__github__list_pull_requests,
+            mcp__github__get_pull_request,
+            mcp__github__list_branches,
+            mcp__github__search_repositories,
+            mcp__github__get_file_contents,
             mcp__github__get_me
