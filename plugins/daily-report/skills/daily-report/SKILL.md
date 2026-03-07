@@ -154,7 +154,7 @@ Where YYYY-MM-DD is the report date (the day being reported on).
 
 ### Structure
 
-```markdown
+````markdown
 # YYYY-MM-DD Daily Report
 
 > **Scope**: {subject_scope} | **Period**: {time_scope} | **Generated**: {timestamp} ET
@@ -176,7 +176,7 @@ the reporting period.
 
 Example (actual values will differ):
 
-~~~
+````
 ```mermaid
 xychart-beta
     title "Commits by Repository Over Time (YYYY-MM-DD, ET)"
@@ -185,8 +185,10 @@ xychart-beta
     bar "repo-a" [1, 3, 0, 2, 3, 3, 1, 3]
     bar "repo-b" [0, 5, 4, 0, 0, 0, 0, 0]
     bar "repo-c" [0, 0, 0, 2, 2, 0, 0, 1]
-```
-~~~
+````
+````
+
+````
 
 ## Executive Summary
 
@@ -290,3 +292,4 @@ The final report content should be posted as a GitHub issue in the triggering re
 - Title: `YYYY-MM-DD Daily Report`
 - Label: `daily-report`
 - The full markdown report as the issue body
+````
