@@ -33,11 +33,11 @@ tool_is_web_session() {
 }
 
 # Resolve the install directory based on plugin config.
-# Reads "install_to_project" config key.
+# Reads "installToProject" config key.
 # Sets INSTALL_DIR as a global variable and creates the directory.
 tool_resolve_install_dir() {
   local install_to_project
-  install_to_project="$(plugin_get_config "install_to_project" "true")"
+  install_to_project="$(plugin_get_config "installToProject" "true")"
 
   if [ "$install_to_project" = "true" ]; then
     INSTALL_DIR="${CLAUDE_PROJECT_DIR:-.}/bin/.local"
@@ -101,12 +101,12 @@ tool_resolve_github_version() {
 }
 
 # Run a function in the background or foreground based on plugin config.
-# Reads "background_install" config key.
+# Reads "backgroundInstall" config key.
 # Args: $1=function_name
 tool_run_install() {
   local func="$1"
   local background
-  background="$(plugin_get_config "background_install" "false")"
+  background="$(plugin_get_config "backgroundInstall" "false")"
 
   if [ "$background" = "true" ]; then
     "$func" &

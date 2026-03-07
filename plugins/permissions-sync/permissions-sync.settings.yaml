@@ -29,9 +29,9 @@ permissions-sync:
 
   # Which permission categories to sync (allow, deny, ask)
   # Set to false to skip a category
-  sync_allow: true
-  sync_deny: true
-  sync_ask: true
+  syncAllow: true
+  syncDeny: true
+  syncAsk: true
 
   # Merge strategy:
   #   "union"   - combine all permissions from all sources (deduplicated)

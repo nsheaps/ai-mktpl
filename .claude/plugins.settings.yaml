@@ -5,7 +5,7 @@
 github:
   # gh is managed by mise (see mise.toml: gh = "latest").
   # The plugin still runs gh auth status to verify authentication.
-  auto_install: false
+  autoInstall: false
 
 github-app:
   # Fetch all GitHub App secrets from a single 1Password item.
@@ -18,5 +18,5 @@ github-app:
   #   GITHUB_APP_PRIVATE_KEY
 
 mise:
-  auto_install_tools: true
-  auto_trust: true
+  autoInstallTools: true
+  autoTrust: true

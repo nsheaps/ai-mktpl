@@ -12,21 +12,21 @@ mise:
   # Set to false when mise is managed externally (e.g. by a workspace hook or
   # container image). The plugin will still activate mise and write to
   # CLAUDE_ENV_FILE when mise is found on PATH.
-  auto_install: true
+  autoInstall: true
 
   # Install mise to $CLAUDE_PROJECT_DIR/bin/.local on web sessions.
-  # Only used when auto_install is true.
-  install_to_project: true
+  # Only used when autoInstall is true.
+  installToProject: true
 
   # Run installation in the background (non-blocking session start)
-  background_install: false
+  backgroundInstall: false
 
   # Specific mise version to install (default: latest)
   # version: "2024.12.16"
   version: 'latest'
 
   # Auto-run `mise install` after mise is available
-  auto_install_tools: true
+  autoInstallTools: true
 
   # Auto-run `mise trust` for the project's mise.toml
-  auto_trust: true
+  autoTrust: true

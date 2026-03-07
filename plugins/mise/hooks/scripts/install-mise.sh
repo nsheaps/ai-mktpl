@@ -2,7 +2,7 @@
 # install-mise.sh — SessionStart hook for mise plugin
 #
 # Installs or updates mise (tool version manager) for Claude Code web sessions.
-# When install_to_project is true, installs to $CLAUDE_PROJECT_DIR/bin/.local/
+# When installToProject is true, installs to $CLAUDE_PROJECT_DIR/bin/.local/
 # which is gitignored and added to PATH.
 set -euo pipefail
 
@@ -18,9 +18,9 @@ tool_is_web_session || { echo '{}'; exit 0; }
 # --- Read config ---
 
 version="$(plugin_get_config "version" "latest")"
-auto_install="$(plugin_get_config "auto_install" "true")"
-auto_install_tools="$(plugin_get_config "auto_install_tools" "true")"
-auto_trust="$(plugin_get_config "auto_trust" "true")"
+auto_install="$(plugin_get_config "autoInstall" "true")"
+auto_install_tools="$(plugin_get_config "autoInstallTools" "true")"
+auto_trust="$(plugin_get_config "autoTrust" "true")"
 
 tool_resolve_install_dir
 
@@ -56,12 +56,12 @@ resolve_mise_bin() {
     fi
     tool_ensure_path "$INSTALL_DIR"
   else
-    # auto_install=false: use whatever mise is on PATH
+    # autoInstall=false: use whatever mise is on PATH
     if tool_is_available mise; then
       mise_bin="$(command -v mise)"
-      echo "${PLUGIN_NAME}: auto_install=false, using mise from PATH at $mise_bin" >&2
+      echo "${PLUGIN_NAME}: autoInstall=false, using mise from PATH at $mise_bin" >&2
     else
-      echo "${PLUGIN_NAME}: auto_install=false and mise not on PATH, skipping" >&2
+      echo "${PLUGIN_NAME}: autoInstall=false and mise not on PATH, skipping" >&2
       return 1
     fi
   fi
