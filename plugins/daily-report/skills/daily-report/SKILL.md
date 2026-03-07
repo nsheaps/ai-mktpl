@@ -154,20 +154,24 @@ Where YYYY-MM-DD is the report date (the day being reported on).
 
 ### Structure
 
-````markdown
-# YYYY-MM-DD Daily Report
+The report is a single Markdown document. The template below shows the required structure.
+Sections marked with `{placeholders}` should be filled with actual data.
 
-> **Scope**: {subject_scope} | **Period**: {time_scope} | **Generated**: {timestamp} ET
+#### Header
 
-## Commit Activity
+    # YYYY-MM-DD Daily Report
 
-A mermaid xychart-beta bar chart showing commit counts bucketed by 15-minute intervals
+    > **Scope**: {subject_scope} | **Period**: {time_scope} | **Generated**: {timestamp} ET
+
+#### Commit Activity Chart
+
+A mermaid `xychart-beta` bar chart showing commit counts bucketed by 15-minute intervals
 (ET), with one bar series per repository. This visualizes which projects were worked on
 and when across the reporting period.
 
 - X-axis: 15-minute intervals covering the **entire** reporting period from midnight to
-  midnight (or the full multi-day range), e.g. "12:00a", "12:15a", ..., "11:45p". Every
-  interval must be present even if no commits occurred — show 0 for empty intervals.
+  midnight (or the full multi-day range). Every interval must be present even if no
+  commits occurred — show 0 for empty intervals.
   - To keep labels readable, only label every 4th tick (i.e. on the hour marks like
     "10a", "11a", "12p") and use a single space `" "` for the intermediate 15-min ticks
     (empty strings are not valid in mermaid xychart syntax).
@@ -178,25 +182,13 @@ and when across the reporting period.
 - Use all commits gathered in Step 2 (across all branches), bucketed by their author
   timestamp converted to Eastern Time
 
-**Color Key**: Below the mermaid chart, include a markdown legend listing each bar series
-with its corresponding color, so readers on renderers that don't support hover can
-identify the repos:
+**Color Key**: Below the mermaid chart, include a markdown table listing each bar series
+with its corresponding color so readers on renderers that don't support hover can
+identify the repos. Use the default mermaid color cycle order: 1st series = blue/purple,
+2nd = orange, 3rd = green, 4th = red, 5th = teal, 6th = pink. Adjust if the theme differs.
 
-```markdown
-| Color  | Repository |
-| ------ | ---------- |
-| Blue   | repo-a     |
-| Orange | repo-b     |
-| Green  | repo-c     |
-```
-````
+Example chart (actual values will differ — only a subset of intervals shown for brevity):
 
-Use the default mermaid color cycle order: 1st series = blue/purple, 2nd = orange,
-3rd = green, 4th = red, 5th = teal, 6th = pink. Adjust if the theme differs.
-
-Example (actual values will differ — only a subset of intervals shown for brevity):
-
-````
 ```mermaid
 xychart-beta
     title "Commits by Repository Over Time (YYYY-MM-DD, ET)"
@@ -206,85 +198,51 @@ xychart-beta
     bar "repo-b" [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 5,0,4,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]
     bar "repo-c" [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 2,0,2,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 1,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]
 ```
-````
 
-## Executive Summary
+Example color key:
+
+| Color       | Repository |
+| ----------- | ---------- |
+| Purple/Blue | repo-a     |
+| Orange      | repo-b     |
+| Green       | repo-c     |
+
+#### Remaining Report Sections
+
+After the chart, include these sections in order:
+
+    ## Executive Summary
 
 One paragraph summarizing the day's activity across the org: total commits, PRs opened/merged/closed,
 issues opened/closed, repos with activity, notable force pushes.
 
-## Repository Activity
+    ## Repository Activity
 
-### {owner}/{repo-name}
+    ### {owner}/{repo-name}
 
-#### Commits ({count})
+For each active repo (sorted alphabetically), include:
 
-| SHA                                                           | Author      | Branch | Message        | Time (ET) |
-| ------------------------------------------------------------- | ----------- | ------ | -------------- | --------- |
-| [`abc1234`](https://github.com/{owner}/{repo}/commit/abc1234) | Author Name | main   | Commit message | 2:30 PM   |
+- **Commits ({count})** — table with SHA (linked), Author, Branch, Message, Time (ET)
+- **Pull Requests ({count})** — table with #, Title, State, Author, Branch, +/-, Updated
+- **Branch Activity** — table with Branch, Event, Actor, Time
+- **Issue Changes ({count})** — table with #, Title, Change, State, Labels
+- **Force Push History** — only if force pushes detected; table with Branch, Actor, Time,
+  Before/After SHAs (linked), Commits Lost/Added. Use `<details>` for old commit tree.
 
-#### Pull Requests ({count})
+Separate each repo with `---`.
 
-| #          | Title    | State  | Author | Branch        | +/-    | Updated |
-| ---------- | -------- | ------ | ------ | ------------- | ------ | ------- |
-| [#42](url) | PR title | merged | author | feature->main | +10/-5 | time    |
+    ## Cross-Repo Summary
 
-#### Branch Activity
+- **By Author** — table with Author, Commits, PRs, Issues
+- **Activity Timeline** — chronological list of significant events across all repos (ET)
 
-| Branch     | Event   | Actor  | Time |
-| ---------- | ------- | ------ | ---- |
-| feature/x  | created | author | time |
-| old-branch | deleted | author | time |
-
-#### Issue Changes ({count})
-
-| #          | Title       | Change             | State  | Labels             |
-| ---------- | ----------- | ------------------ | ------ | ------------------ |
-| [#10](url) | Issue title | opened             | OPEN   | bug, priority:high |
-| [#8](url)  | Issue title | closed (completed) | CLOSED | enhancement        |
-
-#### Force Push History
-
-_Only include this section if force pushes were detected for this repo._
-
-| Branch | Actor | Time | Before          | After           | Commits Lost | Commits Added |
-| ------ | ----- | ---- | --------------- | --------------- | ------------ | ------------- |
-| main   | actor | time | [`old123`](url) | [`new456`](url) | 3            | 5             |
-
-<details>
-<summary>Previous commit tree (before force push)</summary>
-
-| SHA | Author | Message | Time |
-| --- | ------ | ------- | ---- |
-| ... | ...    | ...     | ...  |
-
-</details>
-
----
-
-_(repeat for each active repository)_
-
-## Cross-Repo Summary
-
-### By Author
-
-| Author | Commits | PRs | Issues |
-| ------ | ------- | --- | ------ |
-| Name   | 15      | 3   | 2      |
-
-### Activity Timeline
-
-Chronological list of significant events across all repos, in Eastern Time.
-
-## Methodology Notes
+    ## Methodology Notes
 
 - Time window: {SINCE_ISO} to {UNTIL_ISO}
 - Repositories scanned: {count}
 - Repositories with activity: {count}
 - Force push detection: {method used - audit log or events API}
 - Any data gaps or API limitations encountered
-
-```
 
 ## Formatting Rules
 
@@ -311,4 +269,3 @@ The final report content should be posted as a GitHub issue in the triggering re
 - Title: `YYYY-MM-DD Daily Report`
 - Label: `daily-report`
 - The full markdown report as the issue body
-```
