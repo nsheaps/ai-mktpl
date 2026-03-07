@@ -161,12 +161,16 @@ Where YYYY-MM-DD is the report date (the day being reported on).
 
 ## Commit Activity
 
-A mermaid xychart-beta bar chart showing commit counts bucketed by hour (ET), with one
-bar series per repository. This visualizes which projects were worked on and when across
-the reporting period.
+A mermaid xychart-beta bar chart showing commit counts bucketed by 15-minute intervals
+(ET), with one bar series per repository. This visualizes which projects were worked on
+and when across the reporting period.
 
-- X-axis: hours of the day (e.g. "10a", "11a", "12p", "1p") — only include hours that
-  had at least one commit across any repo
+- X-axis: 15-minute intervals covering the **entire** reporting period from midnight to
+  midnight (or the full multi-day range), e.g. "12:00a", "12:15a", ..., "11:45p". Every
+  interval must be present even if no commits occurred — show 0 for empty intervals.
+  - To keep labels readable, only label every 4th tick (i.e. on the hour marks like
+    "10a", "11a", "12p") and use a single space `" "` for the intermediate 15-min ticks
+    (empty strings are not valid in mermaid xychart syntax).
 - Y-axis: commit count
 - Each bar series is labeled with the repo short name (without the org prefix)
 - Repos with fewer than 2 commits MAY be grouped into an "other" series to keep the
@@ -174,22 +178,34 @@ the reporting period.
 - Use all commits gathered in Step 2 (across all branches), bucketed by their author
   timestamp converted to Eastern Time
 
-Example (actual values will differ):
+**Color Key**: Below the mermaid chart, include a markdown legend listing each bar series
+with its corresponding color, so readers on renderers that don't support hover can
+identify the repos:
+
+```markdown
+| Color   | Repository |
+| ------- | ---------- |
+| Blue    | repo-a     |
+| Orange  | repo-b     |
+| Green   | repo-c     |
 ```
 
+Use the default mermaid color cycle order: 1st series = blue/purple, 2nd = orange,
+3rd = green, 4th = red, 5th = teal, 6th = pink. Adjust if the theme differs.
+
+Example (actual values will differ — only a subset of intervals shown for brevity):
+
+~~~
 ```mermaid
 xychart-beta
     title "Commits by Repository Over Time (YYYY-MM-DD, ET)"
-    x-axis ["10a","11a","12p","1p","2p","3p","4p","5p"]
+    x-axis ["12a"," "," "," ","1a"," "," "," ","2a"," "," "," ","3a"," "," "," ","4a"," "," "," ","5a"," "," "," ","6a"," "," "," ","7a"," "," "," ","8a"," "," "," ","9a"," "," "," ","10a"," "," "," ","11a"," "," "," ","12p"," "," "," ","1p"," "," "," ","2p"," "," "," ","3p"," "," "," ","4p"," "," "," ","5p"," "," "," ","6p"," "," "," ","7p"," "," "," ","8p"," "," "," ","9p"," "," "," ","10p"," "," "," ","11p"," "," "," "]
     y-axis "Commits" 0 --> 15
-    bar "repo-a" [1, 3, 0, 2, 3, 3, 1, 3]
-    bar "repo-b" [0, 5, 4, 0, 0, 0, 0, 0]
-    bar "repo-c" [0, 0, 0, 2, 2, 0, 0, 1]
+    bar "repo-a" [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 1,0,2,0, 0,3,0,0, 0,0,0,0, 2,0,0,0, 0,3,0,0, 3,0,0,0, 1,0,0,0, 3,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]
+    bar "repo-b" [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 5,0,4,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]
+    bar "repo-c" [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 2,0,2,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 1,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]
 ```
-
-```
-
-```
+~~~
 
 ## Executive Summary
 
