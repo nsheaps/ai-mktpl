@@ -236,7 +236,7 @@ Separate each repo with `---`.
 - **By Author** — table with Author, Commits, PRs, Issues
 - **Activity Timeline** — chronological list of significant events across all repos (ET)
 
-    ## Methodology Notes
+  ## Methodology Notes
 
 - Time window: {SINCE_ISO} to {UNTIL_ISO}
 - Repositories scanned: {count}
