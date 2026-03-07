@@ -159,6 +159,35 @@ Where YYYY-MM-DD is the report date (the day being reported on).
 
 > **Scope**: {subject_scope} | **Period**: {time_scope} | **Generated**: {timestamp} ET
 
+## Commit Activity
+
+A mermaid xychart-beta bar chart showing commit counts bucketed by hour (ET), with one
+bar series per repository. This visualizes which projects were worked on and when across
+the reporting period.
+
+- X-axis: hours of the day (e.g. "10a", "11a", "12p", "1p") — only include hours that
+  had at least one commit across any repo
+- Y-axis: commit count
+- Each bar series is labeled with the repo short name (without the org prefix)
+- Repos with fewer than 2 commits MAY be grouped into an "other" series to keep the
+  chart readable (use judgment — if there are ≤6 repos total, show them all)
+- Use all commits gathered in Step 2 (across all branches), bucketed by their author
+  timestamp converted to Eastern Time
+
+Example (actual values will differ):
+
+~~~
+```mermaid
+xychart-beta
+    title "Commits by Repository Over Time (YYYY-MM-DD, ET)"
+    x-axis ["10a","11a","12p","1p","2p","3p","4p","5p"]
+    y-axis "Commits" 0 --> 15
+    bar "repo-a" [1, 3, 0, 2, 3, 3, 1, 3]
+    bar "repo-b" [0, 5, 4, 0, 0, 0, 0, 0]
+    bar "repo-c" [0, 0, 0, 2, 2, 0, 0, 1]
+```
+~~~
+
 ## Executive Summary
 
 One paragraph summarizing the day's activity across the org: total commits, PRs opened/merged/closed,
