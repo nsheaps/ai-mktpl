@@ -138,4 +138,6 @@ jobs:
           skip_push: true
 
       - name: Push all changes together
-        run: git push
+        run: |
+          git remote set-url origin "https://x-access-token:${{ steps.auth.outputs.token }}@github.com/${{ github.repository }}.git"
+          git push
