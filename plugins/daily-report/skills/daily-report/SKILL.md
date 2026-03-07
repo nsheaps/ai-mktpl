@@ -154,7 +154,7 @@ Where YYYY-MM-DD is the report date (the day being reported on).
 
 ### Structure
 
-```markdown
+````markdown
 # YYYY-MM-DD Daily Report
 
 > **Scope**: {subject_scope} | **Period**: {time_scope} | **Generated**: {timestamp} ET
@@ -183,19 +183,20 @@ with its corresponding color, so readers on renderers that don't support hover c
 identify the repos:
 
 ```markdown
-| Color   | Repository |
-| ------- | ---------- |
-| Blue    | repo-a     |
-| Orange  | repo-b     |
-| Green   | repo-c     |
+| Color  | Repository |
+| ------ | ---------- |
+| Blue   | repo-a     |
+| Orange | repo-b     |
+| Green  | repo-c     |
 ```
+````
 
 Use the default mermaid color cycle order: 1st series = blue/purple, 2nd = orange,
 3rd = green, 4th = red, 5th = teal, 6th = pink. Adjust if the theme differs.
 
 Example (actual values will differ — only a subset of intervals shown for brevity):
 
-~~~
+````
 ```mermaid
 xychart-beta
     title "Commits by Repository Over Time (YYYY-MM-DD, ET)"
@@ -205,7 +206,7 @@ xychart-beta
     bar "repo-b" [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 5,0,4,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]
     bar "repo-c" [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 2,0,2,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 1,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]
 ```
-~~~
+````
 
 ## Executive Summary
 
