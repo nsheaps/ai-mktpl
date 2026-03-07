@@ -138,4 +138,8 @@ jobs:
           skip_push: true
 
       - name: Push all changes together
-        run: git push
+        env:
+          GH_TOKEN: ${{ steps.auth.outputs.token }}
+        run: |
+          gh auth setup-git
+          git push
