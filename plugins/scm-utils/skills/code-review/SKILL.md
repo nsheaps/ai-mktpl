@@ -55,7 +55,7 @@ The GitHub App needs:
 4. **Copy the prompt** from `references/prompt-template.md` to `.github/prompts/claude-code-review.md`
 5. **Copy the labels** from `references/labels.yaml` and apply them (or merge into existing `.github/labels.yaml`)
 6. **Copy the actions** — the workflow depends on:
-   - `.github/actions/github-app-auth/` — authenticates as a GitHub App
+   - `nsheaps/github-actions/.github/actions/checkout-as-app` — authenticates as a GitHub App and checks out the repo
    - `.github/actions/interpolate-prompt/` — reads a prompt template and interpolates env vars with `envsubst`
 
 ## Review Behavior

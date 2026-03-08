@@ -20,7 +20,7 @@ Supplementary reference for the `how-this-repo-works` skill. See `../SKILL.md` f
 | `update-marketplace`    | `.github/actions/update-marketplace/action.yaml`    | cd.yaml          |
 | `lint-files`            | `.github/actions/lint-files/action.yaml`            | ci.yaml          |
 | `validate-plugins`      | `.github/actions/validate-plugins/action.yaml`      | ci.yaml          |
-| `github-app-auth`       | `.github/actions/github-app-auth/`                  | ci.yaml, cd.yaml |
+| `checkout-as-app`       | `nsheaps/github-actions/.github/actions/checkout-as-app` | ci.yaml, cd.yaml, claude-agent.yaml, etc. |
 
 ## CI Pipeline Detail (ci.yaml)
 

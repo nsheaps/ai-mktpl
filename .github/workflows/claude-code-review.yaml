@@ -42,18 +42,13 @@ jobs:
       actions: read
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-        with:
-          persist-credentials: false
-          fetch-depth: 50
-
-      - name: Authenticate as GitHub App
+      - name: Checkout and authenticate as GitHub App
         id: auth
-        uses: ./.github/actions/github-app-auth
+        uses: nsheaps/github-actions/.github/actions/checkout-as-app@main
         with:
           app-id: ${{ secrets.REVIEW_GITHUB_APP_ID }}
           private-key: ${{ secrets.REVIEW_GITHUB_APP_PRIVATE_KEY }}
+          fetch-depth: '50'
 
       - name: Remove request-review label
         if: github.event.action == 'labeled' && github.event.label.name == 'request-review'

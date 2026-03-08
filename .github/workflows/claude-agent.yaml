@@ -17,23 +17,18 @@ jobs:
       id-token: write
       actions: read
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
+      - name: Checkout and authenticate as GitHub App
+        id: auth
+        uses: nsheaps/github-actions/.github/actions/checkout-as-app@main
         with:
-          persist-credentials: false
-          fetch-depth: 50
+          app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
+          private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
+          fetch-depth: '50'
 
       - name: Install mise
         uses: jdx/mise-action@v3
         with:
           install: true
-
-      - name: Authenticate as GitHub App
-        id: auth
-        uses: ./.github/actions/github-app-auth
-        with:
-          app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
-          private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
 
       - name: Build prompt from dispatch payload
         id: prompt

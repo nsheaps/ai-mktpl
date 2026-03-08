@@ -91,7 +91,7 @@ Common actions already in use:
    - Example: "git config issues" could be in multiple workflows
 
 4. **Repository dispatch workflows need special auth**
-   - Workflows triggered by `repository_dispatch` need the `github-app-auth` action
+   - Workflows triggered by `repository_dispatch` need the `checkout-as-app` action from `nsheaps/github-actions`
    - This provides proper bot attribution for commits
    - Example: `claude-agent.yaml` needs this, but `ci.yaml` doesn't (uses `stefanzweifel/git-auto-commit-action`)
 
