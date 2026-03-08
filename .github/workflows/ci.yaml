@@ -68,7 +68,7 @@ jobs:
     steps:
       - name: Checkout and authenticate as GitHub App
         id: auth
-        uses: nsheaps/github-actions/.github/actions/checkout-as-app@main
+        uses: nsheaps/github-actions/.github/actions/checkout-as-app@76971e4b9151c3afb279e7cc025d47df901cc3b2 # checkout-as-app
         with:
           app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
           private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
