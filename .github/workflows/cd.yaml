@@ -19,6 +19,7 @@ name: cd
       # Ignore version/marketplace files to prevent bump loops
       - '!plugins/*/.claude-plugin/plugin.json'
       - '!.claude-plugin/marketplace.json'
+  workflow_dispatch:
 
 concurrency:
   group: cd-${{ github.ref }}
