@@ -140,6 +140,20 @@ gh api "repos/${OWNER}/${REPO}/issues/${ISSUE_NUMBER}/timeline" --paginate \
   -q '.[] | select(.created_at >= "'${SINCE_ISO}'")'
 ```
 
+### Step 7: Gather CI Workflow Failures (for Attention Required section)
+
+```bash
+# Recent workflow runs with failures
+gh api "repos/${OWNER}/${REPO}/actions/runs" \
+  -f created=">=${SINCE_DATE}" \
+  -f status="failure" \
+  --paginate \
+  -q '.workflow_runs[] | {name: .name, branch: .head_branch, conclusion: .conclusion, url: .html_url, created_at: .created_at, run_number: .run_number}'
+```
+
+Look for patterns of repeated failures on the same branch/PR, which may indicate agent
+struggles. Cross-reference with PR and commit data from earlier steps.
+
 ## Report Format
 
 The output must be valid GitHub-flavored Markdown suitable for posting as a GitHub issue body.
@@ -163,53 +177,74 @@ Sections marked with `{placeholders}` should be filled with actual data.
 
     > **Scope**: {subject_scope} | **Period**: {time_scope} | **Generated**: {timestamp} ET
 
-#### Commit Activity Chart
+#### Attention Required
 
-A mermaid `xychart-beta` bar chart showing commit counts bucketed by 15-minute intervals
-(ET), with one bar series per repository. This visualizes which projects were worked on
-and when across the reporting period.
+This section appears **immediately after the header**, before any other content. It draws
+the reader's attention to items that need human intervention or investigation.
 
-- X-axis: 15-minute intervals covering the **entire** reporting period from midnight to
-  midnight (or the full multi-day range). Every interval must be present even if no
-  commits occurred — show 0 for empty intervals.
-  - To keep labels readable, only label every 4th tick (i.e. on the hour marks like
-    "10a", "11a", "12p") and use a single space `" "` for the intermediate 15-min ticks
-    (empty strings are not valid in mermaid xychart syntax).
-- Y-axis: commit count
-- Each bar series is labeled with the repo short name (without the org prefix)
-- Repos with fewer than 2 commits MAY be grouped into an "other" series to keep the
-  chart readable (use judgment — if there are ≤6 repos total, show them all)
-- Use all commits gathered in Step 2 (across all branches), bucketed by their author
-  timestamp converted to Eastern Time
+Analyze the gathered data to identify two categories of items:
 
-**Color Key**: Below the mermaid chart, include a markdown table listing each bar series
-with its corresponding color so readers on renderers that don't support hover can
-identify the repos. Use the default mermaid color cycle order: 1st series = blue/purple,
-2nd = orange, 3rd = green, 4th = red, 5th = teal, 6th = pink. Adjust if the theme differs.
+**1. Agent Failures & Issues** — Detect patterns that suggest automated agents struggled
+or failed during the reporting period:
 
-Example chart (actual values will differ — only a subset of intervals shown for brevity):
+- PRs with many force pushes on the same branch in a short time (suggesting repeated
+  failed attempts)
+- Commits with messages like "fix", "retry", "attempt", "revert" appearing in rapid
+  succession on the same branch
+- PRs that were opened and closed without merging multiple times
+- CI workflow runs that failed repeatedly on the same PR/branch
+- Branches with an unusually high number of commits relative to the diff size (churn)
+- Any commit messages explicitly mentioning errors, failures, or workarounds
+
+**2. Action Items Requiring Human Involvement** — Identify items from commits, PRs, and
+issues that explicitly call out the need for human action:
+
+- References to secrets that need to be created or rotated
+- Comments or PR descriptions mentioning "needs review", "need approval", or similar
+- Issues labeled with `status:blocked` or `status:needs-review`
+- References to permissions, access tokens, or credentials that need setup
+- Deployment or infrastructure changes that require manual steps
+- Any TODO/FIXME comments added in the reporting period that reference manual action
+
+Format this section as a blockquote callout with warning emojis:
+
+    > ⚠️🚨 **ATTENTION REQUIRED** 🚨⚠️
+    >
+    > ### 🔴 Agent Failures & Repeated Iterations
+    >
+    > {List each detected issue with repo, branch/PR link, and brief description}
+    > {If none detected: "No agent failure patterns detected."}
+    >
+    > ### 🟡 Items Needing Your Involvement
+    >
+    > {List each item with repo, issue/PR/commit link, and what action is needed}
+    > {If none detected: "No items requiring manual intervention."}
+
+#### Top Repos by Commits
+
+A horizontal bar chart showing the total number of commits per repository during the
+reporting period. This gives a quick visual overview of where the most activity occurred.
+
+- Use a mermaid `xychart-beta` chart with **horizontal** layout
+- Y-axis: repository short names (without the org prefix), sorted by commit count descending
+- X-axis: total commit count
+- One bar per repository
+- Use all commits gathered in Step 2 (across all branches)
+- Only include repos that had at least 1 commit
+
+Example chart (actual values will differ):
 
 ```mermaid
-xychart-beta
-    title "Commits by Repository Over Time (YYYY-MM-DD, ET)"
-    x-axis ["12a"," "," "," ","1a"," "," "," ","2a"," "," "," ","3a"," "," "," ","4a"," "," "," ","5a"," "," "," ","6a"," "," "," ","7a"," "," "," ","8a"," "," "," ","9a"," "," "," ","10a"," "," "," ","11a"," "," "," ","12p"," "," "," ","1p"," "," "," ","2p"," "," "," ","3p"," "," "," ","4p"," "," "," ","5p"," "," "," ","6p"," "," "," ","7p"," "," "," ","8p"," "," "," ","9p"," "," "," ","10p"," "," "," ","11p"," "," "," "]
-    y-axis "Commits" 0 --> 15
-    bar "repo-a" [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 1,0,2,0, 0,3,0,0, 0,0,0,0, 2,0,0,0, 0,3,0,0, 3,0,0,0, 1,0,0,0, 3,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]
-    bar "repo-b" [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 5,0,4,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]
-    bar "repo-c" [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 2,0,2,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 1,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]
+xychart-beta horizontal
+    title "Commits by Repository (YYYY-MM-DD)"
+    x-axis "Commits"
+    y-axis ["repo-a", "repo-b", "repo-c"]
+    bar [18, 9, 5]
 ```
-
-Example color key:
-
-| Color       | Repository |
-| ----------- | ---------- |
-| Purple/Blue | repo-a     |
-| Orange      | repo-b     |
-| Green       | repo-c     |
 
 #### Remaining Report Sections
 
-After the chart, include these sections in order:
+After the attention callout and chart, include these sections in order:
 
     ## Executive Summary
 
