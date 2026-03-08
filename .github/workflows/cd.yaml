@@ -133,13 +133,7 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: 'chore: update marketplace metadata [skip ci]'
+          commit_user_name: ${{ steps.auth.outputs.user-name }}
+          commit_user_email: ${{ steps.auth.outputs.user.email }}
           file_pattern: '.claude-plugin/marketplace.json'
           push_options: '--no-verify'
-          skip_push: true
-
-      - name: Push all changes together
-        env:
-          GH_TOKEN: ${{ steps.auth.outputs.token }}
-        run: |
-          gh auth setup-git
-          git push
