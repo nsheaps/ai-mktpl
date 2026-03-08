@@ -14,12 +14,12 @@ Supplementary reference for the `how-this-repo-works` skill. See `../SKILL.md` f
 
 ## Composite Actions
 
-| Action                  | Location                                            | Used By          |
-| ----------------------- | --------------------------------------------------- | ---------------- |
-| `detect-plugin-changes` | `.github/actions/detect-plugin-changes/action.yaml` | cd.yaml          |
-| `update-marketplace`    | `.github/actions/update-marketplace/action.yaml`    | cd.yaml          |
-| `lint-files`            | `.github/actions/lint-files/action.yaml`            | ci.yaml          |
-| `validate-plugins`      | `.github/actions/validate-plugins/action.yaml`      | ci.yaml          |
+| Action                  | Location                                                 | Used By                                   |
+| ----------------------- | -------------------------------------------------------- | ----------------------------------------- |
+| `detect-plugin-changes` | `.github/actions/detect-plugin-changes/action.yaml`      | cd.yaml                                   |
+| `update-marketplace`    | `.github/actions/update-marketplace/action.yaml`         | cd.yaml                                   |
+| `lint-files`            | `.github/actions/lint-files/action.yaml`                 | ci.yaml                                   |
+| `validate-plugins`      | `.github/actions/validate-plugins/action.yaml`           | ci.yaml                                   |
 | `checkout-as-app`       | `nsheaps/github-actions/.github/actions/checkout-as-app` | ci.yaml, cd.yaml, claude-agent.yaml, etc. |
 
 ## CI Pipeline Detail (ci.yaml)

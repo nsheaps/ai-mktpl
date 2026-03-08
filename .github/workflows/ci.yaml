@@ -72,6 +72,7 @@ jobs:
         with:
           app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
           private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
+          ref: ${{ github.head_ref || github.ref }}
 
       - name: mise install -y
         uses: jdx/mise-action@v3
