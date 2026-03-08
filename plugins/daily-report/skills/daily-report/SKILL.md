@@ -189,8 +189,11 @@ or failed during the reporting period:
 
 - PRs with many force pushes on the same branch in a short time (suggesting repeated
   failed attempts)
-- Commits with messages like "fix", "retry", "attempt", "revert" appearing in rapid
-  succession on the same branch
+- Commits with struggle-indicator messages ("retry", "attempt", "revert", "try again",
+  "wip", "broken") appearing in rapid succession on the same branch. Exclude conventional
+  commit `fix:` or `fix(scope):` prefixes — those indicate intentional bug fixes, not
+  agent struggles. Only flag "fix" when 3+ fix-like commits appear within 1 hour on the
+  same branch (suggesting iterative failed attempts rather than normal development)
 - PRs that were opened and closed without merging multiple times
 - CI workflow runs that failed repeatedly on the same PR/branch
 - Branches with an unusually high number of commits relative to the diff size (churn)
@@ -231,6 +234,11 @@ reporting period. This gives a quick visual overview of where the most activity 
 - One bar per repository
 - Use all commits gathered in Step 2 (across all branches)
 - Only include repos that had at least 1 commit
+
+**Design note**: This chart intentionally replaces the previous time-of-day stacked bar
+chart. The temporal dimension (when activity occurred) is traded for a clearer at-a-glance
+view of where activity concentrated. Time-of-day patterns can still be inferred from the
+commit tables in the Repository Activity section below.
 
 Example chart (actual values will differ):
 
