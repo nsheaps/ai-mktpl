@@ -66,11 +66,13 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - name: Checkout as GitHub App
-        uses: nsheaps/github-actions/.github/actions/checkout-as-app@main
+      - name: Checkout and authenticate as GitHub App
+        id: auth
+        uses: nsheaps/github-actions/.github/actions/checkout-as-app@603052841cd49b9fdc99bc32979ff9c45c9b669e # checkout-as-app@main
         with:
           app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
           private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
+          ref: ${{ github.head_ref || github.ref }}
 
       - name: mise install -y
         uses: jdx/mise-action@v3

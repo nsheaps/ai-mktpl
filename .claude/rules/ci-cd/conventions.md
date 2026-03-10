@@ -90,10 +90,10 @@ Common actions already in use:
    - Don't make broad changes without confirming the scope
    - Example: "git config issues" could be in multiple workflows
 
-4. **Repository dispatch workflows need special auth**
-   - Workflows triggered by `repository_dispatch` need the `github-app-auth` action
-   - This provides proper bot attribution for commits
-   - Example: `claude-agent.yaml` needs this, but `ci.yaml` doesn't (uses `stefanzweifel/git-auto-commit-action`)
+4. **All workflows use `checkout-as-app` for authentication**
+   - All workflows use `nsheaps/github-actions/.github/actions/checkout-as-app` (SHA-pinned) for GitHub App authentication and checkout in a single step
+   - This provides proper bot attribution for commits and consistent auth across all workflows
+   - The action is pinned to a specific commit SHA for supply chain security
 
 5. **Don't fix what isn't broken**
    - If a workflow already works correctly, don't modify it
