@@ -1,6 +1,6 @@
 {
   "name": "datadog-otel-setup",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Configure Claude Code's native OTEL integration for Datadog. Sets environment variables in settings.local.json on session start.",
   "author": {
     "name": "Nathan Heaps",
