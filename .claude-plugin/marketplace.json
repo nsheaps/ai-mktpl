@@ -12,7 +12,7 @@
     {
       "name": "1pass",
       "description": "Install and manage 1Password CLI (op) and op-exec in Claude Code sessions. Provides session-start auto-install for web sessions and comprehensive workflow skills.",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -45,7 +45,7 @@
     {
       "name": "claude-team",
       "description": "Patterns, pitfalls, and operational knowledge for working effectively with Claude Code agent teams",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -105,7 +105,7 @@
     {
       "name": "common-sense",
       "description": "Common-sense rules for AI assistant behavior. On session start, symlinks bundled rules into the project's .claude/rules/common-sense directory so they are automatically loaded as context.",
-      "version": "1.3.1",
+      "version": "1.3.2",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -160,7 +160,7 @@
     {
       "name": "daily-report",
       "description": "Skill for generating daily organization-wide reports covering commits, PRs, branches, and issue changes across all repositories in a GitHub org. Designed for scheduled CI workflows and on-demand reporting.",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -207,7 +207,7 @@
     {
       "name": "datadog-otel-setup",
       "description": "Configure Claude Code's native OTEL integration for Datadog. Sets environment variables in settings.local.json on session start.",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -259,7 +259,7 @@
     {
       "name": "github",
       "description": "GitHub CLI installation, authentication, and workflow skill for Claude Code sessions. Consolidates gh-tool and github-auth-skill into a single plugin.",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -284,7 +284,7 @@
     {
       "name": "github-app",
       "description": "Automatic GitHub App token lifecycle for Claude Code sessions. Generates installation tokens on session start, monitors expiry via PreToolUse hook, and refreshes transparently before commands that need authentication.",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -330,7 +330,7 @@
     {
       "name": "mise",
       "description": "Install and manage mise (tool version manager) in Claude Code sessions. Provides session-start auto-install for web sessions and comprehensive workflow skills.",
-      "version": "0.2.1",
+      "version": "0.2.2",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -370,7 +370,7 @@
     {
       "name": "permissions-sync",
       "description": "Merge permission scopes from configurable source settings.json files into settings.local.json on session start. Supports project-level and user-level installation.",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -392,7 +392,7 @@
     {
       "name": "plugin-management",
       "description": "Skill for installing, updating, and managing Claude Code plugins — including what requires a restart and what hot-reloads.",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -471,7 +471,7 @@
     {
       "name": "scm-utils",
       "description": "Source control management utilities for improving interactions with branches and PRs, both locally and in CI environments",
-      "version": "0.1.6",
+      "version": "0.1.7",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -495,7 +495,7 @@
     {
       "name": "sequential-thinking",
       "description": "Set up the sequential-thinking MCP server and auto-configure permissions for its tools on session start.",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -514,7 +514,7 @@
     {
       "name": "session-report",
       "description": "Skill for generating structured session reports — fact-finding across git history, GitHub issues and PRs, tasks, and agent contributions to produce a comprehensive work summary. Works for solo agents and agent teams alike.",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -533,7 +533,7 @@
     {
       "name": "skill-required",
       "description": "Enforces that specified skills are loaded before certain tools can be used. Tracks skill reads via PostToolUse and blocks tool use via PreToolUse if the required skill hasn't been recently loaded.",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -557,7 +557,7 @@
     {
       "name": "statusline",
       "description": "Configurable status line for Claude Code showing session info, project context, and git status",
-      "version": "0.1.20",
+      "version": "0.1.21",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -569,7 +569,7 @@
     {
       "name": "statusline-iterm",
       "description": "Status line for Claude Code with iTerm2 badge integration - shows session info, project context, git status, and updates iTerm2 badge",
-      "version": "0.1.23",
+      "version": "0.1.24",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -644,7 +644,7 @@
     {
       "name": "todo-plus-plus",
       "description": "Enforces commit-on-complete for tasks and reminds about ephemeral session awareness",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -668,7 +668,7 @@
     {
       "name": "word-vomit",
       "description": "Hook-based workflow for capturing unstructured thoughts and triggering the exec-assist agent to categorize them into actionable items (issues, tasks, docs).",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "author": {
         "name": "Nathan Heaps"
       },
