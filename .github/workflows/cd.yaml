@@ -130,6 +130,9 @@ jobs:
         with:
           commit_message: 'chore: update marketplace metadata [skip ci]'
           commit_user_name: ${{ steps.auth.outputs.user-name }}
-          commit_user_email: ${{ steps.auth.outputs.user.email }}
+          commit_user_email: ${{ steps.auth.outputs.user-email }}
           file_pattern: '.claude-plugin/marketplace.json'
           push_options: '--no-verify'
+          skip_push: true
+      
+      - run: git push
