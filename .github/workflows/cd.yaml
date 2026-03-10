@@ -20,6 +20,12 @@ name: cd
       - '!plugins/*/.claude-plugin/plugin.json'
       - '!.claude-plugin/marketplace.json'
   workflow_dispatch:
+    inputs:
+      from_sha:
+        description: 'commit sha from...HEAD to determine what to bump'
+        required: true
+        default: 'HEAD~1'
+        type: string
 
 concurrency:
   group: cd-${{ github.ref }}
@@ -68,7 +74,7 @@ jobs:
   # For main: Bump versions and update marketplace
   bump-and-update-marketplace:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
     permissions:
       contents: write
     steps:
@@ -93,7 +99,7 @@ jobs:
         id: detect
         uses: ./.github/actions/detect-plugin-changes
         with:
-          base-ref: HEAD~1
+          base-ref: ${{ github.event_name == 'workflow_dispatch' && inputs.from_sha || 'HEAD~1' }}
 
       - name: Bump versions for changed plugins
         if: steps.detect.outputs.has-changes == 'true'
@@ -133,6 +139,3 @@ jobs:
           commit_user_email: ${{ steps.auth.outputs.user-email }}
           file_pattern: '.claude-plugin/marketplace.json'
           push_options: '--no-verify'
-          skip_push: true
-      
-      - run: git push
