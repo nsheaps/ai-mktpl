@@ -22,9 +22,9 @@ name: cd
   workflow_dispatch:
     inputs:
       from_sha:
-        description: 'commit sha from...HEAD to determine what to bump'
-        required: true
-        default: 'HEAD~1'
+        description: 'commit sha from...HEAD to determine what to bump (overrides tag-based detection)'
+        required: false
+        default: ''
         type: string
 
 concurrency:
@@ -45,8 +45,26 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Fetch base branch
-        run: git fetch origin ${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}
+      - name: Fetch base branch and tags
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          git fetch origin "$BASE_REF":refs/remotes/origin/"$BASE_REF"
+          git fetch origin --tags
+
+      - name: Resolve base ref from release tag
+        id: resolve-base
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          TAG_NAME="cd/last-release"
+          if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
+            echo "base-ref=$TAG_NAME" >> $GITHUB_OUTPUT
+            echo "Using release tag '$TAG_NAME' ($(git rev-parse --short $TAG_NAME)) as base ref"
+          else
+            echo "base-ref=$BASE_REF" >> $GITHUB_OUTPUT
+            echo "Release tag '$TAG_NAME' not found, falling back to base branch '$BASE_REF'"
+          fi
 
       - name: mise install -y
         uses: jdx/mise-action@v3
@@ -58,7 +76,7 @@ jobs:
         id: detect
         uses: ./.github/actions/detect-plugin-changes
         with:
-          base-ref: ${{ github.base_ref }}
+          base-ref: ${{ steps.resolve-base.outputs.base-ref }}
 
       - name: Post version preview comment
         uses: marocchino/sticky-pull-request-comment@v2
@@ -86,6 +104,24 @@ jobs:
           private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
           fetch-depth: '0'
 
+      - name: Resolve base ref from release tag
+        id: resolve-base
+        env:
+          FROM_SHA: ${{ inputs.from_sha }}
+        run: |
+          TAG_NAME="cd/last-release"
+          # workflow_dispatch with explicit from_sha takes priority
+          if [ -n "$FROM_SHA" ]; then
+            echo "base-ref=$FROM_SHA" >> $GITHUB_OUTPUT
+            echo "Using workflow_dispatch override: $FROM_SHA"
+          elif git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
+            echo "base-ref=$TAG_NAME" >> $GITHUB_OUTPUT
+            echo "Using release tag '$TAG_NAME' ($(git rev-parse --short $TAG_NAME)) as base ref"
+          else
+            echo "base-ref=HEAD~1" >> $GITHUB_OUTPUT
+            echo "Release tag '$TAG_NAME' not found, falling back to HEAD~1"
+          fi
+
       - name: mise install -y
         uses: jdx/mise-action@v3
         with:
@@ -99,7 +135,7 @@ jobs:
         id: detect
         uses: ./.github/actions/detect-plugin-changes
         with:
-          base-ref: ${{ github.event_name == 'workflow_dispatch' && inputs.from_sha || 'HEAD~1' }}
+          base-ref: ${{ steps.resolve-base.outputs.base-ref }}
 
       - name: Bump versions for changed plugins
         if: steps.detect.outputs.has-changes == 'true'
@@ -155,3 +191,10 @@ jobs:
 
       - name: Push all changes
         run: git push
+
+      - name: Update release tag
+        run: |
+          TAG_NAME="cd/last-release"
+          git tag -f "$TAG_NAME" HEAD
+          git push origin "$TAG_NAME" --force
+          echo "Moved tag '$TAG_NAME' to $(git rev-parse --short HEAD)"
