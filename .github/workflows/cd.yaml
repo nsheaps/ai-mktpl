@@ -105,12 +105,22 @@ jobs:
         if: steps.detect.outputs.has-changes == 'true'
         shell: bash
         run: |
+          FAILED_PLUGINS=()
           for plugin_name in ${{ steps.detect.outputs.plugins }}; do
-            echo "=== Bumping version for $plugin_name ==="
+            echo "::group::Bumping version for $plugin_name"
             cd "plugins/$plugin_name"
-            yarn exec release-it --ci
+            if ! yarn exec release-it --ci 2>&1; then
+              echo "::error::release-it failed for plugin '$plugin_name'"
+              FAILED_PLUGINS+=("$plugin_name")
+            fi
             cd ../..
+            echo "::endgroup::"
           done
+          if [ ${#FAILED_PLUGINS[@]} -gt 0 ]; then
+            echo "::error::Version bump failed for plugins: ${FAILED_PLUGINS[*]}"
+            echo "Hint: Ensure each plugin has a .release-it.js that extends ../../.release-it.base.json"
+            exit 1
+          fi
 
       - name: Run lint after version bump
         if: steps.detect.outputs.has-changes == 'true'
@@ -121,6 +131,8 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: 'chore: bump plugin versions [skip ci]'
+          commit_user_name: ${{ steps.auth.outputs.user-name }}
+          commit_user_email: ${{ steps.auth.outputs.user-email }}
           file_pattern: 'plugins/*/.claude-plugin/plugin.json plugins/*/CHANGELOG.md'
           push_options: '--no-verify'
           skip_push: true
@@ -139,3 +151,7 @@ jobs:
           commit_user_email: ${{ steps.auth.outputs.user-email }}
           file_pattern: '.claude-plugin/marketplace.json'
           push_options: '--no-verify'
+          skip_push: true
+
+      - name: Push all changes
+        run: git push
