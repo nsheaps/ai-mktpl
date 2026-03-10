@@ -46,20 +46,24 @@ jobs:
           fetch-depth: 0
 
       - name: Fetch base branch and tags
+        env:
+          BASE_REF: ${{ github.base_ref }}
         run: |
-          git fetch origin ${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}
+          git fetch origin "$BASE_REF":refs/remotes/origin/"$BASE_REF"
           git fetch origin --tags
 
       - name: Resolve base ref from release tag
         id: resolve-base
+        env:
+          BASE_REF: ${{ github.base_ref }}
         run: |
           TAG_NAME="cd/last-release"
           if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
             echo "base-ref=$TAG_NAME" >> $GITHUB_OUTPUT
             echo "Using release tag '$TAG_NAME' ($(git rev-parse --short $TAG_NAME)) as base ref"
           else
-            echo "base-ref=${{ github.base_ref }}" >> $GITHUB_OUTPUT
-            echo "Release tag '$TAG_NAME' not found, falling back to base branch '${{ github.base_ref }}'"
+            echo "base-ref=$BASE_REF" >> $GITHUB_OUTPUT
+            echo "Release tag '$TAG_NAME' not found, falling back to base branch '$BASE_REF'"
           fi
 
       - name: mise install -y
@@ -102,12 +106,14 @@ jobs:
 
       - name: Resolve base ref from release tag
         id: resolve-base
+        env:
+          FROM_SHA: ${{ inputs.from_sha }}
         run: |
           TAG_NAME="cd/last-release"
           # workflow_dispatch with explicit from_sha takes priority
-          if [ -n "${{ inputs.from_sha }}" ]; then
-            echo "base-ref=${{ inputs.from_sha }}" >> $GITHUB_OUTPUT
-            echo "Using workflow_dispatch override: ${{ inputs.from_sha }}"
+          if [ -n "$FROM_SHA" ]; then
+            echo "base-ref=$FROM_SHA" >> $GITHUB_OUTPUT
+            echo "Using workflow_dispatch override: $FROM_SHA"
           elif git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
             echo "base-ref=$TAG_NAME" >> $GITHUB_OUTPUT
             echo "Using release tag '$TAG_NAME' ($(git rev-parse --short $TAG_NAME)) as base ref"
