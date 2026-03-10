@@ -54,7 +54,6 @@
       "Bash(pnpm:*)",
       "Bash(chmod:*)",
       "Bash(readlink:*)",
-      "mcp__memory__*"
     ],
     "deny": ["Bash(rm -rf /:*)"],
     "ask": [

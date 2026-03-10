@@ -6,10 +6,6 @@
     },
     "context7": {
       "command": "bin/mcp/context7.sh"
-    },
-    "memory": {
-      "description": "Persistent memory storage for session information",
-      "command": "./.claude/mcp/memory.sh"
     }
   }
 }
