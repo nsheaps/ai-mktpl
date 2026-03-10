@@ -1,6 +1,6 @@
 {
   "name": "skill-required",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Enforces that specified skills are loaded before certain tools can be used. Tracks skill reads via PostToolUse and blocks tool use via PreToolUse if the required skill hasn't been recently loaded.",
   "author": {
     "name": "Nathan Heaps",
