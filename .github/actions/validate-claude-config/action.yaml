@@ -9,11 +9,11 @@ inputs:
   settings-file:
     description: Path to Claude settings.json
     required: false
-    default: ".claude/settings.json"
+    default: '.claude/settings.json'
   marketplace-file:
     description: Path to marketplace.json
     required: false
-    default: ".claude-plugin/marketplace.json"
+    default: '.claude-plugin/marketplace.json'
 
 runs:
   using: composite

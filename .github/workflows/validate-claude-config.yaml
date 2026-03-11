@@ -7,12 +7,12 @@ on:
         description: Path to Claude settings.json
         type: string
         required: false
-        default: ".claude/settings.json"
+        default: '.claude/settings.json'
       marketplace-file:
         description: Path to marketplace.json
         type: string
         required: false
-        default: ".claude-plugin/marketplace.json"
+        default: '.claude-plugin/marketplace.json'
 
 jobs:
   validate-claude-config:
