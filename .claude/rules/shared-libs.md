@@ -130,6 +130,27 @@ source "${CLAUDE_PLUGIN_ROOT}/lib/safe-settings-write.sh"
 safe_write_settings '.some.key = "value"'  # jq filter applied to file
 ```
 
+### sync-rules.sh
+
+Shared logic for rules-bundle plugins that symlink a `rules/` directory into `.claude/rules/`. Requires `plugin-config-read.sh` and `safe-settings-write.sh`.
+
+```bash
+PLUGIN_NAME="my-rules-plugin"
+PLUGIN_RULES_DIR="${CLAUDE_PLUGIN_ROOT}/rules"
+LINK_NAME="my-rules-plugin"
+
+source "${CLAUDE_PLUGIN_ROOT}/lib/plugin-config-read.sh"
+source "${CLAUDE_PLUGIN_ROOT}/lib/safe-settings-write.sh"
+source "${CLAUDE_PLUGIN_ROOT}/lib/sync-rules.sh"
+
+sync_rules_run                                 # creates symlink + optional cross-repo sync
+```
+
+Config keys (read via `plugin_get_config`):
+- `alsoSyncToUser` — also symlink into `~/.claude/rules/`
+- `alsoAddToRepos` — `""` (disabled), `"org-name"`, or `"*"` (all sibling repos)
+- `syncSettingsTarget` — `"local"` or `"shared"`: which settings file to write to
+
 ## Adding a New Shared Library
 
 1. Create the library in `shared/lib/`
