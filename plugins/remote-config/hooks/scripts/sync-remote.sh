@@ -8,6 +8,9 @@
 
 set -euo pipefail
 
+PLUGIN_NAME="remote-config"
+source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
+
 CONFIG_FILE="${CLAUDE_REMOTE_CONFIG:-$HOME/.claude/settings.remote-config.yaml}"
 REMOTE_DIR="$HOME/.claude-remote"
 
@@ -26,6 +29,8 @@ yaml_get() {
 
 # --- Load Config ---
 
+hook_log_step "load-config" "Loading remote-config settings"
+
 if [ ! -f "$CONFIG_FILE" ]; then
   # No config file — check env var
   if [ -n "${CLAUDE_REMOTE_UPSTREAM:-}" ]; then
@@ -33,6 +38,7 @@ if [ ! -f "$CONFIG_FILE" ]; then
     VERBOSE="false"
   else
     # No config at all — silently exit (plugin not configured)
+    hook_log_cleanup
     exit 0
   fi
 else
@@ -45,31 +51,33 @@ else
 fi
 
 if [ -z "$UPSTREAM_REPO" ]; then
-  echo "[remote-config] Error: No upstream repo configured" >&2
-  echo "[remote-config] Set 'upstream' in $CONFIG_FILE or CLAUDE_REMOTE_UPSTREAM env var" >&2
+  hook_fail "config" "No upstream repo configured" \
+    "Set 'upstream' in $CONFIG_FILE or set the CLAUDE_REMOTE_UPSTREAM env var"
   exit 0
 fi
 
 # --- Sync ---
+
+hook_log_step "sync" "Syncing upstream config repo"
 
 PREV_SHA=""
 
 if [ -d "$REMOTE_DIR/.git" ]; then
   # Repo exists — pull latest
   PREV_SHA=$(git -C "$REMOTE_DIR" rev-parse --short HEAD 2>/dev/null || true)
+  hook_log "Pulling latest from upstream (current: $PREV_SHA)"
 
   if ! git -C "$REMOTE_DIR" pull --ff-only --quiet 2>/dev/null; then
-    echo "[remote-config] Error: Cannot update $REMOTE_DIR cleanly" >&2
-    echo "[remote-config] Suggest: cd $REMOTE_DIR && git status" >&2
-    echo "[remote-config] Claude could fix this — reset to origin and re-pull" >&2
-    # Hook stdout is shown to user; they can decide
+    hook_fail "git pull" "Cannot update $REMOTE_DIR cleanly (merge conflicts or diverged history)" \
+      "Run: cd $REMOTE_DIR && git status — then reset to origin with: git fetch origin && git reset --hard origin/main"
     exit 0
   fi
 else
   # Fresh clone
+  hook_log "Cloning $UPSTREAM_REPO to $REMOTE_DIR"
   if ! git clone --quiet "$UPSTREAM_REPO" "$REMOTE_DIR" 2>/dev/null; then
-    echo "[remote-config] Error: Failed to clone $UPSTREAM_REPO" >&2
-    echo "[remote-config] Check the upstream URL in $CONFIG_FILE" >&2
+    hook_fail "git clone" "Failed to clone $UPSTREAM_REPO" \
+      "Check the upstream URL in $CONFIG_FILE and verify network connectivity"
     exit 0
   fi
   echo "[remote-config] Cloned $UPSTREAM_REPO → $REMOTE_DIR"
@@ -105,4 +113,5 @@ else
   echo "[remote-config] Up to date: $STATUS_LINE"
 fi
 
+hook_log_cleanup
 exit 0

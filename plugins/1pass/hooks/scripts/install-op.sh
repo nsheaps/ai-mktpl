@@ -9,6 +9,7 @@ set -euo pipefail
 PLUGIN_NAME="1pass"
 source "${CLAUDE_PLUGIN_ROOT}/lib/plugin-config-read.sh"
 source "${CLAUDE_PLUGIN_ROOT}/lib/tool-install.sh"
+source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 
 # --- Guards ---
 
@@ -35,12 +36,20 @@ detect_platform() {
     x86_64)  arch="amd64" ;;
     aarch64|arm64) arch="arm64" ;;
     i386|i686) arch="386" ;;
-    *) echo "${PLUGIN_NAME}: Unsupported architecture: $arch" >&2; return 1 ;;
+    *)
+      hook_fail "platform detection" "Unsupported architecture: $arch" \
+        "This plugin supports x86_64, arm64, and i386 architectures"
+      return 1
+      ;;
   esac
 
   case "$os" in
     linux|darwin) ;;
-    *) echo "${PLUGIN_NAME}: Unsupported OS: $os" >&2; return 1 ;;
+    *)
+      hook_fail "platform detection" "Unsupported OS: $os" \
+        "This plugin supports Linux and macOS only"
+      return 1
+      ;;
   esac
 
   DETECTED_OS="$os"
@@ -60,7 +69,7 @@ resolve_latest_op_version() {
   version="$(curl -fsSL "https://app-updates.agilebits.com/check/1/0/CLI2/en/2.0.0/N" 2>/dev/null \
     | grep -o '"version":"[^"]*"' | sed 's/"version":"//;s/"//' || true)"
   if [ -z "$version" ]; then
-    echo "${PLUGIN_NAME}: Could not determine latest op version, using fallback $fallback" >&2
+    hook_log "Could not determine latest op version, using fallback $fallback"
     version="$fallback"
   fi
   echo "$version"
@@ -69,12 +78,15 @@ resolve_latest_op_version() {
 # --- Download helpers ---
 
 download_op() {
+  hook_log_step "download-op" "Downloading 1Password CLI"
   local target_version="$1"
   local op_bin="$INSTALL_DIR/op"
   local tmp_dir
   tmp_dir="$(mktemp -d)"
   local archive="op_${DETECTED_OS}_${DETECTED_ARCH}_v${target_version}.zip"
   local url="https://cache.agilebits.com/dist/1P/op2/pkg/v${target_version}/${archive}"
+
+  hook_log "Downloading op v${target_version} from ${url}"
 
   if curl -fsSL "$url" -o "$tmp_dir/$archive" 2>/dev/null; then
     if command -v unzip >/dev/null 2>&1; then
@@ -86,28 +98,33 @@ download_op() {
     cp "$tmp_dir/op" "$op_bin"
     chmod +x "$op_bin"
     rm -rf "$tmp_dir"
-    echo "${PLUGIN_NAME}: op v${target_version} installed successfully" >&2
+    hook_log "op v${target_version} installed successfully to ${op_bin}"
     tool_ensure_path "$INSTALL_DIR"
     echo "$op_bin"
   else
-    echo "${PLUGIN_NAME}: Failed to download op v${target_version}" >&2
     rm -rf "$tmp_dir"
+    hook_fail "op download" "Failed to download op v${target_version} from ${url}" \
+      "Check network connectivity, or set opVersion to a specific version in plugin settings"
     return 1
   fi
 }
 
 download_op_exec() {
+  hook_log_step "download-op-exec" "Downloading op-exec"
   local target_version="$1"
   local op_exec_bin="$INSTALL_DIR/op-exec"
   local url="https://github.com/nsheaps/op-exec/releases/download/v${target_version}/op-exec-${DETECTED_OS}-${DETECTED_ARCH}"
 
+  hook_log "Downloading op-exec v${target_version} from ${url}"
+
   if curl -fsSL "$url" -o "$op_exec_bin" 2>/dev/null; then
     chmod +x "$op_exec_bin"
-    echo "${PLUGIN_NAME}: op-exec v${target_version} installed successfully" >&2
+    hook_log "op-exec v${target_version} installed successfully to ${op_exec_bin}"
     tool_ensure_path "$INSTALL_DIR"
     echo "$op_exec_bin"
   else
-    echo "${PLUGIN_NAME}: Failed to download op-exec v${target_version}" >&2
+    hook_fail "op-exec download" "Failed to download op-exec v${target_version} from ${url}" \
+      "Check network connectivity, or verify the release exists at https://github.com/nsheaps/op-exec/releases"
     return 1
   fi
 }
@@ -115,12 +132,13 @@ download_op_exec() {
 # --- Resolve op binary ---
 
 resolve_op_bin() {
+  hook_log_step "resolve-op" "Resolving 1Password CLI binary"
   if [ "$auto_install" = "false" ]; then
     if tool_is_available op; then
-      echo "${PLUGIN_NAME}: autoInstall=false, using op from PATH" >&2
+      hook_log "autoInstall=false, using op from PATH"
       command -v op
     else
-      echo "${PLUGIN_NAME}: autoInstall=false and op not on PATH, skipping" >&2
+      hook_log "autoInstall=false and op not on PATH, skipping"
       return 1
     fi
     return
@@ -134,20 +152,20 @@ resolve_op_bin() {
       current_version="$("$op_bin" --version 2>/dev/null || echo "unknown")"
       latest_version="$(resolve_latest_op_version)"
       if [ "$current_version" = "$latest_version" ]; then
-        echo "${PLUGIN_NAME}: op $current_version is already latest" >&2
+        hook_log "op $current_version is already latest"
         echo "$op_bin"
       else
-        echo "${PLUGIN_NAME}: Updating op from $current_version to $latest_version" >&2
+        hook_log "Updating op from $current_version to $latest_version"
         download_op "$latest_version"
       fi
     else
       echo "$op_bin"
     fi
   elif tool_is_available op; then
-    echo "${PLUGIN_NAME}: op found on PATH ($(command -v op)), skipping install" >&2
+    hook_log "op found on PATH ($(command -v op)), skipping install"
     command -v op
   else
-    echo "${PLUGIN_NAME}: Installing op to $INSTALL_DIR" >&2
+    hook_log "Installing op to $INSTALL_DIR"
     local install_version="$op_version"
     if [ "$install_version" = "latest" ]; then
       install_version="$(resolve_latest_op_version)"
@@ -159,12 +177,13 @@ resolve_op_bin() {
 # --- Resolve op-exec binary ---
 
 resolve_op_exec_bin() {
+  hook_log_step "resolve-op-exec" "Resolving op-exec binary"
   if [ "$install_op_exec" = "false" ]; then
     if tool_is_available op-exec; then
-      echo "${PLUGIN_NAME}: installOpExec=false, using op-exec from PATH" >&2
+      hook_log "installOpExec=false, using op-exec from PATH"
       command -v op-exec
     else
-      echo "${PLUGIN_NAME}: installOpExec=false and op-exec not on PATH, skipping" >&2
+      hook_log "installOpExec=false and op-exec not on PATH, skipping"
       return 1
     fi
     return
@@ -178,20 +197,20 @@ resolve_op_exec_bin() {
       current_version="$("$op_exec_bin" --version 2>/dev/null || echo "unknown")"
       latest_version="$(tool_resolve_github_version "nsheaps/op-exec" "0.0.1")"
       if [ "$current_version" = "$latest_version" ]; then
-        echo "${PLUGIN_NAME}: op-exec $current_version is already latest" >&2
+        hook_log "op-exec $current_version is already latest"
         echo "$op_exec_bin"
       else
-        echo "${PLUGIN_NAME}: Updating op-exec from $current_version to $latest_version" >&2
+        hook_log "Updating op-exec from $current_version to $latest_version"
         download_op_exec "$latest_version"
       fi
     else
       echo "$op_exec_bin"
     fi
   elif tool_is_available op-exec; then
-    echo "${PLUGIN_NAME}: op-exec found on PATH ($(command -v op-exec)), skipping install" >&2
+    hook_log "op-exec found on PATH ($(command -v op-exec)), skipping install"
     command -v op-exec
   else
-    echo "${PLUGIN_NAME}: Installing op-exec to $INSTALL_DIR" >&2
+    hook_log "Installing op-exec to $INSTALL_DIR"
     local install_version="$op_exec_version"
     if [ "$install_version" = "latest" ]; then
       install_version="$(tool_resolve_github_version "nsheaps/op-exec" "0.0.1")"
@@ -213,15 +232,16 @@ do_install() {
 
   # Verify op is available
   if [ -n "${op_bin:-}" ] && [ -x "${op_bin:-}" ]; then
-    echo "${PLUGIN_NAME}: op available at $op_bin" >&2
+    hook_log "op available at $op_bin"
   fi
 
   if [ -n "${op_exec_bin:-}" ] && [ -x "${op_exec_bin:-}" ]; then
-    echo "${PLUGIN_NAME}: op-exec available at $op_exec_bin" >&2
+    hook_log "op-exec available at $op_exec_bin"
   fi
 }
 
 # --- Execute ---
 
 tool_run_install do_install
+hook_log_cleanup
 echo '{}'

@@ -13,6 +13,7 @@ set -euo pipefail
 
 PLUGIN_NAME="datadog-otel-setup"
 source "${CLAUDE_PLUGIN_ROOT}/lib/plugin-config-read.sh"
+source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 
 SETTINGS_FILE="$HOME/.claude/settings.local.json"
 
@@ -25,12 +26,16 @@ plugin_is_enabled || { echo '{}'; exit 0; }
 
 # --- Read config values ---
 
+hook_log_step "read-config" "Reading OTEL configuration"
+
 endpoint="$(plugin_get_config "endpoint" "https://otel.datadoghq.com:4317")"
 metrics_exporter="$(plugin_get_config "metricsExporter" "otlp")"
 logs_exporter="$(plugin_get_config "logsExporter" "otlp")"
 api_key_raw="$(plugin_get_config "apiKey" '${DD_API_KEY}')"
 
 # --- Resolve API key ---
+
+hook_log_step "resolve-api-key" "Resolving Datadog API key"
 
 resolve_api_key() {
   local raw="$1"
@@ -40,7 +45,7 @@ resolve_api_key() {
     local var_name="${BASH_REMATCH[1]}"
     local resolved="${!var_name:-}"
     if [ -z "$resolved" ]; then
-      echo "WARNING: ${PLUGIN_NAME}: env var $var_name is not set, OTEL headers will be empty" >&2
+      hook_log "WARNING: env var $var_name is not set, OTEL headers will be empty"
       echo ""
       return
     fi
@@ -51,16 +56,16 @@ resolve_api_key() {
   # 1Password reference: op://vault/item/field
   if [[ "$raw" == op://* ]]; then
     if ! command -v op &>/dev/null; then
-      echo "WARNING: ${PLUGIN_NAME}: 1Password CLI (op) not found, cannot resolve $raw" >&2
-      echo ""
-      return
+      hook_fail "1Password CLI" "1Password CLI (op) not found, cannot resolve API key ref: $raw" \
+        "Install the 1Password CLI, or set apiKey to a literal value or \${DD_API_KEY} env var reference"
+      return 1
     fi
     local resolved
     resolved="$(op read "$raw" 2>/dev/null || true)"
     if [ -z "$resolved" ]; then
-      echo "WARNING: ${PLUGIN_NAME}: failed to resolve 1Password ref $raw" >&2
-      echo ""
-      return
+      hook_fail "1Password secret" "Failed to resolve 1Password ref: $raw" \
+        "Verify the 1Password reference is correct and you have access to the vault"
+      return 1
     fi
     echo "$resolved"
     return
@@ -70,7 +75,7 @@ resolve_api_key() {
   echo "$raw"
 }
 
-api_key="$(resolve_api_key "$api_key_raw")"
+api_key="$(resolve_api_key "$api_key_raw")" || { echo '{}'; exit 0; }
 
 # --- Build OTEL headers ---
 
@@ -80,6 +85,8 @@ if [ -n "$api_key" ]; then
 fi
 
 # --- Write to settings.local.json ---
+
+hook_log_step "write-settings" "Writing OTEL settings to settings.local.json"
 
 mkdir -p "$(dirname "$SETTINGS_FILE")"
 
@@ -92,11 +99,18 @@ export OTEL_PLUGIN_LOGS_EXP="$logs_exporter"
 export OTEL_PLUGIN_ENDPOINT="$endpoint"
 export OTEL_PLUGIN_HEADERS="$otel_headers"
 
-safe_write_settings \
+if ! safe_write_settings \
   '.env.CLAUDE_CODE_ENABLE_TELEMETRY = "1"
    | .env.OTEL_METRICS_EXPORTER = $ENV.OTEL_PLUGIN_METRICS_EXP
    | .env.OTEL_LOGS_EXPORTER = $ENV.OTEL_PLUGIN_LOGS_EXP
    | .env.OTEL_EXPORTER_OTLP_ENDPOINT = $ENV.OTEL_PLUGIN_ENDPOINT
-   | .env.OTEL_EXPORTER_OTLP_HEADERS = $ENV.OTEL_PLUGIN_HEADERS'
+   | .env.OTEL_EXPORTER_OTLP_HEADERS = $ENV.OTEL_PLUGIN_HEADERS'; then
+  hook_fail "settings write" "Failed to write OTEL config to $SETTINGS_FILE" \
+    "Check file permissions on $SETTINGS_FILE, or verify jq is working correctly"
+  echo '{}'
+  exit 0
+fi
 
+hook_log "OTEL settings written to $SETTINGS_FILE (endpoint: $endpoint)"
+hook_log_cleanup
 echo '{}'
