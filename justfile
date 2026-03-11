@@ -490,7 +490,131 @@ update-marketplace:
 
     just lint-fix
 
+# Validate Claude config (settings.json enabledPlugins, hook references, plugin names)
+# Checks that enabledPlugins keys reference plugins that exist in the marketplace
+# and that plugin.json names match directory names
+validate-claude-config SETTINGS_FILE='.claude/settings.json' MARKETPLACE_FILE='.claude-plugin/marketplace.json':
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    ERRORS=()
+    WARNINGS=()
+
+    SETTINGS="{{SETTINGS_FILE}}"
+    MARKETPLACE="{{MARKETPLACE_FILE}}"
+
+    # --- Check enabledPlugins references ---
+    if [ -f "$SETTINGS" ] && jq -e '.enabledPlugins' "$SETTINGS" > /dev/null 2>&1; then
+        KNOWN_MARKETPLACES=$(jq -r '.extraKnownMarketplaces // {} | keys[]' "$SETTINGS" 2>/dev/null || true)
+
+        KEYS_TMP=$(mktemp)
+        jq -r '.enabledPlugins | keys[]' "$SETTINGS" > "$KEYS_TMP" 2>/dev/null || true
+
+        while IFS= read -r key; do
+            [ -z "$key" ] && continue
+
+            PLUGIN_NAME="${key%%@*}"
+            MARKETPLACE_ID="${key##*@}"
+
+            if [ "$PLUGIN_NAME" = "$key" ]; then
+                WARNINGS+=("enabledPlugins key '$key' has no @marketplace-id suffix")
+                continue
+            fi
+
+            # Check if marketplace ID is known
+            if [ -n "$KNOWN_MARKETPLACES" ] && ! echo "$KNOWN_MARKETPLACES" | grep -qx "$MARKETPLACE_ID"; then
+                ERRORS+=("enabledPlugins '$key': marketplace '$MARKETPLACE_ID' not in extraKnownMarketplaces")
+                continue
+            fi
+
+            # For local marketplace, check plugin exists
+            if [ -f "$MARKETPLACE" ]; then
+                MKTPL_NAME=$(jq -r '.name' "$MARKETPLACE" 2>/dev/null || true)
+                if [ "$MARKETPLACE_ID" = "$MKTPL_NAME" ]; then
+                    if ! jq -e ".plugins[] | select(.name == \"$PLUGIN_NAME\")" "$MARKETPLACE" > /dev/null 2>&1; then
+                        if [ -d "plugins/$PLUGIN_NAME" ]; then
+                            ERRORS+=("enabledPlugins '$key': plugin directory 'plugins/$PLUGIN_NAME' exists but not in marketplace.json (run 'just update-marketplace')")
+                        else
+                            ERRORS+=("enabledPlugins '$key': plugin '$PLUGIN_NAME' not found in marketplace '$MKTPL_NAME' or as a plugin directory")
+                        fi
+                    fi
+                fi
+            fi
+        done < "$KEYS_TMP"
+        rm -f "$KEYS_TMP"
+    fi
+
+    # --- Check plugin.json name matches directory name ---
+    for plugin_dir in plugins/*; do
+        [ -d "$plugin_dir" ] || continue
+        PLUGIN_JSON="$plugin_dir/.claude-plugin/plugin.json"
+        [ -f "$PLUGIN_JSON" ] || continue
+
+        DIR_NAME=$(basename "$plugin_dir")
+        JSON_NAME=$(jq -r '.name' "$PLUGIN_JSON" 2>/dev/null || true)
+
+        if [ -n "$JSON_NAME" ] && [ "$DIR_NAME" != "$JSON_NAME" ]; then
+            WARNINGS+=("Plugin directory '$DIR_NAME' has name '$JSON_NAME' in plugin.json (marketplace uses directory name)")
+        fi
+    done
+
+    # --- Check plugin hook file references ---
+    for plugin_dir in plugins/*; do
+        [ -d "$plugin_dir" ] || continue
+        PLUGIN_JSON="$plugin_dir/.claude-plugin/plugin.json"
+        [ -f "$PLUGIN_JSON" ] || continue
+
+        DIR_NAME=$(basename "$plugin_dir")
+        HOOKS_REF=$(jq -r '.hooks // empty' "$PLUGIN_JSON" 2>/dev/null || true)
+
+        if [ -n "$HOOKS_REF" ]; then
+            HOOKS_FILE="$plugin_dir/$HOOKS_REF"
+            if [ ! -f "$HOOKS_FILE" ]; then
+                ERRORS+=("Plugin '$DIR_NAME': hooks file '$HOOKS_REF' referenced in plugin.json does not exist (expected at $HOOKS_FILE)")
+            else
+                CMDS_TMP=$(mktemp)
+                jq -r '.. | .command? // empty' "$HOOKS_FILE" > "$CMDS_TMP" 2>/dev/null || true
+                while IFS= read -r cmd; do
+                    [ -z "$cmd" ] && continue
+                    SCRIPT_PATH=$(echo "$cmd" | sed 's|\${CLAUDE_PLUGIN_ROOT}|'"$plugin_dir"'|g' | awk '{print $NF}')
+                    if [[ "$SCRIPT_PATH" == "$plugin_dir/"* ]] && [ ! -f "$SCRIPT_PATH" ]; then
+                        ERRORS+=("Plugin '$DIR_NAME': hook command references missing script: $SCRIPT_PATH")
+                    fi
+                done < "$CMDS_TMP"
+                rm -f "$CMDS_TMP"
+            fi
+        fi
+    done
+
+    # --- Output results ---
+    EXIT_CODE=0
+
+    if [ ${#WARNINGS[@]} -gt 0 ]; then
+        echo "⚠️  Warnings:"
+        for w in "${WARNINGS[@]}"; do
+            echo "  - $w"
+        done
+        echo ""
+    fi
+
+    if [ ${#ERRORS[@]} -gt 0 ]; then
+        echo "❌ Errors:"
+        for e in "${ERRORS[@]}"; do
+            echo "  - $e"
+        done
+        EXIT_CODE=1
+    fi
+
+    if [ ${#ERRORS[@]} -eq 0 ] && [ ${#WARNINGS[@]} -eq 0 ]; then
+        echo "✅ Claude config validation passed"
+    elif [ ${#ERRORS[@]} -eq 0 ]; then
+        echo "✅ Claude config validation passed (with warnings)"
+    fi
+
+    exit $EXIT_CODE
+
 # Run all checks (lint + validate)
 check:
     @just lint
     @just validate
+    @just validate-claude-config

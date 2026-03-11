@@ -67,18 +67,6 @@
     ]
   },
   "hooks": {
-    "SessionStart": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/run-hook.sh session-start",
-            "timeout": 120
-          }
-        ]
-      }
-    ],
     "PreToolUse": [
       {
         "matcher": "",
@@ -110,7 +98,7 @@
     "data-serialization@nsheaps-claude-plugins": true,
     "todo-sync@nsheaps-claude-plugins": true,
     "mise@nsheaps-claude-plugins": true,
-    "gh-tool@nsheaps-claude-plugins": true,
+    "github@nsheaps-claude-plugins": true,
     "permissions-sync@nsheaps-claude-plugins": true,
     "sequential-thinking@nsheaps-claude-plugins": true,
     "correct-behavior@nsheaps-claude-plugins": true,
