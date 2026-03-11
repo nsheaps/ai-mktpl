@@ -15,7 +15,7 @@ Repository: [nsheaps/ai-mktpl on GitHub](https://github.com/nsheaps/ai-mktpl)
 
 ## Tooling Stack
 
-The repository relies on these tools, all managed by [mise](https://mise.run) (see `.mise.toml`):
+The repository relies on these tools, all managed by [mise](https://mise.run) (see `mise.toml`):
 
 | Tool                                | Purpose                                         |
 | ----------------------------------- | ----------------------------------------------- |
@@ -35,7 +35,7 @@ Run `just setup` to bootstrap: it calls `mise install -y` then `yarn install`.
 ```
 ~/src/nsheaps/ai/
   .claude-plugin/marketplace.json   # Central plugin registry (auto-generated)
-  .mise.toml                        # Tool versions
+  mise.toml                         # Tool versions
   .release-it.base.json             # Shared release-it config (no git ops, patch increment)
   justfile                          # Build recipes
   package.json                      # Root workspace (yarn 4, release-it devDeps)
@@ -241,3 +241,11 @@ git push
 - Justfile: `justfile` (repo root)
 - Base release config: `.release-it.base.json`
 - Marketplace manifest: `.claude-plugin/marketplace.json`
+
+## Deep-Dive References
+
+These reference documents provide detailed analysis on specific design decisions:
+
+- [Plugin Env Vars Tradeoff](./references/plugin-env-vars-tradeoff.md) — Tradeoffs between writing env vars to `settings.local.json` vs `CLAUDE_ENV_FILE` in SessionStart hooks, including dynamic reloading behavior, scope, persistence, security, and when to use each approach.
+- [Marketplace to User Settings](./references/marketplace-to-user-settings.md) — How plugins propagate from marketplace.json to user installations.
+- [CI/CD Pipeline Details](./references/ci-cd-pipeline-details.md) — Detailed CI/CD pipeline behavior and conventions.

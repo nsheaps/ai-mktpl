@@ -1,0 +1,1 @@
+In your draft PR, add 'request-review' label to get a review from an ai review bot, and then iterate with the feedback from the AI review bot (wait up to 10m for review, wait 2m at a time) until the AI review bot scores each category at 85% or better.

@@ -1,6 +1,6 @@
 {
   "name": "git-spice",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Skill for managing stacked Git branches with git-spice (gs) CLI tool",
   "author": {
     "name": "Nathan Heaps",

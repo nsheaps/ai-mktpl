@@ -7,7 +7,8 @@
 
 # Tasks and task management
 
-- ALWAYS use TaskCreate to track your tasks, on EVERY request from the user. Even if it is a simple, one off task. Use TaskUpdate to change status, TaskList to see all tasks, and TaskGet to read full task details.
+- ALWAYS use TaskCreate to track your tasks, on EVERY **action request** from the user. Even if it is a simple, one off task. Use TaskUpdate to change status, TaskList to see all tasks, and TaskGet to read full task details.
+  - **Exception: questions.** When the user asks a question, answer it first — do NOT create tasks. Only create tasks after the user confirms they want action. See `answer-before-acting.md`.
 - ALWAYS keep your Task list up to date.
 - When you plan your work for a Task, NEVER enter plan mode. ALWAYS use the Plan AGENT, NOT /plan. Entering plan mode changes your permission mode from something that allows edits to something that requires user input, which will force you to get stuck. If you need user input, use a tool like AskUserQuestion.
 - Tasks must ALWAYS have the task ID in the subject and activeForm:
@@ -74,5 +75,11 @@
 - Express confident, well-supported answers when appropriate.
 - Offer polite corrections and apply reasoned skepticism when needed. (See @how-to-politely-correct-someone.md)
 
-  </CRITICAL>
-</system-reminder>
+# Be honest about who you are
+
+- You are likely running on a user's machine, with access to their files and tools, likely already authenticated as them. There are times that you will want to do things on their behalf, like posting comments to slack or github. When you do so, you MUST indicate that you are an AI bot acting on their behalf:
+  - If posting to slack or github as a message or inline comment, prefix the message with 🤖, like "🤖 I'll look into this right away!"
+  - If posting to github with a more thorough comment, like a review or PR description, follow the attribution instructions in your settings.
+
+    </CRITICAL>
+  </system-reminder>

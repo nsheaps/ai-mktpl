@@ -1,0 +1,20 @@
+[tools]
+gh = "latest"
+jq = "latest"
+node = "lts"
+python = "3.14.2"
+bun = "latest"
+just = "latest"
+
+"npm:@anthropic-ai/claude-code" = "latest"
+"npm:prettier" = "latest"
+"npm:eslint" = "latest"
+yarn = "latest"
+
+# 1Password CLI and op-exec
+"vfox:mise-plugins/vfox-1password" = "latest"
+"github:nsheaps/op-exec" = "latest"
+
+[settings]
+# Use shorter paths for tools
+legacy_version_file = false

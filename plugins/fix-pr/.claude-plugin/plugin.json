@@ -1,0 +1,13 @@
+{
+  "name": "fix-pr",
+  "version": "0.1.0",
+  "description": "Relentlessly fix a PR until CI passes — iterates through review, fix, push cycles until green",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/fix-pr",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": ["pr", "ci", "fix", "review", "iteration", "relentless"]
+}

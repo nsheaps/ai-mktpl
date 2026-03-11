@@ -1,0 +1,13 @@
+{
+  "name": "agent-tab-titles",
+  "version": "0.1.0",
+  "description": "Set tmux/iTerm2 tab titles to agent roles in agent team sessions. Disables Claude Code's LLM-generated titles and uses SessionStart hook to set role-based names.",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/agent-tab-titles",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": ["tmux", "iterm2", "tab-title", "agent-teams", "pane-title"]
+}

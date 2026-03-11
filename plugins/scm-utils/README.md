@@ -4,6 +4,16 @@ Source control management utilities for improving Claude's interactions with bra
 
 ## Commands
 
+### /code-review
+
+Request or trigger a code review for a pull request.
+
+```
+/code-review [PR number | PR URL | branch name]
+```
+
+If the repository has the Claude review bot CI workflow, adds the `request-review` label to trigger it. Otherwise, performs a local review.
+
 ### /update-branch
 
 Synchronize a branch with its base and push all changes.
@@ -15,6 +25,31 @@ Synchronize a branch with its base and push all changes.
 **Default behavior (no arguments):** Uses current directory, gets current branch, finds associated PR, and updates from the PR's base branch.
 
 ## Skills
+
+### code-review
+
+Automated PR review system powered by [claude-code-action](https://github.com/anthropics/claude-code-action) running in GitHub Actions. Covers setup, configuration, and troubleshooting of the review bot.
+
+**Triggers on:**
+
+- "set up review bot"
+- "configure code review CI"
+- "how does the review bot work"
+- "add automated PR review"
+- "review bot"
+- "code review CI"
+
+**Reference files included:**
+
+- `references/workflow-template.yaml` — Complete GitHub Actions workflow
+- `references/prompt-template.md` — Review prompt with interpolation variables
+- `references/labels.yaml` — GitHub labels for review triggers
+- `references/copilot-instructions.md` — Fallback instructions for when the review workflow itself is modified
+
+**Requirements:**
+
+- GitHub App with contents:write, pull-requests:write, issues:write permissions
+- Secrets: `REVIEW_GITHUB_APP_ID`, `REVIEW_GITHUB_APP_PRIVATE_KEY`, `REVIEW_ANTHROPIC_API_KEY` (or `ANTHROPIC_API_KEY`)
 
 ### update-branch
 
@@ -58,4 +93,4 @@ Or install from the marketplace (when available).
 ## Requirements
 
 - `git` - Git CLI
-- `gh` - GitHub CLI (for PR metadata)
+- `gh` - GitHub CLI (for PR metadata, labels, reviews)
