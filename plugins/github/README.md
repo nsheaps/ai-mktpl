@@ -29,18 +29,7 @@ The `bin/.local/` directory is gitignored, so installed binaries don't pollute t
 
 ### gh (GitHub CLI Reference)
 
-Full reference for `gh` CLI commands: pull requests, issues, repos, actions, releases, gists, and API access.
-
-### github-auth (Authentication Methods)
-
-Covers all GitHub authentication methods:
-
-- **Device Code Flow** — interactive CLI sessions (`BROWSER=false gh auth login`)
-- **Personal Access Tokens (classic)** — simple automation and CI
-- **Fine-Grained PATs** — targeted repo access with granular permissions
-- **GitHub App auth** — automated systems and bot identities (server-to-server and user-to-server)
-
-The github-auth skill is shared with the `github-app` plugin to ensure consistent authentication guidance.
+Full reference for `gh` CLI commands: pull requests, issues, repos, actions, releases, gists, and API access. Includes authentication methods (device code flow, PATs, fine-grained tokens, GitHub App auth).
 
 ## Configuration
 
@@ -52,10 +41,11 @@ Create or update `plugins.settings.yaml` at project or user level:
 
 github:
   enabled: true
-  install_to_project: true
-  background_install: false
+  autoInstall: true
+  installToProject: true
+  backgroundInstall: false
   version: "latest"
-  auto_auth_check: true
+  autoAuthCheck: true
 ```
 
 ## Local Sessions

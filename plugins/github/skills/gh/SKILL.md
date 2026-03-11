@@ -404,10 +404,11 @@ This plugin supports configuration via `plugins.settings.yaml`:
 ```yaml
 github:
   enabled: true
-  install_to_project: true # Install to $project/bin/.local
-  background_install: false # Install in background
-  version: "latest" # Specific version or "latest"
-  auto_auth_check: true # Check auth on session start
+  autoInstall: true          # Download and install gh if not on PATH
+  installToProject: true     # Install to $project/bin/.local
+  backgroundInstall: false   # Install in background
+  version: "latest"          # Specific version or "latest"
+  autoAuthCheck: true        # Check auth on session start
 ```
 
 Place in:
