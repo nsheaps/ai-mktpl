@@ -32,7 +32,7 @@ This report analyzes three strategies for managing tool dependencies in Claude C
 3. **The session env cache is only invalidated after async hooks complete**, meaning env changes from background hooks are not visible until the hook finishes AND the next Bash tool call occurs.
 4. **Default hook timeout is 600 seconds (10 minutes)**, not the 60s configured in most plugins' hooks.json.
 
-**Recommendation**: A **hybrid approach** — centralized mise for version declaration + a mise plugin for bootstrapping + plugins detecting mise availability at use-time with graceful fallback.
+**Recommendation**: **Strategy D: Async mise bootstrap + shim-based lazy install** — the mise plugin installs mise synchronously (fast), adds shims to PATH, then runs `mise install -y` asynchronously. Other plugins detect mise via `enabledPlugins` in `settings.json`, wait for mise if needed, or fall back to direct download. The agent starts immediately thanks to `async: true` hooks, and is notified when tools become available via `additionalContext` system message injection.
 
 ---
 
@@ -466,6 +466,217 @@ This eliminates the race condition entirely — tools are available before any h
 
 ---
 
+## Strategy D: Async Mise Bootstrap + Shim-Based Lazy Install (Proposed)
+
+This strategy emerged from combining three discoveries:
+1. **`not_found_auto_install = true`** — mise auto-installs tools on first shim invocation
+2. **`async: true` hooks** — SessionStart hooks can run in the background without blocking the session
+3. **`additionalContext` injection** — async hooks notify the model when they complete
+
+### Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ SessionStart (SYNC phase — blocks session start, ~10-20s)       │
+│                                                                 │
+│  mise plugin:                                                   │
+│    1. Install mise binary (5-15s)                               │
+│    2. mise trust (1s)                                           │
+│    3. mise reshim (1s) — creates shims for ALL tools            │
+│    4. Write shim PATH + mise activate to CLAUDE_ENV_FILE        │
+│    5. Output: {"async": true} — go async for bulk install       │
+│                                                                 │
+│  other plugins (parallel):                                      │
+│    - Read settings.json → is mise@nsheaps-claude-plugins enabled?│
+│    - If yes: skip install, mise shims handle it                 │
+│    - If no: self-install via direct download (current behavior) │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ Agent starts working immediately                                │
+│                                                                 │
+│  Background (ASYNC phase):                                      │
+│    mise plugin: mise install -y (30-90s)                        │
+│    gh-review plugin: wait for gh → install extension            │
+│                                                                 │
+│  When agent needs a tool:                                       │
+│    1. Shim intercepts the call                                  │
+│    2. mise checks if tool is installed                          │
+│    3. If installed → exec real binary                           │
+│    4. If not → auto-install (not_found_auto_install=true)       │
+│       then exec real binary                                     │
+│                                                                 │
+│  When async hooks complete:                                     │
+│    → additionalContext injected: "Tools available: gh, just..." │
+│    → Session env cache invalidated (PATH changes take effect)   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Inter-Plugin Awareness
+
+Plugins can detect each other via `settings.json`:
+
+```bash
+# Check if mise plugin is enabled
+_mise_plugin_enabled() {
+  local settings_file="${CLAUDE_PROJECT_DIR:-.}/.claude/settings.json"
+  if [ -f "$settings_file" ] && command -v jq &>/dev/null; then
+    jq -e '.enabledPlugins["mise@nsheaps-claude-plugins"] == true' "$settings_file" &>/dev/null
+    return $?
+  fi
+  # Fallback: check if mise is on PATH or shims exist
+  command -v mise &>/dev/null || [ -d "$HOME/.local/share/mise/shims" ]
+}
+```
+
+This is a **read-only, zero-coordination** approach — plugins check the settings file, no sentinel or lock needed.
+
+### The `not_found_auto_install` Discovery
+
+mise has a built-in setting (default: `true`) that **auto-installs tools when accessed through shims**:
+
+```bash
+$ mise settings get not_found_auto_install
+true
+```
+
+This means mise shims are ALREADY the "lazy install on first call" mechanism. No custom passthrough scripts needed.
+
+**How it works:**
+1. `mise reshim` creates shims for all tools in `mise.toml`
+2. Each shim is a symlink to the mise binary itself
+3. When invoked, mise checks if the requested tool version is installed
+4. If installed → exec the real binary (fast path)
+5. If NOT installed → download, install, then exec (transparent to caller)
+
+**Timing implications:**
+- Shim creation: instant (just symlinks)
+- First use of uninstalled tool: 5-30s download delay (one-time)
+- Subsequent uses: ~50ms shim overhead
+
+### Async Hook Response Format
+
+When the mise plugin's async hook completes, it outputs:
+
+```json
+{
+  "hookSpecificOutput": {
+    "hookEventName": "SessionStart",
+    "additionalContext": "mise: All tools installed successfully. Available: gh 2.88.0, just 1.46.0, node 24.14.0, python 3.14.2, bun 1.3.10"
+  },
+  "systemMessage": "Development tools are now available via mise."
+}
+```
+
+This is injected as a **system attachment** into the model's next turn (verified from binary):
+
+```javascript
+case "async_hook_response": {
+    let response = attachment.response;
+    let messages = [];
+    if (response.systemMessage)
+        messages.push(systemMessage(response.systemMessage));
+    if (response.hookSpecificOutput?.additionalContext)
+        messages.push(systemMessage(response.hookSpecificOutput.additionalContext));
+    return messages;
+}
+```
+
+### The `asyncRewake` Option
+
+For critical tools, hooks can use `asyncRewake: true`:
+
+```json
+{
+  "type": "command",
+  "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/install-mise.sh",
+  "asyncRewake": true,
+  "timeout": 120
+}
+```
+
+- Implies `async: true` (runs in background)
+- On **exit code 2**: injects a **blocking task-notification** to alert the model that something failed
+- On exit code 0: normal async completion with `additionalContext`
+- Exit code 1: error logged but no model notification
+
+### Dependency Chains
+
+For plugins that depend on other plugins' tools (e.g., gh-review depends on gh):
+
+```bash
+# gh-review plugin SessionStart hook (async: true)
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Output async signal immediately — don't block session
+echo '{"async": true}'
+
+# Wait for gh to become available (mise shim or direct install)
+MAX_WAIT=90
+WAITED=0
+while ! command -v gh &>/dev/null; do
+  if [ $WAITED -ge $MAX_WAIT ]; then
+    echo '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"gh-review: gh not available after 90s, extension not installed"}}' >&2
+    exit 0
+  fi
+  sleep 2
+  WAITED=$((WAITED + 2))
+done
+
+# gh is available — install extension
+gh extension install owner/review-extension 2>/dev/null || true
+echo '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"gh-review extension installed successfully"}}'
+```
+
+Since this hook declares `async: true` in hooks.json, it goes background immediately after the first JSON output. The agent starts working. When gh becomes available (via mise shim auto-install or github plugin), the extension installs and the model is notified.
+
+### Sync vs Async Decision Framework
+
+| Hook Type | Sync (default) | `async: true` | `asyncRewake: true` |
+|-----------|:-:|:-:|:-:|
+| **Behavior** | Blocks session start | Background, no notification on completion | Background, notifies on failure (exit 2) |
+| **Use case** | Tools that MUST exist pre-session | Nice-to-have tools | Critical tools where failure matters |
+| **Examples** | mise binary install, PATH setup | `mise install -y`, npm install | Auth token refresh |
+
+**Recommended split for mise architecture:**
+
+```
+SYNC (blocks session start, ~15s total):
+  ✓ mise binary install
+  ✓ mise trust + reshim
+  ✓ PATH activation (shims dir + mise activate)
+
+ASYNC (background, agent starts immediately):
+  ✓ mise install -y (bulk tool install)
+  ✓ gh extension install
+  ✓ npm install / yarn install
+  ✓ Any long-running setup
+```
+
+### Comparison: Passthrough Scripts vs Mise Shims vs PreToolUse Hooks
+
+| Approach | Transparency | First-use latency | Maintenance | Reliability |
+|----------|:-:|:-:|:-:|:-:|
+| **Custom passthrough scripts** | High (looks like real binary) | Blocks until install | Each tool needs a script | Fragile (PATH conflicts) |
+| **Mise shims** | High (symlinks to mise) | Auto-installs on use | Zero (reshim handles it) | Built-in, well-tested |
+| **PreToolUse hooks** | Low (intercepts all Bash) | Hook overhead per call | Regex command parsing | Fragile (parsing arbitrary bash) |
+
+**Mise shims win decisively** — they provide the exact "lazy install on first call" behavior with zero custom code. The `not_found_auto_install` setting makes this work out of the box.
+
+### Open Questions
+
+1. **Should plugins add their tool to `mise.toml` programmatically?** If a plugin needs `gh` and it's not in `mise.toml`, should the plugin run `mise use gh@latest`? This modifies the project file, which may not be desirable.
+
+2. **What if `not_found_auto_install` is disabled?** Some users may disable this setting. Plugins should handle this gracefully — check `mise settings get not_found_auto_install` before relying on shim auto-install.
+
+3. **Rate limiting with auto-install**: If 5 tools auto-install simultaneously on first use, they all hit GitHub API in parallel. This could trigger rate limits. The mise plugin's bulk `mise install -y` (with `GITHUB_TOKEN`) is more rate-limit-friendly.
+
+4. **Shim overhead in tight loops**: Each shim invocation adds ~50ms overhead as mise resolves the version. For tools called thousands of times (e.g., in CI), `mise activate` (adding real binary paths) is preferred over shims.
+
+---
+
 ## Appendix: Binary Analysis Evidence
 
 ### Source: `/opt/claude-code/bin/claude` (v2.1.42)
@@ -527,6 +738,59 @@ async function loadSessionEnv() {
 if (isSessionStart)
     log("Invalidating session env cache after SessionStart hook completed");
     invalidateSessionEnvCache();  // sets cache = undefined
+```
+
+#### Hook Config Schema (async/asyncRewake)
+```javascript
+// Command hook config fields (from Zod schema in binary)
+{
+  type: "command",
+  command: "string",           // Shell command to execute
+  timeout: "number (optional)", // Timeout in seconds
+  statusMessage: "string (optional)", // Spinner message
+  once: "boolean (optional)",   // Run once then remove
+  async: "boolean (optional)",  // Run in background without blocking
+  asyncRewake: "boolean (optional)" // Background + notify model on exit code 2
+}
+```
+
+#### Hook Response Schema (hookSpecificOutput)
+```javascript
+// Sync hook response (xPM schema in binary)
+{
+  continue: "boolean (optional)",        // Whether to continue (default: true)
+  suppressOutput: "boolean (optional)",  // Hide stdout from transcript
+  stopReason: "string (optional)",       // Message when continue=false
+  decision: "'approve' | 'block'",       // Legacy permission decision
+  reason: "string (optional)",           // Explanation for decision
+  systemMessage: "string (optional)",    // Warning/info shown to model
+  hookSpecificOutput: {
+    // For SessionStart:
+    hookEventName: "SessionStart",
+    additionalContext: "string (optional)"  // Injected as system message
+
+    // For PreToolUse:
+    hookEventName: "PreToolUse",
+    permissionDecision: "'allow' | 'deny' | 'ask'",
+    updatedInput: "object (optional)",     // Modify tool input!
+    additionalContext: "string (optional)"
+  }
+}
+
+// Async hook response
+{ async: true, asyncTimeout: "number (optional)" }
+```
+
+#### Async Hook Response Delivery to Model
+```javascript
+// When async hook completes, response becomes a system attachment:
+case "async_hook_response": {
+    if (response.systemMessage)
+        messages.push(systemMessage(response.systemMessage, isMeta: true));
+    if (response.hookSpecificOutput?.additionalContext)
+        messages.push(systemMessage(additionalContext, isMeta: true));
+    return messages;
+}
 ```
 
 ### Key String Evidence
@@ -613,7 +877,27 @@ mise ERROR Failed to install aqua:jqlang/jq@latest:
 ```
 **Result**: Web sessions share egress IPs, causing collective GitHub API rate limiting. This affects both mise-based installation and direct `tool_resolve_github_version` calls. Providing `GITHUB_TOKEN` helps but doesn't eliminate the issue when multiple concurrent sessions are active.
 
-### Test 6: Hook Deduplication
+### Test 6: mise `not_found_auto_install` Setting
+
+```bash
+$ mise settings get not_found_auto_install
+true
+```
+**Result**: mise's `not_found_auto_install` is enabled by default. When a tool is accessed through a shim but not yet installed, mise will automatically download and install it before executing. This is the built-in "lazy install on first call" mechanism — no custom passthrough scripts needed.
+
+### Test 7: Inter-Plugin Awareness via settings.json
+
+```bash
+$ jq '.enabledPlugins' .claude/settings.json
+{
+  "mise@nsheaps-claude-plugins": true,
+  "github@nsheaps-claude-plugins": true,
+  ...
+}
+```
+**Result**: Hook scripts can read `.claude/settings.json` to discover which plugins are enabled. This provides a zero-coordination mechanism for inter-plugin awareness — no sentinel files or locks needed.
+
+### Test 8: Hook Deduplication
 
 From binary analysis, hooks are deduplicated by command string before parallel execution. If two plugins register the exact same `bash install-mise.sh` command, it runs only once. However, this is an unlikely scenario since each plugin uses distinct commands.
 
