@@ -70,6 +70,7 @@ hook_log_cleanup                               # remove log file on success
 ```
 
 On failure, `hook_fail` prints:
+
 ```
 ==== Plugin Setup Failed ====
   Plugin:    my-plugin
