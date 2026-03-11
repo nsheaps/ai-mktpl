@@ -68,6 +68,8 @@ resolve_gh_bin() {
   local gh_bin="$INSTALL_DIR/gh"
 
   if [ -x "$gh_bin" ]; then
+    # Always ensure PATH includes INSTALL_DIR (critical for session resume)
+    tool_ensure_path "$INSTALL_DIR"
     # Already installed — check for updates if version=latest
     if [ "$version" = "latest" ]; then
       local current_version latest_version
