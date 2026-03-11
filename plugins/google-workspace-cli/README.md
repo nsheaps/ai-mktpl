@@ -4,7 +4,7 @@ Install and manage the [Google Workspace CLI](https://github.com/googleworkspace
 
 ## Features
 
-- **Auto-install on web sessions**: Installs `gws` to `$project/bin/.local/` via npm or binary download
+- **Auto-install on web sessions**: Installs `gws` to `$project/bin/.local/` via mise or binary download
 - **Per-service skills**: Individual skills for each Google Workspace service with command references
 - **Overview skill**: General `gws` usage, authentication, and troubleshooting
 - **Background install**: Optional non-blocking installation
@@ -14,7 +14,7 @@ Install and manage the [Google Workspace CLI](https://github.com/googleworkspace
 On session start (web sessions only):
 
 1. Checks if `gws` is already available on PATH
-2. If not, tries `npm install -g @googleworkspace/cli` to a local prefix
+2. If not, tries `mise use -g ubi:googleworkspace/cli` (preferred)
 3. Falls back to downloading a pre-compiled binary from GitHub releases
 4. Adds `bin/.local/` to PATH via `CLAUDE_ENV_FILE`
 
@@ -71,10 +71,9 @@ gws auth status   # Verify authentication
 ## Local Sessions
 
 On local sessions (`CLAUDE_CODE_REMOTE` is not `true`), the install hook does nothing.
-Install `gws` locally via `npm install -g @googleworkspace/cli`.
+Install `gws` locally via `mise use -g ubi:googleworkspace/cli` or download the binary from the [GitHub releases](https://github.com/googleworkspace/cli/releases).
 
 ## Prerequisites
 
-- Node.js 18+ (for npm installation method)
 - Google Cloud project with OAuth credentials
 - Google account with Workspace access (some services require paid Workspace)

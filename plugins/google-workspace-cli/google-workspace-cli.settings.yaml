@@ -9,7 +9,7 @@ google-workspace-cli:
   enabled: true
 
   # Download and install the gws binary if not already on PATH.
-  # Set to false when gws is managed externally (e.g. via npm global install).
+  # Set to false when gws is managed externally.
   autoInstall: true
 
   # Install gws to $CLAUDE_PROJECT_DIR/bin/.local on web sessions.

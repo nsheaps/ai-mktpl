@@ -19,8 +19,8 @@ endpoints become available automatically without software updates.
 ## Installation
 
 ```bash
-# Via npm (recommended)
-npm install -g @googleworkspace/cli
+# Via mise (recommended)
+mise use -g ubi:googleworkspace/cli
 
 # Via pre-compiled binary (Linux x64)
 curl -fsSL https://github.com/googleworkspace/cli/releases/latest/download/gws-linux-x64 -o gws
@@ -88,7 +88,7 @@ Place in:
 
 ### "gws: command not found"
 Ensure the session start hook ran. Check `$CLAUDE_PROJECT_DIR/bin/.local/` for
-the binary. On local sessions, install via `npm install -g @googleworkspace/cli`.
+the binary. On local sessions, install via `mise use -g ubi:googleworkspace/cli` or download from GitHub releases.
 
 ### Authentication errors
 Run `gws auth setup` to configure your Google Cloud project, then `gws auth login`.
