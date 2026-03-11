@@ -147,6 +147,7 @@ sync_rules_run                                 # creates symlink + optional cros
 ```
 
 Config keys (read via `plugin_get_config`):
+
 - `alsoSyncToUser` — also symlink into `~/.claude/rules/`
 - `alsoAddToRepos` — `""` (disabled), `"org-name"`, or `"*"` (all sibling repos)
 - `syncSettingsTarget` — `"local"` or `"shared"`: which settings file to write to
