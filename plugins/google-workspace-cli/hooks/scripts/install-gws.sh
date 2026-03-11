@@ -25,32 +25,54 @@ tool_resolve_install_dir
 
 # --- Download helper ---
 
-# Downloads gws binary directly from GitHub releases.
+# Downloads gws tarball from GitHub releases and extracts the binary.
 # Prints the binary path to stdout. Returns 1 on failure.
 download_gws() {
   local target_version="$1"
   local gws_bin="$INSTALL_DIR/gws"
 
+  local triple
   local arch
   arch="$(uname -m)"
   case "$arch" in
-    x86_64)  arch="x64" ;;
-    aarch64) arch="arm64" ;;
-    arm64)   arch="arm64" ;;
+    x86_64)  triple="x86_64-unknown-linux-gnu" ;;
+    aarch64) triple="aarch64-unknown-linux-gnu" ;;
+    arm64)   triple="aarch64-unknown-linux-gnu" ;;
     *)
       echo "${PLUGIN_NAME}: Unsupported architecture: $arch" >&2
       return 1
       ;;
   esac
 
-  local url="https://github.com/googleworkspace/cli/releases/download/v${target_version}/gws-linux-${arch}"
+  local archive="gws-${triple}.tar.gz"
+  local url="https://github.com/googleworkspace/cli/releases/download/v${target_version}/${archive}"
+  local tmp_dir
+  tmp_dir="$(mktemp -d)"
+
   echo "${PLUGIN_NAME}: Downloading gws v${target_version} from $url" >&2
-  if curl -fsSL "$url" -o "$gws_bin" 2>/dev/null; then
-    chmod +x "$gws_bin"
-    echo "${PLUGIN_NAME}: gws v${target_version} installed successfully" >&2
-    tool_ensure_path "$INSTALL_DIR"
-    echo "$gws_bin"
+  if curl -fsSL "$url" -o "$tmp_dir/$archive" 2>/dev/null; then
+    tar -xf "$tmp_dir/$archive" -C "$tmp_dir"
+    # Find the gws binary in the extracted contents
+    local extracted_bin
+    extracted_bin="$(find "$tmp_dir" -name "gws" -type f -perm -u+x 2>/dev/null | head -1)"
+    if [ -z "$extracted_bin" ]; then
+      # Try without executable check (permissions may not survive tar)
+      extracted_bin="$(find "$tmp_dir" -name "gws" -type f 2>/dev/null | head -1)"
+    fi
+    if [ -n "$extracted_bin" ]; then
+      cp "$extracted_bin" "$gws_bin"
+      chmod +x "$gws_bin"
+      rm -rf "$tmp_dir"
+      echo "${PLUGIN_NAME}: gws v${target_version} installed successfully" >&2
+      tool_ensure_path "$INSTALL_DIR"
+      echo "$gws_bin"
+    else
+      rm -rf "$tmp_dir"
+      echo "${PLUGIN_NAME}: Failed to find gws binary in archive" >&2
+      return 1
+    fi
   else
+    rm -rf "$tmp_dir"
     echo "${PLUGIN_NAME}: Failed to download gws v${target_version}" >&2
     return 1
   fi
@@ -92,7 +114,7 @@ resolve_gws_bin() {
   # Resolve version for installation
   local install_version="$version"
   if [ "$install_version" = "latest" ]; then
-    install_version="$(tool_resolve_github_version "googleworkspace/cli" "0.5.0")"
+    install_version="$(tool_resolve_github_version "googleworkspace/cli" "0.11.0")"
   fi
 
   # Try mise with ubi backend (preferred method)
@@ -102,7 +124,7 @@ resolve_gws_bin() {
     if [ "$install_version" != "latest" ]; then
       mise_spec="${mise_spec}@${install_version}"
     fi
-    if mise use -g "$mise_spec" 2>&1 >&2; then
+    if mise use -g "$mise_spec" >&2 2>&1; then
       if tool_is_available gws; then
         gws_bin="$(command -v gws)"
         echo "${PLUGIN_NAME}: gws installed via mise at $gws_bin" >&2
