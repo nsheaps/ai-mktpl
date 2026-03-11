@@ -83,9 +83,9 @@ gws sheets batchGet <spreadsheet-id> --ranges "Sheet1!A1:B5,Sheet2!A1:C3"
 
 ## Value Input Options
 
-| Option | Behavior |
-|--------|----------|
-| `RAW` | Values stored as-is (no parsing) |
+| Option         | Behavior                                            |
+| -------------- | --------------------------------------------------- |
+| `RAW`          | Values stored as-is (no parsing)                    |
 | `USER_ENTERED` | Values parsed as if user typed them (formulas work) |
 
 ```bash

@@ -90,11 +90,11 @@ gws admin users update "user@example.com" --org-unit "/Engineering"
 
 ### Roles
 
-| Role | Description |
-|------|-------------|
-| `OWNER` | Group owner |
-| `MANAGER` | Group manager |
-| `MEMBER` | Regular member |
+| Role      | Description    |
+| --------- | -------------- |
+| `OWNER`   | Group owner    |
+| `MANAGER` | Group manager  |
+| `MEMBER`  | Regular member |
 
 ## Tips
 

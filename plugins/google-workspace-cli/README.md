@@ -22,19 +22,19 @@ The `bin/.local/` directory is gitignored, so installed binaries don't pollute t
 
 ## Skills Included
 
-| Skill | Description |
-|-------|-------------|
-| `google-workspace-cli` | Overview, installation, auth, and general usage |
-| `gmail` | Read, send, search, draft, and manage emails |
-| `calendar` | View events, create meetings, find free time |
-| `drive` | List, upload, download, share files and folders |
-| `docs` | Create, read, and edit Google Docs |
-| `sheets` | Read/write spreadsheet data, manage sheets |
-| `slides` | Create and modify presentations |
-| `chat` | Send messages, manage spaces |
-| `tasks` | Create and manage task lists and tasks |
-| `contacts` | Search, create, and manage contacts |
-| `admin` | User, group, and org unit management (admin only) |
+| Skill                  | Description                                       |
+| ---------------------- | ------------------------------------------------- |
+| `google-workspace-cli` | Overview, installation, auth, and general usage   |
+| `gmail`                | Read, send, search, draft, and manage emails      |
+| `calendar`             | View events, create meetings, find free time      |
+| `drive`                | List, upload, download, share files and folders   |
+| `docs`                 | Create, read, and edit Google Docs                |
+| `sheets`               | Read/write spreadsheet data, manage sheets        |
+| `slides`               | Create and modify presentations                   |
+| `chat`                 | Send messages, manage spaces                      |
+| `tasks`                | Create and manage task lists and tasks            |
+| `contacts`             | Search, create, and manage contacts               |
+| `admin`                | User, group, and org unit management (admin only) |
 
 ## Configuration
 
@@ -45,12 +45,12 @@ Create or update `plugins.settings.yaml` at project or user level:
 # or ~/.claude/plugins.settings.yaml
 
 google-workspace-cli:
-  enabled: true           # Enable/disable the plugin
-  autoInstall: true       # Auto-install gws on web sessions
-  installToProject: true  # Install to $project/bin/.local (vs ~/.local/bin)
+  enabled: true # Enable/disable the plugin
+  autoInstall: true # Auto-install gws on web sessions
+  installToProject: true # Install to $project/bin/.local (vs ~/.local/bin)
   backgroundInstall: false # Run install in background
-  version: "latest"       # Pin a specific version or use "latest"
-  autoAuth: false         # Auto-check auth status on startup
+  version: "latest" # Pin a specific version or use "latest"
+  autoAuth: false # Auto-check auth status on startup
 ```
 
 ## Authentication Setup

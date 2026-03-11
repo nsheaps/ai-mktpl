@@ -65,11 +65,11 @@ gws chat messages reactions list <message-name>
 
 ## Space Types
 
-| Type | Description |
-|------|-------------|
-| `ROOM` | Named space with threads |
-| `GROUP_CHAT` | Group direct message |
-| `DIRECT_MESSAGE` | 1:1 direct message |
+| Type             | Description              |
+| ---------------- | ------------------------ |
+| `ROOM`           | Named space with threads |
+| `GROUP_CHAT`     | Group direct message     |
+| `DIRECT_MESSAGE` | 1:1 direct message       |
 
 ## Tips
 

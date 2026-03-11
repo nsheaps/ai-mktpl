@@ -124,13 +124,13 @@ gws drive trash empty
 
 ## Google Drive MIME Types
 
-| Type | MIME Type |
-|------|-----------|
-| Folder | `application/vnd.google-apps.folder` |
-| Document | `application/vnd.google-apps.document` |
-| Spreadsheet | `application/vnd.google-apps.spreadsheet` |
+| Type         | MIME Type                                  |
+| ------------ | ------------------------------------------ |
+| Folder       | `application/vnd.google-apps.folder`       |
+| Document     | `application/vnd.google-apps.document`     |
+| Spreadsheet  | `application/vnd.google-apps.spreadsheet`  |
 | Presentation | `application/vnd.google-apps.presentation` |
-| Form | `application/vnd.google-apps.form` |
+| Form         | `application/vnd.google-apps.form`         |
 
 ## JSON Output
 

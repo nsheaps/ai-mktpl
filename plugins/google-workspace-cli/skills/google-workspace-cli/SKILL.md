@@ -41,6 +41,7 @@ gws auth status
 ```
 
 **Requirements:**
+
 - A Google Cloud project with OAuth credentials configured
 - Gmail, Calendar, Drive, and other APIs enabled in the project
 - OAuth consent screen configured
@@ -81,18 +82,22 @@ google-workspace-cli:
 ```
 
 Place in:
+
 - `$CLAUDE_PROJECT_DIR/.claude/plugins.settings.yaml` (project-level)
 - `~/.claude/plugins.settings.yaml` (user-level)
 
 ## Troubleshooting
 
 ### "gws: command not found"
+
 Ensure the session start hook ran. Check `$CLAUDE_PROJECT_DIR/bin/.local/` for
 the binary. On local sessions, install via `mise use -g ubi:googleworkspace/cli` or download from GitHub releases.
 
 ### Authentication errors
+
 Run `gws auth setup` to configure your Google Cloud project, then `gws auth login`.
 
 ### API not enabled
+
 Enable the relevant API (Gmail, Calendar, Drive, etc.) in your Google Cloud Console
 project settings.

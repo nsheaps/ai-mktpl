@@ -21,7 +21,7 @@ google-workspace-cli:
 
   # Specific gws version to install (default: latest)
   # version: "0.5.0"
-  version: "latest"
+  version: 'latest'
 
   # Automatically run `gws auth login` if credentials are not found.
   # Requires OAuth credentials to be configured.

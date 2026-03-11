@@ -103,18 +103,18 @@ gws gmail labels create "MyNewLabel"
 
 Gmail supports powerful search operators:
 
-| Operator | Example | Description |
-|----------|---------|-------------|
-| `from:` | `from:user@example.com` | Sender |
-| `to:` | `to:user@example.com` | Recipient |
-| `subject:` | `subject:meeting` | Subject line |
-| `is:` | `is:unread`, `is:starred` | Message state |
-| `has:` | `has:attachment` | Has attachments |
-| `in:` | `in:inbox`, `in:sent` | Mailbox location |
-| `label:` | `label:important` | Has label |
-| `newer_than:` | `newer_than:7d` | Date range |
-| `older_than:` | `older_than:30d` | Date range |
-| `filename:` | `filename:pdf` | Attachment type |
+| Operator      | Example                   | Description      |
+| ------------- | ------------------------- | ---------------- |
+| `from:`       | `from:user@example.com`   | Sender           |
+| `to:`         | `to:user@example.com`     | Recipient        |
+| `subject:`    | `subject:meeting`         | Subject line     |
+| `is:`         | `is:unread`, `is:starred` | Message state    |
+| `has:`        | `has:attachment`          | Has attachments  |
+| `in:`         | `in:inbox`, `in:sent`     | Mailbox location |
+| `label:`      | `label:important`         | Has label        |
+| `newer_than:` | `newer_than:7d`           | Date range       |
+| `older_than:` | `older_than:30d`          | Date range       |
+| `filename:`   | `filename:pdf`            | Attachment type  |
 
 ## JSON Output
 

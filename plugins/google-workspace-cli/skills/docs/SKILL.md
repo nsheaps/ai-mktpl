@@ -84,6 +84,7 @@ gws drive files export <document-id> --mime-type "application/vnd.openxmlformats
 ## Working with Document Structure
 
 Google Docs uses a structured model with:
+
 - **Body** containing structural elements
 - **Paragraphs** with text runs
 - **Tables** with rows and cells

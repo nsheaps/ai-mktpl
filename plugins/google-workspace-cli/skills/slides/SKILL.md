@@ -72,14 +72,14 @@ gws drive files export <presentation-id> \
 
 Common predefined layouts for `createSlide`:
 
-| Layout | Description |
-|--------|-------------|
-| `BLANK` | Empty slide |
-| `TITLE` | Title slide |
-| `TITLE_AND_BODY` | Title with body text |
+| Layout                  | Description            |
+| ----------------------- | ---------------------- |
+| `BLANK`                 | Empty slide            |
+| `TITLE`                 | Title slide            |
+| `TITLE_AND_BODY`        | Title with body text   |
 | `TITLE_AND_TWO_COLUMNS` | Title with two columns |
-| `TITLE_ONLY` | Title bar only |
-| `SECTION_HEADER` | Section divider |
+| `TITLE_ONLY`            | Title bar only         |
+| `SECTION_HEADER`        | Section divider        |
 
 ## Tips
 

@@ -61,13 +61,13 @@ gws tasks move <tasklist-id> <task-id> --parent <parent-task-id>
 
 ## Task Properties
 
-| Property | Description |
-|----------|-------------|
-| `title` | Task title |
-| `notes` | Task description/notes |
-| `due` | Due date (RFC 3339 or YYYY-MM-DD) |
-| `status` | `needsAction` or `completed` |
-| `parent` | Parent task ID (for subtasks) |
+| Property | Description                       |
+| -------- | --------------------------------- |
+| `title`  | Task title                        |
+| `notes`  | Task description/notes            |
+| `due`    | Due date (RFC 3339 or YYYY-MM-DD) |
+| `status` | `needsAction` or `completed`      |
+| `parent` | Parent task ID (for subtasks)     |
 
 ## Tips
 
