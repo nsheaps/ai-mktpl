@@ -2,13 +2,18 @@
 # github-token-init.sh — SessionStart hook for github-app plugin
 #
 # Generates a GitHub App installation token on session start.
-# Supports multiple secret sources via the `ref` setting:
-#   - op://vault/item         → fetch all fields via op-exec
+# Expects secrets in environment variables. Use the 1pass plugin or
+# an env-file to populate them before this hook runs.
+#
+# Supported secret sources via the `ref` setting:
 #   - env-file://path/to/file → source KEY=VALUE pairs from a file
 # Individual secrets via `secrets.*`:
 #   - Literal values
 #   - ${VAR_NAME}             → expand from environment
-#   - op://vault/item/field   → resolve via `op read`
+#
+# Required env vars (set directly or via ref/secrets config):
+#   GITHUB_APP_ID, GITHUB_APP_PRIVATE_KEY or GITHUB_APP_PRIVATE_KEY_PATH,
+#   GITHUB_INSTALLATION_ID
 #
 # Writes token to a shared file and creates a runtime env file that is
 # sourced by CLAUDE_ENV_FILE. The PreToolUse hook updates the runtime
@@ -26,9 +31,8 @@ plugin_is_enabled || { echo '{}'; exit 0; }
 # --- Secret resolution ---
 
 # Resolve a secret value from one of:
-#   - ${VAR_NAME}       → expand from environment
-#   - op://vault/item/field → resolve via `op read`
-#   - literal           → use as-is
+#   - ${VAR_NAME}  → expand from environment
+#   - literal      → use as-is
 resolve_secret() {
   local raw="$1"
   local name="${2:-secret}"
@@ -45,22 +49,7 @@ resolve_secret() {
     local resolved="${!var_name:-}"
     if [[ -z "$resolved" ]]; then
       hook_log "WARNING: env var $var_name is not set (for $name)"
-    fi
-    echo "$resolved"
-    return
-  fi
-
-  # 1Password reference: op://vault/item/field
-  if [[ "$raw" == op://* ]]; then
-    if ! command -v op &>/dev/null; then
-      hook_log "WARNING: 1Password CLI (op) not found, cannot resolve $name"
-      echo ""
-      return
-    fi
-    local resolved
-    resolved="$(op read "$raw" 2>/dev/null || true)"
-    if [[ -z "$resolved" ]]; then
-      hook_log "WARNING: failed to resolve 1Password ref for $name"
+      echo "${PLUGIN_NAME}: WARNING: env var $var_name is not set (for $name)" >&2
     fi
     echo "$resolved"
     return
@@ -95,40 +84,7 @@ hook_log_step "load-secrets" "Loading secrets from configured source"
 REF="$(plugin_get_config "ref" "")"
 
 if [[ -n "$REF" ]]; then
-  if [[ "$REF" == op://* ]]; then
-    # 1Password item reference — fetch all fields via op-exec
-    OP_EXEC=""
-    if command -v op-exec &>/dev/null; then
-      OP_EXEC="$(command -v op-exec)"
-    elif [[ -x "${CLAUDE_PROJECT_DIR:-}/bin/op-exec" ]]; then
-      OP_EXEC="${CLAUDE_PROJECT_DIR}/bin/op-exec"
-    fi
-
-    if [[ -z "$OP_EXEC" ]]; then
-      hook_fail "op-exec" "op-exec not found (needed for op:// ref)" \
-        "Install op-exec: enable the 1pass plugin with install_op_exec=true, or install nsheaps/op-exec manually"
-      echo '{}'
-      exit 0
-    fi
-
-    if ! command -v op &>/dev/null; then
-      hook_fail "1Password CLI" "1Password CLI (op) not found, cannot resolve ref" \
-        "Install the 1Password CLI: enable the 1pass plugin, or install op manually"
-      echo '{}'
-      exit 0
-    fi
-
-    # Source the env vars from the 1Password item
-    eval "$("$OP_EXEC" "$REF")" || {
-      hook_fail "1Password secret fetch" "Failed to fetch secrets from $REF" \
-        "Verify the 1Password reference is correct and you have access to the vault"
-      echo '{}'
-      exit 0
-    }
-
-    hook_log "Loaded secrets from 1Password item"
-
-  elif [[ "$REF" == env-file://* ]]; then
+  if [[ "$REF" == env-file://* ]]; then
     # Env file reference — source KEY=VALUE pairs
     ENV_FILE_PATH="$(resolve_env_file_path "$REF")"
 
@@ -162,8 +118,8 @@ if [[ -n "$REF" ]]; then
     hook_log "Loaded secrets from env file: $ENV_FILE_PATH"
 
   else
-    hook_fail "ref config" "ref must be an op:// or env-file:// reference, got: $REF" \
-      "Update the 'ref' setting to use op://vault/item or env-file:///path/to/file format"
+    hook_fail "ref config" "Unsupported ref format: $REF" \
+      "Use env-file:///path/to/file format. For 1Password secrets, configure the 1pass plugin to expose them as environment variables instead."
     echo '{}'
     exit 0
   fi
@@ -173,7 +129,7 @@ fi
 
 hook_log_step "resolve-secrets" "Resolving individual secret overrides"
 
-# Each secrets.* value can be a literal, ${ENV_VAR}, or op://vault/item/field
+# Each secrets.* value can be a literal or ${ENV_VAR}
 SECRETS_APP_ID="$(plugin_get_config "secrets.github_app_id" "")"
 SECRETS_CLIENT_ID="$(plugin_get_config "secrets.github_app_client_id" "")"
 SECRETS_CLIENT_SECRET="$(plugin_get_config "secrets.github_app_client_secret" "")"
@@ -203,7 +159,7 @@ GITHUB_INSTALLATION_ID="${GITHUB_INSTALLATION_ID:-$(plugin_get_config "github_in
 
 # --- Handle private key (value vs file path) ---
 
-# GITHUB_APP_PRIVATE_KEY contains the key content directly (e.g., from 1Password)
+# GITHUB_APP_PRIVATE_KEY contains the key content directly (e.g., from env var)
 # GITHUB_APP_PRIVATE_KEY_PATH points to a PEM file on disk
 # If we have key content but no path, write it to a temp file
 GITHUB_APP_PRIVATE_KEY_PATH="${GITHUB_APP_PRIVATE_KEY_PATH:-$(plugin_get_config "private_key_path" "")}"
@@ -221,7 +177,7 @@ fi
 # --- Validate required credentials ---
 
 if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_APP_PRIVATE_KEY_PATH:-}" || -z "${GITHUB_INSTALLATION_ID:-}" ]]; then
-  hook_log "GitHub App not configured (missing APP_ID, PRIVATE_KEY_PATH/PRIVATE_KEY, or INSTALLATION_ID), skipping"
+  hook_log "GitHub App not configured (missing GITHUB_APP_ID, GITHUB_APP_PRIVATE_KEY/GITHUB_APP_PRIVATE_KEY_PATH, or GITHUB_INSTALLATION_ID), skipping"
   hook_log_cleanup
   echo '{}'
   exit 0
@@ -232,7 +188,7 @@ GITHUB_APP_PRIVATE_KEY_PATH="${GITHUB_APP_PRIVATE_KEY_PATH/#\~/$HOME}"
 
 if [[ ! -f "$GITHUB_APP_PRIVATE_KEY_PATH" ]]; then
   hook_fail "private key" "PEM key not found at $GITHUB_APP_PRIVATE_KEY_PATH" \
-    "Ensure the private key file exists, or configure secrets.github_app_private_key to provide key content"
+    "Ensure the private key file exists, or set GITHUB_APP_PRIVATE_KEY env var with the key content"
   echo '{}'
   exit 0
 fi
@@ -241,6 +197,7 @@ fi
 PERMS=$(stat -c '%a' "$GITHUB_APP_PRIVATE_KEY_PATH" 2>/dev/null || stat -f '%Lp' "$GITHUB_APP_PRIVATE_KEY_PATH" 2>/dev/null || echo "unknown")
 if [[ "$PERMS" != "600" && "$PERMS" != "400" && "$PERMS" != "unknown" ]]; then
   hook_log "WARNING: PEM key has permissions $PERMS, should be 600 or 400"
+  echo "${PLUGIN_NAME}: WARNING: PEM key has permissions $PERMS, should be 600 or 400" >&2
 fi
 
 # --- Token generation ---
@@ -262,7 +219,7 @@ TOKEN_OUTPUT=$("${CLAUDE_PLUGIN_ROOT}/bin/generate-token.sh" \
   "$GITHUB_INSTALLATION_ID" \
   "$TOKEN_FILE" 2>&1) || {
   hook_fail "token generation" "Token generation failed: $TOKEN_OUTPUT" \
-    "Verify GitHub App credentials (APP_ID, PRIVATE_KEY, INSTALLATION_ID) are correct and the app is installed on the target org/repo"
+    "Verify GitHub App credentials (GITHUB_APP_ID, GITHUB_APP_PRIVATE_KEY_PATH, GITHUB_INSTALLATION_ID) are correct and the app is installed on the target org/repo"
   echo '{}'
   exit 0
 }
@@ -365,10 +322,9 @@ configure_git_identity() {
 configure_git_identity "$TOKEN" "$GITHUB_APP_ID"
 
 # --- Print initial token info ---
-# Initial creation prints: expiration, app identity, env var name
 
-hook_log "Authenticated as ${APP_SLUG:-app-$GITHUB_APP_ID} (expires: ${EXPIRES_AT:-unknown})"
-hook_log "Token available via \$GH_TOKEN and \$GITHUB_TOKEN"
+echo "${PLUGIN_NAME}: Authenticated as ${APP_SLUG:-app-$GITHUB_APP_ID} (expires: ${EXPIRES_AT:-unknown})" >&2
+echo "${PLUGIN_NAME}: Token available via \$GH_TOKEN and \$GITHUB_TOKEN" >&2
 
 hook_log_cleanup
 echo '{}'

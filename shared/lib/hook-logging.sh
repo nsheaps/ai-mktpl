@@ -81,6 +81,9 @@ hook_fail() {
 
   _HOOK_FAILED="true"
 
+  # Touch fail marker for cross-subshell propagation (used by hook_run)
+  touch "${_HOOK_LOG_FILE}.failed" 2>/dev/null || true
+
   # Ensure the log file is preserved (not cleaned up)
   hook_log "FAILED: ${component}: ${detail}"
 
@@ -102,7 +105,7 @@ hook_fail() {
     echo ""
   } >&2
 
-  return 1
+  return 0
 }
 
 # --- Execution wrapper ---
@@ -116,6 +119,9 @@ hook_run() {
   local func="$1"
   shift
 
+  # Use a temp file marker to track hook_fail across subshell boundaries
+  local fail_marker="${_HOOK_LOG_FILE}.failed"
+
   # Run the function, capturing stderr into the log buffer as well
   # We use a subshell + fd redirection to tee stderr to the log
   local rc=0
@@ -126,16 +132,19 @@ hook_run() {
     done
   } 3>&1 || rc=$?
 
-  if [ "$rc" -ne 0 ] && [ "$_HOOK_FAILED" != "true" ]; then
+  if [ "$rc" -ne 0 ] && [ ! -f "$fail_marker" ]; then
     # Function failed but didn't call hook_fail — generate a generic error
     hook_fail "${func}" "exited with code ${rc}" \
       "Review the log file for details, then retry or disable the ${PLUGIN_NAME} plugin"
   fi
 
   # Clean up log file on success (keep on failure)
-  if [ "$rc" -eq 0 ] && [ "$_HOOK_FAILED" != "true" ]; then
+  if [ "$rc" -eq 0 ] && [ ! -f "$fail_marker" ]; then
     rm -f "$_HOOK_LOG_FILE"
   fi
+
+  # Clean up fail marker
+  rm -f "$fail_marker"
 
   return "$rc"
 }
@@ -144,7 +153,8 @@ hook_run() {
 
 # Remove the log file (call explicitly if you handle errors yourself)
 hook_log_cleanup() {
-  if [ "$_HOOK_FAILED" != "true" ]; then
+  if [ "$_HOOK_FAILED" != "true" ] && [ ! -f "${_HOOK_LOG_FILE}.failed" ]; then
     rm -f "$_HOOK_LOG_FILE"
   fi
+  rm -f "${_HOOK_LOG_FILE}.failed"
 }

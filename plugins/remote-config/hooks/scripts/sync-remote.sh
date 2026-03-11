@@ -80,7 +80,8 @@ else
       "Check the upstream URL in $CONFIG_FILE and verify network connectivity"
     exit 0
   fi
-  echo "[remote-config] Cloned $UPSTREAM_REPO → $REMOTE_DIR"
+  hook_log "Cloned $UPSTREAM_REPO to $REMOTE_DIR"
+  echo "${PLUGIN_NAME}: Cloned $UPSTREAM_REPO → $REMOTE_DIR" >&2
 fi
 
 # --- Status ---
@@ -97,20 +98,22 @@ else
 fi
 
 if [ -n "$PREV_SHA" ] && [ "$PREV_SHA" != "$CURRENT_SHA" ]; then
-  echo "[remote-config] Updated: $PREV_SHA → $STATUS_LINE"
+  hook_log "Updated: $PREV_SHA → $STATUS_LINE"
+  echo "${PLUGIN_NAME}: Updated: $PREV_SHA → $STATUS_LINE" >&2
 
   # Verbose: show commit titles since last update
   if [ "$VERBOSE" = "true" ]; then
-    echo "[remote-config] Changes:"
+    echo "${PLUGIN_NAME}: Changes:" >&2
     git -C "$REMOTE_DIR" log --oneline "${PREV_SHA}..HEAD" --reverse 2>/dev/null | while IFS= read -r line; do
-      echo "  $line"
+      echo "  $line" >&2
     done
   fi
 elif [ -z "$PREV_SHA" ]; then
-  echo "[remote-config] Ready: $STATUS_LINE"
+  hook_log "Ready: $STATUS_LINE"
+  echo "${PLUGIN_NAME}: Ready: $STATUS_LINE" >&2
 else
   # No changes
-  echo "[remote-config] Up to date: $STATUS_LINE"
+  hook_log "Up to date: $STATUS_LINE"
 fi
 
 hook_log_cleanup

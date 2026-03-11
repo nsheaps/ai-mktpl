@@ -54,6 +54,35 @@ add_permission_to_allow "mcp__my-server__*"           # project-level
 add_permission_to_allow "Bash(tool:*)" "user"          # user-level
 ```
 
+### hook-logging.sh
+
+Buffered hook logging with structured error reporting. Captures verbose output during hook execution into a log file. On success, logs are discarded. On failure, prints a structured error message to stderr (visible to both user and Claude) with plugin name, failed component, log file path, and remediation suggestions.
+
+```bash
+PLUGIN_NAME="my-plugin"  # MUST be set before sourcing
+source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
+
+hook_log "Installing tool v1.2.3"              # buffer a verbose log line
+hook_log_step "download" "Downloading binary"  # start a named step
+hook_fail "curl" "404 not found" "Check URL"   # structured error (returns 0)
+hook_run my_main_function                      # wrap function with log capture
+hook_log_cleanup                               # remove log file on success
+```
+
+On failure, `hook_fail` prints:
+```
+==== Plugin Setup Failed ====
+  Plugin:    my-plugin
+  Component: curl
+  Step:      download
+  Error:     404 not found
+  Logs:      /tmp/claude-plugin-logs/my-plugin-20260311-153022-12345.log
+  Fix:       Check URL
+=============================
+```
+
+Set `HOOK_VERBOSE=true` to also print all `hook_log` output to stderr in real time.
+
 ### safe-settings-write.sh
 
 Simple jq-based settings writer.
