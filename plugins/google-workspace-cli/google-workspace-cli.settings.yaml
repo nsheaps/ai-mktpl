@@ -1,0 +1,28 @@
+# Google Workspace CLI plugin configuration
+#
+# Override per-project via ${CLAUDE_PROJECT_DIR}/.claude/plugins.settings.yaml
+# or per-user via ~/.claude/plugins.settings.yaml under the "google-workspace-cli" key.
+#
+# Set enabled: false to disable auto-install without uninstalling the plugin.
+
+google-workspace-cli:
+  enabled: true
+
+  # Download and install the gws binary if not already on PATH.
+  # Set to false when gws is managed externally (e.g. via npm global install).
+  autoInstall: true
+
+  # Install gws to $CLAUDE_PROJECT_DIR/bin/.local on web sessions.
+  # Only used when autoInstall is true.
+  installToProject: true
+
+  # Run installation in the background (non-blocking session start)
+  backgroundInstall: false
+
+  # Specific gws version to install (default: latest)
+  # version: "0.5.0"
+  version: "latest"
+
+  # Automatically run `gws auth login` if credentials are not found.
+  # Requires OAuth credentials to be configured.
+  autoAuth: false
