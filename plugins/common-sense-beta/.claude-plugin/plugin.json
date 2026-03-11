@@ -9,6 +9,14 @@
   },
   "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/common-sense-beta",
   "repository": "https://github.com/nsheaps/ai-mktpl",
-  "keywords": ["rules", "common-sense", "behavior", "best-practices", "session-start", "symlink", "beta"],
+  "keywords": [
+    "rules",
+    "common-sense",
+    "behavior",
+    "best-practices",
+    "session-start",
+    "symlink",
+    "beta"
+  ],
   "hooks": "./hooks/hooks.json"
 }
