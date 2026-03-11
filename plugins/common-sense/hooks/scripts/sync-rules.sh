@@ -63,8 +63,7 @@ setup_symlink() {
   if [ -L "$link_path" ]; then
     rm -f "$link_path"
   elif [ -d "$link_path" ]; then
-    hook_log "WARNING: ${link_path} is a real directory, not replacing"
-    echo "${PLUGIN_NAME}: WARNING: ${link_path} is a real directory, not replacing with symlink — remove it manually if this is unintentional" >&2
+    hook_log_always "WARNING: ${link_path} is a real directory, not replacing with symlink — remove it manually if this is unintentional"
     return 0
   fi
 

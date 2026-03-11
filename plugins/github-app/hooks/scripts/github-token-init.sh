@@ -48,8 +48,7 @@ resolve_secret() {
     local var_name="${BASH_REMATCH[1]}"
     local resolved="${!var_name:-}"
     if [[ -z "$resolved" ]]; then
-      hook_log "WARNING: env var $var_name is not set (for $name)"
-      echo "${PLUGIN_NAME}: WARNING: env var $var_name is not set (for $name)" >&2
+      hook_log_always "WARNING: env var $var_name is not set (for $name)"
     fi
     echo "$resolved"
     return
@@ -196,8 +195,7 @@ fi
 # Validate PEM file permissions
 PERMS=$(stat -c '%a' "$GITHUB_APP_PRIVATE_KEY_PATH" 2>/dev/null || stat -f '%Lp' "$GITHUB_APP_PRIVATE_KEY_PATH" 2>/dev/null || echo "unknown")
 if [[ "$PERMS" != "600" && "$PERMS" != "400" && "$PERMS" != "unknown" ]]; then
-  hook_log "WARNING: PEM key has permissions $PERMS, should be 600 or 400"
-  echo "${PLUGIN_NAME}: WARNING: PEM key has permissions $PERMS, should be 600 or 400" >&2
+  hook_log_always "WARNING: PEM key has permissions $PERMS, should be 600 or 400"
 fi
 
 # --- Token generation ---
@@ -323,8 +321,8 @@ configure_git_identity "$TOKEN" "$GITHUB_APP_ID"
 
 # --- Print initial token info ---
 
-echo "${PLUGIN_NAME}: Authenticated as ${APP_SLUG:-app-$GITHUB_APP_ID} (expires: ${EXPIRES_AT:-unknown})" >&2
-echo "${PLUGIN_NAME}: Token available via \$GH_TOKEN and \$GITHUB_TOKEN" >&2
+hook_log_always "Authenticated as ${APP_SLUG:-app-$GITHUB_APP_ID} (expires: ${EXPIRES_AT:-unknown})"
+hook_log_always "Token available via \$GH_TOKEN and \$GITHUB_TOKEN"
 
 hook_log_cleanup
 echo '{}'

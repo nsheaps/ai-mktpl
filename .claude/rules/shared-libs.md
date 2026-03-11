@@ -63,6 +63,7 @@ PLUGIN_NAME="my-plugin"  # MUST be set before sourcing
 source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 
 hook_log "Installing tool v1.2.3"              # buffer a verbose log line
+hook_log_always "Tool v1.2.3 ready"            # log + always print to stderr
 hook_log_step "download" "Downloading binary"  # start a named step
 hook_fail "curl" "404 not found" "Check URL"   # structured error (returns 0)
 hook_run my_main_function                      # wrap function with log capture
