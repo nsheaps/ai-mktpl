@@ -118,7 +118,7 @@ chmod 600 ~/.config/agent/github-app.pem
 7. **Retry with backoff**: Failed refreshes retry up to 3 times, then back off for 5 minutes
 8. **Git integration**: Credential helper reads from token file for `git push`
 
-Git identity is only configured if `user.name`/`user.email` are not already set. Disable with `auto_git_config: false` in plugin settings.
+Git identity is only configured if `user.name`/`user.email` are not already set. Disable with `autoGitConfig: false` in plugin settings.
 
 ### Token Refresh Behavior
 
@@ -152,8 +152,8 @@ github-app:
     github_installation_id: "${GITHUB_INSTALLATION_ID}"
 
   # Other settings
-  token_file: "~/.config/agent/github-token"
-  auto_git_config: true
+  tokenFile: "~/.config/agent/github-token"
+  autoGitConfig: true
 ```
 
 ### Secret Reference Syntax

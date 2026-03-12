@@ -249,12 +249,12 @@ This plugin supports configuration via `plugins.settings.yaml`:
 ```yaml
 1pass:
   enabled: true
-  auto_install: false # Download op if not on PATH
-  install_to_project: true # Install to $project/bin/.local
-  background_install: false # Install in background
-  op_version: "latest" # Specific op version or "latest"
-  install_op_exec: false # Also install op-exec
-  op_exec_version: "latest" # Specific op-exec version
+  autoInstall: false # Download op if not on PATH
+  installToProject: true # Install to $project/bin/.local
+  backgroundInstall: false # Install in background
+  opVersion: "latest" # Specific op version or "latest"
+  installOpExec: false # Also install op-exec
+  opExecVersion: "latest" # Specific op-exec version
 ```
 
 Place in:
@@ -277,7 +277,7 @@ Place in:
 ### "op: command not found"
 
 Ensure op is installed. This plugin auto-installs to `$CLAUDE_PROJECT_DIR/bin/.local/op`
-when `auto_install: true`. Alternatively, install via mise:
+when `autoInstall: true`. Alternatively, install via mise:
 
 ```toml
 # mise.toml

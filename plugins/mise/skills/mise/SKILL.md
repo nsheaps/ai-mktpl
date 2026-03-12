@@ -258,11 +258,11 @@ This plugin supports configuration via `plugins.settings.yaml`:
 ```yaml
 mise:
   enabled: true
-  install_to_project: true # Install to $project/bin/.local
-  background_install: false # Install in background
-  version: "latest" # Specific version or "latest"
-  auto_install_tools: true # Run mise install after setup
-  auto_trust: true # Auto-trust project mise.toml
+  installToProject: true     # Install to $project/bin/.local
+  backgroundInstall: false   # Install in background
+  version: "latest"          # Specific version or "latest"
+  autoInstallTools: true     # Run mise install after setup
+  autoTrust: true            # Auto-trust project mise.toml
 ```
 
 Place in:

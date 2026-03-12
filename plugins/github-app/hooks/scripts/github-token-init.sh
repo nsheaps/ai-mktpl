@@ -233,7 +233,7 @@ fi
 
 # --- Token generation ---
 
-TOKEN_FILE="${GITHUB_TOKEN_FILE:-$(plugin_get_config "token_file" "$HOME/.config/agent/github-token")}"
+TOKEN_FILE="${GITHUB_TOKEN_FILE:-$(plugin_get_config "tokenFile" "$HOME/.config/agent/github-token")}"
 TOKEN_FILE="${TOKEN_FILE/#\~/$HOME}"
 mkdir -p "$(dirname "$TOKEN_FILE")"
 
@@ -296,7 +296,7 @@ configure_git_identity() {
   local token="$1"
   local app_id="$2"
   local auto_git_config
-  auto_git_config="$(plugin_get_config "auto_git_config" "true")"
+  auto_git_config="$(plugin_get_config "autoGitConfig" "true")"
   [[ "$auto_git_config" == "true" ]] || return 0
 
   # Skip if git user.name is already configured (don't override user's settings)
