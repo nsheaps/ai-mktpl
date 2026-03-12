@@ -124,7 +124,7 @@ resolve_gws_bin() {
     if [ "$install_version" != "latest" ]; then
       mise_spec="${mise_spec}@${install_version}"
     fi
-    if mise use -g "$mise_spec" >&2 2>&1; then
+    if mise use -g "$mise_spec" >&2; then
       if tool_is_available gws; then
         gws_bin="$(command -v gws)"
         echo "${PLUGIN_NAME}: gws installed via mise at $gws_bin" >&2
