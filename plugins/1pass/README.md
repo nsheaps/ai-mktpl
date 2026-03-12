@@ -15,7 +15,7 @@ Install and manage [1Password CLI](https://developer.1password.com/docs/cli/) (o
 On session start (web sessions only):
 
 1. Checks if op is already available on PATH
-2. If `auto_install` is true, downloads the release from 1Password
+2. If `autoInstall` is true, downloads the release from 1Password
 3. Extracts the binary to `$CLAUDE_PROJECT_DIR/bin/.local/op`
 4. Optionally installs op-exec from GitHub releases
 5. Adds `bin/.local/` to PATH via `CLAUDE_ENV_FILE`
@@ -32,12 +32,12 @@ Create or update `plugins.settings.yaml` at project or user level:
 
 1pass:
   enabled: true # Enable/disable the plugin
-  auto_install: false # Download op if not on PATH (default: false)
-  install_to_project: true # Install to $project/bin/.local (vs ~/.local/bin)
-  background_install: false # Run install in background
-  op_version: "latest" # Pin a specific op version or use "latest"
-  install_op_exec: false # Also install op-exec (default: false)
-  op_exec_version: "latest" # Pin a specific op-exec version or use "latest"
+  autoInstall: false # Download op if not on PATH (default: false)
+  installToProject: true # Install to $project/bin/.local (vs ~/.local/bin)
+  backgroundInstall: false # Run install in background
+  opVersion: "latest" # Pin a specific op version or use "latest"
+  installOpExec: false # Also install op-exec (default: false)
+  opExecVersion: "latest" # Pin a specific op-exec version or use "latest"
 ```
 
 ## Authentication

@@ -8,6 +8,14 @@ Every plugin change requires a version bump:
 - **Minor (x.Y.0)**: New features, backwards compatible
 - **Major (X.0.0)**: Breaking changes
 
+## NEVER Manually Edit plugin.json
+
+**CRITICAL:** Do NOT manually modify existing `plugin.json` files. The CI `check-version-files` job blocks all manual modifications to existing `plugin.json` files — including version bumps.
+
+Version bumps are handled automatically by the CD pipeline. If you modify a plugin's code, settings, hooks, or docs, the version bump will be applied automatically on merge to main.
+
+New `plugin.json` files (for brand new plugins) are allowed.
+
 ## Version Check Workflow
 
 The `cd.yaml` workflow enforces versioning:

@@ -84,12 +84,12 @@ op-exec ./ci-script.sh
 
 ## Plugin Settings
 
-This tool is installed by the `1pass` plugin when `install_op_exec: true`:
+This tool is installed by the `1pass` plugin when `installOpExec: true`:
 
 ```yaml
 1pass:
-  install_op_exec: true
-  op_exec_version: "latest"
+  installOpExec: true
+  opExecVersion: "latest"
 ```
 
 ## Troubleshooting

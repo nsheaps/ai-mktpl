@@ -2,7 +2,7 @@
 # install-op.sh — SessionStart hook for 1pass plugin
 #
 # Installs or updates 1Password CLI (op) and op-exec for Claude Code web sessions.
-# When install_to_project is true, installs to $CLAUDE_PROJECT_DIR/bin/.local/
+# When installToProject is true, installs to $CLAUDE_PROJECT_DIR/bin/.local/
 # which is gitignored and added to PATH.
 set -euo pipefail
 
@@ -17,10 +17,10 @@ tool_is_web_session || { echo '{}'; exit 0; }
 
 # --- Read config ---
 
-auto_install="$(plugin_get_config "auto_install" "false")"
-op_version="$(plugin_get_config "op_version" "latest")"
-install_op_exec="$(plugin_get_config "install_op_exec" "false")"
-op_exec_version="$(plugin_get_config "op_exec_version" "latest")"
+auto_install="$(plugin_get_config "autoInstall" "false")"
+op_version="$(plugin_get_config "opVersion" "latest")"
+install_op_exec="$(plugin_get_config "installOpExec" "false")"
+op_exec_version="$(plugin_get_config "opExecVersion" "latest")"
 
 tool_resolve_install_dir
 
@@ -117,10 +117,10 @@ download_op_exec() {
 resolve_op_bin() {
   if [ "$auto_install" = "false" ]; then
     if tool_is_available op; then
-      echo "${PLUGIN_NAME}: auto_install=false, using op from PATH" >&2
+      echo "${PLUGIN_NAME}: autoInstall=false, using op from PATH" >&2
       command -v op
     else
-      echo "${PLUGIN_NAME}: auto_install=false and op not on PATH, skipping" >&2
+      echo "${PLUGIN_NAME}: autoInstall=false and op not on PATH, skipping" >&2
       return 1
     fi
     return
@@ -161,10 +161,10 @@ resolve_op_bin() {
 resolve_op_exec_bin() {
   if [ "$install_op_exec" = "false" ]; then
     if tool_is_available op-exec; then
-      echo "${PLUGIN_NAME}: install_op_exec=false, using op-exec from PATH" >&2
+      echo "${PLUGIN_NAME}: installOpExec=false, using op-exec from PATH" >&2
       command -v op-exec
     else
-      echo "${PLUGIN_NAME}: install_op_exec=false and op-exec not on PATH, skipping" >&2
+      echo "${PLUGIN_NAME}: installOpExec=false and op-exec not on PATH, skipping" >&2
       return 1
     fi
     return
