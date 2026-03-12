@@ -1,0 +1,30 @@
+{
+  "name": "google-workspace-cli",
+  "version": "0.1.1",
+  "description": "Install and manage the Google Workspace CLI (gws) with per-service skills for Gmail, Calendar, Drive, Docs, Sheets, Slides, Chat, Tasks, Contacts, and Admin",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/google-workspace-cli",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": [
+    "google-workspace",
+    "gws",
+    "gmail",
+    "calendar",
+    "drive",
+    "docs",
+    "sheets",
+    "slides",
+    "chat",
+    "tasks",
+    "contacts",
+    "admin",
+    "google",
+    "workspace",
+    "cli"
+  ],
+  "hooks": "./hooks/hooks.json"
+}
