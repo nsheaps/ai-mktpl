@@ -1,6 +1,6 @@
 # common-sense-beta
 
-Beta rules for AI assistant behavior inspired by the Claude 2028 campaign platform. On session start, symlinks bundled rules into your project's `.claude/rules/common-sense-beta/` directory so they are automatically loaded as context.
+Beta rules for AI assistant behavior inspired by the [Claude 2028 platform](https://claude2028.org/). On session start, symlinks bundled rules into your project's `.claude/rules/common-sense-beta/` directory so they are automatically loaded as context.
 
 ## Rules
 
