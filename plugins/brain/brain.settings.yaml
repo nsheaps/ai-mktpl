@@ -5,6 +5,8 @@ brain:
   gitRepo: ''
   # Git branch to use for memory storage
   gitBranch: 'main'
+  # When to show the self-check reminder: "always", "first" (once per session), or "none"
+  selfCheckReminder: 'always'
   # Files to sync to the memory repo
   # Default: ~/.claude/CLAUDE.md, ~/.claude/history.jsonl, and project CLAUDE.md
   # memorySources:

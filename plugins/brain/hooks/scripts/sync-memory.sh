@@ -61,6 +61,13 @@ fi
 # Branch for memory storage
 branch="$(plugin_get_config "gitBranch" "main")"
 
+# Check for uncommitted changes in the memory repo
+if [ -n "$(cd "$git_repo" && git status --porcelain 2>/dev/null)" ]; then
+  echo "brain: Warning — memory repo has uncommitted changes, skipping sync" >&2
+  echo '{}'
+  exit 0
+fi
+
 # Pull latest from remote (best-effort)
 (
   cd "$git_repo"
@@ -78,8 +85,9 @@ for source in "${memory_sources[@]}"; do
   source="${source/#\~/$HOME}"
   if [ -f "$source" ]; then
     # Create a safe filename from the source path
-    # e.g., /home/user/.claude/CLAUDE.md -> home-user-.claude-CLAUDE.md
-    safe_name="$(echo "$source" | sed 's|^/||; s|/|-|g')"
+    # e.g., /home/user/.claude/CLAUDE.md -> home__user__.claude__CLAUDE.md
+    # Uses __ to avoid collisions (e.g., /a/b-c.md vs /a/b/c.md)
+    safe_name="$(echo "$source" | sed 's|^/||; s|/|__|g')"
     dest="${memory_dir}/${safe_name}"
 
     # Only copy if content differs

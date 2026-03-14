@@ -25,6 +25,10 @@ Inspired by the Serena MCP "is task done" command, the plugin encourages a disci
 2. Reminding the agent to check work against the prompt while working
 3. Explicit self-check before declaring a task done
 
+## Relationship with memory-manager
+
+The `memory-manager` plugin detects user preferences during a session and writes them to `CLAUDE.md`. The `brain` plugin is complementary — it syncs those files (and prompt history) to a separate git repo for version-controlled persistence across sessions. You can use both together: `memory-manager` writes the memories, `brain` backs them up.
+
 ## Configuration
 
 Add to `~/.claude/plugins.settings.yaml` or project-level `.claude/plugins.settings.yaml`:
@@ -34,6 +38,7 @@ brain:
   enabled: true
   gitRepo: "~/path/to/memory-repo"
   gitBranch: "main"
+  selfCheckReminder: "always"
   memorySources:
     - "~/.claude/CLAUDE.md"
     - "~/.claude/history.jsonl"
@@ -41,12 +46,13 @@ brain:
 
 ### Settings
 
-| Key             | Default     | Description                                            |
-| --------------- | ----------- | ------------------------------------------------------ |
-| `enabled`       | `true`      | Enable/disable the plugin                              |
-| `gitRepo`       | `""`        | Path to git repo for memory storage (empty = disabled) |
-| `gitBranch`     | `"main"`    | Branch to use for memory commits                       |
-| `memorySources` | (see below) | Files to sync to the memory repo                       |
+| Key                 | Default     | Description                                                                                  |
+| ------------------- | ----------- | -------------------------------------------------------------------------------------------- |
+| `enabled`           | `true`      | Enable/disable the plugin                                                                    |
+| `gitRepo`           | `""`        | Path to git repo for memory storage (empty = disabled)                                       |
+| `gitBranch`         | `"main"`    | Branch to use for memory commits                                                             |
+| `selfCheckReminder` | `"always"`  | When to show the self-check reminder: `"always"`, `"first"` (once per session), or `"none"` |
+| `memorySources`     | (see below) | Files to sync to the memory repo                                                             |
 
 **Default memory sources** (when `memorySources` is not set):
 
@@ -68,6 +74,10 @@ brain:
 2. Pulls latest from the memory repo
 3. Copies configured memory sources into `memory/` directory in the repo
 4. Commits and pushes if changes were made
+
+## Known Limitations
+
+- `history.jsonl` grows without bound. For heavy usage, consider periodically truncating it manually. A future `maxHistoryEntries` setting is planned.
 
 ## Requirements
 
