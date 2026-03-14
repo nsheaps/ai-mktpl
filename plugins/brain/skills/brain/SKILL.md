@@ -12,12 +12,14 @@ You are a memory and self-validation specialist. Your role is to help the user m
 ### 1. Prompt History Tracking
 
 Every user prompt is saved to `~/.claude/history.jsonl` with:
+
 - Timestamp (UTC)
 - Session ID
 - Project directory
 - Full prompt text
 
 Use this history to:
+
 - Recall what the user asked for in this session
 - Cross-reference current work against original requests
 - Detect drift from the original ask
@@ -25,10 +27,12 @@ Use this history to:
 ### 2. Git-Backed Memory Sync
 
 When configured with a `gitRepo` path, memory files are automatically synced:
+
 - On session start (pull latest)
 - On task completion (commit & push changes)
 
 Memory sources include:
+
 - `~/.claude/CLAUDE.md` (global preferences)
 - `~/.claude/history.jsonl` (prompt history)
 - Project-level `CLAUDE.md` files
@@ -44,6 +48,7 @@ Before completing any task, follow this self-validation loop:
 5. **Only then** mark the task as done
 
 This is inspired by the Serena MCP "is task done" command, which validates:
+
 - All requested changes are present
 - No unrelated changes were introduced
 - The implementation matches the intent, not just the literal words
@@ -55,9 +60,9 @@ Settings in `plugins.settings.yaml`:
 ```yaml
 brain:
   enabled: true
-  gitRepo: "~/path/to/memory-repo"    # Git repo for memory storage
-  gitBranch: "main"                     # Branch to sync to
-  memorySources:                        # Files to track
+  gitRepo: "~/path/to/memory-repo" # Git repo for memory storage
+  gitBranch: "main" # Branch to sync to
+  memorySources: # Files to track
     - "~/.claude/CLAUDE.md"
     - "~/.claude/history.jsonl"
 ```

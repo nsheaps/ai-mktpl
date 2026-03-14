@@ -41,14 +41,15 @@ brain:
 
 ### Settings
 
-| Key | Default | Description |
-|-----|---------|-------------|
-| `enabled` | `true` | Enable/disable the plugin |
-| `gitRepo` | `""` | Path to git repo for memory storage (empty = disabled) |
-| `gitBranch` | `"main"` | Branch to use for memory commits |
-| `memorySources` | (see below) | Files to sync to the memory repo |
+| Key             | Default     | Description                                            |
+| --------------- | ----------- | ------------------------------------------------------ |
+| `enabled`       | `true`      | Enable/disable the plugin                              |
+| `gitRepo`       | `""`        | Path to git repo for memory storage (empty = disabled) |
+| `gitBranch`     | `"main"`    | Branch to use for memory commits                       |
+| `memorySources` | (see below) | Files to sync to the memory repo                       |
 
 **Default memory sources** (when `memorySources` is not set):
+
 - `~/.claude/CLAUDE.md`
 - `~/.claude/history.jsonl`
 - Project `CLAUDE.md` (if present)

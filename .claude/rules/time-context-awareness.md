@@ -22,13 +22,13 @@ When a time-reference is detected:
 
 ## Examples
 
-| User Says | What It Implies |
-|-----------|-----------------|
-| "Is the linter fixed now?" | Check recent commits/PRs that touched linting config |
-| "Has the API changed?" | Look at recent changes to API-related files |
+| User Says                           | What It Implies                                      |
+| ----------------------------------- | ---------------------------------------------------- |
+| "Is the linter fixed now?"          | Check recent commits/PRs that touched linting config |
+| "Has the API changed?"              | Look at recent changes to API-related files          |
 | "Is feature X still behind a flag?" | Check current state AND git history for flag changes |
-| "Did that get merged?" | Check PR/branch merge status |
-| "Is the version bumped yet?" | Check plugin.json or version files in recent history |
+| "Did that get merged?"              | Check PR/branch merge status                         |
+| "Is the version bumped yet?"        | Check plugin.json or version files in recent history |
 
 ## Key Principle
 
