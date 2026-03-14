@@ -46,13 +46,13 @@ brain:
 
 ### Settings
 
-| Key                 | Default     | Description                                                                                  |
-| ------------------- | ----------- | -------------------------------------------------------------------------------------------- |
-| `enabled`           | `true`      | Enable/disable the plugin                                                                    |
-| `gitRepo`           | `""`        | Path to git repo for memory storage (empty = disabled)                                       |
-| `gitBranch`         | `"main"`    | Branch to use for memory commits                                                             |
+| Key                 | Default     | Description                                                                                 |
+| ------------------- | ----------- | ------------------------------------------------------------------------------------------- |
+| `enabled`           | `true`      | Enable/disable the plugin                                                                   |
+| `gitRepo`           | `""`        | Path to git repo for memory storage (empty = disabled)                                      |
+| `gitBranch`         | `"main"`    | Branch to use for memory commits                                                            |
 | `selfCheckReminder` | `"always"`  | When to show the self-check reminder: `"always"`, `"first"` (once per session), or `"none"` |
-| `memorySources`     | (see below) | Files to sync to the memory repo                                                             |
+| `memorySources`     | (see below) | Files to sync to the memory repo                                                            |
 
 **Default memory sources** (when `memorySources` is not set):
 
