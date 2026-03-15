@@ -53,7 +53,8 @@
       "Bash(npm:*)",
       "Bash(pnpm:*)",
       "Bash(chmod:*)",
-      "Bash(readlink:*)"
+      "Bash(readlink:*)",
+      "mcp__sequential-thinking__sequentialthinking"
     ],
     "deny": ["Bash(rm -rf /:*)"],
     "ask": [
