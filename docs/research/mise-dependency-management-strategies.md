@@ -51,17 +51,17 @@ All hooks for the same event type run **concurrently**:
 
 ```javascript
 // From cli.js (decompiled, variable names reconstructed)
-W = hooks.map(async function*({hook, pluginRoot, skillRoot}, index) {
-    // Each hook spawns its own shell process
-    let timeout = hook.timeout ? hook.timeout * 1000 : DEFAULT_TIMEOUT; // 600000ms
-    let process = spawn(command, [], {env, cwd, shell: true});
-    // ...
+W = hooks.map(async function* ({ hook, pluginRoot, skillRoot }, index) {
+  // Each hook spawns its own shell process
+  let timeout = hook.timeout ? hook.timeout * 1000 : DEFAULT_TIMEOUT; // 600000ms
+  let process = spawn(command, [], { env, cwd, shell: true });
+  // ...
 });
 
 // Merge results concurrently (q=Infinity means all parallel)
 async function* mergeAsyncIterators(iterators, q = Infinity) {
-    // Uses Promise.race on active generators
-    // Yields values as they arrive from ANY generator
+  // Uses Promise.race on active generators
+  // Yields values as they arrive from ANY generator
 }
 ```
 
@@ -83,12 +83,14 @@ Each SessionStart hook gets its own env file:
 **File naming**: `{hooktype}-hook-{index}.sh` where index is the hook's position in the array.
 
 **Read order** (verified from binary):
+
 1. Files matching `^(setup|sessionstart)-hook-\d+\.sh$` only
 2. `setup` files sort before `sessionstart` files
 3. Within each type, sorted numerically by index
 4. All contents concatenated and **sourced before every Bash tool call**
 
 **Cache behavior**:
+
 - Session env is cached after first read (`_a` variable in binary)
 - Cache is invalidated ONLY when an async SessionStart hook completes
 - This means: **env changes from sync hooks are immediately available, but only after the session starts and the first Bash tool call occurs**
@@ -96,6 +98,7 @@ Each SessionStart hook gets its own env file:
 #### Bash Tool Execution
 
 Every `Bash()` tool call constructs:
+
 ```bash
 source <shell-snapshot> && <session-env-script> && eval '<user-command>' && pwd -P >| <cwd-file>
 ```
@@ -118,35 +121,37 @@ The `<session-env-script>` is the concatenated contents of all session-env files
 
 ### Pros
 
-| Advantage | Detail |
-|-----------|--------|
-| **Single source of truth** | `mise.toml` declares all tool versions in one file |
-| **Version pinning** | `mise.toml` supports exact, range, and `latest` version specs |
-| **Reproducibility** | Every session gets the same tool versions |
-| **Shim availability** | After `mise install`, shims exist for all tools immediately |
-| **Minimal per-plugin code** | Plugins don't need download/install/version-check logic |
-| **Ecosystem breadth** | mise supports 600+ tools via plugins, npm, cargo, go, etc. |
-| **Self-updating** | `mise self-update` keeps mise itself current |
+| Advantage                   | Detail                                                        |
+| --------------------------- | ------------------------------------------------------------- |
+| **Single source of truth**  | `mise.toml` declares all tool versions in one file            |
+| **Version pinning**         | `mise.toml` supports exact, range, and `latest` version specs |
+| **Reproducibility**         | Every session gets the same tool versions                     |
+| **Shim availability**       | After `mise install`, shims exist for all tools immediately   |
+| **Minimal per-plugin code** | Plugins don't need download/install/version-check logic       |
+| **Ecosystem breadth**       | mise supports 600+ tools via plugins, npm, cargo, go, etc.    |
+| **Self-updating**           | `mise self-update` keeps mise itself current                  |
 
 ### Cons
 
-| Disadvantage | Detail |
-|--------------|--------|
-| **Single point of failure** | If mise install fails (network, rate limit), ALL tools are missing |
-| **Long install time** | `mise install -y` for 15+ tools takes 30-90 seconds |
-| **Rate limit vulnerability** | GitHub API rate limits can block tool resolution (observed: jq install failed with 403) |
-| **Timeout pressure** | 60-second hook timeout vs. potentially 90+ second install |
-| **All-or-nothing** | Partial failures leave an inconsistent state |
-| **Web-only guard** | Currently skips local sessions entirely (`tool_is_web_session` guard) |
-| **Activation timing** | `eval "$(mise activate bash)"` in CLAUDE_ENV_FILE only affects Bash calls, not MCP servers |
+| Disadvantage                 | Detail                                                                                     |
+| ---------------------------- | ------------------------------------------------------------------------------------------ |
+| **Single point of failure**  | If mise install fails (network, rate limit), ALL tools are missing                         |
+| **Long install time**        | `mise install -y` for 15+ tools takes 30-90 seconds                                        |
+| **Rate limit vulnerability** | GitHub API rate limits can block tool resolution (observed: jq install failed with 403)    |
+| **Timeout pressure**         | 60-second hook timeout vs. potentially 90+ second install                                  |
+| **All-or-nothing**           | Partial failures leave an inconsistent state                                               |
+| **Web-only guard**           | Currently skips local sessions entirely (`tool_is_web_session` guard)                      |
+| **Activation timing**        | `eval "$(mise activate bash)"` in CLAUDE_ENV_FILE only affects Bash calls, not MCP servers |
 
 ### Edge Cases
 
 **Rate limiting (observed):**
+
 ```
 mise ERROR Failed to install aqua:jqlang/jq@latest: GitHub artifact attestations
 verification failed: API rate limit exceeded for 35.188.35.214
 ```
+
 In web sessions, all instances share egress IPs, causing collective rate limiting.
 
 **Partial install:**
@@ -168,37 +173,39 @@ If mise installs 12/15 tools before timeout, the 3 remaining tools are missing. 
 
 ### Pros
 
-| Advantage | Detail |
-|-----------|--------|
-| **Independent failure domains** | gh install failure doesn't affect op install |
-| **Plugin-specific logic** | Can handle non-GitHub release patterns (1Password uses custom CDN) |
-| **No external dependencies** | Only needs `curl` and standard tools |
-| **Targeted timeouts** | Each plugin gets its own 60-120s timeout |
-| **Custom version resolution** | Can use vendor-specific APIs (1Password update endpoint) |
-| **Background install option** | `tool_run_install` supports `backgroundInstall: true` |
+| Advantage                       | Detail                                                             |
+| ------------------------------- | ------------------------------------------------------------------ |
+| **Independent failure domains** | gh install failure doesn't affect op install                       |
+| **Plugin-specific logic**       | Can handle non-GitHub release patterns (1Password uses custom CDN) |
+| **No external dependencies**    | Only needs `curl` and standard tools                               |
+| **Targeted timeouts**           | Each plugin gets its own 60-120s timeout                           |
+| **Custom version resolution**   | Can use vendor-specific APIs (1Password update endpoint)           |
+| **Background install option**   | `tool_run_install` supports `backgroundInstall: true`              |
 
 ### Cons
 
-| Disadvantage | Detail |
-|--------------|--------|
-| **Duplicated logic** | Each plugin reimplements download, version check, PATH management |
-| **No version coordination** | Two plugins could install different versions of the same tool |
-| **Parallel race** | If plugin B needs tool X that plugin A installs, B may start before A finishes |
-| **Larger plugin size** | Each plugin carries ~100 lines of install boilerplate |
-| **Platform detection** | Each plugin must handle Linux/Darwin/x86_64/arm64 |
-| **No centralized inventory** | Hard to audit what tools are installed and at what versions |
-| **Multiple network calls** | Each plugin hits GitHub API independently (rate limit amplification) |
+| Disadvantage                 | Detail                                                                         |
+| ---------------------------- | ------------------------------------------------------------------------------ |
+| **Duplicated logic**         | Each plugin reimplements download, version check, PATH management              |
+| **No version coordination**  | Two plugins could install different versions of the same tool                  |
+| **Parallel race**            | If plugin B needs tool X that plugin A installs, B may start before A finishes |
+| **Larger plugin size**       | Each plugin carries ~100 lines of install boilerplate                          |
+| **Platform detection**       | Each plugin must handle Linux/Darwin/x86_64/arm64                              |
+| **No centralized inventory** | Hard to audit what tools are installed and at what versions                    |
+| **Multiple network calls**   | Each plugin hits GitHub API independently (rate limit amplification)           |
 
 ### Edge Cases
 
 **Shared tool conflict:**
 If both the `mise` plugin and `github` plugin try to install `gh`:
+
 - mise installs `gh` via `mise install` → shim at `~/.local/share/mise/shims/gh`
 - github plugin installs `gh` via direct download → binary at `bin/.local/gh`
 - PATH order determines which `gh` is used
 - Different versions may be installed
 
 **Background install race:**
+
 ```bash
 # Plugin A (backgroundInstall: true)
 tool_run_install do_install  # Returns immediately, install runs in background
@@ -226,28 +233,29 @@ fi
 
 ### Pros
 
-| Advantage | Detail |
-|-----------|--------|
-| **Best of both worlds** | Uses mise when available, self-installs when not |
-| **Graceful degradation** | Works even without mise plugin enabled |
-| **Consistent versions** | When using mise, respects `mise.toml` versions |
-| **Reduced duplication** | Plugins defer install logic to mise |
-| **Portability** | Works in repos without mise.toml |
+| Advantage                | Detail                                           |
+| ------------------------ | ------------------------------------------------ |
+| **Best of both worlds**  | Uses mise when available, self-installs when not |
+| **Graceful degradation** | Works even without mise plugin enabled           |
+| **Consistent versions**  | When using mise, respects `mise.toml` versions   |
+| **Reduced duplication**  | Plugins defer install logic to mise              |
+| **Portability**          | Works in repos without mise.toml                 |
 
 ### Cons
 
-| Disadvantage | Detail |
-|--------------|--------|
-| **Complexity** | Most complex strategy: detection, polling, fallback paths |
-| **Polling overhead** | Checking for mise availability adds latency |
-| **Uncertain timing** | No guaranteed SLA for when mise becomes available |
-| **Double PATH** | mise shims + direct install PATH entries can conflict |
-| **Testing burden** | Must test both "with mise" and "without mise" paths |
-| **Coordination required** | Needs a protocol (sentinel file, lock) for signaling |
+| Disadvantage              | Detail                                                    |
+| ------------------------- | --------------------------------------------------------- |
+| **Complexity**            | Most complex strategy: detection, polling, fallback paths |
+| **Polling overhead**      | Checking for mise availability adds latency               |
+| **Uncertain timing**      | No guaranteed SLA for when mise becomes available         |
+| **Double PATH**           | mise shims + direct install PATH entries can conflict     |
+| **Testing burden**        | Must test both "with mise" and "without mise" paths       |
+| **Coordination required** | Needs a protocol (sentinel file, lock) for signaling      |
 
 ### Design Challenges
 
 **The Polling Problem:**
+
 ```bash
 # How long do we wait for mise?
 for i in $(seq 1 30); do
@@ -260,6 +268,7 @@ done
 ```
 
 **The Sentinel Approach:**
+
 ```bash
 MISE_SENTINEL="/tmp/claude-mise-ready-${CLAUDE_CODE_SESSION_ID}"
 if [ -f "$MISE_SENTINEL" ]; then
@@ -269,6 +278,7 @@ else
     # Direct download fallback
 fi
 ```
+
 The mise plugin would touch this sentinel after completing. But since hooks run in parallel, the sentinel might not exist when other plugins check.
 
 ---
@@ -305,13 +315,16 @@ T=50s    Session env cache invalidated, mise activation available
 ### Verified Behaviors
 
 **Test 1: CLAUDE_ENV_FILE is empty in Bash tool calls**
+
 ```bash
 $ echo "CLAUDE_ENV_FILE=$CLAUDE_ENV_FILE"
 CLAUDE_ENV_FILE=
 ```
+
 Confirmed: `CLAUDE_ENV_FILE` is ONLY set for SessionStart/Setup hook processes, not for regular Bash tool calls. The env file contents are sourced inline instead.
 
 **Test 2: Session env directory structure**
+
 ```
 ~/.claude/session-env/1dcf8390-b08f-4aed-8260-ece3d90748db/
 (empty - no SessionStart hooks wrote to it in this session because
@@ -319,26 +332,30 @@ Confirmed: `CLAUDE_ENV_FILE` is ONLY set for SessionStart/Setup hook processes, 
 ```
 
 **Test 3: Shims appear immediately after mise install**
+
 ```bash
 $ ls ~/.local/share/mise/shims/
 bun → mise, bunx → mise, claude → mise, gh → mise, just → mise, ...
 ```
+
 Shims are symlinks to mise itself. They exist for ALL tools in mise.toml, even if the tool isn't yet installed. The shim delegates to mise at runtime to find the right version.
 
 **Test 4: Missing tool through shim**
+
 ```bash
 $ mise ls jq
 jq  1.8.1 (missing)  /home/user/ai-mktpl/mise.toml  latest
 ```
+
 When a tool is `(missing)`, the shim either fails or falls through to a system-installed version.
 
 **Test 5: mise activate vs shims PATH behavior**
 
-| Approach | PATH modification | Tool resolution |
-|----------|------------------|-----------------|
-| `mise activate bash` | Adds actual install dirs: `~/.local/share/mise/installs/gh/2.88.0/.../bin` | Direct binary access, no shim overhead |
-| Shims | Adds `~/.local/share/mise/shims` | Symlink → mise → looks up version → exec |
-| Neither | No change | System tools only |
+| Approach             | PATH modification                                                          | Tool resolution                          |
+| -------------------- | -------------------------------------------------------------------------- | ---------------------------------------- |
+| `mise activate bash` | Adds actual install dirs: `~/.local/share/mise/installs/gh/2.88.0/.../bin` | Direct binary access, no shim overhead   |
+| Shims                | Adds `~/.local/share/mise/shims`                                           | Symlink → mise → looks up version → exec |
+| Neither              | No change                                                                  | System tools only                        |
 
 `mise activate` adds **real binary paths** to PATH, bypassing shims entirely. This is faster (no shim lookup) but requires mise to be active in the shell.
 
@@ -359,40 +376,40 @@ The `CLAUDE_ENV_FILE` variable can sometimes be empty in Claude Code web session
 
 ### Decision Matrix
 
-| Criterion | A: Centralized Mise | B: Plugin-Self-Install | C: Deferred Detection |
-|-----------|:---:|:---:|:---:|
-| **Setup complexity** | Low | Medium | High |
-| **Failure isolation** | Poor (SPOF) | Good | Good |
-| **Version consistency** | Excellent | Poor | Good (when mise available) |
-| **Network efficiency** | Good (one install) | Poor (N downloads) | Good |
-| **Race condition risk** | N/A (self-contained) | High (inter-plugin) | Medium |
-| **Timeout risk** | High (long install) | Low (per-tool) | Medium |
-| **Portability** | Requires mise.toml | Standalone | Both paths |
-| **Code duplication** | Minimal | High | Medium |
-| **Debugging** | Easy (one place) | Hard (N places) | Hardest |
-| **Partial failure handling** | Poor | Good | Medium |
+| Criterion                    | A: Centralized Mise  | B: Plugin-Self-Install |   C: Deferred Detection    |
+| ---------------------------- | :------------------: | :--------------------: | :------------------------: |
+| **Setup complexity**         |         Low          |         Medium         |            High            |
+| **Failure isolation**        |     Poor (SPOF)      |          Good          |            Good            |
+| **Version consistency**      |      Excellent       |          Poor          | Good (when mise available) |
+| **Network efficiency**       |  Good (one install)  |   Poor (N downloads)   |            Good            |
+| **Race condition risk**      | N/A (self-contained) |  High (inter-plugin)   |           Medium           |
+| **Timeout risk**             | High (long install)  |     Low (per-tool)     |           Medium           |
+| **Portability**              |  Requires mise.toml  |       Standalone       |         Both paths         |
+| **Code duplication**         |       Minimal        |          High          |           Medium           |
+| **Debugging**                |   Easy (one place)   |    Hard (N places)     |          Hardest           |
+| **Partial failure handling** |         Poor         |          Good          |           Medium           |
 
 ### Timing Analysis
 
-| Phase | Centralized Mise | Plugin-Self-Install | Deferred Detection |
-|-------|:---:|:---:|:---:|
-| Mise bootstrap | 5-15s | N/A | 0s (if available) / 5-15s (fallback) |
-| Tool install | 30-90s (all at once) | 5-15s each (parallel) | 5-15s each |
-| PATH activation | Instant (via eval) | Instant (via export) | Varies |
-| **Total** | **35-105s** | **5-15s** (parallel) | **5-30s** |
+| Phase           |   Centralized Mise   |  Plugin-Self-Install  |          Deferred Detection          |
+| --------------- | :------------------: | :-------------------: | :----------------------------------: |
+| Mise bootstrap  |        5-15s         |          N/A          | 0s (if available) / 5-15s (fallback) |
+| Tool install    | 30-90s (all at once) | 5-15s each (parallel) |              5-15s each              |
+| PATH activation |  Instant (via eval)  | Instant (via export)  |                Varies                |
+| **Total**       |     **35-105s**      | **5-15s** (parallel)  |              **5-30s**               |
 
 The centralized approach is **slowest** because `mise install -y` is sequential within the mise process. Plugin-self-install is fastest because downloads happen in parallel across plugins.
 
 ### Reliability Under Failure
 
-| Failure Mode | A: Centralized | B: Self-Install | C: Deferred |
-|-------------|:---:|:---:|:---:|
-| Network timeout | All tools missing | Only affected tool missing | Graceful fallback |
-| Rate limit | All tools missing | Only affected tool missing | Graceful fallback |
-| Disk full | All tools missing | Partial success possible | Partial success possible |
-| Hook timeout (60s) | Likely hit | Unlikely | Unlikely |
-| CLAUDE_ENV_FILE empty | PATH broken for all | PATH broken per-plugin | PATH broken per-plugin |
-| Container pre-installs | Redundant work | Detects & skips | Detects & skips |
+| Failure Mode           |   A: Centralized    |      B: Self-Install       |       C: Deferred        |
+| ---------------------- | :-----------------: | :------------------------: | :----------------------: |
+| Network timeout        |  All tools missing  | Only affected tool missing |    Graceful fallback     |
+| Rate limit             |  All tools missing  | Only affected tool missing |    Graceful fallback     |
+| Disk full              |  All tools missing  |  Partial success possible  | Partial success possible |
+| Hook timeout (60s)     |     Likely hit      |          Unlikely          |         Unlikely         |
+| CLAUDE_ENV_FILE empty  | PATH broken for all |   PATH broken per-plugin   |  PATH broken per-plugin  |
+| Container pre-installs |   Redundant work    |      Detects & skips       |     Detects & skips      |
 
 ---
 
@@ -452,6 +469,7 @@ Per the project's own documentation:
 > "The hooks are a last-ditch effort to ensure a consistent environment. Always try to pre-emptively install software in an earlier layer, especially one that can be re-used, such as a container layer."
 
 The ideal solution is:
+
 1. **Container image** includes mise + all tools from mise.toml
 2. **SessionStart hooks** verify tools exist and update if needed (fast path)
 3. **Fallback** to full install only in environments without pre-installed tools
@@ -472,6 +490,7 @@ This eliminates the race condition entirely — tools are available before any h
 ## Strategy D: Async Mise Bootstrap + Shim-Based Lazy Install (Proposed)
 
 This strategy emerged from combining three discoveries:
+
 1. **`not_found_auto_install = true`** — mise auto-installs tools on first shim invocation
 2. **`async: true` hooks** — SessionStart hooks can run in the background without blocking the session
 3. **`additionalContext` injection** — async hooks notify the model when they complete
@@ -547,6 +566,7 @@ true
 This means mise shims are ALREADY the "lazy install on first call" mechanism. No custom passthrough scripts needed.
 
 **How it works:**
+
 1. `mise reshim` creates shims for all tools in `mise.toml`
 2. Each shim is a symlink to the mise binary itself
 3. When invoked, mise checks if the requested tool version is installed
@@ -554,6 +574,7 @@ This means mise shims are ALREADY the "lazy install on first call" mechanism. No
 5. If NOT installed → download, install, then exec (transparent to caller)
 
 **Timing implications:**
+
 - Shim creation: instant (just symlinks)
 - First use of uninstalled tool: 5-30s download delay (one-time)
 - Subsequent uses: ~50ms shim overhead
@@ -637,11 +658,11 @@ Since this hook declares `async: true` in hooks.json, it goes background immedia
 
 ### Sync vs Async Decision Framework
 
-| Hook Type | Sync (default) | `async: true` | `asyncRewake: true` |
-|-----------|:-:|:-:|:-:|
-| **Behavior** | Blocks session start | Background, no notification on completion | Background, notifies on failure (exit 2) |
-| **Use case** | Tools that MUST exist pre-session | Nice-to-have tools | Critical tools where failure matters |
-| **Examples** | mise binary install, PATH setup | `mise install -y`, npm install | Auth token refresh |
+| Hook Type    |          Sync (default)           |               `async: true`               |           `asyncRewake: true`            |
+| ------------ | :-------------------------------: | :---------------------------------------: | :--------------------------------------: |
+| **Behavior** |       Blocks session start        | Background, no notification on completion | Background, notifies on failure (exit 2) |
+| **Use case** | Tools that MUST exist pre-session |            Nice-to-have tools             |   Critical tools where failure matters   |
+| **Examples** |  mise binary install, PATH setup  |      `mise install -y`, npm install       |            Auth token refresh            |
 
 **Recommended split for mise architecture:**
 
@@ -660,11 +681,11 @@ ASYNC (background, agent starts immediately):
 
 ### Comparison: Passthrough Scripts vs Mise Shims vs PreToolUse Hooks
 
-| Approach | Transparency | First-use latency | Maintenance | Reliability |
-|----------|:-:|:-:|:-:|:-:|
-| **Custom passthrough scripts** | High (looks like real binary) | Blocks until install | Each tool needs a script | Fragile (PATH conflicts) |
-| **Mise shims** | High (symlinks to mise) | Auto-installs on use | Zero (reshim handles it) | Built-in, well-tested |
-| **PreToolUse hooks** | Low (intercepts all Bash) | Hook overhead per call | Regex command parsing | Fragile (parsing arbitrary bash) |
+| Approach                       |         Transparency          |   First-use latency    |       Maintenance        |           Reliability            |
+| ------------------------------ | :---------------------------: | :--------------------: | :----------------------: | :------------------------------: |
+| **Custom passthrough scripts** | High (looks like real binary) |  Blocks until install  | Each tool needs a script |     Fragile (PATH conflicts)     |
+| **Mise shims**                 |    High (symlinks to mise)    |  Auto-installs on use  | Zero (reshim handles it) |      Built-in, well-tested       |
+| **PreToolUse hooks**           |   Low (intercepts all Bash)   | Hook overhead per call |  Regex command parsing   | Fragile (parsing arbitrary bash) |
 
 **Mise shims win decisively** — they provide the exact "lazy install on first call" behavior with zero custom code. The `not_found_auto_install` setting makes this work out of the box.
 
@@ -723,14 +744,14 @@ exec "${REAL_INSTALL_DIR}/${TOOL_NAME}" "$@"
 
 #### When to Use Pass-Throughs vs Mise Shims
 
-| Scenario | Use Mise Shims | Use Pass-Through |
-|----------|:-:|:-:|
-| Tool has a mise plugin (gh, node, python, jq, etc.) | **Yes** | No |
-| GitHub CLI extension (gh-copilot, gh-dash, etc.) | No | **Yes** |
-| npm global tool (prettier, eslint, etc.) | Prefer mise | **Fallback** |
-| pip tool (pre-commit, black, etc.) | Prefer mise | **Fallback** |
-| Custom binary from private registry | No | **Yes** |
-| Tool with complex install (multi-step, auth required) | No | **Yes** |
+| Scenario                                              | Use Mise Shims | Use Pass-Through |
+| ----------------------------------------------------- | :------------: | :--------------: |
+| Tool has a mise plugin (gh, node, python, jq, etc.)   |    **Yes**     |        No        |
+| GitHub CLI extension (gh-copilot, gh-dash, etc.)      |       No       |     **Yes**      |
+| npm global tool (prettier, eslint, etc.)              |  Prefer mise   |   **Fallback**   |
+| pip tool (pre-commit, black, etc.)                    |  Prefer mise   |   **Fallback**   |
+| Custom binary from private registry                   |       No       |     **Yes**      |
+| Tool with complex install (multi-step, auth required) |       No       |     **Yes**      |
 
 #### Integration with Strategy D
 
@@ -785,7 +806,7 @@ PASSTHROUGH
 
 #### Caveats
 
-1. **PATH ordering matters** — the pass-through directory must be on PATH *after* directories where real binaries get installed, so that once the real tool is installed, it takes precedence.
+1. **PATH ordering matters** — the pass-through directory must be on PATH _after_ directories where real binaries get installed, so that once the real tool is installed, it takes precedence.
 2. **Concurrent invocations** — if two parallel calls hit the pass-through simultaneously, both may try to install. Use a lockfile or atomic rename to prevent double-install.
 3. **Error handling** — if installation fails, the pass-through should leave itself in place (don't self-remove) and return a clear error message rather than silently failing.
 4. **Cleanup** — pass-through scripts are ephemeral per-session. They should be cleaned up on session end or overwritten on next session start.
@@ -799,63 +820,70 @@ PASSTHROUGH
 **Method**: `strings` extraction + pattern matching on the embedded cli.js bundle
 
 #### Hook Timeout Default
+
 ```javascript
-var G0 = 600000;  // 10 minutes default
+var G0 = 600000; // 10 minutes default
 ```
+
 Plugin hooks.json can override: `"timeout": 60` → 60000ms
 
 #### Parallel Hook Execution
+
 ```javascript
 // From the hook runner (rx function)
-let T = Y.map(async function*({hook, pluginRoot, skillRoot}, R) {
-    // Each hook gets its own async generator
-    let g = hook.timeout ? hook.timeout * 1000 : G0;
-    // Spawn shell process...
+let T = Y.map(async function* ({ hook, pluginRoot, skillRoot }, R) {
+  // Each hook gets its own async generator
+  let g = hook.timeout ? hook.timeout * 1000 : G0;
+  // Spawn shell process...
 });
 
 // Merged via concurrent iterator with q=Infinity
 async function* mergeAsyncIterators(iterators, q = Infinity) {
-    // Promise.race semantics
+  // Promise.race semantics
 }
 ```
 
 #### CLAUDE_ENV_FILE Assignment (Only for SessionStart/Setup)
+
 ```javascript
 if ((hookEvent === "SessionStart" || hookEvent === "Setup") && hookIndex !== void 0)
-    env.CLAUDE_ENV_FILE = createHookEnvFile(hookEvent, hookIndex);
+  env.CLAUDE_ENV_FILE = createHookEnvFile(hookEvent, hookIndex);
 ```
 
 #### Session Env File Pattern
+
 ```javascript
 // createHookEnvFile returns:
-path.join(sessionEnvDir, `${hookType.toLowerCase()}-hook-${index}.sh`)
+path.join(sessionEnvDir, `${hookType.toLowerCase()}-hook-${index}.sh`);
 // e.g., sessionstart-hook-0.sh
 ```
 
 #### Session Env Loading (before every Bash call)
+
 ```javascript
 async function loadSessionEnv() {
-    // Cache check
-    if (cache !== undefined) return cache;
+  // Cache check
+  if (cache !== undefined) return cache;
 
-    let scripts = [];
-    // 1. Read CLAUDE_ENV_FILE if set
-    // 2. Read all (setup|sessionstart)-hook-*.sh files from session-env dir
-    // 3. Sort: setup before sessionstart, then by numeric index
-    // 4. Concatenate all contents
-    cache = scripts.join("\n");
-    return cache;
+  let scripts = [];
+  // 1. Read CLAUDE_ENV_FILE if set
+  // 2. Read all (setup|sessionstart)-hook-*.sh files from session-env dir
+  // 3. Sort: setup before sessionstart, then by numeric index
+  // 4. Concatenate all contents
+  cache = scripts.join("\n");
+  return cache;
 }
 ```
 
 #### Cache Invalidation
+
 ```javascript
-if (isSessionStart)
-    log("Invalidating session env cache after SessionStart hook completed");
-    invalidateSessionEnvCache();  // sets cache = undefined
+if (isSessionStart) log("Invalidating session env cache after SessionStart hook completed");
+invalidateSessionEnvCache(); // sets cache = undefined
 ```
 
 #### Hook Config Schema (async/asyncRewake)
+
 ```javascript
 // Command hook config fields (from Zod schema in binary)
 {
@@ -870,6 +898,7 @@ if (isSessionStart)
 ```
 
 #### Hook Response Schema (hookSpecificOutput)
+
 ```javascript
 // Sync hook response (xPM schema in binary)
 {
@@ -897,6 +926,7 @@ if (isSessionStart)
 ```
 
 #### Async Hook Response Delivery to Model
+
 ```javascript
 // When async hook completes, response becomes a system attachment:
 case "async_hook_response": {
@@ -910,13 +940,13 @@ case "async_hook_response": {
 
 ### Key String Evidence
 
-| String | Location | Significance |
-|--------|----------|--------------|
-| `"Invalidating session environment cache"` | `$yL()` function | Cache invalidation trigger |
-| `"Session environment loaded from CLAUDE_ENV_FILE"` | `AyL()` function | Env file read confirmation |
-| `"Hooks: Detected async hook, backgrounding process"` | Hook runner | Async hook detection |
-| `"Hooks: Detected async hook but forceSyncExecution is true"` | Hook runner | Sync override |
-| `"Skipping ${P} hook execution - workspace trust not accepted"` | Hook runner | Trust gate |
+| String                                                          | Location         | Significance               |
+| --------------------------------------------------------------- | ---------------- | -------------------------- |
+| `"Invalidating session environment cache"`                      | `$yL()` function | Cache invalidation trigger |
+| `"Session environment loaded from CLAUDE_ENV_FILE"`             | `AyL()` function | Env file read confirmation |
+| `"Hooks: Detected async hook, backgrounding process"`           | Hook runner      | Async hook detection       |
+| `"Hooks: Detected async hook but forceSyncExecution is true"`   | Hook runner      | Sync override              |
+| `"Skipping ${P} hook execution - workspace trust not accepted"` | Hook runner      | Trust gate                 |
 
 ---
 
@@ -936,6 +966,7 @@ case "async_hook_response": {
 $ echo "CLAUDE_ENV_FILE=$CLAUDE_ENV_FILE"
 CLAUDE_ENV_FILE=
 ```
+
 **Result**: CLAUDE_ENV_FILE is NOT set in regular Bash tool calls. It is only set within SessionStart/Setup hook processes. The env file contents are sourced inline via the session-env mechanism instead.
 
 ### Test 2: Session Env Directory
@@ -945,6 +976,7 @@ $ ls -laR ~/.claude/session-env/
 ~/.claude/session-env/1dcf8390-.../
   (empty directory)
 ```
+
 **Result**: No hook env files were created, confirming the CLAUDE_ENV_FILE reliability issue ([GH #15840](https://github.com/anthropics/claude-code/issues/15840)) was active in this session.
 
 ### Test 3: mise Shim Behavior
@@ -962,6 +994,7 @@ $ mise ls jq
 jq  1.8.1 (missing)  /home/user/ai-mktpl/mise.toml  latest
 # jq shim was NOT created (no shim for missing tools after reshim)
 ```
+
 **Result**: Shims are created only for successfully installed tools. Missing tools get no shim, meaning `command -v` correctly reports them as unavailable.
 
 ### Test 4: mise activate vs Shims PATH
@@ -980,6 +1013,7 @@ $ echo $PATH | tr ':' '\n' | grep mise
 ~/.local/share/mise/installs/bun/1.3.10/bin
 ~/.local/share/mise/installs/just/1.46.0
 ```
+
 **Result**: `mise activate` adds actual binary directories to PATH (faster, no shim overhead). Shims add a single directory with symlinks that delegate to mise at runtime (slower but immediate availability).
 
 ### Test 5: Rate Limit Impact
@@ -990,6 +1024,7 @@ mise ERROR Failed to install aqua:jqlang/jq@latest:
   API error: GitHub API returned 403 Forbidden:
   "API rate limit exceeded for 35.188.35.214"
 ```
+
 **Result**: Web sessions share egress IPs, causing collective GitHub API rate limiting. This affects both mise-based installation and direct `tool_resolve_github_version` calls. Providing `GITHUB_TOKEN` helps but doesn't eliminate the issue when multiple concurrent sessions are active.
 
 ### Test 6: mise `not_found_auto_install` Setting
@@ -998,6 +1033,7 @@ mise ERROR Failed to install aqua:jqlang/jq@latest:
 $ mise settings get not_found_auto_install
 true
 ```
+
 **Result**: mise's `not_found_auto_install` is enabled by default. When a tool is accessed through a shim but not yet installed, mise will automatically download and install it before executing. This is the built-in "lazy install on first call" mechanism — no custom passthrough scripts needed.
 
 ### Test 7: Inter-Plugin Awareness via settings.json
@@ -1010,6 +1046,7 @@ $ jq '.enabledPlugins' .claude/settings.json
   ...
 }
 ```
+
 **Result**: Hook scripts can read `.claude/settings.json` to discover which plugins are enabled. This provides a zero-coordination mechanism for inter-plugin awareness — no sentinel files or locks needed.
 
 ### Test 8: Hook Deduplication
@@ -1020,13 +1057,13 @@ From binary analysis, hooks are deduplicated by command string before parallel e
 
 ## Related Files
 
-| File | Role |
-|------|------|
-| `mise.toml` | Central tool version declarations |
-| `plugins/mise/hooks/scripts/install-mise.sh` | Mise plugin SessionStart hook |
-| `plugins/github/hooks/scripts/install-gh.sh` | GitHub CLI self-install hook |
-| `plugins/1pass/hooks/scripts/install-op.sh` | 1Password CLI self-install hook |
-| `shared/lib/tool-install.sh` | Shared installation library |
-| `shared/lib/plugin-config-read.sh` | 3-tier config resolution |
+| File                                                                        | Role                                     |
+| --------------------------------------------------------------------------- | ---------------------------------------- |
+| `mise.toml`                                                                 | Central tool version declarations        |
+| `plugins/mise/hooks/scripts/install-mise.sh`                                | Mise plugin SessionStart hook            |
+| `plugins/github/hooks/scripts/install-gh.sh`                                | GitHub CLI self-install hook             |
+| `plugins/1pass/hooks/scripts/install-op.sh`                                 | 1Password CLI self-install hook          |
+| `shared/lib/tool-install.sh`                                                | Shared installation library              |
+| `shared/lib/plugin-config-read.sh`                                          | 3-tier config resolution                 |
 | `.claude/skills/how-this-repo-works/references/plugin-env-vars-tradeoff.md` | ENV_FILE vs settings.local.json tradeoff |
-| `.claude/rules/environment-setup-and-maintenance.md` | Setup conventions |
+| `.claude/rules/environment-setup-and-maintenance.md`                        | Setup conventions                        |
