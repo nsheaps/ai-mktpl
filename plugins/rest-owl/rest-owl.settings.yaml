@@ -1,0 +1,31 @@
+rest-owl:
+  # Enable/disable the rest-owl plugin
+  enabled: true
+
+  # Directory for rest-owl artifacts (relative to project root)
+  artifactsDir: "docs/rest-owl"
+
+  # Minimum number of competitors to research in Phase 1
+  minCompetitors: 5
+
+  # Whether to generate HTML mockups (true) or ASCII wireframes only (false)
+  generateHtmlMockups: true
+
+  # Viewports for visual regression screenshots
+  # Options: desktop, tablet, mobile
+  screenshotViewports:
+    - desktop
+    - tablet
+    - mobile
+
+  # Visual regression pixel diff threshold (0.0 - 1.0)
+  visualDiffThreshold: 0.01
+
+  # Whether to auto-create CI workflow for testing
+  setupCi: true
+
+  # Preferred test runner (vitest, jest, bun)
+  testRunner: "vitest"
+
+  # Preferred E2E framework (playwright)
+  e2eFramework: "playwright"
