@@ -1,5 +1,5 @@
 {
-  "description": "Sync common-sense-beta rules into project .claude/rules/ via symlink",
+  "description": "Sync claude2028 rules into project .claude/rules/ via symlink",
   "hooks": {
     "SessionStart": [
       {

@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# sync-rules.sh — SessionStart hook for common-sense-beta plugin
+# sync-rules.sh — SessionStart hook for claude2028 plugin
 #
 # Thin wrapper that sets plugin identity and delegates to shared/lib/sync-rules.sh.
 set -euo pipefail
 
-PLUGIN_NAME="common-sense-beta"
+PLUGIN_NAME="claude2028"
 PLUGIN_RULES_DIR="${CLAUDE_PLUGIN_ROOT}/rules"
-LINK_NAME="common-sense-beta"
+LINK_NAME="claude2028"
 
 # shellcheck source=../../lib/plugin-config-read.sh
 source "${CLAUDE_PLUGIN_ROOT}/lib/plugin-config-read.sh"
