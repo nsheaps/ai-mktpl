@@ -1,6 +1,6 @@
 # Brain Plugin
 
-Git-backed memory and prompt tracking with self-checking reminders.
+Git-backed memory, prompt tracking, self-checking reminders, and learning from failures.
 
 ## Features
 
@@ -9,6 +9,22 @@ Git-backed memory and prompt tracking with self-checking reminders.
 Every user prompt is automatically saved to `~/.claude/history.jsonl` on submit. Each entry includes timestamp, session ID, project directory, and the full prompt text.
 
 On each prompt submit, the hook prints a system reminder encouraging the agent to validate its work against the original request — implementing the "Ralph loop" self-checking pattern from Serena MCP.
+
+### Failure Triage & Learning (PostToolUseFailure)
+
+When a tool fails, the brain plugin emits a system-reminder that instructs the agent to triage the failure:
+
+1. **Haiku triage**: A fast haiku agent determines if the failure is learnable
+2. **Background coaching**: If learnable, a background opus agent analyzes what went wrong and suggests skill/rule updates to prevent recurrence
+3. **Correct-behavior integration**: The coaching agent references the `/correct-behavior` command pattern for structuring fixes
+
+**Learnable failures**: tests you expected to pass, regressions, repeated tool usage mistakes, build failures from your code, API misunderstandings.
+
+**Not learnable**: TDD test-before-implementation, user-denied permissions, network failures, intentional destructive testing.
+
+### Behavior Skill Awareness (UserPromptSubmit)
+
+On each prompt, the plugin checks if the `correct-behavior` plugin is installed and surfaces a reminder that `/correct-behavior` is available for formalizing behavioral fixes.
 
 ### Git-Backed Memory Sync
 
@@ -62,11 +78,10 @@ brain:
 
 ## How It Works
 
-### UserPromptSubmit Hook
+### UserPromptSubmit Hooks
 
-1. Reads the prompt from hook input
-2. Appends a JSON entry to `~/.claude/history.jsonl`
-3. Prints a system-reminder to stderr for the agent
+1. **save-prompt.sh**: Reads the prompt from hook input, appends a JSON entry to `~/.claude/history.jsonl`, prints a self-check system-reminder
+2. **load-behavior-skill.sh**: Checks if `correct-behavior` plugin is installed and surfaces a reminder that `/correct-behavior` is available
 
 ### SessionStart / TaskCompleted Hook
 
@@ -74,6 +89,19 @@ brain:
 2. Pulls latest from the memory repo
 3. Copies configured memory sources into `memory/` directory in the repo
 4. Commits and pushes if changes were made
+
+### PostToolUseFailure Hook
+
+1. **triage-failure.sh**: On any tool failure, emits a system-reminder instructing the agent to:
+   - Use a haiku subagent to triage whether the failure is learnable
+   - If learnable, launch a background opus agent to analyze and suggest skill/rule updates
+   - Reference the `/correct-behavior` command for formalizing the fix
+
+## Related Plugins
+
+- **correct-behavior**: Provides the `/correct-behavior` command for formalizing behavioral corrections into rules/skills
+- **time-context**: Temporal context investigation (previously part of this plugin, now standalone)
+- **memory-manager**: Detects user preferences and writes them to `CLAUDE.md`; brain syncs those files to git
 
 ## Known Limitations
 

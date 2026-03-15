@@ -1,5 +1,5 @@
 {
-  "description": "Brain plugin hooks: saves prompts to history on submit, auto-syncs memory to git repo on session start and task completion",
+  "description": "Brain plugin hooks: saves prompts to history on submit, auto-syncs memory to git repo on session start and task completion, triages tool failures for learning opportunities, and surfaces the correct-behavior command",
   "hooks": {
     "UserPromptSubmit": [
       {
@@ -8,6 +8,11 @@
           {
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/save-prompt.sh",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/load-behavior-skill.sh",
             "timeout": 5
           }
         ]
@@ -33,6 +38,18 @@
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/sync-memory.sh",
             "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/triage-failure.sh",
+            "timeout": 10
           }
         ]
       }

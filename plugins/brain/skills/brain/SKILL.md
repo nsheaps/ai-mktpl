@@ -1,6 +1,6 @@
 ---
 name: brain
-description: Git-backed memory and prompt tracking with self-checking reminders. Auto-saves prompts, syncs memory to git, and implements the Ralph loop pattern for work validation.
+description: Git-backed memory, prompt tracking, self-checking reminders, and learning from failures. Auto-saves prompts, syncs memory to git, implements the Ralph loop pattern, and triages tool failures to improve behavior over time.
 ---
 
 # Brain Plugin
@@ -73,6 +73,28 @@ brain:
 - When you need to validate your work before completing a task
 - When managing memory configuration or troubleshooting sync issues
 - When the user wants to review prompt history
+
+### 4. Learning From Failures (PostToolUseFailure)
+
+When a tool fails, the brain plugin helps you learn from it:
+
+1. **Triage with haiku**: Use a fast haiku subagent to determine if the failure is learnable
+2. **Coach with opus**: If learnable, launch a background opus agent to analyze the failure and suggest skill/rule updates
+3. **Formalize with /correct-behavior**: Use the correct-behavior command to codify the fix into rules
+
+**Learnable failures** (investigate and improve):
+- Tests you expected to pass but failed — check your implementation more carefully
+- Regressions where existing tests broke — ensure tests cover the regression case
+- Repeated tool usage mistakes (wrong flags, bad paths, syntax errors)
+- Build failures from code you just wrote
+
+**Not learnable** (expected, don't over-correct):
+- TDD: tests failing before implementation (they SHOULD fail first)
+- User-denied permissions
+- Network/infrastructure failures
+- Intentional destructive testing
+
+**Key nuance for TDD**: It's important that tests fail before you implement. But it's equally important that when you expect a test to pass, it actually passes. If you run tests expecting them to pass and they don't, that IS a learnable failure — you should check your implementation more carefully before running tests.
 
 ## Self-Check Reminder
 

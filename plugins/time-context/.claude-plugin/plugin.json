@@ -1,0 +1,11 @@
+{
+  "name": "time-context",
+  "version": "0.1.0",
+  "description": "Detects time-referencing language in user prompts and investigates history before answering. Auto-recall when users say 'now', 'still', 'yet', 'changed', etc.",
+  "author": {
+    "name": "Nathan Heaps"
+  },
+  "keywords": ["time", "context", "history", "temporal", "investigation"],
+  "homepage": "https://github.com/nsheaps/ai-mktpl",
+  "repository": "https://github.com/nsheaps/ai-mktpl"
+}
