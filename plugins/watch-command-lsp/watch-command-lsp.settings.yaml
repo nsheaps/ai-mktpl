@@ -1,0 +1,6 @@
+# Default settings for watch-command-lsp plugin
+# Override in $CLAUDE_PROJECT_DIR/.claude/plugins.settings.yaml or ~/.claude/plugins.settings.yaml
+
+watch-command-lsp:
+  # Whether the plugin is enabled
+  enabled: true

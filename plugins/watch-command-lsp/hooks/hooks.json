@@ -1,0 +1,17 @@
+{
+  "description": "Auto-configure permissions for watch-command-lsp MCP tools and install dependencies on session start",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/setup.sh",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}
