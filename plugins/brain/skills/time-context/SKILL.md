@@ -35,13 +35,13 @@ When a time-reference is detected, check these sources before answering:
 
 ## Examples
 
-| User Says | What to Investigate |
-|-----------|---------------------|
-| "Is the linter fixed now?" | Recent commits/PRs touching linting config |
-| "Has the API changed?" | Recent changes to API-related files |
+| User Says                           | What to Investigate                            |
+| ----------------------------------- | ---------------------------------------------- |
+| "Is the linter fixed now?"          | Recent commits/PRs touching linting config     |
+| "Has the API changed?"              | Recent changes to API-related files            |
 | "Is feature X still behind a flag?" | Current state AND git history for flag changes |
-| "Did that get merged?" | PR/branch merge status |
-| "Is the version bumped yet?" | plugin.json or version files in recent history |
+| "Did that get merged?"              | PR/branch merge status                         |
+| "Is the version bumped yet?"        | plugin.json or version files in recent history |
 
 ## Key Principle
 
