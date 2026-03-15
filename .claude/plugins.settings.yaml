@@ -20,3 +20,8 @@ github-app:
 mise:
   autoInstallTools: true
   autoTrust: true
+
+sequential-thinking:
+  # Write permissions to settings.json (committed) so they're available
+  # in cloud sessions without needing a hook to run first.
+  syncSettingsTarget: 'shared'

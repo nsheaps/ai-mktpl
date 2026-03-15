@@ -1,0 +1,12 @@
+# sequential-thinking plugin configuration
+#
+# Override per-project via ${CLAUDE_PROJECT_DIR}/.claude/plugins.settings.yaml
+# or per-user via ~/.claude/plugins.settings.yaml under the "sequential-thinking" key.
+
+sequential-thinking:
+  enabled: true
+
+  # Which settings file to write permissions into:
+  #   "local"    — settings.local.json (gitignored, personal preference) (default)
+  #   "shared"   — settings.json (committed, shared with team)
+  syncSettingsTarget: 'local'

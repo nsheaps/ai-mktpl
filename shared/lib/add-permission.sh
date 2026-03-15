@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# add-permission.sh — Shared library for adding permissions to settings.local.json
+# add-permission.sh — Shared library for adding permissions to Claude Code settings
 #
 # Provides helpers for plugins that need to auto-configure permission scopes
-# in settings.local.json on session start.
+# on session start. Supports writing to settings.local.json (default) or
+# settings.json (shared/committed) based on the target parameter.
 #
 # Usage:
 #   source "path/to/safe-settings-write.sh"  # Must be sourced first
@@ -21,23 +22,35 @@ if [ "${_ADD_PERMISSION_LOADED:-}" = "true" ]; then
 fi
 _ADD_PERMISSION_LOADED="true"
 
-# Resolve the settings.local.json path.
-# Args: $1=target ("project" or "user", defaults to "project")
+# Resolve the settings file path.
+# Args: $1=target, one of:
+#   "project" (default) — project-level settings.local.json
+#   "user"              — user-level settings.local.json
+#   "local"             — same as "project" (settings.local.json, gitignored)
+#   "shared"            — project-level settings.json (committed, shared with team)
 # Returns: file path via stdout
 _resolve_settings_file() {
   local target="${1:-project}"
-  if [ "$target" = "user" ]; then
-    echo "$HOME/.claude/settings.local.json"
-  elif [ -n "${CLAUDE_PROJECT_DIR:-}" ]; then
-    echo "${CLAUDE_PROJECT_DIR}/.claude/settings.local.json"
-  else
-    echo "$HOME/.claude/settings.local.json"
-  fi
+  case "$target" in
+    user)
+      echo "$HOME/.claude/settings.local.json"
+      ;;
+    shared)
+      echo "${CLAUDE_PROJECT_DIR:-.}/.claude/settings.json"
+      ;;
+    project|local|*)
+      if [ -n "${CLAUDE_PROJECT_DIR:-}" ]; then
+        echo "${CLAUDE_PROJECT_DIR}/.claude/settings.local.json"
+      else
+        echo "$HOME/.claude/settings.local.json"
+      fi
+      ;;
+  esac
 }
 
-# Add a permission entry to the "allow" list in settings.local.json.
+# Add a permission entry to the "allow" list in the resolved settings file.
 # Idempotent — skips if already present.
-# Args: $1=permission_entry $2=target ("project" or "user", default "project")
+# Args: $1=permission_entry $2=target ("project", "user", "local", or "shared"; default "project")
 # Returns: 0 on success or already present
 add_permission_to_allow() {
   local perm="$1"
