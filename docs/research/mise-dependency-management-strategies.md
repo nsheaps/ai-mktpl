@@ -1,6 +1,7 @@
 # Mise Dependency Management Strategies: Research Report
 
 **Date**: 2026-03-11
+**Claude Code Version**: v2.1.42 (findings may need re-validation when Claude Code is updated)
 **Scope**: Claude Code plugin dependency installation — centralized (mise plugin) vs. plugin-self-install vs. deferred mise detection
 **Methodology**: Binary reverse-engineering, live environment testing, codebase analysis, online documentation review
 
@@ -16,8 +17,10 @@
 6. [The Race Condition Problem](#the-race-condition-problem)
 7. [Comparative Analysis](#comparative-analysis)
 8. [Recommendations](#recommendations)
-9. [Appendix: Binary Analysis Evidence](#appendix-binary-analysis-evidence)
-10. [Appendix: Test Results](#appendix-test-results)
+9. [Strategy D: Async Mise Bootstrap + Shim-Based Lazy Install](#strategy-d-async-mise-bootstrap--shim-based-lazy-install-proposed)
+   - [Lazy Loaded Tool Pass-Throughs (Non-Mise Tools)](#lazy-loaded-tool-pass-throughs-non-mise-tools)
+10. [Appendix: Binary Analysis Evidence](#appendix-binary-analysis-evidence)
+11. [Appendix: Test Results](#appendix-test-results)
 
 ---
 
@@ -147,7 +150,7 @@ verification failed: API rate limit exceeded for 35.188.35.214
 In web sessions, all instances share egress IPs, causing collective rate limiting.
 
 **Partial install:**
-If mise installs 12/15 tools before timeout, the 3 remaining tools are missing. No retry mechanism exists. The shims for missing tools exist but return errors.
+If mise installs 12/15 tools before timeout, the 3 remaining tools are missing. No retry mechanism exists. Missing tools have no shims, so `command -v` correctly reports them as unavailable.
 
 ---
 
@@ -312,7 +315,7 @@ Confirmed: `CLAUDE_ENV_FILE` is ONLY set for SessionStart/Setup hook processes, 
 ```
 ~/.claude/session-env/1dcf8390-b08f-4aed-8260-ece3d90748db/
 (empty - no SessionStart hooks wrote to it in this session because
- CLAUDE_ENV_FILE was empty per GH #15840)
+ CLAUDE_ENV_FILE was empty per [GH #15840](https://github.com/anthropics/claude-code/issues/15840))
 ```
 
 **Test 3: Shims appear immediately after mise install**
@@ -339,7 +342,7 @@ When a tool is `(missing)`, the shim either fails or falls through to a system-i
 
 `mise activate` adds **real binary paths** to PATH, bypassing shims entirely. This is faster (no shim lookup) but requires mise to be active in the shell.
 
-### The CLAUDE_ENV_FILE Reliability Problem (GH #15840)
+### The CLAUDE_ENV_FILE Reliability Problem ([GH #15840](https://github.com/anthropics/claude-code/issues/15840))
 
 The `CLAUDE_ENV_FILE` variable can sometimes be empty in Claude Code web sessions. This is a **known issue** documented in this repository. When empty:
 
@@ -675,6 +678,118 @@ ASYNC (background, agent starts immediately):
 
 4. **Shim overhead in tight loops**: Each shim invocation adds ~50ms overhead as mise resolves the version. For tools called thousands of times (e.g., in CI), `mise activate` (adding real binary paths) is preferred over shims.
 
+### Lazy Loaded Tool Pass-Throughs (Non-Mise Tools)
+
+Mise shims handle tools in the mise registry, but some tools can't be managed by mise — custom binaries, tools installed via `npm`/`pip`, GitHub CLI extensions, or proprietary tools with non-standard installation. For these, a **lazy pass-through** pattern provides the same "install on first use" behavior without mise.
+
+#### Pattern: Self-Replacing Pass-Through Script
+
+```bash
+#!/usr/bin/env bash
+# Lazy pass-through for <tool-name>
+# Installs the real tool on first invocation, then execs it.
+set -euo pipefail
+
+TOOL_NAME="<tool-name>"
+PASSTHROUGH_DIR="${HOME}/.local/share/claude-plugins/bin"
+REAL_INSTALL_DIR="${HOME}/.local/share/claude-plugins/tools"
+
+# Remove this pass-through script so the real binary takes precedence
+_self_remove() {
+  rm -f "${PASSTHROUGH_DIR}/${TOOL_NAME}"
+}
+
+# Install the real tool
+_install() {
+  mkdir -p "${REAL_INSTALL_DIR}"
+  # Plugin-specific install logic here:
+  # e.g., curl, gh extension install, npm install -g, pip install, etc.
+  echo "Installing ${TOOL_NAME}..." >&2
+  # ... install commands ...
+}
+
+# Main: install, self-remove, exec with original args
+_install
+_self_remove
+exec "${REAL_INSTALL_DIR}/${TOOL_NAME}" "$@"
+```
+
+#### How It Works
+
+1. **At session start** (sync phase): Plugin creates lightweight pass-through scripts in a `bin/` directory on PATH. This is instant — just writing small shell scripts.
+2. **Agent starts immediately** — no tool installation has happened yet.
+3. **On first tool invocation**: The pass-through script installs the real tool, removes itself from PATH priority, then `exec`s the real binary with the original arguments. The agent sees no difference from calling a pre-installed tool (aside from the one-time latency).
+4. **Subsequent invocations**: The real binary is called directly — the pass-through is gone.
+
+#### When to Use Pass-Throughs vs Mise Shims
+
+| Scenario | Use Mise Shims | Use Pass-Through |
+|----------|:-:|:-:|
+| Tool has a mise plugin (gh, node, python, jq, etc.) | **Yes** | No |
+| GitHub CLI extension (gh-copilot, gh-dash, etc.) | No | **Yes** |
+| npm global tool (prettier, eslint, etc.) | Prefer mise | **Fallback** |
+| pip tool (pre-commit, black, etc.) | Prefer mise | **Fallback** |
+| Custom binary from private registry | No | **Yes** |
+| Tool with complex install (multi-step, auth required) | No | **Yes** |
+
+#### Integration with Strategy D
+
+Pass-throughs complement the async mise bootstrap:
+
+```
+SYNC phase (~15s):
+  ✓ mise binary install + reshim (handles mise-managed tools)
+  ✓ Create pass-through scripts for non-mise tools (instant)
+  ✓ Ensure both shim dir and pass-through dir are on PATH
+
+ASYNC phase (background):
+  ✓ mise install -y (bulk install mise tools)
+  ✓ Optionally pre-install pass-through tools in background
+    (so first invocation is fast even if agent calls them early)
+```
+
+#### Shared Library Support
+
+The `tool-install.sh` shared library could be extended with a pass-through helper:
+
+```bash
+# In shared/lib/tool-install.sh
+
+# Create a lazy pass-through script for a tool
+# Usage: tool_create_passthrough "mytool" "install_function_name"
+tool_create_passthrough() {
+  local tool_name="$1"
+  local install_fn="$2"
+  local passthrough_dir="${HOME}/.local/share/claude-plugins/bin"
+
+  # Skip if tool already available
+  if command -v "$tool_name" &>/dev/null; then
+    return 0
+  fi
+
+  mkdir -p "$passthrough_dir"
+  cat > "${passthrough_dir}/${tool_name}" <<PASSTHROUGH
+#!/usr/bin/env bash
+set -euo pipefail
+# Auto-generated lazy pass-through for ${tool_name}
+# Source the plugin's install logic and run it
+source "\${CLAUDE_PLUGIN_ROOT}/hooks/scripts/install-${tool_name}.sh"
+${install_fn}
+rm -f "${passthrough_dir}/${tool_name}"
+exec "\$(command -v ${tool_name})" "\$@"
+PASSTHROUGH
+  chmod +x "${passthrough_dir}/${tool_name}"
+  tool_ensure_path "$passthrough_dir"
+}
+```
+
+#### Caveats
+
+1. **PATH ordering matters** — the pass-through directory must be on PATH *after* directories where real binaries get installed, so that once the real tool is installed, it takes precedence.
+2. **Concurrent invocations** — if two parallel calls hit the pass-through simultaneously, both may try to install. Use a lockfile or atomic rename to prevent double-install.
+3. **Error handling** — if installation fails, the pass-through should leave itself in place (don't self-remove) and return a clear error message rather than silently failing.
+4. **Cleanup** — pass-through scripts are ephemeral per-session. They should be cleaned up on session end or overwritten on next session start.
+
 ---
 
 ## Appendix: Binary Analysis Evidence
@@ -830,7 +945,7 @@ $ ls -laR ~/.claude/session-env/
 ~/.claude/session-env/1dcf8390-.../
   (empty directory)
 ```
-**Result**: No hook env files were created, confirming the CLAUDE_ENV_FILE reliability issue (GH #15840) was active in this session.
+**Result**: No hook env files were created, confirming the CLAUDE_ENV_FILE reliability issue ([GH #15840](https://github.com/anthropics/claude-code/issues/15840)) was active in this session.
 
 ### Test 3: mise Shim Behavior
 
