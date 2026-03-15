@@ -2,11 +2,21 @@
 name: rebase
 description: Rebase a feature branch onto its base branch to produce a linear commit history. Use when the user asks to "rebase my branch", "rebase onto main", "rebase PR #123", "linearize history", "rebase and force push", or when a clean linear history is preferred over merge commits.
 argument-hint: [PR number | PR URL | branch name | directory]
+allowed-tools: Bash, Read, Grep, Glob, Task
 ---
 
 # Rebase Branch
 
 Rebase a feature branch onto its base branch to produce a clean, linear commit history.
+
+## Pre-fetched Context
+
+Current branch: !`git branch --show-current 2>/dev/null || echo "(not in a git repo)"`
+
+Working tree status: !`git status --porcelain 2>/dev/null | head -5 || echo "(not in a git repo)"`
+
+PR info for current branch:
+!`gh pr view --json baseRefName,headRefName,number,title,state 2>/dev/null || echo "(no PR found or gh not authenticated)"`
 
 ## Overview
 
@@ -200,6 +210,14 @@ For detailed conflict patterns, see the update-branch skill's `references/confli
 - The branch is shared with other active contributors (prefer merge)
 - The branch has already been merged elsewhere
 - The user explicitly asked for merge (use `update-branch` skill instead)
+
+## Completion Messaging
+
+When reporting completion, be explicit about what happened:
+
+**Do say:** "Rebased feature branch onto main — force pushed with lease to update remote"
+
+**Don't say:** "Branch updated" (ambiguous — could be merge or rebase)
 
 ## Error Handling
 
