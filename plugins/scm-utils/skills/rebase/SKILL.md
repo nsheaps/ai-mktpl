@@ -161,6 +161,7 @@ For conflicts requiring analysis, delegate to specialized agents:
 3. **Execute the resolution** — the executing agent owns the final resolution.
 
 4. **Stage and continue:**
+
    ```bash
    git add <resolved-files>
    git rebase --continue
@@ -202,14 +203,14 @@ For detailed conflict patterns, see the update-branch skill's `references/confli
 
 ## Error Handling
 
-| Error                              | Resolution                                                     |
-| ---------------------------------- | -------------------------------------------------------------- |
-| No PR found for branch             | Ask user for base branch, or create PR first                   |
-| Dirty working tree                 | Ask user to stash or commit first                              |
-| Rebase conflicts                   | Resolve per-commit, then `git rebase --continue`               |
-| `--force-with-lease` rejected      | Fetch, inspect new remote commits, ask user how to proceed     |
-| Rebase produces empty commits      | Use `git rebase --skip` for truly empty commits                |
-| Authentication failure             | Ensure `gh` and `git` are authenticated                        |
+| Error                         | Resolution                                                 |
+| ----------------------------- | ---------------------------------------------------------- |
+| No PR found for branch        | Ask user for base branch, or create PR first               |
+| Dirty working tree            | Ask user to stash or commit first                          |
+| Rebase conflicts              | Resolve per-commit, then `git rebase --continue`           |
+| `--force-with-lease` rejected | Fetch, inspect new remote commits, ask user how to proceed |
+| Rebase produces empty commits | Use `git rebase --skip` for truly empty commits            |
+| Authentication failure        | Ensure `gh` and `git` are authenticated                    |
 
 ## CI/Remote Environment Usage
 
