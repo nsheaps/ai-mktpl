@@ -1,13 +1,14 @@
 # watch-command-lsp
 
-An MCP server plugin that runs watch commands (test runners, linters, compilers) in the background and exposes their parsed diagnostics as MCP tools. Acts as an interface layer between CLI watch-mode tools and Claude, enabling real-time error monitoring without re-running full suites.
+An LSP server plugin that runs watch commands (test runners, linters, compilers) in the background and publishes their parsed output as LSP diagnostics. Claude sees live errors and warnings natively — no MCP tools to query, no hooks to inject.
 
 ## How It Works
 
-1. You start a watcher with a shell command and a parser type
-2. The plugin spawns the command and continuously parses its stdout/stderr
-3. Errors and warnings are extracted into structured diagnostics
-4. Claude queries diagnostics via MCP tools — no hooks injection needed
+1. Claude Code starts the LSP server when the plugin is enabled
+2. The server reads watcher configurations from `initializationOptions` in `.lsp.json`
+3. Each watcher spawns a shell command and continuously parses its stdout/stderr
+4. Parsed errors and warnings are pushed to Claude as `textDocument/publishDiagnostics` notifications
+5. Claude sees diagnostics inline, just like a real language server
 
 ## Installation
 
@@ -26,66 +27,112 @@ bun install
 bun run build
 ```
 
-## Quick Start
-
-Once installed, use the MCP tools directly:
-
-```
-# Start watching for TypeScript errors
-mcp__watch-command-lsp__start_watcher(id="tsc", command="npx tsc --watch --noEmit", parser="tsc")
-
-# Check for errors
-mcp__watch-command-lsp__get_diagnostics()
-
-# Stop when done
-mcp__watch-command-lsp__stop_watcher(id="tsc")
-```
-
-## MCP Tools
-
-| Tool                | Description                                   |
-| ------------------- | --------------------------------------------- |
-| `start_watcher`     | Start a watch command with a specified parser |
-| `stop_watcher`      | Stop a running watcher                        |
-| `list_watchers`     | List active watchers and their status         |
-| `get_diagnostics`   | Get parsed errors/warnings (filterable)       |
-| `get_output`        | Get raw output lines from a watcher           |
-| `clear_diagnostics` | Clear accumulated diagnostics                 |
-
-## Supported Parsers
-
-| Parser    | Tools                      | Output Format                          |
-| --------- | -------------------------- | -------------------------------------- |
-| `generic` | GCC, Clang, Go, Rust, etc. | `file:line:col: severity: message`     |
-| `jest`    | Jest                       | `FAIL` blocks with stack traces        |
-| `eslint`  | ESLint (default formatter) | Grouped by file with rule IDs          |
-| `tsc`     | TypeScript compiler        | `TS` error codes                       |
-| `regex`   | Any tool                   | Custom regex with named capture groups |
-
 ## Configuration
 
-Settings in `plugins.settings.yaml`:
+Watchers are configured in `.lsp.json` via `initializationOptions`. The default `.lsp.json` ships with an empty watchers array. To add watchers, either:
+
+**Option A: Edit `.lsp.json` directly** (in the plugin directory):
+
+```json
+{
+  "watch-command-lsp": {
+    "command": "node",
+    "args": ["${CLAUDE_PLUGIN_ROOT}/bin/server.mjs", "--stdio"],
+    "transport": "stdio",
+    "extensionToLanguage": {
+      ".ts": "typescript",
+      ".js": "javascript"
+    },
+    "initializationOptions": {
+      "watchers": [
+        {
+          "id": "tsc",
+          "command": "npx tsc --watch --noEmit",
+          "parser": "tsc"
+        },
+        {
+          "id": "jest",
+          "command": "npx jest --watchAll --no-coverage",
+          "parser": "jest"
+        }
+      ]
+    }
+  }
+}
+```
+
+**Option B: Project-level override** in `.claude/plugins.settings.yaml`:
 
 ```yaml
 watch-command-lsp:
-  enabled: true
+  watchers:
+    - id: eslint
+      command: "npx eslint --watch src/"
+      parser: eslint
+    - id: tsc
+      command: "npx tsc --watch --noEmit"
+      parser: tsc
 ```
+
+### Watcher Configuration Fields
+
+| Field           | Required | Description                                         |
+| --------------- | -------- | --------------------------------------------------- |
+| `id`            | Yes      | Unique identifier (e.g. "jest", "eslint", "tsc")    |
+| `command`       | Yes      | Shell command to run                                |
+| `parser`        | Yes      | One of: `generic`, `jest`, `eslint`, `tsc`, `regex` |
+| `cwd`           | No       | Working directory (defaults to workspace root)      |
+| `env`           | No       | Additional environment variables                    |
+| `shell`         | No       | Shell to use (defaults to `/bin/sh`)                |
+| `regexPatterns` | No       | Custom regex patterns (only for `parser: "regex"`)  |
+
+## Supported Parsers
+
+| Parser    | Best For                             | What It Matches                                 |
+| --------- | ------------------------------------ | ----------------------------------------------- |
+| `generic` | Any tool with `file:line:col` output | GCC, Clang, Go, Rust, etc.                      |
+| `jest`    | Jest test runner                     | FAIL blocks, test names, stack traces           |
+| `eslint`  | ESLint linter                        | Default formatter output with rule IDs          |
+| `tsc`     | TypeScript compiler                  | TS error codes, both `()` and `:` formats       |
+| `regex`   | Custom tools                         | User-defined patterns with named capture groups |
+
+### Custom Regex Parser
+
+For tools not covered by built-in parsers:
+
+```json
+{
+  "id": "mycheck",
+  "command": "my-custom-tool --watch",
+  "parser": "regex",
+  "regexPatterns": [
+    {
+      "pattern": "(?<file>[\\w/]+\\.\\w+)\\|(?<line>\\d+)\\|(?<severity>\\w+)\\|(?<message>.*)"
+    }
+  ]
+}
+```
+
+Named capture groups: `file`, `line`, `column`, `message`, `severity`, `code`
 
 ## Architecture
 
 ```
-Claude Code ←(stdio/MCP)→ watch-command-lsp server
-                               ├→ jest --watchAll (subprocess)
-                               ├→ tsc --watch (subprocess)
-                               └→ eslint --watch (subprocess)
+Claude Code ←(stdio/LSP)→ watch-command-lsp server
+                               ├→ jest --watchAll    (subprocess, parsed by JestParser)
+                               ├→ tsc --watch        (subprocess, parsed by TscParser)
+                               └→ eslint --watch     (subprocess, parsed by EslintParser)
+                                        ↓
+                          textDocument/publishDiagnostics → Claude
 ```
 
-The server manages child processes and their output parsing. Each watcher has:
+The server implements the Language Server Protocol over stdio. It manages child processes and their output parsing. Each watcher has:
 
 - A spawned child process
 - An output parser matched to the tool's format
-- An in-memory diagnostic store
-- A ring buffer of raw output lines
+- Diagnostics published per-file to the LSP client
+
+Unlike an MCP-based approach, diagnostics are pushed proactively — Claude doesn't need to poll or query for them.
 
 ## License
 

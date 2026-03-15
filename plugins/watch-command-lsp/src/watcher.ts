@@ -4,14 +4,29 @@ import { Diagnostic, OutputParser, WatcherConfig, WatcherState } from "./types.j
 
 const MAX_OUTPUT_BUFFER_LINES = 500;
 
+/** Called when diagnostics change for a watcher. Key: file path, value: diagnostics for that file. */
+export type DiagnosticChangeCallback = (
+  watcherId: string,
+  diagnosticsByFile: Map<string, Diagnostic[]>,
+) => void;
+
 export class WatcherManager {
   private watchers = new Map<string, WatcherInstance>();
+  private onDiagnosticChange: DiagnosticChangeCallback | null = null;
+
+  setDiagnosticChangeCallback(cb: DiagnosticChangeCallback): void {
+    this.onDiagnosticChange = cb;
+  }
 
   start(config: WatcherConfig): WatcherState {
     if (this.watchers.has(config.id)) {
       throw new Error(`Watcher "${config.id}" is already running`);
     }
-    const instance = new WatcherInstance(config);
+    const instance = new WatcherInstance(config, () => {
+      if (this.onDiagnosticChange) {
+        this.onDiagnosticChange(config.id, instance.getDiagnosticsByFile());
+      }
+    });
     instance.start();
     this.watchers.set(config.id, instance);
     return instance.getState();
@@ -75,6 +90,19 @@ export class WatcherManager {
     return this.watchers.has(id);
   }
 
+  /** Get all diagnostics from all watchers, grouped by file path */
+  getAllDiagnosticsByFile(): Map<string, Diagnostic[]> {
+    const byFile = new Map<string, Diagnostic[]>();
+    for (const instance of this.watchers.values()) {
+      for (const [file, diags] of instance.getDiagnosticsByFile()) {
+        const existing = byFile.get(file) ?? [];
+        existing.push(...diags);
+        byFile.set(file, existing);
+      }
+    }
+    return byFile;
+  }
+
   getOutput(id: string, lines?: number): string[] {
     const instance = this.watchers.get(id);
     if (!instance) {
@@ -93,10 +121,12 @@ class WatcherInstance {
   private startedAt: Date | null = null;
   private lastUpdated: Date | null = null;
   private exitCode: number | null = null;
+  private onChange: (() => void) | null;
 
-  constructor(config: WatcherConfig) {
+  constructor(config: WatcherConfig, onChange?: () => void) {
     this.config = config;
     this.parser = createParser(config.parser, config.regexPatterns);
+    this.onChange = onChange ?? null;
   }
 
   start(): void {
@@ -127,6 +157,7 @@ class WatcherInstance {
       if (newDiags.length > 0) {
         this.diagnostics.push(...newDiags);
         this.lastUpdated = new Date();
+        this.onChange?.();
       }
     };
 
@@ -140,6 +171,7 @@ class WatcherInstance {
       if (remaining.length > 0) {
         this.diagnostics.push(...remaining);
         this.lastUpdated = new Date();
+        this.onChange?.();
       }
     });
 
@@ -163,6 +195,16 @@ class WatcherInstance {
 
   getDiagnostics(): Diagnostic[] {
     return [...this.diagnostics];
+  }
+
+  getDiagnosticsByFile(): Map<string, Diagnostic[]> {
+    const byFile = new Map<string, Diagnostic[]>();
+    for (const diag of this.diagnostics) {
+      const existing = byFile.get(diag.file) ?? [];
+      existing.push(diag);
+      byFile.set(diag.file, existing);
+    }
+    return byFile;
   }
 
   clearDiagnostics(): void {

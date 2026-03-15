@@ -1,118 +1,63 @@
 ---
 name: watch-command-lsp
 description: >
-  Use this skill when you need to monitor a project for live errors, test failures,
-  or lint warnings without re-running full test suites or lint passes. The watch-command-lsp
-  plugin runs watch commands in the background and exposes their parsed diagnostics
-  as MCP tools you can query at any time.
+  Use this skill when you need to understand how the watch-command-lsp plugin works.
+  This plugin runs watch commands (test runners, linters, compilers) in the background
+  and publishes their parsed diagnostics as native LSP diagnostics, so errors and
+  warnings appear inline without re-running full suites.
 ---
 
 # Watch Command LSP
 
-An MCP server that bridges watch-mode CLI tools (test runners, linters, compilers) into structured diagnostics that Claude can query in real-time.
+An LSP server that bridges watch-mode CLI tools into native LSP diagnostics pushed to Claude.
 
 ## When to Use
 
 - You need to monitor for test failures while making changes (e.g. TDD workflow)
-- You want to check lint errors after edits without running the full linter
+- You want live lint errors after edits without running the full linter
 - You're working with a TypeScript project and want live compiler errors
 - You want to watch any command's output for errors matching a pattern
 
-## Available MCP Tools
+## How It Works
 
-All tools are prefixed with `mcp__watch-command-lsp__`.
+1. The LSP server starts automatically when the plugin is enabled
+2. It reads watcher configurations from `initializationOptions` in `.lsp.json`
+3. Each watcher spawns its shell command and parses stdout/stderr in real-time
+4. Parsed errors are published as `textDocument/publishDiagnostics` notifications
+5. Diagnostics appear inline in Claude's context — no polling needed
 
-### `start_watcher`
+## Configuring Watchers
 
-Start a watch command. Required parameters:
-
-| Parameter | Type   | Description                                         |
-| --------- | ------ | --------------------------------------------------- |
-| `id`      | string | Unique identifier (e.g. "jest", "eslint", "tsc")    |
-| `command` | string | Shell command to run                                |
-| `parser`  | string | One of: `generic`, `jest`, `eslint`, `tsc`, `regex` |
-
-Optional: `cwd`, `env`, `regexPatterns`
-
-### `stop_watcher`
-
-Stop a running watcher by `id`.
-
-### `list_watchers`
-
-Show all active watchers with status, PID, and diagnostic counts.
-
-### `get_diagnostics`
-
-Get current errors/warnings. Optional filters: `id`, `severity`, `file`.
-
-Returns structured data:
+Edit `.lsp.json` `initializationOptions.watchers` array:
 
 ```json
 {
-  "count": 2,
-  "diagnostics": [
+  "watchers": [
     {
-      "file": "src/index.ts",
-      "line": 10,
-      "column": 5,
-      "severity": "error",
-      "message": "Type 'string' is not assignable to type 'number'",
-      "source": "tsc",
-      "code": "TS2322"
+      "id": "tsc",
+      "command": "npx tsc --watch --noEmit",
+      "parser": "tsc"
+    },
+    {
+      "id": "jest",
+      "command": "npx jest --watchAll --no-coverage",
+      "parser": "jest"
     }
   ]
 }
 ```
 
-### `get_output`
+### Watcher Fields
 
-Get raw output lines from a watcher. Parameters: `id` (required), `lines` (default: 50).
-
-### `clear_diagnostics`
-
-Clear accumulated diagnostics for a watcher by `id`.
-
-## Workflow Patterns
-
-### TDD with Jest
-
-```
-1. start_watcher(id="jest", command="npx jest --watchAll --no-coverage", parser="jest")
-2. Make code changes
-3. get_diagnostics(id="jest") → see which tests fail
-4. Fix the code
-5. get_diagnostics(id="jest") → verify tests pass
-6. stop_watcher(id="jest") when done
-```
-
-### Lint-as-you-go with ESLint
-
-```
-1. start_watcher(id="eslint", command="npx eslint --watch src/", parser="eslint")
-2. Edit files
-3. get_diagnostics(id="eslint", severity="error") → see only errors
-4. Fix issues, clear_diagnostics(id="eslint")
-5. get_diagnostics(id="eslint") → check for new issues
-```
-
-### TypeScript Compiler Watch
-
-```
-1. start_watcher(id="tsc", command="npx tsc --watch --noEmit", parser="tsc")
-2. get_diagnostics(id="tsc", file="src/utils.ts") → errors in a specific file
-```
-
-### Multiple Watchers
-
-You can run multiple watchers simultaneously:
-
-```
-1. start_watcher(id="tsc", command="npx tsc --watch --noEmit", parser="tsc")
-2. start_watcher(id="jest", command="npx jest --watchAll", parser="jest")
-3. get_diagnostics() → all errors from both watchers
-4. get_diagnostics(severity="error") → only errors across all watchers
-```
+| Field           | Required | Description                                         |
+| --------------- | -------- | --------------------------------------------------- |
+| `id`            | Yes      | Unique identifier (e.g. "jest", "eslint", "tsc")    |
+| `command`       | Yes      | Shell command to run                                |
+| `parser`        | Yes      | One of: `generic`, `jest`, `eslint`, `tsc`, `regex` |
+| `cwd`           | No       | Working directory (defaults to workspace root)      |
+| `env`           | No       | Additional environment variables                    |
+| `shell`         | No       | Shell to use (defaults to `/bin/sh`)                |
+| `regexPatterns` | No       | Custom regex patterns (only for `parser: "regex"`)  |
 
 ## Parser Reference
 
@@ -124,19 +69,33 @@ You can run multiple watchers simultaneously:
 | `tsc`     | TypeScript compiler                  | TS error codes, both `()` and `:` formats       |
 | `regex`   | Custom tools                         | User-defined patterns with named capture groups |
 
-## Custom Regex Parser
+## Example Workflows
 
-For tools not covered by built-in parsers, use the `regex` parser with named capture groups:
+### TDD with Jest
 
-```
-start_watcher(
-  id="mycheck",
-  command="my-custom-tool --watch",
-  parser="regex",
-  regexPatterns=[{
-    "pattern": "(?<file>[\\w/]+\\.\\w+)\\|(?<line>\\d+)\\|(?<severity>\\w+)\\|(?<message>.*)"
-  }]
-)
+Configure a jest watcher, then make code changes. Failed tests appear as diagnostics
+on the test files automatically. Fix the code and watch the diagnostics clear.
+
+### TypeScript + ESLint
+
+Run both `tsc --watch` and `eslint --watch` simultaneously. Type errors and lint
+violations from both tools appear as diagnostics on the relevant files.
+
+### Custom Regex
+
+For tools not covered by built-in parsers, use named capture groups:
+
+```json
+{
+  "id": "mycheck",
+  "command": "my-tool --watch",
+  "parser": "regex",
+  "regexPatterns": [
+    {
+      "pattern": "(?<file>[\\w/]+\\.\\w+):(?<line>\\d+):(?<severity>\\w+):(?<message>.*)"
+    }
+  ]
+}
 ```
 
 Named groups: `file`, `line`, `column`, `message`, `severity`, `code`

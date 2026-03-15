@@ -4,12 +4,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "bun build --target=node --outdir=./bin --entry-naming=[name].mjs src/index.ts",
-    "build:compile": "bun build --compile --outfile=./bin/watch-command-lsp src/index.ts",
-    "dev": "bun run src/index.ts"
+    "build": "bun build --target=node --outdir=./bin --entry-naming=[name].mjs src/server.ts",
+    "build:compile": "bun build --compile --outfile=./bin/watch-command-lsp src/server.ts",
+    "dev": "bun run src/server.ts --stdio"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.12.1"
+    "vscode-languageserver": "^9.0.1",
+    "vscode-languageserver-textdocument": "^1.0.12"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

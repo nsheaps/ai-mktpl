@@ -1,5 +1,5 @@
 {
-  "description": "Auto-configure permissions for watch-command-lsp MCP tools and install dependencies on session start",
+  "description": "Install dependencies and build the LSP server on session start if needed",
   "hooks": {
     "SessionStart": [
       {
