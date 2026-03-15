@@ -3,6 +3,7 @@
   "attribution": {
     "commit": "\nCo-Authored-By: Claude Code (${CLAUDE_PROJECT_DIR/$HOME/~}) <noreply@anthropic.com>"
   },
+  "env":{"FORCE_AUTOUPDATE_PLUGINS":true},
   "includeCoAuthoredBy": false,
   "permissions": {
     "allow": [
