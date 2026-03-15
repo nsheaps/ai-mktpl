@@ -33,11 +33,13 @@ Sets up a complete testing and continuous integration infrastructure that valida
 Test individual functions, utilities, and business logic in isolation.
 
 **Setup**:
+
 - Use the project's native test runner (Vitest for Vite/React, Jest for Next.js, Bun test for Bun)
 - Co-locate tests next to source files: `component.test.ts` alongside `component.ts`
 - Mock external dependencies (APIs, databases, third-party services)
 
 **What to test**:
+
 - Pure functions and utilities
 - Data transformations and validation
 - State management logic (reducers, stores)
@@ -45,6 +47,7 @@ Test individual functions, utilities, and business logic in isolation.
 - API route handlers (request → response)
 
 **Coverage targets**:
+
 - Business logic: 90%+
 - Utilities: 95%+
 - Overall: 80%+
@@ -54,12 +57,14 @@ Test individual functions, utilities, and business logic in isolation.
 Test UI components in isolation with realistic props and interactions.
 
 **Setup**:
+
 - Use Testing Library (`@testing-library/react`, `@testing-library/vue`, etc.)
 - Render components with mock data matching feature spec
 - Test user interactions (click, type, submit)
 - Verify accessibility (role queries, aria attributes)
 
 **What to test**:
+
 - Component renders correctly with various props
 - User interactions trigger expected behavior
 - Loading, empty, and error states render correctly
@@ -81,43 +86,43 @@ bunx playwright install chromium
 **Playwright config** (`playwright.config.ts`):
 
 ```typescript
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
-  testDir: './e2e',
-  outputDir: './test-results',
+  testDir: "./e2e",
+  outputDir: "./test-results",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: [
-    ['html', { outputFolder: 'playwright-report' }],
-    ['json', { outputFile: 'test-results/results.json' }],
+    ["html", { outputFolder: "playwright-report" }],
+    ["json", { outputFile: "test-results/results.json" }],
   ],
   use: {
-    baseURL: 'http://localhost:3000',
-    trace: 'on-first-retry',
-    screenshot: 'only-on-failure',
+    baseURL: "http://localhost:3000",
+    trace: "on-first-retry",
+    screenshot: "only-on-failure",
   },
   projects: [
     {
-      name: 'Desktop Chrome',
-      use: { ...devices['Desktop Chrome'] },
+      name: "Desktop Chrome",
+      use: { ...devices["Desktop Chrome"] },
     },
     {
-      name: 'Mobile Safari',
-      use: { ...devices['iPhone 13'] },
+      name: "Mobile Safari",
+      use: { ...devices["iPhone 13"] },
     },
     {
-      name: 'Tablet',
+      name: "Tablet",
       use: {
         viewport: { width: 768, height: 1024 },
-        userAgent: 'Mozilla/5.0 (iPad; CPU OS 15_0 like Mac OS X)',
+        userAgent: "Mozilla/5.0 (iPad; CPU OS 15_0 like Mac OS X)",
       },
     },
   ],
   webServer: {
-    command: 'bun run dev',
+    command: "bun run dev",
     port: 3000,
     reuseExistingServer: !process.env.CI,
   },
@@ -150,27 +155,28 @@ Each acceptance criterion from the feature spec becomes a test:
 
 ```typescript
 // e2e/flows/auth.spec.ts
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
 // From F-AUTH-001: User Registration
-test.describe('User Registration', () => {
+test.describe("User Registration", () => {
   // AC: User can create account with email and password
-  test('allows registration with valid email and password', async ({ page }) => {
-    await page.goto('/signup');
-    await page.fill('[data-testid="email"]', 'newuser@example.com');
-    await page.fill('[data-testid="password"]', 'SecurePass123!');
+  test("allows registration with valid email and password", async ({ page }) => {
+    await page.goto("/signup");
+    await page.fill('[data-testid="email"]', "newuser@example.com");
+    await page.fill('[data-testid="password"]', "SecurePass123!");
     await page.click('[data-testid="signup-button"]');
-    await expect(page).toHaveURL('/dashboard');
+    await expect(page).toHaveURL("/dashboard");
   });
 
   // AC: Shows validation error for weak password
-  test('rejects weak passwords with helpful message', async ({ page }) => {
-    await page.goto('/signup');
-    await page.fill('[data-testid="email"]', 'newuser@example.com');
-    await page.fill('[data-testid="password"]', '123');
+  test("rejects weak passwords with helpful message", async ({ page }) => {
+    await page.goto("/signup");
+    await page.fill('[data-testid="email"]', "newuser@example.com");
+    await page.fill('[data-testid="password"]', "123");
     await page.click('[data-testid="signup-button"]');
-    await expect(page.locator('[data-testid="password-error"]'))
-      .toContainText('at least 8 characters');
+    await expect(page.locator('[data-testid="password-error"]')).toContainText(
+      "at least 8 characters",
+    );
   });
 });
 ```
@@ -183,15 +189,15 @@ Compare screenshots of the running application against baseline images (derived 
 
 ```typescript
 // e2e/visual/generate-baselines.spec.ts
-import { test } from '@playwright/test';
-import { readdirSync } from 'fs';
-import { join } from 'path';
+import { test } from "@playwright/test";
+import { readdirSync } from "fs";
+import { join } from "path";
 
-const mockupsDir = join(__dirname, '../../docs/rest-owl/03-mockups');
-const mockups = readdirSync(mockupsDir).filter(f => f.endsWith('.html'));
+const mockupsDir = join(__dirname, "../../docs/rest-owl/03-mockups");
+const mockups = readdirSync(mockupsDir).filter((f) => f.endsWith(".html"));
 
 for (const mockup of mockups) {
-  const name = mockup.replace('.html', '');
+  const name = mockup.replace(".html", "");
 
   test(`baseline: ${name}`, async ({ page }) => {
     await page.goto(`file://${join(mockupsDir, mockup)}`);
@@ -208,12 +214,12 @@ for (const mockup of mockups) {
 
 ```typescript
 // e2e/visual/screens.spec.ts
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
 const screens = [
-  { name: 'dashboard-populated', path: '/dashboard', setup: seedDashboardData },
-  { name: 'dashboard-empty', path: '/dashboard', setup: clearAllData },
-  { name: 'login-default', path: '/login', setup: null },
+  { name: "dashboard-populated", path: "/dashboard", setup: seedDashboardData },
+  { name: "dashboard-empty", path: "/dashboard", setup: clearAllData },
+  { name: "login-default", path: "/login", setup: null },
   // ... map every mockup to a route + setup function
 ];
 
@@ -221,12 +227,12 @@ for (const screen of screens) {
   test(`visual: ${screen.name}`, async ({ page }) => {
     if (screen.setup) await screen.setup(page);
     await page.goto(screen.path);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState("networkidle");
 
     await expect(page).toHaveScreenshot(`${screen.name}.png`, {
-      maxDiffPixelRatio: 0.01,  // Allow 1% pixel difference
-      threshold: 0.2,            // Color difference threshold
-      animations: 'disabled',
+      maxDiffPixelRatio: 0.01, // Allow 1% pixel difference
+      threshold: 0.2, // Color difference threshold
+      animations: "disabled",
     });
   });
 }
@@ -245,7 +251,7 @@ git diff --stat e2e/screenshots/
 
 ### GitHub Actions Workflow
 
-```yaml
+````yaml
 name: Test & Visual Regression
 
 on:
@@ -341,7 +347,7 @@ jobs:
             ```bash
             bunx playwright test e2e/visual/ --update-snapshots
             ```
-```
+````
 
 ### Screenshot Artifact Strategy
 
@@ -352,6 +358,7 @@ CI captures screenshots at three levels:
 3. **Baselines in git** — committed baseline screenshots that tests compare against
 
 This means:
+
 - PRs that change the UI must update baseline screenshots
 - Visual regressions are caught automatically
 - Reviewers can download artifacts to see exactly what changed
@@ -414,18 +421,22 @@ playwright-report/
 ## Test Organization Conventions
 
 ### Naming
+
 - Unit tests: `*.test.ts` next to source
 - E2E flow tests: `e2e/flows/[feature].spec.ts`
 - Visual tests: `e2e/visual/[scope].spec.ts`
 
 ### Data-testid Attributes
+
 Every interactive or visually significant element gets a `data-testid`:
+
 - Buttons: `data-testid="[action]-button"` (e.g., `submit-button`)
 - Inputs: `data-testid="[field]-input"` (e.g., `email-input`)
 - Sections: `data-testid="[name]-section"` (e.g., `stats-section`)
 - Cards/items: `data-testid="[type]-[id]"` (e.g., `project-123`)
 
 ### Test Data
+
 - Use factory functions for test data: `createUser()`, `createProject()`
 - Seed data matches the realistic content from mockups
 - Each test manages its own state (no shared mutable state between tests)
@@ -433,6 +444,7 @@ Every interactive or visually significant element gets a `data-testid`:
 ## Quality Checks
 
 Before completing this phase:
+
 - [ ] Unit test framework configured and passing
 - [ ] At least one unit test per utility function
 - [ ] Playwright installed and configured for 3 viewports

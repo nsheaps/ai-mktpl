@@ -64,6 +64,7 @@ The rest-owl workflow has 7 phases. Each phase produces artifacts that feed the 
 **Invoke the `competitive-research` skill** with the project brief.
 
 This phase produces:
+
 - Analysis of 5-10 existing products in the space
 - Feature matrix comparing competitors
 - Common UX patterns and user expectations
@@ -79,6 +80,7 @@ This phase produces:
 **Invoke the `feature-spec` skill** with the competitive research output.
 
 This phase produces:
+
 - Complete feature inventory organized by domain
 - Each feature has: description, user stories, acceptance criteria, priority (P0-P3)
 - Data model definitions
@@ -95,6 +97,7 @@ This phase produces:
 **Invoke the `visual-design` skill** with the feature spec.
 
 This phase produces:
+
 - Design system (colors, typography, spacing, components)
 - ASCII/text wireframes for every screen
 - Single-file HTML mockups for key screens (renderable in browser)
@@ -103,6 +106,7 @@ This phase produces:
 - Accessibility requirements
 
 **Output**:
+
 - `docs/rest-owl/03-design-system.md`
 - `docs/rest-owl/03-mockups/` — directory of HTML mockup files
 - `docs/rest-owl/03-wireframes.md` — ASCII wireframes
@@ -176,6 +180,7 @@ For each milestone:
 **Invoke the `validation-pipeline` skill** to set up the testing infrastructure.
 
 After each milestone:
+
 - Run all tests locally
 - Verify visual baselines match mockups from Phase 3
 - Commit with conventional commit messages

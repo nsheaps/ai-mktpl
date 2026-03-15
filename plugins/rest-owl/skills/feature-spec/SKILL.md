@@ -33,6 +33,7 @@ Extract all features from the competitive research and organize by domain:
 
 ```markdown
 ## Authentication & Authorization
+
 - Sign up (email, OAuth)
 - Sign in / Sign out
 - Password reset
@@ -40,9 +41,10 @@ Extract all features from the competitive research and organize by domain:
 - Session management
 
 ## Core Feature Domain
+
 - [Feature 1]
 - [Feature 2]
-...
+  ...
 ```
 
 **Group features into logical domains** — these become the module boundaries in the architecture.
@@ -72,40 +74,48 @@ For **each** feature in scope, write a complete specification:
 **Dependencies**: [Other features this depends on]
 
 #### Description
+
 [2-3 sentence description of what this feature does and why it exists]
 
 #### User Stories
 
 **US-1**: As a [role], I want to [action] so that [benefit].
+
 - **Given** [precondition]
 - **When** [action]
 - **Then** [expected result]
 
 **US-2**: As a [role], I want to [action] so that [benefit].
+
 - **Given** [precondition]
 - **When** [action]
 - **Then** [expected result]
 
 #### Acceptance Criteria
+
 - [ ] [Specific, testable criterion 1]
 - [ ] [Specific, testable criterion 2]
 - [ ] [Specific, testable criterion 3]
 
 #### UI Requirements
+
 - [Screen/component where this feature appears]
 - [Key interactions and behaviors]
 - [Loading states, empty states, error states]
 
 #### Data Requirements
+
 - [What data this feature reads]
 - [What data this feature writes]
 - [Validation rules]
 
 #### Edge Cases
+
 - [Edge case 1 and expected behavior]
 - [Edge case 2 and expected behavior]
 
 #### Error Scenarios
+
 - [Error scenario 1 and how to handle it]
 - [Error scenario 2 and how to handle it]
 ```
@@ -118,18 +128,21 @@ Define the complete data model for the project:
 ## Data Model
 
 ### Entity: [EntityName]
-| Field | Type | Required | Default | Constraints |
-|-------|------|----------|---------|-------------|
-| id | UUID | Yes | auto | Primary key |
-| name | string | Yes | - | 1-255 chars |
-| createdAt | datetime | Yes | now() | Immutable |
-| updatedAt | datetime | Yes | now() | Auto-updated |
+
+| Field     | Type     | Required | Default | Constraints  |
+| --------- | -------- | -------- | ------- | ------------ |
+| id        | UUID     | Yes      | auto    | Primary key  |
+| name      | string   | Yes      | -       | 1-255 chars  |
+| createdAt | datetime | Yes      | now()   | Immutable    |
+| updatedAt | datetime | Yes      | now()   | Auto-updated |
 
 **Relationships**:
+
 - Has many [OtherEntity] (one-to-many)
 - Belongs to [ParentEntity] (many-to-one)
 
 **Indexes**:
+
 - Unique: [field1, field2]
 - Search: [field3] (full-text)
 ```
@@ -138,12 +151,13 @@ Define the complete data model for the project:
 
 If the project has an API layer, define endpoints:
 
-```markdown
+````markdown
 ## API Endpoints
 
 ### [Domain] API
 
 #### POST /api/[resource]
+
 - **Description**: Create a new [resource]
 - **Auth**: Required (role: user)
 - **Request Body**:
@@ -153,6 +167,8 @@ If the project has an API layer, define endpoints:
     "description": "string (optional, max 5000 chars)"
   }
   ```
+````
+
 - **Response 201**:
   ```json
   {
@@ -166,7 +182,8 @@ If the project has an API layer, define endpoints:
   - 401: Not authenticated
   - 403: Insufficient permissions
   - 409: Resource already exists
-```
+
+````
 
 ### Step 6: State Management Specification
 
@@ -234,7 +251,7 @@ Write to `docs/rest-owl/02-feature-spec.md`:
 
 ## Glossary
 [Domain-specific terms and definitions]
-```
+````
 
 ## Parallelization
 
@@ -243,6 +260,7 @@ Feature specs within different domains are independent — use `Agent` tool to w
 ## Quality Checks
 
 Before completing this phase:
+
 - [ ] Every P0 and P1 feature has a complete specification
 - [ ] Every feature has at least 2 user stories with Given/When/Then
 - [ ] Every feature has at least 3 acceptance criteria

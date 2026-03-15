@@ -29,13 +29,13 @@ Just describe your idea in conversation. The `rest-owl` skill activates when it 
 
 ## Skills
 
-| Skill | Purpose |
-|-------|---------|
-| `rest-owl` | Main orchestrator — coordinates all phases |
-| `competitive-research` | Phase 1: Market analysis and feature comparison |
-| `feature-spec` | Phase 2: Detailed feature specifications |
-| `visual-design` | Phase 3: Design system, wireframes, and HTML mockups |
-| `validation-pipeline` | Phase 6: Testing infrastructure and CI setup |
+| Skill                  | Purpose                                              |
+| ---------------------- | ---------------------------------------------------- |
+| `rest-owl`             | Main orchestrator — coordinates all phases           |
+| `competitive-research` | Phase 1: Market analysis and feature comparison      |
+| `feature-spec`         | Phase 2: Detailed feature specifications             |
+| `visual-design`        | Phase 3: Design system, wireframes, and HTML mockups |
+| `validation-pipeline`  | Phase 6: Testing infrastructure and CI setup         |
 
 ## Artifacts
 
@@ -54,6 +54,7 @@ docs/rest-owl/
 ```
 
 These artifacts serve as:
+
 - **Session checkpoints** — resume work across sessions
 - **Design documentation** — stakeholders can review mockups in any browser
 - **Visual baselines** — CI screenshots compare against mockups
@@ -75,17 +76,17 @@ The workflow pauses after each phase for user review. No phase proceeds without 
 
 Settings in `rest-owl.settings.yaml` or override in `.claude/plugins.settings.yaml`:
 
-| Key | Default | Description |
-|-----|---------|-------------|
-| `enabled` | `true` | Enable/disable plugin |
-| `artifactsDir` | `docs/rest-owl` | Where to save design artifacts |
-| `minCompetitors` | `5` | Minimum competitors to research |
-| `generateHtmlMockups` | `true` | Create HTML mockups (vs wireframes only) |
-| `screenshotViewports` | `[desktop, tablet, mobile]` | Viewports for visual regression |
-| `visualDiffThreshold` | `0.01` | Pixel diff threshold (0.0-1.0) |
-| `setupCi` | `true` | Auto-create CI workflow |
-| `testRunner` | `vitest` | Unit test runner |
-| `e2eFramework` | `playwright` | E2E test framework |
+| Key                   | Default                     | Description                              |
+| --------------------- | --------------------------- | ---------------------------------------- |
+| `enabled`             | `true`                      | Enable/disable plugin                    |
+| `artifactsDir`        | `docs/rest-owl`             | Where to save design artifacts           |
+| `minCompetitors`      | `5`                         | Minimum competitors to research          |
+| `generateHtmlMockups` | `true`                      | Create HTML mockups (vs wireframes only) |
+| `screenshotViewports` | `[desktop, tablet, mobile]` | Viewports for visual regression          |
+| `visualDiffThreshold` | `0.01`                      | Pixel diff threshold (0.0-1.0)           |
+| `setupCi`             | `true`                      | Auto-create CI workflow                  |
+| `testRunner`          | `vitest`                    | Unit test runner                         |
+| `e2eFramework`        | `playwright`                | E2E test framework                       |
 
 ## Session Hook
 

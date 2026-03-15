@@ -34,14 +34,15 @@ Extract every screen from the feature spec:
 ```markdown
 ## Screen Inventory
 
-| Screen | Features | Priority | States |
-|--------|----------|----------|--------|
-| Login | F-AUTH-001 | P0 | default, loading, error, success |
-| Dashboard | F-DASH-001, F-DASH-002 | P0 | empty, populated, loading |
-| Settings | F-SET-001 through F-SET-005 | P1 | each tab |
+| Screen    | Features                    | Priority | States                           |
+| --------- | --------------------------- | -------- | -------------------------------- |
+| Login     | F-AUTH-001                  | P0       | default, loading, error, success |
+| Dashboard | F-DASH-001, F-DASH-002      | P0       | empty, populated, loading        |
+| Settings  | F-SET-001 through F-SET-005 | P1       | each tab                         |
 ```
 
 Identify all **states** for each screen:
+
 - **Default** — normal loaded state
 - **Empty** — no data / first-time user
 - **Loading** — skeleton/spinner state
@@ -57,6 +58,7 @@ Define the visual language before any mockups. Ask the user for preferences:
 # Design System
 
 ## Color Palette
+
 - **Primary**: #[hex] — main actions, links, active states
 - **Secondary**: #[hex] — secondary actions, accents
 - **Neutral**: #[hex] scale (50-900) — text, borders, backgrounds
@@ -67,27 +69,32 @@ Define the visual language before any mockups. Ask the user for preferences:
 - **Surface**: #[hex] — card/panel background
 
 ## Typography
+
 - **Font family**: [name] (from Google Fonts for mockup portability)
 - **Scale**: 12px / 14px / 16px / 18px / 20px / 24px / 32px / 48px
 - **Weights**: 400 (regular), 500 (medium), 600 (semibold), 700 (bold)
 - **Line heights**: 1.25 (headings), 1.5 (body), 1.75 (relaxed)
 
 ## Spacing
+
 - **Base unit**: 4px
 - **Scale**: 4 / 8 / 12 / 16 / 20 / 24 / 32 / 48 / 64 / 96
 
 ## Border Radius
+
 - **Small**: 4px (buttons, inputs)
 - **Medium**: 8px (cards, modals)
 - **Large**: 16px (containers)
 - **Full**: 9999px (pills, avatars)
 
 ## Shadows
+
 - **sm**: 0 1px 2px rgba(0,0,0,0.05)
 - **md**: 0 4px 6px rgba(0,0,0,0.07)
 - **lg**: 0 10px 15px rgba(0,0,0,0.1)
 
 ## Component Library
+
 [List of reusable components: Button, Input, Card, Modal, Dropdown, etc.]
 ```
 
@@ -141,37 +148,39 @@ Each mockup file must be:
 ```html
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>[Screen Name] — [Project Name] Mockup</title>
-  <!-- Tailwind CSS via CDN for consistent utility classes -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=[Font]&display=swap" rel="stylesheet">
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: { /* color scale from design system */ },
-            // ... other design tokens
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>[Screen Name] — [Project Name] Mockup</title>
+    <!-- Tailwind CSS via CDN for consistent utility classes -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=[Font]&display=swap" rel="stylesheet" />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                /* color scale from design system */
+              },
+              // ... other design tokens
+            },
+            fontFamily: {
+              sans: ["[Font]", "system-ui", "sans-serif"],
+            },
           },
-          fontFamily: {
-            sans: ['[Font]', 'system-ui', 'sans-serif'],
-          },
-        }
-      }
-    }
-  </script>
-  <style>
-    /* Any custom styles not covered by Tailwind */
-  </style>
-</head>
-<body class="bg-gray-50 font-sans">
-  <!-- MOCKUP CONTENT -->
-</body>
+        },
+      };
+    </script>
+    <style>
+      /* Any custom styles not covered by Tailwind */
+    </style>
+  </head>
+  <body class="bg-gray-50 font-sans">
+    <!-- MOCKUP CONTENT -->
+  </body>
 </html>
 ```
 
@@ -199,12 +208,15 @@ Document how users move between screens:
 ## User Flows
 
 ### New User Onboarding
+
 Login → Sign Up → Email Verify → Welcome Tour → Dashboard (empty)
 
 ### Core Workflow
+
 Dashboard → [Feature Screen] → [Action Modal] → Dashboard (updated)
 
 ### Settings
+
 Any Screen → Settings → [Tab] → Save → Previous Screen
 ```
 
@@ -227,11 +239,11 @@ For each screen, document responsive behavior:
 ```markdown
 ### Dashboard — Responsive Behavior
 
-| Viewport | Layout | Changes |
-|----------|--------|---------|
-| Desktop (≥1024px) | Sidebar + content | Full sidebar, 3-column stats |
-| Tablet (768-1023px) | Collapsed sidebar + content | Icon-only sidebar, 2-column stats |
-| Mobile (<768px) | Bottom nav + content | No sidebar, stacked stats, hamburger menu |
+| Viewport            | Layout                      | Changes                                   |
+| ------------------- | --------------------------- | ----------------------------------------- |
+| Desktop (≥1024px)   | Sidebar + content           | Full sidebar, 3-column stats              |
+| Tablet (768-1023px) | Collapsed sidebar + content | Icon-only sidebar, 2-column stats         |
+| Mobile (<768px)     | Bottom nav + content        | No sidebar, stacked stats, hamburger menu |
 ```
 
 ### Step 7: Accessibility Specifications
@@ -247,15 +259,16 @@ Document accessibility requirements:
 
 ## Output Files
 
-| File | Content |
-|------|---------|
-| `docs/rest-owl/03-design-system.md` | Complete design token definitions |
-| `docs/rest-owl/03-wireframes.md` | ASCII wireframes for all screens |
-| `docs/rest-owl/03-mockups/*.html` | Single-file HTML mockups (one per screen-state) |
+| File                                | Content                                         |
+| ----------------------------------- | ----------------------------------------------- |
+| `docs/rest-owl/03-design-system.md` | Complete design token definitions               |
+| `docs/rest-owl/03-wireframes.md`    | ASCII wireframes for all screens                |
+| `docs/rest-owl/03-mockups/*.html`   | Single-file HTML mockups (one per screen-state) |
 
 ## Parallelization
 
 Mockup generation for independent screens can run in parallel via `Agent` tool. Each agent gets:
+
 - The design system document
 - The feature spec for its screen
 - The HTML template
@@ -272,6 +285,7 @@ This means mockup accuracy directly affects CI — if the implementation doesn't
 ## Quality Checks
 
 Before completing this phase:
+
 - [ ] Design system has complete color, typography, and spacing definitions
 - [ ] Every screen from the feature spec has a wireframe
 - [ ] Every P0 screen has at least a default-state HTML mockup

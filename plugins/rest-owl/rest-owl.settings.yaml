@@ -3,7 +3,7 @@ rest-owl:
   enabled: true
 
   # Directory for rest-owl artifacts (relative to project root)
-  artifactsDir: "docs/rest-owl"
+  artifactsDir: 'docs/rest-owl'
 
   # Minimum number of competitors to research in Phase 1
   minCompetitors: 5
@@ -25,7 +25,7 @@ rest-owl:
   setupCi: true
 
   # Preferred test runner (vitest, jest, bun)
-  testRunner: "vitest"
+  testRunner: 'vitest'
 
   # Preferred E2E framework (playwright)
-  e2eFramework: "playwright"
+  e2eFramework: 'playwright'
