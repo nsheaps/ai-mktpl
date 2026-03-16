@@ -1,10 +1,10 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "env": {
+    "FORCE_AUTOUPDATE_PLUGINS": "true"
+  },
   "attribution": {
     "commit": "\nCo-Authored-By: Claude Code (${CLAUDE_PROJECT_DIR/$HOME/~}) <noreply@anthropic.com>"
-  },
-  "env": {
-    "FORCE_AUTOUPDATE_PLUGINS": true
   },
   "includeCoAuthoredBy": false,
   "permissions": {
@@ -118,8 +118,8 @@
     "nsheaps-claude-plugins": {
       "source": {
         "source": "github",
-        "path": "nsheaps/ai-mktpl",
         "repo": "nsheaps/ai-mktpl",
+        "path": "nsheaps/ai-mktpl",
         "sparsePaths": [
           ".claude-plugin",
           "plugins"

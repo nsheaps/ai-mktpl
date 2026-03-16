@@ -25,6 +25,5 @@
     "google",
     "workspace",
     "cli"
-  ],
-  "hooks": "./hooks/hooks.json"
+  ]
 }

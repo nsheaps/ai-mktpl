@@ -9,6 +9,12 @@
   },
   "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/safety-evaluation-prompt",
   "repository": "https://github.com/nsheaps/ai-mktpl",
-  "keywords": ["safety", "security", "hooks", "pre-tool-call", "evaluation", "prompt"],
-  "hooks": "./hooks/hooks.json"
+  "keywords": [
+    "safety",
+    "security",
+    "hooks",
+    "pre-tool-call",
+    "evaluation",
+    "prompt"
+  ]
 }

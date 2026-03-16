@@ -19,6 +19,5 @@
     "hooks",
     "agent-teams",
     "credential-helper"
-  ],
-  "hooks": "./hooks/hooks.json"
+  ]
 }
