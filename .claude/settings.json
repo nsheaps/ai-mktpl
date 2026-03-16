@@ -3,7 +3,9 @@
   "attribution": {
     "commit": "\nCo-Authored-By: Claude Code (${CLAUDE_PROJECT_DIR/$HOME/~}) <noreply@anthropic.com>"
   },
-  "env": { "FORCE_AUTOUPDATE_PLUGINS": true },
+  "env": {
+    "FORCE_AUTOUPDATE_PLUGINS": true
+  },
   "includeCoAuthoredBy": false,
   "permissions": {
     "allow": [
@@ -56,7 +58,9 @@
       "Bash(chmod:*)",
       "Bash(readlink:*)"
     ],
-    "deny": ["Bash(rm -rf /:*)"],
+    "deny": [
+      "Bash(rm -rf /:*)"
+    ],
     "ask": [
       "Bash(gh pr view --web:*)",
       "Bash(rm -rf:*)",
@@ -114,7 +118,12 @@
     "nsheaps-claude-plugins": {
       "source": {
         "source": "github",
-        "path": "nsheaps/ai-mktpl"
+        "path": "nsheaps/ai-mktpl",
+        "repo": "nsheaps/ai-mktpl",
+        "sparsePaths": [
+          ".claude-plugin",
+          "plugins"
+        ]
       }
     }
   }
