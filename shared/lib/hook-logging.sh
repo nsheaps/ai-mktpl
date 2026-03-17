@@ -14,7 +14,7 @@
 #   source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 #
 #   hook_log "Installing tool v1.2.3"           # Buffer a verbose log line
-#   hook_log_always "Tool v1.2.3 ready"         # Log + always print to stdout
+#   hook_log_always "Tool v1.2.3 ready"         # Log + always print to stderr
 #   hook_log_step "download" "Downloading binary"  # Start a named step
 #
 #   # Wrap your main logic:
@@ -60,13 +60,14 @@ hook_log() {
   fi
 }
 
-# Log a message AND always print it to stdout (visible to the agent/user).
-# Use for important status messages the agent should see regardless of success/failure.
+# Log a message AND always print it to stderr (visible to the user).
+# Use for important status messages the user should see regardless of success/failure.
+# Keeps stdout clean for structured JSON output (via hook_respond).
 # Args: $1=message
 hook_log_always() {
   local msg="$1"
   echo "[$(date +%H:%M:%S)] ${PLUGIN_NAME}: ${msg}" >> "$_HOOK_LOG_FILE"
-  echo "${PLUGIN_NAME}: ${msg}"
+  echo "${PLUGIN_NAME}: ${msg}" >&2
 }
 
 # Mark the start of a named step (for error attribution).
