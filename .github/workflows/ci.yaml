@@ -94,6 +94,8 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: 'chore: `just lint`'
+          commit_user_name: ${{ steps.auth.outputs.user-name }}
+          commit_user_email: ${{ steps.auth.outputs.user-email }}
 
       - name: 'exit 1 # changes detected or linting failed'
         if: ${{ steps.lint.outputs.changed-or-failed == 'true' && ! cancelled() }}
