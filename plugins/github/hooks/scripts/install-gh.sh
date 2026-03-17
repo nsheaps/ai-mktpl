@@ -11,6 +11,8 @@ source "${CLAUDE_PLUGIN_ROOT}/lib/plugin-config-read.sh"
 source "${CLAUDE_PLUGIN_ROOT}/lib/tool-install.sh"
 source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 
+echo "Hello from github SessionStart hook! Reading config and installing gh if needed..."
+
 # --- Guards ---
 
 plugin_is_enabled || { echo '{}'; exit 0; }
