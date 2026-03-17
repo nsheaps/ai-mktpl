@@ -9,12 +9,5 @@
   },
   "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/linear-mcp-sync",
   "repository": "https://github.com/nsheaps/ai-mktpl",
-  "keywords": [
-    "linear",
-    "mcp",
-    "hooks",
-    "sync",
-    "issue-tracking",
-    "conflict-detection"
-  ]
+  "keywords": ["linear", "mcp", "hooks", "sync", "issue-tracking", "conflict-detection"]
 }

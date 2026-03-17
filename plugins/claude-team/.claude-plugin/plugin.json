@@ -9,11 +9,5 @@
   },
   "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/claude-team",
   "repository": "https://github.com/nsheaps/ai-mktpl",
-  "keywords": [
-    "agent-teams",
-    "orchestration",
-    "multi-agent",
-    "coordination",
-    "claude-code"
-  ]
+  "keywords": ["agent-teams", "orchestration", "multi-agent", "coordination", "claude-code"]
 }

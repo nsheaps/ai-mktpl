@@ -9,10 +9,5 @@
   },
   "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/code-simplifier",
   "repository": "https://github.com/nsheaps/ai-mktpl",
-  "keywords": [
-    "refactoring",
-    "code-quality",
-    "simplification",
-    "cleanup"
-  ]
+  "keywords": ["refactoring", "code-quality", "simplification", "cleanup"]
 }
