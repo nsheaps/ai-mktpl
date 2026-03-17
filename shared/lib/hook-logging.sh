@@ -12,8 +12,8 @@
 #   PLUGIN_NAME="my-plugin"                     # Required: set before sourcing
 #   source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 #
-#   hook_log "Installing tool v1.2.3"           # Print to stdout
-#   hook_log_always "Tool v1.2.3 ready"         # Print to stderr (always visible)
+#   hook_log "Installing tool v1.2.3"           # Print to stdout + stderr
+#   hook_log_always "Tool v1.2.3 ready"         # Alias for hook_log
 #   hook_log_step "download" "Downloading binary"  # Start a named step
 #
 #   # Wrap your main logic:
@@ -49,24 +49,23 @@ _HOOK_FAILED="false"
 
 # --- Logging functions ---
 
-# Print a message to stdout. Also appends to the log file for failure diagnostics.
+# Print a message to both stdout (agent sees it) and stderr (user sees it).
+# Also appends to the log file for failure diagnostics.
 # Args: $1=message
 hook_log() {
-  local msg="$1"
-  echo "[$(date +%H:%M:%S)] ${PLUGIN_NAME}: ${msg}" >> "$_HOOK_LOG_FILE"
-  echo "${PLUGIN_NAME}: ${msg}"
+  local line="${PLUGIN_NAME}: $1"
+  echo "[$(date +%H:%M:%S)] ${line}" >> "$_HOOK_LOG_FILE"
+  echo "$line"
+  echo "$line" >&2
 }
 
-# Print a message to stderr (always visible even when stdout is captured).
-# Also appends to the log file.
+# Alias for hook_log. Previously stderr-only; now both channels.
 # Args: $1=message
 hook_log_always() {
-  local msg="$1"
-  echo "[$(date +%H:%M:%S)] ${PLUGIN_NAME}: ${msg}" >> "$_HOOK_LOG_FILE"
-  echo "${PLUGIN_NAME}: ${msg}" >&2
+  hook_log "$1"
 }
 
-# Alias for hook_log — prints to stdout.
+# Alias for hook_log.
 # Kept for backwards compatibility with scripts that used hook_session_message.
 # Args: $1=message
 hook_session_message() {

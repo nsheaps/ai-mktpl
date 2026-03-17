@@ -62,8 +62,8 @@ Hook logging with structured error reporting. All output prints directly to stdo
 PLUGIN_NAME="my-plugin"  # MUST be set before sourcing
 source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 
-hook_log "Installing tool v1.2.3"              # print to stdout
-hook_log_always "Tool v1.2.3 ready"            # print to stderr (always visible)
+hook_log "Installing tool v1.2.3"              # print to stdout + stderr
+hook_log_always "Tool v1.2.3 ready"            # alias for hook_log
 hook_log_step "download" "Downloading binary"  # start a named step
 hook_fail "curl" "404 not found" "Check URL"   # structured error to stderr (returns 0)
 hook_run my_main_function                      # wrap function, auto-fail on non-zero exit
