@@ -163,5 +163,5 @@ if [ -n "$ALSO_ADD_TO_REPOS" ] && command -v jq &>/dev/null; then
   done
 fi
 
+hook_log "rules synced"
 hook_log_cleanup
-hook_respond

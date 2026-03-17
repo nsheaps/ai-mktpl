@@ -7,7 +7,7 @@ set -euo pipefail
 # Skip configuration for agent team teammates to avoid race conditions.
 # Only the lead or solo sessions configure.
 if [ -n "${CLAUDE_CODE_PARENT_SESSION_ID:-}" ]; then
-  echo '{}'
+  echo "statusline-iterm: sub-agent session, skipping"
   exit 0
 fi
 
@@ -37,6 +37,7 @@ fi
 # Case 1: Not present anywhere - set it
 if [ -z "$current_command" ]; then
   safe_write_settings '.statusLine.type = "command" | .statusLine.command = $script'
+  echo "statusline-iterm: configured"
   exit 0
 fi
 
@@ -44,21 +45,20 @@ fi
 # Match if path contains "plugins/statusline-iterm" or "plugins/statusline/" (original plugin)
 if [[ "$current_command" == *"plugins/statusline-iterm"* ]] || [[ "$current_command" == *"plugins/statusline/"* ]]; then
   safe_write_settings '.statusLine.command = $script'
+  echo "statusline-iterm: updated"
   exit 0
 fi
 
 # Case 3: Present and doesn't match - warn and block
-cat <<EOF
-⚠️  statusLine.command is already configured with a different script:
-   Current: $current_command
-   This plugin wants to use: $STATUSLINE_SCRIPT
-
-To resolve this issue, either:
-1. Ask the user which statusline script they prefer
-2. Manually update ~/.claude/settings.local.json to use this plugin's script
-3. Disable this plugin if they want to keep their current statusline
-
-The statusline-iterm plugin will not override your existing configuration automatically.
-EOF
+echo "statusline-iterm: WARNING — statusLine.command is already configured with a different script:" >&2
+echo "   Current: $current_command" >&2
+echo "   This plugin wants to use: $STATUSLINE_SCRIPT" >&2
+echo "" >&2
+echo "To resolve this issue, either:" >&2
+echo "1. Ask the user which statusline script they prefer" >&2
+echo "2. Manually update ~/.claude/settings.local.json to use this plugin's script" >&2
+echo "3. Disable this plugin if they want to keep their current statusline" >&2
+echo "" >&2
+echo "The statusline-iterm plugin will not override your existing configuration automatically." >&2
 
 exit 2

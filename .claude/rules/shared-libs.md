@@ -56,18 +56,17 @@ add_permission_to_allow "Bash(tool:*)" "user"          # user-level
 
 ### hook-logging.sh
 
-Buffered hook logging with structured error reporting. Captures verbose output during hook execution into a log file. On success, logs are discarded. On failure, prints a structured error message to stderr (visible to both user and Claude) with plugin name, failed component, log file path, and remediation suggestions.
+Hook logging with structured error reporting. All output prints directly to stdout (success) or stderr (errors). On failure, prints a structured error message to stderr with plugin name, failed component, log file path, and remediation suggestions. A log file is also maintained for failure diagnostics.
 
 ```bash
 PLUGIN_NAME="my-plugin"  # MUST be set before sourcing
 source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 
-hook_log "Installing tool v1.2.3"              # buffer a verbose log line
-hook_log_always "Tool v1.2.3 ready"            # log + always print to stderr
+hook_log "Installing tool v1.2.3"              # print to stdout
+hook_log_always "Tool v1.2.3 ready"            # print to stderr (always visible)
 hook_log_step "download" "Downloading binary"  # start a named step
-hook_fail "curl" "404 not found" "Check URL"   # structured error (returns 0)
-hook_respond                                   # no-op for empty {}; prints non-empty JSON
-hook_run my_main_function                      # wrap function with log capture
+hook_fail "curl" "404 not found" "Check URL"   # structured error to stderr (returns 0)
+hook_run my_main_function                      # wrap function, auto-fail on non-zero exit
 hook_log_cleanup                               # remove log file on success
 ```
 
@@ -84,9 +83,7 @@ On failure, `hook_fail` prints:
 =============================
 ```
 
-Set `HOOK_VERBOSE=true` to also print all `hook_log` output to stderr in real time.
-
-`hook_respond` replaces `echo '{}'` at the end of hooks — it suppresses empty `{}` output so users don't see noise.
+`hook_respond` and `hook_session_message` are kept as no-ops/aliases for backwards compatibility but are no longer needed in new code.
 
 ### safe-settings-write.sh
 

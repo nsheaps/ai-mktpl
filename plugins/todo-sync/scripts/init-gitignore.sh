@@ -31,4 +31,4 @@ for pattern in "${patterns[@]}"; do
   fi
 done
 
-exit 0
+echo "todo-sync: gitignore patterns configured"

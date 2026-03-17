@@ -13,8 +13,8 @@ source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 
 # --- Guards ---
 
-plugin_is_enabled || { hook_respond; exit 0; }
-tool_is_web_session || { hook_respond; exit 0; }
+plugin_is_enabled || { hook_log "plugin disabled, skipping"; exit 0; }
+tool_is_web_session || { hook_log "not a web session, skipping"; exit 0; }
 
 # --- Read config ---
 
@@ -108,7 +108,7 @@ resolve_gh_bin() {
 
 do_install() {
   local gh_bin
-  gh_bin="$(resolve_gh_bin)" || { hook_respond; exit 0; }
+  gh_bin="$(resolve_gh_bin)" || { exit 0; }
 
   if [ "$auto_auth_check" = "true" ]; then
     hook_log_step "auth-check" "Checking GitHub CLI authentication"
@@ -120,4 +120,3 @@ do_install() {
 
 tool_run_install do_install
 hook_log_cleanup
-hook_respond

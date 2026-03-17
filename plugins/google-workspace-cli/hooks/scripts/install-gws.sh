@@ -12,8 +12,8 @@ source "${CLAUDE_PLUGIN_ROOT}/lib/tool-install.sh"
 
 # --- Guards ---
 
-plugin_is_enabled || { echo '{}'; exit 0; }
-tool_is_web_session || { echo '{}'; exit 0; }
+plugin_is_enabled || { echo "${PLUGIN_NAME}: plugin disabled, skipping"; exit 0; }
+tool_is_web_session || { echo "${PLUGIN_NAME}: not a web session, skipping"; exit 0; }
 
 # --- Read config ---
 
@@ -144,7 +144,7 @@ resolve_gws_bin() {
 
 do_setup() {
   local gws_bin
-  gws_bin="$(resolve_gws_bin)" || { echo '{}'; exit 0; }
+  gws_bin="$(resolve_gws_bin)" || { echo "${PLUGIN_NAME}: gws not available, skipping"; exit 0; }
 
   # Persist PATH for future tool calls
   tool_ensure_path "$INSTALL_DIR"
@@ -156,10 +156,9 @@ do_setup() {
     fi
   fi
 
-  echo "${PLUGIN_NAME}: Google Workspace CLI is ready" >&2
+  echo "${PLUGIN_NAME}: Google Workspace CLI is ready"
 }
 
 # --- Execute ---
 
 tool_run_install do_setup
-echo '{}'

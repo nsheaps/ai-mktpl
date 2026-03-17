@@ -37,7 +37,8 @@ if [ ! -f "$CONFIG_FILE" ]; then
     UPSTREAM_REPO="$CLAUDE_REMOTE_UPSTREAM"
     VERBOSE="false"
   else
-    # No config at all — silently exit (plugin not configured)
+    # No config at all — exit (plugin not configured)
+    hook_log "not configured, skipping"
     hook_log_cleanup
     exit 0
   fi
@@ -80,7 +81,7 @@ else
       "Check the upstream URL in $CONFIG_FILE and verify network connectivity"
     exit 0
   fi
-  hook_log_always "Cloned $UPSTREAM_REPO → $REMOTE_DIR"
+  hook_log "Cloned $UPSTREAM_REPO → $REMOTE_DIR"
 fi
 
 # --- Status ---
@@ -97,21 +98,20 @@ else
 fi
 
 if [ -n "$PREV_SHA" ] && [ "$PREV_SHA" != "$CURRENT_SHA" ]; then
-  hook_log_always "Updated: $PREV_SHA → $STATUS_LINE"
+  hook_log "Updated: $PREV_SHA → $STATUS_LINE"
 
   # Verbose: show commit titles since last update
   if [ "$VERBOSE" = "true" ]; then
-    hook_log_always "Changes:"
+    hook_log "Changes:"
     git -C "$REMOTE_DIR" log --oneline "${PREV_SHA}..HEAD" --reverse 2>/dev/null | while IFS= read -r line; do
-      hook_log_always "  $line"
+      hook_log "  $line"
     done
   fi
 elif [ -z "$PREV_SHA" ]; then
-  hook_log_always "Ready: $STATUS_LINE"
+  hook_log "Ready: $STATUS_LINE"
 else
   # No changes
-  hook_log "Up to date: $STATUS_LINE"
+  hook_log "up to date: $STATUS_LINE"
 fi
 
 hook_log_cleanup
-exit 0

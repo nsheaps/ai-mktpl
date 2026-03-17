@@ -13,8 +13,8 @@ source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 
 # --- Guards ---
 
-plugin_is_enabled || { hook_respond; exit 0; }
-tool_is_web_session || { hook_respond; exit 0; }
+plugin_is_enabled || { hook_log "plugin disabled, skipping"; exit 0; }
+tool_is_web_session || { hook_log "not a web session, skipping"; exit 0; }
 
 # --- Read config ---
 
@@ -77,7 +77,7 @@ resolve_mise_bin() {
 
 do_setup() {
   local mise_bin
-  mise_bin="$(resolve_mise_bin)" || { hook_respond; exit 0; }
+  mise_bin="$(resolve_mise_bin)" || { exit 0; }
 
   # Always activate mise and persist to CLAUDE_ENV_FILE
   hook_log_step "activate-mise" "Activating mise in shell"
@@ -107,4 +107,3 @@ do_setup() {
 
 tool_run_install do_setup
 hook_log_cleanup
-hook_respond

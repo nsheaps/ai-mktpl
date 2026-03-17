@@ -13,8 +13,8 @@ source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 
 # --- Guards ---
 
-plugin_is_enabled || { hook_respond; exit 0; }
-tool_is_web_session || { hook_respond; exit 0; }
+plugin_is_enabled || { hook_log "plugin disabled, skipping"; exit 0; }
+tool_is_web_session || { hook_log "not a web session, skipping"; exit 0; }
 
 # --- Read config ---
 
@@ -56,7 +56,7 @@ detect_platform() {
   DETECTED_ARCH="$arch"
 }
 
-detect_platform || { hook_respond; exit 0; }
+detect_platform || { exit 0; }
 
 # --- Version resolution ---
 
@@ -98,7 +98,7 @@ download_op() {
     cp "$tmp_dir/op" "$op_bin"
     chmod +x "$op_bin"
     rm -rf "$tmp_dir"
-    hook_log_always "op v${target_version} installed to ${op_bin}"
+    hook_log "op v${target_version} installed to ${op_bin}"
     tool_ensure_path "$INSTALL_DIR"
     echo "$op_bin"
   else
@@ -119,7 +119,7 @@ download_op_exec() {
 
   if curl -fsSL "$url" -o "$op_exec_bin" 2>/dev/null; then
     chmod +x "$op_exec_bin"
-    hook_log_always "op-exec v${target_version} installed to ${op_exec_bin}"
+    hook_log "op-exec v${target_version} installed to ${op_exec_bin}"
     tool_ensure_path "$INSTALL_DIR"
     echo "$op_exec_bin"
   else
@@ -234,13 +234,13 @@ do_install() {
   if [ -n "${op_bin:-}" ] && [ -x "${op_bin:-}" ]; then
     local op_ver
     op_ver="$("$op_bin" --version 2>/dev/null || echo "unknown")"
-    hook_log_always "op v${op_ver} available at ${op_bin}"
+    hook_log "op v${op_ver} available at ${op_bin}"
   fi
 
   if [ -n "${op_exec_bin:-}" ] && [ -x "${op_exec_bin:-}" ]; then
     local opx_ver
     opx_ver="$("$op_exec_bin" --version 2>/dev/null || echo "unknown")"
-    hook_log_always "op-exec v${opx_ver} available at ${op_exec_bin}"
+    hook_log "op-exec v${opx_ver} available at ${op_exec_bin}"
   fi
 }
 
@@ -248,4 +248,3 @@ do_install() {
 
 tool_run_install do_install
 hook_log_cleanup
-hook_respond

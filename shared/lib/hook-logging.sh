@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
-# hook-logging.sh — Shared library for buffered hook logging with structured error reporting
+# hook-logging.sh — Shared library for hook logging with structured error reporting
 #
-# Captures all verbose output during hook execution into a log buffer.
-# On success, logs are silently discarded. On failure, a structured error
-# message is printed to stderr (visible to both user and Claude) that includes:
+# All output is printed directly to stdout (success messages) or stderr (errors).
+# On failure, a structured error message is printed to stderr that includes:
 #   - Which plugin failed
 #   - What operation failed
 #   - Path to the full log file
@@ -13,8 +12,8 @@
 #   PLUGIN_NAME="my-plugin"                     # Required: set before sourcing
 #   source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 #
-#   hook_log "Installing tool v1.2.3"           # Buffer a verbose log line
-#   hook_log_always "Tool v1.2.3 ready"         # Log + always print to stderr
+#   hook_log "Installing tool v1.2.3"           # Print to stdout
+#   hook_log_always "Tool v1.2.3 ready"         # Print to stderr (always visible)
 #   hook_log_step "download" "Downloading binary"  # Start a named step
 #
 #   # Wrap your main logic:
@@ -50,24 +49,28 @@ _HOOK_FAILED="false"
 
 # --- Logging functions ---
 
-# Append a line to the log buffer. Also writes to stderr if HOOK_VERBOSE=true.
+# Print a message to stdout. Also appends to the log file for failure diagnostics.
 # Args: $1=message
 hook_log() {
   local msg="$1"
   echo "[$(date +%H:%M:%S)] ${PLUGIN_NAME}: ${msg}" >> "$_HOOK_LOG_FILE"
-  if [ "${HOOK_VERBOSE:-false}" = "true" ]; then
-    echo "${PLUGIN_NAME}: ${msg}" >&2
-  fi
+  echo "${PLUGIN_NAME}: ${msg}"
 }
 
-# Log a message AND always print it to stderr (visible to the user).
-# Use for important status messages the user should see regardless of success/failure.
-# Keeps stdout clean for structured JSON output (via hook_respond).
+# Print a message to stderr (always visible even when stdout is captured).
+# Also appends to the log file.
 # Args: $1=message
 hook_log_always() {
   local msg="$1"
   echo "[$(date +%H:%M:%S)] ${PLUGIN_NAME}: ${msg}" >> "$_HOOK_LOG_FILE"
   echo "${PLUGIN_NAME}: ${msg}" >&2
+}
+
+# Alias for hook_log — prints to stdout.
+# Kept for backwards compatibility with scripts that used hook_session_message.
+# Args: $1=message
+hook_session_message() {
+  hook_log "$1"
 }
 
 # Mark the start of a named step (for error attribution).
@@ -121,22 +124,16 @@ hook_fail() {
 
 # --- Response helper ---
 
-# Print a JSON response to stdout, suppressing empty objects.
-# Use instead of `echo '{}'` at the end of hook scripts.
-# Args: $1=json_string (default: '{}')
+# No-op kept for backwards compatibility.
+# Previously output JSON; now all output goes directly to stdout/stderr.
+# Scripts can safely remove calls to hook_respond.
 hook_respond() {
-  local json="${1-{}}"
-  if [ "$json" != "{}" ] && [ "$json" != "{ }" ] && [ -n "$json" ]; then
-    echo "$json"
-  fi
+  :
 }
 
 # --- Execution wrapper ---
 
-# Run a function with log capture. On failure, prints the structured error.
-# The wrapped function can call hook_fail directly for specific errors,
-# or this wrapper will produce a generic failure message if the function
-# exits non-zero without calling hook_fail.
+# Run a function. On failure, prints a structured error if hook_fail wasn't called.
 # Args: $1=function_name [remaining args passed through]
 hook_run() {
   local func="$1"
@@ -145,15 +142,9 @@ hook_run() {
   # Use a temp file marker to track hook_fail across subshell boundaries
   local fail_marker="${_HOOK_LOG_FILE}.failed"
 
-  # Run the function, capturing stderr into the log buffer as well
-  # We use a subshell + fd redirection to tee stderr to the log
+  # Run the function directly — stdout/stderr pass through normally
   local rc=0
-  {
-    "$func" "$@" 2>&1 1>&3 | while IFS= read -r line; do
-      echo "$line" >> "$_HOOK_LOG_FILE"
-      echo "$line" >&2
-    done
-  } 3>&1 || rc=$?
+  "$func" "$@" || rc=$?
 
   if [ "$rc" -ne 0 ] && [ ! -f "$fail_marker" ]; then
     # Function failed but didn't call hook_fail — generate a generic error
@@ -174,7 +165,7 @@ hook_run() {
 
 # --- Cleanup helper ---
 
-# Remove the log file (call explicitly if you handle errors yourself)
+# Remove the log file (call explicitly if you handle errors yourself).
 hook_log_cleanup() {
   if [ "$_HOOK_FAILED" != "true" ] && [ ! -f "${_HOOK_LOG_FILE}.failed" ]; then
     rm -f "$_HOOK_LOG_FILE"

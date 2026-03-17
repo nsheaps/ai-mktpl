@@ -10,7 +10,7 @@
 set -euo pipefail
 
 # Read hook input (SessionStart provides agent_type, session_id, etc.)
-INPUT=$(cat 2>/dev/null || echo '{}')
+INPUT=$(cat 2>/dev/null || echo '')
 HOOK_AGENT_TYPE=$(echo "$INPUT" | jq -r '.agent_type // empty' 2>/dev/null || true)
 
 # Priority: CLAUDE_CODE_AGENT_NAME > hook agent_type > CLAUDE_CODE_AGENT_TYPE > "claude"
@@ -19,7 +19,8 @@ TITLE="${CLAUDE_CODE_AGENT_NAME:-${HOOK_AGENT_TYPE:-${CLAUDE_CODE_AGENT_TYPE:-cl
 # Skip if not in a tmux session
 if [ -z "${TMUX:-}" ]; then
   # Not in tmux — use OSC 0 escape sequence for native terminal title
-  printf '\033]0;%s\007' "$TITLE"
+  printf '\033]0;%s\007' "$TITLE" >&2
+  echo "agent-tab-titles: set terminal title to '$TITLE'"
   exit 0
 fi
 
@@ -32,4 +33,4 @@ tmux select-pane -T "$TITLE" 2>/dev/null || true
 # Disable automatic rename so the title sticks
 tmux set-window-option automatic-rename off 2>/dev/null || true
 
-exit 0
+echo "agent-tab-titles: set tmux title to '$TITLE'"

@@ -26,7 +26,7 @@ source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 
 # --- Guards ---
 
-plugin_is_enabled || { hook_respond; exit 0; }
+plugin_is_enabled || { hook_log "plugin disabled, skipping"; exit 0; }
 
 # --- Secret resolution ---
 
@@ -48,7 +48,7 @@ resolve_secret() {
     local var_name="${BASH_REMATCH[1]}"
     local resolved="${!var_name:-}"
     if [[ -z "$resolved" ]]; then
-      hook_log_always "WARNING: env var $var_name is not set (for $name)"
+      hook_log "WARNING: env var $var_name is not set (for $name)"
     fi
     echo "$resolved"
     return
@@ -90,7 +90,6 @@ if [[ -n "$REF" ]]; then
     if [[ ! -f "$ENV_FILE_PATH" ]]; then
       hook_fail "env file" "env file not found: $ENV_FILE_PATH" \
         "Create the env file or update the 'ref' setting in plugin config"
-      hook_respond
       exit 0
     fi
 
@@ -119,7 +118,6 @@ if [[ -n "$REF" ]]; then
   else
     hook_fail "ref config" "Unsupported ref format: $REF" \
       "Use env-file:///path/to/file format. For 1Password secrets, configure the 1pass plugin to expose them as environment variables instead."
-    hook_respond
     exit 0
   fi
 fi
@@ -178,7 +176,6 @@ fi
 if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_APP_PRIVATE_KEY_PATH:-}" || -z "${GITHUB_INSTALLATION_ID:-}" ]]; then
   hook_log "GitHub App not configured (missing GITHUB_APP_ID, GITHUB_APP_PRIVATE_KEY/GITHUB_APP_PRIVATE_KEY_PATH, or GITHUB_INSTALLATION_ID), skipping"
   hook_log_cleanup
-  hook_respond
   exit 0
 fi
 
@@ -188,14 +185,13 @@ GITHUB_APP_PRIVATE_KEY_PATH="${GITHUB_APP_PRIVATE_KEY_PATH/#\~/$HOME}"
 if [[ ! -f "$GITHUB_APP_PRIVATE_KEY_PATH" ]]; then
   hook_fail "private key" "PEM key not found at $GITHUB_APP_PRIVATE_KEY_PATH" \
     "Ensure the private key file exists, or set GITHUB_APP_PRIVATE_KEY env var with the key content"
-  hook_respond
   exit 0
 fi
 
 # Validate PEM file permissions
 PERMS=$(stat -c '%a' "$GITHUB_APP_PRIVATE_KEY_PATH" 2>/dev/null || stat -f '%Lp' "$GITHUB_APP_PRIVATE_KEY_PATH" 2>/dev/null || echo "unknown")
 if [[ "$PERMS" != "600" && "$PERMS" != "400" && "$PERMS" != "unknown" ]]; then
-  hook_log_always "WARNING: PEM key has permissions $PERMS, should be 600 or 400"
+  hook_log "WARNING: PEM key has permissions $PERMS, should be 600 or 400"
 fi
 
 # --- Token generation ---
@@ -218,7 +214,6 @@ TOKEN_OUTPUT=$("${CLAUDE_PLUGIN_ROOT}/bin/generate-token.sh" \
   "$TOKEN_FILE" 2>&1) || {
   hook_fail "token generation" "Token generation failed: $TOKEN_OUTPUT" \
     "Verify GitHub App credentials (GITHUB_APP_ID, GITHUB_APP_PRIVATE_KEY_PATH, GITHUB_INSTALLATION_ID) are correct and the app is installed on the target org/repo"
-  hook_respond
   exit 0
 }
 
@@ -321,8 +316,7 @@ configure_git_identity "$TOKEN" "$GITHUB_APP_ID"
 
 # --- Print initial token info ---
 
-hook_log_always "Authenticated as ${APP_SLUG:-app-$GITHUB_APP_ID} (expires: ${EXPIRES_AT:-unknown})"
-hook_log_always "Token available via \$GH_TOKEN and \$GITHUB_TOKEN"
+hook_log "Authenticated as ${APP_SLUG:-app-$GITHUB_APP_ID} (expires: ${EXPIRES_AT:-unknown})"
+hook_log "Token available via \$GH_TOKEN and \$GITHUB_TOKEN"
 
 hook_log_cleanup
-hook_respond
