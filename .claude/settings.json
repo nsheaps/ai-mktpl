@@ -114,7 +114,7 @@
     "common-sense@ai-mktpl": false,
     "correct-behavior@ai-mktpl": false,
     "data-serialization@ai-mktpl": false,
-    "git-spice@ai-mktpl": false,
+    "git-spice@ai-mktpl": true,
     "github@ai-mktpl": false,
     "mise@ai-mktpl": true,
     "scm-utils@ai-mktpl": false,
