@@ -4,10 +4,22 @@
 # Claude Code merges settings.local.json on top of settings.json at runtime.
 set -euo pipefail
 
+_json_msg() {
+  local msg="$1"
+  if command -v jq &>/dev/null; then
+    jq -n --arg msg "$msg" '{additionalContext: $msg, systemMessage: $msg}'
+  else
+    local escaped
+    escaped=$(printf '%s' "$msg" | sed 's/\\/\\\\/g; s/"/\\"/g; s/\t/\\t/g' | sed ':a;N;$!ba;s/\n/\\n/g')
+    echo "{\"additionalContext\":\"${escaped}\",\"systemMessage\":\"${escaped}\"}"
+  fi
+}
+
 # Skip configuration for agent team teammates to avoid race conditions.
 # Only the lead or solo sessions configure.
 if [ -n "${CLAUDE_CODE_PARENT_SESSION_ID:-}" ]; then
-  echo "statusline: sub-agent session, skipping"
+  echo "statusline: sub-agent session, skipping" >&2
+  _json_msg "statusline: sub-agent session, skipping"
   exit 0
 fi
 
@@ -24,7 +36,8 @@ mkdir -p "$(dirname "$SETTINGS_FILE")"
 SHARED_LIB="${CLAUDE_PLUGIN_ROOT}/lib/safe-settings-write.sh"
 if [ ! -f "$SHARED_LIB" ]; then
   echo "ERROR: shared lib not found: $SHARED_LIB" >&2
-  exit 2
+  _json_msg "statusline: ERROR — shared lib not found: $SHARED_LIB"
+  exit 0
 fi
 source "$SHARED_LIB"
 
@@ -37,7 +50,8 @@ fi
 # Case 1: Not present anywhere - set it
 if [ -z "$current_command" ]; then
   safe_write_settings '.statusLine.type = "command" | .statusLine.command = $script'
-  echo "statusline: configured"
+  echo "statusline: configured" >&2
+  _json_msg "statusline: configured"
   exit 0
 fi
 
@@ -45,20 +59,22 @@ fi
 # Match if path contains "plugins/statusline" or points to statusline.sh
 if [[ "$current_command" == *"plugins/statusline"* ]] || [[ "$current_command" == *"statusline.sh"* ]]; then
   safe_write_settings '.statusLine.command = $script'
-  echo "statusline: updated"
+  echo "statusline: updated" >&2
+  _json_msg "statusline: updated"
   exit 0
 fi
 
 # Case 3: Present and doesn't match - warn and block
-echo "statusline: WARNING — statusLine.command is already configured with a different script:" >&2
-echo "   Current: $current_command" >&2
-echo "   This plugin wants to use: $STATUSLINE_SCRIPT" >&2
-echo "" >&2
-echo "To resolve this issue, either:" >&2
-echo "1. Ask the user which statusline script they prefer" >&2
-echo "2. Manually update ~/.claude/settings.local.json to use this plugin's script" >&2
-echo "3. Disable this plugin if they want to keep their current statusline" >&2
-echo "" >&2
-echo "The statusline plugin will not override your existing configuration automatically." >&2
+msg="statusline: WARNING — statusLine.command is already configured with a different script:
+   Current: $current_command
+   This plugin wants to use: $STATUSLINE_SCRIPT
 
-exit 2
+To resolve this issue, either:
+1. Ask the user which statusline script they prefer
+2. Manually update ~/.claude/settings.local.json to use this plugin's script
+3. Disable this plugin if they want to keep their current statusline
+
+The statusline plugin will not override your existing configuration automatically."
+echo "$msg" >&2
+_json_msg "$msg"
+exit 0

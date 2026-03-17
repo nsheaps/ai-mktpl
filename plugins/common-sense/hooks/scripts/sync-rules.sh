@@ -165,3 +165,4 @@ fi
 
 hook_log "rules synced"
 hook_log_cleanup
+hook_respond

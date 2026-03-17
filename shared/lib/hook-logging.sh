@@ -1,27 +1,26 @@
 #!/usr/bin/env bash
-# hook-logging.sh — Shared library for hook logging with structured error reporting
+# hook-logging.sh — Shared library for hook logging with structured JSON output
 #
-# All output is printed directly to stdout (success messages) or stderr (errors).
-# On failure, a structured error message is printed to stderr that includes:
-#   - Which plugin failed
-#   - What operation failed
-#   - Path to the full log file
-#   - Suggested remediation steps
+# All hooks output structured JSON to stdout (the only channel Claude Code
+# processes for both user-visible systemMessage and agent-visible
+# additionalContext). Human-readable messages also go to stderr for
+# Ctrl+O verbose mode and log file diagnostics.
 #
 # Usage:
 #   PLUGIN_NAME="my-plugin"                     # Required: set before sourcing
 #   source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 #
-#   hook_log "Installing tool v1.2.3"           # Print to stdout + stderr
+#   hook_log "Installing tool v1.2.3"           # stderr + accumulate for JSON
 #   hook_log_always "Tool v1.2.3 ready"         # Alias for hook_log
 #   hook_log_step "download" "Downloading binary"  # Start a named step
+#   hook_fail "curl" "404 not found" "Check URL"   # Structured error to stderr
+#   hook_run my_main_function                      # Wrap function, auto-fail on error
 #
-#   # Wrap your main logic:
-#   hook_run my_main_function
+#   hook_respond                                   # MUST be last — outputs JSON to stdout
 #
-#   # Or manually report failure:
-#   hook_fail "download" "curl returned 404" \
-#     "Check network connectivity and verify the download URL"
+# IMPORTANT: hook_respond MUST be called exactly once, as the last thing
+# before the script exits. It outputs the accumulated messages as JSON.
+# Scripts MUST always exit 0.
 #
 # Requires: PLUGIN_NAME must be set before sourcing.
 # Note: Plugins symlink this file into their own lib/ directory.
@@ -44,29 +43,33 @@ fi
 _HOOK_LOG_DIR="${TMPDIR:-/tmp}/claude-plugin-logs"
 mkdir -p "$_HOOK_LOG_DIR"
 _HOOK_LOG_FILE="${_HOOK_LOG_DIR}/${PLUGIN_NAME}-$(date +%Y%m%d-%H%M%S)-$$.log"
+_HOOK_MSG_FILE="${_HOOK_LOG_DIR}/${PLUGIN_NAME}-msgs-$$.txt"
 _HOOK_CURRENT_STEP=""
 _HOOK_FAILED="false"
 
+# Initialize message accumulator
+: > "$_HOOK_MSG_FILE"
+
 # --- Logging functions ---
 
-# Print a message to both stdout (agent sees it) and stderr (user sees it).
+# Print a message to stderr and accumulate for JSON output.
 # Also appends to the log file for failure diagnostics.
 # Args: $1=message
 hook_log() {
   local line="${PLUGIN_NAME}: $1"
   echo "[$(date +%H:%M:%S)] ${line}" >> "$_HOOK_LOG_FILE"
-  echo "$line"
+  echo "$line" >> "$_HOOK_MSG_FILE"
   echo "$line" >&2
 }
 
-# Alias for hook_log. Previously stderr-only; now both channels.
+# Alias for hook_log.
 # Args: $1=message
 hook_log_always() {
   hook_log "$1"
 }
 
 # Alias for hook_log.
-# Kept for backwards compatibility with scripts that used hook_session_message.
+# Kept for backwards compatibility.
 # Args: $1=message
 hook_session_message() {
   hook_log "$1"
@@ -97,10 +100,10 @@ hook_fail() {
   # Touch fail marker for cross-subshell propagation (used by hook_run)
   touch "${_HOOK_LOG_FILE}.failed" 2>/dev/null || true
 
-  # Ensure the log file is preserved (not cleaned up)
+  # Log the failure
   hook_log "FAILED: ${component}: ${detail}"
 
-  # Print structured error to stderr (visible to user and Claude)
+  # Print structured error to stderr
   {
     echo ""
     echo "==== Plugin Setup Failed ===="
@@ -123,16 +126,37 @@ hook_fail() {
 
 # --- Response helper ---
 
-# No-op kept for backwards compatibility.
-# Previously output JSON; now all output goes directly to stdout/stderr.
-# Scripts can safely remove calls to hook_respond.
+# Output accumulated messages as structured JSON to stdout.
+# MUST be called exactly once as the last thing before exit.
+# Outputs JSON with both systemMessage (user sees) and additionalContext (agent sees).
 hook_respond() {
-  :
+  local combined=""
+  if [ -s "$_HOOK_MSG_FILE" ]; then
+    combined=$(cat "$_HOOK_MSG_FILE")
+  fi
+
+  # Clean up message file
+  rm -f "$_HOOK_MSG_FILE" 2>/dev/null || true
+
+  if [ -n "$combined" ]; then
+    if command -v jq &>/dev/null; then
+      jq -n --arg msg "$combined" \
+        '{additionalContext: $msg, systemMessage: $msg}'
+    else
+      # Fallback: escape for JSON manually
+      local escaped
+      escaped=$(printf '%s' "$combined" | sed 's/\\/\\\\/g; s/"/\\"/g; s/\t/\\t/g' | sed ':a;N;$!ba;s/\n/\\n/g')
+      echo "{\"additionalContext\":\"${escaped}\",\"systemMessage\":\"${escaped}\"}"
+    fi
+  else
+    echo '{}'
+  fi
 }
 
 # --- Execution wrapper ---
 
 # Run a function. On failure, prints a structured error if hook_fail wasn't called.
+# Always returns 0 (hooks must always exit 0).
 # Args: $1=function_name [remaining args passed through]
 hook_run() {
   local func="$1"
@@ -141,9 +165,11 @@ hook_run() {
   # Use a temp file marker to track hook_fail across subshell boundaries
   local fail_marker="${_HOOK_LOG_FILE}.failed"
 
-  # Run the function directly — stdout/stderr pass through normally
+  # Run the function with stdout redirected to stderr so stray echo/printf
+  # from the function cannot pollute the JSON output on stdout.
+  # hook_log already writes to stderr, so it's unaffected.
   local rc=0
-  "$func" "$@" || rc=$?
+  "$func" "$@" 1>&2 || rc=$?
 
   if [ "$rc" -ne 0 ] && [ ! -f "$fail_marker" ]; then
     # Function failed but didn't call hook_fail — generate a generic error
@@ -159,7 +185,8 @@ hook_run() {
   # Clean up fail marker
   rm -f "$fail_marker"
 
-  return "$rc"
+  # Always return 0 — hooks must always exit 0
+  return 0
 }
 
 # --- Cleanup helper ---

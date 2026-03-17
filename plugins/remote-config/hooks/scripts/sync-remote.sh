@@ -40,7 +40,7 @@ if [ ! -f "$CONFIG_FILE" ]; then
     # No config at all — exit (plugin not configured)
     hook_log "not configured, skipping"
     hook_log_cleanup
-    exit 0
+    hook_respond; exit 0
   fi
 else
   UPSTREAM_REPO=$(yaml_get "$CONFIG_FILE" "upstream")
@@ -54,7 +54,7 @@ fi
 if [ -z "$UPSTREAM_REPO" ]; then
   hook_fail "config" "No upstream repo configured" \
     "Set 'upstream' in $CONFIG_FILE or set the CLAUDE_REMOTE_UPSTREAM env var"
-  exit 0
+  hook_respond; exit 0
 fi
 
 # --- Sync ---
@@ -71,7 +71,7 @@ if [ -d "$REMOTE_DIR/.git" ]; then
   if ! git -C "$REMOTE_DIR" pull --ff-only --quiet 2>/dev/null; then
     hook_fail "git pull" "Cannot update $REMOTE_DIR cleanly (merge conflicts or diverged history)" \
       "Run: cd $REMOTE_DIR && git status — then reset to origin with: git fetch origin && git reset --hard origin/main"
-    exit 0
+    hook_respond; exit 0
   fi
 else
   # Fresh clone
@@ -79,7 +79,7 @@ else
   if ! git clone --quiet "$UPSTREAM_REPO" "$REMOTE_DIR" 2>/dev/null; then
     hook_fail "git clone" "Failed to clone $UPSTREAM_REPO" \
       "Check the upstream URL in $CONFIG_FILE and verify network connectivity"
-    exit 0
+    hook_respond; exit 0
   fi
   hook_log "Cloned $UPSTREAM_REPO → $REMOTE_DIR"
 fi
@@ -115,3 +115,4 @@ else
 fi
 
 hook_log_cleanup
+hook_respond

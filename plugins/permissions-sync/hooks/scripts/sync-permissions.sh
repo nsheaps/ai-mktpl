@@ -15,14 +15,14 @@ source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 
 # --- Check if enabled ---
 
-plugin_is_enabled || { hook_log "plugin disabled, skipping"; exit 0; }
+plugin_is_enabled || { hook_log "plugin disabled, skipping"; hook_respond; exit 0; }
 
 # --- Check for jq ---
 
 if ! command -v jq &>/dev/null; then
   hook_fail "jq" "jq required but not found" \
     "Install jq: apt-get install jq, brew install jq, or enable the mise plugin with jq in mise.toml"
-  exit 0
+  hook_respond; exit 0
 fi
 
 # --- Read config ---
@@ -101,7 +101,7 @@ sources="$(plugin_get_config_array "sources")"
 if [ -z "$sources" ]; then
   hook_log "no sources configured, skipping"
   hook_log_cleanup
-  exit 0
+  hook_respond; exit 0
 fi
 
 # --- Merge permissions ---
@@ -149,7 +149,7 @@ merged="$(echo "$merged" | jq 'with_entries(select(.value | length > 0))' 2>/dev
 if [ "$merged" = "{}" ] || [ -z "$merged" ]; then
   hook_log "No permissions to sync"
   hook_log_cleanup
-  exit 0
+  hook_respond; exit 0
 fi
 
 # --- Write to settings.local.json ---
@@ -165,7 +165,7 @@ if ! safe_write_settings '.permissions = (
 )'; then
   hook_fail "settings write" "Failed to write permissions to $SETTINGS_FILE" \
     "Check file permissions on $SETTINGS_FILE, or verify jq is working correctly"
-  exit 0
+  hook_respond; exit 0
 fi
 
 count_allow="$(echo "$merged" | jq '.allow // [] | length' 2>/dev/null || echo "0")"
@@ -174,3 +174,4 @@ count_ask="$(echo "$merged" | jq '.ask // [] | length' 2>/dev/null || echo "0")"
 hook_log "synced permissions to $SETTINGS_FILE (allow: $count_allow, deny: $count_deny, ask: $count_ask)"
 
 hook_log_cleanup
+hook_respond

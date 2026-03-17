@@ -26,7 +26,7 @@ source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 
 # --- Guards ---
 
-plugin_is_enabled || { hook_log "plugin disabled, skipping"; exit 0; }
+plugin_is_enabled || { hook_log "plugin disabled, skipping"; hook_respond; exit 0; }
 
 # --- Secret resolution ---
 
@@ -90,7 +90,7 @@ if [[ -n "$REF" ]]; then
     if [[ ! -f "$ENV_FILE_PATH" ]]; then
       hook_fail "env file" "env file not found: $ENV_FILE_PATH" \
         "Create the env file or update the 'ref' setting in plugin config"
-      exit 0
+      hook_respond; exit 0
     fi
 
     # Source only lines matching KEY=VALUE (skip comments and blanks)
@@ -118,7 +118,7 @@ if [[ -n "$REF" ]]; then
   else
     hook_fail "ref config" "Unsupported ref format: $REF" \
       "Use env-file:///path/to/file format. For 1Password secrets, configure the 1pass plugin to expose them as environment variables instead."
-    exit 0
+    hook_respond; exit 0
   fi
 fi
 
@@ -176,7 +176,7 @@ fi
 if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_APP_PRIVATE_KEY_PATH:-}" || -z "${GITHUB_INSTALLATION_ID:-}" ]]; then
   hook_log "GitHub App not configured (missing GITHUB_APP_ID, GITHUB_APP_PRIVATE_KEY/GITHUB_APP_PRIVATE_KEY_PATH, or GITHUB_INSTALLATION_ID), skipping"
   hook_log_cleanup
-  exit 0
+  hook_respond; exit 0
 fi
 
 # Expand tilde in key path
@@ -320,3 +320,4 @@ hook_log "Authenticated as ${APP_SLUG:-app-$GITHUB_APP_ID} (expires: ${EXPIRES_A
 hook_log "Token available via \$GH_TOKEN and \$GITHUB_TOKEN"
 
 hook_log_cleanup
+hook_respond

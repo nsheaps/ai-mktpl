@@ -9,11 +9,12 @@ set -euo pipefail
 PLUGIN_NAME="google-workspace-cli"
 source "${CLAUDE_PLUGIN_ROOT}/lib/plugin-config-read.sh"
 source "${CLAUDE_PLUGIN_ROOT}/lib/tool-install.sh"
+source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 
 # --- Guards ---
 
-plugin_is_enabled || { echo "${PLUGIN_NAME}: plugin disabled, skipping"; exit 0; }
-tool_is_web_session || { echo "${PLUGIN_NAME}: not a web session, skipping"; exit 0; }
+plugin_is_enabled || { hook_log "plugin disabled, skipping"; hook_respond; exit 0; }
+tool_is_web_session || { hook_log "not a web session, skipping"; hook_respond; exit 0; }
 
 # --- Read config ---
 
@@ -144,7 +145,7 @@ resolve_gws_bin() {
 
 do_setup() {
   local gws_bin
-  gws_bin="$(resolve_gws_bin)" || { echo "${PLUGIN_NAME}: gws not available, skipping"; exit 0; }
+  gws_bin="$(resolve_gws_bin)" || { hook_log "gws not available, skipping"; hook_respond; exit 0; }
 
   # Persist PATH for future tool calls
   tool_ensure_path "$INSTALL_DIR"
@@ -152,13 +153,15 @@ do_setup() {
   # Check auth status
   if [ "$auto_auth" = "true" ]; then
     if ! "$gws_bin" auth status &>/dev/null; then
-      echo "${PLUGIN_NAME}: gws auth not configured. Run 'gws auth setup' and 'gws auth login' to authenticate." >&2
+      hook_log "gws auth not configured. Run 'gws auth setup' and 'gws auth login' to authenticate."
     fi
   fi
 
-  echo "${PLUGIN_NAME}: Google Workspace CLI is ready"
+  hook_log "Google Workspace CLI is ready"
 }
 
 # --- Execute ---
 
 tool_run_install do_setup
+hook_log_cleanup
+hook_respond

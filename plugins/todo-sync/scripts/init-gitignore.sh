@@ -31,4 +31,10 @@ for pattern in "${patterns[@]}"; do
   fi
 done
 
-echo "todo-sync: gitignore patterns configured"
+echo "todo-sync: gitignore patterns configured" >&2
+if command -v jq &>/dev/null; then
+  jq -n --arg msg "todo-sync: gitignore patterns configured" \
+    '{additionalContext: $msg, systemMessage: $msg}'
+else
+  echo '{"additionalContext":"todo-sync: gitignore patterns configured","systemMessage":"todo-sync: gitignore patterns configured"}'
+fi
