@@ -6,11 +6,5 @@
     "name": "Nathan Heaps",
     "email": "nsheaps@gmail.com"
   },
-  "keywords": [
-    "tasks",
-    "commit",
-    "workflow",
-    "ephemeral",
-    "agent-teams"
-  ]
+  "keywords": ["tasks", "commit", "workflow", "ephemeral", "agent-teams"]
 }

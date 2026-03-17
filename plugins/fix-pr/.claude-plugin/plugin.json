@@ -9,12 +9,5 @@
   },
   "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/fix-pr",
   "repository": "https://github.com/nsheaps/ai-mktpl",
-  "keywords": [
-    "pr",
-    "ci",
-    "fix",
-    "review",
-    "iteration",
-    "relentless"
-  ]
+  "keywords": ["pr", "ci", "fix", "review", "iteration", "relentless"]
 }

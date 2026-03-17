@@ -7,11 +7,5 @@
     "email": "nsheaps@gmail.com",
     "url": "https://github.com/nsheaps"
   },
-  "keywords": [
-    "plugin",
-    "install",
-    "update",
-    "reload",
-    "management"
-  ]
+  "keywords": ["plugin", "install", "update", "reload", "management"]
 }

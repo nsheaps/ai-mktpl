@@ -10,11 +10,5 @@
   "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/context-bloat-prevention",
   "repository": "https://github.com/nsheaps/ai-mktpl",
   "license": "MIT",
-  "keywords": [
-    "context-management",
-    "performance",
-    "agent-teams",
-    "hooks",
-    "output-management"
-  ]
+  "keywords": ["context-management", "performance", "agent-teams", "hooks", "output-management"]
 }
