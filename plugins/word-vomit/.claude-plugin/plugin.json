@@ -17,5 +17,6 @@
     "categorization",
     "workflow",
     "hooks"
-  ]
+  ],
+  "hooks": "./hooks/hooks.json"
 }

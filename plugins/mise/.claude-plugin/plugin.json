@@ -16,5 +16,6 @@
     "session-start",
     "web-session",
     "auto-install"
-  ]
+  ],
+  "hooks": "./hooks/hooks.json"
 }

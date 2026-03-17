@@ -16,5 +16,6 @@
     "problem-solving",
     "chain-of-thought",
     "reasoning"
-  ]
+  ],
+  "hooks": "./hooks/hooks.json"
 }

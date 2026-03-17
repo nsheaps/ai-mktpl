@@ -19,5 +19,6 @@
     "allow",
     "deny",
     "ask"
-  ]
+  ],
+  "hooks": "./hooks/hooks.json"
 }
