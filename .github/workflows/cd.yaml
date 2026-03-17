@@ -70,7 +70,7 @@ jobs:
         uses: jdx/mise-action@v3
         with:
           install: true
-          cache: true
+          cache: ${{ github.event_name == 'pull_request'}}
 
       - name: Detect plugin changes
         id: detect
@@ -126,7 +126,7 @@ jobs:
         uses: jdx/mise-action@v3
         with:
           install: true
-          cache: true
+          cache: ${{ github.event_name == 'pull_request'}}
 
       - name: Install yarn dependencies
         run: yarn install --immutable

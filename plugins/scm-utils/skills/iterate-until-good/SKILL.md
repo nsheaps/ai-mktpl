@@ -1,7 +1,8 @@
 ---
 name: iterate-until-good
-description: Use this skill to evaluate the current state of code on a PR or branch in many categories, give it a subjective score, and then iterate on the code until it scores > 85% in each category. Categories include: simplicity, flexibility, usability, documentation and comments (and associated discoverability), security concerns, proper matching of repo patterns/proper introduction of new patterns, adherence to best practices, and general quality assurance and engineering practices.
-argument-hint: [the requested iteration target, like a branch, PR, repo, notion doc, etc]
+description: >
+  Use this skill to evaluate the current state of code on a PR or branch in many categories, give it a subjective score, and then iterate on the code until it scores > 85% in each category. Categories include: simplicity, flexibility, usability, documentation and comments (and associated discoverability), security concerns, proper matching of repo patterns/proper introduction of new patterns, adherence to best practices, and general quality assurance and engineering practices.
+argument-hint: "[the requested iteration target, like a branch, PR, repo, notion doc, etc]"
 ---
 
 The process below outlines how to review something in many categories. For the user's requested target (like a branch, PR, repo, notion doc, etc), please run this review process in parallel across all categories, and then iterate on the target until it scores >85% in each category. If any category is below 70%, that is a hard block that must be addressed before merging or shipping.

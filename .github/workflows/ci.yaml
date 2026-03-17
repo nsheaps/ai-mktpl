@@ -78,7 +78,7 @@ jobs:
         uses: jdx/mise-action@v3
         with:
           install: true
-          cache: true
+          cache: ${{ github.event_name == 'pull_request'}}
 
       - name: just lint
         id: lint
@@ -112,7 +112,7 @@ jobs:
         uses: jdx/mise-action@v3
         with:
           install: true
-          cache: true
+          cache: ${{ github.event_name == 'pull_request'}}
 
       - name: Validate plugin structure
         uses: ./.github/actions/validate-plugins
