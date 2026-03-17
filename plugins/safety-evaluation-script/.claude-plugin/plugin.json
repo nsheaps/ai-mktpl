@@ -9,6 +9,5 @@
   },
   "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/safety-evaluation-script",
   "repository": "https://github.com/nsheaps/ai-mktpl",
-  "keywords": ["safety", "security", "hooks", "pre-tool-call", "evaluation", "haiku"],
-  "hooks": "./hooks/hooks.json"
+  "keywords": ["safety", "security", "hooks", "pre-tool-call", "evaluation", "haiku"]
 }
