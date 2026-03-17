@@ -1,4 +1,8 @@
-# permissions-sync
+
+TODO: This is wrong, it has nothing to do with syncing from projects, it should just be about putting the right permissions into user/project settings.json or settings.local.json
+
+=========================
+permissions-sync
 
 Merge permission scopes from configurable source `settings.json` files into `settings.local.json` on session start.
 
