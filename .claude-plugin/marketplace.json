@@ -206,7 +206,7 @@
     {
       "name": "fix-pr",
       "description": "Relentlessly fix a PR until CI passes — iterates through review, fix, push cycles until green",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -325,7 +325,7 @@
     {
       "name": "memory-manager",
       "description": "Intelligent memory management for CLAUDE.md files. Automatically detects and stores user preferences, rules, and instructions with smart scope detection and hierarchical organization.",
-      "version": "0.2.24",
+      "version": "0.2.25",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -478,7 +478,7 @@
     {
       "name": "scm-utils",
       "description": "Source control management utilities for improving interactions with branches and PRs, both locally and in CI environments",
-      "version": "0.1.7",
+      "version": "0.1.8",
       "author": {
         "name": "Nathan Heaps"
       },
