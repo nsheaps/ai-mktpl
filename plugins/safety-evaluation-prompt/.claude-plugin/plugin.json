@@ -1,6 +1,6 @@
 {
   "name": "safety-evaluation-prompt",
-  "version": "0.2.25",
+  "version": "0.2.26",
   "description": "Pre-tool-call safety evaluation using prompt-style hooks for inline AI evaluation",
   "author": {
     "name": "Nathan Heaps",
@@ -9,5 +9,12 @@
   },
   "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/safety-evaluation-prompt",
   "repository": "https://github.com/nsheaps/ai-mktpl",
-  "keywords": ["safety", "security", "hooks", "pre-tool-call", "evaluation", "prompt"]
+  "keywords": [
+    "safety",
+    "security",
+    "hooks",
+    "pre-tool-call",
+    "evaluation",
+    "prompt"
+  ]
 }

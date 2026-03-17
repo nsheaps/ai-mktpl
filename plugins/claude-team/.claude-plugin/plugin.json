@@ -1,6 +1,6 @@
 {
   "name": "claude-team",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Patterns, pitfalls, and operational knowledge for working effectively with Claude Code agent teams",
   "author": {
     "name": "Nathan Heaps",
@@ -9,5 +9,11 @@
   },
   "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/claude-team",
   "repository": "https://github.com/nsheaps/ai-mktpl",
-  "keywords": ["agent-teams", "orchestration", "multi-agent", "coordination", "claude-code"]
+  "keywords": [
+    "agent-teams",
+    "orchestration",
+    "multi-agent",
+    "coordination",
+    "claude-code"
+  ]
 }

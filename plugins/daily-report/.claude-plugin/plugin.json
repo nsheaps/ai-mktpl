@@ -1,6 +1,6 @@
 {
   "name": "daily-report",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Skill for generating daily organization-wide reports covering commits, PRs, branches, and issue changes across all repositories in a GitHub org. Designed for scheduled CI workflows and on-demand reporting.",
   "author": {
     "name": "Nathan Heaps",
