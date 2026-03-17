@@ -63,9 +63,10 @@ PLUGIN_NAME="my-plugin"  # MUST be set before sourcing
 source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 
 hook_log "Installing tool v1.2.3"              # buffer a verbose log line
-hook_log_always "Tool v1.2.3 ready"            # log + always print to stderr
+hook_log_always "Tool v1.2.3 ready"            # log + always print to stdout
 hook_log_step "download" "Downloading binary"  # start a named step
 hook_fail "curl" "404 not found" "Check URL"   # structured error (returns 0)
+hook_respond                                   # no-op for empty {}; prints non-empty JSON
 hook_run my_main_function                      # wrap function with log capture
 hook_log_cleanup                               # remove log file on success
 ```
@@ -84,6 +85,8 @@ On failure, `hook_fail` prints:
 ```
 
 Set `HOOK_VERBOSE=true` to also print all `hook_log` output to stderr in real time.
+
+`hook_respond` replaces `echo '{}'` at the end of hooks — it suppresses empty `{}` output so users don't see noise.
 
 ### safe-settings-write.sh
 

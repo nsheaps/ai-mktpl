@@ -164,4 +164,4 @@ if [ -n "$ALSO_ADD_TO_REPOS" ] && command -v jq &>/dev/null; then
 fi
 
 hook_log_cleanup
-echo '{}'
+hook_respond

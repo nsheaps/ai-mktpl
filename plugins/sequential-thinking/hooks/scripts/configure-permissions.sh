@@ -19,10 +19,10 @@ hook_log_step "add-permission" "Adding sequential-thinking MCP permissions"
 if ! add_permission_to_allow "mcp__sequential-thinking__*"; then
   hook_fail "permission setup" "Failed to add mcp__sequential-thinking__* to allow list in $SETTINGS_FILE" \
     "Check file permissions on $SETTINGS_FILE, or verify jq is available"
-  echo '{}'
+  hook_respond
   exit 0
 fi
 
 hook_log "Added mcp__sequential-thinking__* to allow list"
 hook_log_cleanup
-echo '{}'
+hook_respond

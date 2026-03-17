@@ -14,7 +14,7 @@
 #   source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 #
 #   hook_log "Installing tool v1.2.3"           # Buffer a verbose log line
-#   hook_log_always "Tool v1.2.3 ready"         # Log + always print to stderr
+#   hook_log_always "Tool v1.2.3 ready"         # Log + always print to stdout
 #   hook_log_step "download" "Downloading binary"  # Start a named step
 #
 #   # Wrap your main logic:
@@ -60,13 +60,13 @@ hook_log() {
   fi
 }
 
-# Log a message AND always print it to stderr (visible to the agent/user).
+# Log a message AND always print it to stdout (visible to the agent/user).
 # Use for important status messages the agent should see regardless of success/failure.
 # Args: $1=message
 hook_log_always() {
   local msg="$1"
   echo "[$(date +%H:%M:%S)] ${PLUGIN_NAME}: ${msg}" >> "$_HOOK_LOG_FILE"
-  echo "${PLUGIN_NAME}: ${msg}" >&2
+  echo "${PLUGIN_NAME}: ${msg}"
 }
 
 # Mark the start of a named step (for error attribution).
@@ -116,6 +116,18 @@ hook_fail() {
   } >&2
 
   return 0
+}
+
+# --- Response helper ---
+
+# Print a JSON response to stdout, suppressing empty objects.
+# Use instead of `echo '{}'` at the end of hook scripts.
+# Args: $1=json_string (default: '{}')
+hook_respond() {
+  local json="${1-{}}"
+  if [ "$json" != "{}" ] && [ "$json" != "{ }" ] && [ -n "$json" ]; then
+    echo "$json"
+  fi
 }
 
 # --- Execution wrapper ---

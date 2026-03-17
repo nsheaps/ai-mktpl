@@ -11,12 +11,10 @@ source "${CLAUDE_PLUGIN_ROOT}/lib/plugin-config-read.sh"
 source "${CLAUDE_PLUGIN_ROOT}/lib/tool-install.sh"
 source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 
-echo "Hello from github SessionStart hook! Reading config and installing gh if needed..."
-
 # --- Guards ---
 
-plugin_is_enabled || { echo '{}'; exit 0; }
-tool_is_web_session || { echo '{}'; exit 0; }
+plugin_is_enabled || { hook_respond; exit 0; }
+tool_is_web_session || { hook_respond; exit 0; }
 
 # --- Read config ---
 
@@ -110,7 +108,7 @@ resolve_gh_bin() {
 
 do_install() {
   local gh_bin
-  gh_bin="$(resolve_gh_bin)" || { echo '{}'; exit 0; }
+  gh_bin="$(resolve_gh_bin)" || { hook_respond; exit 0; }
 
   if [ "$auto_auth_check" = "true" ]; then
     hook_log_step "auth-check" "Checking GitHub CLI authentication"
@@ -122,4 +120,4 @@ do_install() {
 
 tool_run_install do_install
 hook_log_cleanup
-echo '{}'
+hook_respond
