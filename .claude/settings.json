@@ -116,7 +116,7 @@
     "data-serialization@ai-mktpl": false,
     "git-spice@ai-mktpl": false,
     "github@ai-mktpl": false,
-    "mise@ai-mktpl": false,
+    "mise@ai-mktpl": true,
     "scm-utils@ai-mktpl": false,
     "sequential-thinking@ai-mktpl": false,
     "todo-sync@ai-mktpl": false
