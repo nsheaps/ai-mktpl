@@ -26,6 +26,9 @@ if [ ${#PLUGINS[@]} -eq 0 ]; then
     exit 0
 fi
 
+echo "Updating plugin marketplace..."
+claude plugin marketplace update 2>&1 || echo "  [warn] Marketplace update failed, continuing with cached index..."
+
 echo "Installing enabled plugins..."
 for plugin in "${PLUGINS[@]}"; do
     echo "  -> $plugin"
