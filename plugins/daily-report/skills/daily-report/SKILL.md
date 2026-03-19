@@ -230,7 +230,7 @@ reporting period. This gives a quick visual overview of where the most activity 
 
 - Use a mermaid `xychart-beta` chart with **horizontal** layout
 - X-axis: repository short names (without the org prefix), sorted by commit count descending
-- Y-axis: total commit count — always specify `0 --> <max>` so the axis starts at 0 (use the highest bar value, rounded up to a clean number, as `<max>`)
+- Y-axis: total commit count — **ALWAYS start at 0**. You MUST use the syntax `0 --> <max>` where `<max>` is the highest bar value rounded up to a clean number. Never omit the `0 -->` prefix or the axis will not start at zero.
 - One bar per repository
 - Use all commits gathered in Step 2 (across all branches)
 - Only include repos that had at least 1 commit
