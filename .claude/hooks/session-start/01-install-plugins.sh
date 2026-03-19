@@ -37,8 +37,26 @@ fi
 
 echo "[01-install-plugins] Enabled plugins to install: ${PLUGINS[*]}"
 
-# Run marketplace update from the project directory so `claude` picks up
-# extraKnownMarketplaces from the project settings.json.
+# Seed known_marketplaces.json from extraKnownMarketplaces in settings.json.
+# On fresh sessions, the Claude runtime hasn't yet populated the plugin registry
+# from settings.json, so `claude plugin marketplace update` reports
+# "No marketplaces configured". Explicitly registering them first fixes this.
+KNOWN_MARKETPLACES="${HOME}/.claude/plugins/known_marketplaces.json"
+echo "[01-install-plugins] Seeding marketplaces from extraKnownMarketplaces..."
+while IFS="=" read -r name repo; do
+    [ -z "$name" ] && continue
+    # Check if already registered (has an installLocation)
+    already_registered=$(jq -r --arg n "$name" '.[$n].installLocation // empty' "$KNOWN_MARKETPLACES" 2>/dev/null || true)
+    if [ -z "$already_registered" ]; then
+        echo "[01-install-plugins]   -> Registering marketplace: $name ($repo)"
+        (cd "$CLAUDE_PROJECT_DIR" && claude plugin marketplace add "$repo" --scope user 2>&1) \
+            || echo "[01-install-plugins]   [warn] Failed to register $name, continuing..."
+    else
+        echo "[01-install-plugins]   -> Already registered: $name"
+    fi
+done < <(jq -r '.extraKnownMarketplaces | to_entries[] | select(.value.source.source == "github") | .key + "=" + .value.source.repo' "$SETTINGS_FILE" 2>/dev/null || true)
+
+# Run marketplace update to fetch latest plugin indexes.
 echo "[01-install-plugins] Updating plugin marketplace (cwd: $CLAUDE_PROJECT_DIR)..."
 (cd "$CLAUDE_PROJECT_DIR" && claude plugin marketplace update 2>&1) \
     || echo "  [warn] Marketplace update failed, continuing with cached index..."
