@@ -86,10 +86,32 @@ do_setup() {
     hook_log "Persisted mise activation to CLAUDE_ENV_FILE"
   fi
 
-  # Auto-trust
-  if [ "$auto_trust" = "true" ] && [ -f "${CLAUDE_PROJECT_DIR:-.}/mise.toml" ]; then
-    hook_log_step "trust-config" "Trusting mise.toml"
-    "$mise_bin" trust "${CLAUDE_PROJECT_DIR:-.}" 2>/dev/null || true
+  # Auto-trust: trust mise config files in project dir and any git worktrees
+  if [ "$auto_trust" = "true" ]; then
+    local project_dir="${CLAUDE_PROJECT_DIR:-.}"
+    local trusted_any=false
+
+    # Trust the primary project dir config
+    if [ -f "${project_dir}/mise.toml" ]; then
+      hook_log_step "trust-config" "Trusting ${project_dir}/mise.toml"
+      "$mise_bin" trust "${project_dir}/mise.toml" || true
+      trusted_any=true
+    fi
+
+    # Trust mise.toml in any git worktrees
+    if command -v git &>/dev/null; then
+      while IFS= read -r worktree_dir; do
+        if [ "$worktree_dir" != "$project_dir" ] && [ -f "${worktree_dir}/mise.toml" ]; then
+          hook_log "Trusting worktree ${worktree_dir}/mise.toml"
+          "$mise_bin" trust "${worktree_dir}/mise.toml" || true
+          trusted_any=true
+        fi
+      done < <(git -C "$project_dir" worktree list --porcelain 2>/dev/null | grep "^worktree " | sed 's/^worktree //')
+    fi
+
+    if [ "$trusted_any" = "false" ]; then
+      hook_log "No mise.toml found to trust"
+    fi
   fi
 
   # Auto-install tools
