@@ -230,7 +230,7 @@ reporting period. This gives a quick visual overview of where the most activity 
 
 - Use a mermaid `xychart-beta` chart with **horizontal** layout
 - X-axis: repository short names (without the org prefix), sorted by commit count descending
-- Y-axis: total commit count
+- Y-axis: total commit count — always specify `0 --> <max>` so the axis starts at 0 (use the highest bar value, rounded up to a clean number, as `<max>`)
 - One bar per repository
 - Use all commits gathered in Step 2 (across all branches)
 - Only include repos that had at least 1 commit
@@ -246,7 +246,7 @@ Example chart (actual values will differ):
 xychart-beta horizontal
     title "Commits by Repository (YYYY-MM-DD)"
     x-axis ["repo-a", "repo-b", "repo-c"]
-    y-axis "Commits"
+    y-axis "Commits" 0 --> 20
     bar [18, 9, 5]
 ```
 
