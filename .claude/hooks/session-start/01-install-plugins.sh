@@ -7,12 +7,24 @@ if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
     exit 0
 fi
 
-# Plugins enabled in .claude/settings.json enabledPlugins
-PLUGINS=(
-    "plugin-dev@claude-plugins-official"
-    "git-spice@ai-mktpl"
-    "mise@ai-mktpl"
-)
+SETTINGS_FILE="${CLAUDE_PROJECT_DIR}/.claude/settings.json"
+
+if [ ! -f "$SETTINGS_FILE" ]; then
+    echo "No .claude/settings.json found, skipping plugin installation."
+    exit 0
+fi
+
+# Read enabled plugins (keys where value is true) from settings.json
+PLUGINS=()
+_tmp=$(jq -r '.enabledPlugins | to_entries[] | select(.value == true) | .key' "$SETTINGS_FILE")
+while IFS= read -r plugin; do
+    [ -n "$plugin" ] && PLUGINS+=("$plugin")
+done <<< "$_tmp"
+
+if [ ${#PLUGINS[@]} -eq 0 ]; then
+    echo "No enabled plugins found in settings.json."
+    exit 0
+fi
 
 echo "Installing enabled plugins..."
 for plugin in "${PLUGINS[@]}"; do
