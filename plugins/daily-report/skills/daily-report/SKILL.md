@@ -229,8 +229,8 @@ A horizontal bar chart showing the total number of commits per repository during
 reporting period. This gives a quick visual overview of where the most activity occurred.
 
 - Use a mermaid `xychart-beta` chart with **horizontal** layout
-- Y-axis: repository short names (without the org prefix), sorted by commit count descending
-- X-axis: total commit count
+- X-axis: repository short names (without the org prefix), sorted by commit count descending
+- Y-axis: total commit count
 - One bar per repository
 - Use all commits gathered in Step 2 (across all branches)
 - Only include repos that had at least 1 commit
@@ -245,8 +245,8 @@ Example chart (actual values will differ):
 ```mermaid
 xychart-beta horizontal
     title "Commits by Repository (YYYY-MM-DD)"
-    x-axis "Commits"
-    y-axis ["repo-a", "repo-b", "repo-c"]
+    x-axis ["repo-a", "repo-b", "repo-c"]
+    y-axis "Commits"
     bar [18, 9, 5]
 ```
 
