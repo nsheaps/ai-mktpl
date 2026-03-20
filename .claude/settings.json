@@ -80,9 +80,6 @@
         ]
       }
     ],
-        ]
-      }
-    ],
     "SessionStart": [
       {
         "matcher": "",
@@ -131,7 +128,8 @@
     "mise@ai-mktpl": true,
     "scm-utils@ai-mktpl": false,
     "sequential-thinking@ai-mktpl": false,
-    "todo-sync@ai-mktpl": false
+    "todo-sync@ai-mktpl": false,
+    "web-auto-approve@ai-mktpl": true
   },
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
