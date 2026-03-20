@@ -36,7 +36,7 @@ resolve_mise_bin() {
     if [ -x "$mise_bin" ]; then
       hook_log "mise already installed at $mise_bin, checking for updates"
       if [ "$version" = "latest" ]; then
-        "$mise_bin" self-update >/dev/null 2>&1 || hook_log "self-update skipped"
+        "$mise_bin" self-update -y >/dev/null 2>&1 || hook_log "self-update skipped"
       fi
     elif tool_is_available mise; then
       # Found on PATH from elsewhere — use it
@@ -117,10 +117,8 @@ do_setup() {
   # Auto-install tools
   if [ "$auto_install_tools" = "true" ] && [ -f "${CLAUDE_PROJECT_DIR:-.}/mise.toml" ]; then
     hook_log_step "install-tools" "Installing tools from mise.toml"
-    if ! (cd "${CLAUDE_PROJECT_DIR:-.}" && GITHUB_TOKEN="${GITHUB_TOKEN:-${GH_TOKEN:-}}" "$mise_bin" install -y 2>&1); then
-      hook_fail "mise install" "Failed to install tools defined in mise.toml" \
-        "Run 'mise install -y' manually to see detailed errors, or check mise.toml for invalid tool specs"
-      return 1
+    if ! (cd "${CLAUDE_PROJECT_DIR:-.}" && GITHUB_TOKEN="${GITHUB_TOKEN:-${GH_TOKEN:-}}" "$mise_bin" install -y); then
+      hook_log "mise install exited non-zero (partial failure). Tools that installed are still available."
     fi
   fi
 }

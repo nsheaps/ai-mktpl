@@ -137,13 +137,35 @@ run_plugin_session_hooks() {
         # Replace ${CLAUDE_PLUGIN_ROOT} with the actual plugin directory
         local resolved_cmd="${cmd//\$\{CLAUDE_PLUGIN_ROOT\}/$plugin_dir}"
         echo "[01-install-plugins]   [hooks]   -> $resolved_cmd"
-        (
+        local hook_rc=0
+        local hook_output
+        hook_output="$(
             export CLAUDE_PLUGIN_ROOT="$plugin_dir"
             cd "$CLAUDE_PROJECT_DIR"
-            # Redirect stdout to stderr — plugin hooks output JSON via hook_respond
-            # which would corrupt the parent hook's output if left on stdout
-            eval "$resolved_cmd" >&2
-        ) || echo "[01-install-plugins]   [hooks]   [warn] Hook command failed for $plugin_name (exit $?), continuing..."
+            eval "$resolved_cmd" 2>&1
+        )" || hook_rc=$?
+        # Always relay output to stderr so user can see it via Ctrl+O
+        if [ -n "$hook_output" ]; then
+            echo "$hook_output" >&2
+        fi
+        if [ "$hook_rc" -ne 0 ]; then
+            echo "[01-install-plugins]   [hooks]   [warn] Hook for $plugin_name exited $hook_rc, continuing..."
+            # Show last few meaningful lines for quick diagnosis
+            local err_lines
+            err_lines="$(echo "$hook_output" | grep -iE '(ERROR|FAIL|error|fail|denied|not found)' | tail -5)"
+            if [ -n "$err_lines" ]; then
+                echo "[01-install-plugins]   [hooks]   [warn] Key errors:" >&2
+                while IFS= read -r err_line; do
+                    echo "[01-install-plugins]   [hooks]   [warn]   $err_line" >&2
+                done <<< "$err_lines"
+            fi
+            # Point to log files if any exist
+            local log_files
+            log_files="$(ls -t /tmp/claude-plugin-logs/${plugin_name}-*.log 2>/dev/null | head -1)"
+            if [ -n "$log_files" ]; then
+                echo "[01-install-plugins]   [hooks]   [warn] See log: $log_files" >&2
+            fi
+        fi
     done <<< "$commands"
 }
 
