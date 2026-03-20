@@ -63,7 +63,7 @@ curl -s -H "Authorization: Bearer $LITELLM_MASTER_KEY" \
 
 ```yaml
 # In ~/.claude/plugins.settings.yaml
-litellm-proxy:
+poc-litellm-proxy:
   enabled: true
   mode: remote
   remote_url: "https://litellm.company.com:4000"
@@ -128,7 +128,7 @@ model_list:
 
 ```yaml
 # In ~/.claude/plugins.settings.yaml
-litellm-proxy:
+poc-litellm-proxy:
   enabled: true
   mode: gateway
   remote_url: "https://gateway.ai.cloudflare.com/v1/YOUR_ACCOUNT_ID/YOUR_GATEWAY_ID/anthropic"
@@ -200,7 +200,7 @@ curl -X POST https://your-gateway.example.com/v1/messages \
 
 ```yaml
 # In ~/.claude/plugins.settings.yaml
-litellm-proxy:
+poc-litellm-proxy:
   enabled: true
   mode: gateway
   remote_url: "https://your-gateway.example.com"
@@ -214,21 +214,21 @@ To switch between local and remote proxy:
 
 ```yaml
 # Switch to remote
-litellm-proxy:
+poc-litellm-proxy:
   mode: remote
   remote_url: "https://litellm.company.com:4000"
 
 # Switch back to local
-litellm-proxy:
+poc-litellm-proxy:
   mode: local
 
 # Switch to direct Cloudflare
-litellm-proxy:
+poc-litellm-proxy:
   mode: gateway
   remote_url: "https://gateway.ai.cloudflare.com/v1/ACCOUNT/GATEWAY/anthropic"
 
 # Disable proxy entirely (direct Anthropic)
-litellm-proxy:
+poc-litellm-proxy:
   mode: disabled
 ```
 

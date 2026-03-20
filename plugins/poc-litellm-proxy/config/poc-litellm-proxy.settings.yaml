@@ -1,8 +1,8 @@
-# litellm-proxy plugin configuration
+# poc-litellm-proxy plugin configuration
 #
-# This file provides defaults for the litellm-proxy plugin.
+# This file provides defaults for the poc-litellm-proxy plugin.
 # Override per-project via ${CLAUDE_PROJECT_DIR}/.claude/plugins.settings.yaml
-# or per-user via ~/.claude/plugins.settings.yaml under the "litellm-proxy" key.
+# or per-user via ~/.claude/plugins.settings.yaml under the "poc-litellm-proxy" key.
 #
 # Secret resolution order (for master_key and other secrets):
 #   1. Environment variable: ${LITELLM_MASTER_KEY}
@@ -11,7 +11,7 @@
 #
 # Set enabled: false to disable the proxy hook without uninstalling the plugin.
 
-litellm-proxy:
+poc-litellm-proxy:
   # Whether the plugin is active
   enabled: true
 

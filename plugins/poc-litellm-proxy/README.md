@@ -1,4 +1,4 @@
-# litellm-proxy
+# poc-litellm-proxy
 
 Claude Code plugin that auto-detects and configures a [LiteLLM](https://github.com/BerriAI/litellm) proxy on session start. Routes Claude Code API calls through LiteLLM for multi-provider routing, load balancing, observability, and cost tracking.
 
@@ -33,7 +33,7 @@ pip install 'litellm[proxy]'
 ```bash
 mkdir -p ~/.litellm
 # Copy the template from the plugin
-cp ~/.claude/plugins/litellm-proxy/config/litellm_config.template.yaml ~/.litellm/config.yaml
+cp ~/.claude/plugins/poc-litellm-proxy/config/litellm_config.template.yaml ~/.litellm/config.yaml
 # Edit with your API keys and providers
 ```
 
@@ -54,7 +54,7 @@ litellm --config ~/.litellm/config.yaml --port 4000
 
 ```yaml
 # In ~/.claude/plugins.settings.yaml
-litellm-proxy:
+poc-litellm-proxy:
   enabled: true
   mode: local
   master_key: "${LITELLM_MASTER_KEY}"
@@ -70,12 +70,12 @@ Configuration is resolved in order (first match wins):
 
 1. **Project-level**: `${CLAUDE_PROJECT_DIR}/.claude/plugins.settings.yaml`
 2. **User-level**: `~/.claude/plugins.settings.yaml`
-3. **Plugin defaults**: `config/litellm-proxy.settings.yaml` (bundled)
+3. **Plugin defaults**: `config/poc-litellm-proxy.settings.yaml` (bundled)
 
 ### Config Format
 
 ```yaml
-litellm-proxy:
+poc-litellm-proxy:
   enabled: true # Enable/disable the plugin
   mode: auto # auto | local | remote | gateway | disabled
   proxy_host: "http://localhost" # Local proxy host

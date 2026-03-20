@@ -40,11 +40,11 @@ When using a LiteLLM proxy:
 
 ### Method 1: Automatic (Plugin Hook)
 
-The litellm-proxy plugin's session-start hook automatically configures Claude Code. Just set the plugin settings:
+The poc-litellm-proxy plugin's session-start hook automatically configures Claude Code. Just set the plugin settings:
 
 ```yaml
 # In ~/.claude/plugins.settings.yaml
-litellm-proxy:
+poc-litellm-proxy:
   enabled: true
   mode: local # or remote, gateway
   proxy_host: "http://localhost"
@@ -222,7 +222,7 @@ To go back to direct Anthropic connection:
 
 ```yaml
 # In ~/.claude/plugins.settings.yaml
-litellm-proxy:
+poc-litellm-proxy:
   mode: disabled
 ```
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# session-start.sh — SessionStart hook for litellm-proxy plugin
+# session-start.sh — SessionStart hook for poc-litellm-proxy plugin
 #
 # Detects LiteLLM proxy availability and configures Claude Code to route
 # through it via CLAUDE_ENV_FILE. Handles four modes:
@@ -15,7 +15,7 @@ set -euo pipefail
 
 # --- Source shared config lib ---
 
-PLUGIN_NAME="litellm-proxy"
+PLUGIN_NAME="poc-litellm-proxy"
 SHARED_LIB="${CLAUDE_PLUGIN_ROOT}/lib/plugin-config.sh"
 if [ ! -f "$SHARED_LIB" ]; then
   echo "ERROR: shared lib not found: $SHARED_LIB" >&2
@@ -110,11 +110,11 @@ case "$mode" in
     if check_proxy_health "$proxy_url"; then
       base_url="$(get_claude_base_url "$proxy_url")"
     elif [ -n "$remote_url" ] && [ "$remote_url" != "null" ]; then
-      echo "WARNING: litellm-proxy: remote proxy at $remote_url is not reachable" >&2
+      echo "WARNING: ${PLUGIN_NAME}: remote proxy at $remote_url is not reachable" >&2
       base_url="$(get_claude_base_url "$proxy_url")"
     elif check_litellm_installed; then
-      echo "INFO: litellm-proxy: LiteLLM is installed but proxy is not running" >&2
-      echo "INFO: litellm-proxy: Use the setup-litellm skill to start the proxy" >&2
+      echo "INFO: ${PLUGIN_NAME}: LiteLLM is installed but proxy is not running" >&2
+      echo "INFO: ${PLUGIN_NAME}: Use the setup-litellm skill to start the proxy" >&2
       exit 0
     else
       exit 0
@@ -125,14 +125,14 @@ case "$mode" in
     ;;
   remote)
     if [ -z "$remote_url" ] || [ "$remote_url" = "null" ]; then
-      echo "ERROR: litellm-proxy: mode=remote but remote_url is not set" >&2
+      echo "ERROR: ${PLUGIN_NAME}: mode=remote but remote_url is not set" >&2
       exit 0
     fi
     base_url="$(get_claude_base_url "$remote_url")"
     ;;
   gateway)
     if [ -z "$remote_url" ] || [ "$remote_url" = "null" ]; then
-      echo "ERROR: litellm-proxy: mode=gateway but remote_url is not set" >&2
+      echo "ERROR: ${PLUGIN_NAME}: mode=gateway but remote_url is not set" >&2
       exit 0
     fi
     base_url="$remote_url"
@@ -141,7 +141,7 @@ case "$mode" in
     exit 0
     ;;
   *)
-    echo "WARNING: litellm-proxy: unknown mode '$mode', skipping" >&2
+    echo "WARNING: ${PLUGIN_NAME}: unknown mode '$mode', skipping" >&2
     exit 0
     ;;
 esac

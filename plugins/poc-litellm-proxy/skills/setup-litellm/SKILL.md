@@ -153,7 +153,7 @@ Create or update the plugin settings so the session-start hook auto-configures C
 
 ```yaml
 # In ~/.claude/plugins.settings.yaml
-litellm-proxy:
+poc-litellm-proxy:
   enabled: true
   mode: local
   proxy_host: "http://localhost"
