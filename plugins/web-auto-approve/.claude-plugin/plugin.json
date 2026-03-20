@@ -9,11 +9,5 @@
   },
   "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/web-auto-approve",
   "repository": "https://github.com/nsheaps/ai-mktpl",
-  "keywords": [
-    "permissions",
-    "web-session",
-    "auto-approve",
-    "hooks",
-    "PermissionRequest"
-  ]
+  "keywords": ["permissions", "web-session", "auto-approve", "hooks", "PermissionRequest"]
 }
