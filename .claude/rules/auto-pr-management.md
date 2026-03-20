@@ -14,7 +14,7 @@ Update the PR description **after every push** to reflect the current state of c
 
 ## How to Authenticate
 
-Use the `GH_TOKEN` environment variable with the `gh` CLI. This token has write access to pull requests and issues.
+Use the `GH_TOKEN` environment variable with the `gh` CLI. Since the git remote in web sessions is a local proxy, use `gh api` with `--hostname github.com` for all GitHub API calls (not `gh pr create` which requires a GitHub remote).
 
 ```bash
 eval "$(mise activate bash)"
@@ -24,10 +24,20 @@ The `gh` CLI should already be configured via the mise-managed GitHub plugin. If
 
 ## Creating a PR
 
+**Always create PRs as drafts.** After creation, add the `request-review` label to trigger an AI code review.
+
 ```bash
-gh pr create \
-  --title "Short descriptive title" \
-  --body "$(cat <<'EOF'
+eval "$(mise activate bash)"
+
+# Create draft PR via API (works with local proxy remote)
+gh api repos/nsheaps/ai-mktpl/pulls \
+  --hostname github.com \
+  --method POST \
+  --field title="Short descriptive title" \
+  --field head="<branch-name>" \
+  --field base="main" \
+  --field draft=true \
+  --field body="$(cat <<'EOF'
 ## Summary
 - What changed and why
 
@@ -36,11 +46,15 @@ gh pr create \
 
 <session-link>
 EOF
-)" \
-  --hostname github.com
+)" --jq '.number'
+
+# Add request-review label to trigger AI review
+gh api repos/nsheaps/ai-mktpl/issues/<PR_NUMBER>/labels \
+  --hostname github.com \
+  --method POST \
+  --field 'labels[]=request-review'
 ```
 
-- Use `--draft` if the work is still in progress
 - Target the default branch (usually `main`) unless the task specifies otherwise
 - Include a session link if available
 
@@ -49,12 +63,13 @@ EOF
 After subsequent pushes, update the PR body to reflect all changes:
 
 ```bash
-gh pr edit <number-or-branch> \
-  --body "$(cat <<'EOF'
+gh api repos/nsheaps/ai-mktpl/pulls/<PR_NUMBER> \
+  --hostname github.com \
+  --method PATCH \
+  --field body="$(cat <<'EOF'
 Updated description here
 EOF
-)" \
-  --hostname github.com
+)"
 ```
 
 ## Checking for an Existing PR
@@ -62,7 +77,9 @@ EOF
 Before creating, check if a PR already exists for the current branch:
 
 ```bash
-gh pr view --json number,title,state --hostname github.com 2>/dev/null
+gh api repos/nsheaps/ai-mktpl/pulls \
+  --hostname github.com \
+  --jq '.[] | select(.head.ref == "<branch-name>") | {number, title, state}'
 ```
 
 If a PR already exists, update it instead of creating a new one.
@@ -73,7 +90,15 @@ If a PR already exists, update it instead of creating a new one.
 - Start with a verb (Add, Fix, Update, Refactor, etc.)
 - Match conventional commit style when applicable
 
-## Draft vs Ready
+## PR Lifecycle
 
-- Use `--draft` when work is incomplete or experimental
-- Mark ready with `gh pr ready` when the work is complete and CI passes
+1. **Create as draft** — all new PRs start as drafts
+2. **Add `request-review` label** — triggers AI code review automatically
+3. **Address review feedback** — fix any issues found by the AI review
+4. **Mark ready** when work is complete and CI passes:
+   ```bash
+   gh api repos/nsheaps/ai-mktpl/pulls/<PR_NUMBER> \
+     --hostname github.com \
+     --method PATCH \
+     --field draft=false
+   ```
