@@ -36,7 +36,7 @@ resolve_mise_bin() {
     if [ -x "$mise_bin" ]; then
       hook_log "mise already installed at $mise_bin, checking for updates"
       if [ "$version" = "latest" ]; then
-        "$mise_bin" self-update >/dev/null 2>&1 || hook_log "self-update skipped"
+        "$mise_bin" self-update -y >/dev/null 2>&1 || hook_log "self-update skipped"
       fi
     elif tool_is_available mise; then
       # Found on PATH from elsewhere — use it
@@ -117,10 +117,41 @@ do_setup() {
   # Auto-install tools
   if [ "$auto_install_tools" = "true" ] && [ -f "${CLAUDE_PROJECT_DIR:-.}/mise.toml" ]; then
     hook_log_step "install-tools" "Installing tools from mise.toml"
-    if ! (cd "${CLAUDE_PROJECT_DIR:-.}" && GITHUB_TOKEN="${GITHUB_TOKEN:-${GH_TOKEN:-}}" "$mise_bin" install -y 2>&1); then
-      hook_fail "mise install" "Failed to install tools defined in mise.toml" \
-        "Run 'mise install -y' manually to see detailed errors, or check mise.toml for invalid tool specs"
-      return 1
+    local install_output install_rc=0
+    install_output="$(cd "${CLAUDE_PROJECT_DIR:-.}" && GITHUB_TOKEN="${GITHUB_TOKEN:-${GH_TOKEN:-}}" "$mise_bin" install -y 2>&1)" || install_rc=$?
+
+    # Always show the output so individual tool results are visible
+    if [ -n "$install_output" ]; then
+      echo "$install_output" >&2
+    fi
+
+    if [ "$install_rc" -ne 0 ]; then
+      # Collect which tools failed vs succeeded for a clear summary
+      local failed_tools="" succeeded_tools=""
+      while IFS= read -r line; do
+        # mise ERROR lines referencing specific tools
+        if [[ "$line" =~ ^mise\ ERROR.*bin/install\ failed$ ]] || \
+           [[ "$line" =~ ^mise\ ERROR.*bin/list-all$ ]] || \
+           [[ "$line" =~ failed\ to\ install ]]; then
+          failed_tools+="  $line"$'\n'
+        fi
+        # Successfully installed lines
+        if [[ "$line" =~ ✓\ installed$ ]]; then
+          succeeded_tools+="  $line"$'\n'
+        fi
+      done <<< "$install_output"
+
+      if [ -n "$succeeded_tools" ]; then
+        hook_log "Some tools installed successfully:"
+        echo "$succeeded_tools" >&2
+      fi
+      if [ -n "$failed_tools" ]; then
+        hook_log "Some tools failed to install (non-fatal):"
+        echo "$failed_tools" >&2
+      fi
+      # Partial failure is a warning, not a fatal error — the tools that
+      # installed are still usable
+      hook_log "mise install exited $install_rc (partial failure). Tools that installed are available."
     fi
   fi
 }
