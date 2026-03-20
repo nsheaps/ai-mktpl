@@ -117,9 +117,16 @@ do_setup() {
   # Auto-install tools
   if [ "$auto_install_tools" = "true" ] && [ -f "${CLAUDE_PROJECT_DIR:-.}/mise.toml" ]; then
     hook_log_step "install-tools" "Installing tools from mise.toml"
-    if ! (cd "${CLAUDE_PROJECT_DIR:-.}" && GITHUB_TOKEN="${GITHUB_TOKEN:-${GH_TOKEN:-}}" "$mise_bin" install -y); then
+    local install_output
+    install_output="$(cd "${CLAUDE_PROJECT_DIR:-.}" && GITHUB_TOKEN="${GITHUB_TOKEN:-${GH_TOKEN:-}}" "$mise_bin" install -y 2>&1)" || {
       hook_log "mise install exited non-zero (partial failure). Tools that installed are still available."
-    fi
+      if [ -n "$install_output" ]; then
+        hook_log "mise install output:"
+        while IFS= read -r line; do
+          hook_log "  $line"
+        done <<< "$install_output"
+      fi
+    }
   fi
 }
 
