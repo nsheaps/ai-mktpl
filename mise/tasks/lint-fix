@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+#MISE description="Auto-fix lint issues using prettier"
+set -euo pipefail
+
+FILE="${1:-.}"
+
+command -v prettier >/dev/null 2>&1 || mise run setup
+prettier --write --list-different "$FILE"

@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+#MISE description="Run all checks (lint + validate)"
+#MISE depends=["lint", "validate", "validate-claude-config"]
+set -euo pipefail
+
+mise run lint
+mise run validate
+mise run validate-claude-config

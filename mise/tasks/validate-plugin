@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+#MISE description="Validate a single plugin manifest. Usage: mise run validate-plugin <PLUGIN_PATH>"
+set -euo pipefail
+
+PLUGIN_PATH="${1:?Usage: mise run validate-plugin <PLUGIN_PATH>}"
+
+if command -v claude >/dev/null 2>&1; then
+  CLAUDE="claude"
+else
+  CLAUDE="mise exec npm:@anthropic-ai/claude-code -- claude"
+fi
+
+OUTPUT="$($CLAUDE plugin validate "$PLUGIN_PATH")"
+STATUS=$?
+if [ $STATUS -ne 0 ]; then
+  echo "$OUTPUT"
+  exit 1
+else
+  echo "✅ $PLUGIN_PATH"
+fi

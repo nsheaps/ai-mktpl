@@ -80,7 +80,7 @@ jobs:
           install: true
           cache: ${{ github.event_name == 'pull_request'}}
 
-      - name: just lint
+      - name: mise run lint
         id: lint
         #
         uses: ./.github/actions/lint-files
@@ -93,7 +93,7 @@ jobs:
         id: auto-commit-action
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
-          commit_message: 'chore: `just lint`'
+          commit_message: 'chore: `mise run lint`'
           commit_user_name: ${{ steps.auth.outputs.user-name }}
           commit_user_email: ${{ steps.auth.outputs.user-email }}
 

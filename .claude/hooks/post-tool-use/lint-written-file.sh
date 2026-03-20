@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # PostToolUse hook: Lint files after Write tool
-# Runs just lint on the file that was just written
+# Runs mise run lint on the file that was just written
 
 set -euo pipefail
 
@@ -22,7 +22,7 @@ fi
 case "$FILE_PATH" in
     *.json|*.yaml|*.yml|*.md|*.js|*.ts|*.jsx|*.tsx|*.css|*.html)
         echo "Linting: $FILE_PATH" >&2
-        just lint "$FILE_PATH" 2>/dev/null || true
+        mise run lint "$FILE_PATH" 2>/dev/null || true
         ;;
 esac
 
