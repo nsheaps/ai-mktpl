@@ -4,7 +4,11 @@
 
 set -euo pipefail
 
-REST_OWL_DIR="${CLAUDE_PROJECT_DIR:-$(pwd)}/docs/rest-owl"
+PLUGIN_NAME="rest-owl"
+source "${CLAUDE_PLUGIN_ROOT}/lib/plugin-config-read.sh"
+
+artifacts_dir="$(plugin_get_config "artifactsDir" "docs/rest-owl")"
+REST_OWL_DIR="${CLAUDE_PROJECT_DIR:-$(pwd)}/${artifacts_dir}"
 
 if [ ! -d "$REST_OWL_DIR" ]; then
   exit 0
@@ -25,5 +29,5 @@ if [ ${#phases[@]} -eq 0 ]; then
 fi
 
 completed="${phases[*]}"
-echo "📦 rest-owl project detected — completed phases: ${completed}"
+echo "rest-owl project detected — completed phases: ${completed}"
 echo "   Use /rest-owl to resume the workflow"

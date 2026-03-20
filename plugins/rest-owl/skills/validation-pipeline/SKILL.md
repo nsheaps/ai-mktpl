@@ -26,6 +26,10 @@ Sets up a complete testing and continuous integration infrastructure that valida
 - Design system (`docs/rest-owl/03-design-system.md`)
 - Feature spec (`docs/rest-owl/02-feature-spec.md`) — acceptance criteria become tests
 
+## Tool Selection
+
+The examples below default to **Bun** as the runtime and **Playwright** for E2E testing. These are defaults — adapt to whatever the user chose in Phase 0 and Phase 4 (architecture). The `testRunner` and `e2eFramework` settings in `rest-owl.settings.yaml` also control defaults. The patterns and principles apply regardless of specific tool choices.
+
 ## Testing Layers
 
 ### Layer 1: Unit Tests
@@ -328,6 +332,11 @@ jobs:
           name: screenshot-baselines
           path: e2e/screenshots/
 
+      - name: List visual diffs
+        if: failure()
+        id: diffs
+        run: echo "files=$(find test-results -name '*-diff.png' -exec basename {} \; | tr '\n' ', ')" >> "$GITHUB_OUTPUT"
+
       - name: Comment visual diff on PR
         if: failure() && github.event_name == 'pull_request'
         uses: peter-evans/create-or-update-comment@v4
@@ -338,10 +347,7 @@ jobs:
 
             Screenshots have changed. Download the `visual-diffs` artifact to review.
 
-            **Changed screens:**
-            ```
-            $(find test-results -name '*-diff.png' -exec basename {} \;)
-            ```
+            **Changed screens:** ${{ steps.diffs.outputs.files }}
 
             If these changes are intentional, update baselines:
             ```bash

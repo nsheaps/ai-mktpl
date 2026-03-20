@@ -6,7 +6,7 @@ description: >
   "make a Slack competitor", "create a task management app"). Orchestrates research,
   specification, design, implementation, and validation into a complete deliverable.
 argument-hint: "<project idea in plain English>"
-allowed-tools: Bash, Read, Grep, Glob, Edit, Write, Agent, WebSearch, WebFetch, Task, TodoWrite, AskUserQuestion, NotebookEdit
+allowed-tools: Bash, Read, Grep, Glob, Edit, Write, Agent, WebSearch, WebFetch, TodoWrite, AskUserQuestion, NotebookEdit
 ---
 
 # Rest of the Owl

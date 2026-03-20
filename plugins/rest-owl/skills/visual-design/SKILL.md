@@ -145,6 +145,8 @@ Each mockup file must be:
 
 #### HTML Mockup Template
 
+The template below uses Tailwind CSS via CDN as a sensible default for rapid mockup creation. If the user expressed different preferences in Phase 0 (e.g., vanilla CSS, Bootstrap, or a specific design framework), adapt the template accordingly. The key requirement is that mockups remain **single-file and self-contained**.
+
 ```html
 <!DOCTYPE html>
 <html lang="en">
@@ -152,11 +154,14 @@ Each mockup file must be:
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>[Screen Name] — [Project Name] Mockup</title>
-    <!-- Tailwind CSS via CDN for consistent utility classes -->
+    <!-- Tailwind CSS via CDN (default — adapt to user's preferred CSS framework) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link href="https://fonts.googleapis.com/css2?family=[Font]&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=[Font]&display=swap"
+      rel="stylesheet"
+    />
     <script>
       tailwind.config = {
         theme: {
