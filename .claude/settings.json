@@ -70,7 +70,7 @@
   "hooks": {
     "PermissionRequest": [
       {
-        "matcher": "Edit",
+        "matcher": "Edit|Write|Bash",
         "hooks": [
           {
             "type": "command",
@@ -78,25 +78,8 @@
             "timeout": 5
           }
         ]
-      },
-      {
-        "matcher": "Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "[ -n \"$CLAUDE_CODE_REMOTE\" ] && echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PermissionRequest\",\"decision\":{\"behavior\":\"allow\"}}}' || true",
-            "timeout": 5
-          }
-        ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "[ -n \"$CLAUDE_CODE_REMOTE\" ] && echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PermissionRequest\",\"decision\":{\"behavior\":\"allow\"}}}' || true",
-            "timeout": 5
-          }
+      }
+    ],
         ]
       }
     ],
