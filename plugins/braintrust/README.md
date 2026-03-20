@@ -13,9 +13,9 @@ Braintrust is an AI evaluation, tracing, and observability platform. It lets you
 
 ## Required Environment Variables
 
-| Variable             | Description                     | How to get it                                      |
-| -------------------- | ------------------------------- | -------------------------------------------------- |
-| `BRAINTRUST_API_KEY` | API key for Braintrust tracing  | [braintrust.dev/app/settings](https://braintrust.dev/app/settings) → API keys |
+| Variable             | Description                    | How to get it                                                                 |
+| -------------------- | ------------------------------ | ----------------------------------------------------------------------------- |
+| `BRAINTRUST_API_KEY` | API key for Braintrust tracing | [braintrust.dev/app/settings](https://braintrust.dev/app/settings) → API keys |
 
 ## Setup
 
