@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-#MIME description="Validate plugin structure"
 #MISE description="Validate plugin structure"
 set -e
 
