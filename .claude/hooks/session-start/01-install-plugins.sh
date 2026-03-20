@@ -137,35 +137,44 @@ run_plugin_session_hooks() {
         # Replace ${CLAUDE_PLUGIN_ROOT} with the actual plugin directory
         local resolved_cmd="${cmd//\$\{CLAUDE_PLUGIN_ROOT\}/$plugin_dir}"
         echo "[01-install-plugins]   [hooks]   -> $resolved_cmd"
-        local hook_rc=0
-        local hook_output
-        hook_output="$(
+
+        # Capture both stdout and stderr so we can display them on failure.
+        # Plugin hooks emit JSON on stdout (via hook_respond) which would corrupt
+        # the parent hook's text output, so we always capture stdout separately.
+        local hook_stdout_file hook_stderr_file hook_exit_code
+        hook_stdout_file="$(mktemp)"
+        hook_stderr_file="$(mktemp)"
+        hook_exit_code=0
+        (
             export CLAUDE_PLUGIN_ROOT="$plugin_dir"
             cd "$CLAUDE_PROJECT_DIR"
-            eval "$resolved_cmd" 2>&1
-        )" || hook_rc=$?
-        # Always relay output to stderr so user can see it via Ctrl+O
-        if [ -n "$hook_output" ]; then
-            echo "$hook_output" >&2
-        fi
-        if [ "$hook_rc" -ne 0 ]; then
-            echo "[01-install-plugins]   [hooks]   [warn] Hook for $plugin_name exited $hook_rc, continuing..."
-            # Show last few meaningful lines for quick diagnosis
-            local err_lines
-            err_lines="$(echo "$hook_output" | grep -iE '(ERROR|FAIL|error|fail|denied|not found)' | tail -5)"
-            if [ -n "$err_lines" ]; then
-                echo "[01-install-plugins]   [hooks]   [warn] Key errors:" >&2
-                while IFS= read -r err_line; do
-                    echo "[01-install-plugins]   [hooks]   [warn]   $err_line" >&2
-                done <<< "$err_lines"
+            eval "$resolved_cmd"
+        ) >"$hook_stdout_file" 2>"$hook_stderr_file" || hook_exit_code=$?
+
+        if [ "$hook_exit_code" -ne 0 ]; then
+            echo "[01-install-plugins]   [hooks]"
+            echo "[01-install-plugins]   [hooks]   ============================================"
+            echo "[01-install-plugins]   [hooks]   HOOK FAILED: $plugin_name (exit $hook_exit_code)"
+            echo "[01-install-plugins]   [hooks]   Command: $resolved_cmd"
+            echo "[01-install-plugins]   [hooks]   ============================================"
+            if [ -s "$hook_stderr_file" ]; then
+                echo "[01-install-plugins]   [hooks]   --- stderr ---"
+                sed 's/^/[01-install-plugins]   [hooks]   | /' "$hook_stderr_file"
+            else
+                echo "[01-install-plugins]   [hooks]   --- stderr: (empty) ---"
             fi
-            # Point to log files if any exist
-            local log_files
-            log_files="$(ls -t /tmp/claude-plugin-logs/${plugin_name}-*.log 2>/dev/null | head -1)"
-            if [ -n "$log_files" ]; then
-                echo "[01-install-plugins]   [hooks]   [warn] See log: $log_files" >&2
+            if [ -s "$hook_stdout_file" ]; then
+                echo "[01-install-plugins]   [hooks]   --- stdout ---"
+                sed 's/^/[01-install-plugins]   [hooks]   | /' "$hook_stdout_file"
+            else
+                echo "[01-install-plugins]   [hooks]   --- stdout: (empty) ---"
             fi
+            echo "[01-install-plugins]   [hooks]   ============================================"
+            echo "[01-install-plugins]   [hooks]   Continuing with remaining hooks..."
+            echo "[01-install-plugins]   [hooks]"
         fi
+
+        rm -f "$hook_stdout_file" "$hook_stderr_file"
     done <<< "$commands"
 }
 
