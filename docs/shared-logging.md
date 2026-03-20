@@ -6,11 +6,11 @@ This document describes the shared logging libraries available in `shared/lib/` 
 
 Three libraries form the logging stack, from simplest to most feature-rich:
 
-| Library | Purpose | Output | Use When |
-|---------|---------|--------|----------|
-| `log.sh` | Basic stderr logging | stderr only | Any script needs consistent logging |
-| `hook-output.sh` | JSON hook responses | stderr + JSON stdout | Simple hooks returning `{additionalContext, systemMessage}` |
-| `hook-logging.sh` | Full hook lifecycle | stderr + log file + accumulated stdout | Complex hooks with steps, error reporting, `hook_respond` |
+| Library           | Purpose              | Output                                 | Use When                                                    |
+| ----------------- | -------------------- | -------------------------------------- | ----------------------------------------------------------- |
+| `log.sh`          | Basic stderr logging | stderr only                            | Any script needs consistent logging                         |
+| `hook-output.sh`  | JSON hook responses  | stderr + JSON stdout                   | Simple hooks returning `{additionalContext, systemMessage}` |
+| `hook-logging.sh` | Full hook lifecycle  | stderr + log file + accumulated stdout | Complex hooks with steps, error reporting, `hook_respond`   |
 
 ## log.sh
 
@@ -42,6 +42,7 @@ All output goes to stderr, so it never interferes with stdout (hook responses, r
 ### Prefix Resolution
 
 The prefix is resolved in this order:
+
 1. `LOG_PREFIX` (if set explicitly)
 2. `PLUGIN_NAME` (if set)
 3. `"script"` (fallback)
@@ -66,6 +67,7 @@ hook_msg_only "quiet message"          # JSON to stdout only (no stderr)
 ### When to Use
 
 Use `hook-output.sh` for hooks that:
+
 - Need to return a single status message to Claude Code
 - Don't have a complex lifecycle (no steps, no error reporting)
 - Output `{additionalContext, systemMessage}` JSON
@@ -105,6 +107,7 @@ hook_respond                                   # MUST be last — outputs to std
 ### When to Use
 
 Use `hook-logging.sh` for hooks that:
+
 - Install tools or perform multi-step setup
 - Need log file diagnostics on failure
 - Use `hook_run` to wrap main functions
@@ -123,12 +126,14 @@ Does your script need hook-specific output?
 ## Adding to a Plugin
 
 1. Symlink the library into the plugin's `lib/` directory:
+
    ```bash
    mkdir -p plugins/my-plugin/lib
    ln -s ../../../shared/lib/log.sh plugins/my-plugin/lib/log.sh
    ```
 
 2. Source it in your script:
+
    ```bash
    source "${CLAUDE_PLUGIN_ROOT}/lib/log.sh"
    ```
@@ -161,7 +166,7 @@ echo "[my-hook] Starting setup"
 log_info "Installing tool..."
 ```
 
-### Don't duplicate _json_msg
+### Don't duplicate \_json_msg
 
 ```bash
 # Bad
