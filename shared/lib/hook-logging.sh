@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
-# hook-logging.sh — Shared library for hook logging with structured JSON output
+# hook-logging.sh — Shared library for hook logging with human-readable output
 #
-# All hooks output structured JSON to stdout (the only channel Claude Code
-# processes for both user-visible systemMessage and agent-visible
-# additionalContext). Human-readable messages also go to stderr for
-# Ctrl+O verbose mode and log file diagnostics.
+# All hooks output plain text to stdout (shown to the user as systemMessage
+# and provided to the agent as additionalContext). Human-readable messages
+# also go to stderr for Ctrl+O verbose mode and log file diagnostics.
 #
 # Usage:
 #   PLUGIN_NAME="my-plugin"                     # Required: set before sourcing
@@ -126,31 +125,16 @@ hook_fail() {
 
 # --- Response helper ---
 
-# Output accumulated messages as structured JSON to stdout.
+# Output accumulated messages as plain text to stdout.
 # MUST be called exactly once as the last thing before exit.
-# Outputs JSON with both systemMessage (user sees) and additionalContext (agent sees).
+# Stdout is shown to the user as systemMessage and provided to the agent as additionalContext.
 hook_respond() {
-  local combined=""
   if [ -s "$_HOOK_MSG_FILE" ]; then
-    combined=$(cat "$_HOOK_MSG_FILE")
+    cat "$_HOOK_MSG_FILE"
   fi
 
   # Clean up message file
   rm -f "$_HOOK_MSG_FILE" 2>/dev/null || true
-
-  if [ -n "$combined" ]; then
-    if command -v jq &>/dev/null; then
-      jq -n --arg msg "$combined" \
-        '{additionalContext: $msg, systemMessage: $msg}'
-    else
-      # Fallback: escape for JSON manually
-      local escaped
-      escaped=$(printf '%s' "$combined" | sed 's/\\/\\\\/g; s/"/\\"/g; s/\t/\\t/g' | sed ':a;N;$!ba;s/\n/\\n/g')
-      echo "{\"additionalContext\":\"${escaped}\",\"systemMessage\":\"${escaped}\"}"
-    fi
-  else
-    echo '{}'
-  fi
 }
 
 # --- Execution wrapper ---

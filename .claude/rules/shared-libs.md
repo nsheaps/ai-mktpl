@@ -56,22 +56,22 @@ add_permission_to_allow "Bash(tool:*)" "user"          # user-level
 
 ### hook-logging.sh
 
-Hook logging with structured JSON output. Messages are printed to stderr (user sees via Ctrl+O) and accumulated for JSON output on stdout (user sees via `systemMessage`, agent sees via `additionalContext`). On failure, a structured error block is also printed to stderr.
+Hook logging with human-readable output. Messages are printed to stderr (user sees via Ctrl+O) and accumulated for plain text output on stdout (user sees via `systemMessage`, agent sees via `additionalContext`). On failure, a structured error block is also printed to stderr.
 
 ```bash
 PLUGIN_NAME="my-plugin"  # MUST be set before sourcing
 source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 
-hook_log "Installing tool v1.2.3"              # stderr + accumulate for JSON
+hook_log "Installing tool v1.2.3"              # stderr + accumulate for stdout
 hook_log_always "Tool v1.2.3 ready"            # alias for hook_log
 hook_log_step "download" "Downloading binary"  # start a named step
 hook_fail "curl" "404 not found" "Check URL"   # structured error to stderr (returns 0)
 hook_run my_main_function                      # wrap function, auto-fail on non-zero exit
 hook_log_cleanup                               # remove log file on success
-hook_respond                                   # MUST be last — outputs JSON to stdout
+hook_respond                                   # MUST be last — outputs plain text to stdout
 ```
 
-**IMPORTANT:** `hook_respond` MUST be called exactly once, as the last thing before exit. It outputs accumulated messages as JSON with both `systemMessage` (user sees) and `additionalContext` (agent sees). Hooks MUST always exit 0.
+**IMPORTANT:** `hook_respond` MUST be called exactly once, as the last thing before exit. It outputs accumulated messages as plain text to stdout. Hooks MUST always exit 0.
 
 On failure, `hook_fail` prints:
 
