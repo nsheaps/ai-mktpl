@@ -106,9 +106,9 @@ gh api repos/nsheaps/ai-mktpl/pulls/<PR_NUMBER> \
 
 ## Error Handling
 
-| Error | Resolution |
-|-------|-----------|
-| `gh` not found | Run `eval "$(mise activate bash)"` or `mise install` |
-| 401 Unauthorized | Check `GH_TOKEN` is set and has PR write scope |
-| 422 Validation failed | Branch may not exist on remote yet — push first |
-| PR already exists | Use PATCH to update instead of POST to create |
+| Error                 | Resolution                                           |
+| --------------------- | ---------------------------------------------------- |
+| `gh` not found        | Run `eval "$(mise activate bash)"` or `mise install` |
+| 401 Unauthorized      | Check `GH_TOKEN` is set and has PR write scope       |
+| 422 Validation failed | Branch may not exist on remote yet — push first      |
+| PR already exists     | Use PATCH to update instead of POST to create        |
