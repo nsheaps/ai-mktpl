@@ -29,5 +29,5 @@ mise:
   # or op to be signed in interactively on local sessions.
   secrets:
     - envVar: BRAINTRUST_API_KEY
-      reference: "op://heapsinfra/Braintrust/api-key"
+      reference: 'op://heapsinfra/Braintrust/api-key'
       target: envFile
