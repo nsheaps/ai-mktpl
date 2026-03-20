@@ -1,6 +1,7 @@
 # Vibe Coding: AI-First Development and the Idea-to-Implementation Gap
 
 ## Sources
+
 - **Wikipedia**: https://en.wikipedia.org/wiki/Vibe_coding
 - **Google Cloud**: https://cloud.google.com/discover/what-is-vibe-coding
 - **Kristin Darrow - State of Vibecoding Feb 2026**: https://www.kristindarrow.com/insights/the-state-of-vibecoding-in-feb-2026
@@ -14,6 +15,7 @@ Coined by Andrej Karpathy (OpenAI co-founder, former Tesla AI lead) in February 
 ## Evolution from 2025 to 2026
 
 What started as "prompt an LLM and just vibe with whatever comes back" has matured into a structured AI-first development methodology with:
+
 - Multi-model orchestration
 - Persistent project context
 - Layered validation
@@ -30,6 +32,7 @@ What started as "prompt an LLM and just vibe with whatever comes back" has matur
 The defining tension of 2026: **whether improved AI coding models can close the gap between software that works (easy to demo) and software that is secure, maintainable, and reliable.**
 
 This is essentially the "rest of the owl" problem applied to software:
+
 - Step 1: Describe what you want
 - Step 2: Get working software
 - Missing middle: security, scalability, reliability, maintainability

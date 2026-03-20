@@ -1,6 +1,7 @@
 # Martin Fowler (Birgitta Boeckeler): Critical Analysis of SDD Tools
 
 ## Source
+
 - **Martin Fowler / Birgitta Boeckeler - "Understanding Spec-Driven Development: Kiro, spec-kit, and Tessl"**: https://martinfowler.com/articles/exploring-gen-ai/sdd-3-tools.html
 
 ## Overview
@@ -10,6 +11,7 @@ This is a deeply critical, hands-on evaluation of three SDD tools by Birgitta Bo
 ## Three Levels of SDD
 
 The author distinguishes three implementation levels:
+
 1. **Spec-first**: Specs guide initial development, then are discarded
 2. **Spec-anchored**: Specs persist for ongoing feature evolution
 3. **Spec-as-source**: Specs become the primary maintained artifact; code is generated from them
@@ -17,16 +19,19 @@ The author distinguishes three implementation levels:
 ## Tool-by-Tool Assessment
 
 ### Kiro (AWS)
+
 - Lightweight, intuitive three-step workflow: Requirements -> Design -> Tasks
 - But: fixed workflows unsuitable for varying problem sizes
 - A small bug generated "4 user stories with 16 acceptance criteria" -- massive overkill
 
 ### GitHub Spec Kit
+
 - Customizable, uses a "constitution" to enforce architectural principles
 - But: generated excessive markdown files that were "repetitive," "verbose and tedious to review"
 - The author states she would **"rather review code than all these markdown files"**
 
 ### Tessl
+
 - Only tool pursuing spec-anchored and spec-as-source approaches
 - One-to-one spec-to-file mapping reduces LLM interpretation errors
 - Most ambitious but also most unproven
@@ -34,18 +39,23 @@ The author distinguishes three implementation levels:
 ## Critical Weaknesses (Across All Tools)
 
 ### Workflow Mismatch
+
 Fixed workflows don't fit all problem sizes. Using heavyweight spec processes for small fixes creates absurd overhead.
 
 ### Review Burden
+
 SDD doesn't eliminate review -- it shifts it from code review to spec review, and the specs can be MORE tedious to review than code.
 
 ### Instruction Non-Compliance
+
 Despite comprehensive specifications, agents frequently ignored instructions or misinterpreted existing code as new specifications, creating duplicates. The spec doesn't guarantee the AI will follow it.
 
 ### Unclear Target Users
+
 Documentation doesn't clarify whether SDD suits small fixes, large features, or requires cross-functional teams.
 
 ### Semantic Diffusion
+
 The term "spec-driven development" is already poorly defined and experiencing semantic diffusion -- "spec" is becoming synonymous with "detailed prompt."
 
 ## The MDD Parallel (Critical Warning)

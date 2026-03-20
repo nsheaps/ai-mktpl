@@ -1,6 +1,7 @@
 # Visual Regression Testing and Screenshot-Driven Development
 
 ## Sources
+
 - **Sauce Labs - 20 Best Visual Regression Testing Tools 2026**: https://saucelabs.com/resources/blog/comparing-the-20-best-visual-testing-tools-of-2026
 - **testRigor - Top 7 Visual Testing Tools 2026**: https://testrigor.com/blog/visual-testing-tools/
 - **Bug0 - What Is Visual Regression Testing**: https://bug0.com/knowledge-base/what-is-visual-regression-testing
@@ -22,14 +23,14 @@ In 2026, AI-powered diffing has replaced pixel-only comparison as the standard.
 
 ## Leading Tools (2026)
 
-| Tool | Strength |
-|------|----------|
-| Applitools Eyes | Enterprise-grade AI visual engine, low false positives |
+| Tool                 | Strength                                                 |
+| -------------------- | -------------------------------------------------------- |
+| Applitools Eyes      | Enterprise-grade AI visual engine, low false positives   |
 | Percy (BrowserStack) | Smooth CI integration, parallel browser/viewport testing |
-| Chromatic | Built for Storybook/component libraries |
-| Reflect | No-code, natural language test creation |
-| QA.tech | Validates visuals in context of real user flows |
-| Panto AI | AI-driven mobile visual testing |
+| Chromatic            | Built for Storybook/component libraries                  |
+| Reflect              | No-code, natural language test creation                  |
+| QA.tech              | Validates visuals in context of real user flows          |
+| Panto AI             | AI-driven mobile visual testing                          |
 
 ## Key Trends
 

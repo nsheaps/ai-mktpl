@@ -158,10 +158,7 @@ The template below uses Tailwind CSS via CDN as a sensible default for rapid moc
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=[Font]&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=[Font]&display=swap" rel="stylesheet" />
     <script>
       tailwind.config = {
         theme: {

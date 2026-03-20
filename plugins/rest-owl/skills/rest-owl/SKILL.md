@@ -150,6 +150,7 @@ This phase produces:
    This file is placed in the project root and ensures consistent code generation across all milestones. Inspired by GitHub's Spec Kit `/speckit.constitution` pattern.
 
 **Output**:
+
 - `docs/rest-owl/04-architecture.md` — technical decisions and system design
 - `CLAUDE.md` (project root) — constitution / project rules for AI code generation
 

@@ -1,10 +1,11 @@
 # Vibe Coding: The Landscape in 2026
 
 **Sources**:
+
 - https://cloud.google.com/discover/what-is-vibe-coding (Google Cloud)
 - https://en.wikipedia.org/wiki/Vibe_coding (Wikipedia)
 - https://designrevision.com/blog/vibe-coding (DesignRevision)
-**Date read**: 2026-03-20
+  **Date read**: 2026-03-20
 
 ## Key Takeaways
 

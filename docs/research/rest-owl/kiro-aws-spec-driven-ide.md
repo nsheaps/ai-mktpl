@@ -1,6 +1,7 @@
 # Kiro (AWS): Spec-Driven Agentic IDE
 
 ## Sources
+
 - **InfoQ - Beyond Vibe Coding**: https://www.infoq.com/news/2025/08/aws-kiro-spec-driven-agent/
 - **The New Stack - Testing Kiro**: https://thenewstack.io/aws-kiro-testing-an-ai-ide-with-a-spec-driven-approach/
 - **DEV Community - What I Learned Using SDD with Kiro**: https://dev.to/aws-builders/what-i-learned-using-specification-driven-development-with-kiro-pdj
@@ -27,6 +28,7 @@ This prevents "spaghetti code generation" from free-wheeling chat agents.
 ## User Experience Reports
 
 ### Positive
+
 - "Spent more time upfront articulating what I wanted to build, but then could step back and let it execute"
 - "The difference between being a hands-on manager versus setting clear expectations and trusting the process"
 - "Kiro did not invent good engineering practices. It made them unavoidable."
@@ -34,6 +36,7 @@ This prevents "spaghetti code generation" from free-wheeling chat agents.
 - Teams report "reducing time to customer value from weeks to days"
 
 ### Negative
+
 - 50 interactions/month on free tier runs out fast
 - Spec overhead is friction for simple tasks
 - Learning curve for EARS notation and formal spec writing

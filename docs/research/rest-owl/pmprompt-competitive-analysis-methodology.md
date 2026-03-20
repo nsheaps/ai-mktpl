@@ -1,6 +1,7 @@
 # Competitive Analysis Methodologies for Product Development
 
 ## Sources
+
 - **PMPrompt - Competitive Analysis Framework for PMs**: https://pmprompt.com/blog/competitive-analysis-framework
 - **Maven - Competitive Analysis for Product Managers**: https://maven.com/articles/product-competitive-analysis
 - **Cascade - 6 Competitive Analysis Frameworks**: https://www.cascade.app/blog/competitive-analysis-frameworks
@@ -15,16 +16,19 @@ Systematic process of identifying, analyzing, and understanding competitors' str
 ## The Three-Phase Framework: Assess, Benchmark, Strategize
 
 ### 1. Assess
+
 - Identify direct and indirect competitors
 - Map the forces shaping the market
 - Include emerging and non-obvious competitors
 
 ### 2. Benchmark
+
 - Analyze each rival's business in detail
 - Feature matrix comparing key product capabilities
 - Synthesize where you stand vs. competitors
 
 ### 3. Strategize
+
 - Translate insights into recommendations
 - Prioritize areas of opportunity
 - Shore up vulnerabilities
@@ -32,13 +36,13 @@ Systematic process of identifying, analyzing, and understanding competitors' str
 
 ## Key Frameworks
 
-| Framework | Use Case |
-|-----------|----------|
-| SWOT Analysis | Internal strengths/weaknesses + external opportunities/threats per competitor |
-| Porter's Five Forces | Industry-level competitive dynamics |
-| Feature Matrix | Side-by-side product capability comparison |
-| Perceptual Mapping | Visual positioning on 2 axes (e.g., price vs. quality) |
-| Growth Share Matrix (BCG) | Portfolio evaluation by market growth + market share |
+| Framework                 | Use Case                                                                      |
+| ------------------------- | ----------------------------------------------------------------------------- |
+| SWOT Analysis             | Internal strengths/weaknesses + external opportunities/threats per competitor |
+| Porter's Five Forces      | Industry-level competitive dynamics                                           |
+| Feature Matrix            | Side-by-side product capability comparison                                    |
+| Perceptual Mapping        | Visual positioning on 2 axes (e.g., price vs. quality)                        |
+| Growth Share Matrix (BCG) | Portfolio evaluation by market growth + market share                          |
 
 ## Turning Insights into Action
 

@@ -1,6 +1,7 @@
 # r/restofthefuckingowl - The Gap Between Simple Instructions and Complex Results
 
 ## Source
+
 - **Subreddit**: https://www.reddit.com/r/restofthefuckingowl/
 - **Karla Starr article**: https://karlastarr.substack.com/p/draw-the-rest-of-the-fucking-owl
 - **Urban Dictionary**: https://www.urbandictionary.com/define.php?term=draw+the+rest+of+the+owl
@@ -9,6 +10,7 @@
 ## Origin
 
 The phrase comes from a satirical "How to draw an owl" instructional image:
+
 - Step 1: Draw some circles
 - Step 2: Draw the rest of the fucking owl
 
@@ -21,15 +23,19 @@ r/restofthefuckingowl has ~394k subscribers. It collects real-world examples of 
 ## Key Concepts
 
 ### Hypocognition
+
 Karla Starr connects this to **hypocognition** -- "when we don't know what we don't know." When successful people share how they succeeded, they unconsciously skip the parts that came naturally to them or were provided by privilege/environment. The listener is left trying to "draw the rest of the owl" without the hidden prerequisites.
 
 ### The Hidden Middle
+
 People don't realize that others:
+
 - "Bought the owl drawings" (had advantages)
 - "Were raised in an owl-drawing environment" (had training/context)
 - "Are hiding their own owl-drawing efforts" (don't show the struggle)
 
 ### Universal Pattern
+
 This isn't just about bad tutorials. It's a fundamental pattern in knowledge transfer where experts unconsciously skip intermediate steps because those steps are automatic/invisible to them. This is related to the "curse of knowledge" cognitive bias.
 
 ## Relevance to an AI Plugin That Bridges This Gap

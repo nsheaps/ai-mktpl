@@ -1,6 +1,7 @@
 # GitHub Spec Kit: Open Source Spec-Driven Development Toolkit
 
 ## Sources
+
 - **GitHub Repo**: https://github.com/github/spec-kit
 - **GitHub Blog Announcement**: https://github.blog/ai-and-ml/generative-ai/spec-driven-development-with-ai-get-started-with-a-new-open-source-toolkit/
 - **Visual Studio Magazine**: https://visualstudiomagazine.com/articles/2025/09/03/github-open-sources-kit-for-spec-driven-ai-development.aspx
@@ -19,7 +20,7 @@ Open source toolkit (MIT license, released Sept 2025) that structures how AI cod
 ## Workflow (Slash Commands)
 
 1. **`/speckit.constitution`** -- Non-negotiable project rules. Other commands refer back to this.
-2. **`/speckit.specify`** -- Describe features, pages, user flow (the *what*).
+2. **`/speckit.specify`** -- Describe features, pages, user flow (the _what_).
 3. **`/speckit.plan`** -- Generate technical architecture and implementation plan.
 4. **`/speckit.tasks`** -- Break plan into small, testable implementation tasks.
 5. **Implement** -- AI agent executes tasks to generate code.
@@ -40,11 +41,11 @@ Optional: `/speckit.clarify` (resolve ambiguity), `/speckit.analyze` (consistenc
 
 ## Use Cases
 
-| Scenario | How Spec Kit Helps |
-|----------|-------------------|
-| Greenfield (zero-to-one) | Upfront spec ensures AI builds what you intend |
-| Legacy modernization | Capture business logic in spec, rebuild without tech debt |
-| Brownfield extensions | Fit into existing codebases without prior specs |
+| Scenario                 | How Spec Kit Helps                                        |
+| ------------------------ | --------------------------------------------------------- |
+| Greenfield (zero-to-one) | Upfront spec ensures AI builds what you intend            |
+| Legacy modernization     | Capture business logic in spec, rebuild without tech debt |
+| Brownfield extensions    | Fit into existing codebases without prior specs           |
 
 ## Key Benefits
 

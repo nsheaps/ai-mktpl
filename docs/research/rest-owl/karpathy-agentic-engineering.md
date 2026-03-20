@@ -1,11 +1,12 @@
 # Agentic Engineering — Andrej Karpathy (Feb 2026)
 
 **Sources**:
+
 - https://addyosmani.com/blog/agentic-engineering/ (Addy Osmani's comprehensive summary)
 - https://www.ibm.com/think/topics/agentic-engineering (IBM)
 - https://www.glideapps.com/blog/what-is-agentic-engineering (Glide)
 - https://www.nxcode.io/resources/news/agentic-engineering-complete-guide-vibe-coding-ai-agents-2026 (NxCode)
-**Date read**: 2026-03-20
+  **Date read**: 2026-03-20
 
 ## Key Takeaways
 

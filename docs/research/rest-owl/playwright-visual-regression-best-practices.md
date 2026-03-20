@@ -1,11 +1,12 @@
 # Playwright Visual Regression Testing — Best Practices 2025-2026
 
 **Sources**:
+
 - https://blog.scottlogic.com/2025/08/21/making-visual-comparison-test-maintenance-easier-with-github-actions.html
 - https://www.duncanmackenzie.net/blog/visual-regression-testing/
 - https://oneuptime.com/blog/post/2026-01-27-playwright-visual-testing/view
 - https://testdino.com/blog/playwright-visual-testing/
-**Date read**: 2026-03-20
+  **Date read**: 2026-03-20
 
 ## Key Best Practices
 

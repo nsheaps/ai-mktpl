@@ -1,6 +1,7 @@
 # Karla Starr: Hypocognition and the Owl-Drawing Problem
 
 ## Source
+
 - **Karla Starr - "Draw the Rest of the Fucking Owl"**: https://karlastarr.substack.com/p/draw-the-rest-of-the-fucking-owl
 - **Ruminare Substack**: https://ruminare.substack.com/p/draw-the-rest-of-the-owl
 
@@ -17,6 +18,7 @@ This is the "draw the rest of the owl" distilled to its essence -- the expert's 
 ## Incomplete Advice from Expertise
 
 Starr critiques productivity gurus like James Clear, whose suggestions assume:
+
 - Full schedule autonomy
 - No caregiving responsibilities
 - Neurotypical brains

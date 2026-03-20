@@ -1,6 +1,7 @@
 # AI-Assisted Scaffolding: Tools That Generate Complete Projects from Descriptions
 
 ## Sources
+
 - **Medium - AI Coding Platform Wars 2026**: https://medium.com/@aftab001x/the-2026-ai-coding-platform-wars-replit-vs-windsurf-vs-bolt-new-f908b9f76325
 - **Anna Arteeva - AI Prototyping Stack Comparison**: https://annaarteeva.medium.com/choosing-your-ai-prototyping-stack-lovable-v0-bolt-replit-cursor-magic-patterns-compared-9a5194f163e9
 - **Mocha - Best AI App Builder 2026**: https://getmocha.com/blog/best-ai-app-builder-2026/
@@ -14,24 +15,28 @@ Vibe coding went from a meme to a $50B+ market. These are scaffolding generators
 ## Key Platforms
 
 ### Bolt.new (StackBlitz)
+
 - "Prompt to full stack app" in the browser
 - Scaffolds a project in ~8-10 minutes
 - Most framework flexibility
 - Bolt v2 (Oct 2025): autonomous debugging reducing error loops by 98%
 
 ### Lovable (formerly GPT Engineer)
+
 - Produces the cleanest React code
 - Bi-directional GitHub sync (edit in Lovable or external IDE)
 - Hit $100M ARR in 8 months -- potentially fastest-growing startup in history
 - Very welcoming, non-intimidating interface
 
 ### Replit
+
 - Full cloud-based development environment with AI agent
 - Autonomous AI Agent 3: plans, codes, and refines end-to-end
 - Revenue jumped $10M to $100M in 9 months after launching Agent
 - Most autonomous with 30+ integrations
 
 ### Others
+
 - **v0** (Vercel): UI component generation from descriptions
 - **Cursor**: IDE with AI integration for technical users
 - **Windsurf**: AI-powered IDE competitor
@@ -41,6 +46,7 @@ Vibe coding went from a meme to a $50B+ market. These are scaffolding generators
 **These tools create 60-80% of boilerplate. You finish the last 20-40% that requires judgment, domain knowledge, and debugging skills.**
 
 Key limitations:
+
 - None generate production-ready code out of the box
 - Demos compress 40 hours of work into 40 minutes by skipping everything that makes software production-grade
 - Beautiful mockups with clean code that you can't actually deploy without technical help

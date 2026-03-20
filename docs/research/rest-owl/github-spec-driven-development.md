@@ -1,6 +1,7 @@
 # Spec-Driven Development: From Rough Idea to Detailed Specification
 
 ## Sources
+
 - **GitHub Blog - Spec Kit**: https://github.blog/ai-and-ml/generative-ai/spec-driven-development-with-ai-get-started-with-a-new-open-source-toolkit/
 - **Martin Fowler - SDD Tools**: https://martinfowler.com/articles/exploring-gen-ai/sdd-3-tools.html
 - **Augment Code Guide**: https://www.augmentcode.com/guides/what-is-spec-driven-development
@@ -15,7 +16,7 @@ A development paradigm where well-crafted software requirement specifications se
 
 ## The Core Workflow
 
-1. **Specify**: Share your system idea with an AI agent (the *what* and *why*). Agent generates a detailed specification.
+1. **Specify**: Share your system idea with an AI agent (the _what_ and _why_). Agent generates a detailed specification.
 2. **Plan**: Define the technical approach -- frameworks, tools, languages.
 3. **Tasks**: Break everything into small, structured work packages. Instead of "build authentication," you get "create a user registration endpoint that validates email format."
 4. **Implement**: Agent implements each work package.
@@ -33,6 +34,7 @@ A development paradigm where well-crafted software requirement specifications se
 ## SDD vs Vibe Coding
 
 SDD is explicitly positioned as the antidote to vibe coding's weaknesses:
+
 - Vibe coding: "describe goal, get code back, often looks right but doesn't quite work"
 - SDD: "write complete requirements and technical specs before passing to AI agent"
 
