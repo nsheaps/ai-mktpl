@@ -31,3 +31,25 @@
   # Specific op-exec version to install (default: latest)
   # opExecVersion: "1.0.0"
   opExecVersion: 'latest'
+
+  # Inject 1Password secrets as environment variables at session start.
+  # Requires op to be available and authenticated (OP_SERVICE_ACCOUNT_TOKEN set,
+  # or op signed in interactively on local sessions).
+  #
+  # Each entry has:
+  #   envVar:    (required) Environment variable name to set
+  #   reference: (required) 1Password secret reference (op://vault/item/field)
+  #   target:    (optional) Where to write the variable. One of:
+  #                envFile          — append to CLAUDE_ENV_FILE (session-scoped, default)
+  #                settingsJson     — write to .claude/settings.json env block (committed)
+  #                settingsLocalJson — write to .claude/settings.local.json env block (gitignored)
+  #
+  # Example:
+  #   secrets:
+  #     - envVar: BRAINTRUST_API_KEY
+  #       reference: "op://Personal/Braintrust/api-key"
+  #       target: envFile
+  #     - envVar: ANTHROPIC_API_KEY
+  #       reference: "op://Work/Claude API Key/credential"
+  #       target: envFile
+  secrets: []

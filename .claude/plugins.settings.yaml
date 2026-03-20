@@ -23,3 +23,14 @@ mise:
 
 edit-utils:
   formatter: 'prettier --write'
+
+1pass:
+  enabled: true
+  autoInstall: false
+  # Inject 1Password secrets as environment variables at session start.
+  # Requires OP_SERVICE_ACCOUNT_TOKEN to be set (e.g. via settings.local.json env block),
+  # or op to be signed in interactively on local sessions.
+  secrets:
+    - envVar: BRAINTRUST_API_KEY
+      reference: 'op://heapsinfra/Braintrust/api-key'
+      target: userSettingsJson
