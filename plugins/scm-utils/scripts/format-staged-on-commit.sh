@@ -42,7 +42,7 @@ fi
 formatted=0
 while IFS= read -r file; do
   [ -f "$file" ] || continue
-  if ! prettier --check "$file" &>/dev/null 2>&1; then
+  if ! prettier --check "$file" &>/dev/null; then
     # prettier returns non-zero for both "unformatted" and "unsupported" files.
     # Try to format — prettier --write silently skips unsupported files.
     if prettier --write "$file" >/dev/null 2>&1; then
@@ -57,4 +57,5 @@ if [ "$formatted" -gt 0 ]; then
   echo "[scm-utils] Auto-formatted $formatted file(s) before commit" >&2
 fi
 
+echo '{"hookSpecificOutput":{"permissionDecision":"allow"}}'
 exit 0
