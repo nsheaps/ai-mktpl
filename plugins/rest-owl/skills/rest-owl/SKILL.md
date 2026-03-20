@@ -15,17 +15,20 @@ allowed-tools: Bash, Read, Grep, Glob, Edit, Write, Agent, WebSearch, WebFetch, 
 
 This skill turns a napkin-sketch idea into a production-ready software project. The user provides a simple concept; you deliver a fully researched, specified, designed, tested, and validated codebase.
 
+This is **agentic engineering** — not vibe coding. You are orchestrating structured work with human oversight at every stage. The planning phases (0-5) are where the engineering expertise matters most; the build phase (6) follows naturally from thorough upfront work. Better specs produce better code. Comprehensive tests enable confident delegation. Clean architecture reduces hallucination.
+
 ## Philosophy
 
 The user's job is to have the idea. Your job is everything else:
 
 - **Research** what already exists and what users expect
-- **Specify** every feature in detail with acceptance criteria
+- **Specify** every feature in detail with acceptance criteria — specs are executable prompts, not documentation
 - **Design** the visual interface with concrete mockups
-- **Architect** the technical solution with clear decisions
+- **Architect** the technical solution with clear decisions and a project constitution
 - **Plan** the implementation in buildable milestones
-- **Build** the project with proper testing at every layer
+- **Build** test-first: write tests from specs, then implement until they pass
 - **Validate** with automated visual regression and E2E tests in CI
+- **Hand off** with clear documentation so the user can own and maintain the code
 
 ## Activation
 
@@ -53,9 +56,10 @@ The rest-owl workflow has 7 phases. Each phase produces artifacts that feed the 
    - **Tech preferences**: Any framework/language preferences or constraints?
    - **Key differentiator**: What should make this stand out from existing solutions?
    - **Timeline scope**: Full product or focused MVP subset?
-3. Save the intake summary to `docs/rest-owl/00-intake.md`
+3. Draft a **positioning statement** (2-3 sentences): what this project is, who it's for, and how it differs from existing solutions. This bridges research and specification.
+4. Save the intake summary to `docs/rest-owl/00-intake.md`
 
-**Output**: `docs/rest-owl/00-intake.md` — project brief with user's answers
+**Output**: `docs/rest-owl/00-intake.md` — project brief with user's answers and positioning statement
 
 ### Phase 1: Competitive Research
 
@@ -135,7 +139,19 @@ This phase produces:
    - Development workflow (dev server, hot reload, etc.)
    - Dependency list with justifications
 
-**Output**: `docs/rest-owl/04-architecture.md`
+4. **Project constitution** — a `CLAUDE.md` (or equivalent rules file) that establishes non-negotiable project rules for all subsequent AI-generated code:
+   - Architecture patterns and constraints
+   - Coding standards and conventions
+   - Security requirements
+   - Testing requirements (coverage targets, test patterns)
+   - Naming conventions
+   - Import/dependency rules
+
+   This file is placed in the project root and ensures consistent code generation across all milestones. Inspired by GitHub's Spec Kit `/speckit.constitution` pattern.
+
+**Output**:
+- `docs/rest-owl/04-architecture.md` — technical decisions and system design
+- `CLAUDE.md` (project root) — constitution / project rules for AI code generation
 
 ### Phase 5: Implementation Plan
 
@@ -167,26 +183,51 @@ This phase produces:
 
 **Goal**: Implement the project milestone by milestone with full test coverage.
 
+**Test-first approach**: Write tests derived from Phase 2 acceptance criteria BEFORE writing implementation code. Then implement until all tests pass. This is what makes agentic engineering reliable — with a solid test suite, the AI can iterate in a loop until tests pass, giving high confidence in the result.
+
 For each milestone:
 
 1. **Scaffold** — Create files, install dependencies, configure tooling
-2. **Implement** — Build features according to the spec
-3. **Unit test** — Write tests for all business logic
-4. **Component test** — Test UI components in isolation
-5. **E2E test** — Write Playwright tests for user flows
-6. **Visual baseline** — Capture screenshot baselines for visual regression
-7. **CI integration** — Ensure all tests run in CI with screenshot artifacts
+2. **Write tests first** — Translate acceptance criteria from Phase 2 into unit tests, component tests, and E2E tests. These tests will initially fail.
+3. **Implement** — Build features until all tests pass
+4. **Visual baseline** — Capture screenshot baselines for visual regression
+5. **CI integration** — Ensure all tests run in CI with screenshot artifacts
 
 **Invoke the `validation-pipeline` skill** to set up the testing infrastructure.
 
 After each milestone:
 
-- Run all tests locally
+- Run all tests locally — all must pass
 - Verify visual baselines match mockups from Phase 3
 - Commit with conventional commit messages
 - Update implementation plan with completion status
 
 **Output**: The actual codebase with full test coverage
+
+### Phase 7: Handoff & Ownership
+
+**Goal**: Ensure the user understands and can maintain the generated codebase.
+
+This phase addresses a critical reality: agentic engineering produces code quickly, but the user must own and maintain it. Without understanding the architecture and key decisions, the codebase becomes unmaintainable.
+
+1. **Architecture walkthrough** — Summarize the key architectural decisions and why they were made. Reference specific files and patterns.
+
+2. **Code tour** — Identify the 5-10 most important files/modules and explain what each does and how they connect.
+
+3. **Extension guide** — Document how to add common things:
+   - A new feature (which files to create, what patterns to follow)
+   - A new API endpoint
+   - A new UI screen
+   - A new test
+
+4. **Known limitations** — Be honest about what was deferred, simplified, or left as a TODO. List areas that will need attention as the project scales.
+
+5. **Maintenance checklist** — What the user should do regularly:
+   - Dependency updates
+   - Visual baseline updates after intentional UI changes
+   - Test coverage monitoring
+
+**Output**: `docs/rest-owl/06-handoff.md` — architecture guide and maintenance instructions
 
 ## Artifact Directory Structure
 
@@ -194,7 +235,7 @@ All rest-owl artifacts live under `docs/rest-owl/` in the project root:
 
 ```
 docs/rest-owl/
-├── 00-intake.md                    # Project brief and user answers
+├── 00-intake.md                    # Project brief, user answers, positioning statement
 ├── 01-competitive-research.md      # Market analysis and feature matrix
 ├── 02-feature-spec.md              # Complete feature specifications
 ├── 03-design-system.md             # Colors, typography, components
@@ -205,8 +246,11 @@ docs/rest-owl/
 │   └── ...
 ├── 03-wireframes.md                # ASCII wireframes for all screens
 ├── 04-architecture.md              # Technical decisions and system design
-└── 05-implementation-plan.md       # Milestones, tasks, and testing strategy
+├── 05-implementation-plan.md       # Milestones, tasks, and testing strategy
+└── 06-handoff.md                   # Architecture guide and maintenance instructions
 ```
+
+Additionally, a `CLAUDE.md` constitution file is created in the project root during Phase 4.
 
 ## User Checkpoints
 
@@ -246,3 +290,5 @@ If a session ends mid-workflow, the artifact files serve as checkpoints. On resu
 - **Never ship without visual regression** — screenshots in CI catch visual regressions automatically
 - **Never batch all testing to the end** — test each milestone as you build it
 - **Never make tech decisions without justification** — every choice in the architecture doc needs a "why"
+- **Never skip the handoff** — generating code the user can't maintain creates dangerous skill atrophy
+- **Never treat this as vibe coding** — every phase exists for a reason; accepting AI output without review is not agentic engineering

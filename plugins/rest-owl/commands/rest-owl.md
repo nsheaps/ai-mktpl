@@ -22,13 +22,14 @@ Check if `docs/rest-owl/` already exists — if so, this is a **resumption**. Re
 
 Follow the rest-owl skill phases in strict order:
 
-1. **Phase 0 — Intake**: Clarify the idea with targeted questions
+1. **Phase 0 — Intake**: Clarify the idea with targeted questions, draft positioning statement
 2. **Phase 1 — Research**: Competitive analysis (invoke `competitive-research` skill)
 3. **Phase 2 — Specification**: Detailed feature specs (invoke `feature-spec` skill)
 4. **Phase 3 — Visual Design**: Mockups and design system (invoke `visual-design` skill)
-5. **Phase 4 — Architecture**: Technical decisions and system design
+5. **Phase 4 — Architecture**: Technical decisions, system design, and project constitution (`CLAUDE.md`)
 6. **Phase 5 — Planning**: Implementation milestones
-7. **Phase 6 — Build & Validate**: Implementation with testing (invoke `validation-pipeline` skill)
+7. **Phase 6 — Build & Validate**: Test-first implementation with testing (invoke `validation-pipeline` skill)
+8. **Phase 7 — Handoff**: Architecture walkthrough, code tour, and maintenance guide
 
 **Critical**: Get user approval between each phase before proceeding.
 

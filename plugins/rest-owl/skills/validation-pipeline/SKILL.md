@@ -237,10 +237,24 @@ for (const screen of screens) {
       maxDiffPixelRatio: 0.01, // Allow 1% pixel difference
       threshold: 0.2, // Color difference threshold
       animations: "disabled",
+      // Mask dynamic content to prevent flaky tests
+      mask: [
+        page.locator('[data-testid*="timestamp"]'),
+        page.locator('[data-testid*="avatar"]'),
+        page.locator('[data-testid*="relative-time"]'),
+      ],
     });
   });
 }
 ```
+
+**Important: Preventing flaky visual tests**:
+
+- **Mask dynamic content** — timestamps, avatars, counters, and any content that changes between runs
+- **Disable animations** — always use `animations: 'disabled'`
+- **Wait for fonts** — use `page.waitForLoadState('networkidle')` before screenshots
+- **Generate baselines in CI, not locally** — OS differences (macOS vs Linux) cause font rendering mismatches. Use Playwright's Docker image (`mcr.microsoft.com/playwright`) in CI for consistent results.
+- **Start with Chromium only** — add Firefox/WebKit when cross-browser visual bugs actually appear
 
 **Screenshot update workflow**:
 
@@ -306,11 +320,12 @@ jobs:
 
   visual-regression:
     runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.50.0-noble
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
       - run: bun install
-      - run: bunx playwright install --with-deps chromium
 
       - name: Run visual regression tests
         run: bunx playwright test e2e/visual/

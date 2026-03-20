@@ -4,16 +4,19 @@
 
 Turn a simple idea into a fully researched, specified, designed, tested, and validated software project.
 
+This is **agentic engineering** — not vibe coding. Structured AI orchestration with human oversight at every phase. Better specs produce better code. Comprehensive tests enable confident delegation.
+
 ## What It Does
 
 You say "build a Notion clone." This plugin handles everything else:
 
 1. **Competitive Research** — Analyzes 5-10 existing products, builds feature matrices, identifies patterns
-2. **Feature Specification** — Writes detailed specs with user stories, acceptance criteria, data models, API definitions
+2. **Feature Specification** — Writes detailed specs with user stories, acceptance criteria, data models, API definitions. Specs are treated as executable prompts, not documentation.
 3. **Visual Design** — Creates a design system, ASCII wireframes, and renderable HTML mockups for every screen
-4. **Technical Architecture** — Makes and documents all tech stack decisions with justifications
+4. **Technical Architecture** — Makes and documents all tech stack decisions, plus generates a project constitution (`CLAUDE.md`) for consistent AI code generation
 5. **Implementation Planning** — Breaks the build into ordered milestones with testing requirements
-6. **Build & Validate** — Implements with unit tests, E2E tests, and visual regression testing in CI
+6. **Build & Validate** — Test-first: writes tests from specs, then implements until they pass. Visual regression testing in CI.
+7. **Handoff & Ownership** — Architecture walkthrough, code tour, and maintenance guide so you can own the codebase
 
 ## Usage
 
@@ -43,15 +46,18 @@ All design artifacts are saved to `docs/rest-owl/` in the project:
 
 ```
 docs/rest-owl/
-├── 00-intake.md                    # Project brief
+├── 00-intake.md                    # Project brief and positioning statement
 ├── 01-competitive-research.md      # Market analysis
 ├── 02-feature-spec.md              # Feature specifications
 ├── 03-design-system.md             # Design tokens
 ├── 03-wireframes.md                # ASCII wireframes
 ├── 03-mockups/                     # HTML mockup files
 ├── 04-architecture.md              # Technical architecture
-└── 05-implementation-plan.md       # Build milestones
+├── 05-implementation-plan.md       # Build milestones
+└── 06-handoff.md                   # Architecture guide and maintenance instructions
 ```
+
+A `CLAUDE.md` constitution file is also created in the project root during Phase 4.
 
 These artifacts serve as:
 

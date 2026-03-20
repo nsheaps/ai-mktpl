@@ -257,6 +257,16 @@ Write to `docs/rest-owl/02-feature-spec.md`:
 
 Feature specs within different domains are independent — use `Agent` tool to write specs for multiple domains simultaneously.
 
+## Spec Quality Principles
+
+Specifications are not documentation — they are **executable prompts** for Phase 6. The quality of the spec directly determines the quality of the generated code. Apply these principles:
+
+- **Clarity over brevity** — an AI coding agent can't ask clarifying questions mid-generation. If a spec is ambiguous, the agent will hallucinate an answer.
+- **Given/When/Then determinism** — every acceptance criterion should have exactly one correct behavior. Avoid "should handle gracefully" without defining what "gracefully" means.
+- **Domain language** — define terms in the glossary and use them consistently. This reduces AI hallucination by anchoring generation to specific vocabulary.
+- **Explicit over implicit** — state every assumption. What seems "obvious" to you is invisible to the agent. The "curse of knowledge" (assuming others know what you know) is the primary source of spec gaps.
+- **Testable criteria** — every acceptance criterion must be verifiable by an automated test. If you can't write a test for it, the criterion is too vague.
+
 ## Quality Checks
 
 Before completing this phase:
@@ -264,9 +274,11 @@ Before completing this phase:
 - [ ] Every P0 and P1 feature has a complete specification
 - [ ] Every feature has at least 2 user stories with Given/When/Then
 - [ ] Every feature has at least 3 acceptance criteria
+- [ ] Every acceptance criterion is testable (could become an automated test)
 - [ ] Every feature identifies edge cases and error scenarios
 - [ ] Data model covers all entities referenced by features
 - [ ] API endpoints exist for all data operations
 - [ ] Cross-cutting concerns are documented
 - [ ] No circular dependencies between features
+- [ ] Glossary defines all domain-specific terms
 - [ ] User has approved the scope before detailed specs were written
