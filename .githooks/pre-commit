@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# Pre-commit hook: auto-format staged files with prettier
+# Prevents CI from wasting cycles pushing formatting commits back.
+set -euo pipefail
+
+# Check if prettier is available
+if ! command -v prettier &>/dev/null; then
+  echo "[pre-commit] prettier not found, skipping format check"
+  exit 0
+fi
+
+# Get list of staged files (excluding deleted files)
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=d)
+
+if [ -z "$STAGED_FILES" ]; then
+  exit 0
+fi
+
+# Filter to files prettier can handle
+FILES_TO_FORMAT=()
+while IFS= read -r file; do
+  case "$file" in
+    *.json|*.yaml|*.yml|*.md|*.js|*.ts|*.jsx|*.tsx|*.css|*.html)
+      # Only include files that exist (safety check)
+      [ -f "$file" ] && FILES_TO_FORMAT+=("$file")
+      ;;
+  esac
+done <<< "$STAGED_FILES"
+
+if [ ${#FILES_TO_FORMAT[@]} -eq 0 ]; then
+  exit 0
+fi
+
+# Format staged files in place
+CHANGED=0
+for file in "${FILES_TO_FORMAT[@]}"; do
+  if ! prettier --check "$file" &>/dev/null; then
+    prettier --write "$file" >/dev/null
+    git add "$file"
+    CHANGED=1
+    echo "[pre-commit] Formatted: $file"
+  fi
+done
+
+if [ "$CHANGED" -eq 1 ]; then
+  echo "[pre-commit] Files were auto-formatted and re-staged."
+fi
+
+exit 0

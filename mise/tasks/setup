@@ -8,4 +8,6 @@ echo "Installing tools via mise..."
 mise install -y
 echo "Installing yarn dependencies (release-it)..."
 yarn install
+echo "Configuring git hooks path..."
+git config core.hooksPath .githooks
 echo "Setup complete!"
