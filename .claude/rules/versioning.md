@@ -34,7 +34,7 @@ Use conventional commits:
 - `chore:` - Maintenance tasks
 - `docs:` - Documentation updates
 
-Append `[skip ci]` to skip CI workflows when needed.
+**NEVER** manually add `[skip ci]` to commit messages — see [CI/CD Conventions](ci-cd/conventions.md#never-manually-skip-ci) for details.
 
 ## See Also
 
