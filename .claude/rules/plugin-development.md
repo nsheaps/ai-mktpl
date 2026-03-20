@@ -73,11 +73,13 @@ Rules for working with plugins, MCP servers, hooks, and the marketplace repo.
 
 ## Rules vs Skills
 
+CRITICAL: Always prefer abstract concepts and ideas in rules and skills that can be captured and re-used in plugins across projects. Use project skills and rules ONLY for things directly related to the project. Consider the use of the `shared-rules` plugin and rulesets for common rules over project-specific rules.
+
 **Rules** (`.claude/rules/`) define **when** and **what** — behavioral expectations, triggers, and policies. They should NOT contain procedural how-to content (code examples, step-by-step commands).
 
 **Skills** (`plugins/*/skills/`) capture **how** — the detailed procedures, code snippets, and implementation steps to accomplish a task.
 
-If you find yourself writing code blocks or step-by-step instructions in a rule file, that content belongs in a skill instead. The rule should reference the behavior expectation and let the skill provide the implementation.
+If you find yourself writing code blocks or step-by-step instructions in a rule file, that knowledge of "how" belongs in a skill instead, with relevant code written to scripts that the skill references for use. The rule should reference the behavior expectation and let the skill provide the implementation.
 
 ## See Also
 

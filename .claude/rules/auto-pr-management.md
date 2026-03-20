@@ -16,7 +16,7 @@ Update the PR description **after every push** to reflect the current state of c
 
 Use the `GH_TOKEN` environment variable with the `gh` CLI. Since the git remote in web sessions is a local proxy, use `gh api` with `--hostname github.com` for all GitHub API calls (not `gh pr create` which requires a GitHub remote).
 
-The `gh` CLI should already be configured via the mise-managed GitHub plugin. If `gh` is not available, install it via `mise install`.
+The `gh` CLI should already be configured via the mise or GitHub claude-code plugin. If `gh` is not available, investigate the startup hooks for those plugins..
 
 ## Creating a PR
 
