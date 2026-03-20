@@ -637,6 +637,18 @@
       "keywords": ["todos", "plans", "sync", "workflow", "productivity"]
     },
     {
+      "name": "web-auto-approve",
+      "description": "Auto-approve Edit, Write, and Bash permission requests in Claude Code web sessions to suppress interactive permission prompts",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/web-auto-approve",
+      "category": "utility",
+      "tags": ["utility"],
+      "keywords": ["permissions", "web-session", "auto-approve", "hooks", "PermissionRequest"]
+    },
+    {
       "name": "word-vomit",
       "description": "Hook-based workflow for capturing unstructured thoughts and triggering the exec-assist agent to categorize them into actionable items (issues, tasks, docs).",
       "version": "0.1.3",
