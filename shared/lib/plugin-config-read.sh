@@ -13,6 +13,7 @@
 #   source "path/to/plugin-config-read.sh"
 #   value="$(plugin_get_config "some_key" "default_value")"
 #   array_values="$(plugin_get_config_array "sources")"
+#   json_value="$(plugin_get_config_json "secrets" "[]")"  # for arrays-of-objects
 #
 # Requires: PLUGIN_NAME must be set before sourcing.
 # Optional: CLAUDE_PLUGIN_ROOT, CLAUDE_PROJECT_DIR (falls back to "." and $HOME)
@@ -156,6 +157,77 @@ plugin_get_config() {
   fi
   # 3. Plugin-level defaults
   if val="$(_plugin_try_config_key "${CLAUDE_PLUGIN_ROOT:-.}/${PLUGIN_NAME}.settings" "$key")"; then
+    echo "$val"; return
+  fi
+  echo "$default"
+}
+
+# Detect file format and read a key from a settings file, returning it as compact JSON.
+# Supports both YAML (via yq) and JSON (via jq).
+# Useful for arrays-of-objects and other complex values that can't be returned line-by-line.
+# Args: $1=file_path $2=key_name
+# Returns: JSON value via stdout, exit 0 on success, exit 1 if not found or null
+_plugin_read_config_json() {
+  local file="$1" key="$2"
+  if [ ! -f "$file" ]; then
+    return 1
+  fi
+
+  local val=""
+  case "$file" in
+    *.json)
+      if command -v jq &>/dev/null; then
+        val="$(jq -c ".[\"${PLUGIN_NAME}\"].${key} // empty" "$file" 2>/dev/null || true)"
+      fi
+      ;;
+    *.yaml|*.yml)
+      if command -v yq &>/dev/null; then
+        val="$(yq -r -o=json ".[\"${PLUGIN_NAME}\"].${key}" "$file" 2>/dev/null || true)"
+        [ "$val" = "null" ] && val=""
+      fi
+      ;;
+  esac
+
+  if [ -n "$val" ]; then
+    echo "$val"
+    return 0
+  fi
+  return 1
+}
+
+# Try reading a config key as JSON from a base path, checking YAML then JSON extensions.
+# Args: $1=base_path (without extension) $2=key_name
+# Returns: compact JSON via stdout, exit 0 on success, exit 1 if not found
+_plugin_try_config_json() {
+  local base="$1" key="$2"
+  local val
+  if val="$(_plugin_read_config_json "${base}.yaml" "$key")"; then
+    echo "$val"; return 0
+  fi
+  if val="$(_plugin_read_config_json "${base}.yml" "$key")"; then
+    echo "$val"; return 0
+  fi
+  if val="$(_plugin_read_config_json "${base}.json" "$key")"; then
+    echo "$val"; return 0
+  fi
+  return 1
+}
+
+# Get a config value as compact JSON with 3-tier resolution.
+# Useful for complex values like arrays-of-objects that can't be returned line-by-line.
+# Args: $1=key_name $2=default_json (defaults to "null")
+# Returns: compact JSON via stdout
+plugin_get_config_json() {
+  local key="$1" default="${2:-null}"
+  local val
+
+  if val="$(_plugin_try_config_json "${CLAUDE_PROJECT_DIR:-.}/.claude/plugins.settings" "$key")"; then
+    echo "$val"; return
+  fi
+  if val="$(_plugin_try_config_json "$HOME/.claude/plugins.settings" "$key")"; then
+    echo "$val"; return
+  fi
+  if val="$(_plugin_try_config_json "${CLAUDE_PLUGIN_ROOT:-.}/${PLUGIN_NAME}.settings" "$key")"; then
     echo "$val"; return
   fi
   echo "$default"

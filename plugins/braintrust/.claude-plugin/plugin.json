@@ -1,0 +1,21 @@
+{
+  "name": "braintrust",
+  "version": "0.1.0",
+  "description": "Configure Braintrust AI evaluation and observability for Claude Code sessions. Provides skills for AI evaluation workflows and session tracing.",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/braintrust",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": [
+    "braintrust",
+    "ai-evaluation",
+    "observability",
+    "tracing",
+    "evals",
+    "llm",
+    "monitoring"
+  ]
+}
