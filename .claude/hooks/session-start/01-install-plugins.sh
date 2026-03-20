@@ -102,8 +102,8 @@ run_plugin_session_hooks() {
         return 0
     fi
 
-    # Get the most recently modified version directory
-    plugin_dir="$(ls -1td "${cache_base}/"*/ 2>/dev/null | head -1)"
+    # Get the latest version directory by semver sorting
+    plugin_dir="$(ls -1d "${cache_base}/"*/ 2>/dev/null | sort -V | tail -1)"
     if [ -z "$plugin_dir" ]; then
         echo "[01-install-plugins]   [hooks] No version dir in $cache_base, skipping"
         return 0
@@ -118,8 +118,8 @@ run_plugin_session_hooks() {
     fi
 
     # Extract SessionStart hook commands from hooks.json
-    local commands
-    commands=$(jq -r '
+    # Use `local commands=$(...)` so `local` swallows jq's exit code under set -e
+    local commands=$(jq -r '
         .hooks.SessionStart // [] | .[] |
         .hooks // [] | .[] |
         select(.type == "command") |
