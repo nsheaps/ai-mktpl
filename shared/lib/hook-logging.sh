@@ -37,6 +37,11 @@ if [ -z "${PLUGIN_NAME:-}" ]; then
   return 1 2>/dev/null || exit 1
 fi
 
+# Source log.sh for basic stderr logging (resolve relative to this file)
+_HOOK_LOGGING_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=./log.sh
+source "${_HOOK_LOGGING_DIR}/log.sh"
+
 # --- Log file setup ---
 
 _HOOK_LOG_DIR="${TMPDIR:-/tmp}/claude-plugin-logs"
@@ -58,7 +63,7 @@ hook_log() {
   local line="${PLUGIN_NAME}: $1"
   echo "[$(date +%H:%M:%S)] ${line}" >> "$_HOOK_LOG_FILE"
   echo "$line" >> "$_HOOK_MSG_FILE"
-  echo "$line" >&2
+  log_info "$1"
 }
 
 # Alias for hook_log.

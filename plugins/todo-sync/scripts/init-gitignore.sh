@@ -9,6 +9,9 @@
 
 set -euo pipefail
 
+# shellcheck source=../lib/hook-output.sh
+source "${CLAUDE_PLUGIN_ROOT}/lib/hook-output.sh"
+
 # Global gitignore location
 global_gitignore="$HOME/.config/git/ignore"
 
@@ -31,10 +34,4 @@ for pattern in "${patterns[@]}"; do
   fi
 done
 
-echo "todo-sync: gitignore patterns configured" >&2
-if command -v jq &>/dev/null; then
-  jq -n --arg msg "todo-sync: gitignore patterns configured" \
-    '{additionalContext: $msg, systemMessage: $msg}'
-else
-  echo '{"additionalContext":"todo-sync: gitignore patterns configured","systemMessage":"todo-sync: gitignore patterns configured"}'
-fi
+hook_msg "todo-sync: gitignore patterns configured"

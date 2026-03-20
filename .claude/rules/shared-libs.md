@@ -6,6 +6,37 @@ Reusable bash libraries live in `shared/lib/` and are symlinked into each plugin
 
 ## Available Libraries
 
+### log.sh
+
+Lightweight general-purpose stderr logging for any bash script. Works in any context — plugin hooks, session-start scripts, utility scripts, bin scripts.
+
+```bash
+LOG_PREFIX="my-script"               # Optional: defaults to PLUGIN_NAME or "script"
+source "${CLAUDE_PLUGIN_ROOT}/lib/log.sh"
+
+log_info "Installing tool v1.2.3"    # my-script: Installing tool v1.2.3
+log_warn "Fallback to default"       # my-script: [warn] Fallback to default
+log_error "File not found"           # my-script: [error] File not found
+log_step "download" "Downloading..." # my-script: [download] Downloading...
+```
+
+Prefix resolution: `LOG_PREFIX` > `PLUGIN_NAME` > `"script"`.
+
+All output goes to stderr. Never interferes with stdout.
+
+### hook-output.sh
+
+Shared JSON output helper for hooks that return `{additionalContext, systemMessage}`. Replaces the duplicated `_json_msg()` pattern.
+
+```bash
+source "${CLAUDE_PLUGIN_ROOT}/lib/hook-output.sh"
+
+hook_msg "statusline: configured"    # stderr + JSON stdout
+hook_msg_only "quiet message"        # JSON stdout only
+```
+
+Use for simple SessionStart hooks that output a single status message. For hooks with steps and error reporting, use `hook-logging.sh` instead.
+
 ### plugin-config-read.sh
 
 3-tier config resolution for plugin settings. Supports both YAML and JSON formats.
@@ -56,7 +87,7 @@ add_permission_to_allow "Bash(tool:*)" "user"          # user-level
 
 ### hook-logging.sh
 
-Hook logging with human-readable output. Messages are printed to stderr (user sees via Ctrl+O) and accumulated for plain text output on stdout (user sees via `systemMessage`, agent sees via `additionalContext`). On failure, a structured error block is also printed to stderr.
+Full hook lifecycle logging. Depends on `log.sh` (auto-sourced). Messages are printed to stderr (user sees via Ctrl+O) and accumulated for plain text output on stdout (user sees via `systemMessage`, agent sees via `additionalContext`). On failure, a structured error block is also printed to stderr.
 
 ```bash
 PLUGIN_NAME="my-plugin"  # MUST be set before sourcing
@@ -109,7 +140,17 @@ safe_write_settings '.some.key = "value"'  # jq filter applied to file
 ## Conventions
 
 - Libraries use `_UPPERCASE_LOADED` guards to prevent double-sourcing
-- Functions are prefixed by domain (`plugin_`, `tool_`, `add_permission_`)
+- Functions are prefixed by domain (`plugin_`, `tool_`, `add_permission_`, `log_`, `hook_`)
 - All libraries are idempotent and safe to source multiple times
 - Symlinked content is resolved and copied on plugin install (not symlinked at runtime)
 - Set `PLUGIN_NAME` before sourcing any library that needs it
+- **Never use raw `echo` for logging** — use `log.sh`, `hook-output.sh`, or `hook-logging.sh`
+- When `hook-logging.sh` is symlinked, `log.sh` must also be symlinked (it's a dependency)
+
+## Choosing the Right Logging Library
+
+- **Any script** → `log.sh` (basic stderr logging)
+- **Simple hook with JSON response** → `hook-output.sh` (replaces `_json_msg`)
+- **Complex hook with lifecycle** → `hook-logging.sh` (steps, errors, log files)
+
+See [docs/shared-logging.md](../../docs/shared-logging.md) for detailed usage guide and anti-patterns.

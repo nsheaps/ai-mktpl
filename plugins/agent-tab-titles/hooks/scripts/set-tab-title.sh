@@ -9,16 +9,8 @@
 
 set -euo pipefail
 
-_json_msg() {
-  local msg="$1"
-  if command -v jq &>/dev/null; then
-    jq -n --arg msg "$msg" '{additionalContext: $msg, systemMessage: $msg}'
-  else
-    local escaped
-    escaped=$(printf '%s' "$msg" | sed 's/\\/\\\\/g; s/"/\\"/g; s/\t/\\t/g' | sed ':a;N;$!ba;s/\n/\\n/g')
-    echo "{\"additionalContext\":\"${escaped}\",\"systemMessage\":\"${escaped}\"}"
-  fi
-}
+# shellcheck source=../../lib/hook-output.sh
+source "${CLAUDE_PLUGIN_ROOT}/lib/hook-output.sh"
 
 # Read hook input (SessionStart provides agent_type, session_id, etc.)
 INPUT=$(cat 2>/dev/null || echo '')
@@ -31,8 +23,7 @@ TITLE="${CLAUDE_CODE_AGENT_NAME:-${HOOK_AGENT_TYPE:-${CLAUDE_CODE_AGENT_TYPE:-cl
 if [ -z "${TMUX:-}" ]; then
   # Not in tmux — use OSC 0 escape sequence for native terminal title
   printf '\033]0;%s\007' "$TITLE" >&2
-  echo "agent-tab-titles: set terminal title to '$TITLE'" >&2
-  _json_msg "agent-tab-titles: set terminal title to '$TITLE'"
+  hook_msg "agent-tab-titles: set terminal title to '$TITLE'"
   exit 0
 fi
 
@@ -45,5 +36,4 @@ tmux select-pane -T "$TITLE" 2>/dev/null || true
 # Disable automatic rename so the title sticks
 tmux set-window-option automatic-rename off 2>/dev/null || true
 
-echo "agent-tab-titles: set tmux title to '$TITLE'" >&2
-_json_msg "agent-tab-titles: set tmux title to '$TITLE'"
+hook_msg "agent-tab-titles: set tmux title to '$TITLE'"
