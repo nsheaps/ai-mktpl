@@ -57,9 +57,7 @@
       "Bash(chmod:*)",
       "Bash(readlink:*)"
     ],
-    "deny": [
-      "Bash(rm -rf /:*)"
-    ],
+    "deny": ["Bash(rm -rf /:*)"],
     "ask": [
       "Bash(gh pr view --web:*)",
       "Bash(rm -rf:*)",
