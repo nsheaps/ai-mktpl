@@ -32,6 +32,7 @@ When the user asks to review a PR:
    - Post the review directly on the PR
 
 **Notes:**
+
 - The CI review bot is preferred over local review because it runs in an isolated environment with proper GitHub App auth
 - The `request-review` label is automatically removed once the review starts
 - For draft PRs, the `request-review` label triggers a one-time review; use `always-review` for persistent review on drafts
