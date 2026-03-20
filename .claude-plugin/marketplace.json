@@ -182,7 +182,7 @@
     {
       "name": "git-spice",
       "description": "Skill for managing stacked Git branches with git-spice (gs) CLI tool",
-      "version": "0.2.4",
+      "version": "0.2.5",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -301,7 +301,7 @@
     {
       "name": "mise",
       "description": "Install and manage mise (tool version manager) in Claude Code sessions. Provides session-start auto-install for web sessions and comprehensive workflow skills.",
-      "version": "0.2.13",
+      "version": "0.2.14",
       "author": {
         "name": "Nathan Heaps"
       },
