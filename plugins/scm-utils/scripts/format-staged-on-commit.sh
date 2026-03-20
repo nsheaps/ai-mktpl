@@ -6,6 +6,10 @@
 # always properly formatted. Prevents CI from wasting cycles pushing
 # formatting fixes back to PRs.
 #
+# NOTE: This re-stages the entire file after formatting. If you used
+# `git add -p` for partial staging, the unstaged hunks will also be staged.
+# This is acceptable for AI-agent-driven workflows where partial staging is rare.
+#
 # Exit codes:
 #   0 — allow the command (after formatting)
 
@@ -13,7 +17,7 @@ set -euo pipefail
 
 input=$(cat)
 
-command=$(echo "$input" | jq -r '.command // empty' 2>/dev/null || true)
+command=$(echo "$input" | jq -r '.tool_input.command // empty' 2>/dev/null || true)
 
 # Only care about git commit commands
 if ! echo "$command" | grep -qE '(^|\s)git\s+(-[A-Za-z]\s+\S+\s+)*commit(\s|$)'; then
@@ -32,29 +36,22 @@ if [ -z "$staged" ]; then
   exit 0
 fi
 
-# Filter to files prettier can handle
-files_to_format=()
-while IFS= read -r file; do
-  case "$file" in
-    *.json|*.yaml|*.yml|*.md|*.js|*.ts|*.jsx|*.tsx|*.css|*.html)
-      [ -f "$file" ] && files_to_format+=("$file")
-      ;;
-  esac
-done <<< "$staged"
-
-if [ ${#files_to_format[@]} -eq 0 ]; then
-  exit 0
-fi
-
+# Let prettier decide what it can format — run --check on each staged file
+# and only format those that prettier recognizes and finds unformatted.
+# This avoids maintaining a hardcoded extension list that drifts from .prettierrc.
 formatted=0
-for file in "${files_to_format[@]}"; do
-  if ! prettier --check "$file" &>/dev/null; then
-    prettier --write "$file" >/dev/null 2>&1
-    git add "$file"
-    formatted=$((formatted + 1))
-    echo "[scm-utils] Formatted: $file" >&2
+while IFS= read -r file; do
+  [ -f "$file" ] || continue
+  if ! prettier --check "$file" &>/dev/null 2>&1; then
+    # prettier returns non-zero for both "unformatted" and "unsupported" files.
+    # Try to format — prettier --write silently skips unsupported files.
+    if prettier --write "$file" >/dev/null 2>&1; then
+      git add "$file"
+      formatted=$((formatted + 1))
+      echo "[scm-utils] Formatted: $file" >&2
+    fi
   fi
-done
+done <<< "$staged"
 
 if [ "$formatted" -gt 0 ]; then
   echo "[scm-utils] Auto-formatted $formatted file(s) before commit" >&2
