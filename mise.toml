@@ -17,3 +17,7 @@ yarn = "latest"
 [settings]
 # Use shorter paths for tools
 legacy_version_file = false
+# Don't auto-install on every prompt — the mise plugin's SessionStart hook
+# already runs `mise install -y`. This prevents failed tools (e.g. 1password
+# GPG verification) from retrying on every bash command.
+auto_install = false
