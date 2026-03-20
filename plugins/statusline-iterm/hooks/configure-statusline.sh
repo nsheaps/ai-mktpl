@@ -4,22 +4,13 @@
 # Claude Code merges settings.local.json on top of settings.json at runtime.
 set -euo pipefail
 
-_json_msg() {
-  local msg="$1"
-  if command -v jq &>/dev/null; then
-    jq -n --arg msg "$msg" '{additionalContext: $msg, systemMessage: $msg}'
-  else
-    local escaped
-    escaped=$(printf '%s' "$msg" | sed 's/\\/\\\\/g; s/"/\\"/g; s/\t/\\t/g' | sed ':a;N;$!ba;s/\n/\\n/g')
-    echo "{\"additionalContext\":\"${escaped}\",\"systemMessage\":\"${escaped}\"}"
-  fi
-}
+# shellcheck source=../lib/hook-output.sh
+source "${CLAUDE_PLUGIN_ROOT}/lib/hook-output.sh"
 
 # Skip configuration for agent team teammates to avoid race conditions.
 # Only the lead or solo sessions configure.
 if [ -n "${CLAUDE_CODE_PARENT_SESSION_ID:-}" ]; then
-  echo "statusline-iterm: sub-agent session, skipping" >&2
-  _json_msg "statusline-iterm: sub-agent session, skipping"
+  hook_msg "statusline-iterm: sub-agent session, skipping"
   exit 0
 fi
 
@@ -35,8 +26,7 @@ mkdir -p "$(dirname "$SETTINGS_FILE")"
 # shellcheck source=../lib/safe-settings-write.sh
 SHARED_LIB="${CLAUDE_PLUGIN_ROOT}/lib/safe-settings-write.sh"
 if [ ! -f "$SHARED_LIB" ]; then
-  echo "ERROR: shared lib not found: $SHARED_LIB" >&2
-  _json_msg "statusline-iterm: ERROR — shared lib not found: $SHARED_LIB"
+  hook_msg "statusline-iterm: ERROR — shared lib not found: $SHARED_LIB"
   exit 0
 fi
 source "$SHARED_LIB"
@@ -50,8 +40,7 @@ fi
 # Case 1: Not present anywhere - set it
 if [ -z "$current_command" ]; then
   safe_write_settings '.statusLine.type = "command" | .statusLine.command = $script'
-  echo "statusline-iterm: configured" >&2
-  _json_msg "statusline-iterm: configured"
+  hook_msg "statusline-iterm: configured"
   exit 0
 fi
 
@@ -59,8 +48,7 @@ fi
 # Match if path contains "plugins/statusline-iterm" or "plugins/statusline/" (original plugin)
 if [[ "$current_command" == *"plugins/statusline-iterm"* ]] || [[ "$current_command" == *"plugins/statusline/"* ]]; then
   safe_write_settings '.statusLine.command = $script'
-  echo "statusline-iterm: updated" >&2
-  _json_msg "statusline-iterm: updated"
+  hook_msg "statusline-iterm: updated"
   exit 0
 fi
 
@@ -75,6 +63,5 @@ To resolve this issue, either:
 3. Disable this plugin if they want to keep their current statusline
 
 The statusline-iterm plugin will not override your existing configuration automatically."
-echo "$msg" >&2
-_json_msg "$msg"
+hook_msg "$msg"
 exit 0
