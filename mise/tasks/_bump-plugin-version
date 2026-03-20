@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+#MISE description="Bump plugin version using release-it. Usage: mise run _bump-plugin-version [PLUGIN_PATH]"
+set -euo pipefail
+
+PLUGIN_PATH="${1:-$PWD}"
+ROOT_DIR="${MISE_PROJECT_ROOT:-$(git rev-parse --show-toplevel)}"
+
+[ -f "$ROOT_DIR/.pnp.cjs" ] || mise run setup
+source "$ROOT_DIR/bin/lib/stdlib.sh"
+cd "$PLUGIN_PATH"
+PLUGIN_DIR="$(dirname "$(find_up '.claude-plugin')")"
+cd "$PLUGIN_DIR"
+PLUGIN_NAME=$(basename "$PLUGIN_DIR")
+
+echo "=== Bumping version for $PLUGIN_NAME ==="
+yarn exec release-it --ci

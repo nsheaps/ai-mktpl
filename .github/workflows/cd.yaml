@@ -160,7 +160,7 @@ jobs:
 
       - name: Run lint after version bump
         if: steps.detect.outputs.has-changes == 'true'
-        run: just lint
+        run: mise run lint
 
       - name: Commit version bumps
         if: steps.detect.outputs.has-changes == 'true'
@@ -174,10 +174,10 @@ jobs:
           skip_push: true
 
       - name: Update marketplace metadata
-        run: just update-marketplace
+        run: mise run update-marketplace
 
       - name: Run lint after marketplace update
-        run: just lint
+        run: mise run lint
 
       - name: Commit marketplace changes
         uses: stefanzweifel/git-auto-commit-action@v7

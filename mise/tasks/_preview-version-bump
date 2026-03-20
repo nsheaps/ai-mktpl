@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+#MISE description="Preview version bump for a single plugin (dry-run). Usage: mise run _preview-version-bump [PLUGIN_PATH]"
+set -euo pipefail
+
+PLUGIN_PATH="${1:-$PWD}"
+ROOT_DIR="${MISE_PROJECT_ROOT:-$(git rev-parse --show-toplevel)}"
+
+[ -f "$ROOT_DIR/.pnp.cjs" ] || mise run setup
+source "$ROOT_DIR/bin/lib/stdlib.sh"
+cd "$PLUGIN_PATH"
+PLUGIN_DIR="$(dirname "$(find_up '.claude-plugin')")"
+cd "$PLUGIN_DIR"
+echo "===[ DRY RUN for $(basename "$PLUGIN_DIR") ]==="
+yarn exec release-it --dry-run --ci 2>&1 || echo "No release needed"

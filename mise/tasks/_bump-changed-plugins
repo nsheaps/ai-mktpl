@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+#MISE description="Bump versions for changed plugins only. Usage: mise run _bump-changed-plugins [BASE_REF]"
+set -euo pipefail
+
+BASE_REF="${1:-origin/main}"
+ROOT_DIR="${MISE_PROJECT_ROOT:-$(git rev-parse --show-toplevel)}"
+
+[ -f "$ROOT_DIR/.pnp.cjs" ] || mise run setup
+
+for plugin_dir in plugins/*; do
+  if [ ! -d "$plugin_dir" ]; then
+    continue
+  fi
+  PLUGIN_NAME=$(basename "$plugin_dir")
+
+  # Check if plugin has changes (excluding CHANGELOG.md and plugin.json)
+  # Also check symlink targets (shared/ content) for changes
+  HAS_CHANGES=false
+  if git diff --name-only "${BASE_REF}..HEAD" -- "$plugin_dir" | grep -v 'CHANGELOG.md$' | grep -v 'plugin.json$' | grep -q .; then
+    HAS_CHANGES=true
+  elif mise run _has-symlink-changes "$plugin_dir" "$BASE_REF" 2>/dev/null; then
+    HAS_CHANGES=true
+  fi
+
+  if [ "$HAS_CHANGES" = "true" ]; then
+    echo "=== Bumping version for $PLUGIN_NAME (has changes) ==="
+    cd "$plugin_dir"
+    yarn exec release-it --ci
+    cd - > /dev/null
+  else
+    echo "=== Skipping $PLUGIN_NAME (no changes) ==="
+  fi
+done

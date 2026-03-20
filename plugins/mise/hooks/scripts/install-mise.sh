@@ -36,7 +36,7 @@ resolve_mise_bin() {
     if [ -x "$mise_bin" ]; then
       hook_log "mise already installed at $mise_bin, checking for updates"
       if [ "$version" = "latest" ]; then
-        "$mise_bin" self-update 2>/dev/null || hook_log "self-update skipped"
+        "$mise_bin" self-update >/dev/null 2>&1 || hook_log "self-update skipped"
       fi
     elif tool_is_available mise; then
       # Found on PATH from elsewhere — use it

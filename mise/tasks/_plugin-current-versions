@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+#MISE description="List all plugin names and their current versions"
+set -euo pipefail
+
+for plugin_dir in plugins/*; do
+  {
+    if [ ! -d "$plugin_dir" ]; then
+      continue
+    fi
+    PLUGIN_NAME=$(basename "$plugin_dir")
+    CURRENT=$(mise run _plugin-current-version "$plugin_dir")
+    echo "$PLUGIN_NAME: $CURRENT"
+  } &
+done
+wait
