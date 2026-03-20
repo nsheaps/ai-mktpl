@@ -100,6 +100,18 @@ Common actions already in use:
    - Validate that your changes address the specific reported issue
    - Test the fix against the original problem
 
+## NEVER Manually Skip CI
+
+**CRITICAL:** Do NOT add `[skip ci]` to commit messages in manual pushes.
+
+CI on the latest commit of every branch is essential — it gates merges, validates plugin structure, and runs linting. Skipping CI leaves the branch in an unverifiable state.
+
+`[skip ci]` is **only** acceptable in automated workflows (e.g., bot commits that trigger a follow-up workflow, or CD pipeline housekeeping commits where CI will run on a subsequent commit). If you are a human or an AI agent pushing code, CI must always run.
+
+- **Never** use `[skip ci]`, `[ci skip]`, `[no ci]`, or `skip-checks: true` in manual commits
+- If CI is slow or failing, fix the root cause — don't skip it
+- Automated workflows that use `[skip ci]` must ensure CI runs on a later commit in the same pipeline
+
 ## CI Must Pass Before Merging
 
 **CRITICAL:** All CI checks must pass before a PR can be merged. After pushing changes:
