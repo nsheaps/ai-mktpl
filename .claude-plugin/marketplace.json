@@ -11,7 +11,7 @@
     {
       "name": "1pass",
       "description": "Install and manage 1Password CLI (op) and op-exec in Claude Code sessions. Provides session-start auto-install for web sessions and comprehensive workflow skills.",
-      "version": "0.1.9",
+      "version": "0.1.10",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -68,7 +68,7 @@
     {
       "name": "common-sense",
       "description": "Common-sense rules for AI assistant behavior. On session start, symlinks bundled rules into the project's .claude/rules/common-sense directory so they are automatically loaded as context.",
-      "version": "1.3.8",
+      "version": "1.3.9",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -202,7 +202,7 @@
     {
       "name": "github",
       "description": "GitHub CLI installation, authentication, and workflow skill for Claude Code sessions. Consolidates gh-tool and github-auth-skill into a single plugin.",
-      "version": "0.1.10",
+      "version": "0.1.11",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -227,7 +227,7 @@
     {
       "name": "github-app",
       "description": "Automatic GitHub App token lifecycle for Claude Code sessions. Generates installation tokens on session start, monitors expiry via PreToolUse hook, and refreshes transparently before commands that need authentication.",
-      "version": "0.1.8",
+      "version": "0.1.9",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -249,7 +249,7 @@
     {
       "name": "google-workspace-cli",
       "description": "Install and manage the Google Workspace CLI (gws) with per-service skills for Gmail, Calendar, Drive, Docs, Sheets, Slides, Chat, Tasks, Contacts, and Admin",
-      "version": "0.1.4",
+      "version": "0.1.5",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -301,7 +301,7 @@
     {
       "name": "mise",
       "description": "Install and manage mise (tool version manager) in Claude Code sessions. Provides session-start auto-install for web sessions and comprehensive workflow skills.",
-      "version": "0.2.10",
+      "version": "0.2.11",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -341,7 +341,7 @@
     {
       "name": "permissions-sync",
       "description": "Merge permission scopes from configurable source settings.json files into settings.local.json on session start. Supports project-level and user-level installation.",
-      "version": "0.1.9",
+      "version": "0.1.10",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -394,7 +394,7 @@
     {
       "name": "remote-config",
       "description": "Sync upstream Claude config repo on session start. Pulls latest from a configured git repo to ~/.claude-remote/ and reports update status.",
-      "version": "0.1.6",
+      "version": "0.1.7",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -442,13 +442,13 @@
     {
       "name": "scm-utils",
       "description": "Source control management utilities for improving interactions with branches and PRs, both locally and in CI environments",
-      "version": "0.1.9",
+      "version": "0.1.10",
       "author": {
         "name": "Nathan Heaps"
       },
       "source": "./plugins/scm-utils",
       "category": "utility",
-      "tags": ["utility", "command", "skill"],
+      "tags": ["utility", "skill"],
       "keywords": ["git", "branch", "pr", "pull-request", "sync", "merge", "scm", "source-control"]
     },
     {
@@ -466,7 +466,7 @@
     {
       "name": "sequential-thinking",
       "description": "Set up the sequential-thinking MCP server and auto-configure permissions for its tools on session start.",
-      "version": "0.1.8",
+      "version": "0.1.9",
       "author": {
         "name": "Nathan Heaps"
       },

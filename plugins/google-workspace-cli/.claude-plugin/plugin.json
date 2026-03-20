@@ -1,6 +1,6 @@
 {
   "name": "google-workspace-cli",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Install and manage the Google Workspace CLI (gws) with per-service skills for Gmail, Calendar, Drive, Docs, Sheets, Slides, Chat, Tasks, Contacts, and Admin",
   "author": {
     "name": "Nathan Heaps",
