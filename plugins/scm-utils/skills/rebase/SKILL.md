@@ -13,7 +13,7 @@ Rebase a feature branch onto its base branch to produce a clean, linear commit h
 
 Current branch: !`git branch --show-current 2>/dev/null || echo "(not in a git repo)"`
 
-Working tree status: !`git status --porcelain 2>/dev/null | head -5 || echo "(not in a git repo)"`
+Working tree status: !`git status --porcelain 2>/dev/null | head -5; COUNT=$(git status --porcelain 2>/dev/null | wc -l); [ "$COUNT" -gt 5 ] && echo "... and $((COUNT - 5)) more" || true`
 
 PR info for current branch:
 !`gh pr view --json baseRefName,headRefName,number,title,state 2>/dev/null || echo "(no PR found or gh not authenticated)"`
