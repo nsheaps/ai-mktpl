@@ -21,18 +21,21 @@ command=$(echo "$input" | jq -r '.tool_input.command // empty' 2>/dev/null || tr
 
 # Only care about git commit commands
 if ! echo "$command" | grep -qE '(^|\s)git\s+(-[A-Za-z]\s+\S+\s+)*commit(\s|$)'; then
+  echo '{"hookSpecificOutput":{"permissionDecision":"allow"}}'
   exit 0
 fi
 
 # Check if prettier is available
 if ! command -v prettier &>/dev/null; then
   echo "prettier not found, skipping pre-commit format" >&2
+  echo '{"hookSpecificOutput":{"permissionDecision":"allow"}}'
   exit 0
 fi
 
 # Get staged files (excluding deleted)
 staged=$(git diff --cached --name-only --diff-filter=d 2>/dev/null || true)
 if [ -z "$staged" ]; then
+  echo '{"hookSpecificOutput":{"permissionDecision":"allow"}}'
   exit 0
 fi
 
