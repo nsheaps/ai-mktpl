@@ -1,18 +1,6 @@
 {
-  "description": "SCM utilities: pre-commit formatting and uncommitted change reminders",
+  "description": "SCM utilities: uncommitted change reminders and git safety checks",
   "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/format-staged-on-commit.sh",
-            "timeout": 30
-          }
-        ]
-      }
-    ],
     "Stop": []
   }
 }

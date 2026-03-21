@@ -1,0 +1,29 @@
+# edit-utils default settings
+#
+# Override per-project in $CLAUDE_PROJECT_DIR/.claude/plugins.settings.yaml
+# Override per-user in ~/.claude/plugins.settings.yaml
+#
+# To auto-detect settings for a project, use the auto-config skill.
+
+# Whether the plugin is active
+enabled: true
+
+# Formatter command (receives file path as argument)
+# Examples:
+#   formatter: "prettier --write"
+#   formatter: "biome format --write"
+#   formatter: "black"
+formatter: ""
+
+# File extensions to format (omit to let the formatter decide)
+# extensions:
+#   - .json
+#   - .yaml
+#   - .yml
+#   - .md
+#   - .js
+#   - .ts
+#   - .jsx
+#   - .tsx
+#   - .css
+#   - .html
