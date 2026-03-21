@@ -13,7 +13,7 @@ enabled: true
 #   formatter: "prettier --write"
 #   formatter: "biome format --write"
 #   formatter: "black"
-formatter: ""
+formatter: ''
 
 # File extensions to format (omit to let the formatter decide)
 # extensions:

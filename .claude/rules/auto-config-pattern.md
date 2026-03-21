@@ -24,12 +24,13 @@ Plugins should **not hardcode tool assumptions**. Instead, they should discover 
 ```yaml
 # my-plugin.settings.yaml
 enabled: true
-tool: ""  # No tool configured = no action
+tool: "" # No tool configured = no action
 ```
 
 ### 2. Auto-Config Skill
 
 Create a skill at `skills/auto-config/SKILL.md` that:
+
 - Lists all config files/patterns it searches for
 - Maps discovered tools to plugin settings
 - Writes to `$CLAUDE_PROJECT_DIR/.claude/plugins.settings.yaml`
@@ -38,6 +39,7 @@ Create a skill at `skills/auto-config/SKILL.md` that:
 ### 3. SessionStart Hook (optional)
 
 For zero-touch setup, add a SessionStart hook that:
+
 - Checks if config already exists (skip if so)
 - Uses a fast model to explore the project
 - Populates config for subsequent tool calls

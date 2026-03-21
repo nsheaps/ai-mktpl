@@ -23,11 +23,11 @@ edit-utils:
 
 ### Settings
 
-| Key | Default | Description |
-|-----|---------|-------------|
-| `enabled` | `true` | Whether the plugin is active |
-| `formatter` | `""` | Formatter command (receives file path as argument) |
-| `extensions` | *(empty)* | File extensions to format (omit to let formatter decide) |
+| Key          | Default   | Description                                              |
+| ------------ | --------- | -------------------------------------------------------- |
+| `enabled`    | `true`    | Whether the plugin is active                             |
+| `formatter`  | `""`      | Formatter command (receives file path as argument)       |
+| `extensions` | _(empty)_ | File extensions to format (omit to let formatter decide) |
 
 ## Auto-Config
 

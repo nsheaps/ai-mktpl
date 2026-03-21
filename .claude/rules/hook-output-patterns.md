@@ -8,12 +8,12 @@ When a PreToolUse hook has **no opinion** about a tool call (e.g., it only cares
 
 ### When to Output JSON
 
-| Scenario | Output | Effect |
-|----------|--------|--------|
-| Hook has no opinion | Nothing (exit 0) | Defer to permission system |
-| Hook explicitly allows | `permissionDecision: "allow"` | Skip permission prompt |
-| Hook explicitly denies | `permissionDecision: "deny"` | Block the tool call |
-| Hook wants user confirmation | `permissionDecision: "ask"` | Prompt user |
+| Scenario                     | Output                        | Effect                     |
+| ---------------------------- | ----------------------------- | -------------------------- |
+| Hook has no opinion          | Nothing (exit 0)              | Defer to permission system |
+| Hook explicitly allows       | `permissionDecision: "allow"` | Skip permission prompt     |
+| Hook explicitly denies       | `permissionDecision: "deny"`  | Block the tool call        |
+| Hook wants user confirmation | `permissionDecision: "ask"`   | Prompt user                |
 
 ### Correct Pattern
 
