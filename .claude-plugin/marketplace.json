@@ -168,6 +168,18 @@
       ]
     },
     {
+      "name": "edit-utils",
+      "description": "File editing utilities: auto-formatting and linting for written/edited files with project-aware configuration",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/edit-utils",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": ["format", "lint", "prettier", "eslint", "edit", "write", "auto-format"]
+    },
+    {
       "name": "fix-pr",
       "description": "Relentlessly fix a PR until CI passes — iterates through review, fix, push cycles until green",
       "version": "0.1.2",
@@ -442,7 +454,7 @@
     {
       "name": "scm-utils",
       "description": "Source control management utilities for improving interactions with branches and PRs, both locally and in CI environments",
-      "version": "0.1.12",
+      "version": "0.1.13",
       "author": {
         "name": "Nathan Heaps"
       },
