@@ -79,6 +79,9 @@ do_setup() {
   local mise_bin
   mise_bin="$(resolve_mise_bin)" || { hook_respond; exit 0; }
 
+  # Re-apply PATH in parent shell (tool_ensure_path ran in subshell above)
+  tool_ensure_path "$INSTALL_DIR"
+
   # Activate mise in the current shell AND persist to CLAUDE_ENV_FILE
   hook_log_step "activate-mise" "Activating mise in shell"
   eval "$("$mise_bin" activate bash)" 2>/dev/null || true
