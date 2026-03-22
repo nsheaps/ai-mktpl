@@ -35,20 +35,39 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  # For PRs: Preview version bumps only (no commits)
-  preview-version-bump:
+  # For PRs: Auto-bump versions and update marketplace in the PR branch
+  # Pushes changes back to the PR branch (like lint auto-fix).
+  # Does NOT use [skip ci] so CI re-runs to validate the final state.
+  # Loop prevention: skips if latest commit is from a previous auto-bump.
+  auto-version-bump:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     permissions:
-      contents: read
+      contents: write
       pull-requests: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
+      - name: Checkout and authenticate as GitHub App
+        id: auth
+        uses: nsheaps/github-actions/.github/actions/checkout-as-app@603052841cd49b9fdc99bc32979ff9c45c9b669e # checkout-as-app@main
         with:
-          fetch-depth: 0
+          app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
+          private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
+          ref: ${{ github.head_ref }}
+          fetch-depth: '0'
+
+      - name: Check if latest commit is auto-bump (loop prevention)
+        id: check-skip
+        run: |
+          LAST_MSG=$(git log -1 --format='%s')
+          if [[ "$LAST_MSG" == "chore: auto-bump plugin versions and update marketplace" ]]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "Latest commit is from auto-bump, skipping to prevent loop"
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Fetch base branch and tags
+        if: steps.check-skip.outputs.skip != 'true'
         env:
           BASE_REF: ${{ github.base_ref }}
         run: |
@@ -56,6 +75,7 @@ jobs:
           git fetch origin --tags
 
       - name: Resolve base ref from release tag
+        if: steps.check-skip.outputs.skip != 'true'
         id: resolve-base
         env:
           BASE_REF: ${{ github.base_ref }}
@@ -70,29 +90,132 @@ jobs:
           fi
 
       - name: mise install -y
+        if: steps.check-skip.outputs.skip != 'true'
         uses: jdx/mise-action@v3
         with:
           install: true
-          cache: ${{ github.event_name == 'pull_request'}}
+          cache: true
 
-      - name: Detect plugin changes
-        id: detect
-        uses: ./.github/actions/detect-plugin-changes
+      - name: Install yarn dependencies
+        if: steps.check-skip.outputs.skip != 'true'
+        run: yarn install --immutable
+
+      - name: Auto-bump changed plugins and update marketplace
+        if: steps.check-skip.outputs.skip != 'true'
+        id: bump
+        shell: bash
+        env:
+          BASE_REF: ${{ steps.resolve-base.outputs.base-ref }}
+        run: |
+          # Resolve base ref for git commands
+          if git rev-parse --verify "origin/$BASE_REF" >/dev/null 2>&1; then
+            RESOLVED_BASE="origin/$BASE_REF"
+          elif git rev-parse --verify "$BASE_REF" >/dev/null 2>&1; then
+            RESOLVED_BASE="$BASE_REF"
+          else
+            RESOLVED_BASE="HEAD~1"
+          fi
+
+          BUMPED_PLUGINS=()
+          SKIPPED_PLUGINS=()
+          REPORT_MD="| Plugin | Base | Current | Action |\n|---|---|---|---|"
+
+          for plugin_dir in plugins/*; do
+            [ -d "$plugin_dir" ] || continue
+            PLUGIN_NAME=$(basename "$plugin_dir")
+            PLUGIN_JSON="$plugin_dir/.claude-plugin/plugin.json"
+            [ -f "$PLUGIN_JSON" ] || continue
+
+            # Check for code changes (excluding plugin.json and CHANGELOG.md)
+            HAS_CHANGES=false
+            if git diff --name-only "$RESOLVED_BASE..HEAD" -- "$plugin_dir" 2>/dev/null \
+              | grep -v 'CHANGELOG.md$' | grep -v 'plugin.json$' | grep -q .; then
+              HAS_CHANGES=true
+            fi
+
+            # Check symlink target changes
+            if [ "$HAS_CHANGES" = "false" ]; then
+              if mise run _has-symlink-changes "$plugin_dir" "$RESOLVED_BASE" 2>/dev/null; then
+                HAS_CHANGES=true
+              fi
+            fi
+
+            [ "$HAS_CHANGES" = "true" ] || continue
+
+            # Get base version (version before this PR)
+            BASE_VERSION=$(git show "$RESOLVED_BASE:$PLUGIN_JSON" 2>/dev/null | jq -r '.version' 2>/dev/null || echo "0.0.0")
+            # Get current version in PR head
+            HEAD_VERSION=$(jq -r '.version' "$PLUGIN_JSON" 2>/dev/null || echo "0.0.0")
+
+            # If head version is already higher than base, respect the manual/previous bump
+            if [ "$HEAD_VERSION" != "$BASE_VERSION" ]; then
+              HIGHER=$(printf '%s\n%s' "$HEAD_VERSION" "$BASE_VERSION" | sort -V | tail -1)
+              if [ "$HIGHER" = "$HEAD_VERSION" ]; then
+                echo "✅ $PLUGIN_NAME: already bumped $BASE_VERSION → $HEAD_VERSION (keeping)"
+                SKIPPED_PLUGINS+=("$PLUGIN_NAME")
+                REPORT_MD="$REPORT_MD\n| $PLUGIN_NAME | $BASE_VERSION | $HEAD_VERSION | Already bumped |"
+                continue
+              fi
+            fi
+
+            # Auto-bump via release-it (patch increment)
+            echo "⬆️  $PLUGIN_NAME: auto-bumping from $HEAD_VERSION"
+            cd "plugins/$PLUGIN_NAME"
+            if ! yarn exec release-it --ci 2>&1; then
+              echo "::error::release-it failed for plugin '$PLUGIN_NAME'"
+              cd ../..
+              continue
+            fi
+            cd ../..
+
+            NEW_VERSION=$(jq -r '.version' "$PLUGIN_JSON")
+            BUMPED_PLUGINS+=("$PLUGIN_NAME")
+            REPORT_MD="$REPORT_MD\n| $PLUGIN_NAME | $BASE_VERSION | $NEW_VERSION | Auto-bumped |"
+          done
+
+          # Always regenerate marketplace (idempotent, picks up new plugins too)
+          mise run update-marketplace
+
+          # Lint everything
+          mise run lint
+
+          # Check if any files changed
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "has-changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "has-changes=false" >> $GITHUB_OUTPUT
+          fi
+
+          # Save report for PR comment
+          {
+            echo "report-md<<EOF"
+            printf '%b' "$REPORT_MD"
+            echo ""
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
+      - name: Commit and push all changes at once
+        if: steps.check-skip.outputs.skip != 'true' && steps.bump.outputs.has-changes == 'true'
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
-          base-ref: ${{ steps.resolve-base.outputs.base-ref }}
+          commit_message: 'chore: auto-bump plugin versions and update marketplace'
+          commit_user_name: ${{ steps.auth.outputs.user-name }}
+          commit_user_email: ${{ steps.auth.outputs.user-email }}
 
-      - name: Post version preview comment
+      - name: Post version status comment
+        if: steps.check-skip.outputs.skip != 'true'
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           header: 'plugin-versions'
           message: |
-            ### Plugin Version Bumps (Preview)
-            _These versions will be bumped when merged to main._
+            ### Plugin Version Status
+            _Versions are auto-bumped in PRs. Manual bumps to higher versions are preserved._
 
-            ${{ steps.detect.outputs.report-md }}
+            ${{ steps.bump.outputs.report-md }}
 
-  # For main: Bump versions and update marketplace
+  # For main: Bump only plugins that weren't already bumped in the PR,
+  # then update marketplace metadata.
   bump-and-update-marketplace:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
@@ -129,7 +252,7 @@ jobs:
         uses: jdx/mise-action@v3
         with:
           install: true
-          cache: ${{ github.event_name == 'pull_request'}}
+          cache: false
 
       - name: Install yarn dependencies
         run: yarn install --immutable
@@ -140,13 +263,42 @@ jobs:
         with:
           base-ref: ${{ steps.resolve-base.outputs.base-ref }}
 
-      - name: Bump versions for changed plugins
+      - name: Bump versions for changed plugins (skip already bumped)
         if: steps.detect.outputs.has-changes == 'true'
         shell: bash
+        env:
+          PLUGINS: ${{ steps.detect.outputs.plugins }}
+          BASE_REF: ${{ steps.resolve-base.outputs.base-ref }}
         run: |
+          # Resolve base ref for git commands
+          if git rev-parse --verify "origin/$BASE_REF" >/dev/null 2>&1; then
+            RESOLVED_BASE="origin/$BASE_REF"
+          elif git rev-parse --verify "$BASE_REF" >/dev/null 2>&1; then
+            RESOLVED_BASE="$BASE_REF"
+          else
+            RESOLVED_BASE="HEAD~1"
+          fi
+
           FAILED_PLUGINS=()
-          for plugin_name in ${{ steps.detect.outputs.plugins }}; do
-            echo "::group::Bumping version for $plugin_name"
+          for plugin_name in $PLUGINS; do
+            echo "::group::Checking version for $plugin_name"
+            PLUGIN_JSON="plugins/$plugin_name/.claude-plugin/plugin.json"
+
+            # Get base version and current version
+            BASE_VERSION=$(git show "$RESOLVED_BASE:$PLUGIN_JSON" 2>/dev/null | jq -r '.version' 2>/dev/null || echo "0.0.0")
+            HEAD_VERSION=$(jq -r '.version' "$PLUGIN_JSON" 2>/dev/null || echo "0.0.0")
+
+            # Skip if already bumped (version at HEAD > version at base)
+            if [ "$HEAD_VERSION" != "$BASE_VERSION" ]; then
+              HIGHER=$(printf '%s\n%s' "$HEAD_VERSION" "$BASE_VERSION" | sort -V | tail -1)
+              if [ "$HIGHER" = "$HEAD_VERSION" ]; then
+                echo "✅ $plugin_name: already bumped in PR ($BASE_VERSION → $HEAD_VERSION), skipping"
+                echo "::endgroup::"
+                continue
+              fi
+            fi
+
+            echo "⬆️  $plugin_name: bumping from $HEAD_VERSION"
             cd "plugins/$plugin_name"
             if ! yarn exec release-it --ci 2>&1; then
               echo "::error::release-it failed for plugin '$plugin_name'"
