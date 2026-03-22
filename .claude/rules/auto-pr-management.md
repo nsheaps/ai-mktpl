@@ -12,6 +12,17 @@ Create a PR **after the first push** to a new branch. Do not wait for the user t
 
 Update the PR description **after every push** to reflect the current state of changes. Keep the description accurate and up-to-date as work progresses.
 
+## Rebase Before Every Push
+
+**CRITICAL:** Before every push, rebase the branch onto the latest `origin/main`. This is non-negotiable — even if you believe the branch is already up to date.
+
+1. `git fetch origin main`
+2. Check if there are upstream commits: `git log --oneline HEAD..origin/main`
+3. If there are ANY commits behind, rebase: `git rebase origin/main`
+4. Then push (use `--force-with-lease` after a rebase)
+
+**Never skip rebase when the user asks for it.** If the user explicitly requests a rebase, always perform it regardless of whether you think it's needed.
+
 ## How to Authenticate
 
 Use the `GH_TOKEN` environment variable with the `gh` CLI. Since the git remote in web sessions is a local proxy, use `gh api` with `--hostname github.com` for all GitHub API calls (not `gh pr create` which requires a GitHub remote).
