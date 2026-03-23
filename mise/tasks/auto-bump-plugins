@@ -38,7 +38,7 @@ VERSION_BASE=$(resolve_ref "$VERSION_BASE")
 echo "Change detection base: $CHANGE_BASE" >&2
 echo "Version comparison base: $VERSION_BASE" >&2
 
-[ -f "$ROOT_DIR/.pnp.cjs" ] || mise run setup
+[ -f "$ROOT_DIR/.pnp.cjs" ] || mise run setup >&2
 
 BUMPED_PLUGINS=()
 SKIPPED_PLUGINS=()
@@ -59,7 +59,7 @@ for plugin_dir in plugins/*; do
 
   # Check symlink target changes
   if [ "$HAS_CHANGES" = "false" ]; then
-    if mise run _has-symlink-changes "$plugin_dir" "$CHANGE_BASE" 2>/dev/null; then
+    if mise run _has-symlink-changes "$plugin_dir" "$CHANGE_BASE" >/dev/null 2>/dev/null; then
       HAS_CHANGES=true
     fi
   fi
@@ -83,7 +83,7 @@ for plugin_dir in plugins/*; do
 
   # Auto-bump via release-it (patch increment)
   echo "⬆️  $PLUGIN_NAME: auto-bumping from $HEAD_VERSION" >&2
-  if ! (cd "plugins/$PLUGIN_NAME" && yarn exec release-it --ci 2>&1 >&2); then
+  if ! (cd "plugins/$PLUGIN_NAME" && yarn exec release-it --ci >&2 2>&1); then
     echo "::error::release-it failed for plugin '$PLUGIN_NAME'" >&2
     continue
   fi
