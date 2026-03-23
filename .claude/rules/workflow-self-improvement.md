@@ -16,13 +16,13 @@ This applies whenever you:
 
 ## What to Update
 
-| Problem Type | Where to Fix |
-|---|---|
-| CLI command doesn't work in context | Skill for that tool (e.g., `plugins/github/skills/gh/SKILL.md`) |
-| Environment-specific behavior | Rule file (e.g., `.claude/rules/`) or skill troubleshooting section |
-| Repeated manual workflow | Create or update a skill in the appropriate plugin |
-| Missing project convention | Rule file in `.claude/rules/` |
-| Recurring bug or gotcha | `ongoing-issues.md` + GitHub issue |
+| Problem Type                        | Where to Fix                                                        |
+| ----------------------------------- | ------------------------------------------------------------------- |
+| CLI command doesn't work in context | Skill for that tool (e.g., `plugins/github/skills/gh/SKILL.md`)     |
+| Environment-specific behavior       | Rule file (e.g., `.claude/rules/`) or skill troubleshooting section |
+| Repeated manual workflow            | Create or update a skill in the appropriate plugin                  |
+| Missing project convention          | Rule file in `.claude/rules/`                                       |
+| Recurring bug or gotcha             | `ongoing-issues.md` + GitHub issue                                  |
 
 ## How to Apply
 
@@ -35,6 +35,6 @@ This applies whenever you:
 ## Anti-Patterns
 
 - Working around an issue 3+ times without updating docs
-- Adding a workaround in a rule file when it belongs in a skill (rules say *what*, skills say *how*)
+- Adding a workaround in a rule file when it belongs in a skill (rules say _what_, skills say _how_)
 - Documenting the workaround only in a commit message where future sessions won't see it
 - Fixing the symptom in one place while the incorrect guidance remains in another

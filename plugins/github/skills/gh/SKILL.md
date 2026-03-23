@@ -19,11 +19,11 @@ commands for pull requests, issues, repos, actions, and direct API access.
 
 ### What Works and What Doesn't
 
-| Approach | Web Session | Local Session |
-|---|---|---|
-| `gh api --hostname github.com repos/OWNER/REPO/...` | **Works** | Works |
-| `gh pr create`, `gh pr list`, `gh issue list`, etc. | **Fails** (proxy remote) | Works |
-| `gh api repos/OWNER/REPO/...` (no --hostname) | **May fail** (resolves to proxy) | Works |
+| Approach                                            | Web Session                      | Local Session |
+| --------------------------------------------------- | -------------------------------- | ------------- |
+| `gh api --hostname github.com repos/OWNER/REPO/...` | **Works**                        | Works         |
+| `gh pr create`, `gh pr list`, `gh issue list`, etc. | **Fails** (proxy remote)         | Works         |
+| `gh api repos/OWNER/REPO/...` (no --hostname)       | **May fail** (resolves to proxy) | Works         |
 
 ### Always-Safe Pattern
 
