@@ -79,8 +79,12 @@ do_setup() {
   local mise_bin
   mise_bin="$(resolve_mise_bin)" || { hook_respond; exit 0; }
 
-  # Always activate mise and persist to CLAUDE_ENV_FILE
+  # Re-apply PATH in parent shell (tool_ensure_path ran in subshell above)
+  tool_ensure_path "$INSTALL_DIR"
+
+  # Activate mise in the current shell AND persist to CLAUDE_ENV_FILE
   hook_log_step "activate-mise" "Activating mise in shell"
+  eval "$("$mise_bin" activate bash)" 2>/dev/null || true
   if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
     echo 'eval "$('"$mise_bin"' activate bash)"' >> "$CLAUDE_ENV_FILE"
     hook_log "Persisted mise activation to CLAUDE_ENV_FILE"
@@ -117,16 +121,16 @@ do_setup() {
   # Auto-install tools
   if [ "$auto_install_tools" = "true" ] && [ -f "${CLAUDE_PROJECT_DIR:-.}/mise.toml" ]; then
     hook_log_step "install-tools" "Installing tools from mise.toml"
-    local install_output
-    install_output="$(cd "${CLAUDE_PROJECT_DIR:-.}" && GITHUB_TOKEN="${GITHUB_TOKEN:-${GH_TOKEN:-}}" "$mise_bin" install -y 2>&1)" || {
+    local install_output install_rc=0
+    install_output="$(cd "${CLAUDE_PROJECT_DIR:-.}" && GITHUB_TOKEN="${GITHUB_TOKEN:-${GH_TOKEN:-}}" "$mise_bin" install -y 2>&1)" || install_rc=$?
+
+    if [ "$install_rc" -ne 0 ]; then
       hook_log "mise install exited non-zero (partial failure). Tools that installed are still available."
-      if [ -n "$install_output" ]; then
-        hook_log "mise install output:"
-        while IFS= read -r line; do
-          hook_log "  $line"
-        done <<< "$install_output"
-      fi
-    }
+      hook_log "mise install output:"
+      while IFS= read -r line; do
+        [ -n "$line" ] && hook_log "  $line"
+      done <<< "$install_output"
+    fi
   fi
 }
 
