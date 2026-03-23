@@ -218,6 +218,88 @@ Full lifecycle memory capture for Claude Code sessions.
 | **agent-self-reflection** | Periodic self-reflection on recent sessions                                   |
 | **agent-self-assessment** | Security self-assessment for configuration auditing                           |
 
+---
+
+### 6. OpenClaw Native Memory System
+
+OpenClaw uses a file-based, Markdown-driven memory system with semantic search:
+
+#### Two-Layer Default Memory
+1. **Daily Logs** (`memory/YYYY-MM-DD.md`) — append-only running context, reads today + yesterday at session start
+2. **Long-term Memory** (`MEMORY.md`) — curated profile-like info: preferences, decisions, durable facts
+
+#### Memory Tools
+- `memory_search` — hybrid BM25 + vector search over indexed Markdown snippets (SQLite + embeddings)
+- `memory_get` — targeted read by file and line range
+- **Auto-flush before compaction** — when nearing token limits, triggers silent agentic turn to write durable memories
+
+**Key limitation**: Agents are stateless between sessions. Continuity depends entirely on what gets written to and re-read from files.
+
+---
+
+### 7. Cortex Memory (sopaco/cortex-mem)
+
+**[GitHub](https://github.com/sopaco/cortex-mem)** — 211 stars, Rust
+
+Production-grade three-tier cognitive memory framework:
+
+| Tier | Tokens | Weight | Purpose |
+|------|--------|--------|---------|
+| **L0 (Abstract)** | ~100 | 20% | Fast positioning |
+| **L1 (Overview)** | ~500-2000 | 30% | Structured summary |
+| **L2 (Detail)** | Full | 50% | Complete content |
+
+**Key features**:
+- **Ebbinghaus forgetting curve** cleanup — automatic decay based on memory science
+- Event-driven automation
+- Qdrant vector DB backend
+- **93.33% Recall@1** on LOCOMO benchmark
+- 80% token savings over native OpenClaw memory
+- Integrates via "MemClaw" plugin
+- REST API (Axum), CLI, MCP server, and Svelte dashboard
+
+---
+
+### 8. BrainX (Mdx2025)
+
+**[GitHub](https://github.com/Mdx2025/BrainX-The-First-Brain-for-OpenClaw)** — 27 stars, PostgreSQL + pgvector
+
+Shared multi-agent memory with the most sophisticated pipeline:
+
+**Three feeding mechanisms**:
+1. Manual agent input
+2. LLM-powered distiller (every 6 hours)
+3. Regex-based fact extractor
+
+**Auto-promotion pipeline**:
+- 3+ recurrences → importance boost
+- 10+ recurrences → core knowledge (never archived)
+- Promotes to workspace rules (AGENTS.md, TOOLS.md, SOUL.md) as permanent rules
+
+**Cross-agent learning**: When one agent finds something important (importance >= 7), it propagates to ALL agents daily.
+
+**15-step daily pipeline**: Bootstrap → lifecycle management → distillation → harvesting → consolidation → cross-agent learning → contradiction detection → auto-promotion → enforcement → audit
+
+**Pre-action advisory**: Queries past mistakes before high-risk tool execution.
+
+**Contradiction detection**: Identifies conflicting memories and supersedes obsolete versions.
+
+---
+
+### Security: The ClawHavoc Incident (Feb 2026)
+
+Researchers discovered **1,184 malicious skills** on ClawHub from 12 author accounts:
+
+- **341 skills** installed Atomic Stealer (AMOS) macOS malware via fake error messages
+- Some embedded reverse shell backdoors in otherwise functional code
+- Others exfiltrated bot credentials from `~/.clawdbot/.env`
+- **Most concerning**: Attacks targeted `SOUL.md` and `MEMORY.md` persistent memory files, turning point-in-time exploits into **stateful, delayed-execution attacks**
+- **Response**: 2,419 suspicious skills removed, VirusTotal partnership, AES-256-GCM credential encryption, 40+ vulnerabilities patched
+
+**Implications for plugin marketplaces**: Open skill/plugin registries without adequate scanning are high-risk targets. Memory files (SOUL.md, MEMORY.md) are attack surfaces because they persist across sessions.
+
+---
+
 ## Cross-Cutting Patterns
 
 1. **File-based memory** dominates — markdown files are the universal persistence format
