@@ -14,7 +14,6 @@ concurrency:
   group: ${{ github.ref == 'refs/heads/main' && 'ci-cd-main' || format('ci-{0}', github.ref) }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
-
 jobs:
   lint:
     runs-on: ubuntu-latest
