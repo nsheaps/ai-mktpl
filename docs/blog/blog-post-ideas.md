@@ -9,6 +9,7 @@ Planning document for blog content based on learnings, patterns, and experiences
 **Angle:** The origin story — why we built a curated plugin distribution system for Claude Code, what problems it solves, and how it grew from a handful of personal scripts into 42+ plugins with CI/CD, versioning, and automated marketplace updates.
 
 **Key points:**
+
 - The gap between "AI can code" and "AI can code consistently across projects"
 - Why organization-wide configuration matters (21 behavioral rules, 6 custom agents)
 - Plugin as the unit of reusable AI behavior — commands, skills, hooks, agents, MCP servers bundled together
@@ -23,6 +24,7 @@ Planning document for blog content based on learnings, patterns, and experiences
 **Angle:** Deep dive into the hook system (PreToolUse, PostToolUse, SessionStart, Stop, UserPromptSubmit) and how event-driven architecture changes how you govern AI agents. The critical insight: no output = defer to defaults, explicit output = override.
 
 **Key points:**
+
 - The permission model — allow, deny, ask — and why "no opinion" must produce zero output
 - SessionStart hooks for zero-touch environment setup (mise installation, git fetch, tool provisioning)
 - PreToolUse as a safety gate (safety-evaluation plugins, git state validation before termination)
@@ -38,6 +40,7 @@ Planning document for blog content based on learnings, patterns, and experiences
 **Angle:** How we solved the "works on my machine" problem for AI plugins. The auto-config pattern: no config = no action, auto-detect project toolchain, write explicit settings.
 
 **Key points:**
+
 - The problem: a formatting plugin hardcoded to prettier breaks in a biome project
 - 3-tier config resolution (project → user → plugin defaults) with YAML/JSON support
 - Auto-config skills that discover project tools and populate `plugins.settings.yaml`
@@ -53,6 +56,7 @@ Planning document for blog content based on learnings, patterns, and experiences
 **Angle:** We built 7 reusable bash libraries for plugin hooks and scripts. Here's how we standardized logging, config resolution, tool installation, and permission management across 42 plugins — and why bash was the right (and wrong) choice.
 
 **Key points:**
+
 - The evolution from duplicated `_json_msg()` patterns to `hook-output.sh`
 - Three logging tiers: `log.sh` (basic), `hook-output.sh` (simple JSON), `hook-logging.sh` (full lifecycle with steps, log files, error blocks)
 - `plugin-config-read.sh` — 3-tier config resolution with yq/jq fallback
@@ -69,6 +73,7 @@ Planning document for blog content based on learnings, patterns, and experiences
 **Angle:** We wrote 21 behavioral rules governing how AI agents work in our org. The most impactful ones aren't about code — they're about honesty, verification, and knowing when to stop.
 
 **Key points:**
+
 - "Verify before blaming" — the rule born from an agent filing a bug report based on assumptions, not evidence
 - "Never say done prematurely" — why agents must verify their own work
 - "Intellectual honesty in responses" — authenticity over excessive agreeableness
@@ -85,6 +90,7 @@ Planning document for blog content based on learnings, patterns, and experiences
 **Angle:** How we built a CI/CD pipeline that auto-bumps plugin versions, regenerates a marketplace manifest, runs AI-powered code review, and enforces that CI always runs — even when the AI agent really wants to skip it.
 
 **Key points:**
+
 - Semantic versioning for plugins: patch in PRs, auto-bump if forgotten, respect manual bumps
 - The CD pipeline: PR auto-version-bump → main safety-net bump → marketplace.json regeneration
 - AI code review via Claude Code review workflow (triggered by `request-review` label)
@@ -101,6 +107,7 @@ Planning document for blog content based on learnings, patterns, and experiences
 **Angle:** We built two safety evaluation plugins — one prompt-based, one script-based — that evaluate every tool call for safety before execution. Here's what we learned about the tradeoffs between flexibility and latency.
 
 **Key points:**
+
 - The threat model: AI agents with filesystem access, git push, and shell execution
 - Prompt-based safety (safety-evaluation-prompt): flexible, natural language rules, but adds latency
 - Script-based safety (safety-evaluation-script): fast, deterministic, but brittle to edge cases
@@ -117,6 +124,7 @@ Planning document for blog content based on learnings, patterns, and experiences
 **Angle:** We cataloged 33 open-source Claude Code statusline tools across 7 languages, analyzed their features and approaches, then built our own plugin. Here's what the community taught us about information density, terminal UX, and the surprising popularity of Rust for CLI tools.
 
 **Key points:**
+
 - The research: 33 tools cataloged by language (Rust, TypeScript, Python, Go, Bash, Ruby), stars, and features
 - Common patterns: API usage tracking, cost estimation, git status, model info, token counts
 - Unique innovations: Tamagotchi-style gamification, iTerm2 badge integration, tmux powerline segments
@@ -133,6 +141,7 @@ Planning document for blog content based on learnings, patterns, and experiences
 **Angle:** What happens when you give AI agents the ability to spawn other AI agents? We built plugins for tmux-based sub-agents, agent team orchestration, and task parallelization. Here's what worked, what didn't, and why the permission model is everything.
 
 **Key points:**
+
 - The agent team permission model: orchestrators create teams but don't do work; teammates use background sub-agents
 - `CLAUDE_CODE_PARENT_SESSION_ID` — how child agents disable expensive features (API calls, statusline)
 - Task parallelization plugin: the promise and reality of parallel AI work
@@ -150,6 +159,7 @@ Planning document for blog content based on learnings, patterns, and experiences
 **Angle:** We researched TOON (Token-Oriented Object Notation), a format that achieves 30-60% token reduction vs JSON. Here's what we learned about token-efficient data serialization, when it matters, and when JSON is fine.
 
 **Key points:**
+
 - The problem: JSON wastes tokens on quotes, colons, and braces — 30-60% overhead
 - TOON syntax: indentation-based, no quotes for simple strings, minimal punctuation
 - Benchmark results: 73.9% accuracy with TOON vs 70.7% with JSON (on specific tasks)
@@ -167,6 +177,7 @@ Planning document for blog content based on learnings, patterns, and experiences
 **Angle:** We built a plugin that lets AI agents terminate their own sessions — but only after validating clean git state. The intersection of process management, git hygiene, and the philosophical question: should an AI agent be able to kill itself?
 
 **Key points:**
+
 - The use case: config changes that require restart, completed work, fresh start needed
 - The PreToolUse hook: validates no uncommitted changes, no unpushed commits, no untracked files before allowing termination
 - SIGINT (graceful interrupt) over SIGTERM/SIGKILL — why signal choice matters
@@ -182,6 +193,7 @@ Planning document for blog content based on learnings, patterns, and experiences
 **Angle:** Every AI agent session in our org automatically creates a draft PR, adds a review label, rebases before every push, and keeps the PR description current. Here's how we enforced git citizenship at the agent level.
 
 **Key points:**
+
 - The rule: every branch gets a PR, every push updates the description, every push rebases first
 - Draft PRs by default — human review required before merge
 - The `request-review` label triggering AI code review automatically
@@ -197,15 +209,19 @@ Planning document for blog content based on learnings, patterns, and experiences
 ## Potential Series / Groupings
 
 ### "Building an AI Plugin Platform" (posts 1, 3, 4, 6)
+
 End-to-end series on the technical platform: marketplace, auto-config, shared libs, CI/CD.
 
 ### "Governing AI Agents" (posts 2, 5, 7, 11, 12)
+
 Safety, honesty, guardrails, and process management for autonomous AI agents.
 
 ### "Research & Community" (posts 8, 10)
+
 Deep dives into community tools and emerging formats.
 
 ### "Multi-Agent Systems" (post 9)
+
 Orchestration, parallelization, and the challenges of agent-to-agent collaboration.
 
 ---
