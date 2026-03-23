@@ -3,7 +3,3 @@ node_modules
 *.lock
 package-lock.json
 claude-remote-env-snapshot
-
-# Claude Code settings files — managed by Claude Code and hooks, not prettier
-.claude/settings.json
-.claude/settings.local.json

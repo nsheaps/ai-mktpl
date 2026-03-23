@@ -20,3 +20,6 @@ github-app:
 mise:
   autoInstallTools: true
   autoTrust: true
+
+edit-utils:
+  formatter: 'prettier --write'
