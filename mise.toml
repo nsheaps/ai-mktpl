@@ -10,11 +10,12 @@ bun = "latest"
 "npm:eslint" = "latest"
 yarn = "latest"
 
-# 1Password CLI
-# NOTE: op-exec is a standalone script, not an asdf-style versioned tool.
-# It was removed from mise.toml because it lacks list-all/install scripts,
-# causing "Failed to run list-all" errors on every bash command.
-# Install op-exec separately if needed.
+# 1Password CLI and op-exec
+# TODO(#293): op-exec is commented out — it's a standalone script, not an
+# asdf-style versioned tool. It lacks list-all/install scripts, causing
+# "Failed to run list-all" errors on every bash command. Needs proper
+# mise backend or manual install approach.
+# "github:nsheaps/op-exec" = "latest"
 1password = "latest"
 
 [settings]
