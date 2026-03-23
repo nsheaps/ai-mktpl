@@ -8,7 +8,7 @@
 # which is gitignored and added to PATH.
 set -euo pipefail
 
-PLUGIN_NAME="1pass"
+PLUGIN_NAME="poc-1pass"
 source "${CLAUDE_PLUGIN_ROOT}/lib/plugin-config-read.sh"
 source "${CLAUDE_PLUGIN_ROOT}/lib/tool-install.sh"
 source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
