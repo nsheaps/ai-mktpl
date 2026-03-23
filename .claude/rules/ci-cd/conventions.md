@@ -6,7 +6,6 @@
 
 - **Triggers**: PR to any branch, push to main, manual dispatch
 - **Jobs**:
-  - `check-version-files`: Blocks manual modifications to existing plugin.json and marketplace.json (new plugin.json files are allowed)
   - `lint`: Multi-language linting with auto-fix
   - `validate`: Plugin structure validation
 
@@ -14,8 +13,8 @@
 
 - **Triggers**: Push to main or PR with `plugins/**` changes
 - **Jobs**:
-  - `check-version-bump`: Enforces semantic versioning in PRs
-  - `update-marketplace`: Updates marketplace.json on main
+  - `auto-version-bump` (PR): Auto-bumps plugin versions and updates marketplace in PR branch. Respects manual bumps to higher versions. Uses commit message check for loop prevention.
+  - `bump-and-update-marketplace` (main): Safety net — bumps only plugins not already bumped in the PR, then updates marketplace.json
 
 ### claude-code-review.yml
 

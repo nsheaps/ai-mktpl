@@ -38,7 +38,9 @@ if [ -f "$SETTINGS" ] && jq -e '.enabledPlugins' "$SETTINGS" > /dev/null 2>&1; t
       if [ "$MARKETPLACE_ID" = "$MKTPL_NAME" ]; then
         if ! jq -e ".plugins[] | select(.name == \"$PLUGIN_NAME\")" "$MARKETPLACE" > /dev/null 2>&1; then
           if [ -d "plugins/$PLUGIN_NAME" ]; then
-            ERRORS+=("enabledPlugins '$key': plugin directory 'plugins/$PLUGIN_NAME' exists but not in marketplace.json (run 'mise run update-marketplace')")
+            # Plugin exists in directory but not yet in marketplace.json — this is expected
+            # for new plugins that haven't been through the CD pipeline yet
+            WARNINGS+=("enabledPlugins '$key': plugin directory 'plugins/$PLUGIN_NAME' exists but not yet in marketplace.json (will be added automatically)")
           else
             ERRORS+=("enabledPlugins '$key': plugin '$PLUGIN_NAME' not found in marketplace '$MKTPL_NAME' or as a plugin directory")
           fi
