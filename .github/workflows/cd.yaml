@@ -210,12 +210,15 @@ jobs:
           BASE_REF: ${{ steps.resolve-base.outputs.base-ref }}
         run: |
           # On main, use the same ref for both change detection and version comparison
-          mise run auto-bump-plugins "--change-base=$BASE_REF" "--version-base=$BASE_REF"
+          OUTPUT=$(mise run auto-bump-plugins "--change-base=$BASE_REF" "--version-base=$BASE_REF")
+          echo "has-bumps=$(echo "$OUTPUT" | jq -r '.has_bumps')" >> $GITHUB_OUTPUT
 
       - name: Run lint after version bump
+        if: steps.bump.outputs.has-bumps == 'true'
         run: mise run lint
 
       - name: Commit version bumps
+        if: steps.bump.outputs.has-bumps == 'true'
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: 'chore: bump plugin versions [skip ci]'
@@ -242,6 +245,7 @@ jobs:
           skip_push: true
 
       - name: Push all changes
+        if: steps.bump.outputs.has-bumps == 'true'
         run: git push
 
       - name: Update release tag

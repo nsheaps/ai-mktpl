@@ -83,13 +83,10 @@ for plugin_dir in plugins/*; do
 
   # Auto-bump via release-it (patch increment)
   echo "⬆️  $PLUGIN_NAME: auto-bumping from $HEAD_VERSION" >&2
-  cd "plugins/$PLUGIN_NAME"
-  if ! yarn exec release-it --ci 2>&1 >&2; then
+  if ! (cd "plugins/$PLUGIN_NAME" && yarn exec release-it --ci 2>&1 >&2); then
     echo "::error::release-it failed for plugin '$PLUGIN_NAME'" >&2
-    cd ../..
     continue
   fi
-  cd ../..
 
   NEW_VERSION=$(jq -r '.version' "$PLUGIN_JSON")
   BUMPED_PLUGINS+=("$PLUGIN_NAME")
