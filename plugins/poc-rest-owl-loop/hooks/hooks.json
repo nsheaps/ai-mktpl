@@ -1,0 +1,17 @@
+{
+  "description": "Detects poc-rest-owl-loop project artifacts and provides context about workflow state",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/detect-poc-rest-owl-loop-project.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

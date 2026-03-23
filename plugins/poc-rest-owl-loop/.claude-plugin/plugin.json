@@ -1,0 +1,25 @@
+{
+  "name": "poc-rest-owl-loop",
+  "version": "0.1.0",
+  "description": "Turn a simple idea into a fully-specified, tested, and validated software project. Handles research, feature specification, visual design, architecture, implementation planning, and CI-integrated validation workflows including visual regression testing.",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/poc-rest-owl-loop",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": [
+    "project-scaffolding",
+    "research",
+    "specification",
+    "visual-testing",
+    "e2e-testing",
+    "mockups",
+    "competitive-analysis",
+    "sdlc",
+    "full-stack",
+    "rest-of-the-owl"
+  ],
+  "hooks": "./hooks/hooks.json"
+}
