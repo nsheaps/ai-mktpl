@@ -6,28 +6,35 @@ set -euo pipefail
 
 PLUGIN_NAME="poc-rest-owl-loop"
 source "${CLAUDE_PLUGIN_ROOT}/lib/plugin-config-read.sh"
+source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 
-artifacts_dir="$(plugin_get_config "artifactsDir" "docs/rest-owl")"
-REST_OWL_DIR="${CLAUDE_PROJECT_DIR:-$(pwd)}/${artifacts_dir}"
+detect_project() {
+  local artifacts_dir
+  artifacts_dir="$(plugin_get_config "artifactsDir" "docs/rest-owl")"
+  local rest_owl_dir="${CLAUDE_PROJECT_DIR:-$(pwd)}/${artifacts_dir}"
 
-if [ ! -d "$REST_OWL_DIR" ]; then
-  exit 0
-fi
+  if [ ! -d "$rest_owl_dir" ]; then
+    return 0
+  fi
 
-# Determine which phases have been completed
-phases=()
-[ -f "$REST_OWL_DIR/00-intake.md" ] && phases+=("0:intake")
-[ -f "$REST_OWL_DIR/01-competitive-research.md" ] && phases+=("1:research")
-[ -f "$REST_OWL_DIR/02-feature-spec.md" ] && phases+=("2:spec")
-[ -f "$REST_OWL_DIR/03-design-system.md" ] && phases+=("3:design")
-[ -d "$REST_OWL_DIR/03-mockups" ] && phases+=("3:mockups")
-[ -f "$REST_OWL_DIR/04-architecture.md" ] && phases+=("4:architecture")
-[ -f "$REST_OWL_DIR/05-implementation-plan.md" ] && phases+=("5:plan")
+  # Determine which phases have been completed
+  local phases=()
+  [ -f "$rest_owl_dir/00-intake.md" ] && phases+=("0:intake")
+  [ -f "$rest_owl_dir/01-competitive-research.md" ] && phases+=("1:research")
+  [ -f "$rest_owl_dir/02-feature-spec.md" ] && phases+=("2:spec")
+  [ -f "$rest_owl_dir/03-design-system.md" ] && phases+=("3:design")
+  [ -d "$rest_owl_dir/03-mockups" ] && phases+=("3:mockups")
+  [ -f "$rest_owl_dir/04-architecture.md" ] && phases+=("4:architecture")
+  [ -f "$rest_owl_dir/05-implementation-plan.md" ] && phases+=("5:plan")
 
-if [ ${#phases[@]} -eq 0 ]; then
-  exit 0
-fi
+  if [ ${#phases[@]} -eq 0 ]; then
+    return 0
+  fi
 
-completed="${phases[*]}"
-echo "poc-rest-owl-loop project detected — completed phases: ${completed}"
-echo "   Use /poc-rest-owl-loop to resume the workflow"
+  local completed="${phases[*]}"
+  hook_log "project detected — completed phases: ${completed}"
+  hook_log "Use /poc-rest-owl-loop to resume the workflow"
+}
+
+hook_run detect_project
+hook_respond

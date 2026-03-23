@@ -14,9 +14,9 @@ $ARGUMENTS
 
 ## Pre-flight Check
 
-Check if `docs/rest-owl/` already exists — if so, this is a **resumption**. Read existing artifacts to determine which phase was last completed and resume from there. Show the user a status summary before continuing.
+Check for existing artifacts — the default directory is `docs/rest-owl/` but the user may have configured a different `artifactsDir` in their `plugins.settings.yaml`. If artifacts exist, this is a **resumption**. Read existing artifacts to determine which phase was last completed and resume from there. Show the user a status summary before continuing.
 
-!`ls docs/rest-owl/ 2>/dev/null || echo "No existing artifacts — starting fresh"`
+!`for d in docs/rest-owl docs/poc-rest-owl-loop; do [ -d "$d" ] && ls "$d/" 2>/dev/null && echo "--- Artifacts found in $d ---"; done || echo "No existing artifacts — starting fresh"`
 
 ## Workflow
 
