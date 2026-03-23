@@ -35,6 +35,14 @@ case "$FILE_PATH" in
         ;;
 esac
 
+# Skip Claude Code settings files — they have their own formatting
+# and prettier reformats them in ways that create unwanted diffs
+case "$FILE_PATH" in
+    */".claude/settings.json"|*/".claude/settings.local.json")
+        exit 0
+        ;;
+esac
+
 # Only lint files that prettier can handle
 case "$FILE_PATH" in
     *.json|*.yaml|*.yml|*.md|*.js|*.ts|*.jsx|*.tsx|*.css|*.html)
