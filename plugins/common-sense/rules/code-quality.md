@@ -4,6 +4,17 @@ Standards for writing and reviewing code.
 
 See mantras-and-incremental-development.md for general principles that also affect code quality.
 
+## Follow Existing Patterns First
+
+**CRITICAL:** Before writing new code, study how similar functionality is already implemented in the codebase.
+
+- **Search for existing examples** of the same type of operation (install hooks, config reading, error handling, etc.)
+- **Use shared libraries and helpers** that other code uses for the same purpose — never reimplement from scratch
+- **Match the conventions** (guards, error handling, config patterns, logging) used by peer implementations
+- **If 3+ existing files follow the same pattern**, your new code MUST follow that pattern too
+
+**Why:** Deviating from established patterns creates inconsistency, misses safety guards others have already solved (e.g., consent checks, PATH verification), and increases review burden.
+
 ## Quality guidelines
 
 - Smaller files are easier to understand and parse by humans and machines alike. Aim to keep files under 1000 lines.
