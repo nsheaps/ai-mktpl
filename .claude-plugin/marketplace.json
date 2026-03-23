@@ -385,6 +385,29 @@
       "keywords": ["plugin", "install", "update", "reload", "management"]
     },
     {
+      "name": "poc-rest-owl-loop",
+      "description": "Turn a simple idea into a fully-specified, tested, and validated software project. Handles research, feature specification, visual design, architecture, implementation planning, and CI-integrated validation workflows including visual regression testing.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/poc-rest-owl-loop",
+      "category": "utility",
+      "tags": ["utility", "command", "skill"],
+      "keywords": [
+        "project-scaffolding",
+        "research",
+        "specification",
+        "visual-testing",
+        "e2e-testing",
+        "mockups",
+        "competitive-analysis",
+        "sdlc",
+        "full-stack",
+        "rest-of-the-owl"
+      ]
+    },
+    {
       "name": "product-development-and-sdlc",
       "description": "Iterative spec and user story writing with structured SDLC workflows. Guides incremental specification development through research, review, and refinement cycles.",
       "version": "0.1.1",
