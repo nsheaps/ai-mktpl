@@ -7,7 +7,9 @@
 ## What Went Well
 
 ### 1. Parallel Agent Strategy
+
 Launched 8 research agents in parallel to cover different domains simultaneously:
+
 - Starred repos categorization
 - ClawHub ecosystem deep dive
 - Memory systems state of the art
@@ -20,13 +22,17 @@ Launched 8 research agents in parallel to cover different domains simultaneously
 This dramatically reduced wall-clock time vs sequential investigation. The parallel approach is the single biggest performance win for broad research tasks.
 
 ### 2. Direct Web Fetching for Key Resources
+
 When agents were running in background, used WebFetch directly on the most important URLs (ClawHub skills pages) to get detailed, structured information. This supplemented agent research with high-fidelity data.
 
 ### 3. Categorized Output
+
 Creating three separate research documents (starred repos, ClawHub ecosystem, frameworks comparison) plus a comprehensive report provided both detail and synthesis.
 
 ### 4. Pattern Recognition Across Sources
+
 Identified cross-cutting patterns that only emerge when looking at multiple systems together:
+
 - 3x confirmation rule appearing independently in multiple OpenClaw skills
 - Tiered memory (HOT/WARM/COLD) as consensus architecture
 - File-based > database for simple use cases
@@ -35,26 +41,31 @@ Identified cross-cutting patterns that only emerge when looking at multiple syst
 ## What Didn't Go Well
 
 ### 1. Agent Output Format Issues
+
 Background agents' raw output files contained internal JSON metadata mixed with actual results, making it difficult to read intermediate progress. Had to rely on agents returning final results rather than streaming partial findings.
 
 **Improvement**: For future research sessions, agents should write structured intermediate findings to separate files (not rely on the internal output format).
 
 ### 2. Waiting for Agent Completion
+
 Spent significant time polling agent output file sizes with `sleep` commands to check completion status. This was inefficient.
 
 **Improvement**: Trust the background agent notification system. Do other productive work while waiting rather than polling. Or structure work so that agent results feed into the next stage naturally.
 
 ### 3. Some Agents Had Limited Results
+
 The compilation agent (launched to read other agents' outputs) struggled with the internal JSON format of the output files. Should have done the compilation myself rather than delegating it.
 
 **Improvement**: For synthesis tasks that require reading internal agent outputs, do the work directly rather than spawning another agent. Agents work best for independent research, not for reading other agents' raw output.
 
 ### 4. Clawhub Search Required Web Research
+
 The initial search for "clawhub" via GitHub API yielded limited results because ClawHub is a web platform (clawhub.ai), not a GitHub organization. Web search was more effective.
 
 **Improvement**: For ecosystem research, start with web search to understand what something IS before searching GitHub. WebSearch should be the first tool for unknown entities, not `gh api`.
 
 ### 5. Missed Opportunity for Agent Result Compilation
+
 Some background agents likely had valuable findings that weren't fully incorporated because the internal output format was hard to parse.
 
 **Improvement**: Give agents explicit instructions to write their findings to a separate markdown file at a known path, then read that file for compilation.
@@ -86,12 +97,12 @@ Some background agents likely had valuable findings that weren't fully incorpora
 
 ### Agent Usage Patterns
 
-| Pattern | When to Use | When NOT to Use |
-|---------|------------|-----------------|
-| Background agent | Independent research on a specific topic | Synthesis of other agents' results |
-| WebFetch | Known URL with rich content | Unknown/undiscovered resources |
-| WebSearch | Unknown entities, current events | Well-known repos with clear URLs |
-| Direct gh API | Known GitHub repos, structured data | Web platforms, non-GitHub ecosystems |
+| Pattern          | When to Use                              | When NOT to Use                      |
+| ---------------- | ---------------------------------------- | ------------------------------------ |
+| Background agent | Independent research on a specific topic | Synthesis of other agents' results   |
+| WebFetch         | Known URL with rich content              | Unknown/undiscovered resources       |
+| WebSearch        | Unknown entities, current events         | Well-known repos with clear URLs     |
+| Direct gh API    | Known GitHub repos, structured data      | Web platforms, non-GitHub ecosystems |
 
 ### Memory-Relevant Self-Observations
 

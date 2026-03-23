@@ -35,11 +35,13 @@ The ecosystem is converging on several patterns: **file-based memory** for simpl
 ## 1. Memory for Specific Tasks
 
 ### What It Is
+
 Working memory that exists only during the execution of a specific task. Analogous to RAM — fast, immediately accessible, disposable after the task ends.
 
 ### Approaches
 
 #### 1.1 Session State Files
+
 **Used by**: Proactive Agent, OpenClaw skills
 
 ```
@@ -49,17 +51,21 @@ SESSION-STATE.md — Active working memory, written via WAL protocol
 The WAL (Write-Ahead Logging) protocol is the most sophisticated approach: **STOP → WRITE → THEN RESPOND**. Before responding, the agent writes important details to a session state file. This prevents context loss during response composition.
 
 Auto-triggers on detecting:
+
 - Corrections, proper nouns, preferences, decisions, specific values
 
 #### 1.2 Todo Lists and Scratchpads
+
 **Used by**: Claude Code (built-in TodoWrite tool), most coding agents
 
 Simple task-tracking within a single session. The Claude Code TodoWrite tool tracks progress with states (pending, in_progress, completed) but doesn't persist across sessions.
 
 #### 1.3 Working Buffers
+
 **Used by**: Proactive Agent
 
 Survival mechanism for context compaction (the "danger zone"):
+
 - At 60% context usage: clear old buffer, start fresh
 - After 60%: append every exchange as 1-2 sentence summary
 - Post-compaction: read buffer first to recover critical context
@@ -67,16 +73,19 @@ Survival mechanism for context compaction (the "danger zone"):
 This is the most mature approach to handling the fundamental problem of finite context windows.
 
 #### 1.4 In-Context Memory Blocks
+
 **Used by**: Letta/MemGPT (Core Memory)
 
 Always-in-context, agent-editable blocks (persona, goals, preferences). Size-limited and configurable. The agent writes to these blocks during reasoning, and they're always present in the system prompt.
 
 #### 1.5 Task-Specific Knowledge Graphs
+
 **Used by**: Codebase Memory MCP
 
 For code-specific tasks, builds a persistent knowledge graph with 12 node types and 18+ edge types. Sub-millisecond queries. Not general-purpose memory but extremely effective for code understanding tasks.
 
 ### Key Insight
+
 Task-scoped memory benefits most from **write-ahead patterns** (capture before responding) and **progressive disclosure** (load minimal context, expand on demand). The Working Buffer pattern from the Proactive Agent is the most sophisticated solution to context window management.
 
 ---
@@ -84,6 +93,7 @@ Task-scoped memory benefits most from **write-ahead patterns** (capture before r
 ## 2. Cross-Session Persistent Memory
 
 ### What It Is
+
 Memory that persists across session boundaries, allowing an agent to "remember" past interactions, decisions, and context. The critical challenge is **retrieval** — finding the right memories at the right time.
 
 ### Approaches
@@ -95,6 +105,7 @@ Memory that persists across session boundaries, allowing an agent to "remember" 
 The dominant pattern in the current ecosystem. Memory is stored as markdown files in well-known locations.
 
 **Advantages**:
+
 - Zero dependencies
 - Human-readable and editable
 - Version-controllable (git)
@@ -102,12 +113,14 @@ The dominant pattern in the current ecosystem. Memory is stored as markdown file
 - Transparent — user sees exactly what's stored
 
 **Disadvantages**:
+
 - No semantic search
 - Linear scaling (more files = slower)
 - No automatic relevance scoring
 - Consumes context window tokens
 
 **Common Structure**:
+
 ```
 ~/memory-root/
 ├── memory.md          # Always loaded (HOT)
@@ -126,12 +139,12 @@ The dominant pattern in the current ecosystem. Memory is stored as markdown file
 
 Special files that are automatically loaded into the agent's context at session start:
 
-| File | Purpose |
-|------|---------|
-| `CLAUDE.md` / `AGENTS.md` | Operating rules, learned workflows |
-| `SOUL.md` | Identity, principles, boundaries |
-| `USER.md` | Human's context, goals, preferences |
-| `MEMORY.md` | Curated long-term wisdom |
+| File                      | Purpose                             |
+| ------------------------- | ----------------------------------- |
+| `CLAUDE.md` / `AGENTS.md` | Operating rules, learned workflows  |
+| `SOUL.md`                 | Identity, principles, boundaries    |
+| `USER.md`                 | Human's context, goals, preferences |
+| `MEMORY.md`               | Curated long-term wisdom            |
 
 This is the **simplest form of auto-retrieval** — the memory is always present because it's injected into the system prompt. Size-limited by context window constraints.
 
@@ -142,15 +155,17 @@ This is the **simplest form of auto-retrieval** — the memory is always present
 **Architecture**: Observations → embeddings → vector DB → semantic similarity search at retrieval time.
 
 **Mem0 Performance**:
+
 - 26% accuracy improvement over OpenAI Memory
 - 91% faster response times
 - 90% reduction in token consumption
 
 **Claude-Mem Progressive Disclosure**:
+
 1. `search` → compact indices (50-100 tokens/result)
 2. `timeline` → chronological context
 3. `get_observations` → full details (500-1000 tokens/result)
-Result: ~10x token savings by filtering before fetching.
+   Result: ~10x token savings by filtering before fetching.
 
 **Retrieval**: Semantic similarity + keyword matching (hybrid search is best). Auto-retrieval possible by searching relevant memories before each response.
 
@@ -171,6 +186,7 @@ Result: ~10x token savings by filtering before fetching.
 **Architecture**: The agent itself decides what to remember and what to forget via tool calls.
 
 Three tiers:
+
 - **Core Memory** (always in-context, agent-editable)
 - **Recall Memory** (searchable conversation history)
 - **Archival Memory** (vector DB, long-term)
@@ -189,15 +205,16 @@ This is the **most portable** approach — any MCP-compatible agent can use the 
 
 ### Auto-Retrieval Mechanisms
 
-| Mechanism | How It Works | Pros | Cons |
-|-----------|-------------|------|------|
-| **Always-load** | File injected at session start | Simple, reliable | Size-limited, consumes tokens |
-| **Hook-triggered** | SessionStart/UserPromptSubmit hooks search memory | Automatic, targeted | Adds latency, may miss relevant memories |
-| **Agent-initiated** | Agent calls search tools during reasoning | Most flexible | Agent must know to search |
-| **Embedding similarity** | Auto-inject similar memories per message | Most intelligent | Requires embedding pipeline |
-| **Advisory hooks** | MCP hooks suggest using memory tools | Non-blocking | Agent can ignore suggestions |
+| Mechanism                | How It Works                                      | Pros                | Cons                                     |
+| ------------------------ | ------------------------------------------------- | ------------------- | ---------------------------------------- |
+| **Always-load**          | File injected at session start                    | Simple, reliable    | Size-limited, consumes tokens            |
+| **Hook-triggered**       | SessionStart/UserPromptSubmit hooks search memory | Automatic, targeted | Adds latency, may miss relevant memories |
+| **Agent-initiated**      | Agent calls search tools during reasoning         | Most flexible       | Agent must know to search                |
+| **Embedding similarity** | Auto-inject similar memories per message          | Most intelligent    | Requires embedding pipeline              |
+| **Advisory hooks**       | MCP hooks suggest using memory tools              | Non-blocking        | Agent can ignore suggestions             |
 
 ### Key Insight
+
 The best cross-session memory combines **always-loaded curated memory** (small, high-value) with **searchable deep storage** (large, queryable on demand). Auto-retrieval works best as a multi-layer approach: always-load the most important 100 lines, then use semantic search for everything else.
 
 ---
@@ -205,6 +222,7 @@ The best cross-session memory combines **always-loaded curated memory** (small, 
 ## 3. Self-Improvement and Reflection
 
 ### What It Is
+
 Systems that allow agents to learn from past executions, auto-configure based on experience, and improve their own behavior over time. This is the most nascent and challenging area.
 
 ### Approaches
@@ -214,6 +232,7 @@ Systems that allow agents to learn from past executions, auto-configure based on
 **Used by**: Self-Improving Agent (ivangdavila), Self-Improving Agent (pskoett)
 
 **Mechanism**:
+
 1. Detect explicit corrections ("No, that's not right...", "Actually, it should be...")
 2. Log to `corrections.md` or `LEARNINGS.md`
 3. Track occurrence count and recency
@@ -226,6 +245,7 @@ Systems that allow agents to learn from past executions, auto-configure based on
 **Used by**: Self-Improving Agent, Proactive Agent, agent-self-reflection
 
 **When triggered**:
+
 - After multi-step task completion
 - After receiving user feedback (positive or negative)
 - After fixing bugs or mistakes
@@ -233,6 +253,7 @@ Systems that allow agents to learn from past executions, auto-configure based on
 - Periodic heartbeat checks
 
 **Reflection Format**:
+
 ```
 CONTEXT: [task type]
 REFLECTION: [observation]
@@ -252,11 +273,13 @@ Raw Observation → Corrections Log → Warm Memory → HOT Memory → System Pr
 ```
 
 **Promotion criteria**:
+
 - 3x occurrence within 7 days → promote to HOT
 - 3+ recurrences across 2+ tasks within 30 days → system prompt guidance
 - Broadly applicable patterns → standalone skill extraction
 
 **Demotion**:
+
 - Unused 30 days → WARM
 - Unused 90 days → COLD/archive
 - Never delete without user confirmation
@@ -268,12 +291,14 @@ Raw Observation → Corrections Log → Warm Memory → HOT Memory → System Pr
 When learnings become reusable patterns, they're extracted into standalone skills:
 
 **Criteria**:
+
 - Recurring issues (2+ cross-references)
 - Verified fixes
 - Non-obvious solutions
 - Broad applicability
 
 **SkillForge** adds a 4-phase methodology with multi-agent review:
+
 1. Triage (reuse/improve/create/compose)
 2. Deep Analysis (11 thinking lenses)
 3. Specification & Generation
@@ -304,12 +329,12 @@ Beyond reactive learning, the agent actively anticipates needs:
 
 Agents modify their own workspace steering files:
 
-| Target | Type of Modification |
-|--------|---------------------|
+| Target      | Type of Modification  |
+| ----------- | --------------------- |
 | `AGENTS.md` | Workflow improvements |
-| `SOUL.md` | Behavioral patterns |
-| `TOOLS.md` | Tool gotchas |
-| `CLAUDE.md` | Project conventions |
+| `SOUL.md`   | Behavioral patterns   |
+| `TOOLS.md`  | Tool gotchas          |
+| `CLAUDE.md` | Project conventions   |
 
 **Non-destructive**: Additions and amendments only, never deletions without user confirmation.
 
@@ -318,6 +343,7 @@ Agents modify their own workspace steering files:
 The Proactive Agent defines critical guardrails:
 
 **ADL Protocol** (Anti-Drift Limits):
+
 - Prohibits: fake complexity, unverifiable changes, vague justifications
 - Priority: Stability > Explainability > Reusability > Scalability > Novelty
 
@@ -326,6 +352,7 @@ Score changes: High Frequency (3x), Failure Reduction (3x), User Burden (2x), Se
 Threshold: score <50 = skip the modification
 
 ### Key Insight
+
 Self-improvement requires **explicit triggers, confirmation thresholds, and guardrails**. The 3x confirmation rule, anti-drift limits, and never-delete-without-confirmation are essential safety mechanisms. The most effective systems combine correction logging, periodic self-reflection, and structured promotion pipelines with clear demotion paths.
 
 ---
@@ -333,44 +360,53 @@ Self-improvement requires **explicit triggers, confirmation thresholds, and guar
 ## Architectural Patterns
 
 ### Pattern 1: Tiered Memory (HOT/WARM/COLD)
+
 - **HOT**: Always loaded, size-limited (~100 lines), highest-value patterns
 - **WARM**: Loaded on demand, per-project/domain, medium-value
 - **COLD**: Archived, query-only, unlimited size
 - Movement: Promotion based on frequency, demotion based on recency
 
 ### Pattern 2: Write-Ahead Logging (WAL)
+
 - STOP → WRITE to persistent storage → THEN respond
 - Prevents context loss during response composition
 - Auto-triggered by detecting important information types
 
 ### Pattern 3: Progressive Disclosure
+
 - Start with minimal context injection
 - Expand on demand through tool calls
 - ~10x token savings vs loading everything upfront
 
 ### Pattern 4: 3x Confirmation Rule
+
 - Don't learn from single occurrences
 - Require 3 repetitions within 7 days to promote
 - Prevents hallucinated preferences and learning from noise
 
 ### Pattern 5: Workspace Prompt Injection
+
 - Well-known files (CLAUDE.md, AGENTS.md, SOUL.md) auto-loaded by agent
 - Primary mechanism for persistent cross-session context
 - Size-limited but zero-configuration
 
 ### Pattern 6: Hook-Driven Lifecycle
+
 - SessionStart: Load memories, initialize state
 - UserPromptSubmit: Pre-process, inject context
 - PostToolUse: Capture observations
 - Stop/SessionEnd: Persist session state, generate summaries
 
 ### Pattern 7: Promotion Pipeline
+
 ```
 Observation → Log → Warm Memory → Hot Memory → System Prompt → Skill
 ```
+
 Each promotion requires meeting a threshold (frequency, recency, breadth).
 
 ### Pattern 8: Strategic Forgetting
+
 - Precision over recall
 - Remove stale/contradictory context
 - Demote unused patterns on a schedule
@@ -415,6 +451,7 @@ Based on this research, a memory/self-improvement plugin for the ai-mktpl ecosys
    - Progressive disclosure pattern for token efficiency
 
 ### Priority Order
+
 1. File-based tiered memory with workspace injection (MVP)
 2. Hook-driven observation capture
 3. Correction logging with 3x promotion
