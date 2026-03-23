@@ -225,10 +225,12 @@ Full lifecycle memory capture for Claude Code sessions.
 OpenClaw uses a file-based, Markdown-driven memory system with semantic search:
 
 #### Two-Layer Default Memory
+
 1. **Daily Logs** (`memory/YYYY-MM-DD.md`) — append-only running context, reads today + yesterday at session start
 2. **Long-term Memory** (`MEMORY.md`) — curated profile-like info: preferences, decisions, durable facts
 
 #### Memory Tools
+
 - `memory_search` — hybrid BM25 + vector search over indexed Markdown snippets (SQLite + embeddings)
 - `memory_get` — targeted read by file and line range
 - **Auto-flush before compaction** — when nearing token limits, triggers silent agentic turn to write durable memories
@@ -243,13 +245,14 @@ OpenClaw uses a file-based, Markdown-driven memory system with semantic search:
 
 Production-grade three-tier cognitive memory framework:
 
-| Tier | Tokens | Weight | Purpose |
-|------|--------|--------|---------|
-| **L0 (Abstract)** | ~100 | 20% | Fast positioning |
-| **L1 (Overview)** | ~500-2000 | 30% | Structured summary |
-| **L2 (Detail)** | Full | 50% | Complete content |
+| Tier              | Tokens    | Weight | Purpose            |
+| ----------------- | --------- | ------ | ------------------ |
+| **L0 (Abstract)** | ~100      | 20%    | Fast positioning   |
+| **L1 (Overview)** | ~500-2000 | 30%    | Structured summary |
+| **L2 (Detail)**   | Full      | 50%    | Complete content   |
 
 **Key features**:
+
 - **Ebbinghaus forgetting curve** cleanup — automatic decay based on memory science
 - Event-driven automation
 - Qdrant vector DB backend
@@ -267,11 +270,13 @@ Production-grade three-tier cognitive memory framework:
 Shared multi-agent memory with the most sophisticated pipeline:
 
 **Three feeding mechanisms**:
+
 1. Manual agent input
 2. LLM-powered distiller (every 6 hours)
 3. Regex-based fact extractor
 
 **Auto-promotion pipeline**:
+
 - 3+ recurrences → importance boost
 - 10+ recurrences → core knowledge (never archived)
 - Promotes to workspace rules (AGENTS.md, TOOLS.md, SOUL.md) as permanent rules
