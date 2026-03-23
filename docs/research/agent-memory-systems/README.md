@@ -17,6 +17,7 @@
 - [Starred Repos Analysis](./starred-repos-analysis.md) — Categorization of all ~270 starred repos
 - [ClawHub/OpenClaw Ecosystem](./clawhub-openclaw-ecosystem.md) — Deep dive on OpenClaw skills
 - [Memory Frameworks Comparison](./memory-frameworks-comparison.md) — Technical comparison of frameworks
+- [State of the Art Survey](./state-of-the-art-survey.md) — Academic research, additional frameworks (Cognee, MemOS, Zep, LangMem), self-improvement research (Reflexion, Voyager, EvolveR, SAGE, ACE), and emerging trends
 
 ---
 
