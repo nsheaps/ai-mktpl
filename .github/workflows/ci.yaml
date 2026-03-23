@@ -14,9 +14,15 @@ concurrency:
   group: ${{ github.ref == 'refs/heads/main' && 'ci-cd-main' || format('ci-{0}', github.ref) }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+
 jobs:
   lint:
     runs-on: ubuntu-latest
+    # Shares concurrency group with CD auto-version-bump to prevent
+    # concurrent pushes to the same PR branch. See cd.yaml for details.
+    concurrency:
+      group: pr-autofix-${{ github.head_ref || github.ref }}
+      cancel-in-progress: false
     permissions:
       contents: write
       pull-requests: write

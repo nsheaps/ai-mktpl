@@ -34,14 +34,21 @@ concurrency:
   group: ${{ github.ref == 'refs/heads/main' && 'ci-cd-main' || format('cd-{0}', github.ref) }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+env:
+  AUTO_BUMP_COMMIT_MSG: 'chore: auto-bump plugin versions and update marketplace'
+
 jobs:
-  # For PRs: Auto-bump versions and update marketplace in the PR branch
+  # For PRs: Auto-bump versions and update marketplace in the PR branch.
   # Pushes changes back to the PR branch (like lint auto-fix).
   # Does NOT use [skip ci] so CI re-runs to validate the final state.
   # Loop prevention: skips if latest commit is from a previous auto-bump.
+  # Shares concurrency group with CI lint to prevent concurrent pushes.
   auto-version-bump:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
+    concurrency:
+      group: pr-autofix-${{ github.head_ref }}
+      cancel-in-progress: false
     permissions:
       contents: write
       pull-requests: write
@@ -59,7 +66,7 @@ jobs:
         id: check-skip
         run: |
           LAST_MSG=$(git log -1 --format='%s')
-          if [[ "$LAST_MSG" == "chore: auto-bump plugin versions and update marketplace" ]]; then
+          if [[ "$LAST_MSG" == "$AUTO_BUMP_COMMIT_MSG" ]]; then
             echo "skip=true" >> $GITHUB_OUTPUT
             echo "Latest commit is from auto-bump, skipping to prevent loop"
           else
@@ -74,7 +81,7 @@ jobs:
           git fetch origin "$BASE_REF":refs/remotes/origin/"$BASE_REF"
           git fetch origin --tags
 
-      - name: Resolve base ref from release tag
+      - name: Resolve change-detection base from release tag
         if: steps.check-skip.outputs.skip != 'true'
         id: resolve-base
         env:
@@ -82,10 +89,10 @@ jobs:
         run: |
           TAG_NAME="cd/last-release"
           if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
-            echo "base-ref=$TAG_NAME" >> $GITHUB_OUTPUT
-            echo "Using release tag '$TAG_NAME' ($(git rev-parse --short $TAG_NAME)) as base ref"
+            echo "change-base=$TAG_NAME" >> $GITHUB_OUTPUT
+            echo "Using release tag '$TAG_NAME' ($(git rev-parse --short $TAG_NAME)) for change detection"
           else
-            echo "base-ref=$BASE_REF" >> $GITHUB_OUTPUT
+            echo "change-base=$BASE_REF" >> $GITHUB_OUTPUT
             echo "Release tag '$TAG_NAME' not found, falling back to base branch '$BASE_REF'"
           fi
 
@@ -100,89 +107,15 @@ jobs:
         if: steps.check-skip.outputs.skip != 'true'
         run: yarn install --immutable
 
-      - name: Auto-bump changed plugins and update marketplace
+      - name: Auto-bump changed plugins
         if: steps.check-skip.outputs.skip != 'true'
         id: bump
         shell: bash
         env:
-          BASE_REF: ${{ steps.resolve-base.outputs.base-ref }}
-          BASE_BRANCH: ${{ github.base_ref }}
+          CHANGE_BASE: ${{ steps.resolve-base.outputs.change-base }}
+          VERSION_BASE: ${{ github.base_ref }}
         run: |
-          # Resolve base ref for change detection (may be cd/last-release tag)
-          if git rev-parse --verify "origin/$BASE_REF" >/dev/null 2>&1; then
-            RESOLVED_BASE="origin/$BASE_REF"
-          elif git rev-parse --verify "$BASE_REF" >/dev/null 2>&1; then
-            RESOLVED_BASE="$BASE_REF"
-          else
-            RESOLVED_BASE="HEAD~1"
-          fi
-
-          # Resolve the actual base branch for version comparison
-          # This is always the PR target branch (e.g., origin/main), NOT the release tag.
-          # The release tag is used for change detection, but the base branch version
-          # is what we compare against to determine if a bump already happened.
-          if git rev-parse --verify "origin/$BASE_BRANCH" >/dev/null 2>&1; then
-            VERSION_BASE="origin/$BASE_BRANCH"
-          else
-            VERSION_BASE="$RESOLVED_BASE"
-          fi
-
-          BUMPED_PLUGINS=()
-          SKIPPED_PLUGINS=()
-          REPORT_MD="| Plugin | Base | Current | Action |\n|---|---|---|---|"
-
-          for plugin_dir in plugins/*; do
-            [ -d "$plugin_dir" ] || continue
-            PLUGIN_NAME=$(basename "$plugin_dir")
-            PLUGIN_JSON="$plugin_dir/.claude-plugin/plugin.json"
-            [ -f "$PLUGIN_JSON" ] || continue
-
-            # Check for code changes (excluding plugin.json and CHANGELOG.md)
-            HAS_CHANGES=false
-            if git diff --name-only "$RESOLVED_BASE..HEAD" -- "$plugin_dir" 2>/dev/null \
-              | grep -v 'CHANGELOG.md$' | grep -v 'plugin.json$' | grep -q .; then
-              HAS_CHANGES=true
-            fi
-
-            # Check symlink target changes
-            if [ "$HAS_CHANGES" = "false" ]; then
-              if mise run _has-symlink-changes "$plugin_dir" "$RESOLVED_BASE" 2>/dev/null; then
-                HAS_CHANGES=true
-              fi
-            fi
-
-            [ "$HAS_CHANGES" = "true" ] || continue
-
-            # Get base version from the target branch (e.g., origin/main)
-            BASE_VERSION=$(git show "$VERSION_BASE:$PLUGIN_JSON" 2>/dev/null | jq -r '.version' 2>/dev/null || echo "0.0.0")
-            # Get current version in PR head
-            HEAD_VERSION=$(jq -r '.version' "$PLUGIN_JSON" 2>/dev/null || echo "0.0.0")
-
-            # If head version is already higher than base, respect the manual/previous bump
-            if [ "$HEAD_VERSION" != "$BASE_VERSION" ]; then
-              HIGHER=$(printf '%s\n%s' "$HEAD_VERSION" "$BASE_VERSION" | sort -V | tail -1)
-              if [ "$HIGHER" = "$HEAD_VERSION" ]; then
-                echo "✅ $PLUGIN_NAME: already bumped $BASE_VERSION → $HEAD_VERSION (keeping)"
-                SKIPPED_PLUGINS+=("$PLUGIN_NAME")
-                REPORT_MD="$REPORT_MD\n| $PLUGIN_NAME | $BASE_VERSION | $HEAD_VERSION | Already bumped |"
-                continue
-              fi
-            fi
-
-            # Auto-bump via release-it (patch increment)
-            echo "⬆️  $PLUGIN_NAME: auto-bumping from $HEAD_VERSION"
-            cd "plugins/$PLUGIN_NAME"
-            if ! yarn exec release-it --ci 2>&1; then
-              echo "::error::release-it failed for plugin '$PLUGIN_NAME'"
-              cd ../..
-              continue
-            fi
-            cd ../..
-
-            NEW_VERSION=$(jq -r '.version' "$PLUGIN_JSON")
-            BUMPED_PLUGINS+=("$PLUGIN_NAME")
-            REPORT_MD="$REPORT_MD\n| $PLUGIN_NAME | $BASE_VERSION | $NEW_VERSION | Auto-bumped |"
-          done
+          OUTPUT=$(mise run auto-bump-plugins "--change-base=$CHANGE_BASE" "--version-base=$VERSION_BASE")
 
           # Always regenerate marketplace (idempotent, picks up new plugins too)
           mise run update-marketplace
@@ -199,17 +132,16 @@ jobs:
 
           # Save report for PR comment
           {
-            echo "report-md<<EOF"
-            printf '%b' "$REPORT_MD"
-            echo ""
-            echo "EOF"
+            echo "report-md<<REPORT_MD_EOF"
+            echo "$OUTPUT" | jq -r '.report_md'
+            echo "REPORT_MD_EOF"
           } >> $GITHUB_OUTPUT
 
       - name: Commit and push all changes at once
         if: steps.check-skip.outputs.skip != 'true' && steps.bump.outputs.has-changes == 'true'
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
-          commit_message: 'chore: auto-bump plugin versions and update marketplace'
+          commit_message: ${{ env.AUTO_BUMP_COMMIT_MSG }}
           commit_user_name: ${{ steps.auth.outputs.user-name }}
           commit_user_email: ${{ steps.auth.outputs.user-email }}
 
@@ -230,6 +162,9 @@ jobs:
   bump-and-update-marketplace:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
+    concurrency:
+      group: cd-main
+      cancel-in-progress: false
     permissions:
       contents: write
     steps:
@@ -268,68 +203,19 @@ jobs:
       - name: Install yarn dependencies
         run: yarn install --immutable
 
-      - name: Detect plugin changes
-        id: detect
-        uses: ./.github/actions/detect-plugin-changes
-        with:
-          base-ref: ${{ steps.resolve-base.outputs.base-ref }}
-
-      - name: Bump versions for changed plugins (skip already bumped)
-        if: steps.detect.outputs.has-changes == 'true'
+      - name: Auto-bump changed plugins (skip already bumped)
+        id: bump
         shell: bash
         env:
-          PLUGINS: ${{ steps.detect.outputs.plugins }}
           BASE_REF: ${{ steps.resolve-base.outputs.base-ref }}
         run: |
-          # Resolve base ref for git commands
-          if git rev-parse --verify "origin/$BASE_REF" >/dev/null 2>&1; then
-            RESOLVED_BASE="origin/$BASE_REF"
-          elif git rev-parse --verify "$BASE_REF" >/dev/null 2>&1; then
-            RESOLVED_BASE="$BASE_REF"
-          else
-            RESOLVED_BASE="HEAD~1"
-          fi
-
-          FAILED_PLUGINS=()
-          for plugin_name in $PLUGINS; do
-            echo "::group::Checking version for $plugin_name"
-            PLUGIN_JSON="plugins/$plugin_name/.claude-plugin/plugin.json"
-
-            # Get base version and current version
-            BASE_VERSION=$(git show "$RESOLVED_BASE:$PLUGIN_JSON" 2>/dev/null | jq -r '.version' 2>/dev/null || echo "0.0.0")
-            HEAD_VERSION=$(jq -r '.version' "$PLUGIN_JSON" 2>/dev/null || echo "0.0.0")
-
-            # Skip if already bumped (version at HEAD > version at base)
-            if [ "$HEAD_VERSION" != "$BASE_VERSION" ]; then
-              HIGHER=$(printf '%s\n%s' "$HEAD_VERSION" "$BASE_VERSION" | sort -V | tail -1)
-              if [ "$HIGHER" = "$HEAD_VERSION" ]; then
-                echo "✅ $plugin_name: already bumped in PR ($BASE_VERSION → $HEAD_VERSION), skipping"
-                echo "::endgroup::"
-                continue
-              fi
-            fi
-
-            echo "⬆️  $plugin_name: bumping from $HEAD_VERSION"
-            cd "plugins/$plugin_name"
-            if ! yarn exec release-it --ci 2>&1; then
-              echo "::error::release-it failed for plugin '$plugin_name'"
-              FAILED_PLUGINS+=("$plugin_name")
-            fi
-            cd ../..
-            echo "::endgroup::"
-          done
-          if [ ${#FAILED_PLUGINS[@]} -gt 0 ]; then
-            echo "::error::Version bump failed for plugins: ${FAILED_PLUGINS[*]}"
-            echo "Hint: Ensure each plugin has a .release-it.js that extends ../../.release-it.base.json"
-            exit 1
-          fi
+          # On main, use the same ref for both change detection and version comparison
+          mise run auto-bump-plugins "--change-base=$BASE_REF" "--version-base=$BASE_REF"
 
       - name: Run lint after version bump
-        if: steps.detect.outputs.has-changes == 'true'
         run: mise run lint
 
       - name: Commit version bumps
-        if: steps.detect.outputs.has-changes == 'true'
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: 'chore: bump plugin versions [skip ci]'
