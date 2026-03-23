@@ -7,12 +7,12 @@
 
 The field has converged on a four-type taxonomy from [Princeton's CoALA framework](https://blogs.oracle.com/developers/agent-memory-why-your-ai-has-amnesia-and-how-to-fix-it) (2023), drawn from cognitive science:
 
-| Type | Duration | What It Stores | Implementation Example |
-|------|----------|----------------|----------------------|
-| **Working Memory** | Seconds to minutes | Intermediate results, plan progress, CoT steps | Context window contents |
-| **Episodic Memory** | Long-term | Specific past experiences with timestamps/outcomes | Few-shot examples from interactions |
-| **Semantic Memory** | Long-term | Generalized facts, concepts, relationships | Knowledge graphs, vector stores |
-| **Procedural Memory** | Long-term | Learned skills, operational knowledge | Voyager's skill library (executable code) |
+| Type                  | Duration           | What It Stores                                     | Implementation Example                    |
+| --------------------- | ------------------ | -------------------------------------------------- | ----------------------------------------- |
+| **Working Memory**    | Seconds to minutes | Intermediate results, plan progress, CoT steps     | Context window contents                   |
+| **Episodic Memory**   | Long-term          | Specific past experiences with timestamps/outcomes | Few-shot examples from interactions       |
+| **Semantic Memory**   | Long-term          | Generalized facts, concepts, relationships         | Knowledge graphs, vector stores           |
+| **Procedural Memory** | Long-term          | Learned skills, operational knowledge              | Voyager's skill library (executable code) |
 
 **Key Insight**: The gap between "has memory" and "no memory" is [often larger than the gap between different LLM backbones](https://arxiv.org/html/2603.07670). Memory architecture investment can yield returns that rival or exceed model scaling.
 
@@ -25,11 +25,13 @@ The field has converged on a four-type taxonomy from [Princeton's CoALA framewor
 **[Website](https://www.cognee.ai/) | [GitHub](https://github.com/topoteretes/cognee)** — 7K+ stars, $7.5M seed (OpenAI/Facebook AI Research founders)
 
 ECL (Extract, Cognify, Load) pipeline:
+
 - `.add()` ingests data
 - `.cognify()` builds knowledge graph with embeddings (subject-relation-object triplets)
 - `.search()` queries via vector similarity + graph traversal
 
 **Key features**:
+
 - Multi-database backend (Neo4j, FalkorDB, KuzuDB for graphs; Redis, Qdrant, Weaviate for vectors)
 - Zero-setup defaults (SQLite + LanceDB + Kuzu, all embedded)
 - Memory isolation per user/group/shared
@@ -41,11 +43,11 @@ ECL (Extract, Cognify, Load) pipeline:
 
 Treats memory as a first-class OS resource. Three-layer architecture with unified **MemCube** abstraction:
 
-| Memory Type | Description |
-|-------------|-------------|
-| **Parametric** | Long-term knowledge in model weights |
-| **Activation** | Transient cognitive states during inference |
-| **Plaintext** | External text for rapid knowledge updates, personalization |
+| Memory Type    | Description                                                |
+| -------------- | ---------------------------------------------------------- |
+| **Parametric** | Long-term knowledge in model weights                       |
+| **Activation** | Transient cognitive states during inference                |
+| **Plaintext**  | External text for rapid knowledge updates, personalization |
 
 Key features: Async ingestion with millisecond latency, natural language memory correction, multi-agent memory sharing via pub-sub, tool memory for agent planning. OpenClaw plugin achieves 72% lower token usage.
 
@@ -56,6 +58,7 @@ Key features: Async ingestion with millisecond latency, natural language memory 
 Built on **Graphiti**, a temporally-aware knowledge graph engine (Neo4j). Each fact includes `valid_at` and `invalid_at` dates.
 
 **Benchmarks**:
+
 - DMR: 94.8% vs MemGPT's 93.4%
 - LongMemEval: Up to 18.5% accuracy improvement, 90% latency reduction
 - Retrieval: <200ms
@@ -69,18 +72,19 @@ Built on **Graphiti**, a temporally-aware knowledge graph engine (Neo4j). Each f
 Pure functions for memory management (extract, update, remove, consolidate) + prompt optimization.
 
 Three memory types:
+
 - **Semantic**: Collections (searchable knowledge) + Profiles (strict schema by user/agent)
 - **Episodic**: Few-shot examples distilled from longer interactions
 - **Procedural**: Learned procedures saved as updated prompt instructions (algorithms: metaprompt, gradient, prompt_memory)
 
 ### Additional MCP Memory Servers
 
-| Server | Approach |
-|--------|----------|
-| **[memory-mcp](https://github.com/yuvalsuede/memory-mcp)** | Writes to CLAUDE.md with confidence decay (progress: 7 days, context: 30 days, architecture: never) |
-| **[Basic Memory](https://docs.basicmemory.com)** | Semantic search across Claude Code, Cursor, Codex, VS Code, Obsidian |
-| **[MCP Memory Keeper](https://github.com/mkreyman/mcp-memory-keeper)** | Intercepts `/compact`, forces context save. 500 insights: 9,380 → 462 tokens (20x reduction) |
-| **[@modelcontextprotocol/server-memory](https://lobehub.com/mcp/randall-gross-claude-memory-mcp)** | Official Anthropic local knowledge graph (SQLite) |
+| Server                                                                                             | Approach                                                                                            |
+| -------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| **[memory-mcp](https://github.com/yuvalsuede/memory-mcp)**                                         | Writes to CLAUDE.md with confidence decay (progress: 7 days, context: 30 days, architecture: never) |
+| **[Basic Memory](https://docs.basicmemory.com)**                                                   | Semantic search across Claude Code, Cursor, Codex, VS Code, Obsidian                                |
+| **[MCP Memory Keeper](https://github.com/mkreyman/mcp-memory-keeper)**                             | Intercepts `/compact`, forces context save. 500 insights: 9,380 → 462 tokens (20x reduction)        |
+| **[@modelcontextprotocol/server-memory](https://lobehub.com/mcp/randall-gross-claude-memory-mcp)** | Official Anthropic local knowledge graph (SQLite)                                                   |
 
 ---
 
@@ -99,6 +103,7 @@ Three memory types:
 ### Self-Evolving Agents
 
 **[Voyager](https://arxiv.org/abs/2305.16291)**: Foundational work. First LLM-powered embodied lifelong learning agent. Three components:
+
 1. Automatic curriculum
 2. Ever-growing skill library of executable code
 3. Iterative prompting with environment feedback + execution errors + self-verification
@@ -106,6 +111,7 @@ Three memory types:
 Skills are temporally extended, interpretable, and compositional. Alleviates catastrophic forgetting.
 
 **[EvolveR](https://arxiv.org/html/2510.16079v1)**: Closed-loop experience lifecycle:
+
 - Offline Self-Distillation → synthesizes trajectories into reusable strategic principles
 - Online Interaction → retrieves distilled principles to guide decisions
 
@@ -133,19 +139,19 @@ Skills are temporally extended, interpretable, and compositional. Alleviates cat
 
 ## Retrieval Patterns Comparison
 
-| System | Retrieval Type | Mechanism |
-|--------|---------------|-----------|
-| CLAUDE.md | Auto (full load) | Entire file injected at session start |
-| Auto Memory | Auto (full load) | MEMORY.md injected into system prompt |
-| Mem0 | Auto + On-demand | Semantic similarity to current context |
-| Zep | Auto + On-demand | Semantic + graph traversal, temporal filtering |
-| Letta/MemGPT | Agent-driven | Agent decides when to search/retrieve via tools |
-| Cognee | On-demand | Vector similarity + graph traversal (multi-hop) |
-| LangMem | Programmatic + Agent-driven | Developer or agent controls via functions |
-| MemOS | Scheduled | MemScheduler orchestrates retrieval |
-| A-MEM | Auto-linking | New memories trigger updates to related memories |
-| Basic Memory | On-demand | Semantic search via MCP tools |
-| claude-mem | Auto + On-demand | Auto-injection + 3-layer search tools |
+| System       | Retrieval Type              | Mechanism                                        |
+| ------------ | --------------------------- | ------------------------------------------------ |
+| CLAUDE.md    | Auto (full load)            | Entire file injected at session start            |
+| Auto Memory  | Auto (full load)            | MEMORY.md injected into system prompt            |
+| Mem0         | Auto + On-demand            | Semantic similarity to current context           |
+| Zep          | Auto + On-demand            | Semantic + graph traversal, temporal filtering   |
+| Letta/MemGPT | Agent-driven                | Agent decides when to search/retrieve via tools  |
+| Cognee       | On-demand                   | Vector similarity + graph traversal (multi-hop)  |
+| LangMem      | Programmatic + Agent-driven | Developer or agent controls via functions        |
+| MemOS        | Scheduled                   | MemScheduler orchestrates retrieval              |
+| A-MEM        | Auto-linking                | New memories trigger updates to related memories |
+| Basic Memory | On-demand                   | Semantic search via MCP tools                    |
+| claude-mem   | Auto + On-demand            | Auto-injection + 3-layer search tools            |
 
 ---
 
