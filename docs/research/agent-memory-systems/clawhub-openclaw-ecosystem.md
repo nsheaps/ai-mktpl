@@ -229,11 +229,24 @@ OpenClaw uses a file-based, Markdown-driven memory system with semantic search:
 1. **Daily Logs** (`memory/YYYY-MM-DD.md`) — append-only running context, reads today + yesterday at session start
 2. **Long-term Memory** (`MEMORY.md`) — curated profile-like info: preferences, decisions, durable facts
 
+#### Hybrid Search (BM25 + Vector)
+- **Vector search** (default 70% weight): cosine similarity via sqlite-vec. Handles conceptual matches.
+- **BM25 keyword search** (default 30% weight): SQLite FTS5 full-text search. Excels at error codes, function names.
+- Scoring: `finalScore = vectorWeight × vectorScore + textWeight × textScore`
+- Uses **union, not intersection** — results from either search contribute to final ranking
+- Post-processing: MMR diversity re-ranking, temporal decay
+- Supports multiple embedding providers: OpenAI, Gemini, Voyage, Mistral, Ollama, local GGUF
+
 #### Memory Tools
 
-- `memory_search` — hybrid BM25 + vector search over indexed Markdown snippets (SQLite + embeddings)
+- `memory_search` — hybrid BM25 + vector search over indexed Markdown snippets
 - `memory_get` — targeted read by file and line range
 - **Auto-flush before compaction** — when nearing token limits, triggers silent agentic turn to write durable memories
+
+#### LanceDB Memory Plugin
+Built-in deeper integration with tools: `memory_recall`, `memory_store`, `memory_forget`, `memory_update`. Supports auto-recall and auto-capture via lifecycle hooks.
+
+Enhanced **memory-lancedb-pro** variant adds: Vector + BM25 → RRF fusion → Jina Cross-Encoder Rerank → Recency Boost → Importance Weight → Length Norm → Time Decay → Hard Min Score → Noise Filter → MMR Diversity. Multi-scope isolation (global, agent, project, user).
 
 **Key limitation**: Agents are stateless between sessions. Continuity depends entirely on what gets written to and re-read from files.
 
