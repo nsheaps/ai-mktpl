@@ -125,38 +125,11 @@ do_setup() {
     install_output="$(cd "${CLAUDE_PROJECT_DIR:-.}" && GITHUB_TOKEN="${GITHUB_TOKEN:-${GH_TOKEN:-}}" "$mise_bin" install -y 2>&1)" || install_rc=$?
 
     if [ "$install_rc" -ne 0 ]; then
-      # Check what tools are actually available despite the error
-      local available_tools failed_tools
-      available_tools=""
-      failed_tools=""
-      while IFS= read -r tool_line; do
-        local tool_name
-        tool_name="$(echo "$tool_line" | awk '{print $1}')"
-        if [ -n "$tool_name" ] && command -v "$tool_name" &>/dev/null; then
-          available_tools="${available_tools:+$available_tools, }$tool_name"
-        fi
-      done < <(cd "${CLAUDE_PROJECT_DIR:-.}" && "$mise_bin" ls --current 2>/dev/null | tail -n +1 || true)
-
-      # Extract failed tool names from mise output
-      if echo "$install_output" | grep -q "Failed to install"; then
-        failed_tools="$(echo "$install_output" | grep "Failed to install" | sed 's/.*Failed to install tools: //')"
-      fi
-
-      hook_log "mise install completed with warnings (exit code $install_rc)"
-      if [ -n "$failed_tools" ]; then
-        hook_log "  Partially failed: $failed_tools"
-        hook_log "  (tools installed successfully but post-install hooks failed — likely reshim errors)"
-      fi
-
-      # Show what's actually available
-      local ls_output
-      ls_output="$(cd "${CLAUDE_PROJECT_DIR:-.}" && "$mise_bin" ls --current 2>/dev/null || true)"
-      if [ -n "$ls_output" ]; then
-        hook_log "  Available tools:"
-        while IFS= read -r line; do
-          [ -n "$line" ] && hook_log "    $line"
-        done <<< "$ls_output"
-      fi
+      hook_log "mise install exited non-zero (partial failure). Tools that installed are still available."
+      hook_log "mise install output:"
+      while IFS= read -r line; do
+        [ -n "$line" ] && hook_log "  $line"
+      done <<< "$install_output"
     fi
   fi
 }
