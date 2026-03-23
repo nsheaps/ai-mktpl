@@ -28,8 +28,11 @@ name: cd
         type: string
 
 concurrency:
-  group: cd-${{ github.ref }}
-  cancel-in-progress: true
+  # On push to main, share concurrency group with CI to prevent races where
+  # both CI (lint auto-fix) and CD (version bump) try to push commits
+  # simultaneously. On PRs, use a separate group since CD only previews.
+  group: ${{ github.ref == 'refs/heads/main' && 'ci-cd-main' || format('cd-{0}', github.ref) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   # For PRs: Preview version bumps only (no commits)

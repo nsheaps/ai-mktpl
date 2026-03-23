@@ -23,6 +23,18 @@ if [[ -z "$FILE_PATH" ]]; then
     exit 0
 fi
 
+# Only lint files within this project (ai-mktpl) — other repos won't have
+# the mise lint task and `mise run lint` would fail with "no tasks defined"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+case "$FILE_PATH" in
+    "$PROJECT_DIR"/*)
+        ;; # File is within project, continue
+    *)
+        exit 0 # File is outside project, skip
+        ;;
+esac
+
 # Only lint files that prettier can handle
 case "$FILE_PATH" in
     *.json|*.yaml|*.yml|*.md|*.js|*.ts|*.jsx|*.tsx|*.css|*.html)
