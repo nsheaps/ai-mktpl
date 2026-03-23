@@ -1,11 +1,11 @@
-# 1pass plugin configuration
+# poc-1pass plugin configuration
 #
 # Override per-project via ${CLAUDE_PROJECT_DIR}/.claude/plugins.settings.yaml
-# or per-user via ~/.claude/plugins.settings.yaml under the "1pass" key.
+# or per-user via ~/.claude/plugins.settings.yaml under the "poc-1pass" key.
 #
 # Set enabled: false to disable auto-install without uninstalling the plugin.
 
-1pass:
+poc-1pass:
   enabled: true
 
   # Download and install the op binary if not already on PATH.
