@@ -230,6 +230,7 @@ OpenClaw uses a file-based, Markdown-driven memory system with semantic search:
 2. **Long-term Memory** (`MEMORY.md`) — curated profile-like info: preferences, decisions, durable facts
 
 #### Hybrid Search (BM25 + Vector)
+
 - **Vector search** (default 70% weight): cosine similarity via sqlite-vec. Handles conceptual matches.
 - **BM25 keyword search** (default 30% weight): SQLite FTS5 full-text search. Excels at error codes, function names.
 - Scoring: `finalScore = vectorWeight × vectorScore + textWeight × textScore`
@@ -244,6 +245,7 @@ OpenClaw uses a file-based, Markdown-driven memory system with semantic search:
 - **Auto-flush before compaction** — when nearing token limits, triggers silent agentic turn to write durable memories
 
 #### LanceDB Memory Plugin
+
 Built-in deeper integration with tools: `memory_recall`, `memory_store`, `memory_forget`, `memory_update`. Supports auto-recall and auto-capture via lifecycle hooks.
 
 Enhanced **memory-lancedb-pro** variant adds: Vector + BM25 → RRF fusion → Jina Cross-Encoder Rerank → Recency Boost → Importance Weight → Length Norm → Time Decay → Hard Min Score → Noise Filter → MMR Diversity. Multi-scope isolation (global, agent, project, user).

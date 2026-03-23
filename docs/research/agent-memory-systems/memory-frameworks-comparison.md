@@ -304,28 +304,33 @@ MCP-first open-source memory server designed to plug directly into MCP-compatibl
 
 ### Four Memory Networks (Mimicking Human Memory)
 
-| Network | Content |
-|---------|---------|
-| **World** | Facts about the external world |
-| **Experiences** | The agent's own past experiences |
-| **Opinion** | Beliefs with confidence scores |
+| Network         | Content                                                              |
+| --------------- | -------------------------------------------------------------------- |
+| **World**       | Facts about the external world                                       |
+| **Experiences** | The agent's own past experiences                                     |
+| **Opinion**     | Beliefs with confidence scores                                       |
 | **Observation** | Complex mental models derived by reflecting on facts and experiences |
 
 ### Three Core Operations
+
 - `retain` (store), `recall` (search), `reflect` (reason)
 
 ### Mental Models
+
 Living documents that auto-update as memories grow. E.g., "Create a mental model summarizing my project architecture." Generation runs in background via LLM.
 
 ### Retrieval
+
 Four parallel retrieval strategies with cross-encoder reranking. 91.4% vs 49.0% advantage over single-strategy search on LongMemEval.
 
 ### Strengths
+
 - MCP-native (zero glue code for Claude Code, Cursor, etc.)
 - Fully self-hostable with Docker
 - Mental models are a unique concept
 
 ### Weaknesses
+
 - Early stage, less battle-tested
 - Requires LLM at retrieval time for reranking
 
