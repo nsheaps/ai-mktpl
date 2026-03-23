@@ -83,11 +83,27 @@ do_setup() {
   tool_ensure_path "$INSTALL_DIR"
 
   # Activate mise in the current shell AND persist to CLAUDE_ENV_FILE
+  #
+  # IMPORTANT: We use `mise env -s bash` instead of `mise activate bash` for
+  # CLAUDE_ENV_FILE. `mise activate bash` installs a PROMPT_COMMAND hook that
+  # calls `eval "$(mise hook-env -s bash)"` on EVERY bash command. This causes
+  # problems because:
+  #   1. mise hook-env outputs errors to stderr (and sometimes stdout) when
+  #      mise.toml is not trusted, polluting every command's output
+  #   2. mise hook-env can output warnings (rate limits, missing tools) to
+  #      stdout, which get `eval`'d as bash commands causing "command not found"
+  #   3. The activation also overrides cd/pushd/popd to call _mise_hook on
+  #      every directory change, compounding the above issues
+  #
+  # `mise env -s bash` just outputs static `export` statements for the current
+  # tool versions — no hooks, no eval loops, no side effects.
   hook_log_step "activate-mise" "Activating mise in shell"
   eval "$("$mise_bin" activate bash)" 2>/dev/null || true
   if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
-    echo 'eval "$('"$mise_bin"' activate bash)"' >> "$CLAUDE_ENV_FILE"
-    hook_log "Persisted mise activation to CLAUDE_ENV_FILE"
+    # Use `mise env` for persistence — it only exports PATH and tool vars,
+    # no hooks or eval loops that run on every command
+    echo 'eval "$('"$mise_bin"' env -s bash 2>/dev/null)"' >> "$CLAUDE_ENV_FILE"
+    hook_log "Persisted mise env to CLAUDE_ENV_FILE (using mise env, not activate)"
   fi
 
   # Auto-trust: trust mise config files in project dir and any git worktrees
