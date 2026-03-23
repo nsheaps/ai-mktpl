@@ -13,6 +13,65 @@ description: >
 The GitHub CLI (`gh`) brings GitHub workflows to the terminal. It provides
 commands for pull requests, issues, repos, actions, and direct API access.
 
+## Web Session Proxy — CRITICAL
+
+**In Claude Code web sessions, the git remote is a local proxy, NOT github.com.** This means `gh` subcommands that infer the repo from the git remote (`gh pr create`, `gh pr list`, `gh issue list`, `gh pr view`, etc.) **will fail or target the wrong host**.
+
+### What Works and What Doesn't
+
+| Approach | Web Session | Local Session |
+|---|---|---|
+| `gh api --hostname github.com repos/OWNER/REPO/...` | **Works** | Works |
+| `gh pr create`, `gh pr list`, `gh issue list`, etc. | **Fails** (proxy remote) | Works |
+| `gh api repos/OWNER/REPO/...` (no --hostname) | **May fail** (resolves to proxy) | Works |
+
+### Always-Safe Pattern
+
+**Always use `gh api` with `--hostname github.com` and explicit `repos/OWNER/REPO` paths.** This works in both web and local sessions:
+
+```bash
+# Instead of: gh pr list
+gh api "repos/OWNER/REPO/pulls?state=open" --hostname github.com --jq '.[].title'
+
+# Instead of: gh pr create --title "..." --body "..."
+gh api repos/OWNER/REPO/pulls --hostname github.com \
+  --method POST \
+  --field title="Title" \
+  --field head="branch-name" \
+  --field base="main" \
+  --field draft=true \
+  --field body="Description"
+
+# Instead of: gh issue list
+gh api "repos/OWNER/REPO/issues?state=open" --hostname github.com --jq '.[].title'
+
+# Instead of: gh issue create --title "..." --body "..."
+gh api repos/OWNER/REPO/issues --hostname github.com \
+  --method POST \
+  --field title="Title" \
+  --field body="Description"
+
+# Instead of: gh pr view 123
+gh api repos/OWNER/REPO/pulls/123 --hostname github.com
+
+# Instead of: gh pr merge 123 --squash
+gh api repos/OWNER/REPO/pulls/123/merge --hostname github.com \
+  --method PUT \
+  --field merge_method="squash"
+```
+
+### Detecting Web Sessions
+
+```bash
+if [ "${CLAUDE_CODE_REMOTE:-}" = "true" ]; then
+  echo "Web session — use gh api --hostname github.com"
+fi
+```
+
+### Why This Happens
+
+Claude Code web sessions route git operations through a local proxy for security. The `gh` CLI reads the git remote to determine the GitHub host, so it resolves to the proxy instead of `github.com`. Using `--hostname github.com` explicitly overrides this.
+
 ## Quick Reference
 
 ### Authentication
@@ -21,11 +80,12 @@ commands for pull requests, issues, repos, actions, and direct API access.
 # Check auth status
 gh auth status
 
-# Login interactively
-gh auth login
-
 # Login with token (CI/web sessions)
-echo "$GH_TOKEN" | gh auth login --with-token
+# GH_TOKEN env var is preferred — gh respects it automatically
+export GH_TOKEN="ghp_..."
+
+# Login interactively (local only)
+gh auth login
 
 # Switch between accounts
 gh auth switch
@@ -75,14 +135,19 @@ gh api users/my-app[bot] --jq '.id'
 
 ## Pull Request Workflows
 
+> **Reminder:** In web sessions, use `gh api --hostname github.com` instead of `gh pr` subcommands. See [Web Session Proxy](#web-session-proxy--critical) above.
+
 ### Creating PRs
 
 ```bash
-# Create PR with title and body
-gh pr create --title "Add feature X" --body "Description here"
-
-# Create PR with body from heredoc
-gh pr create --title "Fix bug Y" --body "$(cat <<'EOF'
+# Via gh api (works in all sessions)
+gh api repos/OWNER/REPO/pulls --hostname github.com \
+  --method POST \
+  --field title="Add feature X" \
+  --field head="branch-name" \
+  --field base="main" \
+  --field draft=true \
+  --field body="$(cat <<'EOF'
 ## Summary
 - Fixed the thing
 
@@ -91,120 +156,133 @@ gh pr create --title "Fix bug Y" --body "$(cat <<'EOF'
 EOF
 )"
 
-# Create draft PR
-gh pr create --draft --title "WIP: Feature Z"
+# Add labels after creation
+gh api repos/OWNER/REPO/issues/PR_NUMBER/labels --hostname github.com \
+  --method POST --field 'labels[]=bug'
 
-# Create PR targeting specific base branch
-gh pr create --base develop --title "Feature for develop"
-
-# Create PR and fill from commits
-gh pr create --fill
-
-# Create PR with labels and reviewers
-gh pr create --title "Fix" --label "bug" --reviewer "username"
+# Local-only alternatives (won't work in web sessions):
+# gh pr create --title "Add feature X" --body "Description here"
+# gh pr create --draft --title "WIP: Feature Z"
+# gh pr create --base develop --title "Feature for develop"
 ```
 
 ### Reviewing PRs
 
 ```bash
 # View PR details
-gh pr view 123
-gh pr view 123 --json title,body,reviews,mergeable
+gh api repos/OWNER/REPO/pulls/123 --hostname github.com
 
-# View PR diff
-gh pr diff 123
-
-# List PR files
-gh pr view 123 --json files --jq '.files[].path'
+# View PR files
+gh api repos/OWNER/REPO/pulls/123/files --hostname github.com \
+  --jq '.[].filename'
 
 # Check PR status (CI checks)
-gh pr checks 123
+gh api repos/OWNER/REPO/commits/SHA/check-runs --hostname github.com \
+  --jq '.check_runs[] | {name, status, conclusion}'
 
 # View PR comments
-gh api repos/{owner}/{repo}/pulls/123/comments
+gh api repos/OWNER/REPO/pulls/123/comments --hostname github.com
 
-# Add a review comment
-gh pr review 123 --comment --body "LGTM!"
+# View PR review comments
+gh api repos/OWNER/REPO/pulls/123/reviews --hostname github.com
 
-# Approve a PR
-gh pr review 123 --approve
+# Create a review
+gh api repos/OWNER/REPO/pulls/123/reviews --hostname github.com \
+  --method POST \
+  --field event="COMMENT" \
+  --field body="LGTM!"
 
-# Request changes
-gh pr review 123 --request-changes --body "Please fix X"
+# Local-only alternatives:
+# gh pr view 123
+# gh pr diff 123
+# gh pr checks 123
 ```
 
 ### Managing PRs
 
 ```bash
 # List open PRs
-gh pr list
+gh api "repos/OWNER/REPO/pulls?state=open" --hostname github.com \
+  --jq '.[] | {number, title, user: .user.login}'
 
 # List PRs by author
-gh pr list --author "@me"
+gh api "repos/OWNER/REPO/pulls?state=open" --hostname github.com \
+  --jq '[.[] | select(.user.login == "USERNAME")] | .[] | {number, title}'
 
-# List PRs with specific label
-gh pr list --label "needs-review"
+# Update PR (title, body, etc.)
+gh api repos/OWNER/REPO/pulls/123 --hostname github.com \
+  --method PATCH \
+  --field title="Updated title" \
+  --field body="Updated body"
 
-# Merge a PR (merge commit)
-gh pr merge 123
-
-# Squash merge
-gh pr merge 123 --squash
-
-# Rebase merge
-gh pr merge 123 --rebase
-
-# Auto-merge when checks pass
-gh pr merge 123 --auto --squash
+# Merge a PR (squash)
+gh api repos/OWNER/REPO/pulls/123/merge --hostname github.com \
+  --method PUT \
+  --field merge_method="squash"
 
 # Close without merging
-gh pr close 123
+gh api repos/OWNER/REPO/pulls/123 --hostname github.com \
+  --method PATCH \
+  --field state="closed"
 
-# Checkout PR branch locally
-gh pr checkout 123
+# Local-only alternatives:
+# gh pr list
+# gh pr merge 123 --squash
+# gh pr close 123
 ```
 
 ## Issue Workflows
 
+> **Reminder:** In web sessions, use `gh api --hostname github.com` instead of `gh issue` subcommands.
+
 ### Creating Issues
 
 ```bash
-# Create issue interactively
-gh issue create
+# Via gh api (works in all sessions)
+gh api repos/OWNER/REPO/issues --hostname github.com \
+  --method POST \
+  --field title="Bug: X crashes" \
+  --field body="Steps to reproduce..." \
+  --field 'labels[]=bug' \
+  --field 'labels[]=priority:high'
 
-# Create with title and body
-gh issue create --title "Bug: X crashes" --body "Steps to reproduce..."
-
-# Create with labels
-gh issue create --title "Feature request" --label "enhancement" --label "priority:high"
-
-# Create with assignee
-gh issue create --title "Fix Y" --assignee "@me"
+# Local-only alternatives:
+# gh issue create --title "Bug: X crashes" --body "Steps to reproduce..."
+# gh issue create --title "Feature request" --label "enhancement"
 ```
 
 ### Managing Issues
 
 ```bash
 # List open issues
-gh issue list
+gh api "repos/OWNER/REPO/issues?state=open" --hostname github.com \
+  --jq '.[] | {number, title}'
 
 # List issues with label
-gh issue list --label "bug"
-
-# List issues assigned to me
-gh issue list --assignee "@me"
+gh api "repos/OWNER/REPO/issues?labels=bug&state=open" --hostname github.com \
+  --jq '.[] | {number, title}'
 
 # View issue details
-gh issue view 42
+gh api repos/OWNER/REPO/issues/42 --hostname github.com
 
 # Close issue with comment
-gh issue close 42 --comment "Fixed in #123"
+gh api repos/OWNER/REPO/issues/42/comments --hostname github.com \
+  --method POST --field body="Fixed in #123"
+gh api repos/OWNER/REPO/issues/42 --hostname github.com \
+  --method PATCH --field state="closed"
 
-# Edit issue
-gh issue edit 42 --title "New title" --add-label "status:in-progress"
+# Add/remove labels
+gh api repos/OWNER/REPO/issues/42/labels --hostname github.com \
+  --method POST --field 'labels[]=status:in-progress'
 
 # Add comment
-gh issue comment 42 --body "Working on this"
+gh api repos/OWNER/REPO/issues/42/comments --hostname github.com \
+  --method POST --field body="Working on this"
+
+# Local-only alternatives:
+# gh issue list --label "bug"
+# gh issue view 42
+# gh issue close 42 --comment "Fixed in #123"
 ```
 
 ## Repository Operations
@@ -231,62 +309,74 @@ gh repo edit --enable-auto-merge --delete-branch-on-merge
 
 ## GitHub Actions
 
+> **Reminder:** In web sessions, use `gh api --hostname github.com` instead of `gh run`/`gh workflow` subcommands.
+
 ```bash
 # List recent workflow runs
-gh run list
+gh api repos/OWNER/REPO/actions/runs --hostname github.com \
+  --jq '.workflow_runs[:10] | .[] | {id, name: .name, status, conclusion}'
 
 # View a specific run
-gh run view 12345
+gh api repos/OWNER/REPO/actions/runs/12345 --hostname github.com
 
-# View run logs
-gh run view 12345 --log
+# View run jobs
+gh api repos/OWNER/REPO/actions/runs/12345/jobs --hostname github.com \
+  --jq '.jobs[] | {name, status, conclusion}'
 
-# Watch a running workflow
-gh run watch 12345
+# View job logs
+gh api repos/OWNER/REPO/actions/jobs/JOB_ID/logs --hostname github.com
 
 # Re-run a failed workflow
-gh run rerun 12345
+gh api repos/OWNER/REPO/actions/runs/12345/rerun --hostname github.com \
+  --method POST
 
 # Re-run only failed jobs
-gh run rerun 12345 --failed
+gh api repos/OWNER/REPO/actions/runs/12345/rerun-failed-jobs --hostname github.com \
+  --method POST
 
 # Trigger a workflow dispatch
-gh workflow run ci.yaml --ref main
+gh api repos/OWNER/REPO/actions/workflows/ci.yaml/dispatches --hostname github.com \
+  --method POST --field ref="main"
 
 # List workflows
-gh workflow list
+gh api repos/OWNER/REPO/actions/workflows --hostname github.com \
+  --jq '.workflows[] | {name, state}'
 
-# View workflow details
-gh workflow view ci.yaml
+# Local-only alternatives:
+# gh run list
+# gh run view 12345 --log
+# gh workflow run ci.yaml --ref main
 ```
 
 ## GitHub API Access
 
-The `gh api` command provides authenticated access to any GitHub API endpoint.
+The `gh api` command provides authenticated access to any GitHub API endpoint. **Always include `--hostname github.com`** to ensure correct routing in web sessions.
 
 ### Common API Patterns
 
 ```bash
 # GET request
-gh api repos/owner/repo
+gh api repos/owner/repo --hostname github.com
 
 # GET with jq filtering
-gh api repos/owner/repo --jq '.description'
+gh api repos/owner/repo --hostname github.com --jq '.description'
 
 # POST request (create)
-gh api repos/owner/repo/labels -f name="priority:critical" -f color="FF0000"
+gh api repos/owner/repo/labels --hostname github.com \
+  -f name="priority:critical" -f color="FF0000"
 
 # PATCH request (update)
-gh api repos/owner/repo/issues/42 -X PATCH -f state="closed"
+gh api repos/owner/repo/issues/42 --hostname github.com \
+  -X PATCH -f state="closed"
 
 # DELETE request
-gh api repos/owner/repo/labels/old-label -X DELETE
+gh api repos/owner/repo/labels/old-label --hostname github.com -X DELETE
 
 # Paginated results
-gh api repos/owner/repo/issues --paginate --jq '.[].title'
+gh api repos/owner/repo/issues --hostname github.com --paginate --jq '.[].title'
 
 # GraphQL query
-gh api graphql -f query='
+gh api graphql --hostname github.com -f query='
   query {
     repository(owner: "owner", name: "repo") {
       pullRequests(first: 10, states: OPEN) {
@@ -301,22 +391,25 @@ gh api graphql -f query='
 
 ```bash
 # Get file contents from a repo
-gh api repos/owner/repo/contents/path/to/file --jq '.content' | base64 -d
+gh api repos/owner/repo/contents/path/to/file --hostname github.com \
+  --jq '.content' | base64 -d
 
 # List PR review comments
-gh api repos/owner/repo/pulls/123/comments
+gh api repos/owner/repo/pulls/123/comments --hostname github.com
 
 # Get commit status
-gh api repos/owner/repo/commits/SHA/status
+gh api repos/owner/repo/commits/SHA/status --hostname github.com
 
 # List repository topics
-gh api repos/owner/repo/topics --jq '.names[]'
+gh api repos/owner/repo/topics --hostname github.com --jq '.names[]'
 
 # Search code
-gh api search/code -f q="pattern repo:owner/repo" --jq '.items[].path'
+gh api search/code --hostname github.com \
+  -f q="pattern repo:owner/repo" --jq '.items[].path'
 
 # Create a repository dispatch event
-gh api repos/owner/repo/dispatches -f event_type="deploy" -f client_payload='{"env":"prod"}'
+gh api repos/owner/repo/dispatches --hostname github.com \
+  -f event_type="deploy" -f client_payload='{"env":"prod"}'
 ```
 
 ## Releases
@@ -430,17 +523,24 @@ Place in:
 
 ## Troubleshooting
 
+### `gh pr create` / `gh issue list` fails in web sessions
+
+This is the most common issue. The git remote points to a local proxy, so `gh` subcommands that infer the repo from the remote will fail. **Use `gh api --hostname github.com` with explicit repo paths instead.** See [Web Session Proxy](#web-session-proxy--critical) at the top of this document.
+
 ### Authentication issues
 
 ```bash
 # Verify auth
 gh auth status
 
-# Re-authenticate
-gh auth login
+# Check if GH_TOKEN is set (preferred in web sessions)
+echo "${GH_TOKEN:+set}" || echo "not set"
 
 # Check token scopes
 gh auth status -t
+
+# Re-authenticate (local only)
+gh auth login
 ```
 
 ### "gh: command not found" in web sessions
@@ -454,7 +554,7 @@ Use authenticated requests (default with `gh`) to get 5,000 req/hour
 instead of 60. For heavy API usage, check remaining:
 
 ```bash
-gh api rate_limit --jq '.rate'
+gh api rate_limit --hostname github.com --jq '.rate'
 ```
 
 ### Working with GitHub Enterprise
