@@ -1,7 +1,8 @@
 # nsheaps Starred Repos Analysis
 
 > Research compiled: 2026-03-23
-> Total repos: ~270+
+> Total repos: 257 (verified count)
+> Categories: 37
 
 ## Category Breakdown
 
@@ -164,6 +165,48 @@ Multiple statusline tools for Claude Code usage monitoring - see separate status
 
 Various utility repos, dotfiles, trading tools, security tools, and historical repos.
 
+## Distribution Summary
+
+The 257 repos break down roughly as:
+
+| Category | Count | % |
+|----------|-------|---|
+| Claude Code tools, plugins, extensions | 65 | 25% |
+| AI agent frameworks & orchestration | 25 | 10% |
+| MCP servers & tools | 20 | 8% |
+| AI/LLM general tools & research | 22 | 9% |
+| GitHub Actions & CI/CD | 16 | 6% |
+| DevOps & infrastructure | 14 | 5% |
+| CLI & terminal tools | 12 | 5% |
+| Curated lists | 7 | 3% |
+| All other categories | 76 | 29% |
+
+### Top Starred Repos (Memory/Agent Relevant)
+
+| Repo | Stars | Relevance |
+|------|-------|-----------|
+| [affaan-m/everything-claude-code](https://github.com/affaan-m/everything-claude-code) | 99K | Skills, instincts, memory, security for Claude Code |
+| [obra/superpowers](https://github.com/obra/superpowers) | 106K | Agentic skills framework and methodology |
+| [anthropics/skills](https://github.com/anthropics/skills) | 100K | Official Anthropic Agent Skills |
+| [msitarzewski/agency-agents](https://github.com/msitarzewski/agency-agents) | 60K | Complete AI agency with specialized agents |
+| [thedotmack/claude-mem](https://github.com/thedotmack/claude-mem) | 40K | Persistent memory plugin (SQLite + Chroma) |
+| [volcengine/OpenViking](https://github.com/volcengine/OpenViking) | 18K | Context database for AI agents (memory, resources, skills) |
+| [musistudio/claude-code-router](https://github.com/musistudio/claude-code-router) | 30K | Claude Code as coding infrastructure |
+| [hesreallyhim/awesome-claude-code](https://github.com/hesreallyhim/awesome-claude-code) | 30K | Curated skills, hooks, commands |
+| [VoltAgent/awesome-claude-code-subagents](https://github.com/VoltAgent/awesome-claude-code-subagents) | 15K | 100+ specialized subagents |
+| [agentskills/agentskills](https://github.com/agentskills/agentskills) | 14K | Agent Skills specification |
+
+### Notable Repos Not in Initial Analysis
+
+| Repo | Stars | Description |
+|------|-------|-------------|
+| [volcengine/OpenViking](https://github.com/volcengine/OpenViking) | 18K | Open-source context database managing memory, resources, skills for AI agents |
+| [adolfousier/opencrabs](https://github.com/adolfousier/opencrabs) | 546 | Self-hosted self-improving fully autonomous AI agent (single binary) |
+| [yologdev/yoyo-evolve](https://github.com/yologdev/yoyo-evolve) | 659 | Coding agent that evolves itself, one commit per day |
+| [hexdocom/lemonai](https://github.com/hexdocom/lemonai) | 1.5K | Full-stack open-source self-evolving general AI agent |
+| [code-yeongyu/oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) | 43K | Multi-agent orchestration TUI |
+| [farion1231/cc-switch](https://github.com/farion1231/cc-switch) | 32K | Cross-platform desktop all-in-one assistant tool |
+
 ## Key Patterns Observed
 
 1. **Memory is the frontier** - Many starred repos focus on persistent context and memory
@@ -172,3 +215,5 @@ Various utility repos, dotfiles, trading tools, security tools, and historical r
 4. **MCP is the integration standard** - Memory systems increasingly use MCP for agent integration
 5. **File-based over database** - Many simpler systems use markdown files for memory persistence
 6. **Vector search is standard** - For larger memory systems, vector DBs are the default retrieval mechanism
+7. **Claude Code dominance** - 25% of all starred repos are Claude Code-specific tools/plugins
+8. **Self-evolving agents emerging** - opencrabs, yoyo-evolve, lemonai represent a new category of self-improving agents
