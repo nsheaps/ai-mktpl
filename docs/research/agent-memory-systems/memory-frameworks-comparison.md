@@ -293,3 +293,52 @@ Transforms Obsidian vaults into agent-accessible knowledge stores.
 ### Significance
 
 Bridges human-curated knowledge bases with agent reasoning. Enables agents to use Obsidian as a structured memory store that humans also maintain and curate.
+
+---
+
+## 8. Hindsight (Vectorize.io)
+
+**[Website](https://hindsight.vectorize.io) | MIT License**
+
+MCP-first open-source memory server designed to plug directly into MCP-compatible agents.
+
+### Four Memory Networks (Mimicking Human Memory)
+
+| Network | Content |
+|---------|---------|
+| **World** | Facts about the external world |
+| **Experiences** | The agent's own past experiences |
+| **Opinion** | Beliefs with confidence scores |
+| **Observation** | Complex mental models derived by reflecting on facts and experiences |
+
+### Three Core Operations
+- `retain` (store), `recall` (search), `reflect` (reason)
+
+### Mental Models
+Living documents that auto-update as memories grow. E.g., "Create a mental model summarizing my project architecture." Generation runs in background via LLM.
+
+### Retrieval
+Four parallel retrieval strategies with cross-encoder reranking. 91.4% vs 49.0% advantage over single-strategy search on LongMemEval.
+
+### Strengths
+- MCP-native (zero glue code for Claude Code, Cursor, etc.)
+- Fully self-hostable with Docker
+- Mental models are a unique concept
+
+### Weaknesses
+- Early stage, less battle-tested
+- Requires LLM at retrieval time for reranking
+
+---
+
+## Key Architectural Insights
+
+1. **Extraction-consolidation spectrum**: Mem0/Zep use external LLM pipelines. Letta delegates to the agent. LangMem offers both (hot path vs background). Tradeoff: control vs cost.
+
+2. **Temporal reasoning is unsolved**: Only Zep has a principled bi-temporal model. As agents operate over longer time horizons, this becomes critical.
+
+3. **No-LLM retrieval advantage**: Zep requires no LLM calls at retrieval time (hybrid search handles everything), giving fundamental latency and cost advantages for read-heavy workloads.
+
+4. **MCP is the integration standard**: Mem0 (OpenMemory), Hindsight, Anthropic's reference server, Microsoft Foundry all converge on MCP tools for memory consumption.
+
+5. **Prompt optimization is underexplored**: LangMem's Prompt Optimizer is the ONLY system that explicitly treats the agent's system prompt as evolvable procedural memory. This is a genuinely different approach to agent improvement that other frameworks have not adopted.
