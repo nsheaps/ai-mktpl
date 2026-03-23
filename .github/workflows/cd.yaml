@@ -106,14 +106,25 @@ jobs:
         shell: bash
         env:
           BASE_REF: ${{ steps.resolve-base.outputs.base-ref }}
+          BASE_BRANCH: ${{ github.base_ref }}
         run: |
-          # Resolve base ref for git commands
+          # Resolve base ref for change detection (may be cd/last-release tag)
           if git rev-parse --verify "origin/$BASE_REF" >/dev/null 2>&1; then
             RESOLVED_BASE="origin/$BASE_REF"
           elif git rev-parse --verify "$BASE_REF" >/dev/null 2>&1; then
             RESOLVED_BASE="$BASE_REF"
           else
             RESOLVED_BASE="HEAD~1"
+          fi
+
+          # Resolve the actual base branch for version comparison
+          # This is always the PR target branch (e.g., origin/main), NOT the release tag.
+          # The release tag is used for change detection, but the base branch version
+          # is what we compare against to determine if a bump already happened.
+          if git rev-parse --verify "origin/$BASE_BRANCH" >/dev/null 2>&1; then
+            VERSION_BASE="origin/$BASE_BRANCH"
+          else
+            VERSION_BASE="$RESOLVED_BASE"
           fi
 
           BUMPED_PLUGINS=()
@@ -142,8 +153,8 @@ jobs:
 
             [ "$HAS_CHANGES" = "true" ] || continue
 
-            # Get base version (version before this PR)
-            BASE_VERSION=$(git show "$RESOLVED_BASE:$PLUGIN_JSON" 2>/dev/null | jq -r '.version' 2>/dev/null || echo "0.0.0")
+            # Get base version from the target branch (e.g., origin/main)
+            BASE_VERSION=$(git show "$VERSION_BASE:$PLUGIN_JSON" 2>/dev/null | jq -r '.version' 2>/dev/null || echo "0.0.0")
             # Get current version in PR head
             HEAD_VERSION=$(jq -r '.version' "$PLUGIN_JSON" 2>/dev/null || echo "0.0.0")
 
