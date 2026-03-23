@@ -55,7 +55,9 @@
       "Bash(chmod:*)",
       "Bash(readlink:*)"
     ],
-    "deny": ["Bash(rm -rf /:*)"],
+    "deny": [
+      "Bash(rm -rf /:*)"
+    ],
     "ask": [
       "Bash(gh pr view --web:*)",
       "Bash(rm -rf:*)",
@@ -118,7 +120,7 @@
     "code-review@claude-plugins-official": false,
     "plugin-dev@claude-plugins-official": true,
     "pr-review-toolkit@claude-plugins-official": false,
-    "1pass@ai-mktpl": false,
+    "poc-1pass@ai-mktpl": false,
     "common-sense@ai-mktpl": false,
     "correct-behavior@ai-mktpl": false,
     "data-serialization@ai-mktpl": false,
