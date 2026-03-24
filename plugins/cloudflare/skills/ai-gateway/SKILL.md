@@ -14,7 +14,7 @@ Cloudflare AI Gateway is a managed proxy that sits between your application and 
 
 - **Docs**: <https://developers.cloudflare.com/ai-gateway/>
 - **Dashboard**: <https://dash.cloudflare.com/?to=/:account/ai/ai-gateway>
-- **Pulumi resource**: `cloudflare.AiGateway` ([docs](https://www.pulumi.com/registry/packages/cloudflare/api-docs/aigateway/))
+- **API**: <https://developers.cloudflare.com/api/resources/ai_gateway/>
 
 ## Key Features
 
@@ -213,59 +213,54 @@ curl "https://gateway.ai.cloudflare.com/v1/ACCT_ID/GATEWAY_ID" \
   ]'
 ```
 
-## Pulumi IaC Setup
+## Infrastructure Setup
 
-### Resource: `cloudflare.AiGateway`
+### No Native Pulumi/Terraform Resource
 
-```typescript
-import * as cloudflare from "@pulumi/cloudflare";
+As of March 2026, there is **no native Pulumi or Terraform resource** for Cloudflare AI Gateway. The upstream Terraform provider tracks this as [issue #6720](https://github.com/cloudflare/terraform-provider-cloudflare/issues/6720).
 
-const gateway = new cloudflare.AiGateway("claude-code-gateway", {
-  accountId: accountId,
-  name: "claude-code", // This becomes the gateway_id in the URL
+Create the gateway via the **dashboard** or the **Cloudflare REST API**.
 
-  // Caching
-  cacheInvalidateOnUpdate: true,
-  cacheTtl: 3600, // Cache TTL in seconds (0 to disable)
+### Create via Dashboard
 
-  // Rate limiting
-  rateLimitingInterval: 60, // Window in seconds
-  rateLimitingLimit: 100, // Max requests per window
-  rateLimitingTechnique: "fixed", // "fixed" or "sliding"
+1. Go to [AI Gateway](https://dash.cloudflare.com/?to=/:account/ai/ai-gateway)
+2. Click **Create Gateway**
+3. Set a name/slug (e.g., `claude-code`) — this becomes the `{gateway_id}` in URLs
+4. Configure rate limiting and caching as desired
 
-  // Logging
-  logpush: false, // Push logs to Cloudflare Logpush
-  logpushPublicKey: "", // Public key for log encryption
-});
+### Create via REST API
 
-export const gatewayUrl = pulumi.interpolate`https://gateway.ai.cloudflare.com/v1/${accountId}/${gateway.name}`;
-export const anthropicViaGateway = pulumi.interpolate`${gatewayUrl}/anthropic`;
+```bash
+# One-time setup — create the gateway
+curl -X POST "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/ai-gateway/gateways" \
+  -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "claude-code",
+    "slug": "claude-code",
+    "rate_limiting_interval": 60,
+    "rate_limiting_limit": 200,
+    "rate_limiting_technique": "fixed",
+    "cache_ttl": 0
+  }'
 ```
 
-### Full Example with DNS
+### Reference in Pulumi
+
+Since no native resource exists, reference the gateway by name in your Pulumi stack outputs:
 
 ```typescript
 import * as pulumi from "@pulumi/pulumi";
-import * as cloudflare from "@pulumi/cloudflare";
 
 const config = new pulumi.Config();
 const cfConfig = new pulumi.Config("cloudflare");
 const accountId = cfConfig.require("accountId");
+const aiGatewayName = config.get("aiGatewayName") ?? "claude-code";
 
-// AI Gateway
-const aiGateway = new cloudflare.AiGateway("ai-gateway", {
-  accountId,
-  name: "ai-gateway",
-  cacheInvalidateOnUpdate: true,
-  cacheTtl: 0, // Disable caching for Claude Code (non-deterministic)
-  rateLimitingInterval: 60,
-  rateLimitingLimit: 200,
-  rateLimitingTechnique: "fixed",
-});
-
-export const gatewayId = aiGateway.name;
-export const anthropicBaseUrl = pulumi.interpolate`https://gateway.ai.cloudflare.com/v1/${accountId}/${aiGateway.name}/anthropic`;
-export const openrouterBaseUrl = pulumi.interpolate`https://gateway.ai.cloudflare.com/v1/${accountId}/${aiGateway.name}/openrouter`;
+// Gateway must be created via dashboard or API first
+export const aiGatewayId = aiGatewayName;
+export const anthropicBaseUrl = pulumi.interpolate`https://gateway.ai.cloudflare.com/v1/${accountId}/${aiGatewayName}/anthropic`;
+export const openrouterBaseUrl = pulumi.interpolate`https://gateway.ai.cloudflare.com/v1/${accountId}/${aiGatewayName}/openrouter`;
 ```
 
 ## Monitoring and Analytics
@@ -300,5 +295,6 @@ Access at: `https://dash.cloudflare.com/?to=/:account/ai/ai-gateway/YOUR_GATEWAY
 - [Rate Limiting](https://developers.cloudflare.com/ai-gateway/configuration/rate-limiting/)
 - [Logging](https://developers.cloudflare.com/ai-gateway/observability/logging/)
 - [Analytics](https://developers.cloudflare.com/ai-gateway/observability/analytics/)
-- [Pulumi cloudflare.AiGateway](https://www.pulumi.com/registry/packages/cloudflare/api-docs/aigateway/)
+- [Cloudflare AI Gateway API](https://developers.cloudflare.com/api/resources/ai_gateway/)
+- [Terraform provider issue #6720](https://github.com/cloudflare/terraform-provider-cloudflare/issues/6720) (no native IaC resource yet)
 - [Claude Code Environment Variables](https://docs.anthropic.com/en/docs/claude-code/settings#environment-variables)
