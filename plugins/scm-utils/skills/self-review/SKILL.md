@@ -1,0 +1,1 @@
+../../../../shared/skills/self-review/SKILL.md

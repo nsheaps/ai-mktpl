@@ -28,7 +28,7 @@ When the user asks to review a PR:
    - Inform the user: "Triggered the review bot. It will post a review on the PR shortly."
 
 4. **If review bot workflow does NOT exist**:
-   - Perform a local review using the `pr-review-toolkit:review-pr` skill or the `code-review:code-review` agent
+   - Perform a local review using the `self-review` skill (shared multi-agent review process)
    - Post the review directly on the PR
 
 **Notes:**

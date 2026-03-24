@@ -126,9 +126,19 @@ Questions you leave in past reviews may be answered in the PR body or comments. 
    CRITICAL: This ensures only your latest review is visible, preventing clutter and confusion.
    CRITICAL: Only hide YOUR OWN previous reviews, never reviews from other users.
 10. **Submit the review**: Use `mcp__github__submit_pending_pull_request_review` to post your review.
-    CRITICAL: If there are security, performance, or correctness issues that MUST be addressed before merging, use "REQUEST_CHANGES".
-    CRITICAL: If there are no other changes to make, and the PR is ready to merge, use "APPROVE".
-    Use event type "COMMENT" (not "REQUEST_CHANGES") to publish all comments as a non-blocking review if you think there should be changes, but the system won't break if the changes are merged.
+
+    Use **"REQUEST_CHANGES"** when:
+    - Security, performance, or correctness issues must be fixed before merging
+    - The code would improve meaningfully from a suggested change and the change is straightforward to make
+    - CRITICAL: If a change would make the code better and it's reasonable to do before merge, it's a requested change, not a suggestion
+
+    Use **"APPROVE"** when:
+    - The PR is ready to merge as-is with no outstanding issues
+
+    Use **"COMMENT"** only when ALL of these are true:
+    - The code won't break if merged as-is
+    - The suggestions are genuinely optional and there is a clear reason why each should NOT be addressed in this PR
+    - CRITICAL: If a suggestion would improve the code and is reasonable to implement, use REQUEST_CHANGES. Non-blocking feedback must have a justification.
 
 11. **Post-review verification**: After submitting your review, re-read the PR and all comments to ensure correct state.
 
@@ -163,9 +173,9 @@ _🖱️ Click to expand for full details_
 <detailed review sections with L3+ headings>
 </details>
 
-**Recommended follow-ups** (non-blocking):
-- Item 1
-- Item 2
+**Recommended follow-ups** (non-blocking — each item MUST explain why it shouldn't be addressed in this PR):
+- [Item] — [Reason it's not blocking]
+- [Item] — [Reason]
 
 Notes:[^1][^2]
 [^1]: Workflow Run: [URL]
@@ -184,6 +194,7 @@ Code changes should follow: KISS, YAGNI, DRY, WET, TDA, SOLID.
 - Do not use CI output to base your review — review the code itself
 - Do not post "test" or "review in progress" comments
 - Your review MUST contain `<details>` and `<summary>` HTML tags
+- NEVER wrap any part of your review output in `<![CDATA[...]]>` tags. CDATA wrappers are invalid in GitHub markdown and will render as literal broken text in PR comments. All output must be plain GitHub-flavored markdown.
 
 ## Extra info to help you
 
