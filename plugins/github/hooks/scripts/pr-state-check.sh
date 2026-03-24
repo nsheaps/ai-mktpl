@@ -7,7 +7,7 @@
 # CI failure, new comment), outputs a message to inform the agent.
 #
 # On SessionStart: establishes baseline state for all discovered PRs
-# On PostToolUse: checks for changes since last fetch
+# On PostToolUse: checks for changes since last fetch (throttled)
 # On Stop: final check and summary of any pending changes
 #
 # Environment:
@@ -28,11 +28,11 @@ source "${SCRIPT_DIR}/lib/pr-discover.sh"
 
 pr_state_enabled="$(plugin_get_config "prStateTracking" "true")"
 cache_base="$(plugin_get_config "prStateCacheDir" "")"
+check_interval="$(plugin_get_config "prStateCheckInterval" "60")"
 
 # --- Guards ---
 
 if [ "$pr_state_enabled" = "false" ]; then
-  # Consume stdin and exit silently
   cat > /dev/null
   exit 0
 fi
@@ -53,6 +53,9 @@ if [ -z "$cache_base" ]; then
   cache_base="${HOME}/.claude/plugin-cache/github"
 fi
 
+# Expand tilde in user-configured paths
+cache_base="${cache_base/#\~/$HOME}"
+
 # Add project-specific subdirectory based on project dir name
 if [ -n "${CLAUDE_PROJECT_DIR:-}" ]; then
   project_slug="$(basename "$CLAUDE_PROJECT_DIR")"
@@ -69,6 +72,23 @@ hook_input="$(cat)"
 # --- Determine hook event ---
 
 hook_event="${HOOK_EVENT:-PostToolUse}"
+
+# --- Throttle for PostToolUse ---
+# PostToolUse fires on every tool use. To avoid excessive API calls,
+# enforce a cooldown period (default 60s) between checks.
+
+if [ "$hook_event" = "PostToolUse" ]; then
+  last_check_file="${cache_dir}/.last-check"
+  now="$(date +%s)"
+  if [ -f "$last_check_file" ]; then
+    last_check="$(cat "$last_check_file")"
+    elapsed=$((now - last_check))
+    if [ "$elapsed" -lt "$check_interval" ]; then
+      exit 0
+    fi
+  fi
+  echo "$now" > "$last_check_file"
+fi
 
 # --- Discover PRs ---
 
@@ -120,14 +140,6 @@ fi
   done
   echo ""
   echo "Review these changes and determine if any action is needed."
-} > /dev/stdout
+}
 
-# For PostToolUse and Stop hooks, exit 2 to provide feedback to Claude
-# For SessionStart, exit 0 with the message in stdout
-if [ "$hook_event" = "SessionStart" ]; then
-  exit 0
-else
-  # Exit 2 signals "feedback" for Stop hooks (shown to Claude)
-  # For PostToolUse, stdout is advisory (additionalContext)
-  exit 0
-fi
+exit 0

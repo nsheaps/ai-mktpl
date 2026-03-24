@@ -37,10 +37,16 @@ github:
   # Enable/disable PR state tracking hooks.
   prStateTracking: true
 
+  # Minimum seconds between PostToolUse checks (throttle/debounce).
+  # Prevents excessive API calls on every tool use.
+  # SessionStart and Stop always run regardless of this interval.
+  prStateCheckInterval: 60
+
   # Cache directory for PR state snapshots.
   # Default: ~/.claude/plugin-cache/github
   # The plugin appends /<project-slug>/pr-state/ to this path.
   # For multi-project sessions, each project gets its own subdirectory.
+  # Both ~ and $HOME are supported in paths.
   #
   # Suggested structure for project-specific overrides:
   #   ~/.claude/plugin-cache/github/<project-name>/pr-state/

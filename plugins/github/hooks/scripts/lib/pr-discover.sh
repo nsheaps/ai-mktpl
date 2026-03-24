@@ -43,7 +43,7 @@ pr_discover_all() {
   fi
 
   # For each directory, find the current branch's PR
-  for dir in "${#dirs[@]+${dirs[@]}}"; do
+  for dir in "${dirs[@]}"; do
     [ -d "$dir/.git" ] || continue
     _pr_discover_for_dir "$dir"
   done

@@ -74,10 +74,11 @@ _pr_state_fetch() {
     gh_hostname_flag="--hostname github.com"
   fi
 
-  # Fetch PR details, reviews, comments, and check runs in parallel
+  # Fetch PR details, reviews, comments, and check runs sequentially
   local pr_json review_json comment_json checks_json
 
-  # PR core data (body, state, mergeable, title, labels, draft, reviewDecision)
+  # PR core data (body, state, mergeable, title, labels, draft)
+  # Note: reviewDecision is only available via GraphQL, not REST API
   pr_json="$(gh api ${gh_hostname_flag} \
     "repos/${owner}/${repo}/pulls/${pr_number}" \
     --jq '{
@@ -89,7 +90,6 @@ _pr_state_fetch() {
       mergeable_state: .mergeable_state,
       merged: .merged,
       merge_commit_sha: .merge_commit_sha,
-      review_decision: .auto_merge,
       labels: [.labels[].name],
       head_sha: .head.sha,
       updated_at: .updated_at

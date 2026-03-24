@@ -35,7 +35,7 @@ The plugin includes async hooks that monitor PR state changes across all project
 
 **SessionStart**: Discovers all active PRs for the session's projects and establishes a baseline snapshot of their state (comments, reviews, CI checks, body, merge status).
 
-**PostToolUse**: After each tool use, silently re-fetches PR state and compares against the cached snapshot. When changes are detected (e.g., a new review was submitted, CI completed, a comment was added), the agent is notified with details about what changed.
+**PostToolUse**: Periodically re-fetches PR state (throttled to once per `prStateCheckInterval` seconds, default 60s) and compares against the cached snapshot. When changes are detected (e.g., a new review was submitted, CI completed, a comment was added), the agent is notified with details about what changed.
 
 **Stop**: Performs a final state check before session end.
 
@@ -116,6 +116,7 @@ github:
 
   # PR state tracking
   prStateTracking: true
+  prStateCheckInterval: 60  # seconds between PostToolUse checks
   # prStateCacheDir: "~/.claude/plugin-cache/github"
 ```
 
@@ -129,7 +130,10 @@ For project-specific overrides:
 # In $CLAUDE_PROJECT_DIR/.claude/plugins.settings.yaml
 github:
   prStateCacheDir: "~/.claude/plugin-cache/github/my-project"
+  prStateCheckInterval: 120  # check less frequently
 ```
+
+Both `~` and `$HOME` are supported in `prStateCacheDir` paths.
 
 When installed at the user level, the plugin handles multiple projects automatically by using the project directory name as a cache key. Each project's PRs are tracked independently.
 

@@ -34,8 +34,7 @@ On session start, the plugin:
 
 ### Post Tool Use
 
-After each tool use, the plugin:
-
+After each tool use (throttled to once per `prStateCheckInterval` seconds, default 60s):
 1. Re-fetches state for all tracked PRs
 2. Compares against the cached snapshot
 3. If changes are detected, reports them via stdout (shown as additionalContext)
@@ -50,8 +49,9 @@ On session stop, performs a final state check for any last-minute changes.
 ```yaml
 # In plugins.settings.yaml (project or user level)
 github:
-  prStateTracking: true # Enable/disable (default: true)
-  prStateCacheDir: "" # Custom cache dir (default: ~/.claude/plugin-cache/github)
+  prStateTracking: true       # Enable/disable (default: true)
+  prStateCheckInterval: 60    # Seconds between PostToolUse checks (default: 60)
+  prStateCacheDir: ""          # Custom cache dir (default: ~/.claude/plugin-cache/github)
 ```
 
 ### Cache Structure
