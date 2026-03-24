@@ -454,13 +454,13 @@
     {
       "name": "scm-utils",
       "description": "Source control management utilities for improving interactions with branches and PRs, both locally and in CI environments",
-      "version": "0.1.13",
+      "version": "0.1.14",
       "author": {
         "name": "Nathan Heaps"
       },
       "source": "./plugins/scm-utils",
       "category": "utility",
-      "tags": ["utility", "skill"],
+      "tags": ["utility", "command", "skill"],
       "keywords": ["git", "branch", "pr", "pull-request", "sync", "merge", "scm", "source-control"]
     },
     {

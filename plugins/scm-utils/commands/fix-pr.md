@@ -33,17 +33,20 @@ Fetch the current PR details (title, body, commits, changed files) so you unders
 Check the PR against these standards (from the `making-great-prs` skill):
 
 ### Title
+
 - Under 70 characters
 - Starts with a verb (Add, Fix, Update, Refactor, etc.)
 - Matches conventional commit style when applicable
 
 ### Body Structure
+
 - Has a `## Summary` section with bullet points describing what changed and why
 - Has a `## Test plan` section with checkbox items for verification
 - Includes a session link if available
 - Uses proper markdown formatting with real newlines (no literal `\n`)
 
 ### Body Content
+
 - Summary accurately reflects ALL commits on the branch, not just the latest
 - Test plan items are specific and actionable
 - No placeholder text or template remnants
