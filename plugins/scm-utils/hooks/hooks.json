@@ -1,6 +1,18 @@
 {
-  "description": "SCM utilities: uncommitted change reminders and git safety checks",
+  "description": "SCM utilities: uncommitted change reminders, git safety checks, and pre-push sync",
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/prepush-pull.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
     "Stop": []
   }
 }

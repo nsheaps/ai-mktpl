@@ -1,0 +1,3 @@
+scm-utils:
+  # Strategy for pulling before push: "rebase" (default) or "merge"
+  prePushPullStrategy: "rebase"
