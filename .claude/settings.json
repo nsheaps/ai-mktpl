@@ -119,7 +119,7 @@
     "pr-review-toolkit@claude-plugins-official": false,
     "1pass@ai-mktpl": false,
     "common-sense@ai-mktpl": false,
-    "correct-behavior@ai-mktpl": false,
+    "agentic-behavior@ai-mktpl": false,
     "data-serialization@ai-mktpl": false,
     "edit-utils@ai-mktpl": true,
     "git-spice@ai-mktpl": true,
