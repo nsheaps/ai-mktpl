@@ -108,13 +108,15 @@ do_setup() {
 
   # Auto-trust: trust mise config files in project dir and any git worktrees
   if [ "$auto_trust" = "true" ]; then
-    local project_dir="${CLAUDE_PROJECT_DIR:-.}"
+    local project_dir
+    project_dir="$(cd "${CLAUDE_PROJECT_DIR:-.}" 2>/dev/null && pwd)" || project_dir="${CLAUDE_PROJECT_DIR:-.}"
     local trusted_any=false
 
     # Trust the primary project dir config
     if [ -f "${project_dir}/mise.toml" ]; then
-      hook_log_step "trust-config" "Trusting ${project_dir}/mise.toml"
-      "$mise_bin" trust "${project_dir}/mise.toml" || true
+      local trust_path="${project_dir}/mise.toml"
+      hook_log_step "trust-config" "Trusting ${trust_path}"
+      "$mise_bin" trust "$trust_path" || true
       trusted_any=true
     fi
 
@@ -122,15 +124,16 @@ do_setup() {
     if command -v git &>/dev/null; then
       while IFS= read -r worktree_dir; do
         if [ "$worktree_dir" != "$project_dir" ] && [ -f "${worktree_dir}/mise.toml" ]; then
-          hook_log "Trusting worktree ${worktree_dir}/mise.toml"
-          "$mise_bin" trust "${worktree_dir}/mise.toml" || true
+          local wt_trust_path="${worktree_dir}/mise.toml"
+          hook_log "Trusting worktree ${wt_trust_path}"
+          "$mise_bin" trust "$wt_trust_path" || true
           trusted_any=true
         fi
       done < <(git -C "$project_dir" worktree list --porcelain 2>/dev/null | grep "^worktree " | sed 's/^worktree //')
     fi
 
     if [ "$trusted_any" = "false" ]; then
-      hook_log "No mise.toml found to trust"
+      hook_log "No mise.toml found to trust (looked in ${project_dir})"
     fi
   fi
 

@@ -1,14 +1,15 @@
 ---
-name: auto-pr
+name: making-great-prs
 description: >
-  Automatically create or update a pull request for the current branch.
-  Use after pushing commits to ensure a PR exists and its description is current.
+  Best practices and procedures for creating and maintaining high-quality pull requests.
+  Covers PR creation, body formatting, title conventions, and lifecycle management.
   Triggers on: "create a PR", "update the PR", "open a pull request", "push and PR",
-  or automatically after any push to a feature branch per the auto-pr-management rule.
+  "fix PR", "fix PR body", "PR formatting", or automatically after any push to a
+  feature branch per the auto-pr-management rule.
 allowed-tools: Bash, Read, Grep, Glob
 ---
 
-# Auto PR Management
+# Making Great PRs
 
 Create and maintain pull requests for feature branches using `gh api` with `--hostname github.com` (required for web sessions where the git remote is a local proxy).
 
@@ -103,6 +104,14 @@ gh api repos/nsheaps/ai-mktpl/pulls/<PR_NUMBER> \
 - Keep under 70 characters
 - Start with a verb (Add, Fix, Update, Refactor, etc.)
 - Match conventional commit style when applicable
+
+## PR Body Formatting
+
+**CRITICAL:** PR bodies must contain real newlines, not literal `\n` escape sequences.
+
+- When using `gh api`, use heredocs (`$(cat <<'PREOF' ... PREOF)`) — they preserve newlines naturally
+- When using MCP tools (e.g. `mcp__github__create_pull_request`), pass the body as a multi-line string with actual newlines — MCP tool string parameters support real newlines
+- **Never** construct PR bodies by concatenating strings with `\n` — GitHub renders them as literal text, not line breaks
 
 ## Error Handling
 
