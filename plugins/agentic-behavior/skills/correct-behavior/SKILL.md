@@ -1,6 +1,11 @@
 ---
 name: correct-behavior
-description: Correct a behavior mistake I made and update rules to prevent recurrence
+description: >-
+  Use this skill when the user says you did something wrong, made a mistake, or
+  wants to correct your behavior. Trigger phrases include "don't do that",
+  "that's wrong", "stop doing X", "you should have done Y", "correct yourself",
+  "fix your behavior", "remember to always/never", or any feedback about
+  incorrect AI actions that should be prevented in the future.
 argument-hint: "[SCOPE] <description of what I did wrong>"
 allowed-tools: Read, Glob, Grep, Edit, Write, Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git rev-parse:*), Bash(git add:*), Bash(git commit:*), Bash(git push:*), Bash(git checkout:*), Bash(gh pr:*), Bash(ls:*), Bash(pwd:*), Bash(mkdir:*), AskUserQuestion
 ---
