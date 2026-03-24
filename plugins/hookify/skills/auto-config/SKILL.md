@@ -26,11 +26,13 @@ Detect dependency management files in the current project and configure hookify 
 ## Steps
 
 1. Search for dependency files at the project root:
+
    ```bash
    ls package.json requirements.txt pyproject.toml Cargo.toml go.mod Gemfile build.gradle pom.xml 2>/dev/null
    ```
 
 2. Search for license-related files or components:
+
    ```bash
    grep -rl "LICENSES\|LicensesDisclosure\|license.*disclosure\|third.party.licenses" --include="*.tsx" --include="*.ts" --include="*.jsx" --include="*.js" --include="*.md" . 2>/dev/null | head -10
    ```

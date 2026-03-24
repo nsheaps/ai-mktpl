@@ -24,12 +24,12 @@ hookify:
 
 ### Settings
 
-| Key | Type | Default | Description |
-|-----|------|---------|-------------|
-| `enabled` | bool | `true` | Enable/disable the plugin |
-| `watchFiles` | list | `[]` | File basenames to watch (supports glob patterns) |
-| `reminderMessage` | string | generic | Message shown when a watched file changes |
-| `checkFiles` | list | `[]` | Files the agent should review |
+| Key               | Type   | Default | Description                                      |
+| ----------------- | ------ | ------- | ------------------------------------------------ |
+| `enabled`         | bool   | `true`  | Enable/disable the plugin                        |
+| `watchFiles`      | list   | `[]`    | File basenames to watch (supports glob patterns) |
+| `reminderMessage` | string | generic | Message shown when a watched file changes        |
+| `checkFiles`      | list   | `[]`    | Files the agent should review                    |
 
 ## Installation
 
