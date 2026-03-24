@@ -1,0 +1,13 @@
+{
+  "name": "incident-tracker",
+  "version": "1.0.0",
+  "description": "Track behavioral incidents, document corrections, and maintain learned rules with footnote references",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/incident-tracker",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": ["incident", "behavior", "correction", "learning", "rules", "footnotes"]
+}
