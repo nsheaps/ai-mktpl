@@ -30,6 +30,12 @@ edit-utils:
   # Inject 1Password secrets as environment variables at session start.
   # Requires OP_SERVICE_ACCOUNT_TOKEN to be set (e.g. via settings.local.json env block),
   # or op to be signed in interactively on local sessions.
+  #
+  # Each entry: envVar (required), reference (required), target (optional, default: envFile)
+  # Valid targets:
+  #   envFile           — write to CLAUDE_ENV_FILE (session-scoped, not persisted, recommended)
+  #   settingsLocalJson — write to .claude/settings.local.json env block (persists, gitignored)
+  #   settingsJson      — write to .claude/settings.json env block (persists, COMMITTED to git)
   secrets:
     - envVar: BRAINTRUST_API_KEY
       reference: 'op://heapsinfra/Braintrust/api-key'
