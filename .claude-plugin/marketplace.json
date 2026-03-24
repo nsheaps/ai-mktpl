@@ -780,7 +780,7 @@
     },
     {
       "name": "zai-glm",
-      "description": "Skills for using z.ai (Zhipu AI) GLM models and configuring Claude Code to access them via API gateways.",
+      "description": "Skills for using z.ai (Zhipu AI) GLM models and configuring Claude Code to access them via the Anthropic-compatible endpoint or API gateways.",
       "version": "0.1.0",
       "author": {
         "name": "Nathan Heaps"
@@ -793,11 +793,13 @@
         "z-ai",
         "zhipu",
         "glm",
-        "glm-4",
-        "glm-4-plus",
+        "glm-5",
+        "glm-4.7",
+        "glm-4.5",
         "chatglm",
         "ai-models",
         "openai-compatible",
+        "anthropic-compatible",
         "china-ai",
         "llm-provider"
       ]
