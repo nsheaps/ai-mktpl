@@ -17,4 +17,4 @@ conditions:
 When `package.json` dependencies change, verify that all new or updated
 packages have compatible licenses (MIT, ISC, BSD, Apache-2.0, etc.).
 
-Run `npx license-checker --summary` or `bun pm ls` to review.
+Run `npx license-checker --summary` or `bunx license-checker --summary` to review.
