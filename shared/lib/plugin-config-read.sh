@@ -182,7 +182,9 @@ _plugin_read_config_json() {
       ;;
     *.yaml|*.yml)
       if command -v yq &>/dev/null; then
-        val="$(yq -r -o=json ".[\"${PLUGIN_NAME}\"].${key}" "$file" 2>/dev/null || true)"
+        # mikefarah/yq (Go) uses -o=json; Python yq (jq wrapper) outputs JSON by default
+        val="$(yq -r -o=json ".[\"${PLUGIN_NAME}\"].${key}" "$file" 2>/dev/null || \
+               yq -r ".[\"${PLUGIN_NAME}\"].${key}" "$file" 2>/dev/null || true)"
         [ "$val" = "null" ] && val=""
       fi
       ;;
