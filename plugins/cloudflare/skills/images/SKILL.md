@@ -51,11 +51,11 @@ Cloudflare Images is managed via API and dashboard. Pulumi does not have a dedic
 
 ## Pricing
 
-| Feature | Cost |
-|---------|------|
-| Storage | $5.00/100K images/month |
-| Delivery | $1.00/100K images served |
-| Transformations | Included with delivery |
+| Feature         | Cost                     |
+| --------------- | ------------------------ |
+| Storage         | $5.00/100K images/month  |
+| Delivery        | $1.00/100K images served |
+| Transformations | Included with delivery   |
 
 ## References
 

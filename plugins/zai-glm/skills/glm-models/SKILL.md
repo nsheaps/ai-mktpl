@@ -15,23 +15,23 @@ The GLM (General Language Model) family is developed by Zhipu AI (智谱AI) and 
 
 ## Text Generation Models
 
-| Model | Context | Description | Best For |
-|-------|---------|-------------|----------|
-| `glm-4-plus` | 128K | Most capable GLM-4 variant; strong reasoning and instruction following | Complex tasks, analysis, creative writing |
-| `glm-4-0520` | 128K | Specific snapshot of GLM-4 | Reproducible results |
-| `glm-4-air` | 128K | Fast, cost-effective variant | High-throughput applications |
-| `glm-4-airx` | 8K | Ultra-fast inference | Real-time chat, low-latency |
-| `glm-4-long` | 1M | Million-token context window | Very long documents, large codebases |
-| `glm-4-flash` | 128K | Free tier model; good quality for basic tasks | Prototyping, low-cost applications |
-| `glm-4-flashx` | 128K | Enhanced flash with better performance | Better quality at low cost |
+| Model          | Context | Description                                                            | Best For                                  |
+| -------------- | ------- | ---------------------------------------------------------------------- | ----------------------------------------- |
+| `glm-4-plus`   | 128K    | Most capable GLM-4 variant; strong reasoning and instruction following | Complex tasks, analysis, creative writing |
+| `glm-4-0520`   | 128K    | Specific snapshot of GLM-4                                             | Reproducible results                      |
+| `glm-4-air`    | 128K    | Fast, cost-effective variant                                           | High-throughput applications              |
+| `glm-4-airx`   | 8K      | Ultra-fast inference                                                   | Real-time chat, low-latency               |
+| `glm-4-long`   | 1M      | Million-token context window                                           | Very long documents, large codebases      |
+| `glm-4-flash`  | 128K    | Free tier model; good quality for basic tasks                          | Prototyping, low-cost applications        |
+| `glm-4-flashx` | 128K    | Enhanced flash with better performance                                 | Better quality at low cost                |
 
 ## Vision Models
 
-| Model | Context | Description |
-|-------|---------|-------------|
-| `glm-4v` | 2K | Multimodal: text + image understanding |
-| `glm-4v-plus` | 8K | Enhanced vision with longer context |
-| `glm-4v-flash` | 8K | Fast vision model (free tier) |
+| Model          | Context | Description                            |
+| -------------- | ------- | -------------------------------------- |
+| `glm-4v`       | 2K      | Multimodal: text + image understanding |
+| `glm-4v-plus`  | 8K      | Enhanced vision with longer context    |
+| `glm-4v-flash` | 8K      | Fast vision model (free tier)          |
 
 ### Vision API Example
 
@@ -53,10 +53,10 @@ curl "https://open.bigmodel.cn/api/paas/v4/chat/completions" \
 
 ## Embedding Models
 
-| Model | Dimensions | Description |
-|-------|-----------|-------------|
-| `embedding-3` | 2048 | General-purpose text embeddings |
-| `embedding-2` | 1024 | Previous generation embeddings |
+| Model         | Dimensions | Description                     |
+| ------------- | ---------- | ------------------------------- |
+| `embedding-3` | 2048       | General-purpose text embeddings |
+| `embedding-2` | 1024       | Previous generation embeddings  |
 
 ### Embedding API Example
 
@@ -72,11 +72,11 @@ curl "https://open.bigmodel.cn/api/paas/v4/embeddings" \
 
 ## Image Generation Models
 
-| Model | Description |
-|-------|-------------|
-| `cogview-3-plus` | High-quality text-to-image generation |
-| `cogview-3` | Standard text-to-image |
-| `cogview-3-flash` | Fast image generation |
+| Model             | Description                           |
+| ----------------- | ------------------------------------- |
+| `cogview-3-plus`  | High-quality text-to-image generation |
+| `cogview-3`       | Standard text-to-image                |
+| `cogview-3-flash` | Fast image generation                 |
 
 ### Image Generation Example
 
@@ -92,10 +92,10 @@ curl "https://open.bigmodel.cn/api/paas/v4/images/generations" \
 
 ## Video Generation Models
 
-| Model | Description |
-|-------|-------------|
-| `cogvideox` | Text-to-video generation |
-| `cogvideox-flash` | Fast video generation |
+| Model             | Description              |
+| ----------------- | ------------------------ |
+| `cogvideox`       | Text-to-video generation |
+| `cogvideox-flash` | Fast video generation    |
 
 ## Code Generation
 
@@ -108,29 +108,29 @@ GLM-4 models (especially `glm-4-plus` and `glm-4-air`) are strong at code genera
 
 ## Model Selection Guide
 
-| Use Case | Recommended Model | Why |
-|----------|-------------------|-----|
-| General chat | `glm-4-flash` | Free, good quality |
-| Complex reasoning | `glm-4-plus` | Most capable |
-| High throughput | `glm-4-airx` | Fastest inference |
-| Long documents | `glm-4-long` | 1M context window |
-| Image understanding | `glm-4v-plus` | Best vision model |
-| Embeddings/search | `embedding-3` | Latest generation |
-| Image creation | `cogview-3-plus` | Highest quality |
-| Budget-conscious | `glm-4-flash` | Free tier available |
+| Use Case            | Recommended Model | Why                 |
+| ------------------- | ----------------- | ------------------- |
+| General chat        | `glm-4-flash`     | Free, good quality  |
+| Complex reasoning   | `glm-4-plus`      | Most capable        |
+| High throughput     | `glm-4-airx`      | Fastest inference   |
+| Long documents      | `glm-4-long`      | 1M context window   |
+| Image understanding | `glm-4v-plus`     | Best vision model   |
+| Embeddings/search   | `embedding-3`     | Latest generation   |
+| Image creation      | `cogview-3-plus`  | Highest quality     |
+| Budget-conscious    | `glm-4-flash`     | Free tier available |
 
 ## Pricing
 
-| Model | Input (per 1M tokens) | Output (per 1M tokens) |
-|-------|----------------------|------------------------|
-| glm-4-plus | ¥50 (~$7) | ¥50 (~$7) |
-| glm-4-air | ¥1 (~$0.14) | ¥1 (~$0.14) |
-| glm-4-airx | ¥10 (~$1.40) | ¥10 (~$1.40) |
-| glm-4-long | ¥1 (~$0.14) | ¥1 (~$0.14) |
-| glm-4-flash | Free | Free |
-| glm-4-flashx | ¥0.1 (~$0.014) | ¥0.1 (~$0.014) |
+| Model        | Input (per 1M tokens) | Output (per 1M tokens) |
+| ------------ | --------------------- | ---------------------- |
+| glm-4-plus   | ¥50 (~$7)             | ¥50 (~$7)              |
+| glm-4-air    | ¥1 (~$0.14)           | ¥1 (~$0.14)            |
+| glm-4-airx   | ¥10 (~$1.40)          | ¥10 (~$1.40)           |
+| glm-4-long   | ¥1 (~$0.14)           | ¥1 (~$0.14)            |
+| glm-4-flash  | Free                  | Free                   |
+| glm-4-flashx | ¥0.1 (~$0.014)        | ¥0.1 (~$0.014)         |
 
-*Prices in CNY; USD approximate at ~¥7.2/$ rate.*
+_Prices in CNY; USD approximate at ~¥7.2/$ rate._
 
 ## Unique Features
 

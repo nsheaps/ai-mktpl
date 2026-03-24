@@ -24,11 +24,13 @@ export default {
     });
 
     // Insert into Vectorize
-    await env.VECTORIZE.upsert([{
-      id: "doc-1",
-      values: embedding.data[0],
-      metadata: { title: "About Cloudflare" },
-    }]);
+    await env.VECTORIZE.upsert([
+      {
+        id: "doc-1",
+        values: embedding.data[0],
+        metadata: { title: "About Cloudflare" },
+      },
+    ]);
 
     // Query
     const results = await env.VECTORIZE.query(embedding.data[0], {
@@ -76,18 +78,18 @@ const vectorizeIndex = new command.local.Command("vectorize-index", {
 
 ## Index Configuration
 
-| Setting | Options | Description |
-|---------|---------|-------------|
-| Dimensions | 1–1536 | Must match your embedding model output |
-| Metric | `cosine`, `euclidean`, `dot-product` | Similarity metric |
+| Setting    | Options                              | Description                            |
+| ---------- | ------------------------------------ | -------------------------------------- |
+| Dimensions | 1–1536                               | Must match your embedding model output |
+| Metric     | `cosine`, `euclidean`, `dot-product` | Similarity metric                      |
 
 ## Pricing
 
-| Resource | Free | Paid |
-|----------|------|------|
-| Queried dimensions | 30M/month | $0.01/M |
-| Stored dimensions | 5M | $0.05/M/month |
-| Indexes | 5 | 100 |
+| Resource           | Free      | Paid          |
+| ------------------ | --------- | ------------- |
+| Queried dimensions | 30M/month | $0.01/M       |
+| Stored dimensions  | 5M        | $0.05/M/month |
+| Indexes            | 5         | 100           |
 
 ## References
 

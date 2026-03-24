@@ -19,9 +19,7 @@ D1 is Cloudflare's serverless SQLite database. It runs on Cloudflare's edge with
 ```typescript
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
-    const { results } = await env.DB.prepare(
-      "SELECT * FROM users WHERE id = ?"
-    ).bind(1).all();
+    const { results } = await env.DB.prepare("SELECT * FROM users WHERE id = ?").bind(1).all();
     return Response.json(results);
   },
 };
@@ -64,11 +62,11 @@ export const databaseId = db.id;
 
 ## Pricing
 
-| Resource | Free | Paid |
-|----------|------|------|
-| Rows read | 5M/day | $0.001/M |
-| Rows written | 100K/day | $1.00/M |
-| Storage | 5 GB | $0.75/GB/month |
+| Resource     | Free     | Paid           |
+| ------------ | -------- | -------------- |
+| Rows read    | 5M/day   | $0.001/M       |
+| Rows written | 100K/day | $1.00/M        |
+| Storage      | 5 GB     | $0.75/GB/month |
 
 ## References
 

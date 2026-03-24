@@ -131,11 +131,11 @@ For Claude Code web sessions, you can make z.ai credentials available via enviro
 
 ## Rate Limits
 
-| Tier | Requests/min | Tokens/min |
-|------|-------------|------------|
-| Free | 5 | 10,000 |
-| Standard | 60 | 300,000 |
-| Enterprise | Custom | Custom |
+| Tier       | Requests/min | Tokens/min |
+| ---------- | ------------ | ---------- |
+| Free       | 5            | 10,000     |
+| Standard   | 60           | 300,000    |
+| Enterprise | Custom       | Custom     |
 
 ## References
 

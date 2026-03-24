@@ -83,14 +83,14 @@ const pagesDomain = new cloudflare.PagesDomain("my-domain", {
 
 ## Pricing
 
-| Feature | Free | Pro |
-|---------|------|-----|
-| Sites | Unlimited | Unlimited |
-| Requests | Unlimited | Unlimited |
-| Bandwidth | Unlimited | Unlimited |
-| Builds | 500/month | 5,000/month |
-| Concurrent builds | 1 | 5 |
-| Functions requests | 100K/day | Unlimited |
+| Feature            | Free      | Pro         |
+| ------------------ | --------- | ----------- |
+| Sites              | Unlimited | Unlimited   |
+| Requests           | Unlimited | Unlimited   |
+| Bandwidth          | Unlimited | Unlimited   |
+| Builds             | 500/month | 5,000/month |
+| Concurrent builds  | 1         | 5           |
+| Functions requests | 100K/day  | Unlimited   |
 
 ## References
 

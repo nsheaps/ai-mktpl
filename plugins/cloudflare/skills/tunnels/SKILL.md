@@ -43,7 +43,7 @@ ingress:
     service: http://localhost:8080
   - hostname: api.example.com
     service: http://localhost:3000
-  - service: http_status:404  # Catch-all (required)
+  - service: http_status:404 # Catch-all (required)
 ```
 
 ## Docker Deployment
@@ -65,7 +65,7 @@ import * as cloudflare from "@pulumi/cloudflare";
 const tunnel = new cloudflare.ZeroTrustTunnelCloudflared("my-tunnel", {
   accountId,
   name: "my-tunnel",
-  secret: tunnelSecret,  // Base64-encoded 32+ byte random string
+  secret: tunnelSecret, // Base64-encoded 32+ byte random string
 });
 
 const tunnelConfig = new cloudflare.ZeroTrustTunnelCloudflaredConfig("my-tunnel-config", {

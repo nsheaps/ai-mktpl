@@ -15,14 +15,14 @@ Cloudflare DNS is one of the fastest authoritative DNS providers. It supports pr
 
 ## Common Record Types
 
-| Type | Use Case | Example |
-|------|----------|---------|
-| A | IPv4 address | `example.com -> 1.2.3.4` |
-| AAAA | IPv6 address | `example.com -> 2001:db8::1` |
-| CNAME | Alias | `www -> example.com` |
-| MX | Mail server | `example.com -> mail.example.com` |
-| TXT | Verification, SPF, DKIM | `v=spf1 include:...` |
-| SRV | Service discovery | `_sip._tcp.example.com` |
+| Type  | Use Case                | Example                           |
+| ----- | ----------------------- | --------------------------------- |
+| A     | IPv4 address            | `example.com -> 1.2.3.4`          |
+| AAAA  | IPv6 address            | `example.com -> 2001:db8::1`      |
+| CNAME | Alias                   | `www -> example.com`              |
+| MX    | Mail server             | `example.com -> mail.example.com` |
+| TXT   | Verification, SPF, DKIM | `v=spf1 include:...`              |
+| SRV   | Service discovery       | `_sip._tcp.example.com`           |
 
 ## Proxy Mode (Orange Cloud)
 

@@ -18,15 +18,15 @@ Cloudflare AI Gateway is a managed proxy that sits between your application and 
 
 ## Key Features
 
-| Feature | Description |
-|---------|-------------|
-| **Logging** | Full request/response logging with metadata (tokens, latency, cost) |
-| **Caching** | Cache identical prompts to reduce cost and latency; configurable TTL |
-| **Rate Limiting** | Per-gateway or per-user rate limits to control spend |
-| **Cost Tracking** | Real-time cost analytics across all providers |
-| **Retries** | Automatic retries with backoff on provider errors |
-| **Fallbacks** | Route to a backup provider if the primary fails |
-| **Real-time Logs** | Stream logs in the dashboard for debugging |
+| Feature            | Description                                                          |
+| ------------------ | -------------------------------------------------------------------- |
+| **Logging**        | Full request/response logging with metadata (tokens, latency, cost)  |
+| **Caching**        | Cache identical prompts to reduce cost and latency; configurable TTL |
+| **Rate Limiting**  | Per-gateway or per-user rate limits to control spend                 |
+| **Cost Tracking**  | Real-time cost analytics across all providers                        |
+| **Retries**        | Automatic retries with backoff on provider errors                    |
+| **Fallbacks**      | Route to a backup provider if the primary fails                      |
+| **Real-time Logs** | Stream logs in the dashboard for debugging                           |
 
 ## How It Works
 
@@ -37,6 +37,7 @@ https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_id}/{provider}
 ```
 
 Supported `{provider}` values include:
+
 - `anthropic` — Anthropic (Claude models)
 - `openai` — OpenAI (GPT models)
 - `openrouter` — OpenRouter (multi-model aggregator)
@@ -65,6 +66,7 @@ With a body that specifies the provider and target URL. See the [universal endpo
 ### Step 1: Create an AI Gateway
 
 In the Cloudflare dashboard or via Pulumi (see below), create a gateway. Note your:
+
 - **Account ID** (found in dashboard URL or API)
 - **Gateway ID** (the slug you chose, e.g., `claude-code`)
 
@@ -220,19 +222,19 @@ import * as cloudflare from "@pulumi/cloudflare";
 
 const gateway = new cloudflare.AiGateway("claude-code-gateway", {
   accountId: accountId,
-  name: "claude-code",  // This becomes the gateway_id in the URL
+  name: "claude-code", // This becomes the gateway_id in the URL
 
   // Caching
   cacheInvalidateOnUpdate: true,
-  cacheTtl: 3600,  // Cache TTL in seconds (0 to disable)
+  cacheTtl: 3600, // Cache TTL in seconds (0 to disable)
 
   // Rate limiting
-  rateLimitingInterval: 60,     // Window in seconds
-  rateLimitingLimit: 100,       // Max requests per window
-  rateLimitingTechnique: "fixed",  // "fixed" or "sliding"
+  rateLimitingInterval: 60, // Window in seconds
+  rateLimitingLimit: 100, // Max requests per window
+  rateLimitingTechnique: "fixed", // "fixed" or "sliding"
 
   // Logging
-  logpush: false,     // Push logs to Cloudflare Logpush
+  logpush: false, // Push logs to Cloudflare Logpush
   logpushPublicKey: "", // Public key for log encryption
 });
 
@@ -255,7 +257,7 @@ const aiGateway = new cloudflare.AiGateway("ai-gateway", {
   accountId,
   name: "ai-gateway",
   cacheInvalidateOnUpdate: true,
-  cacheTtl: 0,           // Disable caching for Claude Code (non-deterministic)
+  cacheTtl: 0, // Disable caching for Claude Code (non-deterministic)
   rateLimitingInterval: 60,
   rateLimitingLimit: 200,
   rateLimitingTechnique: "fixed",
@@ -280,14 +282,14 @@ Access at: `https://dash.cloudflare.com/?to=/:account/ai/ai-gateway/YOUR_GATEWAY
 
 ## Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| `401 Unauthorized` | Your API key is passed through to the provider. Verify `ANTHROPIC_API_KEY` is set correctly |
-| `403 Forbidden` | Check that your Cloudflare account has AI Gateway enabled |
-| `429 Too Many Requests` | Hit the gateway rate limit. Increase `rateLimitingLimit` or wait |
-| `502 Bad Gateway` | The upstream provider is down. Check provider status pages |
-| Requests not appearing in logs | Verify the URL path is correct: `/v1/{account_id}/{gateway_id}/{provider}` |
-| Claude Code hangs on start | Ensure `ANTHROPIC_BASE_URL` does not have a trailing slash |
+| Issue                          | Solution                                                                                    |
+| ------------------------------ | ------------------------------------------------------------------------------------------- |
+| `401 Unauthorized`             | Your API key is passed through to the provider. Verify `ANTHROPIC_API_KEY` is set correctly |
+| `403 Forbidden`                | Check that your Cloudflare account has AI Gateway enabled                                   |
+| `429 Too Many Requests`        | Hit the gateway rate limit. Increase `rateLimitingLimit` or wait                            |
+| `502 Bad Gateway`              | The upstream provider is down. Check provider status pages                                  |
+| Requests not appearing in logs | Verify the URL path is correct: `/v1/{account_id}/{gateway_id}/{provider}`                  |
+| Claude Code hangs on start     | Ensure `ANTHROPIC_BASE_URL` does not have a trailing slash                                  |
 
 ## References
 

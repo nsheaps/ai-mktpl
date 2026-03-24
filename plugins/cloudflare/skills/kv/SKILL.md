@@ -56,13 +56,13 @@ export const kvNamespaceId = kv.id;
 
 ## Pricing
 
-| Resource | Free | Paid |
-|----------|------|------|
-| Reads | 100K/day | $0.50/M |
-| Writes | 1K/day | $5.00/M |
-| Deletes | 1K/day | $5.00/M |
-| Lists | 1K/day | $5.00/M |
-| Storage | 1 GB | $0.50/GB/month |
+| Resource | Free     | Paid           |
+| -------- | -------- | -------------- |
+| Reads    | 100K/day | $0.50/M        |
+| Writes   | 1K/day   | $5.00/M        |
+| Deletes  | 1K/day   | $5.00/M        |
+| Lists    | 1K/day   | $5.00/M        |
+| Storage  | 1 GB     | $0.50/GB/month |
 
 ## References
 

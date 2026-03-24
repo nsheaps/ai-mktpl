@@ -42,9 +42,11 @@ const accessPolicy = new cloudflare.ZeroTrustAccessPolicy("allow-team", {
   name: "Allow Team",
   precedence: 1,
   decision: "allow",
-  includes: [{
-    emails: ["user@example.com"],
-  }],
+  includes: [
+    {
+      emails: ["user@example.com"],
+    },
+  ],
 });
 ```
 
@@ -61,7 +63,7 @@ const dnsPolicy = new cloudflare.ZeroTrustGatewayPolicy("block-malware", {
   action: "block",
   enabled: true,
   filters: ["dns"],
-  traffic: 'any(dns.security_category[*] in {68 178 80})',
+  traffic: "any(dns.security_category[*] in {68 178 80})",
 });
 ```
 
@@ -72,10 +74,10 @@ Route device traffic through Cloudflare for DNS filtering, split tunneling, and 
 ## Pricing
 
 | Feature | Free (50 users) | Pay-as-you-go |
-|---------|-----------------|---------------|
-| Access | Included | $7/user/month |
-| Gateway | Included | $7/user/month |
-| WARP | Included | $7/user/month |
+| ------- | --------------- | ------------- |
+| Access  | Included        | $7/user/month |
+| Gateway | Included        | $7/user/month |
+| WARP    | Included        | $7/user/month |
 
 ## References
 

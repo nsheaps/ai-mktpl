@@ -82,13 +82,13 @@ const worker = new cloudflare.WorkersScript("do-worker", {
 
 ## Pricing
 
-| Resource | Free | Paid |
-|----------|------|------|
-| Requests | 1M included | $0.15/M |
-| Duration | 400K GB-s | $12.50/M GB-s |
-| Storage reads | 1M/month | $0.20/M |
-| Storage writes | 1M/month | $1.00/M |
-| Storage | 1 GB | $0.20/GB/month |
+| Resource       | Free        | Paid           |
+| -------------- | ----------- | -------------- |
+| Requests       | 1M included | $0.15/M        |
+| Duration       | 400K GB-s   | $12.50/M GB-s  |
+| Storage reads  | 1M/month    | $0.20/M        |
+| Storage writes | 1M/month    | $1.00/M        |
+| Storage        | 1 GB        | $0.20/GB/month |
 
 ## References
 

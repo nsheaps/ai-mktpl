@@ -65,11 +65,11 @@ export const queueId = queue.id;
 
 ## Pricing
 
-| Resource | Free | Paid |
-|----------|------|------|
-| Messages | 1M/month | $0.40/M |
-| Operations | Included | Included |
-| Storage (backlog) | — | $0.025/GB |
+| Resource          | Free     | Paid      |
+| ----------------- | -------- | --------- |
+| Messages          | 1M/month | $0.40/M   |
+| Operations        | Included | Included  |
+| Storage (backlog) | —        | $0.025/GB |
 
 ## References
 

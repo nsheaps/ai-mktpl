@@ -54,16 +54,16 @@ interface Env {
 
 Workers connect to other Cloudflare services via **bindings** declared in `wrangler.toml`:
 
-| Binding | Type | Use Case |
-|---------|------|----------|
-| KV | `kv_namespaces` | Key-value storage |
-| R2 | `r2_buckets` | Object storage |
-| D1 | `d1_databases` | SQL database |
-| Durable Objects | `durable_objects` | Stateful coordination |
-| Queues | `queues` | Message queues |
-| AI | `ai` | Workers AI inference |
-| Service | `services` | Worker-to-Worker calls |
-| Secret | `[vars]` / secrets | Environment variables |
+| Binding         | Type               | Use Case               |
+| --------------- | ------------------ | ---------------------- |
+| KV              | `kv_namespaces`    | Key-value storage      |
+| R2              | `r2_buckets`       | Object storage         |
+| D1              | `d1_databases`     | SQL database           |
+| Durable Objects | `durable_objects`  | Stateful coordination  |
+| Queues          | `queues`           | Message queues         |
+| AI              | `ai`               | Workers AI inference   |
+| Service         | `services`         | Worker-to-Worker calls |
+| Secret          | `[vars]` / secrets | Environment variables  |
 
 ## Pulumi IaC
 
@@ -73,30 +73,40 @@ import * as cloudflare from "@pulumi/cloudflare";
 const worker = new cloudflare.WorkersScript("my-worker", {
   accountId: accountId,
   name: "my-worker",
-  content: workerScriptContent,  // The JS/TS bundle as a string
-  module: true,                   // ES modules format
+  content: workerScriptContent, // The JS/TS bundle as a string
+  module: true, // ES modules format
 
   // Bindings
-  kvNamespaceBindings: [{
-    name: "MY_KV",
-    namespaceId: myKvNamespace.id,
-  }],
-  r2BucketBindings: [{
-    name: "MY_R2",
-    bucketName: myR2Bucket.name,
-  }],
-  d1DatabaseBindings: [{
-    name: "MY_DB",
-    databaseId: myD1Database.id,
-  }],
-  plainTextBindings: [{
-    name: "ENV_VAR",
-    text: "value",
-  }],
-  secretTextBindings: [{
-    name: "API_KEY",
-    text: config.requireSecret("apiKey"),
-  }],
+  kvNamespaceBindings: [
+    {
+      name: "MY_KV",
+      namespaceId: myKvNamespace.id,
+    },
+  ],
+  r2BucketBindings: [
+    {
+      name: "MY_R2",
+      bucketName: myR2Bucket.name,
+    },
+  ],
+  d1DatabaseBindings: [
+    {
+      name: "MY_DB",
+      databaseId: myD1Database.id,
+    },
+  ],
+  plainTextBindings: [
+    {
+      name: "ENV_VAR",
+      text: "value",
+    },
+  ],
+  secretTextBindings: [
+    {
+      name: "API_KEY",
+      text: config.requireSecret("apiKey"),
+    },
+  ],
 });
 
 // Route the worker to a custom domain
@@ -109,13 +119,13 @@ const route = new cloudflare.WorkersRoute("my-route", {
 
 ## Limits
 
-| Limit | Free | Paid |
-|-------|------|------|
-| Requests/day | 100,000 | Unlimited |
-| CPU time/request | 10ms | 30s |
-| Script size | 1 MB | 10 MB |
-| Subrequests | 50 | 1,000 |
-| KV reads/request | 1,000 | 1,000 |
+| Limit            | Free    | Paid      |
+| ---------------- | ------- | --------- |
+| Requests/day     | 100,000 | Unlimited |
+| CPU time/request | 10ms    | 30s       |
+| Script size      | 1 MB    | 10 MB     |
+| Subrequests      | 50      | 1,000     |
+| KV reads/request | 1,000   | 1,000     |
 
 ## References
 

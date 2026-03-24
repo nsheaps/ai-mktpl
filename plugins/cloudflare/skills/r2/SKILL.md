@@ -55,7 +55,7 @@ import * as cloudflare from "@pulumi/cloudflare";
 const bucket = new cloudflare.R2Bucket("my-bucket", {
   accountId,
   name: "my-bucket",
-  location: "WNAM",  // Optional: WNAM, ENAM, WEUR, EEUR, APAC
+  location: "WNAM", // Optional: WNAM, ENAM, WEUR, EEUR, APAC
 });
 
 export const bucketName = bucket.name;
@@ -63,12 +63,12 @@ export const bucketName = bucket.name;
 
 ## Pricing
 
-| Resource | Free | Paid |
-|----------|------|------|
-| Storage | 10 GB/month | $0.015/GB/month |
-| Class A ops (write) | 1M/month | $4.50/M |
-| Class B ops (read) | 10M/month | $0.36/M |
-| Egress | Unlimited | $0 (always free) |
+| Resource            | Free        | Paid             |
+| ------------------- | ----------- | ---------------- |
+| Storage             | 10 GB/month | $0.015/GB/month  |
+| Class A ops (write) | 1M/month    | $4.50/M          |
+| Class B ops (read)  | 10M/month   | $0.36/M          |
+| Egress              | Unlimited   | $0 (always free) |
 
 ## References
 

@@ -41,13 +41,13 @@ binding = "AI"
 
 ## Popular Models
 
-| Model | Task | ID |
-|-------|------|----|
-| Llama 3.1 8B | Text generation | `@cf/meta/llama-3.1-8b-instruct` |
-| Mistral 7B | Text generation | `@cf/mistral/mistral-7b-instruct-v0.2` |
-| BAAI BGE | Text embeddings | `@cf/baai/bge-base-en-v1.5` |
+| Model               | Task             | ID                                             |
+| ------------------- | ---------------- | ---------------------------------------------- |
+| Llama 3.1 8B        | Text generation  | `@cf/meta/llama-3.1-8b-instruct`               |
+| Mistral 7B          | Text generation  | `@cf/mistral/mistral-7b-instruct-v0.2`         |
+| BAAI BGE            | Text embeddings  | `@cf/baai/bge-base-en-v1.5`                    |
 | Stable Diffusion XL | Image generation | `@cf/stabilityai/stable-diffusion-xl-base-1.0` |
-| Whisper | Speech-to-text | `@cf/openai/whisper` |
+| Whisper             | Speech-to-text   | `@cf/openai/whisper`                           |
 
 ## REST API
 
@@ -74,10 +74,10 @@ const worker = new cloudflare.WorkersScript("ai-worker", {
 
 ## Pricing
 
-| Tier | Neurons/day | Cost |
-|------|-------------|------|
-| Free | 10,000 | $0 |
-| Paid | Unlimited | $0.011 per 1,000 neurons |
+| Tier | Neurons/day | Cost                     |
+| ---- | ----------- | ------------------------ |
+| Free | 10,000      | $0                       |
+| Paid | Unlimited   | $0.011 per 1,000 neurons |
 
 Neurons are a normalized unit of compute across all models.
 

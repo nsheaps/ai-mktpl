@@ -4,10 +4,10 @@ Skills for using [z.ai](https://z.ai/) (Zhipu AI) GLM models and configuring acc
 
 ## Skills
 
-| Skill | Description |
-|-------|-------------|
-| `zai-setup` | Setting up z.ai API access, getting API keys, configuring Claude Code to access z.ai via gateways (Cloudflare AI Gateway, OpenRouter) |
-| `glm-models` | GLM model family reference — capabilities, pricing, selection guide for GLM-4, GLM-4V, CogView, CogVideoX, embeddings |
+| Skill        | Description                                                                                                                           |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `zai-setup`  | Setting up z.ai API access, getting API keys, configuring Claude Code to access z.ai via gateways (Cloudflare AI Gateway, OpenRouter) |
+| `glm-models` | GLM model family reference — capabilities, pricing, selection guide for GLM-4, GLM-4V, CogView, CogVideoX, embeddings                 |
 
 ## About z.ai
 

@@ -58,10 +58,10 @@ Stream is managed via API and dashboard. No dedicated Pulumi resource exists for
 
 ## Pricing
 
-| Resource | Cost |
-|----------|------|
-| Storage | $5.00/1,000 min/month |
-| Delivery | $1.00/1,000 min viewed |
+| Resource   | Cost                     |
+| ---------- | ------------------------ |
+| Storage    | $5.00/1,000 min/month    |
+| Delivery   | $1.00/1,000 min viewed   |
 | Live input | $0.75/1,000 min ingested |
 
 ## References
