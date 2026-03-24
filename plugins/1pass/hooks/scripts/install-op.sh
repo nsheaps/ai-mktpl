@@ -222,7 +222,7 @@ resolve_op_exec_bin() {
 # --- Secrets injection ---
 
 # Write a key=value pair to the specified target.
-# Args: $1=env_var $2=value $3=target (envFile|settingsJson|settingsLocalJson)
+# Args: $1=env_var $2=value $3=target (envFile|settingsJson|settingsLocalJson|userSettingsJson)
 _write_secret() {
   local env_var="$1" value="$2" target="${3:-envFile}"
 
@@ -244,8 +244,13 @@ _write_secret() {
         export "${env_var}=${value}"
       fi
       ;;
-    settingsJson)
-      local settings_file="${CLAUDE_PROJECT_DIR:-.}/.claude/settings.json"
+    settingsJson|settingsLocalJson|userSettingsJson)
+      local settings_file
+      case "$target" in
+        settingsJson)      settings_file="${CLAUDE_PROJECT_DIR:-.}/.claude/settings.json" ;;
+        settingsLocalJson) settings_file="${CLAUDE_PROJECT_DIR:-.}/.claude/settings.local.json" ;;
+        userSettingsJson)  settings_file="${HOME}/.claude/settings.json" ;;
+      esac
       mkdir -p "$(dirname "$settings_file")"
       if [ ! -f "$settings_file" ]; then
         echo '{}' > "$settings_file"
@@ -254,31 +259,7 @@ _write_secret() {
       tmp_settings="$(mktemp)"
       jq --arg k "$env_var" --arg v "$value" '.env[$k] = $v' "$settings_file" > "$tmp_settings"
       mv "$tmp_settings" "$settings_file"
-      hook_log "Injected ${env_var} into .claude/settings.json env block"
-      ;;
-    settingsLocalJson)
-      local settings_file="${CLAUDE_PROJECT_DIR:-.}/.claude/settings.local.json"
-      mkdir -p "$(dirname "$settings_file")"
-      if [ ! -f "$settings_file" ]; then
-        echo '{}' > "$settings_file"
-      fi
-      local tmp_settings
-      tmp_settings="$(mktemp)"
-      jq --arg k "$env_var" --arg v "$value" '.env[$k] = $v' "$settings_file" > "$tmp_settings"
-      mv "$tmp_settings" "$settings_file"
-      hook_log "Injected ${env_var} into .claude/settings.local.json env block"
-      ;;
-    userSettingsJson)
-      local settings_file="${HOME}/.claude/settings.json"
-      mkdir -p "$(dirname "$settings_file")"
-      if [ ! -f "$settings_file" ]; then
-        echo '{}' > "$settings_file"
-      fi
-      local tmp_settings
-      tmp_settings="$(mktemp)"
-      jq --arg k "$env_var" --arg v "$value" '.env[$k] = $v' "$settings_file" > "$tmp_settings"
-      mv "$tmp_settings" "$settings_file"
-      hook_log "Injected ${env_var} into ~/.claude/settings.json env block"
+      hook_log "Injected ${env_var} into ${settings_file} env block"
       ;;
     *)
       hook_fail "secrets injection" "Unknown target '${target}' for ${env_var}" \
