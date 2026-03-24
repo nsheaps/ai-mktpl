@@ -118,6 +118,7 @@ networks:
 ```
 
 Key points:
+
 - `OP_SERVICE_ACCOUNT_TOKEN` is injected by Arcane as a global variable
 - Secrets are fetched in parallel (`&` + `wait`) for speed
 - Secrets volume is `:rw` for init, `:ro` for app
@@ -155,6 +156,7 @@ networks:
 ```
 
 Common shared networks:
+
 - `cloudflared` — services exposed via Cloudflare Tunnel
 - `postgresql` — services needing database access
 - `redis` — services needing cache/queue access
@@ -240,6 +242,7 @@ On each deploy, the tag moves to the current commit. Next run compares HEAD agai
 ## Adding a New Stack
 
 1. Create the directory:
+
    ```bash
    mkdir -p hosts/<hostname>/<stack-name>
    ```
@@ -251,6 +254,7 @@ On each deploy, the tag moves to the current commit. Next run compares HEAD agai
 4. If the service needs external access, join the `cloudflared` network and configure the tunnel hostname in Cloudflare dashboard (or via Pulumi)
 
 5. Commit and push to `main`:
+
    ```bash
    git add hosts/<hostname>/<stack-name>/
    git commit -m "feat(<hostname>): add <stack-name> stack"

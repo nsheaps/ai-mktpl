@@ -36,41 +36,41 @@ The typical Zero Trust stack:
 
 ### Concepts
 
-| Concept | Description |
-|---------|-------------|
-| **Application** | A hostname or path to protect (e.g., `app.example.com`) |
-| **Policy** | Rules that determine who can access an application |
+| Concept               | Description                                                         |
+| --------------------- | ------------------------------------------------------------------- |
+| **Application**       | A hostname or path to protect (e.g., `app.example.com`)             |
+| **Policy**            | Rules that determine who can access an application                  |
 | **Identity Provider** | Where users authenticate (Google, GitHub, Okta, one-time PIN, etc.) |
-| **Service Token** | Machine-to-machine auth (no human login) |
-| **mTLS** | Mutual TLS certificate-based auth |
-| **Session Duration** | How long an authenticated session lasts before re-auth |
+| **Service Token**     | Machine-to-machine auth (no human login)                            |
+| **mTLS**              | Mutual TLS certificate-based auth                                   |
+| **Session Duration**  | How long an authenticated session lasts before re-auth              |
 
 ### Supported Identity Providers
 
-| Provider | Type | Setup Complexity |
-|----------|------|-----------------|
-| One-time PIN (email) | Built-in | None — works immediately |
-| Google | OAuth | Add client ID/secret |
-| GitHub | OAuth | Add client ID/secret |
-| Okta | SAML/OIDC | Configure in Okta admin |
-| Azure AD | SAML/OIDC | Configure in Azure portal |
-| SAML (generic) | SAML | Any SAML 2.0 IdP |
-| OpenID Connect (generic) | OIDC | Any OIDC provider |
+| Provider                 | Type      | Setup Complexity          |
+| ------------------------ | --------- | ------------------------- |
+| One-time PIN (email)     | Built-in  | None — works immediately  |
+| Google                   | OAuth     | Add client ID/secret      |
+| GitHub                   | OAuth     | Add client ID/secret      |
+| Okta                     | SAML/OIDC | Configure in Okta admin   |
+| Azure AD                 | SAML/OIDC | Configure in Azure portal |
+| SAML (generic)           | SAML      | Any SAML 2.0 IdP          |
+| OpenID Connect (generic) | OIDC      | Any OIDC provider         |
 
 ### Policy Rules
 
 Policies use **Include** (match any), **Exclude** (deny if matched), and **Require** (must match all):
 
-| Rule Type | Examples |
-|-----------|---------|
-| Email | `user@example.com` |
-| Email domain | `@example.com` |
-| IP range | `192.168.1.0/24` |
-| Country | US, GB, etc. |
-| Authentication method | Specific IdP |
-| Service token | Machine-to-machine |
-| Device posture | WARP enrolled, OS version, disk encryption |
-| External evaluation | Custom API check |
+| Rule Type             | Examples                                   |
+| --------------------- | ------------------------------------------ |
+| Email                 | `user@example.com`                         |
+| Email domain          | `@example.com`                             |
+| IP range              | `192.168.1.0/24`                           |
+| Country               | US, GB, etc.                               |
+| Authentication method | Specific IdP                               |
+| Service token         | Machine-to-machine                         |
+| Device posture        | WARP enrolled, OS version, disk encryption |
+| External evaluation   | Custom API check                           |
 
 ### Dashboard Setup
 
@@ -182,9 +182,11 @@ const teamPolicy = new cloudflare.ZeroTrustAccessPolicy("allow-team", {
   name: "Allow Team",
   precedence: 1,
   decision: "allow",
-  includes: [{
-    emailDomains: ["example.com"],
-  }],
+  includes: [
+    {
+      emailDomains: ["example.com"],
+    },
+  ],
 });
 
 // Allow specific external users
@@ -194,9 +196,11 @@ const externalPolicy = new cloudflare.ZeroTrustAccessPolicy("allow-external", {
   name: "Allow External Partners",
   precedence: 2,
   decision: "allow",
-  includes: [{
-    emails: ["partner@other.com"],
-  }],
+  includes: [
+    {
+      emails: ["partner@other.com"],
+    },
+  ],
 });
 
 // Service token for machine-to-machine access (CI/CD, APIs)
@@ -212,9 +216,11 @@ const apiPolicy = new cloudflare.ZeroTrustAccessPolicy("allow-service-token", {
   name: "Allow Service Token",
   precedence: 3,
   decision: "non_identity",
-  includes: [{
-    serviceTokens: [serviceToken.id],
-  }],
+  includes: [
+    {
+      serviceTokens: [serviceToken.id],
+    },
+  ],
 });
 
 export const serviceTokenClientId = serviceToken.clientId;
@@ -314,13 +320,13 @@ const accessPolicy = new cloudflare.ZeroTrustAccessPolicy("dashboard-policy", {
 
 Many self-hosted apps have admin panels that should be locked down:
 
-| App | Path/Hostname | Policy |
-|-----|---------------|--------|
-| Nextcloud | `nextcloud.example.com` | Allow @example.com |
-| n8n | `n8n.example.com` | Allow specific emails |
-| Grafana | `grafana.example.com` | Allow @example.com |
-| Portainer | `portainer.example.com` | Allow admin email only |
-| Home Assistant | `ha.example.com` | Allow @example.com + require WARP |
+| App            | Path/Hostname           | Policy                            |
+| -------------- | ----------------------- | --------------------------------- |
+| Nextcloud      | `nextcloud.example.com` | Allow @example.com                |
+| n8n            | `n8n.example.com`       | Allow specific emails             |
+| Grafana        | `grafana.example.com`   | Allow @example.com                |
+| Portainer      | `portainer.example.com` | Allow admin email only            |
+| Home Assistant | `ha.example.com`        | Allow @example.com + require WARP |
 
 ### Bypass Access for APIs
 
@@ -346,12 +352,12 @@ const bypassPolicy = new cloudflare.ZeroTrustAccessPolicy("bypass-api", {
 
 ## Pricing
 
-| Feature | Free (50 users) | Pay-as-you-go |
-|---------|-----------------|---------------|
-| Access | Included | $7/user/month |
-| Gateway | Included | $7/user/month |
-| WARP (Zero Trust) | Included | $7/user/month |
-| Browser Isolation | — | $10/user/month |
+| Feature           | Free (50 users) | Pay-as-you-go  |
+| ----------------- | --------------- | -------------- |
+| Access            | Included        | $7/user/month  |
+| Gateway           | Included        | $7/user/month  |
+| WARP (Zero Trust) | Included        | $7/user/month  |
+| Browser Isolation | —               | $10/user/month |
 
 The **free plan (50 users)** is generous for personal and small-team use.
 

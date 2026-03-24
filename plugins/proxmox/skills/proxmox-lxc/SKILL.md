@@ -20,15 +20,15 @@ Proxmox VE (PVE) is an open-source server virtualization platform built on Debia
 
 ## LXC vs VM
 
-| Feature | LXC Container | KVM VM |
-|---------|--------------|--------|
-| Boot time | ~1 second | ~30 seconds |
-| Memory overhead | Minimal | ~256 MB+ |
-| Kernel | Shared with host | Own kernel |
-| Isolation | Namespace + cgroup | Full hardware |
-| Performance | Near-native | Near-native (with VT-x) |
-| Docker support | Needs nesting | Native |
-| Use case | Services, Docker hosts | Windows, custom kernels |
+| Feature         | LXC Container          | KVM VM                  |
+| --------------- | ---------------------- | ----------------------- |
+| Boot time       | ~1 second              | ~30 seconds             |
+| Memory overhead | Minimal                | ~256 MB+                |
+| Kernel          | Shared with host       | Own kernel              |
+| Isolation       | Namespace + cgroup     | Full hardware           |
+| Performance     | Near-native            | Near-native (with VT-x) |
+| Docker support  | Needs nesting          | Native                  |
+| Use case        | Services, Docker hosts | Windows, custom kernels |
 
 **Use LXC when**: running Linux services, Docker hosts, lightweight workloads.
 **Use KVM when**: you need Windows, custom kernels, or strong isolation.
@@ -72,18 +72,18 @@ pct enter 100
 
 ### Common Parameters
 
-| Parameter | Example | Description |
-|-----------|---------|-------------|
-| `--hostname` | `my-service` | Container hostname |
-| `--memory` | `2048` | RAM in MB |
-| `--swap` | `512` | Swap in MB |
-| `--cores` | `2` | CPU cores |
-| `--rootfs` | `local-lvm:20` | Storage and disk size (GB) |
-| `--net0` | `name=eth0,bridge=vmbr0,ip=dhcp` | Network config |
-| `--nameserver` | `1.1.1.1` | DNS server |
-| `--unprivileged` | `1` | Unprivileged (1) or privileged (0) |
-| `--features` | `nesting=1` | Enable container features |
-| `--onboot` | `1` | Start on host boot |
+| Parameter        | Example                          | Description                        |
+| ---------------- | -------------------------------- | ---------------------------------- |
+| `--hostname`     | `my-service`                     | Container hostname                 |
+| `--memory`       | `2048`                           | RAM in MB                          |
+| `--swap`         | `512`                            | Swap in MB                         |
+| `--cores`        | `2`                              | CPU cores                          |
+| `--rootfs`       | `local-lvm:20`                   | Storage and disk size (GB)         |
+| `--net0`         | `name=eth0,bridge=vmbr0,ip=dhcp` | Network config                     |
+| `--nameserver`   | `1.1.1.1`                        | DNS server                         |
+| `--unprivileged` | `1`                              | Unprivileged (1) or privileged (0) |
+| `--features`     | `nesting=1`                      | Enable container features          |
+| `--onboot`       | `1`                              | Start on host boot                 |
 
 ## Running Docker in LXC
 
@@ -106,6 +106,7 @@ pct create 101 local:vztmpl/debian-12-standard_12.7-1_amd64.tar.zst \
 ```
 
 Key settings:
+
 - `--unprivileged 0` — Privileged container (required for Docker)
 - `--features nesting=1` — Allow nested namespaces (required for Docker)
 - More memory/disk than a plain service container
@@ -312,13 +313,13 @@ const lxc = new command.remote.Command("create-lxc", {
 
 ### Container Sizing
 
-| Workload | Memory | Cores | Disk |
-|----------|--------|-------|------|
-| cloudflared (direct) | 256 MB | 1 | 4 GB |
-| Single service | 512 MB | 1 | 8 GB |
-| Docker host (light) | 2 GB | 2 | 20 GB |
-| Docker host (heavy) | 4+ GB | 4 | 50+ GB |
-| Database (PostgreSQL) | 2+ GB | 2 | 20+ GB |
+| Workload              | Memory | Cores | Disk   |
+| --------------------- | ------ | ----- | ------ |
+| cloudflared (direct)  | 256 MB | 1     | 4 GB   |
+| Single service        | 512 MB | 1     | 8 GB   |
+| Docker host (light)   | 2 GB   | 2     | 20 GB  |
+| Docker host (heavy)   | 4+ GB  | 4     | 50+ GB |
+| Database (PostgreSQL) | 2+ GB  | 2     | 20+ GB |
 
 ### Security
 

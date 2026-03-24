@@ -4,8 +4,8 @@ Skills for managing Proxmox VE hosts and LXC containers — creating containers,
 
 ## Skills
 
-| Skill | Description |
-|-------|-------------|
+| Skill         | Description                                                                                                                                                             |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `proxmox-lxc` | LXC container management: creating containers via UI/CLI, running Docker in LXC (privileged + nesting), cloudflared deployment, resource sizing, Proxmox API automation |
 
 ## Overview

@@ -4,8 +4,8 @@ Skills for deploying docker-compose stacks via Arcane GitOps — directory conve
 
 ## Skills
 
-| Skill | Description |
-|-------|-------------|
+| Skill           | Description                                                                                                                                                     |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `arcane-gitops` | Full GitOps workflow: repo structure, init-secrets pattern with 1Password, shared networking, database initialization, image pinning, GitHub Actions deployment |
 
 ## Overview

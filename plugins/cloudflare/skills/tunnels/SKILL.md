@@ -31,6 +31,7 @@ Internet → Cloudflare Edge → Tunnel (encrypted) → cloudflared → Your Ser
 ```
 
 The tunnel is **outbound-only** — your server connects to Cloudflare, not the other way around. This means:
+
 - No need for a public IP address
 - No inbound firewall rules required
 - No port forwarding on your router
@@ -67,26 +68,26 @@ ingress:
   - hostname: api.example.com
     service: http://localhost:3000
     originRequest:
-      noTLSVerify: true       # Skip TLS verification to origin
+      noTLSVerify: true # Skip TLS verification to origin
       connectTimeout: 30s
   - hostname: ssh.example.com
     service: ssh://localhost:22
   - hostname: rdp.example.com
     service: rdp://localhost:3389
-  - service: http_status:404    # Catch-all (REQUIRED — must be last)
+  - service: http_status:404 # Catch-all (REQUIRED — must be last)
 ```
 
 ### Ingress Service Types
 
-| Protocol | Example | Use Case |
-|----------|---------|----------|
-| `http://host:port` | Web apps, APIs | Most common |
-| `https://host:port` | TLS-terminated origins | When origin has its own cert |
-| `ssh://host:port` | SSH access | Remote shell via browser |
-| `rdp://host:port` | Remote Desktop | Windows RDP via browser |
-| `tcp://host:port` | Raw TCP | Databases, custom protocols |
-| `unix:/path/to/socket` | Unix sockets | Docker socket, etc. |
-| `http_status:404` | Static response | Catch-all fallback |
+| Protocol               | Example                | Use Case                     |
+| ---------------------- | ---------------------- | ---------------------------- |
+| `http://host:port`     | Web apps, APIs         | Most common                  |
+| `https://host:port`    | TLS-terminated origins | When origin has its own cert |
+| `ssh://host:port`      | SSH access             | Remote shell via browser     |
+| `rdp://host:port`      | Remote Desktop         | Windows RDP via browser      |
+| `tcp://host:port`      | Raw TCP                | Databases, custom protocols  |
+| `unix:/path/to/socket` | Unix sockets           | Docker socket, etc.          |
+| `http_status:404`      | Static response        | Catch-all fallback           |
 
 ## Docker Compose Deployment
 
@@ -132,7 +133,7 @@ services:
       chmod 444 /run/secrets/*
 
   cloudflared:
-    image: cloudflare/cloudflared:2026.3.0  # Pin version for reproducibility
+    image: cloudflare/cloudflared:2026.3.0 # Pin version for reproducibility
     restart: always
     command: tunnel --no-autoupdate run --token-file /run/secrets/cloudflared_token
     volumes:
@@ -167,7 +168,7 @@ services:
 
 networks:
   cloudflared:
-    external: true  # Join the network created by the cloudflared stack
+    external: true # Join the network created by the cloudflared stack
 ```
 
 Then add the hostname → service mapping in the Cloudflare dashboard (or via Pulumi/API).
@@ -337,9 +338,11 @@ const accessPolicy = new cloudflare.ZeroTrustAccessPolicy("allow-team", {
   name: "Allow Team",
   precedence: 1,
   decision: "allow",
-  includes: [{
-    emails: ["admin@example.com"],
-  }],
+  includes: [
+    {
+      emails: ["admin@example.com"],
+    },
+  ],
 });
 ```
 
@@ -358,14 +361,14 @@ cloudflared tunnel --metrics localhost:2000
 
 ## Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| Tunnel won't connect | Check `TUNNEL_TOKEN` / credentials file. Verify DNS resolves |
-| `ERR_CONNECTION_REFUSED` | Origin service isn't running or wrong port |
-| Intermittent 502s | Increase `connectTimeout` in ingress config |
-| Can't reach service from tunnel | Ensure both containers are on the same Docker network |
-| Token file permission denied | Check volume mount permissions (`:ro` vs `:rw`) |
-| LXC DNS issues | Add `--nameserver 1.1.1.1` to LXC config |
+| Issue                           | Solution                                                     |
+| ------------------------------- | ------------------------------------------------------------ |
+| Tunnel won't connect            | Check `TUNNEL_TOKEN` / credentials file. Verify DNS resolves |
+| `ERR_CONNECTION_REFUSED`        | Origin service isn't running or wrong port                   |
+| Intermittent 502s               | Increase `connectTimeout` in ingress config                  |
+| Can't reach service from tunnel | Ensure both containers are on the same Docker network        |
+| Token file permission denied    | Check volume mount permissions (`:ro` vs `:rw`)              |
+| LXC DNS issues                  | Add `--nameserver 1.1.1.1` to LXC config                     |
 
 ## References
 
