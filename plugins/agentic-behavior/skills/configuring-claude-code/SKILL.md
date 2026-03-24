@@ -50,13 +50,13 @@ Claude Code running in GitHub Actions workflows. Typically:
 
 ### Key Settings
 
-| Key | Type | Description |
-|-----|------|-------------|
-| `enabledPlugins` | `{string: boolean}` | Plugin enable/disable map |
-| `permissions` | `object` | Tool permission rules |
-| `hooks` | `object` | Hook definitions by event type |
-| `env` | `{string: string}` | Environment variables |
-| `extraKnownMarketplaces` | `object` | Shared marketplace declarations |
+| Key                      | Type                | Description                     |
+| ------------------------ | ------------------- | ------------------------------- |
+| `enabledPlugins`         | `{string: boolean}` | Plugin enable/disable map       |
+| `permissions`            | `object`            | Tool permission rules           |
+| `hooks`                  | `object`            | Hook definitions by event type  |
+| `env`                    | `{string: string}`  | Environment variables           |
+| `extraKnownMarketplaces` | `object`            | Shared marketplace declarations |
 
 ### Example Project Settings
 
@@ -112,11 +112,11 @@ claude plugins marketplace update
 
 ### Scopes
 
-| Scope | Settings File | Use When |
-|-------|---------------|----------|
-| `user` | `~/.claude/settings.json` | Personal plugins for all projects |
-| `project` | `.claude/settings.json` | Team-shared plugins (committed to git) |
-| `local` | `.claude/settings.local.json` | Personal project overrides (gitignored) |
+| Scope     | Settings File                 | Use When                                |
+| --------- | ----------------------------- | --------------------------------------- |
+| `user`    | `~/.claude/settings.json`     | Personal plugins for all projects       |
+| `project` | `.claude/settings.json`       | Team-shared plugins (committed to git)  |
+| `local`   | `.claude/settings.local.json` | Personal project overrides (gitignored) |
 
 ### Plugin ID Format
 
@@ -126,11 +126,11 @@ Always `<plugin-name>@<marketplace-name>`, e.g., `common-sense@ai-mktpl`.
 
 ### CLAUDE.md Files
 
-| File | Scope | Committed? |
-|------|-------|------------|
-| `~/.claude/CLAUDE.md` | User | N/A |
-| `<project>/CLAUDE.md` or `<project>/.claude/CLAUDE.md` | Project | Yes |
-| `<project>/CLAUDE.local.md` | Personal | No |
+| File                                                   | Scope    | Committed? |
+| ------------------------------------------------------ | -------- | ---------- |
+| `~/.claude/CLAUDE.md`                                  | User     | N/A        |
+| `<project>/CLAUDE.md` or `<project>/.claude/CLAUDE.md` | Project  | Yes        |
+| `<project>/CLAUDE.local.md`                            | Personal | No         |
 
 ### Rules Directory
 
@@ -153,14 +153,14 @@ Hooks run shell commands in response to Claude Code lifecycle events.
 
 ### Event Types
 
-| Event | When It Fires |
-|-------|---------------|
-| `SessionStart` | Claude Code session begins |
-| `PreToolUse` | Before a tool is executed |
-| `PostToolUse` | After a tool completes |
-| `UserPromptSubmit` | When user sends a message |
-| `TaskCompleted` | When Claude finishes a task |
-| `Stop` | When Claude stops |
+| Event              | When It Fires               |
+| ------------------ | --------------------------- |
+| `SessionStart`     | Claude Code session begins  |
+| `PreToolUse`       | Before a tool is executed   |
+| `PostToolUse`      | After a tool completes      |
+| `UserPromptSubmit` | When user sends a message   |
+| `TaskCompleted`    | When Claude finishes a task |
+| `Stop`             | When Claude stops           |
 
 ### Hook Definition (in settings.json)
 

@@ -30,6 +30,7 @@ claude plugins --help
 ```
 
 **Output:**
+
 ```
 Usage: claude plugin|plugins [options] [command]
 
@@ -59,6 +60,7 @@ claude plugins list --available --json
 This returns JSON with two top-level keys: `installed` and `available`. The `--available` flag **requires** `--json`.
 
 Each available plugin entry includes:
+
 - `pluginId` - Format: `<name>@<marketplace>` (e.g., `common-sense@ai-mktpl`)
 - `name` - Plugin name
 - `marketplace` - Marketplace name
@@ -71,6 +73,7 @@ Each available plugin entry includes:
 Plugin identifiers always use the format: `<plugin-name>@<marketplace-name>`
 
 Examples:
+
 - `common-sense@ai-mktpl`
 - `plugin-dev@claude-plugins-official`
 - `mise@ai-mktpl`
@@ -82,6 +85,7 @@ claude plugins marketplace list
 ```
 
 **Output:**
+
 ```
 Configured marketplaces:
 
@@ -93,11 +97,13 @@ Configured marketplaces:
 ```
 
 JSON format also available:
+
 ```bash
 claude plugins marketplace list --json
 ```
 
 **Output:**
+
 ```json
 [
   {
@@ -129,15 +135,16 @@ Alias: `claude plugins i`
 
 ### Scope Options
 
-| Scope | Settings File | Description |
-|-------|---------------|-------------|
-| `user` (default) | `~/.claude/settings.json` | Available in all projects |
-| `project` | `.claude/settings.json` | Shared with team (checked into git) |
-| `local` | `.claude/settings.local.json` | Project-specific, not checked in |
+| Scope            | Settings File                 | Description                         |
+| ---------------- | ----------------------------- | ----------------------------------- |
+| `user` (default) | `~/.claude/settings.json`     | Available in all projects           |
+| `project`        | `.claude/settings.json`       | Shared with team (checked into git) |
+| `local`          | `.claude/settings.local.json` | Project-specific, not checked in    |
 
 ### Examples Tested
 
 **Install at project scope:**
+
 ```bash
 $ claude plugins install agent-tab-titles@ai-mktpl --scope project
 Installing plugin "agent-tab-titles@ai-mktpl"...
@@ -145,6 +152,7 @@ Installing plugin "agent-tab-titles@ai-mktpl"...
 ```
 
 **Install at user scope:**
+
 ```bash
 $ claude plugins install agent-tab-titles@ai-mktpl --scope user
 Installing plugin "agent-tab-titles@ai-mktpl"...
@@ -152,6 +160,7 @@ Installing plugin "agent-tab-titles@ai-mktpl"...
 ```
 
 **Install at local scope:**
+
 ```bash
 $ claude plugins install agent-tab-titles@ai-mktpl --scope local
 Installing plugin "agent-tab-titles@ai-mktpl"...
@@ -167,6 +176,7 @@ Installing plugin "agent-tab-titles@ai-mktpl"...
 ### Local Path Install
 
 **Local paths are NOT supported via `install`.** Attempting:
+
 ```bash
 $ claude plugins install /home/user/ai-mktpl/plugins/agent-tab-titles --scope project
 × Failed to install plugin "...": Plugin "..." not found in any configured marketplace
@@ -185,6 +195,7 @@ claude plugins list
 ```
 
 **Output:**
+
 ```
 Installed plugins:
 
@@ -221,6 +232,7 @@ claude plugins list --json
 ```
 
 Each entry includes:
+
 ```json
 {
   "id": "common-sense@ai-mktpl",
@@ -253,12 +265,14 @@ claude plugins disable <plugin-id> [--scope <scope>]
 ```
 
 **Example:**
+
 ```bash
 $ claude plugins disable agent-tab-titles@ai-mktpl
 √ Successfully disabled plugin: agent-tab-titles (scope: project)
 ```
 
 This sets the value to `false` in `enabledPlugins`:
+
 ```json
 {
   "enabledPlugins": {
@@ -276,6 +290,7 @@ claude plugins disable --all
 ```
 
 **Output:**
+
 ```
 √ Disabled 8 plugins
 ```
@@ -289,6 +304,7 @@ claude plugins enable <plugin-id> [--scope <scope>]
 ```
 
 **Example:**
+
 ```bash
 $ claude plugins enable agent-tab-titles@ai-mktpl
 √ Successfully enabled plugin: agent-tab-titles (scope: project)
@@ -350,6 +366,7 @@ Updates a plugin to the latest version available in its marketplace. A session r
 ### Marketplace Refresh
 
 To pull latest marketplace metadata:
+
 ```bash
 $ claude plugins marketplace update ai-mktpl
 Updating marketplace: ai-mktpl...
@@ -358,6 +375,7 @@ Refreshing marketplace cache (timeout: 120s)...
 ```
 
 Update all marketplaces:
+
 ```bash
 claude plugins marketplace update
 ```
@@ -373,6 +391,7 @@ claude plugins marketplace add <source> [--scope <scope>] [--sparse <paths...>]
 ```
 
 Source can be:
+
 - A GitHub repo (e.g., `nsheaps/ai-mktpl`)
 - A URL
 - A local path
@@ -380,6 +399,7 @@ Source can be:
 **Scope:** `user` (default), `project`, or `local`
 
 **Sparse checkout:** For monorepos, limit checkout to specific directories:
+
 ```bash
 claude plugins marketplace add my-org/monorepo --sparse .claude-plugin plugins
 ```
@@ -407,6 +427,7 @@ claude plugins marketplace update
 Marketplaces are stored in two locations:
 
 1. **Known marketplaces file:** `~/.claude/plugins/known_marketplaces.json`
+
    ```json
    {
      "ai-mktpl": {
@@ -479,11 +500,11 @@ The `enabledPlugins` key is an object mapping plugin IDs to booleans.
 
 ### Settings File Hierarchy
 
-| File | Scope | Checked into git? |
-|------|-------|--------------------|
-| `~/.claude/settings.json` | User | N/A (user home) |
-| `.claude/settings.json` | Project | Yes |
-| `.claude/settings.local.json` | Local | No (gitignored) |
+| File                          | Scope   | Checked into git? |
+| ----------------------------- | ------- | ----------------- |
+| `~/.claude/settings.json`     | User    | N/A (user home)   |
+| `.claude/settings.json`       | Project | Yes               |
+| `.claude/settings.local.json` | Local   | No (gitignored)   |
 
 Settings are merged. A plugin enabled at any scope is available. Local settings can override project settings.
 
@@ -514,6 +535,7 @@ Settings are merged. A plugin enabled at any scope is available. Local settings 
 ### Example: User-Level Settings (`~/.claude/settings.json`)
 
 After installing at user scope:
+
 ```json
 {
   "enabledPlugins": {
@@ -525,6 +547,7 @@ After installing at user scope:
 ### Example: Local Settings (`.claude/settings.local.json`)
 
 After installing at local scope:
+
 ```json
 {
   "enabledPlugins": {
@@ -534,6 +557,7 @@ After installing at local scope:
 ```
 
 After uninstalling, the file retains the structure but with empty object:
+
 ```json
 {
   "enabledPlugins": {}
@@ -618,6 +642,7 @@ claude --plugin-dir /path/to/plugin-a --plugin-dir /path/to/plugin-b
 ### 1. `disable --all` Is Broad and Destructive
 
 `claude plugins disable --all` sets ALL `enabledPlugins` entries to `false` across ALL scopes. This includes:
+
 - Plugins that were already `false` (no-op for those)
 - Plugins referenced in settings but not currently installed
 - Plugins at every scope (user, project, local)

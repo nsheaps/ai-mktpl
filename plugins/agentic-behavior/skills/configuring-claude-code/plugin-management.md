@@ -59,11 +59,11 @@ Alias: `claude plugins i`
 
 ### Scope Options
 
-| Scope | Settings File | Default? | Use Case |
-|-------|---------------|----------|----------|
-| `user` | `~/.claude/settings.json` | Yes | Personal plugins, all projects |
-| `project` | `.claude/settings.json` | No | Team-shared, committed to git |
-| `local` | `.claude/settings.local.json` | No | Personal project overrides, gitignored |
+| Scope     | Settings File                 | Default? | Use Case                               |
+| --------- | ----------------------------- | -------- | -------------------------------------- |
+| `user`    | `~/.claude/settings.json`     | Yes      | Personal plugins, all projects         |
+| `project` | `.claude/settings.json`       | No       | Team-shared, committed to git          |
+| `local`   | `.claude/settings.local.json` | No       | Personal project overrides, gitignored |
 
 ### Examples
 
@@ -160,10 +160,10 @@ Preserves the plugin's persistent data at `~/.claude/plugins/data/<id>/`.
 
 ### Disable vs Uninstall
 
-| Action | `enabledPlugins` | Can re-enable? | Needs re-install? |
-|--------|------------------|----------------|-------------------|
-| `disable` | Set to `false` | Yes, instant | No |
-| `uninstall` | Key removed | No | Yes |
+| Action      | `enabledPlugins` | Can re-enable? | Needs re-install? |
+| ----------- | ---------------- | -------------- | ----------------- |
+| `disable`   | Set to `false`   | Yes, instant   | No                |
+| `uninstall` | Key removed      | No             | Yes               |
 
 ## Updating Plugins
 
