@@ -58,12 +58,12 @@ Each secret entry has three fields:
 
 The `target` field controls where the resolved secret value is persisted:
 
-| Target               | File written                                | Scope                                       | Committed to git?                 |
-| -------------------- | ------------------------------------------- | ------------------------------------------- | --------------------------------- |
-| `envFile` (default)  | `$CLAUDE_ENV_FILE`                          | Current session only — gone on next session | No                                |
-| `settingsJson`       | `.claude/settings.json` → `env` block       | Persists across sessions                    | **Yes** — visible in repo history |
-| `settingsLocalJson`  | `.claude/settings.local.json` → `env` block | Persists across sessions                    | No — gitignored                   |
-| `userSettingsJson`   | `~/.claude/settings.json` → `env` block     | User-global, persists across all projects   | No — outside repo                 |
+| Target              | File written                                | Scope                                       | Committed to git?                 |
+| ------------------- | ------------------------------------------- | ------------------------------------------- | --------------------------------- |
+| `envFile` (default) | `$CLAUDE_ENV_FILE`                          | Current session only — gone on next session | No                                |
+| `settingsJson`      | `.claude/settings.json` → `env` block       | Persists across sessions                    | **Yes** — visible in repo history |
+| `settingsLocalJson` | `.claude/settings.local.json` → `env` block | Persists across sessions                    | No — gitignored                   |
+| `userSettingsJson`  | `~/.claude/settings.json` → `env` block     | User-global, persists across all projects   | No — outside repo                 |
 
 **When to use which target:**
 
