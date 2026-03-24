@@ -1,0 +1,10 @@
+{
+  "id": "incident-tracker",
+  "name": "Incident Tracker",
+  "version": "1.0.0",
+  "description": "Track behavioral incidents, document corrections, and maintain learned rules with footnote references",
+  "author": "nsheaps",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": ["incident", "behavior", "correction", "learning", "rules"],
+  "license": "MIT"
+}
