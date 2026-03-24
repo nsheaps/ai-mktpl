@@ -13,64 +13,41 @@ description: >
 The GitHub CLI (`gh`) brings GitHub workflows to the terminal. It provides
 commands for pull requests, issues, repos, actions, and direct API access.
 
-## Web Session Proxy — CRITICAL
+## Web Sessions
 
-**In Claude Code web sessions, the git remote is a local proxy, NOT github.com.** This means `gh` subcommands that infer the repo from the git remote (`gh pr create`, `gh pr list`, `gh issue list`, `gh pr view`, etc.) **will fail or target the wrong host**.
+In Claude Code web sessions, the git remote is a local proxy, not github.com. The `gh` CLI infers the host and repo from the remote, so subcommands like `gh pr create` would fail without configuration.
 
-### What Works and What Doesn't
+### Solution: GH_HOST and GH_REPO Environment Variables
 
-| Approach                                            | Web Session                      | Local Session |
-| --------------------------------------------------- | -------------------------------- | ------------- |
-| `gh api --hostname github.com repos/OWNER/REPO/...` | **Works**                        | Works         |
-| `gh pr create`, `gh pr list`, `gh issue list`, etc. | **Fails** (proxy remote)         | Works         |
-| `gh api repos/OWNER/REPO/...` (no --hostname)       | **May fail** (resolves to proxy) | Works         |
-
-### Always-Safe Pattern
-
-**Always use `gh api` with `--hostname github.com` and explicit `repos/OWNER/REPO` paths.** This works in both web and local sessions:
+The github plugin's SessionStart hook **automatically sets** `GH_HOST` and `GH_REPO` in web sessions. Once set, all standard `gh` subcommands work normally:
 
 ```bash
-# Instead of: gh pr list
-gh api "repos/OWNER/REPO/pulls?state=open" --hostname github.com --jq '.[].title'
-
-# Instead of: gh pr create --title "..." --body "..."
-gh api repos/OWNER/REPO/pulls --hostname github.com \
-  --method POST \
-  --field title="Title" \
-  --field head="branch-name" \
-  --field base="main" \
-  --field draft=true \
-  --field body="Description"
-
-# Instead of: gh issue list
-gh api "repos/OWNER/REPO/issues?state=open" --hostname github.com --jq '.[].title'
-
-# Instead of: gh issue create --title "..." --body "..."
-gh api repos/OWNER/REPO/issues --hostname github.com \
-  --method POST \
-  --field title="Title" \
-  --field body="Description"
-
-# Instead of: gh pr view 123
-gh api repos/OWNER/REPO/pulls/123 --hostname github.com
-
-# Instead of: gh pr merge 123 --squash
-gh api repos/OWNER/REPO/pulls/123/merge --hostname github.com \
-  --method PUT \
-  --field merge_method="squash"
+# These all work in web sessions when GH_HOST and GH_REPO are set:
+gh pr create --draft --title "Add feature X" --body "Description"
+gh pr list
+gh pr view 123
+gh issue create --title "Bug: X" --body "Details"
+gh issue list --label "bug"
+gh run list
+gh run view 12345 --log
 ```
 
-### Detecting Web Sessions
+If for some reason the env vars are not set (e.g., hook didn't run), set them manually:
 
 ```bash
-if [ "${CLAUDE_CODE_REMOTE:-}" = "true" ]; then
-  echo "Web session — use gh api --hostname github.com"
-fi
+export GH_HOST="github.com"
+export GH_REPO="owner/repo"  # inferred from git remote by the hook
 ```
 
-### Why This Happens
+Reference: https://cli.github.com/manual/gh_help_environment
 
-Claude Code web sessions route git operations through a local proxy for security. The `gh` CLI reads the git remote to determine the GitHub host, so it resolves to the proxy instead of `github.com`. Using `--hostname github.com` explicitly overrides this.
+### Fallback: gh api
+
+For edge cases or direct API access, `gh api` with `--hostname github.com` always works:
+
+```bash
+gh api repos/OWNER/REPO/pulls --hostname github.com --jq '.[].title'
+```
 
 ## Quick Reference
 
@@ -135,19 +112,25 @@ gh api users/my-app[bot] --jq '.id'
 
 ## Pull Request Workflows
 
-> **Reminder:** In web sessions, use `gh api --hostname github.com` instead of `gh pr` subcommands. See [Web Session Proxy](#web-session-proxy--critical) above.
+> **Note:** In web sessions, `GH_HOST` and `GH_REPO` are set automatically by the github plugin. All `gh pr` subcommands work normally.
 
 ### Creating PRs
 
 ```bash
-# Via gh api (works in all sessions)
-gh api repos/OWNER/REPO/pulls --hostname github.com \
-  --method POST \
-  --field title="Add feature X" \
-  --field head="branch-name" \
-  --field base="main" \
-  --field draft=true \
-  --field body="$(cat <<'EOF'
+# Create a PR
+gh pr create --title "Add feature X" --body "Description here"
+
+# Create as draft
+gh pr create --draft --title "WIP: Feature Z"
+
+# Target a specific base branch
+gh pr create --base develop --title "Feature for develop"
+
+# Create with labels
+gh pr create --draft --title "Fix bug" --label "bug"
+
+# Multi-line body
+gh pr create --draft --title "Add feature X" --body "$(cat <<'EOF'
 ## Summary
 - Fixed the thing
 
@@ -155,134 +138,84 @@ gh api repos/OWNER/REPO/pulls --hostname github.com \
 - [ ] Unit tests pass
 EOF
 )"
-
-# Add labels after creation
-gh api repos/OWNER/REPO/issues/PR_NUMBER/labels --hostname github.com \
-  --method POST --field 'labels[]=bug'
-
-# Local-only alternatives (won't work in web sessions):
-# gh pr create --title "Add feature X" --body "Description here"
-# gh pr create --draft --title "WIP: Feature Z"
-# gh pr create --base develop --title "Feature for develop"
 ```
 
 ### Reviewing PRs
 
 ```bash
 # View PR details
-gh api repos/OWNER/REPO/pulls/123 --hostname github.com
+gh pr view 123
 
-# View PR files
-gh api repos/OWNER/REPO/pulls/123/files --hostname github.com \
-  --jq '.[].filename'
+# View PR diff
+gh pr diff 123
 
-# Check PR status (CI checks)
-gh api repos/OWNER/REPO/commits/SHA/check-runs --hostname github.com \
-  --jq '.check_runs[] | {name, status, conclusion}'
+# Check CI status
+gh pr checks 123
 
-# View PR comments
-gh api repos/OWNER/REPO/pulls/123/comments --hostname github.com
+# View PR as JSON
+gh pr view 123 --json title,state,reviews,statusCheckRollup
 
-# View PR review comments
-gh api repos/OWNER/REPO/pulls/123/reviews --hostname github.com
-
-# Create a review
-gh api repos/OWNER/REPO/pulls/123/reviews --hostname github.com \
-  --method POST \
-  --field event="COMMENT" \
-  --field body="LGTM!"
-
-# Local-only alternatives:
-# gh pr view 123
-# gh pr diff 123
-# gh pr checks 123
+# Create a review comment
+gh pr review 123 --comment --body "LGTM!"
 ```
 
 ### Managing PRs
 
 ```bash
 # List open PRs
-gh api "repos/OWNER/REPO/pulls?state=open" --hostname github.com \
-  --jq '.[] | {number, title, user: .user.login}'
+gh pr list
 
 # List PRs by author
-gh api "repos/OWNER/REPO/pulls?state=open" --hostname github.com \
-  --jq '[.[] | select(.user.login == "USERNAME")] | .[] | {number, title}'
+gh pr list --author USERNAME
 
-# Update PR (title, body, etc.)
-gh api repos/OWNER/REPO/pulls/123 --hostname github.com \
-  --method PATCH \
-  --field title="Updated title" \
-  --field body="Updated body"
+# Edit PR title/body
+gh pr edit 123 --title "Updated title" --body "Updated body"
 
-# Merge a PR (squash)
-gh api repos/OWNER/REPO/pulls/123/merge --hostname github.com \
-  --method PUT \
-  --field merge_method="squash"
+# Add labels
+gh pr edit 123 --add-label "bug,priority:high"
+
+# Merge (squash)
+gh pr merge 123 --squash
 
 # Close without merging
-gh api repos/OWNER/REPO/pulls/123 --hostname github.com \
-  --method PATCH \
-  --field state="closed"
-
-# Local-only alternatives:
-# gh pr list
-# gh pr merge 123 --squash
-# gh pr close 123
+gh pr close 123
 ```
 
 ## Issue Workflows
 
-> **Reminder:** In web sessions, use `gh api --hostname github.com` instead of `gh issue` subcommands.
+> **Note:** In web sessions, `GH_HOST` and `GH_REPO` are set automatically by the github plugin. All `gh issue` subcommands work normally.
 
 ### Creating Issues
 
 ```bash
-# Via gh api (works in all sessions)
-gh api repos/OWNER/REPO/issues --hostname github.com \
-  --method POST \
-  --field title="Bug: X crashes" \
-  --field body="Steps to reproduce..." \
-  --field 'labels[]=bug' \
-  --field 'labels[]=priority:high'
+# Create an issue
+gh issue create --title "Bug: X crashes" --body "Steps to reproduce..."
 
-# Local-only alternatives:
-# gh issue create --title "Bug: X crashes" --body "Steps to reproduce..."
-# gh issue create --title "Feature request" --label "enhancement"
+# Create with labels
+gh issue create --title "Bug: X crashes" --label "bug" --label "priority:high"
 ```
 
 ### Managing Issues
 
 ```bash
 # List open issues
-gh api "repos/OWNER/REPO/issues?state=open" --hostname github.com \
-  --jq '.[] | {number, title}'
+gh issue list
 
 # List issues with label
-gh api "repos/OWNER/REPO/issues?labels=bug&state=open" --hostname github.com \
-  --jq '.[] | {number, title}'
+gh issue list --label "bug"
 
 # View issue details
-gh api repos/OWNER/REPO/issues/42 --hostname github.com
+gh issue view 42
 
 # Close issue with comment
-gh api repos/OWNER/REPO/issues/42/comments --hostname github.com \
-  --method POST --field body="Fixed in #123"
-gh api repos/OWNER/REPO/issues/42 --hostname github.com \
-  --method PATCH --field state="closed"
+gh issue close 42 --comment "Fixed in #123"
 
 # Add/remove labels
-gh api repos/OWNER/REPO/issues/42/labels --hostname github.com \
-  --method POST --field 'labels[]=status:in-progress'
+gh issue edit 42 --add-label "status:in-progress"
+gh issue edit 42 --remove-label "status:in-progress"
 
 # Add comment
-gh api repos/OWNER/REPO/issues/42/comments --hostname github.com \
-  --method POST --field body="Working on this"
-
-# Local-only alternatives:
-# gh issue list --label "bug"
-# gh issue view 42
-# gh issue close 42 --comment "Fixed in #123"
+gh issue comment 42 --body "Working on this"
 ```
 
 ## Repository Operations
@@ -309,48 +242,34 @@ gh repo edit --enable-auto-merge --delete-branch-on-merge
 
 ## GitHub Actions
 
-> **Reminder:** In web sessions, use `gh api --hostname github.com` instead of `gh run`/`gh workflow` subcommands.
+> **Note:** In web sessions, `GH_HOST` and `GH_REPO` are set automatically by the github plugin. All `gh run`/`gh workflow` subcommands work normally.
 
 ```bash
 # List recent workflow runs
-gh api repos/OWNER/REPO/actions/runs --hostname github.com \
-  --jq '.workflow_runs[:10] | .[] | {id, name: .name, status, conclusion}'
+gh run list --limit 10
 
 # View a specific run
-gh api repos/OWNER/REPO/actions/runs/12345 --hostname github.com
+gh run view 12345
 
-# View run jobs
-gh api repos/OWNER/REPO/actions/runs/12345/jobs --hostname github.com \
-  --jq '.jobs[] | {name, status, conclusion}'
-
-# View job logs
-gh api repos/OWNER/REPO/actions/jobs/JOB_ID/logs --hostname github.com
+# View run logs
+gh run view 12345 --log
 
 # Re-run a failed workflow
-gh api repos/OWNER/REPO/actions/runs/12345/rerun --hostname github.com \
-  --method POST
+gh run rerun 12345
 
 # Re-run only failed jobs
-gh api repos/OWNER/REPO/actions/runs/12345/rerun-failed-jobs --hostname github.com \
-  --method POST
+gh run rerun 12345 --failed
 
 # Trigger a workflow dispatch
-gh api repos/OWNER/REPO/actions/workflows/ci.yaml/dispatches --hostname github.com \
-  --method POST --field ref="main"
+gh workflow run ci.yaml --ref main
 
 # List workflows
-gh api repos/OWNER/REPO/actions/workflows --hostname github.com \
-  --jq '.workflows[] | {name, state}'
-
-# Local-only alternatives:
-# gh run list
-# gh run view 12345 --log
-# gh workflow run ci.yaml --ref main
+gh workflow list
 ```
 
 ## GitHub API Access
 
-The `gh api` command provides authenticated access to any GitHub API endpoint. **Always include `--hostname github.com`** to ensure correct routing in web sessions.
+The `gh api` command provides authenticated access to any GitHub API endpoint. When `GH_HOST` is set (automatic in web sessions), `--hostname` is not required. Include `--hostname github.com` as a fallback if env vars aren't set.
 
 ### Common API Patterns
 
@@ -525,7 +444,14 @@ Place in:
 
 ### `gh pr create` / `gh issue list` fails in web sessions
 
-This is the most common issue. The git remote points to a local proxy, so `gh` subcommands that infer the repo from the remote will fail. **Use `gh api --hostname github.com` with explicit repo paths instead.** See [Web Session Proxy](#web-session-proxy--critical) at the top of this document.
+The git remote points to a local proxy in web sessions. The github plugin's SessionStart hook sets `GH_HOST` and `GH_REPO` automatically to fix this. If the hook hasn't run yet, set them manually:
+
+```bash
+export GH_HOST="github.com"
+export GH_REPO="owner/repo"
+```
+
+As a fallback, `gh api --hostname github.com` with explicit repo paths always works.
 
 ### Authentication issues
 

@@ -11,7 +11,7 @@ allowed-tools: Bash, Read, Grep, Glob
 
 # Making Great PRs
 
-Create and maintain pull requests for feature branches using `gh api` with `--hostname github.com` (required for web sessions where the git remote is a local proxy).
+Create and maintain pull requests for feature branches. The github plugin sets `GH_HOST` and `GH_REPO` automatically in web sessions, so standard `gh` subcommands work everywhere.
 
 ## Pre-fetched Context
 
@@ -27,12 +27,10 @@ The `gh` CLI must be available (installed via mise) and `GH_TOKEN` must be set i
 
 ## Step 1: Check for Existing PR
 
-Always check before creating to avoid duplicates. Use server-side filtering:
+Always check before creating to avoid duplicates:
 
 ```bash
-gh api "repos/nsheaps/ai-mktpl/pulls?head=nsheaps:<branch-name>&state=open" \
-  --hostname github.com \
-  --jq '.[0] | {number, title, state}'
+gh pr list --head "<branch-name>" --state open --json number,title --jq '.[0]'
 ```
 
 If a PR already exists, skip to [Step 3: Update PR](#step-3-update-pr).
@@ -40,14 +38,10 @@ If a PR already exists, skip to [Step 3: Update PR](#step-3-update-pr).
 ## Step 2: Create Draft PR
 
 ```bash
-PR_NUMBER=$(gh api repos/nsheaps/ai-mktpl/pulls \
-  --hostname github.com \
-  --method POST \
-  --field title="Short descriptive title" \
-  --field head="<branch-name>" \
-  --field base="main" \
-  --field draft=true \
-  --field body="$(cat <<'PREOF'
+PR_URL=$(gh pr create \
+  --draft \
+  --title "Short descriptive title" \
+  --body "$(cat <<'PREOF'
 ## Summary
 - What changed and why
 
@@ -56,16 +50,14 @@ PR_NUMBER=$(gh api repos/nsheaps/ai-mktpl/pulls \
 
 <!-- Include Claude Code session link if available, e.g.: https://claude.ai/code/session_XXXXX -->
 PREOF
-)" --jq '.number')
+)")
 ```
 
 Then add the `request-review` label to trigger AI code review:
 
 ```bash
-gh api repos/nsheaps/ai-mktpl/issues/${PR_NUMBER}/labels \
-  --hostname github.com \
-  --method POST \
-  --field 'labels[]=request-review'
+PR_NUMBER=$(echo "$PR_URL" | grep -oE '[0-9]+$')
+gh pr edit "$PR_NUMBER" --add-label "request-review"
 ```
 
 ## Step 3: Update PR
@@ -73,10 +65,7 @@ gh api repos/nsheaps/ai-mktpl/issues/${PR_NUMBER}/labels \
 After subsequent pushes, update the PR body to reflect all current changes:
 
 ```bash
-gh api repos/nsheaps/ai-mktpl/pulls/<PR_NUMBER> \
-  --hostname github.com \
-  --method PATCH \
-  --field body="$(cat <<'PREOF'
+gh pr edit <PR_NUMBER> --body "$(cat <<'PREOF'
 ## Summary
 - Updated description reflecting all changes
 
@@ -93,10 +82,7 @@ PREOF
 Only after review feedback is addressed and CI passes:
 
 ```bash
-gh api repos/nsheaps/ai-mktpl/pulls/<PR_NUMBER> \
-  --hostname github.com \
-  --method PATCH \
-  --field draft=false
+gh pr ready <PR_NUMBER>
 ```
 
 ## PR Title Conventions
@@ -115,9 +101,10 @@ gh api repos/nsheaps/ai-mktpl/pulls/<PR_NUMBER> \
 
 ## Error Handling
 
-| Error                 | Resolution                                           |
-| --------------------- | ---------------------------------------------------- |
-| `gh` not found        | Run `eval "$(mise activate bash)"` or `mise install` |
-| 401 Unauthorized      | Check `GH_TOKEN` is set and has PR write scope       |
-| 422 Validation failed | Branch may not exist on remote yet — push first      |
-| PR already exists     | Use PATCH to update instead of POST to create        |
+| Error                 | Resolution                                                          |
+| --------------------- | ------------------------------------------------------------------- |
+| `gh` not found        | Run `eval "$(mise activate bash)"` or `mise install`                |
+| 401 Unauthorized      | Check `GH_TOKEN` is set and has PR write scope                     |
+| 422 Validation failed | Branch may not exist on remote yet — push first                    |
+| PR already exists     | Use `gh pr edit` to update instead of `gh pr create`               |
+| Host/repo not found   | Ensure `GH_HOST` and `GH_REPO` are set (automatic in web sessions) |
