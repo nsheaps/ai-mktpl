@@ -1,8 +1,8 @@
 ---
-date: {{date}}
+date: { { date } }
 time: "{{time}}"
-severity: {{severity}}
-tags: [{{tags}}]
+severity: { { severity } }
+tags: [{ { tags } }]
 status: documented
 ---
 

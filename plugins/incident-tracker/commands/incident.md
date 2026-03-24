@@ -9,6 +9,7 @@ Track behavioral incidents, document corrections, and maintain learned rules.
 ```
 
 When the user corrects your behavior, use this command to:
+
 1. Document what happened
 2. Analyze why it was wrong
 3. Derive a reusable rule
@@ -19,9 +20,11 @@ When the user corrects your behavior, use this command to:
 When given a behavioral correction:
 
 ### 1. STOP IMMEDIATELY
+
 Do not continue with the previous task. Acknowledge the correction first.
 
 ### 2. GATHER CONTEXT
+
 - What did the user ask you to do?
 - What did you actually do?
 - What did the user say was wrong?
@@ -29,6 +32,7 @@ Do not continue with the previous task. Acknowledge the correction first.
 ### 3. CREATE INCIDENT FILE
 
 Create a file in `incidents/behavioral/` with this naming pattern:
+
 ```
 YYYY-MM-DD--short-description.md
 ```
@@ -96,6 +100,7 @@ N. **<Rule title>** — <Rule description>. [^rule-N]
 ### 5. CONFIRM WITH USER
 
 Before continuing, confirm:
+
 - What you documented
 - The derived rule
 - That the user agrees with the characterization
@@ -105,6 +110,7 @@ Before continuing, confirm:
 User says: "You just restarted yourself without asking"
 
 You respond:
+
 1. Stop
 2. Create `incidents/behavioral/2026-03-21--restarted-without-permission.md`
 3. Add rule to AGENTS.md: "Always confirm before restarting the gateway"
@@ -112,11 +118,11 @@ You respond:
 
 ## Severity Levels
 
-| Level | When to Use |
-|-------|-------------|
-| low | Minor inconvenience, no lasting impact |
-| medium | Affected user workflow, required correction |
-| high | Data loss, security issue, or significant trust impact |
+| Level  | When to Use                                            |
+| ------ | ------------------------------------------------------ |
+| low    | Minor inconvenience, no lasting impact                 |
+| medium | Affected user workflow, required correction            |
+| high   | Data loss, security issue, or significant trust impact |
 
 ## Notes
 

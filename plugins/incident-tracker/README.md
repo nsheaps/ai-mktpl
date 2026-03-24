@@ -40,6 +40,7 @@ When you receive a behavioral correction:
 ```
 
 The plugin will:
+
 1. Stop the current task
 2. Document the incident
 3. Derive a reusable rule
