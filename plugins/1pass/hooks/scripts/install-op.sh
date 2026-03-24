@@ -268,9 +268,21 @@ _write_secret() {
       mv "$tmp_settings" "$settings_file"
       hook_log "Injected ${env_var} into .claude/settings.local.json env block"
       ;;
+    userSettingsJson)
+      local settings_file="${HOME}/.claude/settings.json"
+      mkdir -p "$(dirname "$settings_file")"
+      if [ ! -f "$settings_file" ]; then
+        echo '{}' > "$settings_file"
+      fi
+      local tmp_settings
+      tmp_settings="$(mktemp)"
+      jq --arg k "$env_var" --arg v "$value" '.env[$k] = $v' "$settings_file" > "$tmp_settings"
+      mv "$tmp_settings" "$settings_file"
+      hook_log "Injected ${env_var} into ~/.claude/settings.json env block"
+      ;;
     *)
       hook_fail "secrets injection" "Unknown target '${target}' for ${env_var}" \
-        "Valid targets: envFile, settingsJson, settingsLocalJson"
+        "Valid targets: envFile, settingsJson, settingsLocalJson, userSettingsJson"
       ;;
   esac
 }

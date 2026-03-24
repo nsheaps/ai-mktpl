@@ -58,16 +58,18 @@ Each secret entry has three fields:
 
 The `target` field controls where the resolved secret value is persisted:
 
-| Target              | File written                                | Scope                                       | Committed to git?                 |
-| ------------------- | ------------------------------------------- | ------------------------------------------- | --------------------------------- |
-| `envFile` (default) | `$CLAUDE_ENV_FILE`                          | Current session only — gone on next session | No                                |
-| `settingsJson`      | `.claude/settings.json` → `env` block       | Persists across sessions                    | **Yes** — visible in repo history |
-| `settingsLocalJson` | `.claude/settings.local.json` → `env` block | Persists across sessions                    | No — gitignored                   |
+| Target               | File written                                | Scope                                       | Committed to git?                 |
+| -------------------- | ------------------------------------------- | ------------------------------------------- | --------------------------------- |
+| `envFile` (default)  | `$CLAUDE_ENV_FILE`                          | Current session only — gone on next session | No                                |
+| `settingsJson`       | `.claude/settings.json` → `env` block       | Persists across sessions                    | **Yes** — visible in repo history |
+| `settingsLocalJson`  | `.claude/settings.local.json` → `env` block | Persists across sessions                    | No — gitignored                   |
+| `userSettingsJson`   | `~/.claude/settings.json` → `env` block     | User-global, persists across all projects   | No — outside repo                 |
 
 **When to use which target:**
 
 - **`envFile`** — Best for most secrets. Session-scoped, no disk persistence, no git risk. Re-injected fresh each session from 1Password. This is the default and recommended target.
 - **`settingsLocalJson`** — Use when you need the secret to survive across sessions without re-injection (e.g. if `op` auth is only available during initial setup). The file is gitignored so secrets won't leak to the repo.
+- **`userSettingsJson`** — Use for secrets that should be available across all projects for a user. Writes to `~/.claude/settings.json` which is outside any repo. Good for API keys used across multiple projects (e.g. `BRAINTRUST_API_KEY`).
 - **`settingsJson`** — Use only for non-sensitive values you want committed. **Never use this for actual secrets** — the file is tracked by git.
 
 ### Example

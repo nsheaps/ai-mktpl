@@ -40,9 +40,10 @@
   #   envVar:    (required) Environment variable name to set
   #   reference: (required) 1Password secret reference (op://vault/item/field)
   #   target:    (optional) Where to write the variable. One of:
-  #                envFile          — append to CLAUDE_ENV_FILE (session-scoped, default)
-  #                settingsJson     — write to .claude/settings.json env block (committed)
+  #                envFile           — append to CLAUDE_ENV_FILE (session-scoped, default)
+  #                settingsJson      — write to .claude/settings.json env block (committed)
   #                settingsLocalJson — write to .claude/settings.local.json env block (gitignored)
+  #                userSettingsJson  — write to ~/.claude/settings.json env block (user-global, not committed)
   #
   # Example:
   #   secrets:
