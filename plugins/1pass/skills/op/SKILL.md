@@ -255,12 +255,32 @@ This plugin supports configuration via `plugins.settings.yaml`:
   opVersion: "latest" # Specific op version or "latest"
   installOpExec: false # Also install op-exec
   opExecVersion: "latest" # Specific op-exec version
+
+  # Expose entire 1Password items as environment variables
+  opExec:
+    items:
+      - 'op://MyVault/ENVIRONMENT'
+    targets:
+      - sessionStartBashEnv # → CLAUDE_ENV_FILE (session-scoped, bash only)
+      - userSettings # → ~/.claude/settings.local.json (persistent, all tools)
+    recursiveResolve: true # Resolve op:// refs in field values (default)
 ```
 
 Place in:
 
 - `$CLAUDE_PROJECT_DIR/.claude/plugins.settings.yaml` (project-level)
 - `~/.claude/plugins.settings.yaml` (user-level)
+
+### Output Targets for op-exec
+
+The `opExec.targets` array controls where resolved env vars are written:
+
+| Target                | Where                                    | Scope            | Persistence     |
+| --------------------- | ---------------------------------------- | ---------------- | --------------- |
+| `sessionStartBashEnv` | `CLAUDE_ENV_FILE`                        | Bash tools only  | Session only    |
+| `userSettings`        | `~/.claude/settings.local.json` `.env`   | All tools        | Across sessions |
+
+Both targets are enabled by default, ensuring env vars reach all tool types.
 
 ## Environment Variables
 
