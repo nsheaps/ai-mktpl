@@ -16,17 +16,17 @@ The GLM (General Language Model) family is developed by z.ai (formerly Zhipu AI 
 
 ## Flagship Text Models
 
-| Model             | Architecture        | Context     | Key Features                                                      |
-| ----------------- | ------------------- | ----------- | ----------------------------------------------------------------- |
-| `glm-5`          | ~745B MoE (44B active) | 200K in / 128K out | Agentic engineering, tool streaming, long-horizon tasks, MIT      |
-| `glm-5-turbo`    | Same, optimized     | 200K in / 128K out | Improved stability for long-chain agent tasks                     |
-| `glm-4.7`        | ~400B MoE           | 200K in / 128K out | Coding-focused, Preserved Thinking, Turn-level Thinking, MIT      |
-| `glm-4.7-flash`  | Lightweight         | Reduced     | Free tier, lighter capability                                     |
-| `glm-4.6`        | 355B total          | 200K        | Strong code benchmarks, agent frameworks, MIT                     |
-| `glm-4.5`        | 355B / 32B active   | 128K        | Hybrid reasoning (thinking/non-thinking modes), deep thinking     |
-| `glm-4.5-x`      | Premium tier        | 128K        | Higher capability, premium pricing                                |
-| `glm-4.5-air`    | 106B / 12B active   | 128K        | Compact variant of GLM-4.5                                        |
-| `glm-4.5-flash`  | Lightweight         | 128K        | Free tier                                                         |
+| Model           | Architecture           | Context            | Key Features                                                  |
+| --------------- | ---------------------- | ------------------ | ------------------------------------------------------------- |
+| `glm-5`         | ~745B MoE (44B active) | 200K in / 128K out | Agentic engineering, tool streaming, long-horizon tasks, MIT  |
+| `glm-5-turbo`   | Same, optimized        | 200K in / 128K out | Improved stability for long-chain agent tasks                 |
+| `glm-4.7`       | ~400B MoE              | 200K in / 128K out | Coding-focused, Preserved Thinking, Turn-level Thinking, MIT  |
+| `glm-4.7-flash` | Lightweight            | Reduced            | Free tier, lighter capability                                 |
+| `glm-4.6`       | 355B total             | 200K               | Strong code benchmarks, agent frameworks, MIT                 |
+| `glm-4.5`       | 355B / 32B active      | 128K               | Hybrid reasoning (thinking/non-thinking modes), deep thinking |
+| `glm-4.5-x`     | Premium tier           | 128K               | Higher capability, premium pricing                            |
+| `glm-4.5-air`   | 106B / 12B active      | 128K               | Compact variant of GLM-4.5                                    |
+| `glm-4.5-flash` | Lightweight            | 128K               | Free tier                                                     |
 
 ### Thinking Mode
 
@@ -35,8 +35,8 @@ GLM-4.5+ models support **hybrid reasoning** — toggle between deep thinking an
 ```json
 {
   "model": "glm-4.7",
-  "messages": [{"role": "user", "content": "Solve this step by step"}],
-  "thinking": {"type": "enabled"}
+  "messages": [{ "role": "user", "content": "Solve this step by step" }],
+  "thinking": { "type": "enabled" }
 }
 ```
 
@@ -46,11 +46,11 @@ GLM-4.5+ models support **hybrid reasoning** — toggle between deep thinking an
 
 ## Vision / Multimodal Models
 
-| Model            | Parameters          | Context | Description                         |
-| ---------------- | ------------------- | ------- | ----------------------------------- |
-| `glm-4.6v`      | 106B / 12B active   | 128K    | Vision understanding, function calling |
-| `glm-4.6v-flash` | 9B                 | —       | Free, open weights, commercial license |
-| `glm-4.5v`      | 106B VLM            | —       | Vision-language model               |
+| Model            | Parameters        | Context | Description                            |
+| ---------------- | ----------------- | ------- | -------------------------------------- |
+| `glm-4.6v`       | 106B / 12B active | 128K    | Vision understanding, function calling |
+| `glm-4.6v-flash` | 9B                | —       | Free, open weights, commercial license |
+| `glm-4.5v`       | 106B VLM          | —       | Vision-language model                  |
 
 ### Vision API Example
 
@@ -72,13 +72,13 @@ curl "https://api.z.ai/api/paas/v4/chat/completions" \
 
 ## Specialized Models
 
-| Model       | Category        | Description                     |
-| ----------- | --------------- | ------------------------------- |
-| `glm-image` | Image generation | Text-to-image (Jan 2026)       |
-| `glm-ocr`   | OCR             | Document and image OCR          |
-| `cogview-3-plus` | Image gen  | High-quality text-to-image      |
-| `cogvideox`      | Video gen  | Text-to-video generation        |
-| `cogvideox-flash` | Video gen | Fast video generation           |
+| Model             | Category         | Description                |
+| ----------------- | ---------------- | -------------------------- |
+| `glm-image`       | Image generation | Text-to-image (Jan 2026)   |
+| `glm-ocr`         | OCR              | Document and image OCR     |
+| `cogview-3-plus`  | Image gen        | High-quality text-to-image |
+| `cogvideox`       | Video gen        | Text-to-video generation   |
+| `cogvideox-flash` | Video gen        | Fast video generation      |
 
 ## Embedding Models
 
@@ -99,17 +99,17 @@ curl "https://api.z.ai/api/paas/v4/embeddings" \
 
 ## Model Selection Guide
 
-| Use Case            | Recommended Model | Why                                    |
-| ------------------- | ----------------- | -------------------------------------- |
-| Agentic tasks       | `glm-5`          | Tool streaming, long-horizon planning  |
-| Coding              | `glm-4.7`        | Coding-focused, Preserved Thinking     |
-| Complex reasoning   | `glm-4.5`        | Hybrid reasoning with deep thinking    |
-| General chat        | `glm-4.5-flash`  | Free, good quality                     |
-| High throughput     | `glm-4.5-air`    | Compact, fast inference                |
-| Image understanding | `glm-4.6v`       | Best vision model with function calling |
-| Embeddings/search   | `embedding-3`    | Latest generation                      |
-| Image creation      | `glm-image`      | Latest generation (Jan 2026)           |
-| Budget-conscious    | `glm-4.5-flash`  | Free tier available                    |
+| Use Case            | Recommended Model | Why                                     |
+| ------------------- | ----------------- | --------------------------------------- |
+| Agentic tasks       | `glm-5`           | Tool streaming, long-horizon planning   |
+| Coding              | `glm-4.7`         | Coding-focused, Preserved Thinking      |
+| Complex reasoning   | `glm-4.5`         | Hybrid reasoning with deep thinking     |
+| General chat        | `glm-4.5-flash`   | Free, good quality                      |
+| High throughput     | `glm-4.5-air`     | Compact, fast inference                 |
+| Image understanding | `glm-4.6v`        | Best vision model with function calling |
+| Embeddings/search   | `embedding-3`     | Latest generation                       |
+| Image creation      | `glm-image`       | Latest generation (Jan 2026)            |
+| Budget-conscious    | `glm-4.5-flash`   | Free tier available                     |
 
 ### Claude Code Model Mapping
 
@@ -117,22 +117,22 @@ When using z.ai's Anthropic-compatible endpoint with Claude Code, map models to 
 
 | Claude Code Slot | Recommended GLM Model | Rationale                    |
 | ---------------- | --------------------- | ---------------------------- |
-| Opus             | `glm-5`              | Most capable, agentic        |
-| Sonnet           | `glm-4.7`            | Strong coding, balanced cost |
-| Haiku            | `glm-4.5-air`        | Fast, cost-effective         |
+| Opus             | `glm-5`               | Most capable, agentic        |
+| Sonnet           | `glm-4.7`             | Strong coding, balanced cost |
+| Haiku            | `glm-4.5-air`         | Fast, cost-effective         |
 
 ## Pricing (per 1M tokens, USD)
 
-| Model           | Input   | Output  |
-| --------------- | ------- | ------- |
-| `glm-5`        | ~$1.00  | ~$3.20  |
-| `glm-4.7`      | $0.60   | $2.20   |
-| `glm-4.7-flash` | Free   | Free    |
-| `glm-4.5`      | ~$0.20  | ~$1.10  |
-| `glm-4.5-x`    | —       | $8.90   |
-| `glm-4.5-flash` | Free   | Free    |
-| `glm-4.6v`     | ~$0.14  | ~$0.41  |
-| `glm-4.6v-flash` | Free  | Free    |
+| Model            | Input  | Output |
+| ---------------- | ------ | ------ |
+| `glm-5`          | ~$1.00 | ~$3.20 |
+| `glm-4.7`        | $0.60  | $2.20  |
+| `glm-4.7-flash`  | Free   | Free   |
+| `glm-4.5`        | ~$0.20 | ~$1.10 |
+| `glm-4.5-x`      | —      | $8.90  |
+| `glm-4.5-flash`  | Free   | Free   |
+| `glm-4.6v`       | ~$0.14 | ~$0.41 |
+| `glm-4.6v-flash` | Free   | Free   |
 
 _Prices approximate; see [docs.z.ai/guides/overview/pricing](https://docs.z.ai/guides/overview/pricing) for current rates. Batch API available at 50% cost._
 

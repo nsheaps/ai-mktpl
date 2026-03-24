@@ -118,15 +118,15 @@ zaiclaude() {
 }
 ```
 
-| Variable                              | Purpose                                       |
-| ------------------------------------- | --------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                  | Points Claude Code to z.ai's Anthropic endpoint |
-| `ANTHROPIC_AUTH_TOKEN`                | Your z.ai API key                             |
-| `ANTHROPIC_API_KEY`                   | Set to `""` to avoid conflicts with existing Anthropic key |
-| `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` | Prevents background traffic to Anthropic servers |
-| `ANTHROPIC_DEFAULT_SONNET_MODEL`      | GLM model for the "Sonnet" slot               |
-| `ANTHROPIC_DEFAULT_OPUS_MODEL`        | GLM model for the "Opus" slot                 |
-| `ANTHROPIC_DEFAULT_HAIKU_MODEL`       | GLM model for the "Haiku" slot                |
+| Variable                                   | Purpose                                                    |
+| ------------------------------------------ | ---------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                       | Points Claude Code to z.ai's Anthropic endpoint            |
+| `ANTHROPIC_AUTH_TOKEN`                     | Your z.ai API key                                          |
+| `ANTHROPIC_API_KEY`                        | Set to `""` to avoid conflicts with existing Anthropic key |
+| `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` | Prevents background traffic to Anthropic servers           |
+| `ANTHROPIC_DEFAULT_SONNET_MODEL`           | GLM model for the "Sonnet" slot                            |
+| `ANTHROPIC_DEFAULT_OPUS_MODEL`             | GLM model for the "Opus" slot                              |
+| `ANTHROPIC_DEFAULT_HAIKU_MODEL`            | GLM model for the "Haiku" slot                             |
 
 > **Note**: See <https://docs.z.ai/scenario-example/develop-tools/claude> for z.ai's official Claude Code integration guide.
 
