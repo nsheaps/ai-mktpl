@@ -54,6 +54,7 @@ gh api repos/{owner}/{repo}/issues/{pr}/comments --paginate
 ```
 
 **Key distinctions:**
+
 - **Reviews** (`get_reviews` / `/pulls/{pr}/reviews`): The top-level review objects with a verdict (APPROVE, REQUEST_CHANGES, COMMENT) and an optional body.
 - **Review comments** (`get_review_comments` / `/pulls/{pr}/comments`): Inline comments attached to specific lines in the diff. These are grouped into threads with `isResolved` / `isOutdated` metadata.
 - **Issue comments** (`get_comments` / `/issues/{pr}/comments`): Conversation-level comments on the PR (not tied to specific code lines).
@@ -104,6 +105,7 @@ Before acting, compile a single list of all actionable items:
 5. **CI annotations** — specific file/line warnings or errors from check output
 
 Skip items that are:
+
 - Already resolved threads
 - Outdated comments on code that no longer exists in the diff
 - Passing checks
@@ -118,6 +120,7 @@ For every item in the inventory, classify it into one of four categories:
 The feedback is unclear, ambiguous, or references something you can't locate.
 
 **Action:**
+
 - Reply to the comment asking for clarification
 - Be specific about what you don't understand
 - Do NOT guess or make assumptions
@@ -131,6 +134,7 @@ add_issue_comment(owner, repo, issue_number, body)
 ```
 
 Example response:
+
 > I'm not sure I understand this feedback — could you clarify what you mean by "the abstraction is leaky here"? Are you referring to the error handling in `parse()` or the public API surface?
 
 ### Category B: Disagree — Feedback is Incorrect
@@ -138,6 +142,7 @@ Example response:
 You believe the feedback is wrong or based on a misunderstanding. This requires **evidence**.
 
 **Action:**
+
 - Reply with a clear, respectful explanation of why you disagree
 - **MUST include references and sources** to support your position:
   - Links to official documentation
@@ -149,6 +154,7 @@ You believe the feedback is wrong or based on a misunderstanding. This requires 
 - Acknowledge if there's nuance or if the reviewer might have a valid sub-point
 
 Example response:
+
 > I respectfully disagree with this suggestion. The current approach uses `structuredClone()` which is [supported in all target environments](https://developer.mozilla.org/en-US/docs/Web/API/structuredClone#browser_compatibility) per our browserslist config in [`package.json:L12`](https://github.com/owner/repo/blob/abc123/package.json#L12). Using `JSON.parse(JSON.stringify(...))` would silently drop `undefined` values and `Date` objects, which our data model relies on ([see `types.ts:L45-L52`](https://github.com/owner/repo/blob/abc123/src/types.ts#L45-L52)). I'm confident this is the correct choice here.
 
 **Important:** If you cannot find strong evidence to back your disagreement, do NOT disagree. Re-evaluate whether the feedback is actually valid.
@@ -156,6 +162,7 @@ Example response:
 ### Category C: Valid but Defer — Ticket for Follow-Up
 
 The feedback is valid but addressing it now would be:
+
 - Out of scope for the current PR
 - A significant refactor that risks the current changeset
 - Better handled as a separate, focused change
@@ -163,6 +170,7 @@ The feedback is valid but addressing it now would be:
 **This should be rare.** Most valid feedback should be addressed immediately (Category D). Only defer when there's a clear, articulable reason.
 
 **Action:**
+
 - Acknowledge the feedback is valid
 - Explain concisely why it should be deferred
 - Create a GitHub issue to track the follow-up
@@ -176,6 +184,7 @@ gh issue create --title "Follow-up: {description}" \
 ```
 
 Example response:
+
 > Good catch — this validation should be tightened. However, the input sanitization refactor is out of scope for this PR (which focuses on the auth flow). I've created #187 to track this. I'll address it in a dedicated PR to keep this change focused.
 
 ### Category D: Address the Feedback (Most Common)
@@ -209,6 +218,7 @@ The feedback is valid and should be fixed now.
    > Fixed — the error message now includes the HTTP status code and response body summary. See commit: https://github.com/{owner}/{repo}/commit/{sha}
 
    To get the commit permalink after pushing:
+
    ```bash
    # Get the SHA of your most recent commit
    git rev-parse HEAD
@@ -234,6 +244,7 @@ pull_request_read(method="get_check_runs", owner, repo, pullNumber)
 ```
 
 For each failing check:
+
 1. Note the check name, conclusion, and details URL
 2. Read the output summary and annotations (file/line-level errors)
 3. If the summary is insufficient, fetch full logs:
@@ -245,20 +256,21 @@ For each failing check:
 
 Common CI failure categories:
 
-| Failure Type | Diagnosis | Fix |
-|---|---|---|
-| **Lint errors** | Read annotations for file:line | Fix the specific lint violations |
-| **Type errors** | Read compiler output | Fix type mismatches |
-| **Test failures** | Read test output for assertion details | Fix the code or update the test |
-| **Build failures** | Read build log for the error | Fix compilation/bundling issues |
-| **Flaky tests** | Check if the test passes locally and in recent CI runs | Re-run if flaky; fix if genuine |
-| **Security/audit** | Read advisory details | Update dependencies or add exceptions |
+| Failure Type       | Diagnosis                                              | Fix                                   |
+| ------------------ | ------------------------------------------------------ | ------------------------------------- |
+| **Lint errors**    | Read annotations for file:line                         | Fix the specific lint violations      |
+| **Type errors**    | Read compiler output                                   | Fix type mismatches                   |
+| **Test failures**  | Read test output for assertion details                 | Fix the code or update the test       |
+| **Build failures** | Read build log for the error                           | Fix compilation/bundling issues       |
+| **Flaky tests**    | Check if the test passes locally and in recent CI runs | Re-run if flaky; fix if genuine       |
+| **Security/audit** | Read advisory details                                  | Update dependencies or add exceptions |
 
 ### 3c. Commit and Push
 
 Same rules as Category D above — commit the CI fix in isolation, push, and the CI will re-run automatically.
 
 If a CI failure was caused by a **flaky test** (not related to your changes):
+
 ```bash
 # Re-run just the failed jobs
 gh run rerun {run_id} --failed --repo {owner}/{repo}
@@ -269,21 +281,25 @@ gh run rerun {run_id} --failed --repo {owner}/{repo}
 After addressing all feedback:
 
 1. **Verify CI is passing** — wait for checks to complete after your fix commits:
+
    ```
    pull_request_read(method="get_check_runs", owner, repo, pullNumber)
    ```
 
 2. **Self-review your changes** — read the updated diff to make sure fixes are correct:
+
    ```
    pull_request_read(method="get_diff", owner, repo, pullNumber)
    ```
 
 3. **Request re-review** — use the `request-review` label to trigger the AI review bot (if configured in the repo):
+
    ```bash
    gh pr edit {pr} --add-label "request-review" --repo {owner}/{repo}
    ```
 
    Or using MCP tools:
+
    ```
    update_pull_request(owner, repo, pullNumber, reviewers=["original-reviewer"])
    ```
@@ -322,6 +338,7 @@ gh api repos/{owner}/{repo}/pulls/{pr}/comments --paginate
 ### Filtering What Matters
 
 After fetching, filter down to actionable items:
+
 - **Review comments**: Only unresolved, non-outdated threads
 - **Reviews**: Most recent review per reviewer (earlier ones are superseded)
 - **CI checks**: Only `conclusion: "failure"` or `conclusion: "cancelled"`
@@ -329,21 +346,21 @@ After fetching, filter down to actionable items:
 
 ## Quick Reference: MCP Tools for PR Feedback
 
-| Task | MCP Tool | Method/Parameters |
-|---|---|---|
-| PR metadata | `pull_request_read` | `method="get"` |
-| Review verdicts | `pull_request_read` | `method="get_reviews"` |
-| Inline comment threads | `pull_request_read` | `method="get_review_comments"` |
-| General comments | `pull_request_read` | `method="get_comments"` |
-| CI check runs | `pull_request_read` | `method="get_check_runs"` |
-| Combined commit status | `pull_request_read` | `method="get_status"` |
-| PR diff | `pull_request_read` | `method="get_diff"` |
-| Changed files | `pull_request_read` | `method="get_files"` |
-| Reply to review comment | `add_reply_to_pull_request_comment` | `commentId`, `body` |
-| Add general comment | `add_issue_comment` | `issue_number`, `body` |
-| Resolve a thread | `resolve_review_thread` | `threadId` |
-| Request reviewers | `update_pull_request` | `reviewers=[...]` |
-| Submit a review | `pull_request_review_write` | `method="create"`, `event` |
+| Task                    | MCP Tool                            | Method/Parameters              |
+| ----------------------- | ----------------------------------- | ------------------------------ |
+| PR metadata             | `pull_request_read`                 | `method="get"`                 |
+| Review verdicts         | `pull_request_read`                 | `method="get_reviews"`         |
+| Inline comment threads  | `pull_request_read`                 | `method="get_review_comments"` |
+| General comments        | `pull_request_read`                 | `method="get_comments"`        |
+| CI check runs           | `pull_request_read`                 | `method="get_check_runs"`      |
+| Combined commit status  | `pull_request_read`                 | `method="get_status"`          |
+| PR diff                 | `pull_request_read`                 | `method="get_diff"`            |
+| Changed files           | `pull_request_read`                 | `method="get_files"`           |
+| Reply to review comment | `add_reply_to_pull_request_comment` | `commentId`, `body`            |
+| Add general comment     | `add_issue_comment`                 | `issue_number`, `body`         |
+| Resolve a thread        | `resolve_review_thread`             | `threadId`                     |
+| Request reviewers       | `update_pull_request`               | `reviewers=[...]`              |
+| Submit a review         | `pull_request_review_write`         | `method="create"`, `event`     |
 
 ## Workflow Summary
 

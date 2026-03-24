@@ -233,7 +233,11 @@
         "issues",
         "session-start",
         "web-session",
-        "auto-install"
+        "auto-install",
+        "pr-feedback",
+        "code-review",
+        "ci-failures",
+        "review-comments"
       ]
     },
     {
