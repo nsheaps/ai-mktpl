@@ -31,12 +31,12 @@ Create or update `plugins.settings.yaml` at project or user level:
 # or ~/.claude/plugins.settings.yaml
 
 1pass:
-  enabled: true          # Enable/disable the plugin
-  autoInstall: false     # Download op if not on PATH (default: false)
+  enabled: true # Enable/disable the plugin
+  autoInstall: false # Download op if not on PATH (default: false)
   installToProject: true # Install to $project/bin/.local (vs ~/.local/bin)
   backgroundInstall: false # Run install in background
-  opVersion: "latest"    # Pin a specific op version or use "latest"
-  installOpExec: false   # Also install op-exec (default: false)
+  opVersion: "latest" # Pin a specific op version or use "latest"
+  installOpExec: false # Also install op-exec (default: false)
   opExecVersion: "latest" # Pin a specific op-exec version or use "latest"
 ```
 
@@ -48,21 +48,21 @@ The plugin can inject 1Password secrets as environment variables at session star
 
 Each secret entry has three fields:
 
-| Field       | Required | Description |
-|-------------|----------|-------------|
+| Field       | Required | Description                                                  |
+| ----------- | -------- | ------------------------------------------------------------ |
 | `envVar`    | yes      | Environment variable name to set (e.g. `BRAINTRUST_API_KEY`) |
 | `reference` | yes      | 1Password secret reference in `op://vault/item/field` format |
-| `target`    | no       | Where to write the variable (default: `envFile`) |
+| `target`    | no       | Where to write the variable (default: `envFile`)             |
 
 ### Target Options
 
 The `target` field controls where the resolved secret value is persisted:
 
-| Target              | File written                          | Scope | Committed to git? |
-|---------------------|---------------------------------------|-------|--------------------|
-| `envFile` (default) | `$CLAUDE_ENV_FILE`                    | Current session only — gone on next session | No |
-| `settingsJson`      | `.claude/settings.json` → `env` block | Persists across sessions | **Yes** — visible in repo history |
-| `settingsLocalJson` | `.claude/settings.local.json` → `env` block | Persists across sessions | No — gitignored |
+| Target              | File written                                | Scope                                       | Committed to git?                 |
+| ------------------- | ------------------------------------------- | ------------------------------------------- | --------------------------------- |
+| `envFile` (default) | `$CLAUDE_ENV_FILE`                          | Current session only — gone on next session | No                                |
+| `settingsJson`      | `.claude/settings.json` → `env` block       | Persists across sessions                    | **Yes** — visible in repo history |
+| `settingsLocalJson` | `.claude/settings.local.json` → `env` block | Persists across sessions                    | No — gitignored                   |
 
 **When to use which target:**
 
