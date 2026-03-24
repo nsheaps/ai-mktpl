@@ -52,6 +52,7 @@ PR state snapshots are stored as JSON files in the cache directory:
 ```
 
 Each snapshot includes:
+
 - PR metadata (title, body, state, draft status, labels)
 - Reviews (user, state, body)
 - Comments (issue comments and inline review comments)
@@ -62,18 +63,18 @@ Each snapshot includes:
 
 The following changes are detected and reported:
 
-| Change | Example |
-|--------|---------|
-| New review | "nsheaps APPROVED" |
-| New comment | "bot: CI passed" |
-| New review comment | "nsheaps on src/main.ts: Consider using..." |
-| CI status change | "lint: in_progress/pending -> completed/success" |
-| PR body updated | Body content changed |
-| PR title changed | Old title -> new title |
-| Draft status | Converted to draft / marked ready |
-| State change | open -> closed, merged |
-| Merge status | mergeable changed, conflicts detected |
-| Label changes | Labels added/removed |
+| Change             | Example                                          |
+| ------------------ | ------------------------------------------------ |
+| New review         | "nsheaps APPROVED"                               |
+| New comment        | "bot: CI passed"                                 |
+| New review comment | "nsheaps on src/main.ts: Consider using..."      |
+| CI status change   | "lint: in_progress/pending -> completed/success" |
+| PR body updated    | Body content changed                             |
+| PR title changed   | Old title -> new title                           |
+| Draft status       | Converted to draft / marked ready                |
+| State change       | open -> closed, merged                           |
+| Merge status       | mergeable changed, conflicts detected            |
+| Label changes      | Labels added/removed                             |
 
 ### Future: Claude Code Channels
 

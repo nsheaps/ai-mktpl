@@ -26,6 +26,7 @@ The github plugin includes async hooks that silently monitor PR state changes ac
 ### Session Start
 
 On session start, the plugin:
+
 1. Discovers all sibling git repositories (multi-project support)
 2. Finds open PRs for each repo's current branch
 3. Fetches a full state snapshot for each PR
@@ -34,6 +35,7 @@ On session start, the plugin:
 ### Post Tool Use
 
 After each tool use, the plugin:
+
 1. Re-fetches state for all tracked PRs
 2. Compares against the cached snapshot
 3. If changes are detected, reports them via stdout (shown as additionalContext)
@@ -48,8 +50,8 @@ On session stop, performs a final state check for any last-minute changes.
 ```yaml
 # In plugins.settings.yaml (project or user level)
 github:
-  prStateTracking: true   # Enable/disable (default: true)
-  prStateCacheDir: ""      # Custom cache dir (default: ~/.claude/plugin-cache/github)
+  prStateTracking: true # Enable/disable (default: true)
+  prStateCacheDir: "" # Custom cache dir (default: ~/.claude/plugin-cache/github)
 ```
 
 ### Cache Structure
