@@ -4,7 +4,7 @@ Status line for Claude Code with iTerm2 badge integration - shows session info, 
 
 ## Overview
 
-This plugin is a fork of the `statusline` plugin that adds iTerm2 badge integration. In addition to displaying the standard status line, it also sets an iTerm2 user variable (`user.badge`) that can be displayed as a badge in your terminal.
+This plugin provides an informative status line that displays at the top of your Claude Code sessions, with optional iTerm2 badge integration. It automatically configures itself on installation and updates to show real-time information about your workspace. On iTerm2, it also sets a user variable (`user.badge`) for badge display.
 
 ## Features
 
@@ -15,6 +15,15 @@ This plugin is a fork of the `statusline` plugin that adds iTerm2 badge integrat
 ✅ **Auto-configuration** - Hooks automatically update settings.json
 ✅ **Worktree support** - Handles git worktrees correctly
 ✅ **iTerm2 badge** - Updates iTerm2 badge with repo/branch/status
+✅ **Agent team aware** - Automatically disabled for teammates to prevent API rate limit exhaustion
+
+## Agent Teams
+
+When running with [Claude Code agent teams](https://code.claude.com/docs/en/agent-teams), the statusline is automatically disabled for spawned teammates. Only the team lead and solo sessions display the statusline.
+
+**Why**: The statusline makes GitHub API calls (`gh pr view`, `gh repo view`) on every refresh. With 7+ teammates, these calls multiply and exhaust the GitHub API rate limit (~5,000/hour). Since teammates don't have a visible status bar anyway, disabling the script prevents unnecessary API consumption.
+
+**Detection**: Uses `CLAUDE_CODE_PARENT_SESSION_ID`, which Claude Code sets for spawned teammates but not for the lead or solo sessions.
 
 ## iTerm2 Badge
 
@@ -94,6 +103,28 @@ Usage: 50K tokens (5% of limit)
 - `uvx` and `par-cc-usage` - Token usage tracking (degrades gracefully if missing)
 - iTerm2 - For badge display (degrades gracefully in other terminals)
 
+## How It Works
+
+### Hook-Based Configuration
+
+The plugin uses SessionStart and UserPromptSubmit hooks to ensure settings.json always points to the latest version of the statusline script:
+
+1. **On session start**: Configure statusline if not set
+2. **On each prompt**: Verify configuration is current
+3. **On plugin update**: Update path automatically
+
+This ensures the statusline always uses the plugin's script, even after plugin updates or moves.
+
+### Script Execution
+
+Claude Code calls `bin/statusline.sh`:
+
+- Receives JSON with session and workspace info via stdin
+- Extracts relevant data (session ID, paths, git status)
+- Outputs formatted lines to display
+- Sets iTerm2 badge variable (gracefully degrades on non-iTerm terminals)
+- Runs fast with per-section performance timing
+
 ## Troubleshooting
 
 ### Badge not appearing in iTerm2
@@ -118,6 +149,38 @@ Usage: 50K tokens (5% of limit)
 
 3. Restart Claude Code
 
+### Wrong script path
+
+If the statusline shows an error about the script not being found:
+
+1. Check the path in settings.json:
+
+   ```bash
+   jq -r '.statusLine.command' ~/.claude/settings.json
+   ```
+
+2. Verify the script exists at that path
+3. The hook should auto-fix on next prompt, or restart Claude Code
+
+### Hook warning appears
+
+If you see a warning about statusline configuration conflict, the plugin detected you're using a different statusline script. The plugin will not override your existing configuration automatically — you must choose which statusline to use.
+
+### Missing git info
+
+If git information doesn't appear:
+
+- Ensure you're in a git repository
+- Check git is installed: `which git`
+- Verify repository has a remote: `git remote -v`
+
+### Usage tracking not showing
+
+The par-cc-usage integration is optional:
+
+- Install with: `uvx install par-cc-usage`
+- Or ignore - the script degrades gracefully
+
 ## Development
 
 ### Testing Script Changes
@@ -130,7 +193,6 @@ echo '{"session_id": "test", "workspace": {"project_dir": "'"$PWD"'"}}' | \
 
 ## Related Plugins
 
-- **statusline** - Original statusline plugin (without iTerm2 badge)
 - **commit-skill** - Automatic git commit management
 
 ## Support

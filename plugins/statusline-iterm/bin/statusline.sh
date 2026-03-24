@@ -3,6 +3,14 @@
 # Based on: stainless-api/stainless/.mise/tasks/claude-statusline
 set -e
 
+# Skip statusline entirely for agent team teammates.
+# CLAUDE_CODE_PARENT_SESSION_ID is set by Claude Code for spawned teammates
+# but NOT for the team lead or solo sessions. This avoids multiplying
+# GitHub API calls (gh pr view, gh repo view) across 7+ agents.
+if [ -n "${CLAUDE_CODE_PARENT_SESSION_ID:-}" ]; then
+  exit 0
+fi
+
 # Timing helper using perl for ms precision (portable, no coreutils dependency)
 _now_ms() { perl -MTime::HiRes=time -e 'printf "%.0f\n", time()*1000'; }
 _statusline_start_ms=$(_now_ms)
