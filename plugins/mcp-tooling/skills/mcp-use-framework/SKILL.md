@@ -156,17 +156,17 @@ agent = MCPAgent(
 
 ## Key Features
 
-| Feature | Description |
-|---------|-------------|
-| Decorator-based API | Simple `@server.tool()` syntax for defining tools |
-| Type safety | Pydantic models for automatic parameter validation |
-| Async-native | Built for concurrent operations with `async/await` |
-| Multi-server agents | Intelligent routing across multiple MCP servers |
-| Built-in inspector | Web debugger at `/inspector` on every server |
-| Authentication | Bearer token, OAuth middleware support |
-| Observability | LangFuse, OpenTelemetry integration |
-| LLM agnostic | Works with OpenAI, Anthropic, Google via LangChain |
-| Session management | Stateful interactions with `session_id` |
+| Feature             | Description                                        |
+| ------------------- | -------------------------------------------------- |
+| Decorator-based API | Simple `@server.tool()` syntax for defining tools  |
+| Type safety         | Pydantic models for automatic parameter validation |
+| Async-native        | Built for concurrent operations with `async/await` |
+| Multi-server agents | Intelligent routing across multiple MCP servers    |
+| Built-in inspector  | Web debugger at `/inspector` on every server       |
+| Authentication      | Bearer token, OAuth middleware support             |
+| Observability       | LangFuse, OpenTelemetry integration                |
+| LLM agnostic        | Works with OpenAI, Anthropic, Google via LangChain |
+| Session management  | Stateful interactions with `session_id`            |
 
 ## Debugging
 
@@ -180,10 +180,10 @@ DEBUG=2 python your_server.py
 
 ## When to Use mcp-use
 
-| Scenario | Recommendation |
-|----------|---------------|
-| Building a new MCP server in Python | mcp-use (decorator API, type safety, built-in inspector) |
-| Connecting to multiple MCP servers programmatically | mcp-use client (multi-server config, direct tool calls) |
-| Building an AI agent that uses MCP tools | mcp-use agent (LangChain integration, auto-routing) |
-| Quick CLI interaction with existing servers | Use mcp-cli or mcpc instead |
-| Production deployment with monitoring | mcp-use + Manufact platform |
+| Scenario                                            | Recommendation                                           |
+| --------------------------------------------------- | -------------------------------------------------------- |
+| Building a new MCP server in Python                 | mcp-use (decorator API, type safety, built-in inspector) |
+| Connecting to multiple MCP servers programmatically | mcp-use client (multi-server config, direct tool calls)  |
+| Building an AI agent that uses MCP tools            | mcp-use agent (LangChain integration, auto-routing)      |
+| Quick CLI interaction with existing servers         | Use mcp-cli or mcpc instead                              |
+| Production deployment with monitoring               | mcp-use + Manufact platform                              |

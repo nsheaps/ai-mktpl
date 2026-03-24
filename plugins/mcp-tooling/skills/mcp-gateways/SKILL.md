@@ -15,25 +15,25 @@ MCP gateways sit between AI clients and MCP servers, providing centralized manag
 
 ## Why Use an MCP Gateway
 
-| Problem | Gateway Solution |
-|---------|-----------------|
-| Each session spawns duplicate MCP servers | Single shared server instance behind the gateway |
-| stdio servers can't be accessed remotely | Transport bridge: stdio → SSE/HTTP |
-| Multiple servers need separate connections | Federation: one endpoint, all tools |
-| No centralized auth or access control | Gateway handles auth, RBAC, rate limiting |
-| No visibility into tool usage | Centralized observability and logging |
-| Credentials scattered in configs | Gateway manages credential lifecycle |
+| Problem                                    | Gateway Solution                                 |
+| ------------------------------------------ | ------------------------------------------------ |
+| Each session spawns duplicate MCP servers  | Single shared server instance behind the gateway |
+| stdio servers can't be accessed remotely   | Transport bridge: stdio → SSE/HTTP               |
+| Multiple servers need separate connections | Federation: one endpoint, all tools              |
+| No centralized auth or access control      | Gateway handles auth, RBAC, rate limiting        |
+| No visibility into tool usage              | Centralized observability and logging            |
+| Credentials scattered in configs           | Gateway manages credential lifecycle             |
 
 ## When to Use Each Pattern
 
-| Scenario | Recommended Approach |
-|----------|---------------------|
-| Expose a local stdio server over HTTP | Supergateway or mcp-proxy |
-| Share servers between local sessions | mcp-proxy daemoning (see mcp-proxy-daemoning skill) |
-| Enterprise multi-team MCP federation | ContextForge, Kong, or liteLLM |
-| AWS-hosted MCP with IAM auth | AWS MCP Proxy |
-| Kubernetes-native MCP routing | AgentGateway or Envoy AI Gateway |
-| Quick debugging/testing of remote servers | Supergateway (one-liner) |
+| Scenario                                  | Recommended Approach                                |
+| ----------------------------------------- | --------------------------------------------------- |
+| Expose a local stdio server over HTTP     | Supergateway or mcp-proxy                           |
+| Share servers between local sessions      | mcp-proxy daemoning (see mcp-proxy-daemoning skill) |
+| Enterprise multi-team MCP federation      | ContextForge, Kong, or liteLLM                      |
+| AWS-hosted MCP with IAM auth              | AWS MCP Proxy                                       |
+| Kubernetes-native MCP routing             | AgentGateway or Envoy AI Gateway                    |
+| Quick debugging/testing of remote servers | Supergateway (one-liner)                            |
 
 ## Popular Gateway Implementations
 
@@ -214,13 +214,13 @@ Enterprise API gateway with MCP server generation from REST APIs.
 
 ### Authentication Patterns
 
-| Pattern | When to Use |
-|---------|------------|
-| OAuth 2.1 | Multi-user environments, external clients |
-| Bearer tokens | Single-user, trusted network |
-| AWS SigV4 | AWS-hosted servers |
-| mTLS | High-security, machine-to-machine |
-| No auth | Local-only (localhost, Docker network) |
+| Pattern       | When to Use                               |
+| ------------- | ----------------------------------------- |
+| OAuth 2.1     | Multi-user environments, external clients |
+| Bearer tokens | Single-user, trusted network              |
+| AWS SigV4     | AWS-hosted servers                        |
+| mTLS          | High-security, machine-to-machine         |
+| No auth       | Local-only (localhost, Docker network)    |
 
 ### Access Control
 

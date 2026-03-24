@@ -158,14 +158,14 @@ npx @apify/actors-mcp-server --tools actors,docs,apify/web-scraper
 
 ## Key Differences from philschmid/mcp-cli
 
-| Feature | mcpc (Apify) | mcp-cli (philschmid) |
-|---------|-------------|---------------------|
-| Sessions | Persistent named sessions | Stateless per-command |
-| Authentication | Full OAuth 2.1 + keychain | Environment variables only |
-| Transport | Streamable HTTP + stdio | stdio + HTTP |
-| Interactive mode | Shell mode (`mcpc @s shell`) | No interactive mode |
-| Connection model | Session-based (connect once) | Per-invocation |
-| Runtime | Node.js | Bun |
+| Feature          | mcpc (Apify)                 | mcp-cli (philschmid)       |
+| ---------------- | ---------------------------- | -------------------------- |
+| Sessions         | Persistent named sessions    | Stateless per-command      |
+| Authentication   | Full OAuth 2.1 + keychain    | Environment variables only |
+| Transport        | Streamable HTTP + stdio      | stdio + HTTP               |
+| Interactive mode | Shell mode (`mcpc @s shell`) | No interactive mode        |
+| Connection model | Session-based (connect once) | Per-invocation             |
+| Runtime          | Node.js                      | Bun                        |
 
 ## Practical Workflow
 

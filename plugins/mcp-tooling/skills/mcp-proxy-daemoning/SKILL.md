@@ -180,10 +180,10 @@ The wrapper script:
 
 ## Troubleshooting
 
-| Issue | Resolution |
-|-------|-----------|
-| Daemon not starting | Check `~/.aitkit/lib/mcpproxy/mcp-proxy.log` |
-| Stale PID files | Remove `~/.aitkit/run/mcp-servers/*` and `~/.aitkit/run/mcp-proxy-*.pid` |
-| Port conflict | Change `MCPPROXY_PORT` in the config |
-| Tool not found | Verify `mcp_proxy_config.json` includes the server |
-| Daemon crashes between sessions | Background health loop auto-recovers; check logs |
+| Issue                           | Resolution                                                               |
+| ------------------------------- | ------------------------------------------------------------------------ |
+| Daemon not starting             | Check `~/.aitkit/lib/mcpproxy/mcp-proxy.log`                             |
+| Stale PID files                 | Remove `~/.aitkit/run/mcp-servers/*` and `~/.aitkit/run/mcp-proxy-*.pid` |
+| Port conflict                   | Change `MCPPROXY_PORT` in the config                                     |
+| Tool not found                  | Verify `mcp_proxy_config.json` includes the server                       |
+| Daemon crashes between sessions | Background health loop auto-recovers; check logs                         |

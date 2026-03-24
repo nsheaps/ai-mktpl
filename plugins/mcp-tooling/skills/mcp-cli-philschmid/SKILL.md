@@ -38,14 +38,14 @@ bun install -g https://github.com/philschmid/mcp-cli
 
 ## Core Commands
 
-| Command | Purpose |
-|---------|---------|
-| `mcp-cli` | List all servers and tools |
-| `mcp-cli -d` | List all servers and tools with descriptions |
-| `mcp-cli info <server>` | Show all tools available in a server |
-| `mcp-cli info <server> <tool>` | Display complete tool JSON schema |
-| `mcp-cli grep "<pattern>"` | Search tools by name using glob pattern |
-| `mcp-cli call <server> <tool> <json>` | Execute a tool with JSON arguments |
+| Command                               | Purpose                                      |
+| ------------------------------------- | -------------------------------------------- |
+| `mcp-cli`                             | List all servers and tools                   |
+| `mcp-cli -d`                          | List all servers and tools with descriptions |
+| `mcp-cli info <server>`               | Show all tools available in a server         |
+| `mcp-cli info <server> <tool>`        | Display complete tool JSON schema            |
+| `mcp-cli grep "<pattern>"`            | Search tools by name using glob pattern      |
+| `mcp-cli call <server> <tool> <json>` | Execute a tool with JSON arguments           |
 
 ## Recommended Workflow (Discover → Explore → Inspect → Execute)
 
@@ -138,19 +138,19 @@ mcp-cli grep "read*"
 
 ## Exit Codes
 
-| Code | Meaning |
-|------|---------|
-| `0` | Success |
-| `1` | Client error |
-| `2` | Server error |
-| `3` | Network issue |
+| Code | Meaning       |
+| ---- | ------------- |
+| `0`  | Success       |
+| `1`  | Client error  |
+| `2`  | Server error  |
+| `3`  | Network issue |
 
 ## When to Use mcp-cli vs Native MCP Integration
 
-| Scenario | Recommendation |
-|----------|---------------|
-| AI agent needs a few specific tools | mcp-cli (discover on demand, save tokens) |
-| Shell scripts calling MCP tools | mcp-cli (native shell integration) |
-| Debugging MCP server issues | mcp-cli (inspect schemas, test calls) |
+| Scenario                             | Recommendation                                          |
+| ------------------------------------ | ------------------------------------------------------- |
+| AI agent needs a few specific tools  | mcp-cli (discover on demand, save tokens)               |
+| Shell scripts calling MCP tools      | mcp-cli (native shell integration)                      |
+| Debugging MCP server issues          | mcp-cli (inspect schemas, test calls)                   |
 | Full IDE integration with many tools | Native MCP (persistent connection, all tools available) |
-| CI/CD pipelines | mcp-cli (scriptable, JSON output) |
+| CI/CD pipelines                      | mcp-cli (scriptable, JSON output)                       |

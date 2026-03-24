@@ -56,10 +56,10 @@ Covers: Supergateway, mcp-proxy, ContextForge (IBM), AWS MCP Proxy, Envoy AI Gat
 
 ## When to Use What
 
-| I want to... | Use this skill |
-|--------------|---------------|
-| Call MCP tools from the shell | mcp-cli-philschmid |
-| Build an MCP server or agent in Python | mcp-use-framework |
-| Connect to remote MCP servers with auth | mcpc-apify |
-| Share MCP servers across local sessions | mcp-proxy-daemoning |
-| Run MCP servers off-host or federate them | mcp-gateways |
+| I want to...                              | Use this skill      |
+| ----------------------------------------- | ------------------- |
+| Call MCP tools from the shell             | mcp-cli-philschmid  |
+| Build an MCP server or agent in Python    | mcp-use-framework   |
+| Connect to remote MCP servers with auth   | mcpc-apify          |
+| Share MCP servers across local sessions   | mcp-proxy-daemoning |
+| Run MCP servers off-host or federate them | mcp-gateways        |
