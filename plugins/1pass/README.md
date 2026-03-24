@@ -31,12 +31,12 @@ Create or update `plugins.settings.yaml` at project or user level:
 # or ~/.claude/plugins.settings.yaml
 
 1pass:
-  enabled: true          # Enable/disable the plugin
-  autoInstall: false     # Download op if not on PATH (default: false)
+  enabled: true # Enable/disable the plugin
+  autoInstall: false # Download op if not on PATH (default: false)
   installToProject: true # Install to $project/bin/.local (vs ~/.local/bin)
   backgroundInstall: false # Run install in background
-  opVersion: "latest"    # Pin a specific op version or use "latest"
-  installOpExec: false   # Also install op-exec (default: false)
+  opVersion: "latest" # Pin a specific op version or use "latest"
+  installOpExec: false # Also install op-exec (default: false)
   opExecVersion: "latest" # Pin a specific op-exec version or use "latest"
 ```
 
