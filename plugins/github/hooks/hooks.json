@@ -1,5 +1,5 @@
 {
-  "description": "Install/update GitHub CLI on session start for web sessions",
+  "description": "GitHub CLI installation and PR state tracking hooks",
   "hooks": {
     "SessionStart": [
       {
@@ -9,6 +9,35 @@
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/install-gh.sh",
             "timeout": 60
+          },
+          {
+            "type": "command",
+            "command": "HOOK_EVENT=SessionStart bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/pr-state-check.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "HOOK_EVENT=PostToolUse bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/pr-state-check.sh",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "HOOK_EVENT=Stop bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/pr-state-check.sh",
+            "timeout": 15
           }
         ]
       }
