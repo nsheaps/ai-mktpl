@@ -84,10 +84,10 @@ op-exec ./ci-script.sh
 
 ## Plugin Settings
 
-This tool is installed by the `poc-1pass` plugin when `installOpExec: true`:
+This tool is installed by the `1pass` plugin when `installOpExec: true`:
 
 ```yaml
-poc-1pass:
+1pass:
   installOpExec: true
   opExecVersion: "latest"
 ```
