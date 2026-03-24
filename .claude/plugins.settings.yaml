@@ -10,7 +10,7 @@ github:
 github-app:
   # Fetch all GitHub App secrets from a single 1Password item.
   # Uses bin/op-exec to render item fields as environment variables.
-  ref: 'op://heapsinfra/github-app--repo--ai-mktpl'
+  ref: 'op://AI-Jack/github-app--repo--ai-mktpl'
   # Item fields expected:
   #   GITHUB_APP_ID
   #   GITHUB_APP_CLIENT_ID
@@ -35,5 +35,5 @@ mise:
   #   settingsJson      — write to .claude/settings.json env block (persists, COMMITTED to git)
   secrets:
     - envVar: BRAINTRUST_API_KEY
-      reference: 'op://heapsinfra/Braintrust/api-key'
+      reference: 'op://AI-Jack/Braintrust/api-key'
       target: envFile
