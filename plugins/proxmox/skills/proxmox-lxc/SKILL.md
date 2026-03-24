@@ -137,12 +137,12 @@ docker compose version
 
 ### Unprivileged vs Privileged
 
-| Aspect        | Unprivileged (recommended) | Privileged                           |
-| ------------- | -------------------------- | ------------------------------------ |
-| Security      | UID-mapped; escape = nobody on host | Container root = host root         |
-| Docker        | Works with `nesting=1,keyctl=1` | Works out of the box               |
-| Limitations   | Cannot mount SMB/CIFS directly | Full host access on escape         |
-| ZFS caveat    | Needs ext4 formatted volume | Native ZFS driver works            |
+| Aspect      | Unprivileged (recommended)          | Privileged                 |
+| ----------- | ----------------------------------- | -------------------------- |
+| Security    | UID-mapped; escape = nobody on host | Container root = host root |
+| Docker      | Works with `nesting=1,keyctl=1`     | Works out of the box       |
+| Limitations | Cannot mount SMB/CIFS directly      | Full host access on escape |
+| ZFS caveat  | Needs ext4 formatted volume         | Native ZFS driver works    |
 
 ### When to Use a VM Instead
 
@@ -324,8 +324,7 @@ const ct = new proxmox.ct.Container(
     nodeName: "pve",
     vmId: 101,
     operatingSystem: {
-      templateFileId:
-        "local:vztmpl/debian-12-standard_12.7-1_amd64.tar.zst",
+      templateFileId: "local:vztmpl/debian-12-standard_12.7-1_amd64.tar.zst",
       type: "debian",
     },
     disk: { datastoreId: "local-lvm", size: 20 },
@@ -340,6 +339,7 @@ const ct = new proxmox.ct.Container(
 ```
 
 > **Note**: Creating multiple containers in parallel can cause Proxmox lock errors. Use sequential creation or `parallelism: 1` in Terraform.
+
 ```
 
 ## Best Practices
@@ -379,3 +379,4 @@ const ct = new proxmox.ct.Container(
 - [Terraform bpg/proxmox Provider](https://registry.terraform.io/providers/bpg/proxmox/latest)
 - [Pulumi proxmoxve Provider](https://www.pulumi.com/registry/packages/proxmoxve/)
 - [Proxmox Community Helper Scripts](https://community-scripts.github.io/ProxmoxVE/)
+```
