@@ -87,9 +87,9 @@ pct enter 100
 
 ## Running Docker in LXC
 
-Docker requires a **privileged container with nesting enabled**. This is less isolated than an unprivileged container but necessary for Docker's use of cgroups and namespaces.
+Docker works in **unprivileged containers** on Proxmox 8.x+ with `nesting=1` and `keyctl=1` features enabled. This is the recommended approach — more secure than privileged containers.
 
-### Create a Docker-Ready LXC
+### Create a Docker-Ready LXC (Unprivileged — Recommended)
 
 ```bash
 pct create 101 local:vztmpl/debian-12-standard_12.7-1_amd64.tar.zst \
@@ -99,17 +99,23 @@ pct create 101 local:vztmpl/debian-12-standard_12.7-1_amd64.tar.zst \
   --cores 4 \
   --rootfs local-lvm:50 \
   --net0 name=eth0,bridge=vmbr0,ip=dhcp \
-  --features nesting=1 \
-  --unprivileged 0 \
+  --features nesting=1,keyctl=1 \
+  --unprivileged 1 \
   --onboot 1 \
   --start 1
 ```
 
 Key settings:
 
-- `--unprivileged 0` — Privileged container (required for Docker)
-- `--features nesting=1` — Allow nested namespaces (required for Docker)
+- `--unprivileged 1` — Unprivileged container (recommended, more secure)
+- `--features nesting=1,keyctl=1` — Both required for Docker in unprivileged LXC
 - More memory/disk than a plain service container
+
+To enable on an existing container (or via UI: **Options > Features > check nesting + keyctl**):
+
+```bash
+pct set 101 --features nesting=1,keyctl=1
+```
 
 ### Install Docker Inside the LXC
 
@@ -129,14 +135,25 @@ apt install -y docker-compose-plugin
 docker compose version
 ```
 
-### Security Considerations
+### Unprivileged vs Privileged
 
-Privileged LXC containers have less isolation than unprivileged ones:
+| Aspect        | Unprivileged (recommended) | Privileged                           |
+| ------------- | -------------------------- | ------------------------------------ |
+| Security      | UID-mapped; escape = nobody on host | Container root = host root         |
+| Docker        | Works with `nesting=1,keyctl=1` | Works out of the box               |
+| Limitations   | Cannot mount SMB/CIFS directly | Full host access on escape         |
+| ZFS caveat    | Needs ext4 formatted volume | Native ZFS driver works            |
 
-- **Risk**: A container escape gives root on the host
-- **Mitigation**: Only run trusted workloads
-- **Alternative**: Use a KVM VM for Docker if strong isolation is needed
-- **Best practice**: Dedicate one LXC per role (don't mix Docker host with other services)
+### When to Use a VM Instead
+
+- You need live migration between Proxmox nodes
+- You need Docker overlay/macvlan networking
+- You want maximum isolation (zero risk of host kernel exploits)
+- You run GPU-passthrough workloads
+
+### Known Gotcha
+
+Docker/containerd updates inside LXC can break with `net.ipv4.ip_unprivileged_port_start` permission errors. Pin or test containerd.io versions before upgrading. **Snapshot before upgrading** the host OS or Docker.
 
 ## Use Case: cloudflared in LXC
 
@@ -188,8 +205,8 @@ pct create 201 local:vztmpl/debian-12-standard_12.7-1_amd64.tar.zst \
   --cores 2 \
   --rootfs local-lvm:30 \
   --net0 name=eth0,bridge=vmbr0,ip=dhcp \
-  --features nesting=1 \
-  --unprivileged 0 \
+  --features nesting=1,keyctl=1 \
+  --unprivileged 1 \
   --onboot 1 \
   --start 1
 
@@ -286,27 +303,43 @@ curl -X POST "https://proxmox:8006/api2/json/nodes/<node>/lxc" \
 
 ### Terraform / Pulumi
 
-There is a community **Terraform provider** for Proxmox that can also be used via Pulumi's Terraform bridge:
+Community providers for Proxmox IaC:
 
-- **Terraform**: [bpg/proxmox](https://registry.terraform.io/providers/bpg/proxmox/latest) (most maintained)
-- **Pulumi**: Use the Terraform bridge to wrap the provider, or use `pulumi-command` for API calls
+- **Terraform**: [bpg/proxmox](https://registry.terraform.io/providers/bpg/proxmox/latest) (actively maintained, supports PVE 8.x and 9.x)
+- **Pulumi**: [@muhlba91/pulumi-proxmoxve](https://www.pulumi.com/registry/packages/proxmoxve/) (wraps bpg provider; TypeScript, Python, Go, C#)
 
 ```typescript
-// Example using pulumi-command for Proxmox API calls
-import * as command from "@pulumi/command";
+// Pulumi example — create an LXC container
+import * as proxmox from "@muhlba91/pulumi-proxmoxve";
 
-const lxc = new command.remote.Command("create-lxc", {
-  connection: {
-    host: "proxmox.local",
-    user: "root",
-    privateKey: sshKey,
-  },
-  create: `pct create 100 local:vztmpl/debian-12-standard_12.7-1_amd64.tar.zst \
-    --hostname my-service --memory 2048 --cores 2 \
-    --rootfs local-lvm:20 --net0 name=eth0,bridge=vmbr0,ip=dhcp \
-    --features nesting=1 --unprivileged 0 --onboot 1 --start 1`,
-  delete: "pct destroy 100 --force",
+const provider = new proxmox.Provider("pve", {
+  endpoint: "https://pve.example.com:8006/",
+  apiToken: "root@pam!pulumi=<secret>",
+  insecure: true,
 });
+
+const ct = new proxmox.ct.Container(
+  "docker-host",
+  {
+    nodeName: "pve",
+    vmId: 101,
+    operatingSystem: {
+      templateFileId:
+        "local:vztmpl/debian-12-standard_12.7-1_amd64.tar.zst",
+      type: "debian",
+    },
+    disk: { datastoreId: "local-lvm", size: 20 },
+    cpu: { cores: 2 },
+    memory: { dedicated: 2048 },
+    networkInterface: { name: "eth0", bridge: "vmbr0" },
+    features: { nesting: true, keyctl: true },
+    unprivileged: true,
+  },
+  { provider },
+);
+```
+
+> **Note**: Creating multiple containers in parallel can cause Proxmox lock errors. Use sequential creation or `parallelism: 1` in Terraform.
 ```
 
 ## Best Practices
@@ -323,7 +356,7 @@ const lxc = new command.remote.Command("create-lxc", {
 
 ### Security
 
-- **Prefer unprivileged** containers unless Docker is needed
+- **Always use unprivileged** containers (Docker works with `nesting=1,keyctl=1`)
 - **One role per container** — don't mix unrelated services
 - **Use onboot=1** for critical infrastructure (cloudflared, databases)
 - **Regular snapshots** before upgrades
@@ -342,4 +375,7 @@ const lxc = new command.remote.Command("create-lxc", {
 - [PCT CLI Reference](https://pve.proxmox.com/pve-docs/pct.1.html)
 - [Proxmox API](https://pve.proxmox.com/pve-docs/api-viewer/)
 - [Docker in LXC](https://pve.proxmox.com/wiki/Linux_Container#pct_container_types)
+- [Unprivileged LXC Containers](https://pve.proxmox.com/wiki/Unprivileged_LXC_containers)
 - [Terraform bpg/proxmox Provider](https://registry.terraform.io/providers/bpg/proxmox/latest)
+- [Pulumi proxmoxve Provider](https://www.pulumi.com/registry/packages/proxmoxve/)
+- [Proxmox Community Helper Scripts](https://community-scripts.github.io/ProxmoxVE/)
