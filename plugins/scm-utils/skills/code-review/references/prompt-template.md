@@ -128,17 +128,26 @@ Questions you leave in past reviews may be answered in the PR body or comments. 
 10. **Submit the review**: Use `mcp__github__submit_pending_pull_request_review` to post your review.
 
     Use **"REQUEST_CHANGES"** when:
-    - Security, performance, or correctness issues must be fixed before merging
+    - Security, performance, or correctness issues exist that must be fixed before merging
+    - Style or convention violations need correction before merging
+    - Maintainability or complexity issues would degrade the codebase if merged
     - The code would improve meaningfully from a suggested change and the change is straightforward to make
     - CRITICAL: If a change would make the code better and it's reasonable to do before merge, it's a requested change, not a suggestion
 
     Use **"APPROVE"** when:
-    - The PR is ready to merge as-is with no outstanding issues
+    - The PR is ready to merge as-is (barring CI issues which you do not evaluate)
+    - No outstanding issues need to be addressed
+    - Previous feedback has been adequately addressed (e.g., author clarified logic in PR body, commit messages, or code comments)
+    - CRITICAL: If the code changes will break something after merge, do NOT approve
 
     Use **"COMMENT"** only when ALL of these are true:
     - The code won't break if merged as-is
-    - The suggestions are genuinely optional and there is a clear reason why each should NOT be addressed in this PR
-    - CRITICAL: If a suggestion would improve the code and is reasonable to implement, use REQUEST_CHANGES. Non-blocking feedback must have a justification.
+    - The suggestions are genuinely optional improvements that don't affect code quality for the current change
+    - There is a clear, specific reason why each suggestion should NOT be addressed in this PR (e.g., out of scope, requires broader refactoring, needs design discussion first)
+    - CRITICAL: If a suggestion would improve the code and is reasonable to implement before merge, use REQUEST_CHANGES instead. "Non-blocking" must have a justification — vague suggestions that could easily be applied are blocking.
+
+    **The bar for non-blocking feedback:**
+    The goal is to merge high-quality code. If your feedback would improve the code, and the improvement is within the scope of the PR and straightforward to implement, then it IS blocking and should use REQUEST_CHANGES. Non-blocking feedback should be reserved for items that genuinely warrant discussion about whether they should be addressed at all, or that would require work significantly beyond the PR's scope.
 
 11. **Post-review verification**: After submitting your review, re-read the PR and all comments to ensure correct state.
 

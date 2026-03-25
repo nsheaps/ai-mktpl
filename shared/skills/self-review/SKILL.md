@@ -61,8 +61,8 @@ When all agents complete, review each report. Compare results across dimensions 
   - 🚨 Score below 70%
   - ⚠️ Score below 85%
   - ✅ Score 85% or above
-- If any category has ⚠️, the maximum overall score is 94%
-- If overall score is >95%, keep the final review to just the table
+- If any category has ⚠️, the overall score should reflect that no category achieved ✅ level
+- If overall score is >95%, the detailed section can be minimal (just the table and a brief summary)
 - References from sub-agents should be verbose and verifiable
 
 ### Step 4: Post Review
