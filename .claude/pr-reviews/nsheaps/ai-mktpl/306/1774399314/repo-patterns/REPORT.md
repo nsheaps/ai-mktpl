@@ -1,4 +1,5 @@
 # Repo Patterns Review — PR #306
+
 Score: 84/100
 
 ## Summary
@@ -14,6 +15,7 @@ The updated `plugins/github/hooks/hooks.json` follows the exact schema used by a
 ### Script structure — PARTIAL DEVIATION
 
 Existing hook scripts (`install-gh.sh`, `install-mise.sh`) follow a strict pattern:
+
 1. `PLUGIN_NAME="<name>"`
 2. `source "${CLAUDE_PLUGIN_ROOT}/lib/plugin-config-read.sh"`
 3. `source "${CLAUDE_PLUGIN_ROOT}/lib/tool-install.sh"`
@@ -34,12 +36,14 @@ The new library files `hooks/scripts/lib/pr-state.sh` and `hooks/scripts/lib/pr-
 ### Double-source guard — MATCHES
 
 Both new library files use the repo's established guard idiom:
+
 ```bash
 if [ "${_PR_STATE_LOADED:-}" = "true" ]; then
   return 0 2>/dev/null || true
 fi
 _PR_STATE_LOADED="true"
 ```
+
 This exactly matches the pattern in `plugins/github/lib/log.sh` (`_LOG_SH_LOADED`) and `plugins/github/lib/hook-logging.sh` (`_HOOK_LOGGING_LOADED`). The guard variable naming convention (`_<UPPER_NAME>_LOADED`) is consistent.
 
 ### Settings YAML — MATCHES

@@ -1,9 +1,10 @@
 # Simplicity Review — PR #306
+
 Score: 58/100
 
 ## Summary
 
-The PR introduces a real, useful feature — async PR state tracking — and the overall intent is clean: fetch, cache, diff, report. However, the implementation carries a meaningful complexity tax at several layers. The `_pr_state_diff` function spawns a separate `echo "$json" | jq` subprocess for every individual field it inspects (roughly 20 separate jq invocations against the same two JSON blobs), when a single jq call could produce all diff output at once. The 3-file library split is slightly over-engineered for the volume of code involved: `pr-discover.sh` (114 lines) and `pr-state.sh` (330 lines) are reasonable in isolation, but their combined caller `pr-state-check.sh` is thin enough (145 lines, much of which is scaffolding) that collapsing all three into a single well-commented script would reduce sourcing overhead and make the execution path easier to follow. The `PostToolUse "*"` matcher with an in-script throttle works correctly but introduces a subtle ordering constraint: the throttle state file is written *after* the interval check passes, meaning the script must always spin up just to re-read the cache and exit — a more targeted matcher or a dedicated debounce hook type would eliminate that per-tool-use bash invocation entirely. These are real costs but none are blockers; the code is correct and well-commented throughout.
+The PR introduces a real, useful feature — async PR state tracking — and the overall intent is clean: fetch, cache, diff, report. However, the implementation carries a meaningful complexity tax at several layers. The `_pr_state_diff` function spawns a separate `echo "$json" | jq` subprocess for every individual field it inspects (roughly 20 separate jq invocations against the same two JSON blobs), when a single jq call could produce all diff output at once. The 3-file library split is slightly over-engineered for the volume of code involved: `pr-discover.sh` (114 lines) and `pr-state.sh` (330 lines) are reasonable in isolation, but their combined caller `pr-state-check.sh` is thin enough (145 lines, much of which is scaffolding) that collapsing all three into a single well-commented script would reduce sourcing overhead and make the execution path easier to follow. The `PostToolUse "*"` matcher with an in-script throttle works correctly but introduces a subtle ordering constraint: the throttle state file is written _after_ the interval check passes, meaning the script must always spin up just to re-read the cache and exit — a more targeted matcher or a dedicated debounce hook type would eliminate that per-tool-use bash invocation entirely. These are real costs but none are blockers; the code is correct and well-commented throughout.
 
 ## Findings
 
@@ -75,7 +76,7 @@ The split is not wrong and is forward-compatible if reuse is anticipated, but th
 
 **File:** `plugins/github/hooks/hooks.json`, line 14
 
-The matcher `"*"` means `pr-state-check.sh` is invoked after every single tool use. The script then reads the throttle file to decide whether to exit early. This is correct behavior, but it means the full bash startup + `source` of 4 library files + config reads occurs on every tool use — only to exit after the interval check in most cases. A more efficient approach would be to place the throttle check *before* the library sources, or to use a dedicated hook event that fires less frequently if the platform supports it. Currently the early-exit guard at line 98 in `pr-state-check.sh` comes after config reads, `source` calls, and guard checks — which is already reasonably fast but not minimal.
+The matcher `"*"` means `pr-state-check.sh` is invoked after every single tool use. The script then reads the throttle file to decide whether to exit early. This is correct behavior, but it means the full bash startup + `source` of 4 library files + config reads occurs on every tool use — only to exit after the interval check in most cases. A more efficient approach would be to place the throttle check _before_ the library sources, or to use a dedicated hook event that fires less frequently if the platform supports it. Currently the early-exit guard at line 98 in `pr-state-check.sh` comes after config reads, `source` calls, and guard checks — which is already reasonably fast but not minimal.
 
 A minor structural improvement: move the `hook_input="$(cat)"` stdin drain above the throttle check, which is already required before any early exit to avoid breaking the pipe, but the current ordering already does this correctly.
 
@@ -90,6 +91,7 @@ A minor structural improvement: move the `hook_input="$(cat)"` stdin drain above
 **File:** `plugins/github/hooks/scripts/pr-state-check.sh`, lines 48, 52, 56
 
 Each early-exit guard uses `cat > /dev/null` before `exit 0` to drain stdin. This pattern is correct for Claude Code hooks (which pipe stdin), but:
+
 - The `hook_input="$(cat)"` drain at line 82 already handles this once stdin is needed.
 - The early-exit guards before any stdin read are correct to drain, but `cat > /dev/null` is an unusual idiom. The simpler `exec > /dev/null 2>&1` or `read -r -d '' _` would be more standard. This is a minor clarity issue, not a correctness problem.
 

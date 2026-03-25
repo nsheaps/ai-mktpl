@@ -1,4 +1,5 @@
 # Documentation Review — PR #306
+
 Score: 87/100
 
 ## Summary

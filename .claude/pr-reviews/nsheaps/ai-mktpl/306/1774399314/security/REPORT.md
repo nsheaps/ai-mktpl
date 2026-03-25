@@ -1,4 +1,5 @@
 # Security Review — PR #306
+
 Score: 62/100
 
 ## Summary
@@ -8,6 +9,7 @@ PR #306 introduces async shell-based hooks for PR state tracking. The scripts ar
 ## Findings
 
 ### F1 — Path Traversal via Parsed Remote URL (Medium)
+
 **File:** `plugins/github/hooks/scripts/lib/pr-discover.sh`, lines 88–100
 
 `_pr_extract_owner_repo` extracts `_PR_OWNER` and `_PR_REPO` from the git remote URL using `sed` with no sanitization or character-class restriction. The captured groups allow `/`, `..`, `~`, and other filesystem-significant characters. Both values flow directly into the cache filename in `pr-state.sh`:
@@ -28,6 +30,7 @@ Mitigation: validate that `_PR_OWNER` and `_PR_REPO` match `^[A-Za-z0-9_.-]+$` b
 ---
 
 ### F2 — `head_sha` from API Response Used in URL Without Validation (Low-Medium)
+
 **File:** `plugins/github/hooks/scripts/lib/pr-state.sh`, lines 118–124
 
 `head_sha` is extracted from the GitHub API JSON response via `jq -r '.head_sha // empty'` and immediately used in a subsequent API call:
@@ -43,6 +46,7 @@ A SHA returned by the API should be a 40-character hex string. If the API proxy 
 ---
 
 ### F3 — Unquoted `$gh_hostname_flag` (Low)
+
 **Files:** `plugins/github/hooks/scripts/lib/pr-discover.sh` line ~72; `plugins/github/hooks/scripts/lib/pr-state.sh` lines ~77, 83, 88, 94, 119
 
 `gh_hostname_flag` is used unquoted in all `gh api` invocations:
@@ -56,6 +60,7 @@ The value is either empty or the literal string `--hostname github.com`, so word
 ---
 
 ### F4 — `check_interval` Arithmetic Expansion Without Integer Validation (Low)
+
 **File:** `plugins/github/hooks/scripts/pr-state-check.sh`, lines ~86–93
 
 ```bash
@@ -70,6 +75,7 @@ if [ "$elapsed" -lt "$check_interval" ]; then
 ---
 
 ### F5 — Cache Files Created Without Explicit Permissions (Low-Medium)
+
 **File:** `plugins/github/hooks/scripts/lib/pr-state.sh`, line ~43; `pr-state-check.sh` line ~62
 
 ```bash
@@ -83,6 +89,7 @@ Neither the directory nor files are created with an explicit restrictive mode. T
 ---
 
 ### F6 — TOCTOU Race in Throttle Logic (Low)
+
 **File:** `plugins/github/hooks/scripts/pr-state-check.sh`, lines ~86–95
 
 The throttle pattern reads `.last-check`, evaluates elapsed time, then writes the updated timestamp — a classic check-then-act race:
@@ -103,6 +110,7 @@ The same race applies in `pr_state_fetch_and_compare`: old state is read, API is
 ---
 
 ### F7 — Raw PR Content Interpolated into Change Strings (Low)
+
 **File:** `plugins/github/hooks/scripts/lib/pr-state.sh`, lines ~178, 184 and throughout `_pr_state_diff`
 
 PR titles, labels, and the first 100 characters of comment/review bodies from the GitHub API are interpolated directly into the `PR_STATE_CHANGES` array strings and echoed to stdout:
@@ -118,6 +126,7 @@ A PR title containing terminal escape sequences (e.g., `\033[2J` to clear the te
 ---
 
 ### F8 — `set -euo pipefail` Absent from Sourced Library Files (Informational)
+
 **Files:** `plugins/github/hooks/scripts/lib/pr-state.sh` line 1; `plugins/github/hooks/scripts/lib/pr-discover.sh` line 1
 
 The library files are sourced (not executed), so they inherit the entry point's `set -euo pipefail`. This is correct behavior. However, the absence of the directive in the library headers means if a future caller sources these libraries without strict mode, silent failure propagation becomes possible (e.g., a failed `git` command silently returning empty string). A comment noting this inherited dependency would help prevent future misuse.
@@ -125,6 +134,7 @@ The library files are sourced (not executed), so they inherit the entry point's 
 ---
 
 ### F9 — `project_slug` Safe; No Path Traversal (Informational — Positive Finding)
+
 **File:** `plugins/github/hooks/scripts/pr-state-check.sh`, line ~60
 
 ```bash
@@ -136,6 +146,7 @@ project_slug="$(basename "$CLAUDE_PROJECT_DIR")"
 ---
 
 ### F10 — No Validation That Discovered Sibling Directories Are Trustworthy (Low)
+
 **File:** `plugins/github/hooks/scripts/lib/pr-discover.sh`, lines ~30–43
 
 The multi-project discovery scans `$(dirname "$CLAUDE_PROJECT_DIR")/*/` for sibling `.git` repos. In a shared or adversarially constructed filesystem, a symlinked directory or an attacker-planted git repo in the parent directory could be discovered and have its remote URL parsed, potentially causing `gh api` calls for attacker-controlled repositories. This is a low-severity concern in the intended single-user workstation context but worth noting for web-session deployments on shared infrastructure.

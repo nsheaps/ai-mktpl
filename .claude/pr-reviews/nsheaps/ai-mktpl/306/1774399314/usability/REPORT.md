@@ -1,4 +1,5 @@
 # Usability Review — PR #306
+
 Score: 81/100
 
 ## Summary
@@ -60,6 +61,7 @@ On SessionStart with no changes, the script outputs `"github: PR state baseline 
 ### Output format
 
 The bulleted list format for changes is clean:
+
 ```
 github: PR state changes detected since last check:
 
@@ -68,6 +70,7 @@ github: PR state changes detected since last check:
 
 Review these changes and determine if any action is needed.
 ```
+
 This is readable, correctly prefixed with the plugin name, and ends with an explicit action prompt. The trailing blank lines and the closing call-to-action improve agent comprehension over a raw list.
 
 ## References
