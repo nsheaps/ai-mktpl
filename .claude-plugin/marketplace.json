@@ -42,6 +42,60 @@
       "keywords": ["tmux", "iterm2", "tab-title", "agent-teams", "pane-title"]
     },
     {
+      "name": "arcane",
+      "description": "Skills for deploying docker-compose stacks via Arcane GitOps — directory conventions, secrets management with 1Password, and GitHub Actions CI/CD.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/arcane",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": [
+        "arcane",
+        "gitops",
+        "docker-compose",
+        "deployment",
+        "1password",
+        "secrets",
+        "docker",
+        "containers",
+        "self-hosted",
+        "homelab"
+      ]
+    },
+    {
+      "name": "cloudflare",
+      "description": "Skills for managing Cloudflare developer platform components including Workers, R2, D1, AI Gateway, Pages, Tunnels, and more — with Pulumi IaC setup for each.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/cloudflare",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": [
+        "cloudflare",
+        "workers",
+        "r2",
+        "d1",
+        "kv",
+        "pages",
+        "tunnels",
+        "ai-gateway",
+        "zero-trust",
+        "durable-objects",
+        "queues",
+        "vectorize",
+        "dns",
+        "pulumi",
+        "infrastructure-as-code",
+        "iac",
+        "serverless",
+        "edge-computing"
+      ]
+    },
+    {
       "name": "code-simplifier",
       "description": "Simplify and refine code for clarity, consistency, and maintainability. Requires pr-review-toolkit plugin.",
       "version": "0.1.1",
@@ -427,6 +481,28 @@
       ]
     },
     {
+      "name": "proxmox",
+      "description": "Skills for managing Proxmox VE hosts and LXC containers — creating containers, running Docker in LXC, and hosting services like cloudflared.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/proxmox",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": [
+        "proxmox",
+        "pve",
+        "lxc",
+        "containers",
+        "virtualization",
+        "homelab",
+        "self-hosted",
+        "docker",
+        "infrastructure"
+      ]
+    },
+    {
       "name": "remote-config",
       "description": "Sync upstream Claude config repo on session start. Pulls latest from a configured git repo to ~/.claude-remote/ and reports update status.",
       "version": "0.1.8",
@@ -700,6 +776,32 @@
         "categorization",
         "workflow",
         "hooks"
+      ]
+    },
+    {
+      "name": "zai-glm",
+      "description": "Skills for using z.ai (Zhipu AI) GLM models and configuring Claude Code to access them via the Anthropic-compatible endpoint or API gateways.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/zai-glm",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": [
+        "zai",
+        "z-ai",
+        "zhipu",
+        "glm",
+        "glm-5",
+        "glm-4.7",
+        "glm-4.5",
+        "chatglm",
+        "ai-models",
+        "openai-compatible",
+        "anthropic-compatible",
+        "china-ai",
+        "llm-provider"
       ]
     }
   ]
