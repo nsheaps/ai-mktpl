@@ -116,7 +116,7 @@ github:
 
   # PR state tracking
   prStateTracking: true
-  prStateCheckInterval: 60  # seconds between PostToolUse checks
+  prStateCheckInterval: 60 # seconds between PostToolUse checks
   # prStateCacheDir: "~/.claude/plugin-cache/github"
 ```
 
@@ -130,7 +130,7 @@ For project-specific overrides:
 # In $CLAUDE_PROJECT_DIR/.claude/plugins.settings.yaml
 github:
   prStateCacheDir: "~/.claude/plugin-cache/github/my-project"
-  prStateCheckInterval: 120  # check less frequently
+  prStateCheckInterval: 120 # check less frequently
 ```
 
 Both `~` and `$HOME` are supported in `prStateCacheDir` paths.
