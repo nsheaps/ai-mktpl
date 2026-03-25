@@ -1,6 +1,6 @@
 {
   "name": "permissions-sync",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "description": "Merge permission scopes from configurable source settings.json files into settings.local.json on session start. Supports project-level and user-level installation.",
   "author": {
     "name": "Nathan Heaps",

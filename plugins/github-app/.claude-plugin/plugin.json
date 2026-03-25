@@ -1,6 +1,6 @@
 {
   "name": "github-app",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Automatic GitHub App token lifecycle for Claude Code sessions. Generates installation tokens on session start, monitors expiry via PreToolUse hook, and refreshes transparently before commands that need authentication.",
   "author": {
     "name": "Nathan Heaps",
