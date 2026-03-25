@@ -313,7 +313,7 @@
     {
       "name": "mise",
       "description": "Install and manage mise (tool version manager) in Claude Code sessions. Provides session-start auto-install for web sessions and comprehensive workflow skills.",
-      "version": "0.2.18",
+      "version": "0.2.19",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -383,6 +383,29 @@
       "category": "utility",
       "tags": ["utility", "skill"],
       "keywords": ["plugin", "install", "update", "reload", "management"]
+    },
+    {
+      "name": "poc-litellm-proxy",
+      "description": "POC: Auto-configure LiteLLM proxy for Claude Code with multi-provider routing, observability, and remote gateway support",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/poc-litellm-proxy",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": [
+        "litellm",
+        "proxy",
+        "llm-gateway",
+        "multi-provider",
+        "anthropic",
+        "openai",
+        "observability",
+        "opentelemetry",
+        "langfuse",
+        "cloudflare-ai-gateway"
+      ]
     },
     {
       "name": "product-development-and-sdlc",
