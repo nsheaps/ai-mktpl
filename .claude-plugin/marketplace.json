@@ -299,6 +299,29 @@
       "keywords": ["linear", "mcp", "hooks", "sync", "issue-tracking", "conflict-detection"]
     },
     {
+      "name": "mcp-tooling",
+      "description": "Skills for MCP CLI tools, frameworks, proxy daemoning, and gateway patterns. Covers philschmid/mcp-cli, mcp-use, apify/mcpc, mcp-proxy daemoning, and MCP gateway architecture for sharing servers across sessions and networks.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/mcp-tooling",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": [
+        "mcp",
+        "mcp-cli",
+        "mcp-use",
+        "mcpc",
+        "mcp-proxy",
+        "mcp-gateway",
+        "model-context-protocol",
+        "tool-discovery",
+        "server-sharing",
+        "daemon"
+      ]
+    },
+    {
       "name": "memory-manager",
       "description": "Intelligent memory management for CLAUDE.md files. Automatically detects and stores user preferences, rules, and instructions with smart scope detection and hierarchical organization.",
       "version": "0.2.26",
