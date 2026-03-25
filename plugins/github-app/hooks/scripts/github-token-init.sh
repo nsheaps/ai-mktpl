@@ -241,10 +241,11 @@ cat > "$ENV_RUNTIME_FILE" <<ENVEOF
 export GH_TOKEN="$TOKEN"
 export GITHUB_TOKEN="$TOKEN"
 export GITHUB_TOKEN_FILE="$TOKEN_FILE"
+export GITHUB_APP_TOKEN_FILE="$TOKEN_FILE"
+export GITHUB_APP_ENV_FILE="$ENV_RUNTIME_FILE"
 export GITHUB_APP_ID="$GITHUB_APP_ID"
 export GITHUB_APP_PRIVATE_KEY_PATH="$GITHUB_APP_PRIVATE_KEY_PATH"
 export GITHUB_INSTALLATION_ID="$GITHUB_INSTALLATION_ID"
-export GITHUB_APP_ENV_FILE="$ENV_RUNTIME_FILE"
 ENVEOF
 [[ -n "${GITHUB_APP_CLIENT_ID:-}" ]] && echo "export GITHUB_APP_CLIENT_ID=\"$GITHUB_APP_CLIENT_ID\"" >> "$ENV_RUNTIME_FILE"
 [[ -n "${GITHUB_APP_CLIENT_SECRET:-}" ]] && echo "export GITHUB_APP_CLIENT_SECRET=\"$GITHUB_APP_CLIENT_SECRET\"" >> "$ENV_RUNTIME_FILE"
@@ -257,62 +258,56 @@ if [[ -n "${CLAUDE_ENV_FILE:-}" ]]; then
   echo "source \"$ENV_RUNTIME_FILE\"" >> "$CLAUDE_ENV_FILE"
 fi
 
-# --- Configure git identity from GitHub App bot account ---
+# --- Configure git identity from GitHub App bot account via env vars ---
+#
+# Sets GIT_AUTHOR_NAME, GIT_AUTHOR_EMAIL, GIT_COMMITTER_NAME, GIT_COMMITTER_EMAIL
+# as environment variables instead of writing to git config. This avoids polluting
+# the global git config on shared machines where multiple agents may be running.
 
-configure_git_identity() {
-  local token="$1"
-  local app_id="$2"
+configure_git_identity_env() {
   local auto_git_config
   auto_git_config="$(plugin_get_config "autoGitConfig" "true")"
   [[ "$auto_git_config" == "true" ]] || return 0
 
-  hook_log_step "git-identity" "Configuring git identity from GitHub App"
+  hook_log_step "git-identity" "Configuring git identity env vars from GitHub App"
 
-  # Skip if git user.name is already configured (don't override user's settings)
-  if git config user.name &>/dev/null && git config user.email &>/dev/null; then
-    hook_log "git user.name/email already configured, skipping"
-    return 0
-  fi
-
-  # Fetch the App's slug (name) from the API
-  local app_info app_slug bot_id
-  app_info=$(curl -s \
-    -H "Authorization: token $token" \
-    -H "Accept: application/vnd.github+json" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
-    "https://api.github.com/app" 2>/dev/null) || return 0
-
-  app_slug=$(echo "$app_info" | jq -r '.slug // empty' 2>/dev/null)
+  # Fetch the App's slug (name) from the API using the already-set GH_TOKEN
+  local app_slug bot_id
+  app_slug=$(GH_TOKEN="$TOKEN" gh api /app --jq '.slug // empty' 2>/dev/null) || true
   [[ -n "$app_slug" ]] || return 0
 
   # Get the bot user ID for the noreply email
-  local bot_login="${app_slug}[bot]"
-  local bot_user
-  bot_user=$(curl -s \
-    -H "Authorization: token $token" \
-    -H "Accept: application/vnd.github+json" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
-    "https://api.github.com/users/${bot_login}" 2>/dev/null) || true
-
-  bot_id=$(echo "$bot_user" | jq -r '.id // empty' 2>/dev/null)
+  bot_id=$(GH_TOKEN="$TOKEN" gh api "/users/${app_slug}[bot]" --jq '.id // empty' 2>/dev/null) || true
 
   local bot_name="${app_slug}[bot]"
   local bot_email
   if [[ -n "$bot_id" ]]; then
     bot_email="${bot_id}+${app_slug}[bot]@users.noreply.github.com"
   else
-    bot_email="${app_id}+${app_slug}[bot]@users.noreply.github.com"
+    bot_email="${GITHUB_APP_ID}+${app_slug}[bot]@users.noreply.github.com"
   fi
 
-  git config user.name "$bot_name"
-  git config user.email "$bot_email"
-  hook_log "Configured git identity: $bot_name <$bot_email>"
+  # Export into current process so the rest of this hook sees them
+  export GIT_AUTHOR_NAME="$bot_name"
+  export GIT_AUTHOR_EMAIL="$bot_email"
+  export GIT_COMMITTER_NAME="$bot_name"
+  export GIT_COMMITTER_EMAIL="$bot_email"
 
-  # Save slug for use by PreToolUse hook output
+  # Append to the runtime env file so subsequent Bash commands pick them up
+  cat >> "$ENV_RUNTIME_FILE" <<GITENVEOF
+export GIT_AUTHOR_NAME="$bot_name"
+export GIT_AUTHOR_EMAIL="$bot_email"
+export GIT_COMMITTER_NAME="$bot_name"
+export GIT_COMMITTER_EMAIL="$bot_email"
+GITENVEOF
+
+  hook_log "Configured git identity env vars: $bot_name <$bot_email>"
+
+  # Save slug for use by hook output logging
   APP_SLUG="$app_slug"
 }
 
-configure_git_identity "$TOKEN" "$GITHUB_APP_ID"
+configure_git_identity_env
 
 # --- Print initial token info ---
 
