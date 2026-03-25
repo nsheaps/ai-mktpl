@@ -29,19 +29,25 @@ This plugin clones arbitrary remote git repositories and symlinks their contents
 ## Inline Comments
 
 ### plugins/poc-shared-rules/hooks/scripts/sync-rules.sh:67–68
+
 `_SRC_PATH` is stripped of its leading `/` but not validated for `..` components. A path like `../../.ssh` would survive this and be passed to `sparse-checkout` and used as the symlink target. Add: `if [[ "$_SRC_PATH" =~ (^|/)\.\.(/|$) ]]; then hook_fail ...; return 1; fi`
 
 ### plugins/poc-shared-rules/hooks/scripts/sync-rules.sh:62
+
 `_SRC_NAME` (symlink name) comes from the left side of `=` in user config with no sanitization. A name containing `/` or `..` would allow directory traversal when constructing `link_path="${rules_dir}/${name}"` at line 167. Validate that `_SRC_NAME` contains only safe characters (`[a-zA-Z0-9._-]`).
 
 ### plugins/poc-shared-rules/hooks/scripts/sync-rules.sh:136–137
+
 `$ref` is passed directly as `--branch "$ref"` to git. Git option injection is possible if `$ref` starts with `-`. Validate that `$ref` matches a safe ref pattern (e.g. `[a-zA-Z0-9._/-]+`) before use.
 
 ### plugins/poc-shared-rules/hooks/scripts/sync-rules.sh:201
+
 `read_dependencies` parses a `.shared-rules.yaml` from the cloned repo — content fully controlled by the remote repository author. Parsed entries are passed without further validation into `process_source` at line 271. A malicious repo can use this to trigger clones of other arbitrary repos at session start. At minimum, this should be opt-in (disabled by default) and prominently documented as a trust escalation.
 
 ### plugins/poc-shared-rules/hooks/scripts/sync-rules.sh:37
+
 `CACHE_BASE` is set from user-supplied `cacheDir` config with no path validation. Setting this to `/tmp` or `/etc` and combining with a traversal in `_SRC_NAME` could place symlinks in unexpected locations.
 
 ### plugins/poc-shared-rules/hooks/scripts/sync-rules.sh:268
+
 The recursion depth limit of 10 prevents infinite loops but not wide dependency graphs. A single source can declare hundreds of dependencies, each cloning a separate repo. Consider also limiting total dependency count per run to prevent session-start denial-of-service.

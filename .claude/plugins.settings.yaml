@@ -49,4 +49,4 @@ poc-shared-rules:
   sources:
     # The same ruleset bundled in the common-sense plugin, referenced directly
     # from the source repo so it stays current without plugin updates.
-    - "common-sense=nsheaps/ai-mktpl@main:/plugins/common-sense/rules"
+    - 'common-sense=nsheaps/ai-mktpl@main:/plugins/common-sense/rules'

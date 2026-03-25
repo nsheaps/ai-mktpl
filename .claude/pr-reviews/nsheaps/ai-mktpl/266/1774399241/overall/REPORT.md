@@ -5,17 +5,17 @@
 
 ## Score Summary
 
-| Category | Score | Status |
-|---|---|---|
-| Simplicity | 52/100 | 🚨 Hard block |
-| Security | 42/100 | 🚨 Hard block |
-| QA & Engineering | 62/100 | 🚨 Hard block |
-| Flexibility | 72/100 | ⚠️ Below threshold |
-| Usability | 76/100 | ⚠️ Below threshold |
-| Documentation | 82/100 | ⚠️ Below threshold |
-| Best Practices | 82/100 | ⚠️ Below threshold |
-| Repo Patterns | 90/100 | ✅ |
-| **Overall** | **70/100** | 🚨 **Not mergeable** |
+| Category         | Score      | Status               |
+| ---------------- | ---------- | -------------------- |
+| Simplicity       | 52/100     | 🚨 Hard block        |
+| Security         | 42/100     | 🚨 Hard block        |
+| QA & Engineering | 62/100     | 🚨 Hard block        |
+| Flexibility      | 72/100     | ⚠️ Below threshold   |
+| Usability        | 76/100     | ⚠️ Below threshold   |
+| Documentation    | 82/100     | ⚠️ Below threshold   |
+| Best Practices   | 82/100     | ⚠️ Below threshold   |
+| Repo Patterns    | 90/100     | ✅                   |
+| **Overall**      | **70/100** | 🚨 **Not mergeable** |
 
 ---
 

@@ -9,16 +9,21 @@ Two minor deductions: (1) The script calls `hook_fail` inside `fetch_into_cache`
 ## Inline Comments
 
 ### plugins/poc-shared-rules/hooks/scripts/sync-rules.sh:145-148
+
 `hook_fail` logs a structured error to stderr, but the immediately following `return 1` propagates through `fetch_into_cache` back into `process_source` (line 249), which itself returns 1, and that is caught by the `|| hook_log "WARNING: ..."` guard on line 371. The structured `hook_fail` error block therefore fires but execution continues to `hook_respond` normally. This is functional but inconsistent with the intended pattern where `hook_run my_main_function` wraps the top-level call so that a single `hook_fail` maps cleanly to one structured error. Consider wrapping the main processing loop in a function and calling it via `hook_run`.
 
 ### plugins/poc-shared-rules/hooks/scripts/sync-rules.sh:361
+
 `exit 0` is correctly placed inside the early-return branch (`if [ ${#SOURCES[@]} -eq 0 ]`). It is preceded by `hook_respond`, satisfying the "hook_respond MUST be last" contract for that branch. Good.
 
 ### plugins/poc-shared-rules/hooks/hooks.json:11
+
 `"timeout": 60` is reasonable for a network operation (sparse clone). The `mise` plugin uses the same timeout for its install hook. Consistent.
 
 ### plugins/poc-shared-rules/.claude-plugin/plugin.json:1-13
+
 No `"hooks"` key referencing `./hooks/hooks.json`. Per the plugin-hooks-organization rule, the correct pattern is `{ "hooks": "./hooks/hooks.json" }` in `plugin.json`. However, no existing plugin in the repo implements this key — `common-sense`, `mise`, `remote-config`, `context-bloat-prevention`, `github-app`, and `safety-evaluation-prompt` all omit it. This appears to be an unimplemented rule, so not penalized in the score, but worth noting for consistency if the rule is ever enforced.
 
 ### plugins/poc-shared-rules/lib/
+
 The three symlinks present (`hook-logging.sh`, `log.sh`, `plugin-config-read.sh`) are the correct and sufficient set for this plugin's dependencies. Consistent with `common-sense` (minus `safe-settings-write.sh`, which this plugin does not need). No missing or spurious symlinks.

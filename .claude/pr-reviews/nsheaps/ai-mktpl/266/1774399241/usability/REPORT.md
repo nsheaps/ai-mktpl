@@ -11,25 +11,33 @@ Compared to `mise/README.md`, which separates Features, How It Works, Configurat
 ## Inline Comments
 
 ### plugins/poc-shared-rules/README.md:5
+
 The PoC disclaimer is useful but incomplete. Users need to know whether existing configuration will be migrated or break when the plugin is promoted to `shared-rules`. Add a sentence: "Configuration key will change on promotion; plan to rename `poc-shared-rules:` to `shared-rules:` in your `plugins.settings.yaml`."
 
 ### plugins/poc-shared-rules/README.md:32
+
 The Installation section shows how to enable the plugin but does not mention that `sources` must also be configured before anything happens. A new user who follows only this section will see a silent "no sources configured" log and wonder why nothing appeared. Add a note like: "After enabling, configure at least one source (see Configuration below) — the plugin takes no action until sources are defined."
 
 ### plugins/poc-shared-rules/README.md:61-72
+
 The Recursive Dependencies section shows the `.shared-rules.yaml` format but gives no hint about where this file lives relative to the repo (inside the `path` directory being referenced). Add one sentence clarifying that `.shared-rules.yaml` must live at the root of the `path` directory specified in the source ref (e.g., at `plugins/common-sense/rules/.shared-rules.yaml`).
 
 ### plugins/poc-shared-rules/README.md:76
+
 Caching behavior says "fetches the latest commits for the specified ref" but does not mention that pinning to a commit SHA effectively disables auto-update (the fetch is a no-op once the SHA is already present). This is an important behavioral difference for users who want stable rules vs always-latest rules.
 
 ### plugins/poc-shared-rules/README.md (missing section)
+
 There is no "Troubleshooting" or "Requirements" section. The hook depends on `git` being available and optionally on `yq` or `python3` for config reading. A user on a minimal web session who lacks git will get a cryptic `hook_fail` with no guidance. Even a single-line callout — "Requires: git (for cloning), yq or python3 (for config parsing)" — would reduce support burden.
 
 ### plugins/poc-shared-rules/hooks/scripts/sync-rules.sh:359
+
 The "no sources configured" message is logged via `hook_log`, which goes to stderr and `additionalContext`. It will not surface prominently to a first-time user who just enabled the plugin and is waiting to see it do something. Consider either elevating this to a more prominent warning or including it in `hook_respond` output so it appears in the session start message.
 
 ### plugins/poc-shared-rules/hooks/scripts/sync-rules.sh:174
+
 The warning "is a real directory — not replacing; remove it manually" is logged via `hook_log` (stderr + accumulated text) but still returns 0 and continues. This silent skip could confuse users who renamed a rules directory and now wonder why the symlink wasn't updated. The message is technically correct but would benefit from a concrete path in the "remove it manually" instruction: "remove it manually: `rm -rf <link_path>`".
 
 ### plugins/poc-shared-rules/poc-shared-rules.settings.yaml:23
+
 The `alsoSyncToUser` option description says "also sync to user-level ~/.claude/rules/" but does not warn that this affects ALL projects on the machine, not just the current one. A one-line warning here would prevent an easy misconfiguration: "Warning: enabling this makes rules available globally, not just in this project."

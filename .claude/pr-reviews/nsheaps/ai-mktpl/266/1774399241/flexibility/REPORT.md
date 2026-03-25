@@ -7,28 +7,37 @@ The plugin demonstrates strong design intentions around flexibility: configurabl
 ## Inline Comments
 
 ### plugins/poc-shared-rules/hooks/scripts/sync-rules.sh:113
+
 `clone_url` is hardcoded to `https://github.com/`. There is no way to use GitLab, Bitbucket, self-hosted Git, or SSH URLs. A `host` or `cloneBaseUrl` config option, or a richer source ref format like `gitlab.com:owner/repo@ref:/path`, would make the plugin usable outside the GitHub ecosystem.
 
 ### plugins/poc-shared-rules/hooks/scripts/sync-rules.sh:113
+
 Private repositories are not supported — there is no mechanism to inject credentials (e.g. a `GITHUB_TOKEN` or `gitCredential` config key). Any source in a private repository will silently fail with an authentication error from git, with only a generic "Failed to clone" message surfaced to the user.
 
 ### plugins/poc-shared-rules/hooks/scripts/sync-rules.sh:282-350
+
 `read_source_config` reimplements the 3-tier settings file search instead of using `plugin_get_config_array`. The reimplementation omits `.json` file support (lines 286-293 only enumerate `.yaml`/`.yml` paths), so users with JSON-format settings files will get no sources loaded. The shared library already handles this correctly.
 
 ### plugins/poc-shared-rules/hooks/scripts/sync-rules.sh:345-349
+
 Sources are taken from the **first** settings file that has a non-empty `sources` array and then the loop returns immediately. This means a project-level `plugins.settings.yaml` with `sources: []` would suppress all user-level sources, even though an empty array likely means "not configured here" rather than "intentionally empty". There is no documented behavior for this edge case.
 
 ### plugins/poc-shared-rules/hooks/scripts/sync-rules.sh:323-325
+
 The python3 fallback parser assumes exactly 2-space indentation for the `sources:` key (`r'^\s{2}sources\s*:'`). YAML files using 4-space indentation or tabs will not match, causing silent failure — no sources will be loaded and no error will be emitted.
 
 ### plugins/poc-shared-rules/hooks/scripts/sync-rules.sh:355-362
+
 The `plugin_is_enabled` check from `plugin-config-read.sh` is never called. A user who sets `enabled: false` in their settings will still have the hook run on every session start. Compare the mise plugin, which respects this flag.
 
 ### plugins/poc-shared-rules/hooks/hooks.json:12
+
 The `timeout` of 60 seconds is hardcoded. Users with slow network connections or many deep dependency trees may hit this limit, while users who want snappier sessions cannot reduce it. A `hookTimeout` config key would allow per-project tuning.
 
 ### plugins/poc-shared-rules/hooks/scripts/sync-rules.sh:192
+
 The `NOTE` comment on line 192 documents that the python3 fallback in `read_dependencies` only handles the legacy string format — mapping entries in `.shared-rules.yaml` require `yq`. This is a silent degradation: dependency files using the documented mapping format will have their dependencies silently skipped when `yq` is absent. This should either be surfaced as a warning or the fallback should be improved.
 
 ### plugins/poc-shared-rules/hooks/scripts/sync-rules.sh:39
+
 `PROJECT_RULES_DIR` falls back to `./.claude/rules` when `CLAUDE_PROJECT_DIR` is unset. This relative path resolves against whatever the current working directory is at hook execution time, which may not be the project root. The mise plugin and others avoid this by requiring `CLAUDE_PROJECT_DIR` to be set or failing explicitly.

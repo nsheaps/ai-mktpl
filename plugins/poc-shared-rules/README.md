@@ -95,20 +95,24 @@ rm -rf ~/.cache/claude-shared-rules
 ## Troubleshooting
 
 **No sources configured / hook does nothing**
+
 - Check that your `plugins.settings.yaml` uses the key `poc-shared-rules:` with a nested `sources:` list
 - Each source must be a quoted string in `"name=owner/repo@ref:/path"` format
 - Verify `yq` is installed: `command -v yq`
 
 **Clone fails / path not found**
+
 - Confirm the repository exists and is publicly accessible on GitHub
 - Confirm the `ref` (branch/tag) exists
 - Confirm the `path` exists in the repository at that ref
 
 **Stale symlinks after removing a source**
+
 - Symlinks are not automatically removed when a source is deleted from config
 - Manually remove the stale link: `rm ~/.claude/rules/<name>`
 
 **Rules not appearing after session start**
+
 - Check hook output via Ctrl+O in the Claude Code sidebar
 - If `yq` is missing, sources may not be parsed — install it via `mise install yq`
 

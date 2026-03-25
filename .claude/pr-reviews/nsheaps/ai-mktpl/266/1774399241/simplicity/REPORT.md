@@ -7,16 +7,21 @@ The core concept is simple — fetch git paths and symlink them into `.claude/ru
 ## Inline Comments
 
 ### plugins/poc-shared-rules/hooks/scripts/sync-rules.sh:282-351
+
 `read_source_config` re-implements YAML array parsing that `plugin_get_config_array` from the shared `plugin-config-read.sh` library already provides. This is ~70 lines of fragile inline Python that bypasses the shared library abstraction the rest of the plugin relies on. If `plugin_get_config_array` cannot handle the mapping format (`{ name: 'value' }`), that is the right place to extend it, not to duplicate the entire config resolution loop.
 
 ### plugins/poc-shared-rules/hooks/scripts/sync-rules.sh:75-94
+
 The legacy `owner/repo/path@ref [as name]` parse branch exists solely for `.shared-rules.yaml` dependency files. This is a new plugin at v0.0.1 with no existing users; the dependency file format could require the same `name=owner/repo@ref:/path` format used everywhere else. Carrying a legacy format from day one doubles the surface area of `parse_source_ref` and creates a permanently asymmetric python3 fallback in `read_dependencies`.
 
 ### plugins/poc-shared-rules/hooks/scripts/sync-rules.sh:115-159
+
 The cascading `|| true` fallbacks on `sparse-checkout add`, `checkout`, and `fetch` mean `fetch_into_cache` always exits 0 regardless of whether the requested path was actually checked out. The function silently succeeds even when git operations fail, and the caller detects failure only by checking if the path exists afterwards. This indirect error signaling is harder to follow than letting git errors propagate or checking return codes explicitly.
 
 ### plugins/poc-shared-rules/hooks/scripts/sync-rules.sh:199-219
+
 `read_dependencies` embeds a second inline Python heredoc that only handles the legacy string format, not the mapping format. This means the python3 fallback path silently ignores mapping-style dependencies. The asymmetry (yq handles both; python3 handles one) is noted in a comment but is a simplification hazard: anyone testing without yq will get subtly different behaviour.
 
 ### plugins/poc-shared-rules/hooks/scripts/sync-rules.sh:263-265
+
 `setup_symlink` is called for `USER_RULES_DIR` inside `process_source`, which recurses for every dependency. This means the user-level symlink is created for transitively fetched dependencies, not just top-level configured sources. If this is intentional it should be documented; if not, the user-sync call belongs in the top-level loop in `main`, not inside the recursive processor.
