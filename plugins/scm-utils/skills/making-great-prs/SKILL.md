@@ -101,9 +101,9 @@ gh pr ready <PR_NUMBER>
 
 ## Error Handling
 
-| Error                 | Resolution                                                          |
-| --------------------- | ------------------------------------------------------------------- |
-| `gh` not found        | Run `eval "$(mise activate bash)"` or `mise install`                |
+| Error                 | Resolution                                                         |
+| --------------------- | ------------------------------------------------------------------ |
+| `gh` not found        | Run `eval "$(mise activate bash)"` or `mise install`               |
 | 401 Unauthorized      | Check `GH_TOKEN` is set and has PR write scope                     |
 | 422 Validation failed | Branch may not exist on remote yet — push first                    |
 | PR already exists     | Use `gh pr edit` to update instead of `gh pr create`               |
