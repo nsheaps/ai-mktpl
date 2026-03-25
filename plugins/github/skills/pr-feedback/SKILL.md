@@ -31,14 +31,16 @@ Reviews and review comments (inline) are separate API concepts. You need both.
 
 ```
 # Get the reviews themselves (APPROVE, REQUEST_CHANGES, COMMENT)
-pull_request_read(method="get_reviews", owner, repo, pullNumber)
+mcp__github__pull_request_read(method="get_reviews", owner, repo, pullNumber)
 
 # Get inline review comment threads (includes resolved/unresolved status)
-pull_request_read(method="get_review_comments", owner, repo, pullNumber)
+mcp__github__pull_request_read(method="get_review_comments", owner, repo, pullNumber)
 
 # Get general PR comments (non-review, conversation-level)
-pull_request_read(method="get_comments", owner, repo, pullNumber)
+mcp__github__pull_request_read(method="get_comments", owner, repo, pullNumber)
 ```
+
+> **Note:** The `mcp__github__` prefix is the standard prefix for the GitHub MCP server. Tool names may vary by MCP server configuration — the important part is the base name and method parameter.
 
 **Using `gh` CLI fallback:**
 
@@ -65,10 +67,10 @@ gh api repos/{owner}/{repo}/issues/{pr}/comments --paginate
 
 ```
 # Get check runs (individual CI jobs) for the PR's head commit
-pull_request_read(method="get_check_runs", owner, repo, pullNumber)
+mcp__github__pull_request_read(method="get_check_runs", owner, repo, pullNumber)
 
 # Get combined commit status (status API integrations)
-pull_request_read(method="get_status", owner, repo, pullNumber)
+mcp__github__pull_request_read(method="get_status", owner, repo, pullNumber)
 ```
 
 **Using `gh` CLI fallback:**
@@ -88,10 +90,10 @@ gh api repos/{owner}/{repo}/commits/{head_sha}/status
 
 ```
 # Full diff to understand what changed
-pull_request_read(method="get_diff", owner, repo, pullNumber)
+mcp__github__pull_request_read(method="get_diff", owner, repo, pullNumber)
 
 # Files changed (for scoping)
-pull_request_read(method="get_files", owner, repo, pullNumber)
+mcp__github__pull_request_read(method="get_files", owner, repo, pullNumber)
 ```
 
 ### 1d. Build a Feedback Inventory
@@ -127,10 +129,10 @@ The feedback is unclear, ambiguous, or references something you can't locate.
 
 ```
 # Reply to a review comment thread
-add_reply_to_pull_request_comment(owner, repo, pullNumber, commentId, body)
+mcp__github__add_reply_to_pull_request_comment(owner, repo, pullNumber, commentId, body)
 
 # Or for general comments
-add_issue_comment(owner, repo, issue_number, body)
+mcp__github__add_issue_comment(owner, repo, issue_number, body)
 ```
 
 Example response:
@@ -180,7 +182,7 @@ The feedback is valid but addressing it now would be:
 # Create a tracking issue
 gh issue create --title "Follow-up: {description}" \
   --body "From PR #{pr} review by @{reviewer}: {feedback summary}\n\nOriginal comment: {permalink}" \
-  --label "follow-up"
+  --label "enhancement"
 ```
 
 Example response:
@@ -229,7 +231,7 @@ The feedback is valid and should be fixed now.
 
 6. **Resolve the thread** if you have permission:
    ```
-   resolve_review_thread(threadId)
+   mcp__github__resolve_review_thread(threadId)
    ```
 
 ## Step 3: Address CI Failures
@@ -240,7 +242,7 @@ CI failures follow a similar but distinct process:
 
 ```
 # Get check runs with failure details
-pull_request_read(method="get_check_runs", owner, repo, pullNumber)
+mcp__github__pull_request_read(method="get_check_runs", owner, repo, pullNumber)
 ```
 
 For each failing check:
@@ -283,13 +285,13 @@ After addressing all feedback:
 1. **Verify CI is passing** — wait for checks to complete after your fix commits:
 
    ```
-   pull_request_read(method="get_check_runs", owner, repo, pullNumber)
+   mcp__github__pull_request_read(method="get_check_runs", owner, repo, pullNumber)
    ```
 
 2. **Self-review your changes** — read the updated diff to make sure fixes are correct:
 
    ```
-   pull_request_read(method="get_diff", owner, repo, pullNumber)
+   mcp__github__pull_request_read(method="get_diff", owner, repo, pullNumber)
    ```
 
 3. **Request re-review** — use the `request-review` label to trigger the AI review bot (if configured in the repo):
@@ -301,7 +303,7 @@ After addressing all feedback:
    Or using MCP tools:
 
    ```
-   update_pull_request(owner, repo, pullNumber, reviewers=["original-reviewer"])
+   mcp__github__update_pull_request(owner, repo, pullNumber, reviewers=["original-reviewer"])
    ```
 
 4. **Update the PR description** if your changes materially altered the approach or scope.
@@ -314,13 +316,13 @@ Make all read calls in parallel at the start to minimize round-trips:
 
 ```
 # Fire these simultaneously — they have no dependencies on each other
-pull_request_read(method="get", ...)           # PR metadata
-pull_request_read(method="get_reviews", ...)    # Review verdicts
-pull_request_read(method="get_review_comments", ...)  # Inline threads
-pull_request_read(method="get_comments", ...)   # General comments
-pull_request_read(method="get_check_runs", ...) # CI status
-pull_request_read(method="get_diff", ...)       # The diff itself
-pull_request_read(method="get_files", ...)      # Changed file list
+mcp__github__pull_request_read(method="get", ...)           # PR metadata
+mcp__github__pull_request_read(method="get_reviews", ...)    # Review verdicts
+mcp__github__pull_request_read(method="get_review_comments", ...)  # Inline threads
+mcp__github__pull_request_read(method="get_comments", ...)   # General comments
+mcp__github__pull_request_read(method="get_check_runs", ...) # CI status
+mcp__github__pull_request_read(method="get_diff", ...)       # The diff itself
+mcp__github__pull_request_read(method="get_files", ...)      # Changed file list
 ```
 
 ### Pagination
@@ -329,7 +331,7 @@ Review comments and CI checks can be paginated. Always check for pagination and 
 
 ```
 # MCP tools support perPage and page parameters
-pull_request_read(method="get_review_comments", owner, repo, pullNumber, perPage=100)
+mcp__github__pull_request_read(method="get_review_comments", owner, repo, pullNumber, perPage=100)
 
 # gh CLI with --paginate
 gh api repos/{owner}/{repo}/pulls/{pr}/comments --paginate
@@ -346,21 +348,21 @@ After fetching, filter down to actionable items:
 
 ## Quick Reference: MCP Tools for PR Feedback
 
-| Task                    | MCP Tool                            | Method/Parameters              |
-| ----------------------- | ----------------------------------- | ------------------------------ |
-| PR metadata             | `pull_request_read`                 | `method="get"`                 |
-| Review verdicts         | `pull_request_read`                 | `method="get_reviews"`         |
-| Inline comment threads  | `pull_request_read`                 | `method="get_review_comments"` |
-| General comments        | `pull_request_read`                 | `method="get_comments"`        |
-| CI check runs           | `pull_request_read`                 | `method="get_check_runs"`      |
-| Combined commit status  | `pull_request_read`                 | `method="get_status"`          |
-| PR diff                 | `pull_request_read`                 | `method="get_diff"`            |
-| Changed files           | `pull_request_read`                 | `method="get_files"`           |
-| Reply to review comment | `add_reply_to_pull_request_comment` | `commentId`, `body`            |
-| Add general comment     | `add_issue_comment`                 | `issue_number`, `body`         |
-| Resolve a thread        | `resolve_review_thread`             | `threadId`                     |
-| Request reviewers       | `update_pull_request`               | `reviewers=[...]`              |
-| Submit a review         | `pull_request_review_write`         | `method="create"`, `event`     |
+| Task | MCP Tool | Method/Parameters |
+|---|---|---|
+| PR metadata | `mcp__github__pull_request_read` | `method="get"` |
+| Review verdicts | `mcp__github__pull_request_read` | `method="get_reviews"` |
+| Inline comment threads | `mcp__github__pull_request_read` | `method="get_review_comments"` |
+| General comments | `mcp__github__pull_request_read` | `method="get_comments"` |
+| CI check runs | `mcp__github__pull_request_read` | `method="get_check_runs"` |
+| Combined commit status | `mcp__github__pull_request_read` | `method="get_status"` |
+| PR diff | `mcp__github__pull_request_read` | `method="get_diff"` |
+| Changed files | `mcp__github__pull_request_read` | `method="get_files"` |
+| Reply to review comment | `mcp__github__add_reply_to_pull_request_comment` | `commentId`, `body` |
+| Add general comment | `mcp__github__add_issue_comment` | `issue_number`, `body` |
+| Resolve a thread | `mcp__github__resolve_review_thread` | `threadId` |
+| Request reviewers | `mcp__github__update_pull_request` | `reviewers=[...]` |
+| Submit a review | `mcp__github__pull_request_review_write` | `method="create"`, `event` |
 
 ## Workflow Summary
 
