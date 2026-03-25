@@ -42,6 +42,18 @@
       "keywords": ["tmux", "iterm2", "tab-title", "agent-teams", "pane-title"]
     },
     {
+      "name": "claude2028",
+      "description": "Rules for AI assistant behavior inspired by the Claude 2028 platform. On session start, symlinks bundled rules into the project's .claude/rules/claude2028 directory so they are automatically loaded as context.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/claude2028",
+      "category": "utility",
+      "tags": ["utility"],
+      "keywords": ["rules", "claude2028", "behavior", "best-practices", "session-start", "symlink"]
+    },
+    {
       "name": "code-simplifier",
       "description": "Simplify and refine code for clarity, consistency, and maintainability. Requires pr-review-toolkit plugin.",
       "version": "0.1.1",
