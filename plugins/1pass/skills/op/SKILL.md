@@ -259,7 +259,7 @@ This plugin supports configuration via `plugins.settings.yaml`:
   # Expose entire 1Password items as environment variables
   opExec:
     items:
-      - 'op://MyVault/ENVIRONMENT'
+      - "op://MyVault/ENVIRONMENT"
     targets:
       - sessionStartBashEnv # → CLAUDE_ENV_FILE (session-scoped, bash only)
       - userSettings # → ~/.claude/settings.local.json (persistent, all tools)
@@ -275,10 +275,10 @@ Place in:
 
 The `opExec.targets` array controls where resolved env vars are written:
 
-| Target                | Where                                    | Scope            | Persistence     |
-| --------------------- | ---------------------------------------- | ---------------- | --------------- |
-| `sessionStartBashEnv` | `CLAUDE_ENV_FILE`                        | Bash tools only  | Session only    |
-| `userSettings`        | `~/.claude/settings.local.json` `.env`   | All tools        | Across sessions |
+| Target                | Where                                  | Scope           | Persistence     |
+| --------------------- | -------------------------------------- | --------------- | --------------- |
+| `sessionStartBashEnv` | `CLAUDE_ENV_FILE`                      | Bash tools only | Session only    |
+| `userSettings`        | `~/.claude/settings.local.json` `.env` | All tools       | Across sessions |
 
 Both targets are enabled by default, ensuring env vars reach all tool types.
 

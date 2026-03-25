@@ -24,7 +24,6 @@ mise:
 edit-utils:
   formatter: 'prettier --write'
 
-
 1pass:
   enabled: true
   autoInstall: false

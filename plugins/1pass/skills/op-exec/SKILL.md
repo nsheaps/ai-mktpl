@@ -117,14 +117,14 @@ the resolved environment variables to multiple targets.
   opExec:
     # 1Password items to expose as environment variables
     items:
-      - 'op://MyVault/ENVIRONMENT'
-      - 'op://MyVault/extra-secrets'
+      - "op://MyVault/ENVIRONMENT"
+      - "op://MyVault/extra-secrets"
 
     # Where to write the resolved env vars (multiple allowed)
     # Defaults to both targets when omitted.
     targets:
-      - sessionStartBashEnv   # → CLAUDE_ENV_FILE (session-scoped, bash only)
-      - userSettings           # → ~/.claude/settings.local.json .env (persistent, all tools)
+      - sessionStartBashEnv # → CLAUDE_ENV_FILE (session-scoped, bash only)
+      - userSettings # → ~/.claude/settings.local.json .env (persistent, all tools)
 
     # Resolve op:// references in field values recursively (default: true)
     recursiveResolve: true
@@ -132,10 +132,10 @@ the resolved environment variables to multiple targets.
 
 ### Output Targets
 
-| Target                | Mechanism                     | Scope               | Persistence  | Non-Bash tools |
-| --------------------- | ----------------------------- | ------------------- | ------------ | -------------- |
-| `sessionStartBashEnv` | `CLAUDE_ENV_FILE`             | Bash tool calls     | Session only | No             |
-| `userSettings`        | `~/.claude/settings.local.json` `.env` | All tools | Across sessions | Yes         |
+| Target                | Mechanism                              | Scope           | Persistence     | Non-Bash tools |
+| --------------------- | -------------------------------------- | --------------- | --------------- | -------------- |
+| `sessionStartBashEnv` | `CLAUDE_ENV_FILE`                      | Bash tool calls | Session only    | No             |
+| `userSettings`        | `~/.claude/settings.local.json` `.env` | All tools       | Across sessions | Yes            |
 
 **Default:** Both `sessionStartBashEnv` and `userSettings` are enabled when
 `targets` is not specified, ensuring env vars are available to all tools and
