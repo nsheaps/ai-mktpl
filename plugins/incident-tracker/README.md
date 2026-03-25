@@ -12,24 +12,10 @@ A Claude Code plugin for tracking behavioral incidents, documenting corrections,
 
 ## Installation
 
-Add to your Claude Code config:
+Install via the Claude Code plugin marketplace. No configuration required — the plugin uses default paths:
 
-```json
-{
-  "plugins": {
-    "entries": {
-      "incident-tracker": {
-        "enabled": true,
-        "config": {
-          "incidentsDir": "incidents/behavioral",
-          "rulesFile": "AGENTS.md",
-          "rulesSection": "Learned Behaviors"
-        }
-      }
-    }
-  }
-}
-```
+- **Incident files**: `incidents/behavioral/` in your workspace
+- **Derived rules**: `AGENTS.md` in your workspace
 
 ## Usage
 
