@@ -127,10 +127,12 @@ services:
       - OP_SERVICE_ACCOUNT_TOKEN=${OP_SERVICE_ACCOUNT_TOKEN}
     volumes:
       - cloudflare-secrets:/run/secrets:rw
-    command: |
-      /bin/bash -c
-      fetch "op://Infrastructure/cloudflared/token" "/run/secrets/cloudflared_token"
-      chmod 444 /run/secrets/*
+    command:
+      - /bin/bash
+      - -c
+      - |
+        op read "op://Infrastructure/cloudflared/token" > /run/secrets/cloudflared_token
+        chmod 444 /run/secrets/*
 
   cloudflared:
     image: cloudflare/cloudflared:2026.3.0 # Pin version for reproducibility

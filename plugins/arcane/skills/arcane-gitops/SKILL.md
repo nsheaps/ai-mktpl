@@ -90,12 +90,14 @@ services:
       - OP_SERVICE_ACCOUNT_TOKEN=${OP_SERVICE_ACCOUNT_TOKEN}
     volumes:
       - app-secrets:/run/secrets:rw
-    command: |
-      /bin/bash -c
-      fetch "op://Infrastructure/my-app/db-password" "/run/secrets/db_password" &
-      fetch "op://Infrastructure/my-app/api-key"     "/run/secrets/api_key"     &
-      wait
-      chmod 444 /run/secrets/*
+    command:
+      - /bin/bash
+      - -c
+      - |
+        op read "op://Infrastructure/my-app/db-password" > /run/secrets/db_password &
+        op read "op://Infrastructure/my-app/api-key"     > /run/secrets/api_key     &
+        wait
+        chmod 444 /run/secrets/*
 
   my-app:
     image: my-app:latest
@@ -176,16 +178,15 @@ services:
       - app-secrets:/run/secrets:ro
     networks:
       - postgresql
-    entrypoint: /bin/bash
-    command: |
-      -c "
-      export PGPASSWORD=$(cat /run/secrets/root_password)
-      # Create user and database if they don't exist
-      psql -h postgresql -U postgres -tc \"SELECT 1 FROM pg_roles WHERE rolname='myapp'\" | grep -q 1 || \
-        psql -h postgresql -U postgres -c \"CREATE USER myapp WITH PASSWORD '$(cat /run/secrets/db_password)';\"
-      psql -h postgresql -U postgres -tc \"SELECT 1 FROM pg_database WHERE datname='myapp'\" | grep -q 1 || \
-        psql -h postgresql -U postgres -c \"CREATE DATABASE myapp OWNER myapp;\"
-      "
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        export PGPASSWORD=$$(cat /run/secrets/root_password)
+        # Create user and database if they don't exist
+        psql -h postgresql -U postgres -tc "SELECT 1 FROM pg_roles WHERE rolname='myapp'" | grep -q 1 || \
+          psql -h postgresql -U postgres -c "CREATE USER myapp WITH PASSWORD '$$(cat /run/secrets/db_password)';"
+        psql -h postgresql -U postgres -tc "SELECT 1 FROM pg_database WHERE datname='myapp'" | grep -q 1 || \
+          psql -h postgresql -U postgres -c "CREATE DATABASE myapp OWNER myapp;"
 ```
 
 ### Reusable Compose Modules

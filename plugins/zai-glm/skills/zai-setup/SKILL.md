@@ -170,13 +170,14 @@ For Claude Code web sessions, set environment variables in `.claude/settings.loc
 ```json
 {
   "env": {
-    "ZHIPU_API_KEY": "your-key-here",
-    "ZHIPU_BASE_URL": "https://api.z.ai/api/paas/v4/"
+    "ANTHROPIC_BASE_URL": "https://api.z.ai/api/anthropic",
+    "ANTHROPIC_AUTH_TOKEN": "your-zai-api-key",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
   }
 }
 ```
 
-> **Important**: Never put API keys in `settings.json` (committed). Always use `settings.local.json` (gitignored) or a secrets manager like 1Password.
+> **Important**: Never put API keys in `settings.json` (committed). Always use `settings.local.json` (gitignored) or a secrets manager like 1Password. These use the same Anthropic-compatible environment variables as Option 1 above.
 
 ## Coding Plan
 

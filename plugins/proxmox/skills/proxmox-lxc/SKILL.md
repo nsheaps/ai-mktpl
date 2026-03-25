@@ -340,8 +340,6 @@ const ct = new proxmox.ct.Container(
 
 > **Note**: Creating multiple containers in parallel can cause Proxmox lock errors. Use sequential creation or `parallelism: 1` in Terraform.
 
-```
-
 ## Best Practices
 
 ### Container Sizing
@@ -379,4 +377,3 @@ const ct = new proxmox.ct.Container(
 - [Terraform bpg/proxmox Provider](https://registry.terraform.io/providers/bpg/proxmox/latest)
 - [Pulumi proxmoxve Provider](https://www.pulumi.com/registry/packages/proxmoxve/)
 - [Proxmox Community Helper Scripts](https://community-scripts.github.io/ProxmoxVE/)
-```
