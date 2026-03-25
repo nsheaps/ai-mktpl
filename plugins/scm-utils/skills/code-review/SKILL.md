@@ -98,11 +98,11 @@ The bot follows a structured review process:
 
 ### Review Verdicts
 
-| Verdict           | When                                                            |
-| ----------------- | --------------------------------------------------------------- |
-| `APPROVE`         | No outstanding issues, ready to merge                           |
-| `COMMENT`         | Genuinely optional, with justification for why not blocking     |
-| `REQUEST_CHANGES` | Would improve code and is reasonable to do before merge         |
+| Verdict           | When                                                        |
+| ----------------- | ----------------------------------------------------------- |
+| `APPROVE`         | No outstanding issues, ready to merge                       |
+| `COMMENT`         | Genuinely optional, with justification for why not blocking |
+| `REQUEST_CHANGES` | Would improve code and is reasonable to do before merge     |
 
 ### Review Summary Format
 
