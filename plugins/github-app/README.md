@@ -111,14 +111,14 @@ chmod 600 ~/.config/agent/github-app.pem
 
 1. **Session starts**: Hook reads App credentials, generates JWT, exchanges for installation token
 2. **Token stored**: Written to `~/.config/agent/github-token` with 600 permissions
-3. **Git identity configured**: Sets `git config user.name` and `user.email` to the App's bot identity (e.g., `my-app[bot]` / `12345+my-app[bot]@users.noreply.github.com`)
-4. **Runtime env file**: `GH_TOKEN` and `GITHUB_TOKEN` written to `~/.config/agent/github-app-env`, sourced by `CLAUDE_ENV_FILE`
+3. **Git identity configured**: Sets `GIT_AUTHOR_NAME`, `GIT_AUTHOR_EMAIL`, `GIT_COMMITTER_NAME`, `GIT_COMMITTER_EMAIL` env vars to the App's bot identity (e.g., `my-app[bot]` / `12345+my-app[bot]@users.noreply.github.com`). Uses env vars instead of `git config` to avoid collisions on shared machines with multiple agents.
+4. **Runtime env file**: `GH_TOKEN`, `GITHUB_TOKEN`, git identity vars, and file path pointers written to `~/.config/agent/github-app-env`, sourced by `CLAUDE_ENV_FILE`
 5. **PreToolUse monitoring**: Before each tool call, checks token expiry (debounced to every 30s)
 6. **Smart refresh**: Commands using `gh`/`git push` get synchronous checks; others get async background refresh
 7. **Retry with backoff**: Failed refreshes retry up to 3 times, then back off for 5 minutes
 8. **Git integration**: Credential helper reads from token file for `git push`
 
-Git identity is only configured if `user.name`/`user.email` are not already set. Disable with `autoGitConfig: false` in plugin settings.
+Git identity env vars are always set (they override `git config` for the session). Disable with `autoGitConfig: false` in plugin settings.
 
 ### Token Refresh Behavior
 
