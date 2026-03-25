@@ -1,1 +1,0 @@
-../../../../shared/skills/parallel-review/SKILL.md

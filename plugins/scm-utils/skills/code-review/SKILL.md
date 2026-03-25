@@ -101,8 +101,8 @@ The bot follows a structured review process:
 | Verdict           | When                                                            |
 | ----------------- | --------------------------------------------------------------- |
 | `APPROVE`         | No outstanding issues, ready to merge                           |
-| `COMMENT`         | Suggestions but not blocking (won't break if merged)            |
-| `REQUEST_CHANGES` | Must fix before merge (security, correctness, breaking changes) |
+| `COMMENT`         | Genuinely optional, with justification for why not blocking     |
+| `REQUEST_CHANGES` | Would improve code and is reasonable to do before merge         |
 
 ### Review Summary Format
 

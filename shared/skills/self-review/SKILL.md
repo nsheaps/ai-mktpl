@@ -40,7 +40,12 @@ Factor in all available context:
 ### Step 2: Launch Parallel Sub-Agents
 
 Launch a `run_in_background:true` Task sub-agent (do NOT launch Teammates) for each review dimension. Each agent independently evaluates the change in its category and produces:
-- A score from 0-100
+- A score from 0-100 using this calibration:
+  - **90-100**: Exemplary, no meaningful improvements possible
+  - **85-89**: Good, minor nitpicks only
+  - **65-84**: Acceptable but has concrete issues that should be addressed
+  - **40-64**: Significant problems that block merge
+  - **0-39**: Fundamental issues, major rework needed
 - A short paragraph explaining the score
 - Many references to support claims (codebase links, external docs, org repos, wikis, workflow links)
 
@@ -57,11 +62,11 @@ Each agent may also:
 
 When all agents complete, review each report. Compare results across dimensions to build a complete picture. Create one overall report including:
 
-- Score table with emoji indicators:
-  - 🚨 Score below 70%
-  - ⚠️ Score below 85%
-  - ✅ Score 85% or above
-- If any category has ⚠️, the overall score should reflect that no category achieved ✅ level
+- Score table with emoji indicators (thresholds match badge colors):
+  - 🚨 Score below 65% — hard block, must fix before merge
+  - ⚠️ Score 65-84% — warning, should be addressed
+  - ✅ Score 85% or above — good
+- If any category has ⚠️, the maximum overall score is 84% (cannot be ✅ overall)
 - If overall score is >95%, the detailed section can be minimal (just the table and a brief summary)
 - References from sub-agents should be verbose and verifiable
 
@@ -78,21 +83,7 @@ When all agents complete, review each report. Compare results across dimensions 
 
 ## Review Verdict Criteria
 
-Use **REQUEST_CHANGES** when:
-- Security, performance, or correctness issues must be fixed before merging
-- The code would improve meaningfully from a suggested change and the change is straightforward to make
-- If a change would make the code better and it's reasonable to do before merge, it IS a requested change
-
-Use **APPROVE** when:
-- The PR is ready to merge as-is with no outstanding issues
-
-Use **COMMENT** only when ALL of these are true:
-- The code won't break if merged as-is
-- The suggestions are genuinely optional and there is a clear reason why each should NOT be addressed in this PR
-- If a suggestion would improve the code and is reasonable to implement, use REQUEST_CHANGES instead
-
-**The bar for non-blocking feedback:**
-The goal is to merge high-quality code. If feedback would improve the code, and the improvement is within scope and straightforward, it IS blocking. Non-blocking items must justify why they shouldn't be addressed now.
+Follow the verdict criteria defined in the prompt template at `plugins/scm-utils/skills/code-review/references/prompt-template.md` (step 10). The key principle: if a suggestion would improve the code and is reasonable to implement before merge, use REQUEST_CHANGES, not COMMENT.
 
 ## Inline Comment Conventions
 
@@ -113,10 +104,4 @@ Colors: Green `#60A060` (85+), Yellow `#C0C040` (65-84), Red `#D07070` (<65), Gr
 
 ## Design Principles
 
-Code changes should follow:
-- **KISS** — Keep It Simple, Stupid
-- **YAGNI** — You Aren't Gonna Need It
-- **DRY** — Don't Repeat Yourself
-- **WET** — (Don't) Write Everything Twice
-- **TDA** — Tell, Don't Ask
-- **SOLID** — Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, Dependency Inversion
+Sub-agents should evaluate against standard software engineering principles (KISS, YAGNI, DRY, SOLID, TDA) as relevant to their dimension. See the prompt template for the full list.

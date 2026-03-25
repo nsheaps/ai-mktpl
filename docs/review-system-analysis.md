@@ -21,7 +21,6 @@ The ai-mktpl review system is a multi-layered automated PR review pipeline built
 | **CI Workflow** | `.github/workflows/claude-code-review.yaml` | GitHub Actions workflow triggered on PR events |
 | **Review Prompt** | `.github/prompts/claude-code-review.md` | Detailed prompt template for CI review bot |
 | **Shared Self-Review Skill** | `shared/skills/self-review/SKILL.md` | Multi-agent review procedure (scoring, dimensions, format) |
-| **Shared Parallel-Review Skill** | `shared/skills/parallel-review/SKILL.md` | Agent Teams fan-out review orchestration |
 | **Plugin Code-Review Skill** | `plugins/scm-utils/skills/code-review/SKILL.md` | Entry point: triggers CI or falls back to self-review |
 | **Plugin Template** | `plugins/scm-utils/skills/code-review/references/prompt-template.md` | Prompt template for other repos |
 | **Workflow Template** | `plugins/scm-utils/skills/code-review/references/workflow-template.yaml` | Workflow template for other repos |
@@ -74,25 +73,6 @@ User invokes /code-review or /self-review
       └─ Parent agent synthesizes into final review with score table
 ```
 
-### Flow: Parallel Review (Agent Teams)
-
-```
-User invokes /parallel-review (requires CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1)
-  │
-  ├─ Lead creates team "pr-review-<PR>"
-  │
-  ├─ Spawns 8 teammates (one per dimension, model: sonnet)
-  │
-  ├─ Teammates work simultaneously (true parallelism)
-  │   ├─ Each reads PR context independently
-  │   ├─ Each writes to its own REPORT.md
-  │   └─ Can message each other for cross-referencing
-  │
-  ├─ Lead synthesizes all reports into final review
-  │
-  └─ Cleans up team
-```
-
 ---
 
 ## 2. Strengths
@@ -141,7 +121,6 @@ Previously, review instructions existed in three divergent places. In v2, the ar
 | `.github/prompts/claude-code-review.md` | Active CI prompt (comprehensive) | Updated with fixes |
 | `plugins/scm-utils/.../prompt-template.md` | Template for other repos | Updated with fixes |
 | `shared/skills/self-review/SKILL.md` | Shared review procedure | **NEW** — extracted from project skill |
-| `shared/skills/parallel-review/SKILL.md` | Agent Teams fan-out | **NEW** |
 | `.claude/skills/code-review/SKILL.md` | (Removed) | **REMOVED** — replaced by shared skills |
 
 The CI prompt and plugin template still need to be kept in sync manually. A future improvement could generate both from a single source.
@@ -191,45 +170,20 @@ The prompt says "future reviews don't need to re-post in-line comments" but ther
 
 The scm-utils plugin is the **distribution mechanism**. It contains templates and a skill that knows how to trigger the CI bot (via label) or fall back to local review. The ai-mktpl project has its own instantiated copies that have evolved beyond the templates.
 
-### Self-Review vs. CI Review vs. Parallel Review
+### Self-Review vs. CI Review
 
 - **Self-review** (`shared/skills/self-review/SKILL.md`): Multi-agent review procedure using background sub-agents. Used as fallback when CI isn't available, or invoked directly.
 - **CI review** (`.github/workflows/claude-code-review.yaml`): Automated, runs on PR events, posts as a GitHub App. Uses a single Claude session with the CI prompt. Primary review mechanism.
-- **Parallel review** (`shared/skills/parallel-review/SKILL.md`): Agent Teams fan-out with 8 concurrent teammates. Interactive use only (requires Agent Teams enabled). Maximum depth at higher token cost.
 - **Code-review entry point** (`plugins/scm-utils/skills/code-review/`): User-facing skill that routes to CI (preferred) or self-review (fallback).
 
 ---
 
-## 5. Suggested Improvements
+## 5. Known Improvements
 
-### 5.1 Unify Prompt Templates (High Priority)
-Extract the shared review logic into a single source of truth. The scm-utils template should be the canonical version, with the ai-mktpl prompt generated from it (or symlinked).
+The following improvements are tracked as GitHub issues:
 
-### 5.2 Multi-Agent CI Review (High Priority)
-Bring the parallel agent architecture from the project SKILL.md into the CI workflow. Use Claude Code's Agent Teams or sub-agent fan-out to parallelize review by category. See the migration guide for details.
+- Unify CI prompt and plugin template from a single source (high priority)
+- Add output validation gate for review markdown
+- Multi-agent CI review via Agent Teams (when feature exits experimental)
 
-### 5.3 Output Validation Gate
-Add a post-processing step (or hook) that validates the review markdown before posting:
-- Strip any CDATA wrappers
-- Verify `<details>/<summary>` structure
-- Validate shields.io badge URLs return 200
-- Check footnote references are complete
-
-### 5.4 Review State Persistence
-Store review decisions in a structured format (e.g., `.claude/pr-reviews/<pr>/<timestamp>/decision.json`) that subsequent reviews can reference. This enables:
-- Consistent scoring across iterations
-- Awareness of which issues were previously raised and addressed
-- Faster subsequent reviews (skip validated categories)
-
-### 5.5 Prompt Versioning
-Version the review prompt independently from the workflow. Tag prompt versions and include the version in the review footnotes so authors know which review criteria were applied.
-
-### 5.6 Strengthen Non-Blocking Criteria
-The non-blocking feedback fix applied in this changeset raises the bar for `COMMENT` verdicts. Monitor subsequent reviews to confirm the model respects the new criteria and adjusts to REQUEST_CHANGES for actionable improvements.
-
-### 5.7 Review Metrics Dashboard
-Instrument reviews to track:
-- Review duration
-- Verdict distribution (APPROVE/COMMENT/REQUEST_CHANGES)
-- Score distributions by category
-- How often REQUEST_CHANGES findings are actually addressed before merge
+See the [ai-mktpl issues](https://github.com/nsheaps/ai-mktpl/issues?q=label%3Areview-system) for current status.
