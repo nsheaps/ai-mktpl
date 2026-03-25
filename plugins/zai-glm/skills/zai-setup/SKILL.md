@@ -165,7 +165,7 @@ curl "https://openrouter.ai/api/v1/chat/completions" \
 
 ### Claude Code Web Sessions
 
-For Claude Code web sessions, set environment variables in `.claude/settings.json`:
+For Claude Code web sessions, set environment variables in `.claude/settings.local.json` (gitignored):
 
 ```json
 {
@@ -176,7 +176,7 @@ For Claude Code web sessions, set environment variables in `.claude/settings.jso
 }
 ```
 
-> **Important**: Do not commit API keys. Use `.claude/settings.local.json` (gitignored) for secrets, or use a secrets manager like 1Password.
+> **Important**: Never put API keys in `settings.json` (committed). Always use `settings.local.json` (gitignored) or a secrets manager like 1Password.
 
 ## Coding Plan
 
