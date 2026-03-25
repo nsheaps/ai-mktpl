@@ -126,6 +126,7 @@ the resolved environment variables to multiple targets.
       - sessionStartBashEnv # → CLAUDE_ENV_FILE (session-scoped, bash only)
       - userSettings # → ~/.claude/settings.local.json .env (persistent, all tools)
 
+
     # Note: recursive resolution of op:// references is always on (op-exec built-in)
 ```
 
