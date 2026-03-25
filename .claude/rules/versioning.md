@@ -8,22 +8,30 @@ Every plugin change requires a version bump:
 - **Minor (x.Y.0)**: New features, backwards compatible
 - **Major (X.0.0)**: Breaking changes
 
-## NEVER Manually Edit plugin.json
+## Version Bumps in PRs
 
-**CRITICAL:** Do NOT manually modify existing `plugin.json` files. The CI `check-version-files` job blocks all manual modifications to existing `plugin.json` files — including version bumps.
+Version bumps happen **in PRs**, not on merge to main. The CD workflow's `auto-version-bump` job:
 
-Version bumps are handled automatically by the CD pipeline. If you modify a plugin's code, settings, hooks, or docs, the version bump will be applied automatically on merge to main.
+1. Detects plugins with code changes
+2. Compares the PR's version against the base version
+3. If not already bumped, auto-bumps (patch increment) and pushes back to the PR branch
+4. If manually bumped to a higher version, preserves the manual bump
 
-New `plugin.json` files (for brand new plugins) are allowed.
+### Manual Version Bumps
 
-## Version Check Workflow
+You **can** manually edit `plugin.json` to set a higher version (e.g., minor or major bump). The auto-bump will respect manual bumps — it only bumps if the version hasn't been increased yet.
 
-The `cd.yaml` workflow enforces versioning:
+### What Happens on Merge to Main
 
-1. Detects changed plugins in PRs
-2. Compares versions between base and head
-3. Fails if version not bumped
-4. Suggests appropriate version bump
+The CD `bump-and-update-marketplace` job runs on main and:
+
+1. Checks if each changed plugin was already bumped in the PR
+2. Only bumps plugins that still need it (safety net)
+3. Regenerates `marketplace.json`
+
+### New Plugins
+
+New `plugin.json` files (for brand new plugins) are always allowed. The `validate-claude-config` task treats a plugin that exists in `plugins/` but isn't yet in `marketplace.json` as a warning, not an error.
 
 ## Commit Message Format
 
