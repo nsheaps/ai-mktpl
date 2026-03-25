@@ -17,6 +17,7 @@ The skill is placed at `plugins/github/skills/pr-feedback/SKILL.md`, which follo
 The frontmatter contains the required `name` and `description` fields with proper YAML block scalar syntax (`>`), matching the pattern in `plugins/github/skills/github-auth/SKILL.md`. The `<example>` tags embedded in the description field also match the pattern used by `github-auth` (5 examples) -- `pr-feedback` uses 7 examples, which is reasonable.
 
 **Missing `argument-hint`:** Many comparable skills include an `argument-hint` field in their frontmatter. For example:
+
 - `plugins/scm-utils/skills/code-review/SKILL.md`: `argument-hint: [PR number | PR URL | branch name]`
 - `plugins/scm-utils/skills/commit/SKILL.md`: `argument-hint: [optional hint]`
 - `plugins/scm-utils/skills/rebase/SKILL.md`: `argument-hint: [PR number | PR URL | branch name | directory]`
@@ -42,6 +43,7 @@ The skill correctly references `scm-utils:commit` in two places (Step 2 Category
 ### Skill Structure (PASS)
 
 The skill follows the structural conventions observed in comparable skills:
+
 - Starts with a clear title and purpose statement
 - Uses numbered steps with sub-sections
 - Provides both MCP tool and `gh` CLI fallback approaches (matching the dual-approach pattern in `plugins/github/skills/gh/SKILL.md`)

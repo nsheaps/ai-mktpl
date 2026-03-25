@@ -40,12 +40,12 @@ The "Batch Fetch" example (lines 317-326) re-lists the same seven MCP calls from
 
 ### 7. Length in Context of Other Skills
 
-| Skill | Lines | Scope |
-|---|---|---|
-| `slash-command-writing` | 398 | Reference guide for an entire feature surface |
-| **`pr-feedback`** | **378** | Procedural workflow for one task |
-| `daily-report` | 314 | Complex multi-step data gathering + report template |
-| `memory-manager` | 234 | Detection logic + file management + examples |
+| Skill                   | Lines   | Scope                                               |
+| ----------------------- | ------- | --------------------------------------------------- |
+| `slash-command-writing` | 398     | Reference guide for an entire feature surface       |
+| **`pr-feedback`**       | **378** | Procedural workflow for one task                    |
+| `daily-report`          | 314     | Complex multi-step data gathering + report template |
+| `memory-manager`        | 234     | Detection logic + file management + examples        |
 
 The pr-feedback skill is comparable in length to `slash-command-writing`, which is a comprehensive reference document covering syntax, arguments, bash execution, file references, namespacing, troubleshooting, and multiple example commands. The pr-feedback skill covers a narrower domain (respond to PR feedback) but achieves similar length primarily through duplication rather than breadth.
 

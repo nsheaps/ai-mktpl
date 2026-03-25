@@ -24,12 +24,14 @@ The branch contains 5 commits total, of which 3 are substantive to this PR:
 5. `20b3461` — `chore: auto-bump plugin versions and update marketplace` (automation-nsheaps[bot])
 
 **Positives:**
+
 - Commits follow [conventional commit](https://www.conventionalcommits.org/) format with proper type prefixes (`feat`, `fix`, `chore`) as required by [versioning.md](https://github.com/nsheaps/ai-mktpl/blob/main/.claude/rules/versioning.md).
 - The initial `feat` commit includes a well-written body explaining the scope of the skill.
 - The `fix` commit for review feedback is properly isolated and its message references what was addressed.
 - Automated commits (`chore: auto-bump`, `chore: mise run lint`) are clearly attributable to CI/CD automation.
 
 **Negatives:**
+
 - Two separate `chore: auto-bump plugin versions and update marketplace` commits (`f96b47c` and `20b3461`) appear because CI ran twice. This is expected behavior from the CD pipeline but adds noise to the history.
 - The lint auto-fix commit (`895dae1`) suggests the author did not run `mise run lint` locally before pushing, which is called out as a best practice in [ci-cd/conventions.md](https://github.com/nsheaps/ai-mktpl/blob/main/.claude/rules/ci-cd/conventions.md) ("Run `mise run lint` locally before pushing to catch linting issues").
 
@@ -47,17 +49,18 @@ The only minor gap: the `fix` commit body could have linked to the specific revi
 
 The PR is well-scoped. It adds a single new skill (`pr-feedback`) to an existing plugin (`github`), along with the necessary `plugin.json` keyword updates. The 12 files changed in the PR break down as:
 
-| Category | Files | Notes |
-|---|---|---|
-| New skill content | 1 | `plugins/github/skills/pr-feedback/SKILL.md` (378 lines added) |
-| Plugin manifest update | 1 | `plugins/github/.claude-plugin/plugin.json` (keywords added) |
-| Auto-bump (CI-generated) | 10 | Various `plugin.json` + `marketplace.json` version bumps |
+| Category                 | Files | Notes                                                          |
+| ------------------------ | ----- | -------------------------------------------------------------- |
+| New skill content        | 1     | `plugins/github/skills/pr-feedback/SKILL.md` (378 lines added) |
+| Plugin manifest update   | 1     | `plugins/github/.claude-plugin/plugin.json` (keywords added)   |
+| Auto-bump (CI-generated) | 10    | Various `plugin.json` + `marketplace.json` version bumps       |
 
 The 10 auto-bumped files are noise from the CD pipeline bumping unrelated plugins. The actual authored content is just 2 files, which is appropriately focused for adding a new skill.
 
 ### CI Status (Score: 8/10)
 
 Per the task description, all CI checks are passing:
+
 - Lint: passing
 - Validate: passing
 - Auto-version-bump: passing
@@ -84,6 +87,7 @@ Additionally, the version bump in `plugin.json` shows `0.1.12` -> `0.1.14` on th
 This is the weakest area of the PR. Two review cycles occurred:
 
 **Review 1** (henry-nsheaps[bot], `CHANGES_REQUESTED`): Raised 3 threads:
+
 1. MCP tool names are fictional (`pull_request_read(method=...)` pattern does not exist) — **not resolved**
 2. Quick Reference table uses non-existent tools — **not resolved**
 3. `follow-up` label not in `.github/labels.yaml` — **resolved** (changed to `enhancement`)
@@ -91,11 +95,13 @@ This is the weakest area of the PR. Two review cycles occurred:
 **Author response to Review 1:** The label fix was accepted and applied (good). However, the MCP tool name issue was dismissed. The author claimed the `pull_request_read(method=...)` pattern IS the actual API and that the reviewer's suggested alternatives "do not exist in the GitHub MCP server." The author stated "Confidence: High."
 
 **Review 2** (henry-nsheaps[bot], `CHANGES_REQUESTED`): Re-raised the MCP tool issue with additional verification, plus 2 new threads:
+
 1. MCP tool names still fictional — **not resolved** (4 unresolved threads total)
 2. Quick Reference table still wrong — **not resolved**
 3. `resolve_review_thread` does not exist as MCP tool — **not resolved**
 
 **Analysis of the dispute:** Having access to the same MCP tool definitions in this session, I can confirm:
+
 - `mcp__github__pull_request_read` with a `method` parameter **does exist** as a tool. The tool definition is present in the current session's MCP server with enum values for `method`: `get`, `get_diff`, `get_status`, `get_files`, `get_review_comments`, `get_reviews`, `get_comments`, `get_check_runs`.
 - `mcp__github__resolve_review_thread` **does exist** as a tool accepting a `threadId` parameter.
 - `mcp__github__add_reply_to_pull_request_comment` **does exist** as a tool.
@@ -112,6 +118,7 @@ No dead code, leftover debugging, console.log statements, or TODO comments were 
 ### Formatting Consistency (Score: 9/10)
 
 The SKILL.md file is well-formatted:
+
 - Consistent heading hierarchy (H1 -> H2 -> H3)
 - Proper use of code blocks with language hints
 - Clean markdown tables
@@ -123,6 +130,7 @@ The only minor observation: the lint auto-fix commit suggests there were formatt
 ### Version Bump Appropriateness (Score: 8/10)
 
 The github plugin went from `0.1.12` to `0.1.14` (skipping `0.1.13`). This occurred because:
+
 1. The initial commit was created when main was at `0.1.12`.
 2. The CD auto-bump incremented to `0.1.13`.
 3. After the review-fix commit, the CD auto-bumped again to `0.1.14`.
@@ -133,18 +141,18 @@ The 10 unrelated plugin version bumps in the PR are artifacts of the CD auto-bum
 
 ## Score Breakdown
 
-| Criterion | Weight | Score | Weighted |
-|---|---|---|---|
-| Commit history clean and logical | 15% | 8/10 | 12.0 |
-| Commit messages descriptive / conventional | 10% | 9/10 | 9.0 |
-| PR properly scoped | 10% | 9/10 | 9.0 |
-| CI passing, no warnings | 15% | 8/10 | 12.0 |
-| Mergeable state acceptable | 15% | 4/10 | 6.0 |
-| Review feedback addressed properly | 15% | 3/10 | 4.5 |
-| No dead code or leftover debugging | 5% | 10/10 | 5.0 |
-| Formatting consistency | 5% | 9/10 | 4.5 |
-| Version bump appropriate | 10% | 8/10 | 8.0 |
-| **Total** | **100%** | | **70.0** |
+| Criterion                                  | Weight   | Score | Weighted |
+| ------------------------------------------ | -------- | ----- | -------- |
+| Commit history clean and logical           | 15%      | 8/10  | 12.0     |
+| Commit messages descriptive / conventional | 10%      | 9/10  | 9.0      |
+| PR properly scoped                         | 10%      | 9/10  | 9.0      |
+| CI passing, no warnings                    | 15%      | 8/10  | 12.0     |
+| Mergeable state acceptable                 | 15%      | 4/10  | 6.0      |
+| Review feedback addressed properly         | 15%      | 3/10  | 4.5      |
+| No dead code or leftover debugging         | 5%       | 10/10 | 5.0      |
+| Formatting consistency                     | 5%       | 9/10  | 4.5      |
+| Version bump appropriate                   | 10%      | 8/10  | 8.0      |
+| **Total**                                  | **100%** |       | **70.0** |
 
 **Adjusted Score: 62/100** — Reduced from the weighted 70 due to the compounding effect of the dirty mergeable state and unresolved review threads: the PR cannot be merged as-is, and the review dispute has no clear resolution path. These two issues together create a significant blocker that the weighted average alone does not fully capture.
 

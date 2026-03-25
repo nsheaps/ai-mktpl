@@ -70,6 +70,7 @@ This is a common source of confusion in the GitHub API. The [GitHub REST API doc
 The example commit message (L209-212) correctly uses the `fix:` prefix with a descriptive subject line and body referencing the review feedback. This aligns with the [Conventional Commits specification](https://www.conventionalcommits.org/en/v1.0.0/).
 
 **Gaps:**
+
 - The skill only shows a `fix:` example but doesn't mention that other prefixes (`refactor:`, `style:`, `docs:`, `test:`) may be appropriate depending on the nature of the feedback. The repo's own `versioning.md` rule lists `feat:`, `fix:`, `chore:`, and `docs:`.
 - No mention of scope syntax (e.g., `fix(auth): ...`) which is common in larger projects.
 - The body text "Addresses review feedback on error message clarity" is good practice for traceability but the skill could explicitly recommend including the reviewer's comment permalink in the commit body for full auditability.
@@ -137,19 +138,19 @@ The 8-step summary provides a clean mental model: GATHER, INVENTORY, TRIAGE, ACT
 
 ## Score Breakdown
 
-| Criterion | Score | Weight | Weighted |
-|---|---|---|---|
-| MCP tool accuracy | 10/10 | 20% | 20.0 |
-| A/B/C/D triage framework design | 9/10 | 15% | 13.5 |
-| GitHub API concepts explanation | 10/10 | 10% | 10.0 |
-| `gh` CLI command correctness | 9/10 | 10% | 9.0 |
-| Conventional commits guidance | 7/10 | 10% | 7.0 |
-| Commit isolation and attribution | 10/10 | 10% | 10.0 |
-| Re-review workflow | 7/10 | 10% | 7.0 |
-| Example response quality | 10/10 | 5% | 5.0 |
-| Efficient querying patterns | 9/10 | 5% | 4.5 |
-| Skill structure and frontmatter | 9/10 | 5% | 4.5 |
-| **Total** | | **100%** | **90.5 -> 88** |
+| Criterion                        | Score | Weight   | Weighted       |
+| -------------------------------- | ----- | -------- | -------------- |
+| MCP tool accuracy                | 10/10 | 20%      | 20.0           |
+| A/B/C/D triage framework design  | 9/10  | 15%      | 13.5           |
+| GitHub API concepts explanation  | 10/10 | 10%      | 10.0           |
+| `gh` CLI command correctness     | 9/10  | 10%      | 9.0            |
+| Conventional commits guidance    | 7/10  | 10%      | 7.0            |
+| Commit isolation and attribution | 10/10 | 10%      | 10.0           |
+| Re-review workflow               | 7/10  | 10%      | 7.0            |
+| Example response quality         | 10/10 | 5%       | 5.0            |
+| Efficient querying patterns      | 9/10  | 5%       | 4.5            |
+| Skill structure and frontmatter  | 9/10  | 5%       | 4.5            |
+| **Total**                        |       | **100%** | **90.5 -> 88** |
 
 **Final Score: 88/100**
 

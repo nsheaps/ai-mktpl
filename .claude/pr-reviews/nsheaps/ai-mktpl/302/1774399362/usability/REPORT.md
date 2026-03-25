@@ -58,10 +58,10 @@ All other categories show both MCP tools and CLI fallback, but Category C (defer
 
 ## Scoring Breakdown
 
-| Criterion | Score | Notes |
-|---|---|---|
-| Agent can follow step-by-step | 16/20 | Clear overall, but threadId gap and CI/triage overlap cause confusion |
-| Trigger examples comprehensive | 18/20 | Seven good examples covering varied phrasings |
-| Workflow clarity and ordering | 14/20 | Summary contradicts body on per-item vs batched processing |
+| Criterion                          | Score | Notes                                                                                  |
+| ---------------------------------- | ----- | -------------------------------------------------------------------------------------- |
+| Agent can follow step-by-step      | 16/20 | Clear overall, but threadId gap and CI/triage overlap cause confusion                  |
+| Trigger examples comprehensive     | 18/20 | Seven good examples covering varied phrasings                                          |
+| Workflow clarity and ordering      | 14/20 | Summary contradicts body on per-item vs batched processing                             |
 | Code examples correct and complete | 16/20 | MCP calls match actual schema; missing threadId source; no language tags on MCP blocks |
-| Triage framework intuitive | 18/20 | Categories A-D are well-defined with strong examples and guardrails |
+| Triage framework intuitive         | 18/20 | Categories A-D are well-defined with strong examples and guardrails                    |

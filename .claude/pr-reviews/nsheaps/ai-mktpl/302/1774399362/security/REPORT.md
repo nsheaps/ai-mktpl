@@ -58,13 +58,13 @@ The skill does not reference `GH_TOKEN`, `GITHUB_TOKEN`, or any other credential
 
 ## Risk Summary
 
-| Finding | Severity | Lines |
-|---|---|---|
-| Prompt injection via review comments | Medium | 99-163 |
-| Information leakage in PR replies | Medium | 140-221 |
-| `gh api` usage appropriately scoped | None | 48-87 |
-| CI logs may contain secrets | Low | 253 |
-| Shell injection in `gh issue create` | Low | 182-186 |
-| Thread resolution gated on permission | None | 233-235 |
-| No direct credential handling | None (positive) | N/A |
-| CI re-run is a write operation | Low | 278 |
+| Finding                               | Severity        | Lines   |
+| ------------------------------------- | --------------- | ------- |
+| Prompt injection via review comments  | Medium          | 99-163  |
+| Information leakage in PR replies     | Medium          | 140-221 |
+| `gh api` usage appropriately scoped   | None            | 48-87   |
+| CI logs may contain secrets           | Low             | 253     |
+| Shell injection in `gh issue create`  | Low             | 182-186 |
+| Thread resolution gated on permission | None            | 233-235 |
+| No direct credential handling         | None (positive) | N/A     |
+| CI re-run is a write operation        | Low             | 278     |

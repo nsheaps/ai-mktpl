@@ -38,6 +38,7 @@ mcp__github__pull_request_read(method="get_files", owner, repo, pullNumber)
 Use `perPage=100` to reduce pagination. If results are paginated, fetch all pages before proceeding.
 
 **Key distinctions:**
+
 - **Reviews** (`get_reviews`): Top-level review objects with a verdict (APPROVE, REQUEST_CHANGES, COMMENT) and an optional body.
 - **Review comments** (`get_review_comments`): Inline comments on specific diff lines, grouped into threads with `isResolved`/`isOutdated` metadata. Each thread has a GraphQL `node_id` (the `threadId` needed for resolving threads later).
 - **Issue comments** (`get_comments`): Conversation-level comments not tied to code lines.
@@ -78,6 +79,7 @@ mcp__github__add_reply_to_pull_request_comment(owner, repo, pullNumber, commentI
 You believe the feedback is wrong. This requires **evidence**.
 
 **Action:** Reply with a respectful explanation including:
+
 - Links to documentation, source code (GitHub permalinks), or specifications
 - Your confidence level
 - Acknowledgment of any valid sub-points
@@ -138,13 +140,13 @@ gh run view {run_id} --log-failed --repo {owner}/{repo}
 
 > **Security note:** CI logs may contain leaked secrets or internal infrastructure details. Do not quote log content verbatim in PR comments.
 
-| Failure Type | Diagnosis | Fix |
-|---|---|---|
-| **Lint errors** | Read annotations for file:line | Fix the specific violations |
-| **Type errors** | Read compiler output | Fix type mismatches |
-| **Test failures** | Read test output | Fix the code or update the test |
-| **Build failures** | Read build log | Fix compilation/bundling issues |
-| **Flaky tests** | Check if test passes locally | Re-run (`gh run rerun {run_id} --failed`) if flaky; fix if genuine |
+| Failure Type       | Diagnosis                      | Fix                                                                |
+| ------------------ | ------------------------------ | ------------------------------------------------------------------ |
+| **Lint errors**    | Read annotations for file:line | Fix the specific violations                                        |
+| **Type errors**    | Read compiler output           | Fix type mismatches                                                |
+| **Test failures**  | Read test output               | Fix the code or update the test                                    |
+| **Build failures** | Read build log                 | Fix compilation/bundling issues                                    |
+| **Flaky tests**    | Check if test passes locally   | Re-run (`gh run rerun {run_id} --failed`) if flaky; fix if genuine |
 
 Commit CI fixes in isolation (same rules as Category D), push, and CI re-runs automatically.
 

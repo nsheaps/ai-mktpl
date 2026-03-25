@@ -79,15 +79,15 @@ The skill introduces several domain concepts and explains each:
 
 ## Score Breakdown
 
-| Criterion | Score | Notes |
-|---|---|---|
-| Self-documenting skill | 18/20 | Thorough, well-structured. Minor gap: cross-skill references could include plugin names. |
-| Frontmatter description accuracy | 18/20 | Accurate and detailed. Could add an example for the disagree/defer sub-workflows. |
-| Example triggers | 10/10 | Seven diverse, natural triggers covering reviews and CI. |
-| PR title and body | 10/10 | Clear, structured, includes feedback traceability section. |
-| Commit messages | 10/10 | Proper conventional commits with scopes and explanatory bodies. |
-| Plugin.json tags | 8/10 | Four relevant new tags added. Could consider `triage` or `feedback-loop` for the methodology aspect. |
-| Quick Reference accuracy | 8/10 | All tool names verified correct. Missing brief note about the method-dispatch pattern to prevent confusion. |
-| Terms/concepts explained | Deducted above | MCP naming convention needs upfront explanation to prevent reviewer confusion (already caused two rounds of incorrect feedback). |
+| Criterion                        | Score          | Notes                                                                                                                            |
+| -------------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Self-documenting skill           | 18/20          | Thorough, well-structured. Minor gap: cross-skill references could include plugin names.                                         |
+| Frontmatter description accuracy | 18/20          | Accurate and detailed. Could add an example for the disagree/defer sub-workflows.                                                |
+| Example triggers                 | 10/10          | Seven diverse, natural triggers covering reviews and CI.                                                                         |
+| PR title and body                | 10/10          | Clear, structured, includes feedback traceability section.                                                                       |
+| Commit messages                  | 10/10          | Proper conventional commits with scopes and explanatory bodies.                                                                  |
+| Plugin.json tags                 | 8/10           | Four relevant new tags added. Could consider `triage` or `feedback-loop` for the methodology aspect.                             |
+| Quick Reference accuracy         | 8/10           | All tool names verified correct. Missing brief note about the method-dispatch pattern to prevent confusion.                      |
+| Terms/concepts explained         | Deducted above | MCP naming convention needs upfront explanation to prevent reviewer confusion (already caused two rounds of incorrect feedback). |
 
 **Total: 82/100**
