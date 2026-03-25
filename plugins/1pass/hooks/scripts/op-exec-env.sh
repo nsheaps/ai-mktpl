@@ -4,7 +4,7 @@
 # Uses op-exec to expose entire 1Password items as environment variables.
 # Supports multiple items and multiple output targets (CLAUDE_ENV_FILE,
 # settings.local.json). Field values containing op:// references are
-# resolved recursively when recursiveResolve is enabled.
+# resolved recursively by op-exec (always on).
 set -euo pipefail
 
 PLUGIN_NAME="1pass"
@@ -31,9 +31,6 @@ if [ -z "$op_exec_targets" ]; then
   op_exec_targets=$'sessionStartBashEnv\nuserSettings'
 fi
 
-# Read recursiveResolve (default: true)
-recursive_resolve="$(plugin_get_config "opExec.recursiveResolve" "true")"
-
 # --- Dependency checks ---
 
 if ! command -v op-exec &>/dev/null; then
@@ -50,7 +47,7 @@ if ! command -v op &>/dev/null; then
   exit 0
 fi
 
-if ! op account list &>/dev/null 2>&1; then
+if ! op account list &>/dev/null; then
   hook_fail "op auth" "Not signed in to 1Password" \
     "Set OP_SERVICE_ACCOUNT_TOKEN or run 'op signin'"
   hook_respond
@@ -84,6 +81,10 @@ fi
 
 # --- Process each item ---
 
+# Collect env vars for batch settings.local.json write
+declare -a settings_env_names=()
+declare -a settings_env_values=()
+
 write_to_targets() {
   local env_name="$1"
   local env_value="$2"
@@ -93,12 +94,34 @@ write_to_targets() {
   fi
 
   if [ "$target_user_settings" = "true" ]; then
-    # Write directly with jq since safe_write_settings doesn't support --arg
-    local result
-    if result=$(jq --arg key "$env_name" --arg val "$env_value" \
-      '.env[$key] = $val' "$SETTINGS_FILE" 2>/dev/null) && [ -n "$result" ]; then
-      echo "$result" > "$SETTINGS_FILE"
+    settings_env_names+=("$env_name")
+    settings_env_values+=("$env_value")
+  fi
+}
+
+flush_settings() {
+  if [ "$target_user_settings" != "true" ] || [ ${#settings_env_names[@]} -eq 0 ]; then
+    return
+  fi
+
+  # Build a single jq filter that sets all env vars at once
+  local jq_args=()
+  local jq_filter=".env += {"
+  for i in "${!settings_env_names[@]}"; do
+    local arg_key="k${i}"
+    local arg_val="v${i}"
+    jq_args+=(--arg "$arg_key" "${settings_env_names[$i]}")
+    jq_args+=(--arg "$arg_val" "${settings_env_values[$i]}")
+    if [ "$i" -gt 0 ]; then
+      jq_filter+=", "
     fi
+    jq_filter+="(\$${arg_key}): \$${arg_val}"
+  done
+  jq_filter+="}"
+
+  local result
+  if result=$(jq "${jq_args[@]}" "$jq_filter" "$SETTINGS_FILE" 2>/dev/null) && [ -n "$result" ]; then
+    echo "$result" > "$SETTINGS_FILE"
   fi
 }
 
@@ -113,16 +136,8 @@ process_item() {
     return 0
   fi
 
-  # Build op-exec flags
-  local op_exec_args=()
-  if [ "$recursive_resolve" != "true" ]; then
-    # op-exec resolves recursively by default; no flag needed to enable it
-    # If we wanted to disable it, we'd need to skip — but op-exec always resolves.
-    # For now, recursive resolution is always on (it's a feature of op-exec itself).
-    true
-  fi
-
   # Run op-exec to get export statements
+  # Note: op-exec always resolves op:// references recursively (built-in behavior)
   local exports
   if ! exports="$(op-exec "$item_ref" 2>/dev/null)"; then
     hook_fail "op-exec" "Failed to resolve item: $item_ref" \
@@ -145,8 +160,7 @@ process_item() {
     local env_value="${assignment#*=}"
 
     # Remove shell quoting from value (op-exec uses printf %q)
-    # Use eval to safely unquote
-    env_value="$(eval echo "$env_value" 2>/dev/null || echo "$env_value")"
+    env_value="$(printf '%b' "$env_value" 2>/dev/null || echo "$env_value")"
 
     if [ -n "$env_name" ]; then
       write_to_targets "$env_name" "$env_value"
@@ -169,12 +183,14 @@ do_inject() {
     targets_desc="${targets_desc}userSettings"
   fi
   hook_log "targets: $targets_desc"
-  hook_log "recursiveResolve: $recursive_resolve"
 
   while IFS= read -r item_ref; do
     [ -z "$item_ref" ] && continue
     process_item "$item_ref"
   done <<< "$op_exec_items"
+
+  # Flush collected env vars to settings.local.json in a single write
+  flush_settings
 }
 
 # --- Execute ---

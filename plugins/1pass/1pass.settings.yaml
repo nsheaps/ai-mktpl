@@ -69,11 +69,10 @@
   #   - userSettings         — write to ~/.claude/settings.local.json .env (persistent, all tools)
   #   Defaults to both sessionStartBashEnv and userSettings.
   #
-  # recursiveResolve: when true (default), field values that are themselves
-  #   op:// references are resolved recursively (max depth 5).
+  # Note: op-exec always resolves op:// references in field values recursively
+  # (max depth 5). This is built-in behavior and not configurable.
   opExec:
     items: []
     targets:
       - sessionStartBashEnv
       - userSettings
-    recursiveResolve: true

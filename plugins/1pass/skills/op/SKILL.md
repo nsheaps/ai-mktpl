@@ -263,7 +263,7 @@ This plugin supports configuration via `plugins.settings.yaml`:
     targets:
       - sessionStartBashEnv # → CLAUDE_ENV_FILE (session-scoped, bash only)
       - userSettings # → ~/.claude/settings.local.json (persistent, all tools)
-    recursiveResolve: true # Resolve op:// refs in field values (default)
+    # Note: recursive resolution of op:// references is always on (op-exec built-in)
 ```
 
 Place in:
