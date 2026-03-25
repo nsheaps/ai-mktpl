@@ -16,38 +16,30 @@
 #   CLAUDE_PLUGIN_ROOT — plugin root for accessing libs
 set -euo pipefail
 
-PLUGIN_NAME="github"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-source "${CLAUDE_PLUGIN_ROOT}/lib/plugin-config-read.sh"
-source "${CLAUDE_PLUGIN_ROOT}/lib/log.sh"
-source "${SCRIPT_DIR}/lib/pr-state.sh"
-source "${SCRIPT_DIR}/lib/pr-discover.sh"
+# --- Consume stdin early ---
+# Hook input is provided via stdin; consume it to avoid broken pipe
+hook_input="$(cat)"
 
-# --- Read config ---
+# --- Minimal config for early exit checks ---
+# Source only what's needed for guards and throttle — defer heavy libs
+PLUGIN_NAME="github"
+source "${CLAUDE_PLUGIN_ROOT}/lib/plugin-config-read.sh"
 
 pr_state_enabled="$(plugin_get_config "prStateTracking" "true")"
+if [ "$pr_state_enabled" = "false" ]; then
+  exit 0
+fi
+
+if ! command -v gh &>/dev/null || ! command -v jq &>/dev/null; then
+  exit 0
+fi
+
+# --- Resolve cache directory (needed for throttle check) ---
+
 cache_base="$(plugin_get_config "prStateCacheDir" "")"
 check_interval="$(plugin_get_config "prStateCheckInterval" "60")"
-
-# --- Guards ---
-
-if [ "$pr_state_enabled" = "false" ]; then
-  cat > /dev/null
-  exit 0
-fi
-
-if ! command -v gh &>/dev/null; then
-  cat > /dev/null
-  exit 0
-fi
-
-if ! command -v jq &>/dev/null; then
-  cat > /dev/null
-  exit 0
-fi
-
-# --- Resolve cache directory ---
 
 if [ -z "$cache_base" ]; then
   cache_base="${HOME}/.claude/plugin-cache/github"
@@ -63,11 +55,6 @@ else
   project_slug="default"
 fi
 cache_dir="${cache_base}/${project_slug}/pr-state"
-pr_state_init "$cache_dir"
-
-# --- Consume stdin ---
-# Hook input is provided via stdin; consume it to avoid broken pipe
-hook_input="$(cat)"
 
 # --- Determine hook event ---
 
@@ -76,19 +63,31 @@ hook_event="${HOOK_EVENT:-PostToolUse}"
 # --- Throttle for PostToolUse ---
 # PostToolUse fires on every tool use. To avoid excessive API calls,
 # enforce a cooldown period (default 60s) between checks.
+# This runs BEFORE sourcing heavy libraries for performance.
 
 if [ "$hook_event" = "PostToolUse" ]; then
+  mkdir -p -m 700 "$cache_dir"
   last_check_file="${cache_dir}/.last-check"
   now="$(date +%s)"
   if [ -f "$last_check_file" ]; then
     last_check="$(cat "$last_check_file")"
-    elapsed=$((now - last_check))
-    if [ "$elapsed" -lt "$check_interval" ]; then
+    # Validate check_interval is a positive integer
+    if [[ "$check_interval" =~ ^[0-9]+$ ]] && [ "$((now - last_check))" -lt "$check_interval" ]; then
       exit 0
     fi
   fi
-  echo "$now" > "$last_check_file"
+  # Atomic timestamp write
+  echo "$now" > "${last_check_file}.tmp.$$"
+  mv -f "${last_check_file}.tmp.$$" "$last_check_file"
 fi
+
+# --- Source heavy libraries (only reached when we actually need to check) ---
+
+source "${CLAUDE_PLUGIN_ROOT}/lib/log.sh"
+source "${SCRIPT_DIR}/lib/pr-state.sh"
+source "${SCRIPT_DIR}/lib/pr-discover.sh"
+
+pr_state_init "$cache_dir"
 
 # --- Discover PRs ---
 

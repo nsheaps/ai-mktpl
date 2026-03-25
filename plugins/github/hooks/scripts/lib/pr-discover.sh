@@ -14,6 +14,13 @@ if [ "${_PR_DISCOVER_LOADED:-}" = "true" ]; then
 fi
 _PR_DISCOVER_LOADED="true"
 
+# Validate that a string contains only safe GitHub identifier characters.
+# Args: $1=string to validate
+# Returns: 0 if safe, 1 if not
+_pr_validate_identifier() {
+  [[ "$1" =~ ^[A-Za-z0-9._-]+$ ]]
+}
+
 # Discover PRs for all projects in the current session.
 # Checks CLAUDE_PROJECT_DIR and scans for sibling project dirs
 # that are git repos on branches with open PRs.
@@ -54,16 +61,24 @@ pr_discover_all() {
 # Output: "owner repo pr_number" on stdout (one per PR found)
 _pr_discover_for_dir() {
   local dir="$1"
-  local branch remote_url owner repo pr_number
+  local branch remote_url pr_number
 
   # Get current branch
   branch="$(git -C "$dir" rev-parse --abbrev-ref HEAD 2>/dev/null)" || return 0
   [ "$branch" = "HEAD" ] && return 0
-  [ "$branch" = "main" ] || [ "$branch" = "master" ] && return 0
+  # Skip default branches — no PRs to track
+  if [ "$branch" = "main" ] || [ "$branch" = "master" ]; then
+    return 0
+  fi
 
   # Get remote URL and extract owner/repo
   remote_url="$(git -C "$dir" config --get remote.origin.url 2>/dev/null)" || return 0
   _pr_extract_owner_repo "$remote_url" || return 0
+
+  # Validate extracted values to prevent path traversal / injection
+  if ! _pr_validate_identifier "$_PR_OWNER" || ! _pr_validate_identifier "$_PR_REPO"; then
+    return 1
+  fi
 
   # Find open PR for this branch
   local gh_hostname_flag=""
