@@ -249,6 +249,12 @@ export GITHUB_INSTALLATION_ID="$GITHUB_INSTALLATION_ID"
 ENVEOF
 [[ -n "${GITHUB_APP_CLIENT_ID:-}" ]] && echo "export GITHUB_APP_CLIENT_ID=\"$GITHUB_APP_CLIENT_ID\"" >> "$ENV_RUNTIME_FILE"
 [[ -n "${GITHUB_APP_CLIENT_SECRET:-}" ]] && echo "export GITHUB_APP_CLIENT_SECRET=\"$GITHUB_APP_CLIENT_SECRET\"" >> "$ENV_RUNTIME_FILE"
+
+# Expose wrapper scripts via PATH so `gh` and `git push` auto-source the token
+# when called from any Bash command, even when GH_TOKEN is not already in scope.
+echo "export PATH=\"${CLAUDE_PLUGIN_ROOT}/bin:\$PATH\"" >> "$ENV_RUNTIME_FILE"
+echo "alias gh=\"${CLAUDE_PLUGIN_ROOT}/bin/gh-wrapper.sh\"" >> "$ENV_RUNTIME_FILE"
+
 chmod 600 "$ENV_RUNTIME_FILE"
 
 # Source the runtime env file from CLAUDE_ENV_FILE so all Bash commands

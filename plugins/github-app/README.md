@@ -183,12 +183,56 @@ plugins/github-app/
 │   ├── generate-token.sh            # JWT generation + token exchange
 │   ├── token-check.sh               # Token validity check + refresh logic
 │   ├── token-status.sh              # Token status JSON output
-│   └── git-credential-github-app.sh # Git credential helper
+│   ├── git-credential-github-app.sh # Git credential helper
+│   ├── gh-wrapper.sh                # gh drop-in that auto-sources token
+│   └── git-push-wrapper.sh          # git push wrapper with token auth
 ├── lib/                             # Shared libraries (symlinks)
 ├── docs/
 │   ├── token-refresh-spec.md        # Original design spec
 │   └── reference/                   # Archived implementations
 └── README.md
+```
+
+## Wrapper Scripts
+
+Two drop-in wrapper scripts are included in `bin/` to handle cases where `GH_TOKEN` is not already in the shell environment (e.g., in subshells or external tooling).
+
+### `bin/gh-wrapper.sh`
+
+Transparent wrapper around `gh`. Before calling `gh`, it checks whether `GH_TOKEN` is set. If not, it sources the runtime env file (`GITHUB_APP_ENV_FILE`, defaulting to `~/.config/agent/github-app-env`) and then delegates to the real `gh` binary with all arguments passed through.
+
+```bash
+# Behaves exactly like: gh pr list
+gh-wrapper.sh pr list
+```
+
+The `SessionStart` hook adds `bin/` to `$PATH` and sets a `gh` alias so that all `gh` calls within Bash commands automatically go through this wrapper.
+
+### `bin/git-push-wrapper.sh`
+
+Similar wrapper for `git push`. Sources the env file if `GH_TOKEN` is unset, then:
+
+- If `GH_TOKEN` is available and the remote is a `https://github.com/` URL, rewrites the remote URL on-the-fly to use token auth (`x-access-token`) without permanently modifying git config.
+- Falls back to plain `git push` for SSH remotes or if no token is available (logs a warning in the latter case).
+
+```bash
+# Equivalent to: git push origin main (with token auth)
+git-push-wrapper.sh origin main
+```
+
+### Manual Configuration
+
+If you want to use the wrappers outside a plugin-managed session, source the env file directly:
+
+```bash
+source ~/.config/agent/github-app-env
+# GH_TOKEN, PATH (with bin/), and the gh alias are now set
+```
+
+Or configure the wrapper explicitly as an alias:
+
+```bash
+alias gh="/path/to/plugins/github-app/bin/gh-wrapper.sh"
 ```
 
 ## Related
