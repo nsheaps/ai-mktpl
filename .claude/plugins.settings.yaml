@@ -48,4 +48,3 @@ edit-utils:
     targets:
       - sessionStartBashEnv
       - userSettings
-    recursiveResolve: true
