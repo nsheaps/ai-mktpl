@@ -222,7 +222,11 @@ _pr_state_diff() {
         PR_STATE_CHANGES+=("Merge status changed on ${prefix}: ${field}=${old_val}->${new_val}")
         ;;
       labels)
-        PR_STATE_CHANGES+=("Labels changed on ${prefix}: ${old_val} -> ${new_val}")
+        # Convert JSON arrays to human-readable comma-separated lists
+        local old_labels new_labels
+        old_labels="$(echo "$old_val" | jq -r 'join(", ")' 2>/dev/null || echo "$old_val")"
+        new_labels="$(echo "$new_val" | jq -r 'join(", ")' 2>/dev/null || echo "$new_val")"
+        PR_STATE_CHANGES+=("Labels changed on ${prefix}: [${old_labels}] -> [${new_labels}]")
         ;;
       review_count)
         _pr_state_diff_new_reviews "$new" "$old_val" "$prefix"
@@ -302,11 +306,11 @@ _pr_state_diff_checks_unified() {
     --argjson old_checks "$(echo "$old" | jq '.checks.checks // []')" \
     --argjson new_checks "$(echo "$new" | jq '.checks.checks // []')" \
     '
-    # Index checks by name
+    # Index checks by name, merge to get union of all check names
     def by_name: [.[] | {key: .name, value: {s: .status, c: (.conclusion // "pending")}}] | from_entries;
     ($old_checks | by_name) as $o |
     ($new_checks | by_name) as $n |
-    ([$o | keys[], $n | keys[]] | unique[]) as $name |
+    ($o + $n | keys[]) as $name |
     ($o[$name] // {s:"missing",c:"pending"}) as $ov |
     ($n[$name] // {s:"missing",c:"pending"}) as $nv |
     select("\($ov.s)/\($ov.c)" != "\($nv.s)/\($nv.c)") |

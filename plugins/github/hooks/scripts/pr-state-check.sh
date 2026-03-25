@@ -33,6 +33,10 @@ if [ "$pr_state_enabled" = "false" ]; then
 fi
 
 if ! command -v gh &>/dev/null || ! command -v jq &>/dev/null; then
+  # Log a one-time warning on SessionStart so the user knows tracking is disabled
+  if [ "${HOOK_EVENT:-}" = "SessionStart" ]; then
+    echo "github: PR state tracking disabled — missing $(command -v gh &>/dev/null || echo 'gh')$(command -v jq &>/dev/null || echo ' jq') CLI"
+  fi
   exit 0
 fi
 
@@ -83,11 +87,15 @@ fi
 
 # --- Source heavy libraries (only reached when we actually need to check) ---
 
-source "${CLAUDE_PLUGIN_ROOT}/lib/log.sh"
+source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 source "${SCRIPT_DIR}/lib/pr-state.sh"
 source "${SCRIPT_DIR}/lib/pr-discover.sh"
 
 pr_state_init "$cache_dir"
+
+# --- Prune stale cache files (older than 7 days) ---
+
+find "$cache_dir" -name "*.json" -mtime +7 -delete 2>/dev/null || true
 
 # --- Discover PRs ---
 
@@ -97,6 +105,7 @@ pr_list="$(pr_discover_all 2>/dev/null)" || pr_list=""
 
 if [ -z "$pr_list" ]; then
   log_info "No active PRs found for tracked projects"
+  hook_respond
   exit 0
 fi
 
@@ -125,20 +134,18 @@ log_info "Checked ${pr_count} PR(s)"
 if [ ${#all_changes[@]} -eq 0 ]; then
   # No changes — silent success
   if [ "$hook_event" = "SessionStart" ]; then
-    echo "github: PR state baseline established for ${pr_count} PR(s)"
+    hook_log "PR state baseline established for ${pr_count} PR(s)"
   fi
+  hook_respond
   exit 0
 fi
 
 # Changes detected — build output message
-{
-  echo "github: PR state changes detected since last check:"
-  echo ""
-  for change in "${all_changes[@]}"; do
-    echo "  - ${change}"
-  done
-  echo ""
-  echo "Review these changes and determine if any action is needed."
-}
+hook_log "PR state changes detected since last check:"
+for change in "${all_changes[@]}"; do
+  hook_log "  - ${change}"
+done
+hook_log "Review these changes and determine if any action is needed."
+hook_respond
 
 exit 0
