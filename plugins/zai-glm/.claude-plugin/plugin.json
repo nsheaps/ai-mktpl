@@ -1,6 +1,6 @@
 {
   "name": "zai-glm",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Skills for using z.ai (Zhipu AI) GLM models and configuring Claude Code to access them via the Anthropic-compatible endpoint or API gateways.",
   "author": {
     "name": "Nathan Heaps",
