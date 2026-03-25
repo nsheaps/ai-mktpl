@@ -9,13 +9,6 @@
   },
   "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/claude2028",
   "repository": "https://github.com/nsheaps/ai-mktpl",
-  "keywords": [
-    "rules",
-    "claude2028",
-    "behavior",
-    "best-practices",
-    "session-start",
-    "symlink"
-  ],
+  "keywords": ["rules", "claude2028", "behavior", "best-practices", "session-start", "symlink"],
   "hooks": "./hooks/hooks.json"
 }
