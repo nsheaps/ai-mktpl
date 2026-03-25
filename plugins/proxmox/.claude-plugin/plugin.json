@@ -1,6 +1,6 @@
 {
   "name": "proxmox",
-  "version": "0.1.1",
+  "version": "0.1.0",
   "description": "Skills for managing Proxmox VE hosts and LXC containers — creating containers, running Docker in LXC, and hosting services like cloudflared.",
   "author": {
     "name": "Nathan Heaps",
