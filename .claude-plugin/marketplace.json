@@ -11,7 +11,7 @@
     {
       "name": "1pass",
       "description": "Install and manage 1Password CLI (op) and op-exec in Claude Code sessions. Provides session-start auto-install for web sessions and comprehensive workflow skills.",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -214,7 +214,7 @@
     {
       "name": "github",
       "description": "GitHub CLI installation, authentication, and workflow skill for Claude Code sessions. Consolidates gh-tool and github-auth-skill into a single plugin.",
-      "version": "0.1.13",
+      "version": "0.1.14",
       "author": {
         "name": "Nathan Heaps"
       },
