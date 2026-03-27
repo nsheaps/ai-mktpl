@@ -59,12 +59,12 @@ Search broadly — the right place to track something may not be obvious.
 
 ### Step 3 — Decide
 
-| Search result       | Action                                                                          |
-| ------------------- | ------------------------------------------------------------------------------- |
-| Clear match (open)  | Comment on the existing issue with new context; do NOT create a duplicate       |
-| Clear match (closed)| Evaluate: reopen with a comment, or reference it in a new issue if truly new   |
-| Ambiguous match     | Ask: "Found `owner/repo#N` which looks related — update that one or create new?" |
-| No match            | Create a new issue                                                              |
+| Search result        | Action                                                                           |
+| -------------------- | -------------------------------------------------------------------------------- |
+| Clear match (open)   | Comment on the existing issue with new context; do NOT create a duplicate        |
+| Clear match (closed) | Evaluate: reopen with a comment, or reference it in a new issue if truly new     |
+| Ambiguous match      | Ask: "Found `owner/repo#N` which looks related — update that one or create new?" |
+| No match             | Create a new issue                                                               |
 
 ---
 
@@ -75,11 +75,13 @@ These operations map to every supported ticketing platform.
 ### Create a ticket
 
 Required fields:
+
 - **Title** — concise, action-oriented (e.g., "Fix: login redirects to 404 on mobile")
 - **Body** — problem description, steps to reproduce (bugs), or acceptance criteria (features)
 - **Labels** — at minimum, one type label (`bug`, `enhancement`, `question`)
 
 Optional:
+
 - **Assignee** — who should handle this
 - **Milestone / sprint** — when it should be resolved
 - **Linked issues** — what this relates to or blocks
@@ -257,13 +259,13 @@ GitHub auto-closes the issue when the PR merges.
 
 ## Anti-Patterns to Avoid
 
-| Anti-Pattern                        | Instead                                                       |
-| ----------------------------------- | ------------------------------------------------------------- |
-| Creating without searching first    | Always run the deduplication protocol before creating         |
-| Vague titles like "Fix bug"         | Use specific, actionable titles: "Fix: login 404 on mobile"   |
-| Empty body or one-liner description | Include context, reproduction steps, or acceptance criteria   |
-| Silently creating a duplicate       | Comment on the existing issue or ask the handler to decide    |
-| Closing without explanation         | Always include a resolution comment referencing the fix       |
+| Anti-Pattern                        | Instead                                                     |
+| ----------------------------------- | ----------------------------------------------------------- |
+| Creating without searching first    | Always run the deduplication protocol before creating       |
+| Vague titles like "Fix bug"         | Use specific, actionable titles: "Fix: login 404 on mobile" |
+| Empty body or one-liner description | Include context, reproduction steps, or acceptance criteria |
+| Silently creating a duplicate       | Comment on the existing issue or ask the handler to decide  |
+| Closing without explanation         | Always include a resolution comment referencing the fix     |
 
 ---
 
