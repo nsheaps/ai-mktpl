@@ -6,7 +6,7 @@
 #
 # Configuration (via environment):
 #   TELEGRAM_BOT_TOKEN    — required; Telegram Bot API token
-#   TELEGRAM_CHAT_ID      — optional; defaults to handler's chat ID (1650664303)
+#   TELEGRAM_CHAT_ID      — required; target chat ID for notifications
 #
 # Hook input (stdin, JSON):
 #   tool_name   — e.g. Edit, Write, Bash, Read
@@ -15,7 +15,12 @@ set -euo pipefail
 
 # --- Configuration ---
 
-CHAT_ID="${TELEGRAM_CHAT_ID:-1650664303}"
+CHAT_ID="${TELEGRAM_CHAT_ID:-}"
+if [[ -z "$CHAT_ID" ]]; then
+  # No chat ID configured — skip silently (same pattern as token guard)
+  exit 0
+fi
+
 MAX_SUMMARY_LEN=200
 MAX_DIFF_LEN=400
 
@@ -34,9 +39,11 @@ TOOL_NAME=$(printf '%s' "$INPUT" | jq -r '.tool_name // "unknown"' 2>/dev/null |
 
 # --- Build notification content based on tool type ---
 
-build_notification() {
-  local title detail summary
+NOTIF_TITLE=""
+NOTIF_DETAIL=""
+NOTIF_SUMMARY=""
 
+build_notification() {
   case "$TOOL_NAME" in
     Edit)
       local file_path old_str new_str
@@ -44,16 +51,16 @@ build_notification() {
       old_str=$(printf '%s' "$INPUT" | jq -r '.tool_input.old_string // ""' 2>/dev/null)
       new_str=$(printf '%s' "$INPUT" | jq -r '.tool_input.new_string // ""' 2>/dev/null)
 
-      title="Edit"
-      detail="$file_path"
+      NOTIF_TITLE="Edit"
+      NOTIF_DETAIL="$file_path"
 
       if [[ -n "$old_str" || -n "$new_str" ]]; then
         local old_preview new_preview
-        old_preview=$(printf '%s' "$old_str" | head -c "$MAX_DIFF_LEN")
-        new_preview=$(printf '%s' "$new_str" | head -c "$MAX_DIFF_LEN")
-        summary="- ${old_preview:-(empty)}"$'\n'"+ ${new_preview:-(empty)}"
+        old_preview=$(printf '%s' "$old_str" | cut -c1-"$MAX_DIFF_LEN")
+        new_preview=$(printf '%s' "$new_str" | cut -c1-"$MAX_DIFF_LEN")
+        NOTIF_SUMMARY="- ${old_preview:-(empty)}"$'\n'"+ ${new_preview:-(empty)}"
       else
-        summary="(no diff available)"
+        NOTIF_SUMMARY="(no diff available)"
       fi
       ;;
 
@@ -62,37 +69,35 @@ build_notification() {
       file_path=$(printf '%s' "$INPUT" | jq -r '.tool_input.file_path // ""' 2>/dev/null)
       content=$(printf '%s' "$INPUT" | jq -r '.tool_input.content // ""' 2>/dev/null)
 
-      title="Write"
-      detail="$file_path"
-      summary=$(printf '%s' "$content" | head -c "$MAX_SUMMARY_LEN")
+      NOTIF_TITLE="Write"
+      NOTIF_DETAIL="$file_path"
+      NOTIF_SUMMARY=$(printf '%s' "$content" | cut -c1-"$MAX_SUMMARY_LEN")
       ;;
 
     Bash)
       local cmd
       cmd=$(printf '%s' "$INPUT" | jq -r '.tool_input.command // ""' 2>/dev/null)
 
-      title="Bash"
-      detail=""
-      summary=$(printf '%s' "$cmd" | head -c "$MAX_SUMMARY_LEN")
+      NOTIF_TITLE="Bash"
+      NOTIF_DETAIL=""
+      NOTIF_SUMMARY=$(printf '%s' "$cmd" | cut -c1-"$MAX_SUMMARY_LEN")
       ;;
 
     Read)
       local file_path
       file_path=$(printf '%s' "$INPUT" | jq -r '.tool_input.file_path // ""' 2>/dev/null)
 
-      title="Read"
-      detail="$file_path"
-      summary=""
+      NOTIF_TITLE="Read"
+      NOTIF_DETAIL="$file_path"
+      NOTIF_SUMMARY=""
       ;;
 
     *)
-      title="$TOOL_NAME"
-      detail=$(printf '%s' "$INPUT" | jq -r '.tool_input | to_entries | map("\(.key): \(.value)") | join(", ")' 2>/dev/null | head -c "$MAX_SUMMARY_LEN" || echo "")
-      summary=""
+      NOTIF_TITLE="$TOOL_NAME"
+      NOTIF_DETAIL=$(printf '%s' "$INPUT" | jq -r '.tool_input | to_entries | map("\(.key): \(.value)") | join(", ")' 2>/dev/null | cut -c1-"$MAX_SUMMARY_LEN" || echo "")
+      NOTIF_SUMMARY=""
       ;;
   esac
-
-  printf '%s\t%s\t%s' "$title" "$detail" "$summary"
 }
 
 # --- Escape HTML for Telegram ---
@@ -106,25 +111,22 @@ html_escape() {
 
 # --- Main ---
 
-NOTIFICATION=$(build_notification)
-TITLE=$(printf '%s' "$NOTIFICATION" | cut -f1)
-DETAIL=$(printf '%s' "$NOTIFICATION" | cut -f2)
-SUMMARY=$(printf '%s' "$NOTIFICATION" | cut -f3-)
+build_notification
 
 # Build HTML message
-MSG="<b>🔒 Permission Request: $(html_escape "$TITLE")</b>"
+MSG="<b>🔒 Permission Request: $(html_escape "$NOTIF_TITLE")</b>"
 
-if [[ -n "$DETAIL" ]]; then
-  MSG+=$'\n'"📁 <code>$(html_escape "$DETAIL")</code>"
+if [[ -n "$NOTIF_DETAIL" ]]; then
+  MSG+=$'\n'"📁 <code>$(html_escape "$NOTIF_DETAIL")</code>"
 fi
 
-if [[ -n "$SUMMARY" ]]; then
-  MSG+=$'\n'"📝 <pre>$(html_escape "$SUMMARY")</pre>"
+if [[ -n "$NOTIF_SUMMARY" ]]; then
+  MSG+=$'\n'"📝 <pre>$(html_escape "$NOTIF_SUMMARY")</pre>"
 fi
 
 # Send notification in the background — never block permission decision
 (
-  curl -s -X POST \
+  curl -s --max-time 5 -X POST \
     "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
     -H "Content-Type: application/json" \
     -d "$(jq -n \

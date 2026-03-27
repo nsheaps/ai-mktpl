@@ -22,10 +22,10 @@ Sent via the Telegram Bot API with HTML parse mode.
 
 Set the following environment variables before starting the Claude Code session:
 
-| Variable             | Required | Default      | Description                      |
-| -------------------- | -------- | ------------ | -------------------------------- |
-| `TELEGRAM_BOT_TOKEN` | Yes      | —            | Telegram Bot API token           |
-| `TELEGRAM_CHAT_ID`   | No       | `1650664303` | Chat ID to receive notifications |
+| Variable             | Required | Default | Description                      |
+| -------------------- | -------- | ------- | -------------------------------- |
+| `TELEGRAM_BOT_TOKEN` | Yes      | —       | Telegram Bot API token           |
+| `TELEGRAM_CHAT_ID`   | Yes      | —       | Chat ID to receive notifications |
 
 ### Recommended: inject via op-exec
 
@@ -56,7 +56,7 @@ Or use the `1pass` / `op-exec` plugin to inject secrets automatically.
 
 - The notification is sent asynchronously (background `curl`) — it never delays the permission decision
 - The hook outputs no `permissionDecision` field, so Claude Code falls through to its normal flow
-- If `TELEGRAM_BOT_TOKEN` is unset, the hook exits silently with no effect
+- If `TELEGRAM_BOT_TOKEN` or `TELEGRAM_CHAT_ID` is unset, the hook exits silently with no effect
 
 ## References
 

@@ -12,7 +12,7 @@ The notification is purely informational — it never blocks or overrides the pe
 - **Async delivery**: Notification sent in background — zero latency impact
 - **Rich previews**: Shows file paths, diff excerpts (Edit), command text (Bash), or content previews (Write)
 - **HTML formatting**: Clean Telegram messages with bold headers and code blocks
-- **Zero-config fallback**: If `TELEGRAM_BOT_TOKEN` is unset, hook exits silently
+- **Zero-config fallback**: If `TELEGRAM_BOT_TOKEN` or `TELEGRAM_CHAT_ID` is unset, hook exits silently
 
 ## Notification Format
 
@@ -52,9 +52,9 @@ Or source it from a file:
 source ~/.config/agent/telegram-env
 ```
 
-### 3. (Optional) Override the Chat ID
+### 3. Set Your Chat ID
 
-The default chat ID is `1650664303` (the handler's personal chat). Override with:
+Set the `TELEGRAM_CHAT_ID` to your personal chat ID. This is required — the hook exits silently if unset.
 
 ```bash
 export TELEGRAM_CHAT_ID="your_chat_id"
@@ -64,10 +64,10 @@ To find your chat ID, message [@userinfobot](https://t.me/userinfobot).
 
 ## Configuration Reference
 
-| Variable             | Required | Default      | Description                      |
-| -------------------- | -------- | ------------ | -------------------------------- |
-| `TELEGRAM_BOT_TOKEN` | Yes      | —            | Telegram Bot API token           |
-| `TELEGRAM_CHAT_ID`   | No       | `1650664303` | Target chat ID for notifications |
+| Variable             | Required | Default | Description                      |
+| -------------------- | -------- | ------- | -------------------------------- |
+| `TELEGRAM_BOT_TOKEN` | Yes      | —       | Telegram Bot API token           |
+| `TELEGRAM_CHAT_ID`   | Yes      | —       | Target chat ID for notifications |
 
 ## Plugin Structure
 
