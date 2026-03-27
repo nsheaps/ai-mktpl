@@ -27,10 +27,16 @@ if [[ -n "${GH_TOKEN:-}" ]]; then
   # non-flag positional argument as the remote name, defaulting to 'origin'.
   # This correctly handles patterns like: git push -u origin main
   REMOTE="origin"
+  REMOTE_FOUND=false
+  ARGS_WITHOUT_REMOTE=()
   for arg in "$@"; do
-    if [[ "$arg" != -* ]]; then
+    if [[ "$REMOTE_FOUND" == false && "$arg" != -* ]]; then
       REMOTE="$arg"
-      break
+      REMOTE_FOUND=true
+      # Do NOT add the remote name to ARGS_WITHOUT_REMOTE — it will be
+      # replaced by the TOKEN_URL when using token-based auth.
+    else
+      ARGS_WITHOUT_REMOTE+=("$arg")
     fi
   done
 
@@ -41,9 +47,11 @@ if [[ -n "${GH_TOKEN:-}" ]]; then
     REPO_PATH="${REMOTE_URL#https://github.com/}"
     TOKEN_URL="https://x-access-token:${GH_TOKEN}@github.com/${REPO_PATH}"
 
-    # Run git push with the token URL; sanitize stderr so the token does not
-    # appear in error messages (git may echo the full remote URL on failure).
-    git push "$TOKEN_URL" "$@" 2> >(sed "s|x-access-token:[^@]*@|x-access-token:***@|g" >&2)
+    # Run git push with the token URL substituted for the remote name.
+    # ARGS_WITHOUT_REMOTE contains all original args except the remote name,
+    # so git receives: push <TOKEN_URL> [flags...] [refspecs...]
+    # (The remote name is NOT passed again — it was replaced by the URL.)
+    git push "$TOKEN_URL" "${ARGS_WITHOUT_REMOTE[@]}" 2> >(sed "s|x-access-token:[^@]*@|x-access-token:***@|g" >&2)
     exit $?
   fi
 
