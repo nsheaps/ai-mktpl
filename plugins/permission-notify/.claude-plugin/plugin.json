@@ -1,0 +1,13 @@
+{
+  "name": "permission-notify",
+  "version": "0.1.0",
+  "description": "Sends Telegram notifications on permission requests with edit summaries",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/permission-notify",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": ["telegram", "notifications", "permissions", "hooks"]
+}
