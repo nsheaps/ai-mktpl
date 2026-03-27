@@ -1,0 +1,17 @@
+{
+  "description": "Edit utilities: auto-format and lint files after Write/Edit tool calls",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/format-on-save.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

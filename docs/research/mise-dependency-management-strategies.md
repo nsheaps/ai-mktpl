@@ -338,7 +338,7 @@ $ ls ~/.local/share/mise/shims/
 bun → mise, bunx → mise, claude → mise, gh → mise, just → mise, ...
 ```
 
-Shims are symlinks to mise itself. They exist for ALL tools in mise.toml, even if the tool isn't yet installed. The shim delegates to mise at runtime to find the right version.
+Shims are symlinks to mise itself. They exist only for INSTALLED tools — tools declared in `mise.toml` but not yet installed do not have shims until they are installed. The shim delegates to mise at runtime to find the right version.
 
 **Test 4: Missing tool through shim**
 
@@ -504,7 +504,7 @@ This strategy emerged from combining three discoveries:
 │  mise plugin:                                                   │
 │    1. Install mise binary (5-15s)                               │
 │    2. mise trust (1s)                                           │
-│    3. mise reshim (1s) — creates shims for ALL tools            │
+│    3. mise reshim (1s) — creates shims for INSTALLED tools only            │
 │    4. Write shim PATH + mise activate to CLAUDE_ENV_FILE        │
 │    5. Output: {"async": true} — go async for bulk install       │
 │                                                                 │
@@ -567,7 +567,7 @@ This means mise shims are ALREADY the "lazy install on first call" mechanism. No
 
 **How it works:**
 
-1. `mise reshim` creates shims for all tools in `mise.toml`
+1. `mise reshim` creates shims for all INSTALLED tools (tools in `mise.toml` that are not yet installed do not get shims until installed)
 2. Each shim is a symlink to the mise binary itself
 3. When invoked, mise checks if the requested tool version is installed
 4. If installed → exec the real binary (fast path)

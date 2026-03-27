@@ -1,0 +1,12 @@
+# git-spice plugin configuration
+#
+# Override per-project via ${CLAUDE_PROJECT_DIR}/.claude/plugins.settings.yaml
+# or per-user via ~/.claude/plugins.settings.yaml under the "git-spice" key.
+
+git-spice:
+  enabled: true
+
+  # Automatically install gs-stack-status via mise in web sessions.
+  #   true  — install if missing (default)
+  #   false — skip install, only use if already on PATH
+  autoInstall: true

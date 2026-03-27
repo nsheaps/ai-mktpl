@@ -9,11 +9,12 @@ set -euo pipefail
 PLUGIN_NAME="google-workspace-cli"
 source "${CLAUDE_PLUGIN_ROOT}/lib/plugin-config-read.sh"
 source "${CLAUDE_PLUGIN_ROOT}/lib/tool-install.sh"
+source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 
 # --- Guards ---
 
-plugin_is_enabled || { echo '{}'; exit 0; }
-tool_is_web_session || { echo '{}'; exit 0; }
+plugin_is_enabled || { hook_log "plugin disabled, skipping"; hook_respond; exit 0; }
+tool_is_web_session || { hook_log "not a web session, skipping"; hook_respond; exit 0; }
 
 # --- Read config ---
 
@@ -39,7 +40,7 @@ download_gws() {
     aarch64) triple="aarch64-unknown-linux-gnu" ;;
     arm64)   triple="aarch64-unknown-linux-gnu" ;;
     *)
-      echo "${PLUGIN_NAME}: Unsupported architecture: $arch" >&2
+      log_error "Unsupported architecture: $arch"
       return 1
       ;;
   esac
@@ -49,7 +50,7 @@ download_gws() {
   local tmp_dir
   tmp_dir="$(mktemp -d)"
 
-  echo "${PLUGIN_NAME}: Downloading gws v${target_version} from $url" >&2
+  log_info "Downloading gws v${target_version} from $url"
   if curl -fsSL "$url" -o "$tmp_dir/$archive" 2>/dev/null; then
     tar -xf "$tmp_dir/$archive" -C "$tmp_dir"
     # Find the gws binary in the extracted contents
@@ -63,17 +64,17 @@ download_gws() {
       cp "$extracted_bin" "$gws_bin"
       chmod +x "$gws_bin"
       rm -rf "$tmp_dir"
-      echo "${PLUGIN_NAME}: gws v${target_version} installed successfully" >&2
+      log_info "gws v${target_version} installed successfully"
       tool_ensure_path "$INSTALL_DIR"
       echo "$gws_bin"
     else
       rm -rf "$tmp_dir"
-      echo "${PLUGIN_NAME}: Failed to find gws binary in archive" >&2
+      log_error "Failed to find gws binary in archive"
       return 1
     fi
   else
     rm -rf "$tmp_dir"
-    echo "${PLUGIN_NAME}: Failed to download gws v${target_version}" >&2
+    log_error "Failed to download gws v${target_version}"
     return 1
   fi
 }
@@ -86,9 +87,9 @@ resolve_gws_bin() {
   if [ "$auto_install" != "true" ]; then
     if tool_is_available gws; then
       gws_bin="$(command -v gws)"
-      echo "${PLUGIN_NAME}: autoInstall=false, using gws from PATH at $gws_bin" >&2
+      log_info "autoInstall=false, using gws from PATH at $gws_bin"
     else
-      echo "${PLUGIN_NAME}: autoInstall=false and gws not on PATH, skipping" >&2
+      log_info "autoInstall=false and gws not on PATH, skipping"
       return 1
     fi
     echo "$gws_bin"
@@ -98,7 +99,7 @@ resolve_gws_bin() {
   # Check if already installed in INSTALL_DIR
   if [ -x "$gws_bin" ]; then
     tool_ensure_path "$INSTALL_DIR"
-    echo "${PLUGIN_NAME}: gws already installed at $gws_bin" >&2
+    log_info "gws already installed at $gws_bin"
     echo "$gws_bin"
     return 0
   fi
@@ -106,7 +107,7 @@ resolve_gws_bin() {
   # Check if available on PATH (e.g. installed by mise globally)
   if tool_is_available gws; then
     gws_bin="$(command -v gws)"
-    echo "${PLUGIN_NAME}: gws found on PATH at $gws_bin" >&2
+    log_info "gws found on PATH at $gws_bin"
     echo "$gws_bin"
     return 0
   fi
@@ -119,7 +120,7 @@ resolve_gws_bin() {
 
   # Try mise with ubi backend (preferred method)
   if tool_is_available mise; then
-    echo "${PLUGIN_NAME}: Installing gws via mise (ubi backend)..." >&2
+    log_info "Installing gws via mise (ubi backend)..."
     local mise_spec="ubi:googleworkspace/cli"
     if [ "$install_version" != "latest" ]; then
       mise_spec="${mise_spec}@${install_version}"
@@ -127,16 +128,16 @@ resolve_gws_bin() {
     if mise use -g "$mise_spec" >&2; then
       if tool_is_available gws; then
         gws_bin="$(command -v gws)"
-        echo "${PLUGIN_NAME}: gws installed via mise at $gws_bin" >&2
+        log_info "gws installed via mise at $gws_bin"
         echo "$gws_bin"
         return 0
       fi
     fi
-    echo "${PLUGIN_NAME}: mise install failed, trying direct binary download..." >&2
+    log_warn "mise install failed, trying direct binary download..."
   fi
 
   # Fallback: download pre-compiled binary from GitHub releases
-  echo "${PLUGIN_NAME}: Installing gws to $INSTALL_DIR" >&2
+  log_info "Installing gws to $INSTALL_DIR"
   download_gws "$install_version"
 }
 
@@ -144,7 +145,7 @@ resolve_gws_bin() {
 
 do_setup() {
   local gws_bin
-  gws_bin="$(resolve_gws_bin)" || { echo '{}'; exit 0; }
+  gws_bin="$(resolve_gws_bin)" || { hook_log "gws not available, skipping"; hook_respond; exit 0; }
 
   # Persist PATH for future tool calls
   tool_ensure_path "$INSTALL_DIR"
@@ -152,14 +153,15 @@ do_setup() {
   # Check auth status
   if [ "$auto_auth" = "true" ]; then
     if ! "$gws_bin" auth status &>/dev/null; then
-      echo "${PLUGIN_NAME}: gws auth not configured. Run 'gws auth setup' and 'gws auth login' to authenticate." >&2
+      hook_log "gws auth not configured. Run 'gws auth setup' and 'gws auth login' to authenticate."
     fi
   fi
 
-  echo "${PLUGIN_NAME}: Google Workspace CLI is ready" >&2
+  hook_log "Google Workspace CLI is ready"
 }
 
 # --- Execute ---
 
 tool_run_install do_setup
-echo '{}'
+hook_log_cleanup
+hook_respond

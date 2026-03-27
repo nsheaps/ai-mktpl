@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+#MISE description="Run all linters (uses .prettierrc.yaml for config). Optional FILE argument to lint a single file."
+#MISE alias="l"
+set -euo pipefail
+
+FILE="${1:-.}"
+
+command -v prettier >/dev/null 2>&1 || mise run setup
+
+if mise run lint-check "$FILE"; then
+  exit 0
+fi
+echo "Lint errors found. Attempting to fix..."
+mise run lint-fix "$FILE"
+# Exit based on whether issues remain - CI handles detecting/committing changes
+mise run lint-check "$FILE"

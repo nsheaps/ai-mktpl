@@ -50,6 +50,7 @@ jobs:
         uses: jdx/mise-action@v3
         with:
           install: true
+          cache: true
 
       - name: Compute report parameters
         id: params

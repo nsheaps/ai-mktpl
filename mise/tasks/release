@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+#MISE description="Bump plugin versions. Use --dry-run to preview. Optional: --format=md for markdown output."
+set -euo pipefail
+
+if [[ "${*}" == *"--dry-run"* ]]; then
+  # Extract format flag if present, default to raw
+  if [[ "${*}" == *"--format=md"* ]]; then
+    mise run _preview-version-bumps --format=md
+  else
+    mise run _preview-version-bumps --format=raw
+  fi
+else
+  mise run _bump-plugin-versions
+fi

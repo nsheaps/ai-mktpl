@@ -18,9 +18,9 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: just validate-claude-config
+    - name: mise run validate-claude-config
       shell: bash
       run: |
-        just validate-claude-config \
+        mise run validate-claude-config \
           "${{ inputs.settings-file }}" \
           "${{ inputs.marketplace-file }}"

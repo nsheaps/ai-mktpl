@@ -91,7 +91,6 @@ The plugin manifest file is **required** for all plugins. It must contain valid 
   "keywords": ["enterprise", "security", "compliance"],
   "commands": ["./custom/commands/special.md"],
   "agents": "./custom/agents/",
-  "hooks": "./config/hooks.json",
   "mcpServers": "./mcp-config.json"
 }
 ```

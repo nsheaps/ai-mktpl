@@ -4,6 +4,10 @@
 
 set -euo pipefail
 
+LOG_PREFIX="self-terminate"
+# shellcheck source=../lib/log.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/lib/log.sh"
+
 # Traverse up the process tree to find Claude
 find_claude_pid() {
     local pid="$PPID"
@@ -15,7 +19,7 @@ find_claude_pid() {
         process_name=$(ps -o comm= -p "$pid" 2>/dev/null || echo "")
 
         if [[ -z "$process_name" ]]; then
-            echo "Error: Could not find Claude in process tree (reached PID $pid)" >&2
+            log_error "Could not find Claude in process tree (reached PID $pid)"
             return 1
         fi
 
@@ -29,7 +33,7 @@ find_claude_pid() {
         parent_pid=$(ps -o ppid= -p "$pid" 2>/dev/null | tr -d ' ')
 
         if [[ -z "$parent_pid" || "$parent_pid" == "0" || "$parent_pid" == "1" ]]; then
-            echo "Error: Reached init without finding Claude" >&2
+            log_error "Reached init without finding Claude"
             return 1
         fi
 
@@ -37,7 +41,7 @@ find_claude_pid() {
         ((depth++))
     done
 
-    echo "Error: Max depth reached without finding Claude" >&2
+    log_error "Max depth reached without finding Claude"
     return 1
 }
 
@@ -47,6 +51,6 @@ if [[ -z "$CLAUDE_PID" ]]; then
     exit 1
 fi
 
-echo "Found Claude process (PID: $CLAUDE_PID)"
-echo "Sending SIGINT..."
+log_info "Found Claude process (PID: $CLAUDE_PID)"
+log_info "Sending SIGINT..."
 kill -INT "$CLAUDE_PID"

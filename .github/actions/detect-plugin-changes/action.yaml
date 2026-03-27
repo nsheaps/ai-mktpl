@@ -28,8 +28,8 @@ runs:
       id: detect
       shell: bash
       run: |
-        # Run justfile recipe and capture JSON output
-        OUTPUT=$(just detect-plugin-changes "${{ inputs.base-ref }}")
+        # Run mise task and capture JSON output
+        OUTPUT=$(mise run detect-plugin-changes "${{ inputs.base-ref }}")
 
         # Parse JSON and set outputs
         echo "has_changes=$(echo "$OUTPUT" | jq -r '.has_changes')" >> $GITHUB_OUTPUT

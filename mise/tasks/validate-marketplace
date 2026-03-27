@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#MISE description="Validate marketplace plugin manifest"
+set -euo pipefail
+
+mise run validate-plugin .claude-plugin/marketplace.json
