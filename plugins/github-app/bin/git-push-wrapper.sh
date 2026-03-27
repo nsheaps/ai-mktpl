@@ -23,15 +23,28 @@ if [[ -z "${GH_TOKEN:-}" ]]; then
 fi
 
 if [[ -n "${GH_TOKEN:-}" ]]; then
-  # Determine the push remote (first positional arg, or 'origin')
-  REMOTE="${1:-origin}"
+  # Parse args: collect flags (anything starting with -) and find the first
+  # non-flag positional argument as the remote name, defaulting to 'origin'.
+  # This correctly handles patterns like: git push -u origin main
+  REMOTE="origin"
+  for arg in "$@"; do
+    if [[ "$arg" != -* ]]; then
+      REMOTE="$arg"
+      break
+    fi
+  done
+
   REMOTE_URL=$(git remote get-url "$REMOTE" 2>/dev/null || true)
 
   if [[ -n "$REMOTE_URL" ]] && [[ "$REMOTE_URL" == https://github.com/* ]]; then
-    # Rewrite URL to embed token credentials without storing them in git config
+    # Rewrite URL to embed token credentials without storing them in git config.
     REPO_PATH="${REMOTE_URL#https://github.com/}"
     TOKEN_URL="https://x-access-token:${GH_TOKEN}@github.com/${REPO_PATH}"
-    exec git push "$TOKEN_URL" "${@:2}"
+
+    # Run git push with the token URL; sanitize stderr so the token does not
+    # appear in error messages (git may echo the full remote URL on failure).
+    git push "$TOKEN_URL" "$@" 2> >(sed "s|x-access-token:[^@]*@|x-access-token:***@|g" >&2)
+    exit $?
   fi
 
   # Non-https or non-github remote — fall through to plain git push.
