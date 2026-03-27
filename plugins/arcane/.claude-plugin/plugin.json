@@ -1,6 +1,6 @@
 {
   "name": "arcane",
-  "version": "0.1.1",
+  "version": "0.1.0",
   "description": "Skills for deploying docker-compose stacks via Arcane GitOps — directory conventions, secrets management with 1Password, and GitHub Actions CI/CD.",
   "author": {
     "name": "Nathan Heaps",

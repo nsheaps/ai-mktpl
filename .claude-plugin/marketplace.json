@@ -44,7 +44,7 @@
     {
       "name": "arcane",
       "description": "Skills for deploying docker-compose stacks via Arcane GitOps — directory conventions, secrets management with 1Password, and GitHub Actions CI/CD.",
-      "version": "0.1.1",
+      "version": "0.1.0",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -67,7 +67,7 @@
     {
       "name": "cloudflare",
       "description": "Skills for managing Cloudflare developer platform components including Workers, R2, D1, AI Gateway, Pages, Tunnels, and more — with Pulumi IaC setup for each.",
-      "version": "0.1.1",
+      "version": "0.1.0",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -432,18 +432,6 @@
       ]
     },
     {
-      "name": "permission-notify",
-      "description": "Sends Telegram notifications on permission requests with edit summaries",
-      "version": "0.1.0",
-      "author": {
-        "name": "Nathan Heaps"
-      },
-      "source": "./plugins/permission-notify",
-      "category": "utility",
-      "tags": ["utility", "skill"],
-      "keywords": ["telegram", "notifications", "permissions", "hooks"]
-    },
-    {
       "name": "permissions-sync",
       "description": "Merge permission scopes from configurable source settings.json files into settings.local.json on session start. Supports project-level and user-level installation.",
       "version": "0.1.12",
@@ -499,7 +487,7 @@
     {
       "name": "proxmox",
       "description": "Skills for managing Proxmox VE hosts and LXC containers — creating containers, running Docker in LXC, and hosting services like cloudflared.",
-      "version": "0.1.1",
+      "version": "0.1.0",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -797,7 +785,7 @@
     {
       "name": "zai-glm",
       "description": "Skills for using z.ai (Zhipu AI) GLM models and configuring Claude Code to access them via the Anthropic-compatible endpoint or API gateways.",
-      "version": "0.1.1",
+      "version": "0.1.0",
       "author": {
         "name": "Nathan Heaps"
       },
