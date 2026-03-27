@@ -17,7 +17,10 @@
       },
       "source": "./plugins/1pass",
       "category": "utility",
-      "tags": ["utility", "skill"],
+      "tags": [
+        "utility",
+        "skill"
+      ],
       "keywords": [
         "1password",
         "op",
@@ -38,8 +41,16 @@
       },
       "source": "./plugins/agent-tab-titles",
       "category": "utility",
-      "tags": ["utility"],
-      "keywords": ["tmux", "iterm2", "tab-title", "agent-teams", "pane-title"]
+      "tags": [
+        "utility"
+      ],
+      "keywords": [
+        "tmux",
+        "iterm2",
+        "tab-title",
+        "agent-teams",
+        "pane-title"
+      ]
     },
     {
       "name": "agentic-behavior",
@@ -50,7 +61,10 @@
       },
       "source": "./plugins/agentic-behavior",
       "category": "utility",
-      "tags": ["utility", "skill"],
+      "tags": [
+        "utility",
+        "skill"
+      ],
       "keywords": [
         "configuration",
         "behavior",
@@ -63,6 +77,66 @@
       ]
     },
     {
+      "name": "arcane",
+      "description": "Skills for deploying docker-compose stacks via Arcane GitOps \u2014 directory conventions, secrets management with 1Password, and GitHub Actions CI/CD.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/arcane",
+      "category": "utility",
+      "tags": [
+        "utility",
+        "skill"
+      ],
+      "keywords": [
+        "arcane",
+        "gitops",
+        "docker-compose",
+        "deployment",
+        "1password",
+        "secrets",
+        "docker",
+        "containers",
+        "self-hosted",
+        "homelab"
+      ]
+    },
+    {
+      "name": "cloudflare",
+      "description": "Skills for managing Cloudflare developer platform components including Workers, R2, D1, AI Gateway, Pages, Tunnels, and more \u2014 with Pulumi IaC setup for each.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/cloudflare",
+      "category": "utility",
+      "tags": [
+        "utility",
+        "skill"
+      ],
+      "keywords": [
+        "cloudflare",
+        "workers",
+        "r2",
+        "d1",
+        "kv",
+        "pages",
+        "tunnels",
+        "ai-gateway",
+        "zero-trust",
+        "durable-objects",
+        "queues",
+        "vectorize",
+        "dns",
+        "pulumi",
+        "infrastructure-as-code",
+        "iac",
+        "serverless",
+        "edge-computing"
+      ]
+    },
+    {
       "name": "code-simplifier",
       "description": "Simplify and refine code for clarity, consistency, and maintainability. Requires pr-review-toolkit plugin.",
       "version": "0.1.1",
@@ -71,8 +145,17 @@
       },
       "source": "./plugins/code-simplifier",
       "category": "utility",
-      "tags": ["utility", "command", "skill"],
-      "keywords": ["refactoring", "code-quality", "simplification", "cleanup"]
+      "tags": [
+        "utility",
+        "command",
+        "skill"
+      ],
+      "keywords": [
+        "refactoring",
+        "code-quality",
+        "simplification",
+        "cleanup"
+      ]
     },
     {
       "name": "command-help-skill",
@@ -83,8 +166,19 @@
       },
       "source": "./plugins/command-help-skill",
       "category": "utility",
-      "tags": ["utility", "skill"],
-      "keywords": ["commands", "help", "discovery", "skill", "slash-commands", "ai", "assistant"]
+      "tags": [
+        "utility",
+        "skill"
+      ],
+      "keywords": [
+        "commands",
+        "help",
+        "discovery",
+        "skill",
+        "slash-commands",
+        "ai",
+        "assistant"
+      ]
     },
     {
       "name": "common-sense",
@@ -95,7 +189,9 @@
       },
       "source": "./plugins/common-sense",
       "category": "utility",
-      "tags": ["utility"],
+      "tags": [
+        "utility"
+      ],
       "keywords": [
         "rules",
         "common-sense",
@@ -114,8 +210,37 @@
       },
       "source": "./plugins/context-bloat-prevention",
       "category": "utility",
-      "tags": ["utility"],
-      "keywords": ["context-management", "performance", "agent-teams", "hooks", "output-management"]
+      "tags": [
+        "utility"
+      ],
+      "keywords": [
+        "context-management",
+        "performance",
+        "agent-teams",
+        "hooks",
+        "output-management"
+      ]
+    },
+    {
+      "name": "correct-behavior",
+      "description": "Command to correct AI behavior mistakes and update rules to prevent recurrence",
+      "version": "0.2.25",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/correct-behavior",
+      "category": "utility",
+      "tags": [
+        "utility",
+        "command"
+      ],
+      "keywords": [
+        "behavior",
+        "correction",
+        "rules",
+        "memory",
+        "learning"
+      ]
     },
     {
       "name": "create-command",
@@ -126,8 +251,18 @@
       },
       "source": "./plugins/create-command",
       "category": "utility",
-      "tags": ["utility", "command", "skill"],
-      "keywords": ["slash-command", "command", "create", "automation", "workflow"]
+      "tags": [
+        "utility",
+        "command",
+        "skill"
+      ],
+      "keywords": [
+        "slash-command",
+        "command",
+        "create",
+        "automation",
+        "workflow"
+      ]
     },
     {
       "name": "daily-report",
@@ -138,7 +273,10 @@
       },
       "source": "./plugins/daily-report",
       "category": "utility",
-      "tags": ["utility", "skill"],
+      "tags": [
+        "utility",
+        "skill"
+      ],
       "keywords": [
         "daily-report",
         "org-report",
@@ -158,7 +296,10 @@
       },
       "source": "./plugins/data-serialization",
       "category": "utility",
-      "tags": ["utility", "skill"],
+      "tags": [
+        "utility",
+        "skill"
+      ],
       "keywords": [
         "yaml",
         "json",
@@ -185,20 +326,41 @@
       },
       "source": "./plugins/edit-utils",
       "category": "utility",
-      "tags": ["utility", "skill"],
-      "keywords": ["format", "lint", "prettier", "eslint", "edit", "write", "auto-format"]
+      "tags": [
+        "utility",
+        "skill"
+      ],
+      "keywords": [
+        "format",
+        "lint",
+        "prettier",
+        "eslint",
+        "edit",
+        "write",
+        "auto-format"
+      ]
     },
     {
       "name": "fix-pr",
-      "description": "Relentlessly fix a PR until CI passes — iterates through review, fix, push cycles until green",
+      "description": "Relentlessly fix a PR until CI passes \u2014 iterates through review, fix, push cycles until green",
       "version": "0.1.2",
       "author": {
         "name": "Nathan Heaps"
       },
       "source": "./plugins/fix-pr",
       "category": "utility",
-      "tags": ["utility", "command"],
-      "keywords": ["pr", "ci", "fix", "review", "iteration", "relentless"]
+      "tags": [
+        "utility",
+        "command"
+      ],
+      "keywords": [
+        "pr",
+        "ci",
+        "fix",
+        "review",
+        "iteration",
+        "relentless"
+      ]
     },
     {
       "name": "git-spice",
@@ -209,7 +371,10 @@
       },
       "source": "./plugins/git-spice",
       "category": "git",
-      "tags": ["utility", "skill"],
+      "tags": [
+        "utility",
+        "skill"
+      ],
       "keywords": [
         "git",
         "git-spice",
@@ -229,7 +394,10 @@
       },
       "source": "./plugins/github",
       "category": "git",
-      "tags": ["utility", "skill"],
+      "tags": [
+        "utility",
+        "skill"
+      ],
       "keywords": [
         "github",
         "gh",
@@ -254,7 +422,10 @@
       },
       "source": "./plugins/github-app",
       "category": "git",
-      "tags": ["utility", "skill"],
+      "tags": [
+        "utility",
+        "skill"
+      ],
       "keywords": [
         "github",
         "github-app",
@@ -276,7 +447,10 @@
       },
       "source": "./plugins/google-workspace-cli",
       "category": "utility",
-      "tags": ["utility", "skill"],
+      "tags": [
+        "utility",
+        "skill"
+      ],
       "keywords": [
         "google-workspace",
         "gws",
@@ -304,8 +478,43 @@
       },
       "source": "./plugins/linear-mcp-sync",
       "category": "utility",
-      "tags": ["utility"],
-      "keywords": ["linear", "mcp", "hooks", "sync", "issue-tracking", "conflict-detection"]
+      "tags": [
+        "utility"
+      ],
+      "keywords": [
+        "linear",
+        "mcp",
+        "hooks",
+        "sync",
+        "issue-tracking",
+        "conflict-detection"
+      ]
+    },
+    {
+      "name": "mcp-tooling",
+      "description": "Skills for MCP CLI tools, frameworks, proxy daemoning, and gateway patterns. Covers philschmid/mcp-cli, mcp-use, apify/mcpc, mcp-proxy daemoning, and MCP gateway architecture for sharing servers across sessions and networks.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/mcp-tooling",
+      "category": "utility",
+      "tags": [
+        "utility",
+        "skill"
+      ],
+      "keywords": [
+        "mcp",
+        "mcp-cli",
+        "mcp-use",
+        "mcpc",
+        "mcp-proxy",
+        "mcp-gateway",
+        "model-context-protocol",
+        "tool-discovery",
+        "server-sharing",
+        "daemon"
+      ]
     },
     {
       "name": "memory-manager",
@@ -316,8 +525,17 @@
       },
       "source": "./plugins/memory-manager",
       "category": "utility",
-      "tags": ["utility", "skill"],
-      "keywords": ["memory", "preferences", "claude.md", "context", "instructions"]
+      "tags": [
+        "utility",
+        "skill"
+      ],
+      "keywords": [
+        "memory",
+        "preferences",
+        "claude.md",
+        "context",
+        "instructions"
+      ]
     },
     {
       "name": "mise",
@@ -328,7 +546,10 @@
       },
       "source": "./plugins/mise",
       "category": "utility",
-      "tags": ["utility", "skill"],
+      "tags": [
+        "utility",
+        "skill"
+      ],
       "keywords": [
         "mise",
         "tool-manager",
@@ -347,7 +568,10 @@
       },
       "source": "./plugins/og-image",
       "category": "utility",
-      "tags": ["utility", "skill"],
+      "tags": [
+        "utility",
+        "skill"
+      ],
       "keywords": [
         "generation",
         "image",
@@ -368,7 +592,9 @@
       },
       "source": "./plugins/permissions-sync",
       "category": "utility",
-      "tags": ["utility"],
+      "tags": [
+        "utility"
+      ],
       "keywords": [
         "permissions",
         "settings",
@@ -383,15 +609,24 @@
     },
     {
       "name": "plugin-management",
-      "description": "Skill for installing, updating, and managing Claude Code plugins — including what requires a restart and what hot-reloads.",
+      "description": "Skill for installing, updating, and managing Claude Code plugins \u2014 including what requires a restart and what hot-reloads.",
       "version": "0.1.3",
       "author": {
         "name": "Nathan Heaps"
       },
       "source": "./plugins/plugin-management",
       "category": "utility",
-      "tags": ["utility", "skill"],
-      "keywords": ["plugin", "install", "update", "reload", "management"]
+      "tags": [
+        "utility",
+        "skill"
+      ],
+      "keywords": [
+        "plugin",
+        "install",
+        "update",
+        "reload",
+        "management"
+      ]
     },
     {
       "name": "product-development-and-sdlc",
@@ -402,7 +637,10 @@
       },
       "source": "./plugins/product-development-and-sdlc",
       "category": "utility",
-      "tags": ["utility", "skill"],
+      "tags": [
+        "utility",
+        "skill"
+      ],
       "keywords": [
         "spec",
         "specifications",
@@ -410,6 +648,31 @@
         "sdlc",
         "iterative-development",
         "product-management"
+      ]
+    },
+    {
+      "name": "proxmox",
+      "description": "Skills for managing Proxmox VE hosts and LXC containers \u2014 creating containers, running Docker in LXC, and hosting services like cloudflared.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/proxmox",
+      "category": "utility",
+      "tags": [
+        "utility",
+        "skill"
+      ],
+      "keywords": [
+        "proxmox",
+        "pve",
+        "lxc",
+        "containers",
+        "virtualization",
+        "homelab",
+        "self-hosted",
+        "docker",
+        "infrastructure"
       ]
     },
     {
@@ -421,8 +684,15 @@
       },
       "source": "./plugins/remote-config",
       "category": "utility",
-      "tags": ["utility"],
-      "keywords": ["remote-config", "sync", "dotfiles", "claude-config"]
+      "tags": [
+        "utility"
+      ],
+      "keywords": [
+        "remote-config",
+        "sync",
+        "dotfiles",
+        "claude-config"
+      ]
     },
     {
       "name": "review-changes",
@@ -433,8 +703,17 @@
       },
       "source": "./plugins/review-changes",
       "category": "utility",
-      "tags": ["utility", "command"],
-      "keywords": ["code-review", "review", "quality", "security", "lint"]
+      "tags": [
+        "utility",
+        "command"
+      ],
+      "keywords": [
+        "code-review",
+        "review",
+        "quality",
+        "security",
+        "lint"
+      ]
     },
     {
       "name": "safety-evaluation-prompt",
@@ -445,8 +724,17 @@
       },
       "source": "./plugins/safety-evaluation-prompt",
       "category": "utility",
-      "tags": ["utility"],
-      "keywords": ["safety", "security", "hooks", "pre-tool-call", "evaluation", "prompt"]
+      "tags": [
+        "utility"
+      ],
+      "keywords": [
+        "safety",
+        "security",
+        "hooks",
+        "pre-tool-call",
+        "evaluation",
+        "prompt"
+      ]
     },
     {
       "name": "safety-evaluation-script",
@@ -457,8 +745,17 @@
       },
       "source": "./plugins/safety-evaluation-script",
       "category": "utility",
-      "tags": ["utility"],
-      "keywords": ["safety", "security", "hooks", "pre-tool-call", "evaluation", "haiku"]
+      "tags": [
+        "utility"
+      ],
+      "keywords": [
+        "safety",
+        "security",
+        "hooks",
+        "pre-tool-call",
+        "evaluation",
+        "haiku"
+      ]
     },
     {
       "name": "scm-utils",
@@ -469,8 +766,20 @@
       },
       "source": "./plugins/scm-utils",
       "category": "utility",
-      "tags": ["utility", "skill"],
-      "keywords": ["git", "branch", "pr", "pull-request", "sync", "merge", "scm", "source-control"]
+      "tags": [
+        "utility",
+        "skill"
+      ],
+      "keywords": [
+        "git",
+        "branch",
+        "pr",
+        "pull-request",
+        "sync",
+        "merge",
+        "scm",
+        "source-control"
+      ]
     },
     {
       "name": "self-terminate",
@@ -481,8 +790,17 @@
       },
       "source": "./plugins/self-terminate",
       "category": "utility",
-      "tags": ["utility", "skill"],
-      "keywords": ["terminate", "exit", "sigint", "process", "self-destruct"]
+      "tags": [
+        "utility",
+        "skill"
+      ],
+      "keywords": [
+        "terminate",
+        "exit",
+        "sigint",
+        "process",
+        "self-destruct"
+      ]
     },
     {
       "name": "sequential-thinking",
@@ -493,7 +811,10 @@
       },
       "source": "./plugins/sequential-thinking",
       "category": "utility",
-      "tags": ["utility", "skill"],
+      "tags": [
+        "utility",
+        "skill"
+      ],
       "keywords": [
         "sequential-thinking",
         "mcp",
@@ -505,14 +826,17 @@
     },
     {
       "name": "session-report",
-      "description": "Skill for generating structured session reports — fact-finding across git history, GitHub issues and PRs, tasks, and agent contributions to produce a comprehensive work summary. Works for solo agents and agent teams alike.",
+      "description": "Skill for generating structured session reports \u2014 fact-finding across git history, GitHub issues and PRs, tasks, and agent contributions to produce a comprehensive work summary. Works for solo agents and agent teams alike.",
       "version": "0.1.3",
       "author": {
         "name": "Nathan Heaps"
       },
       "source": "./plugins/session-report",
       "category": "utility",
-      "tags": ["utility", "skill"],
+      "tags": [
+        "utility",
+        "skill"
+      ],
       "keywords": [
         "session-report",
         "daily-summary",
@@ -531,8 +855,16 @@
       },
       "source": "./plugins/skill-required",
       "category": "utility",
-      "tags": ["utility"],
-      "keywords": ["skill-enforcement", "hooks", "workflow", "quality", "tool-gating"]
+      "tags": [
+        "utility"
+      ],
+      "keywords": [
+        "skill-enforcement",
+        "hooks",
+        "workflow",
+        "quality",
+        "tool-gating"
+      ]
     },
     {
       "name": "skills-maintenance",
@@ -543,8 +875,18 @@
       },
       "source": "./plugins/skills-maintenance",
       "category": "utility",
-      "tags": ["utility", "skill"],
-      "keywords": ["skills", "maintenance", "update", "improve", "refactor", "documentation"]
+      "tags": [
+        "utility",
+        "skill"
+      ],
+      "keywords": [
+        "skills",
+        "maintenance",
+        "update",
+        "improve",
+        "refactor",
+        "documentation"
+      ]
     },
     {
       "name": "statusline",
@@ -555,8 +897,17 @@
       },
       "source": "./plugins/statusline",
       "category": "utility",
-      "tags": ["utility"],
-      "keywords": ["statusline", "status", "ui", "git", "workflow", "productivity"]
+      "tags": [
+        "utility"
+      ],
+      "keywords": [
+        "statusline",
+        "status",
+        "ui",
+        "git",
+        "workflow",
+        "productivity"
+      ]
     },
     {
       "name": "statusline-iterm",
@@ -567,7 +918,9 @@
       },
       "source": "./plugins/statusline-iterm",
       "category": "utility",
-      "tags": ["utility"],
+      "tags": [
+        "utility"
+      ],
       "keywords": [
         "statusline",
         "status",
@@ -589,7 +942,9 @@
       },
       "source": "./plugins/sync-settings",
       "category": "utility",
-      "tags": ["utility"],
+      "tags": [
+        "utility"
+      ],
       "keywords": [
         "sync",
         "settings",
@@ -610,7 +965,10 @@
       },
       "source": "./plugins/task-parallelization",
       "category": "utility",
-      "tags": ["utility", "skill"],
+      "tags": [
+        "utility",
+        "skill"
+      ],
       "keywords": [
         "parallelization",
         "task",
@@ -630,8 +988,20 @@
       },
       "source": "./plugins/tmux-subagent",
       "category": "utility",
-      "tags": ["utility", "command", "skill"],
-      "keywords": ["tmux", "subagent", "parallel", "iterm", "terminal", "isolation", "delegation"]
+      "tags": [
+        "utility",
+        "command",
+        "skill"
+      ],
+      "keywords": [
+        "tmux",
+        "subagent",
+        "parallel",
+        "iterm",
+        "terminal",
+        "isolation",
+        "delegation"
+      ]
     },
     {
       "name": "todo-plus-plus",
@@ -642,8 +1012,17 @@
       },
       "source": "./plugins/todo-plus-plus",
       "category": "utility",
-      "tags": ["utility", "skill"],
-      "keywords": ["tasks", "commit", "workflow", "ephemeral", "agent-teams"]
+      "tags": [
+        "utility",
+        "skill"
+      ],
+      "keywords": [
+        "tasks",
+        "commit",
+        "workflow",
+        "ephemeral",
+        "agent-teams"
+      ]
     },
     {
       "name": "todo-sync",
@@ -654,8 +1033,17 @@
       },
       "source": "./plugins/todo-sync",
       "category": "utility",
-      "tags": ["utility", "skill"],
-      "keywords": ["todos", "plans", "sync", "workflow", "productivity"]
+      "tags": [
+        "utility",
+        "skill"
+      ],
+      "keywords": [
+        "todos",
+        "plans",
+        "sync",
+        "workflow",
+        "productivity"
+      ]
     },
     {
       "name": "web-auto-approve",
@@ -666,8 +1054,16 @@
       },
       "source": "./plugins/web-auto-approve",
       "category": "utility",
-      "tags": ["utility"],
-      "keywords": ["permissions", "web-session", "auto-approve", "hooks", "PermissionRequest"]
+      "tags": [
+        "utility"
+      ],
+      "keywords": [
+        "permissions",
+        "web-session",
+        "auto-approve",
+        "hooks",
+        "PermissionRequest"
+      ]
     },
     {
       "name": "word-vomit",
@@ -678,7 +1074,10 @@
       },
       "source": "./plugins/word-vomit",
       "category": "utility",
-      "tags": ["utility", "skill"],
+      "tags": [
+        "utility",
+        "skill"
+      ],
       "keywords": [
         "word-vomit",
         "exec-assist",
@@ -686,6 +1085,35 @@
         "categorization",
         "workflow",
         "hooks"
+      ]
+    },
+    {
+      "name": "zai-glm",
+      "description": "Skills for using z.ai (Zhipu AI) GLM models and configuring Claude Code to access them via the Anthropic-compatible endpoint or API gateways.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/zai-glm",
+      "category": "utility",
+      "tags": [
+        "utility",
+        "skill"
+      ],
+      "keywords": [
+        "zai",
+        "z-ai",
+        "zhipu",
+        "glm",
+        "glm-5",
+        "glm-4.7",
+        "glm-4.5",
+        "chatglm",
+        "ai-models",
+        "openai-compatible",
+        "anthropic-compatible",
+        "china-ai",
+        "llm-provider"
       ]
     }
   ]
