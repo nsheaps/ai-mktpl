@@ -64,10 +64,10 @@ To find your chat ID, message [@userinfobot](https://t.me/userinfobot).
 
 ## Configuration Reference
 
-| Variable             | Required | Default     | Description                      |
-|----------------------|----------|-------------|----------------------------------|
-| `TELEGRAM_BOT_TOKEN` | Yes      | —           | Telegram Bot API token           |
-| `TELEGRAM_CHAT_ID`   | No       | `1650664303`| Target chat ID for notifications |
+| Variable             | Required | Default      | Description                      |
+| -------------------- | -------- | ------------ | -------------------------------- |
+| `TELEGRAM_BOT_TOKEN` | Yes      | —            | Telegram Bot API token           |
+| `TELEGRAM_CHAT_ID`   | No       | `1650664303` | Target chat ID for notifications |
 
 ## Plugin Structure
 

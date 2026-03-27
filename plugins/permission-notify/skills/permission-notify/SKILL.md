@@ -22,10 +22,10 @@ Sent via the Telegram Bot API with HTML parse mode.
 
 Set the following environment variables before starting the Claude Code session:
 
-| Variable             | Required | Default     | Description                          |
-|----------------------|----------|-------------|--------------------------------------|
-| `TELEGRAM_BOT_TOKEN` | Yes      | —           | Telegram Bot API token               |
-| `TELEGRAM_CHAT_ID`   | No       | `1650664303`| Chat ID to receive notifications     |
+| Variable             | Required | Default      | Description                      |
+| -------------------- | -------- | ------------ | -------------------------------- |
+| `TELEGRAM_BOT_TOKEN` | Yes      | —            | Telegram Bot API token           |
+| `TELEGRAM_CHAT_ID`   | No       | `1650664303` | Chat ID to receive notifications |
 
 ### Recommended: inject via op-exec
 
@@ -44,13 +44,13 @@ Or use the `1pass` / `op-exec` plugin to inject secrets automatically.
 
 ## Supported Tools
 
-| Tool    | Detail shown        | Summary shown                          |
-|---------|---------------------|----------------------------------------|
-| `Edit`  | File path           | First 400 chars of old/new diff        |
-| `Write` | File path           | First 200 chars of content             |
-| `Bash`  | —                   | Full command (up to 200 chars)         |
-| `Read`  | File path           | —                                      |
-| Others  | Key-value of inputs | First 200 chars of stringified inputs  |
+| Tool    | Detail shown        | Summary shown                         |
+| ------- | ------------------- | ------------------------------------- |
+| `Edit`  | File path           | First 400 chars of old/new diff       |
+| `Write` | File path           | First 200 chars of content            |
+| `Bash`  | —                   | Full command (up to 200 chars)        |
+| `Read`  | File path           | —                                     |
+| Others  | Key-value of inputs | First 200 chars of stringified inputs |
 
 ## Notes
 
