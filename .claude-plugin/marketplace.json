@@ -42,6 +42,25 @@
       "keywords": ["tmux", "iterm2", "tab-title", "agent-teams", "pane-title"]
     },
     {
+      "name": "agentic-behavior",
+      "description": "Skills and rules for AI agent behavior patterns — task tracking, issue management, and structured workflows.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/agentic-behavior",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": [
+        "agentic",
+        "issue-management",
+        "task-tracking",
+        "deduplication",
+        "github-issues",
+        "skills"
+      ]
+    },
+    {
       "name": "arcane",
       "description": "Skills for deploying docker-compose stacks via Arcane GitOps — directory conventions, secrets management with 1Password, and GitHub Actions CI/CD.",
       "version": "0.1.0",

@@ -9,5 +9,12 @@
   },
   "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/agentic-behavior",
   "repository": "https://github.com/nsheaps/ai-mktpl",
-  "keywords": ["agentic", "issue-management", "task-tracking", "deduplication", "github-issues", "skills"]
+  "keywords": [
+    "agentic",
+    "issue-management",
+    "task-tracking",
+    "deduplication",
+    "github-issues",
+    "skills"
+  ]
 }
