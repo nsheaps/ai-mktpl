@@ -51,7 +51,8 @@ gh api graphql -f query='
       }
     }
   }
-' -f q="keywords org:your-org-name"
+' -f q="keywords org:$ORG"
+# Replace $ORG with your GitHub organization name (e.g., "nsheaps")
 ```
 
 Issues may live in a different repo from where you're currently working.
@@ -273,4 +274,4 @@ GitHub auto-closes the issue when the PR merges.
 
 - [GitHub Issues documentation](https://docs.github.com/en/issues)
 - [`gh` CLI skill](../../../github/skills/gh/SKILL.md) — full gh CLI reference
-- [Linear MCP sync plugin](../../linear-mcp-sync/) — future Linear integration
+- [Linear MCP sync plugin](../../../linear-mcp-sync/) — future Linear integration
