@@ -1,0 +1,4 @@
+# agentic-behavior plugin configuration
+
+agentic-behavior:
+  enabled: true
