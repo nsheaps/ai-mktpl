@@ -24,6 +24,7 @@ End-to-end PR lifecycle from creation to merge. See also: `making-great-prs`, `p
 ## 3. Respond to Threads First
 
 Before making any code changes, reply to each reviewer thread:
+
 - Acknowledge what you'll fix, OR
 - Explain (politely) why you disagree
 
@@ -73,10 +74,10 @@ gh pr merge <PR_NUMBER> --squash --delete-branch --hostname github.com
 
 ## Rules
 
-| Rule | Detail |
-|------|--------|
-| No rebase on pushed branches | Merge main instead |
-| No force push | Add commits on top |
-| Always respond before re-requesting review | Non-negotiable |
-| Never merge without handler approval | **STRIKE ONE** — asking then acting before answer is worse |
-| Review sub-agent diffs | Before reporting PR as fixed |
+| Rule                                       | Detail                                                     |
+| ------------------------------------------ | ---------------------------------------------------------- |
+| No rebase on pushed branches               | Merge main instead                                         |
+| No force push                              | Add commits on top                                         |
+| Always respond before re-requesting review | Non-negotiable                                             |
+| Never merge without handler approval       | **STRIKE ONE** — asking then acting before answer is worse |
+| Review sub-agent diffs                     | Before reporting PR as fixed                               |
