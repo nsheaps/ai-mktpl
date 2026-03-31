@@ -65,6 +65,18 @@
       ]
     },
     {
+      "name": "brain",
+      "description": "Git-backed memory and prompt tracking. Auto-saves prompts to history, syncs memory files to a configurable git repo, and provides self-checking reminders inspired by the Serena MCP Ralph loop pattern.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/brain",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": ["memory", "history", "git", "brain", "prompt-tracking", "self-check"]
+    },
+    {
       "name": "cloudflare",
       "description": "Skills for managing Cloudflare developer platform components including Workers, R2, D1, AI Gateway, Pages, Tunnels, and more — with Pulumi IaC setup for each.",
       "version": "0.1.0",
@@ -195,27 +207,6 @@
       ]
     },
     {
-      "name": "deep-researcher",
-      "description": "Deep research agent for complex, multi-source investigations. Performs market research, competitive analysis, technical deep-dives, and multi-source synthesis with evidence-based reports.",
-      "version": "0.1.0",
-      "author": {
-        "name": "Nathan Heaps"
-      },
-      "source": "./plugins/deep-researcher",
-      "category": "utility",
-      "tags": ["utility", "agent"],
-      "keywords": [
-        "research",
-        "investigation",
-        "analysis",
-        "synthesis",
-        "agent",
-        "deep-research",
-        "competitive-analysis",
-        "technical-investigation"
-      ]
-    },
-    {
       "name": "data-serialization",
       "description": "Data format conversion and querying utilities. Supports YAML, JSON, TOON (Token-Oriented Object Notation), and XML/HTML transformations with special handling for Playwright accessibility snapshots. TOON provides 30-60% token reduction vs JSON for LLM contexts.",
       "version": "0.2.25",
@@ -241,6 +232,18 @@
         "accessibility",
         "data-transformation"
       ]
+    },
+    {
+      "name": "deep-researcher",
+      "description": "Deep research agent for complex, multi-source investigations. Performs market research, competitive analysis, technical deep-dives, and multi-source synthesis with evidence-based reports.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/deep-researcher",
+      "category": "utility",
+      "tags": ["utility"],
+      "keywords": ["research", "investigation", "analysis", "synthesis", "agent"]
     },
     {
       "name": "edit-utils",
