@@ -1,0 +1,16 @@
+{
+  "name": "deep-researcher",
+  "version": "0.1.0",
+  "description": "Deep research agent for complex, multi-source investigations. Performs market research, competitive analysis, technical deep-dives, and multi-source synthesis with evidence-based reports.",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/deep-researcher",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": ["research", "investigation", "analysis", "synthesis", "agent"],
+  "auto_discovery": {
+    "agents": "agents/"
+  }
+}
