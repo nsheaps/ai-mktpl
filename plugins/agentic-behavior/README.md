@@ -1,6 +1,34 @@
-# Brain Plugin
+# Agentic Behavior Plugin
 
-Git-backed memory and prompt tracking with self-checking reminders.
+Skills for configuring Claude Code, behavior correction, memory tracking, autonomy rules, and time-context awareness.
+
+## Skills
+
+### /correct-behavior
+
+Corrects AI behavior mistakes and updates rules to prevent recurrence. Invocable manually via `/correct-behavior` or auto-triggered by Claude when it detects corrective feedback.
+
+```bash
+/correct-behavior [SCOPE] <description of what went wrong>
+```
+
+### /time-context
+
+Detects time-referencing language in prompts and investigates history before answering (see `skills/time-context/SKILL.md`).
+
+### /brain
+
+Git-backed memory and prompt tracking with self-checking reminders (see `skills/brain/SKILL.md`).
+
+### /configuring-claude-code
+
+Guide for configuring Claude Code across local CLI, CI actions, and Claude Code Web — including plugin management (see `skills/configuring-claude-code/SKILL.md`).
+
+## Rules
+
+### autonomy.md
+
+Rules for autonomous decision-making, recommendation style, merge approval, and research-first patterns. Synced into project `.claude/rules/` via the SessionStart hook.
 
 ## Features
 
@@ -17,6 +45,10 @@ Configure a git repository to automatically version-control your memory files (C
 - **Session start**: Pull latest from remote
 - **Task completion**: Commit and push changes
 
+### Rules Sync
+
+On session start, creates a symlink at `.claude/rules/agentic-behavior` pointing to this plugin's `rules/` directory, making autonomy and other rules available as Claude Code context.
+
 ### Self-Validation (Ralph Loop)
 
 Inspired by the Serena MCP "is task done" command, the plugin encourages a discipline of:
@@ -27,14 +59,14 @@ Inspired by the Serena MCP "is task done" command, the plugin encourages a disci
 
 ## Relationship with memory-manager
 
-The `memory-manager` plugin detects user preferences during a session and writes them to `CLAUDE.md`. The `brain` plugin is complementary — it syncs those files (and prompt history) to a separate git repo for version-controlled persistence across sessions. You can use both together: `memory-manager` writes the memories, `brain` backs them up.
+The `memory-manager` plugin detects user preferences during a session and writes them to `CLAUDE.md`. The `agentic-behavior` plugin is complementary — it syncs those files (and prompt history) to a separate git repo for version-controlled persistence across sessions. You can use both together: `memory-manager` writes the memories, `agentic-behavior` backs them up.
 
 ## Configuration
 
 Add to `~/.claude/plugins.settings.yaml` or project-level `.claude/plugins.settings.yaml`:
 
 ```yaml
-brain:
+agentic-behavior:
   enabled: true
   gitRepo: "~/path/to/memory-repo"
   gitBranch: "main"
@@ -68,12 +100,19 @@ brain:
 2. Appends a JSON entry to `~/.claude/history.jsonl`
 3. Prints a system-reminder to stderr for the agent
 
-### SessionStart / TaskCompleted Hook
+### SessionStart Hook
+
+1. Creates a symlink at `.claude/rules/agentic-behavior` for rule delivery
+2. Checks if `gitRepo` is configured
+3. Pulls latest from the memory repo if configured
+4. Copies configured memory sources into `memory/` directory in the repo
+5. Commits and pushes if changes were made
+
+### TaskCompleted Hook
 
 1. Checks if `gitRepo` is configured
-2. Pulls latest from the memory repo
-3. Copies configured memory sources into `memory/` directory in the repo
-4. Commits and pushes if changes were made
+2. Copies updated memory files into the memory repo
+3. Commits and pushes if changes were made
 
 ## Known Limitations
 

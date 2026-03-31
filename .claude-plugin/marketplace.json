@@ -151,16 +151,27 @@
       "keywords": ["context-management", "performance", "agent-teams", "hooks", "output-management"]
     },
     {
-      "name": "correct-behavior",
-      "description": "Command to correct AI behavior mistakes and update rules to prevent recurrence",
-      "version": "0.2.25",
+      "name": "agentic-behavior",
+      "description": "Skills for configuring Claude Code, behavior correction, memory tracking, autonomy rules, and time-context awareness. Combines prompt history tracking, git-backed memory sync, rules delivery via symlink, and the self-checking Ralph loop pattern.",
+      "version": "0.1.0",
       "author": {
         "name": "Nathan Heaps"
       },
-      "source": "./plugins/correct-behavior",
+      "source": "./plugins/agentic-behavior",
       "category": "utility",
-      "tags": ["utility", "command"],
-      "keywords": ["behavior", "correction", "rules", "memory", "learning"]
+      "tags": ["utility", "command", "skill"],
+      "keywords": [
+        "configuration",
+        "behavior",
+        "correction",
+        "memory",
+        "prompt-tracking",
+        "self-check",
+        "time-context",
+        "claude-code",
+        "autonomy",
+        "rules"
+      ]
     },
     {
       "name": "create-command",
