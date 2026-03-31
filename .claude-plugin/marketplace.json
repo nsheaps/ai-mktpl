@@ -65,6 +65,18 @@
       ]
     },
     {
+      "name": "brain",
+      "description": "Git-backed memory and prompt tracking. Auto-saves prompts to history, syncs memory files to a configurable git repo, and provides self-checking reminders inspired by the Serena MCP Ralph loop pattern.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/brain",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": ["memory", "history", "git", "brain", "prompt-tracking", "self-check"]
+    },
+    {
       "name": "cloudflare",
       "description": "Skills for managing Cloudflare developer platform components including Workers, R2, D1, AI Gateway, Pages, Tunnels, and more — with Pulumi IaC setup for each.",
       "version": "0.1.0",
@@ -569,7 +581,7 @@
     {
       "name": "self-terminate",
       "description": "Allows Claude to gracefully terminate itself using SIGINT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -677,7 +689,7 @@
     {
       "name": "sync-settings",
       "description": "Automatically sync and merge local Claude Code settings, commands, and files using configurable rules in syncconfig.yaml",
-      "version": "0.2.26",
+      "version": "0.2.27",
       "author": {
         "name": "Nathan Heaps"
       },
