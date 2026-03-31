@@ -65,6 +65,18 @@
       ]
     },
     {
+      "name": "brain",
+      "description": "Git-backed memory and prompt tracking. Auto-saves prompts to history, syncs memory files to a configurable git repo, and provides self-checking reminders inspired by the Serena MCP Ralph loop pattern.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/brain",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": ["memory", "history", "git", "brain", "prompt-tracking", "self-check"]
+    },
+    {
       "name": "cloudflare",
       "description": "Skills for managing Cloudflare developer platform components including Workers, R2, D1, AI Gateway, Pages, Tunnels, and more — with Pulumi IaC setup for each.",
       "version": "0.1.0",
@@ -557,7 +569,7 @@
     {
       "name": "scm-utils",
       "description": "Source control management utilities for improving interactions with branches and PRs, both locally and in CI environments",
-      "version": "0.1.14",
+      "version": "0.1.15",
       "author": {
         "name": "Nathan Heaps"
       },
