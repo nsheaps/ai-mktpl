@@ -242,7 +242,7 @@
       },
       "source": "./plugins/deep-researcher",
       "category": "utility",
-      "tags": ["utility", "agent", "research"],
+      "tags": ["utility"],
       "keywords": ["research", "investigation", "analysis", "synthesis", "agent"]
     },
     {
