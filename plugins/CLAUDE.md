@@ -7,6 +7,7 @@ This directory contains all Claude Code plugins in the marketplace. Each subdire
 See [how-this-repo-works](../docs/how-this-repo-works.md) for the full repo structure and conventions.
 
 Key locations within each plugin:
+
 - `.claude-plugin/plugin.json` — manifest (name, version, auto_discovery)
 - `hooks/hooks.json` + `hooks/scripts/` — hook definitions and scripts
 - `skills/` — skills (auto-discovered if `auto_discovery.skills` is set)

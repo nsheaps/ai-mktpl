@@ -78,21 +78,21 @@ When PRs merge, a CD workflow auto-bumps plugin versions and updates `marketplac
 
 ## Where Things Live
 
-| Artifact Type | Location | Notes |
-|---------------|----------|-------|
-| Plugin source | `plugins/<name>/` | One directory per plugin |
-| Plugin manifest | `plugins/<name>/.claude-plugin/plugin.json` | Required for every plugin |
-| Hook scripts | `plugins/<name>/hooks/scripts/` | Executed by hooks.json bindings |
-| Skills | `plugins/<name>/skills/` | Auto-discovered if configured |
-| Agent definitions | `plugins/<name>/agents/` | Auto-discovered if configured |
-| Commands | `plugins/<name>/commands/` | Auto-discovered if configured |
-| Rules | `plugins/<name>/rules/` | Loaded as project rules |
-| Shared libraries | `shared/lib/` | Symlinked by plugins via `lib/` |
-| Shared skills | `shared/skills/` | Symlinked by multiple plugins |
-| Org-wide rules | `.ai/rules/` | Synced to `~/.claude/rules/` |
-| Marketplace | `.claude-plugin/marketplace.json` | Central plugin registry |
-| Specs | `docs/specs/{draft,reviewed,live}/` | Feature specifications |
-| Research | `docs/research/` | Investigation reports |
+| Artifact Type     | Location                                    | Notes                           |
+| ----------------- | ------------------------------------------- | ------------------------------- |
+| Plugin source     | `plugins/<name>/`                           | One directory per plugin        |
+| Plugin manifest   | `plugins/<name>/.claude-plugin/plugin.json` | Required for every plugin       |
+| Hook scripts      | `plugins/<name>/hooks/scripts/`             | Executed by hooks.json bindings |
+| Skills            | `plugins/<name>/skills/`                    | Auto-discovered if configured   |
+| Agent definitions | `plugins/<name>/agents/`                    | Auto-discovered if configured   |
+| Commands          | `plugins/<name>/commands/`                  | Auto-discovered if configured   |
+| Rules             | `plugins/<name>/rules/`                     | Loaded as project rules         |
+| Shared libraries  | `shared/lib/`                               | Symlinked by plugins via `lib/` |
+| Shared skills     | `shared/skills/`                            | Symlinked by multiple plugins   |
+| Org-wide rules    | `.ai/rules/`                                | Synced to `~/.claude/rules/`    |
+| Marketplace       | `.claude-plugin/marketplace.json`           | Central plugin registry         |
+| Specs             | `docs/specs/{draft,reviewed,live}/`         | Feature specifications          |
+| Research          | `docs/research/`                            | Investigation reports           |
 
 ## Working In This Repo
 
