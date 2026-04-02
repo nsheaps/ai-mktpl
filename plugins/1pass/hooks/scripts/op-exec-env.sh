@@ -47,7 +47,7 @@ if ! command -v op &>/dev/null; then
   exit 0
 fi
 
-if ! op account list &>/dev/null; then
+if ! op whoami &>/dev/null; then
   hook_fail "op auth" "Not signed in to 1Password" \
     "Set OP_SERVICE_ACCOUNT_TOKEN or run 'op signin'"
   hook_respond
