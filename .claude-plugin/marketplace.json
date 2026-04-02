@@ -11,7 +11,7 @@
     {
       "name": "1pass",
       "description": "Install and manage 1Password CLI (op) and op-exec in Claude Code sessions. Provides session-start auto-install for web sessions and comprehensive workflow skills.",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -63,6 +63,18 @@
         "self-hosted",
         "homelab"
       ]
+    },
+    {
+      "name": "brain",
+      "description": "Git-backed memory and prompt tracking. Auto-saves prompts to history, syncs memory files to a configurable git repo, and provides self-checking reminders inspired by the Serena MCP Ralph loop pattern.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/brain",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": ["memory", "history", "git", "brain", "prompt-tracking", "self-check"]
     },
     {
       "name": "cloudflare",
