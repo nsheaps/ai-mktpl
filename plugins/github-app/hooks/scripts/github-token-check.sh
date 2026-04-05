@@ -35,13 +35,13 @@ TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)
 
 # Only act if the github-app plugin has been configured (credentials in env)
 if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_APP_PRIVATE_KEY_PATH:-}" || -z "${GITHUB_INSTALLATION_ID:-}" ]]; then
-  echo '{"hookSpecificOutput":{"permissionDecision":"allow"}}'
+  echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow"}}'
   exit 0
 fi
 
 # No token file means SessionStart didn't generate one — skip
 if [[ ! -f "$TOKEN_FILE" ]]; then
-  echo '{"hookSpecificOutput":{"permissionDecision":"allow"}}'
+  echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow"}}'
   exit 0
 fi
 
@@ -96,7 +96,7 @@ BIN_DIR="$PLUGIN_DIR/bin"
 # --- Allow helper ---
 
 allow_silent() {
-  echo '{"hookSpecificOutput":{"permissionDecision":"allow"}}'
+  echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow"}}'
   exit 0
 }
 
