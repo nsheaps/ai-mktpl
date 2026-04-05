@@ -14,13 +14,13 @@ Supplementary reference for the `how-this-repo-works` skill. See `../SKILL.md` f
 
 ## Composite Actions
 
-| Action                  | Location                                            | Used By          |
-| ----------------------- | --------------------------------------------------- | ---------------- |
-| `detect-plugin-changes` | `.github/actions/detect-plugin-changes/action.yaml` | cd.yaml          |
-| `update-marketplace`    | `.github/actions/update-marketplace/action.yaml`    | cd.yaml          |
-| `lint-files`            | `.github/actions/lint-files/action.yaml`            | ci.yaml          |
-| `validate-plugins`      | `.github/actions/validate-plugins/action.yaml`      | ci.yaml          |
-| `github-app-auth`       | `.github/actions/github-app-auth/`                  | ci.yaml, cd.yaml |
+| Action                  | Location                                                 | Used By                                   |
+| ----------------------- | -------------------------------------------------------- | ----------------------------------------- |
+| `detect-plugin-changes` | `.github/actions/detect-plugin-changes/action.yaml`      | cd.yaml                                   |
+| `update-marketplace`    | `.github/actions/update-marketplace/action.yaml`         | cd.yaml                                   |
+| `lint-files`            | `.github/actions/lint-files/action.yaml`                 | ci.yaml                                   |
+| `validate-plugins`      | `.github/actions/validate-plugins/action.yaml`           | ci.yaml                                   |
+| `checkout-as-app`       | `nsheaps/github-actions/.github/actions/checkout-as-app` | ci.yaml, cd.yaml, claude-agent.yaml, etc. |
 
 ## CI Pipeline Detail (ci.yaml)
 
@@ -52,7 +52,7 @@ git checkout origin/<base> -- plugins/*/.claude-plugin/plugin.json .claude-plugi
 1. Checkout code
 2. Authenticate as GitHub App (for push permission)
 3. Install tools via mise
-4. Run `just lint` through the `lint-files` composite action with `fix: true`
+4. Run `mise run lint` through the `lint-files` composite action with `fix: true`
 5. If files changed or lint failed, auto-commit fixes with `stefanzweifel/git-auto-commit-action`
 6. Exit 1 so the job fails (next push triggers a re-run with clean state)
 
@@ -85,7 +85,7 @@ Group: `cd-${{ github.ref }}` with cancel-in-progress.
 
 1. Checkout with full history (`fetch-depth: 0`)
 2. Fetch base branch
-3. Run `just detect-plugin-changes` via composite action
+3. Run `mise run detect-plugin-changes` via composite action
 4. Post a sticky PR comment (`marocchino/sticky-pull-request-comment`) with header `plugin-versions` showing a markdown table of plugin name, current version, bump type, and new version.
 
 ### Job: bump-and-update-marketplace (main only)
@@ -97,7 +97,7 @@ Steps in order:
 1. **Checkout** with full history, `persist-credentials: false`
 2. **GitHub App auth** for push access
 3. **Install mise tools** and **yarn dependencies**
-4. **Detect changes** (`base-ref: HEAD~1`) -- The `detect-plugin-changes` action runs `just detect-plugin-changes` which:
+4. **Detect changes** (`base-ref: HEAD~1`) -- The `detect-plugin-changes` action runs `mise run detect-plugin-changes` which:
    - Iterates `plugins/*`
    - Diffs each plugin dir against `HEAD~1`
    - Excludes `CHANGELOG.md` and `plugin.json` from diff consideration
@@ -107,15 +107,15 @@ Steps in order:
    - Applies patch increment
    - Writes new version back to `plugin.json`
    - Runs `prettier --write` on plugin.json (via `after:bump` hook)
-6. **Lint** -- `just lint` ensures everything is formatted
+6. **Lint** -- `mise run lint` ensures everything is formatted
 7. **Commit version bumps** -- `chore: bump plugin versions [skip ci]`, targeting `plugins/*/.claude-plugin/plugin.json` and `plugins/*/CHANGELOG.md`, with `skip_push: true`
-8. **Update marketplace** -- `just update-marketplace` which:
+8. **Update marketplace** -- `mise run update-marketplace` which:
    - Reads each `plugins/*/.claude-plugin/plugin.json`
    - Extracts name, version, description, author, keywords
    - Infers category (git vs utility) from plugin name
    - Infers tags from presence of `commands/` and `skills/` dirs
    - Rebuilds `.claude-plugin/marketplace.json` with plugins sorted by name
-   - Runs `just lint-fix` at the end
+   - Runs `mise run lint-fix` at the end
 9. **Lint again** -- Ensures marketplace.json formatting
 10. **Commit marketplace** -- `chore: update marketplace metadata [skip ci]`, targeting `.claude-plugin/marketplace.json`, with `skip_push: true`
 11. **Push** -- Single `git push` sends both commits at once

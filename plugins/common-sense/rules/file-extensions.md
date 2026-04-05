@@ -1,0 +1,4 @@
+- Always prefer .yaml over .yml
+- use .md for markdown files, even those that contain frontmatter (don't use .mdc)
+- prefer the use of json5 over json where possible. If json is required, ask the user if they'd like to programmatically keep it up to date
+  - for example, a project may maintain `default.json5` (with comments) and programmatically generate `default.json` from it.

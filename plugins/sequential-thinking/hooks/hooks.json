@@ -1,0 +1,17 @@
+{
+  "description": "Auto-configure permissions for sequential-thinking MCP tools on session start",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/configure-permissions.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

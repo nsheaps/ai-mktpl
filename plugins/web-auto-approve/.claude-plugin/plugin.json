@@ -1,0 +1,13 @@
+{
+  "name": "web-auto-approve",
+  "version": "0.1.0",
+  "description": "Auto-approve Edit, Write, and Bash permission requests in Claude Code web sessions to suppress interactive permission prompts",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/web-auto-approve",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": ["permissions", "web-session", "auto-approve", "hooks", "PermissionRequest"]
+}

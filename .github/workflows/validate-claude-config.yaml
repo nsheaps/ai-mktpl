@@ -1,0 +1,34 @@
+name: Validate Claude Config
+
+on:
+  workflow_call:
+    inputs:
+      settings-file:
+        description: Path to Claude settings.json
+        type: string
+        required: false
+        default: '.claude/settings.json'
+      marketplace-file:
+        description: Path to marketplace.json
+        type: string
+        required: false
+        default: '.claude-plugin/marketplace.json'
+
+jobs:
+  validate-claude-config:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: mise install -y
+        uses: jdx/mise-action@v3
+        with:
+          install: true
+          cache: false
+
+      - name: Validate Claude config
+        uses: ./.github/actions/validate-claude-config
+        with:
+          settings-file: ${{ inputs.settings-file }}
+          marketplace-file: ${{ inputs.marketplace-file }}

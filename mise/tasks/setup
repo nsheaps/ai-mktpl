@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+#MISE description="Install development dependencies via mise and yarn"
+set -euo pipefail
+
+echo "Pruning unused tools"
+mise prune -y
+echo "Installing tools via mise..."
+mise install -y
+echo "Installing yarn dependencies (release-it)..."
+yarn install
+echo "Setup complete!"

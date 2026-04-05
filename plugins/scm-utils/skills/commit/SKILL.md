@@ -1,10 +1,8 @@
 ---
 name: commit
 description: Intelligently commit outstanding changes in logical, focused commits. Use this when you want to commit code using git.
-argument-hint: [optional hint for skill]
+argument-hint: [optional hint]
 ---
-
-NOTE: a slash command has been provided to the user for convenience. If you read this skill, you do not need to execute the command.
 
 # Current branch status
 

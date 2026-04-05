@@ -8,9 +8,7 @@
     "requireUpstream": false,
     "getLatestTagFromAllRefs": false
   },
-  "npm": {
-    "publish": false
-  },
+  "npm": false,
   "github": {
     "release": false
   },

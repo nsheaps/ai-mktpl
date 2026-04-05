@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+#MISE description="Check if a plugin directory has symlink targets that changed vs a base ref. Returns 0 (true) if symlink targets changed, 1 (false) otherwise."
+# Usage: mise run _has-symlink-changes <PLUGIN_DIR> <BASE_REF>
+
+PLUGIN_DIR="${1:?Usage: mise run _has-symlink-changes <PLUGIN_DIR> <BASE_REF>}"
+BASE_REF="${2:?Usage: mise run _has-symlink-changes <PLUGIN_DIR> <BASE_REF>}"
+
+for symlink in $(find "$PLUGIN_DIR" -type l 2>/dev/null); do
+  target=$(readlink -f "$symlink" 2>/dev/null || true)
+  if [[ -n "$target" && "$target" == "$PWD/"* ]]; then
+    rel_target="${target#$PWD/}"
+    if git diff --name-only "${BASE_REF}..HEAD" -- "$rel_target" 2>/dev/null | grep -q .; then
+      exit 0
+    fi
+  fi
+done
+exit 1
