@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # install-op.sh — SessionStart hook for 1pass plugin
 #
-# Installs or updates 1Password CLI (op) and op-exec for Claude Code web sessions.
+# On web sessions: installs/updates 1Password CLI (op) and op-exec.
+# On all sessions: injects configured 1Password secrets as environment variables.
+#
 # When installToProject is true, installs to $CLAUDE_PROJECT_DIR/bin/.local/
 # which is gitignored and added to PATH.
 set -euo pipefail
@@ -14,7 +16,6 @@ source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 # --- Guards ---
 
 plugin_is_enabled || { hook_log "plugin disabled, skipping"; hook_respond; exit 0; }
-tool_is_web_session || { hook_log "not a web session, skipping"; hook_respond; exit 0; }
 
 # --- Read config ---
 
@@ -22,6 +23,7 @@ auto_install="$(plugin_get_config "autoInstall" "false")"
 op_version="$(plugin_get_config "opVersion" "latest")"
 install_op_exec="$(plugin_get_config "installOpExec" "false")"
 op_exec_version="$(plugin_get_config "opExecVersion" "latest")"
+secrets_json="$(plugin_get_config_json "secrets" "[]")"
 
 tool_resolve_install_dir
 
@@ -55,8 +57,6 @@ detect_platform() {
   DETECTED_OS="$os"
   DETECTED_ARCH="$arch"
 }
-
-detect_platform || { hook_respond; exit 0; }
 
 # --- Version resolution ---
 
@@ -219,22 +219,143 @@ resolve_op_exec_bin() {
   fi
 }
 
+# --- Secrets injection ---
+
+# Write a key=value pair to the specified target.
+# Args: $1=env_var $2=value $3=target (envFile|settingsJson|settingsLocalJson|userSettingsJson)
+_write_secret() {
+  local env_var="$1" value="$2" target="${3:-envFile}"
+
+  case "$target" in
+    envFile)
+      if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
+        # Remove any existing export of this var to avoid duplicates
+        if [ -f "$CLAUDE_ENV_FILE" ]; then
+          local tmp_env
+          tmp_env="$(mktemp)"
+          grep -v "^export ${env_var}=" "$CLAUDE_ENV_FILE" > "$tmp_env" 2>/dev/null || true
+          mv "$tmp_env" "$CLAUDE_ENV_FILE"
+        fi
+        printf 'export %s=%q\n' "$env_var" "$value" >> "$CLAUDE_ENV_FILE"
+        export "${env_var}=${value}"
+        hook_log "Injected ${env_var} via CLAUDE_ENV_FILE"
+      else
+        hook_log "CLAUDE_ENV_FILE not set, falling back to current environment only"
+        export "${env_var}=${value}"
+      fi
+      ;;
+    settingsJson|settingsLocalJson|userSettingsJson)
+      local settings_file
+      case "$target" in
+        settingsJson)      settings_file="${CLAUDE_PROJECT_DIR:-.}/.claude/settings.json" ;;
+        settingsLocalJson) settings_file="${CLAUDE_PROJECT_DIR:-.}/.claude/settings.local.json" ;;
+        userSettingsJson)  settings_file="${HOME}/.claude/settings.json" ;;
+      esac
+      mkdir -p "$(dirname "$settings_file")"
+      if [ ! -f "$settings_file" ]; then
+        echo '{}' > "$settings_file"
+      fi
+      local tmp_settings
+      tmp_settings="$(mktemp)"
+      jq --arg k "$env_var" --arg v "$value" '.env[$k] = $v' "$settings_file" > "$tmp_settings"
+      mv "$tmp_settings" "$settings_file"
+      hook_log "Injected ${env_var} into ${settings_file} env block"
+      ;;
+    *)
+      hook_fail "secrets injection" "Unknown target '${target}' for ${env_var}" \
+        "Valid targets: envFile, settingsJson, settingsLocalJson, userSettingsJson"
+      ;;
+  esac
+}
+
+# Inject secrets from the configured secrets list using op read.
+# Requires op to be available and authenticated.
+inject_secrets() {
+  # Skip if no secrets configured
+  local secret_count
+  secret_count="$(echo "$secrets_json" | jq 'length' 2>/dev/null || echo "0")"
+  if [ "$secret_count" = "0" ] || [ "$secret_count" = "null" ]; then
+    hook_log "No secrets configured, skipping injection"
+    return 0
+  fi
+
+  hook_log_step "inject-secrets" "Injecting ${secret_count} secret(s) from 1Password"
+
+  # Verify op is available
+  local op_bin
+  if tool_is_available op; then
+    op_bin="$(command -v op)"
+  elif [ -x "${INSTALL_DIR:-}/op" ]; then
+    op_bin="${INSTALL_DIR}/op"
+  else
+    hook_fail "secrets injection" "op not available" \
+      "Set autoInstall: true or install op manually. Cannot inject secrets without op."
+    return 1
+  fi
+
+  # Verify op is authenticated
+  if ! "$op_bin" whoami &>/dev/null; then
+    hook_fail "secrets injection" "op not authenticated" \
+      "Set OP_SERVICE_ACCOUNT_TOKEN env var, or sign in with 'op signin' on local sessions"
+    return 1
+  fi
+
+  # Iterate over each secret entry
+  local i=0
+  while [ "$i" -lt "$secret_count" ]; do
+    local entry env_var reference target
+    entry="$(echo "$secrets_json" | jq -c ".[$i]")"
+    env_var="$(echo "$entry" | jq -r '.envVar // empty')"
+    reference="$(echo "$entry" | jq -r '.reference // empty')"
+    target="$(echo "$entry" | jq -r '.target // "envFile"')"
+
+    if [ -z "$env_var" ] || [ -z "$reference" ]; then
+      hook_fail "secrets injection" "Secret entry $i missing required fields" \
+        "Each secret entry must have 'envVar' and 'reference' fields"
+      i=$((i + 1))
+      continue
+    fi
+
+    hook_log "Reading secret ${env_var} from ${reference}"
+    local secret_value
+    if secret_value="$("$op_bin" read "$reference" 2>/dev/null)"; then
+      _write_secret "$env_var" "$secret_value" "$target"
+    else
+      hook_fail "secrets injection" "Failed to read ${reference} for ${env_var}" \
+        "Check the reference path and that op has access to the vault"
+    fi
+
+    i=$((i + 1))
+  done
+}
+
 # --- Main ---
 
 do_install() {
-  # Install op CLI
-  local op_bin
-  op_bin="$(resolve_op_bin)" || true
+  # Install op CLI (web sessions only)
+  local op_bin=""
+  local op_exec_bin=""
 
-  # Install op-exec
-  local op_exec_bin
-  op_exec_bin="$(resolve_op_exec_bin)" || true
+  if tool_is_web_session; then
+    detect_platform || return 0
+    op_bin="$(resolve_op_bin)" || true
+    op_exec_bin="$(resolve_op_exec_bin)" || true
+  else
+    hook_log "local session, skipping op install"
+  fi
+
+  # Inject secrets (all sessions — requires op to be available and authenticated)
+  inject_secrets || true
 
   # Report tool availability to agent
   if [ -n "${op_bin:-}" ] && [ -x "${op_bin:-}" ]; then
     local op_ver
     op_ver="$("$op_bin" --version 2>/dev/null || echo "unknown")"
     hook_log "op v${op_ver} available at ${op_bin}"
+  elif tool_is_available op; then
+    local op_ver
+    op_ver="$(op --version 2>/dev/null || echo "unknown")"
+    hook_log "op v${op_ver} available at $(command -v op)"
   fi
 
   if [ -n "${op_exec_bin:-}" ] && [ -x "${op_exec_bin:-}" ]; then
