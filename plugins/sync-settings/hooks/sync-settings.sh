@@ -27,11 +27,11 @@ elif command -v python &> /dev/null; then
         PYTHON="python"
     else
         log_error "Python 3 is required but only Python 2 was found"
-        exit 2
+        exit 0
     fi
 else
     log_error "Python 3 is not installed"
-    exit 2
+    exit 0
 fi
 
 # Check for PyYAML
@@ -39,7 +39,7 @@ if ! $PYTHON -c 'import yaml' 2>/dev/null; then
     log_warn "PyYAML not installed. Installing..."
     $PYTHON -m pip install --user pyyaml 2>/dev/null || {
         log_error "Failed to install PyYAML. Please install manually: pip install pyyaml"
-        exit 2
+        exit 0
     }
 fi
 

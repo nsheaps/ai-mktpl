@@ -581,7 +581,7 @@
     {
       "name": "self-terminate",
       "description": "Allows Claude to gracefully terminate itself using SIGINT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -689,7 +689,7 @@
     {
       "name": "sync-settings",
       "description": "Automatically sync and merge local Claude Code settings, commands, and files using configurable rules in syncconfig.yaml",
-      "version": "0.2.26",
+      "version": "0.2.27",
       "author": {
         "name": "Nathan Heaps"
       },

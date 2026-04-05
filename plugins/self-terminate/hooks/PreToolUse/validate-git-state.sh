@@ -33,7 +33,7 @@ Or discard changes:
   git restore .
   git clean -fd
 EOF
-    exit 1  # Block termination
+    exit 2  # Block termination
 fi
 
 # Check for unpushed commits
@@ -47,7 +47,7 @@ Please push your commits before terminating:
 Or if you want to discard unpushed commits:
   git reset --hard @{u}
 EOF
-    exit 1  # Block termination
+    exit 2  # Block termination
 fi
 
 # Check for untracked files (excluding common ignorable patterns)
@@ -64,7 +64,7 @@ Please either:
   2. Add to .gitignore
   3. Remove them: git clean -fd
 EOF
-    exit 1  # Block termination
+    exit 2  # Block termination
 fi
 
 # All checks passed - allow termination
