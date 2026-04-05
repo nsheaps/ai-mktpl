@@ -1,6 +1,6 @@
 {
   "name": "plugin-management",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Skill for installing, updating, and managing Claude Code plugins — including what requires a restart and what hot-reloads.",
   "author": {
     "name": "Nathan Heaps",

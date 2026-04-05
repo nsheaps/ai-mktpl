@@ -133,10 +133,9 @@ Rules are symlinked to `~/.claude/rules/` by automation and apply across all pro
 ## Development
 
 ```bash
-just lint      # Run all linters
-just validate  # Validate plugin structure
-just check     # Run lint + validate
-just plugins   # List all plugins
+mise run lint      # Run all linters
+mise run validate  # Validate plugin structure
+mise run check     # Run lint + validate
 ```
 
 ## Contributing

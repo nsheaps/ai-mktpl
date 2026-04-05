@@ -11,23 +11,68 @@
   # Download and install the op binary if not already on PATH.
   # Set to false when op is managed externally (e.g. via mise with op in mise.toml).
   # When false, the plugin still validates that op is available.
-  auto_install: false
+  autoInstall: false
 
   # Install op to $CLAUDE_PROJECT_DIR/bin/.local on web sessions.
-  # Only used when auto_install is true.
-  install_to_project: true
+  # Only used when autoInstall is true.
+  installToProject: true
 
   # Run installation in the background (non-blocking session start)
-  background_install: false
+  backgroundInstall: false
 
   # Specific op CLI version to install (default: latest)
-  # version: "2.30.0"
-  op_version: 'latest'
+  # opVersion: "2.30.0"
+  opVersion: 'latest'
 
   # Also install op-exec (from nsheaps/op-exec)
   # Set to false to skip op-exec installation.
-  install_op_exec: false
+  installOpExec: false
 
   # Specific op-exec version to install (default: latest)
-  # op_exec_version: "1.0.0"
-  op_exec_version: 'latest'
+  # opExecVersion: "1.0.0"
+  opExecVersion: 'latest'
+
+  # --- Individual secrets injection ---
+  # Inject specific 1Password fields as named environment variables.
+  # Each entry has:
+  #   envVar:    (required) Environment variable name to set
+  #   reference: (required) 1Password secret reference (op://vault/item/field)
+  #   target:    (optional) Where to write the variable. One of:
+  #                envFile           — append to CLAUDE_ENV_FILE (session-scoped, default)
+  #                settingsJson      — write to .claude/settings.json env block (committed)
+  #                settingsLocalJson — write to .claude/settings.local.json env block (gitignored)
+  #                userSettingsJson  — write to ~/.claude/settings.json env block (user-global, not committed)
+  #
+  # Example:
+  #   secrets:
+  #     - envVar: BRAINTRUST_API_KEY
+  #       reference: "op://Personal/Braintrust/api-key"
+  #       target: envFile
+  secrets: []
+
+  # --- Whole-item environment injection via op-exec ---
+  # Expose entire 1Password items as environment variables at session start.
+  # All STRING and CONCEALED fields in each item are converted to env vars
+  # (field labels → UPPER_SNAKE_CASE, e.g. "API Key" → API_KEY).
+  #
+  # Requires op-exec to be available (install via mise, Homebrew, or set
+  # installOpExec: true above) and op to be authenticated.
+  #
+  # items: list of op:// vault/item references (op://vault/item format)
+  #   Example:
+  #     items:
+  #       - 'op://MyVault/ENVIRONMENT'
+  #       - 'op://MyVault/extra-secrets'
+  #
+  # targets: where to write the resolved env vars (list, multiple allowed)
+  #   - sessionStartBashEnv  — append to CLAUDE_ENV_FILE (session-scoped, bash tool only)
+  #   - userSettings         — write to ~/.claude/settings.local.json .env (persistent, all tools)
+  #   Defaults to both sessionStartBashEnv and userSettings.
+  #
+  # Note: op-exec always resolves op:// references in field values recursively
+  # (max depth 5). This is built-in behavior and not configurable.
+  opExec:
+    items: []
+    targets:
+      - sessionStartBashEnv
+      - userSettings

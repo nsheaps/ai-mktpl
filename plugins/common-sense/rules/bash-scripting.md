@@ -63,6 +63,36 @@ NEVER use pipes to pile to commands like `| tail` and `| head` to get specific l
 
 Instead focus on dumping output to a file and analyzing that with the appropriate tools.
 
+## Never Suppress Errors with 2>/dev/null
+
+**NEVER** redirect stderr to `/dev/null` in scripts, hooks, or commands that perform significant operations (installs, downloads, API calls, configuration changes).
+
+Suppressing stderr hides the exact error message that would explain a failure, making debugging extremely difficult.
+
+**BAD:**
+
+```bash
+mise use -g ubi:nsheaps/some-tool 2>/dev/null
+curl -fsSL "$url" -o "$file" 2>/dev/null
+```
+
+**GOOD:**
+
+```bash
+# Let stderr flow through (visible to user via Ctrl+O in hooks)
+mise use -g ubi:nsheaps/some-tool
+
+# Or redirect to a log file for later analysis
+mise use -g ubi:nsheaps/some-tool 2>>"$log_file"
+
+# Or use structured error reporting (in plugin hooks)
+if ! mise use -g ubi:nsheaps/some-tool; then
+  hook_fail "mise install" "Failed to install some-tool" "Install manually: ..."
+fi
+```
+
+**Exception:** `2>/dev/null` is acceptable for quick existence checks like `command -v tool 2>/dev/null` or version detection where failure is expected and handled.
+
 ## Script Files
 
 Scripts longer than 3 lines MUST be in separate files:

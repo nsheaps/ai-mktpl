@@ -9,11 +9,12 @@ set -euo pipefail
 PLUGIN_NAME="github"
 source "${CLAUDE_PLUGIN_ROOT}/lib/plugin-config-read.sh"
 source "${CLAUDE_PLUGIN_ROOT}/lib/tool-install.sh"
+source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 
 # --- Guards ---
 
-plugin_is_enabled || { echo '{}'; exit 0; }
-tool_is_web_session || { echo '{}'; exit 0; }
+plugin_is_enabled || { hook_log "plugin disabled, skipping"; hook_respond; exit 0; }
+tool_is_web_session || { hook_log "not a web session, skipping"; hook_respond; exit 0; }
 
 # --- Read config ---
 
@@ -28,6 +29,7 @@ tool_resolve_install_dir
 # Downloads gh at the given version to $INSTALL_DIR, adds to PATH.
 # Prints the binary path to stdout. Returns 1 on failure.
 download_gh() {
+  hook_log_step "download-gh" "Downloading GitHub CLI"
   local target_version="$1"
   local gh_bin="$INSTALL_DIR/gh"
   local tmp_dir
@@ -35,17 +37,20 @@ download_gh() {
   local archive="gh_${target_version}_linux_amd64.tar.gz"
   local url="https://github.com/cli/cli/releases/download/v${target_version}/${archive}"
 
+  hook_log "Downloading gh v${target_version} from ${url}"
+
   if curl -fsSL "$url" -o "$tmp_dir/$archive" 2>/dev/null; then
     tar -xf "$tmp_dir/$archive" -C "$tmp_dir"
     cp "$tmp_dir/gh_${target_version}_linux_amd64/bin/gh" "$gh_bin"
     chmod +x "$gh_bin"
     rm -rf "$tmp_dir"
-    echo "${PLUGIN_NAME}: gh v${target_version} installed successfully" >&2
+    hook_log "gh v${target_version} installed successfully to ${gh_bin}"
     tool_ensure_path "$INSTALL_DIR"
     echo "$gh_bin"
   else
-    echo "${PLUGIN_NAME}: Failed to download gh v${target_version}" >&2
     rm -rf "$tmp_dir"
+    hook_fail "gh download" "Failed to download gh v${target_version} from ${url}" \
+      "Check network connectivity, or set version to a specific version in plugin settings"
     return 1
   fi
 }
@@ -54,12 +59,13 @@ download_gh() {
 
 # Prints the path to a usable gh binary, or returns 1 if unavailable.
 resolve_gh_bin() {
+  hook_log_step "resolve-gh" "Resolving GitHub CLI binary"
   if [ "$auto_install" = "false" ]; then
     if tool_is_available gh; then
-      echo "${PLUGIN_NAME}: autoInstall=false, using gh from PATH" >&2
+      hook_log "autoInstall=false, using gh from PATH"
       command -v gh
     else
-      echo "${PLUGIN_NAME}: autoInstall=false and gh not on PATH, skipping" >&2
+      hook_log "autoInstall=false and gh not on PATH, skipping"
       return 1
     fi
     return
@@ -76,20 +82,20 @@ resolve_gh_bin() {
       current_version="$("$gh_bin" version 2>/dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || echo "unknown")"
       latest_version="$(tool_resolve_github_version "cli/cli" "2.87.3")"
       if [ "$current_version" = "$latest_version" ]; then
-        echo "${PLUGIN_NAME}: gh $current_version is already latest" >&2
+        hook_log "gh $current_version is already latest"
         echo "$gh_bin"
       else
-        echo "${PLUGIN_NAME}: Updating gh from $current_version to $latest_version" >&2
+        hook_log "Updating gh from $current_version to $latest_version"
         download_gh "$latest_version"
       fi
     else
       echo "$gh_bin"
     fi
   elif tool_is_available gh; then
-    echo "${PLUGIN_NAME}: gh found on PATH ($(command -v gh)), skipping install" >&2
+    hook_log "gh found on PATH ($(command -v gh)), skipping install"
     command -v gh
   else
-    echo "${PLUGIN_NAME}: Installing gh to $INSTALL_DIR" >&2
+    hook_log "Installing gh to $INSTALL_DIR"
     local install_version="$version"
     if [ "$install_version" = "latest" ]; then
       install_version="$(tool_resolve_github_version "cli/cli" "2.87.3")"
@@ -102,14 +108,16 @@ resolve_gh_bin() {
 
 do_install() {
   local gh_bin
-  gh_bin="$(resolve_gh_bin)" || { echo '{}'; exit 0; }
+  gh_bin="$(resolve_gh_bin)" || { hook_respond; exit 0; }
 
   if [ "$auto_auth_check" = "true" ]; then
-    "$gh_bin" auth status 2>&1 || echo "${PLUGIN_NAME}: gh auth not configured" >&2
+    hook_log_step "auth-check" "Checking GitHub CLI authentication"
+    "$gh_bin" auth status 2>&1 || hook_log "gh auth not configured"
   fi
 }
 
 # --- Execute ---
 
 tool_run_install do_install
-echo '{}'
+hook_log_cleanup
+hook_respond

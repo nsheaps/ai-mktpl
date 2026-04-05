@@ -1,11 +1,20 @@
 ---
 name: update-branch
 description: This skill should be used when the user asks to "update the PR", "update PR #123", "sync the branch", "update the branch", "merge base into feature branch", "pull and push changes", "get latest from main", "synchronize with upstream", or when working in CI and needing to synchronize a feature branch with its base. Handles local/remote branch synchronization and merge conflict resolution.
+argument-hint: [pr-number|url|branch|directory]
+allowed-tools: Bash, Read, Grep, Glob, Task
 ---
 
 # Update Branch
 
 Synchronize a local branch with its remote counterpart and ensure the remote branch is up-to-date with its base branch.
+
+## Pre-fetched Context
+
+Current branch: !`git branch --show-current 2>/dev/null || echo "(not in a git repo)"`
+
+PR info for current branch:
+!`gh pr view --json baseRefName,headRefName,number,title,state 2>/dev/null || echo "(no PR found or gh not authenticated)"`
 
 ## Overview
 
@@ -166,6 +175,14 @@ This skill works identically in CI and local environments:
 | Merge conflicts                  | Follow conflict resolution workflow          |
 | Push rejected (non-fast-forward) | Pull first, then push again                  |
 | Authentication failure           | Ensure `gh` and `git` are authenticated      |
+
+## Completion Messaging
+
+When reporting completion, use clear language that doesn't imply the PR was merged:
+
+**Don't say:** "PR #123 is now merged with main" (implies PR merged INTO main)
+
+**Do say:** "Branch updated: merged base branch (main) into feature branch, synced local and remote"
 
 ## Additional Resources
 

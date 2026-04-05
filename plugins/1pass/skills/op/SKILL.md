@@ -249,18 +249,38 @@ This plugin supports configuration via `plugins.settings.yaml`:
 ```yaml
 1pass:
   enabled: true
-  auto_install: false # Download op if not on PATH
-  install_to_project: true # Install to $project/bin/.local
-  background_install: false # Install in background
-  op_version: "latest" # Specific op version or "latest"
-  install_op_exec: false # Also install op-exec
-  op_exec_version: "latest" # Specific op-exec version
+  autoInstall: false # Download op if not on PATH
+  installToProject: true # Install to $project/bin/.local
+  backgroundInstall: false # Install in background
+  opVersion: "latest" # Specific op version or "latest"
+  installOpExec: false # Also install op-exec
+  opExecVersion: "latest" # Specific op-exec version
+
+  # Expose entire 1Password items as environment variables
+  opExec:
+    items:
+      - "op://MyVault/ENVIRONMENT"
+    targets:
+      - sessionStartBashEnv # → CLAUDE_ENV_FILE (session-scoped, bash only)
+      - userSettings # → ~/.claude/settings.local.json (persistent, all tools)
+    # Note: recursive resolution of op:// references is always on (op-exec built-in)
 ```
 
 Place in:
 
 - `$CLAUDE_PROJECT_DIR/.claude/plugins.settings.yaml` (project-level)
 - `~/.claude/plugins.settings.yaml` (user-level)
+
+### Output Targets for op-exec
+
+The `opExec.targets` array controls where resolved env vars are written:
+
+| Target                | Where                                  | Scope           | Persistence     |
+| --------------------- | -------------------------------------- | --------------- | --------------- |
+| `sessionStartBashEnv` | `CLAUDE_ENV_FILE`                      | Bash tools only | Session only    |
+| `userSettings`        | `~/.claude/settings.local.json` `.env` | All tools       | Across sessions |
+
+Both targets are enabled by default, ensuring env vars reach all tool types.
 
 ## Environment Variables
 
@@ -277,7 +297,7 @@ Place in:
 ### "op: command not found"
 
 Ensure op is installed. This plugin auto-installs to `$CLAUDE_PROJECT_DIR/bin/.local/op`
-when `auto_install: true`. Alternatively, install via mise:
+when `autoInstall: true`. Alternatively, install via mise:
 
 ```toml
 # mise.toml

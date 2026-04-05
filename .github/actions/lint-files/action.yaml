@@ -24,9 +24,9 @@ runs:
         FIX="${{ inputs.fix }}"
 
         if [ "$FIX" = "true" ]; then
-          just lint || HAS_ERRORS=true
+          mise run lint || HAS_ERRORS=true
         else
-          just lint-check || HAS_ERRORS=true
+          mise run lint-check || HAS_ERRORS=true
         fi
 
         # Check if any files were changed by auto-fix

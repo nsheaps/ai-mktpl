@@ -15,7 +15,7 @@ Install and manage [1Password CLI](https://developer.1password.com/docs/cli/) (o
 On session start (web sessions only):
 
 1. Checks if op is already available on PATH
-2. If `auto_install` is true, downloads the release from 1Password
+2. If `autoInstall` is true, downloads the release from 1Password
 3. Extracts the binary to `$CLAUDE_PROJECT_DIR/bin/.local/op`
 4. Optionally installs op-exec from GitHub releases
 5. Adds `bin/.local/` to PATH via `CLAUDE_ENV_FILE`
@@ -32,12 +32,70 @@ Create or update `plugins.settings.yaml` at project or user level:
 
 1pass:
   enabled: true # Enable/disable the plugin
-  auto_install: false # Download op if not on PATH (default: false)
-  install_to_project: true # Install to $project/bin/.local (vs ~/.local/bin)
-  background_install: false # Run install in background
-  op_version: "latest" # Pin a specific op version or use "latest"
-  install_op_exec: false # Also install op-exec (default: false)
-  op_exec_version: "latest" # Pin a specific op-exec version or use "latest"
+  autoInstall: false # Download op if not on PATH (default: false)
+  installToProject: true # Install to $project/bin/.local (vs ~/.local/bin)
+  backgroundInstall: false # Run install in background
+  opVersion: "latest" # Pin a specific op version or use "latest"
+  installOpExec: false # Also install op-exec (default: false)
+  opExecVersion: "latest" # Pin a specific op-exec version or use "latest"
+```
+
+## Secrets Injection
+
+The plugin can inject 1Password secrets as environment variables at session start. This works on **all session types** (local and web), as long as `op` is available and authenticated.
+
+### Secrets Configuration
+
+Each secret entry has three fields:
+
+| Field       | Required | Description                                                  |
+| ----------- | -------- | ------------------------------------------------------------ |
+| `envVar`    | yes      | Environment variable name to set (e.g. `BRAINTRUST_API_KEY`) |
+| `reference` | yes      | 1Password secret reference in `op://vault/item/field` format |
+| `target`    | no       | Where to write the variable (default: `envFile`)             |
+
+### Target Options
+
+The `target` field controls where the resolved secret value is persisted:
+
+| Target              | File written                                | Scope                                       | Committed to git?                 |
+| ------------------- | ------------------------------------------- | ------------------------------------------- | --------------------------------- |
+| `envFile` (default) | `$CLAUDE_ENV_FILE`                          | Current session only — gone on next session | No                                |
+| `settingsJson`      | `.claude/settings.json` → `env` block       | Persists across sessions                    | **Yes** — visible in repo history |
+| `settingsLocalJson` | `.claude/settings.local.json` → `env` block | Persists across sessions                    | No — gitignored                   |
+| `userSettingsJson`  | `~/.claude/settings.json` → `env` block     | User-global, persists across all projects   | No — outside repo                 |
+
+**When to use which target:**
+
+- **`envFile`** — Best for most secrets. Session-scoped, no disk persistence, no git risk. Re-injected fresh each session from 1Password. This is the default and recommended target.
+- **`settingsLocalJson`** — Use when you need the secret to survive across sessions without re-injection (e.g. if `op` auth is only available during initial setup). The file is gitignored so secrets won't leak to the repo.
+- **`userSettingsJson`** — Use for secrets that should be available across all projects for a user. Writes to `~/.claude/settings.json` which is outside any repo. Good for API keys used across multiple projects (e.g. `BRAINTRUST_API_KEY`).
+- **`settingsJson`** — Use only for non-sensitive values you want committed. **Never use this for actual secrets** — the file is tracked by git.
+
+### Example
+
+```yaml
+1pass:
+  enabled: true
+  secrets:
+    # API key re-injected each session (recommended)
+    - envVar: BRAINTRUST_API_KEY
+      reference: "op://Personal/Braintrust/api-key"
+      target: envFile
+
+    # Persists locally between sessions (gitignored)
+    - envVar: DATABASE_URL
+      reference: "op://Work/Production DB/connection_string"
+      target: settingsLocalJson
+
+    # Non-secret config value committed to repo
+    - envVar: SENTRY_ORG
+      reference: "op://Work/Sentry/org-slug"
+      target: settingsJson
+
+    # target defaults to envFile when omitted
+    - envVar: ANTHROPIC_API_KEY
+      reference: "op://Work/Claude API Key/credential"
 ```
 
 ## Authentication
