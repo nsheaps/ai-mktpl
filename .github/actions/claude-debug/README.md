@@ -50,7 +50,7 @@ jobs:
           npm install -g @anthropic/claude-code
 
       - name: Run Claude Debug Action
-        uses: nsheaps/.ai/.github/actions/claude-debug@main
+        uses: nsheaps/ai-mktpl/.github/actions/claude-debug@main
         id: debug
         with:
           continue: true
@@ -119,7 +119,7 @@ jobs:
           token: ${{ secrets.ORG_PAT }}
 
       - name: Debug Claude Session
-        uses: nsheaps/.ai/.github/actions/claude-debug@main
+        uses: nsheaps/ai-mktpl/.github/actions/claude-debug@main
         id: debug
         with:
           working-directory: .
@@ -252,7 +252,7 @@ jobs:
         with:
           repository: my-org/${{ matrix.repo }}
 
-      - uses: nsheaps/.ai/.github/actions/claude-debug@main
+      - uses: nsheaps/ai-mktpl/.github/actions/claude-debug@main
         id: debug
 
       - name: Alert on Errors
@@ -447,8 +447,8 @@ Contributions welcome! Please:
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/nsheaps/.ai/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/nsheaps/.ai/discussions)
+- **Issues**: [GitHub Issues](https://github.com/nsheaps/ai-mktpl/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/nsheaps/ai-mktpl/discussions)
 - **Claude Code Docs**: [code.claude.com/docs](https://code.claude.com/docs)
 
 ## Related Actions
@@ -458,4 +458,4 @@ Contributions welcome! Please:
 
 ---
 
-**Part of the [Claude Code Plugin Marketplace](https://github.com/nsheaps/.ai)**
+**Part of the [Claude Code Plugin Marketplace](https://github.com/nsheaps/ai-mktpl)**

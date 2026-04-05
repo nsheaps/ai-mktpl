@@ -100,7 +100,7 @@ jobs:
         uses: peter-evans/repository-dispatch@v2
         with:
           token: ${{ secrets.PAT_TOKEN }}
-          repository: nsheaps/.ai
+          repository: nsheaps/ai-mktpl
           event-type: claude-debug-request
           client-payload: |
             {
@@ -136,7 +136,7 @@ app.post("/webhooks/debug", (req, res) => {
 The repository dispatch workflow automatically posts results back to the source PR:
 
 ```yaml
-# In nsheaps/.ai repository (repository-dispatch-debug.yml handles this)
+# In nsheaps/ai-mktpl repository (repository-dispatch-debug.yml handles this)
 # External repo will receive a comment like:
 
 ## 🤖 Claude Code Debug Information
@@ -244,9 +244,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Reference the action from nsheaps/.ai
+      # Reference the action from nsheaps/ai-mktpl
       - name: Debug Claude Session
-        uses: nsheaps/.ai/.github/actions/claude-debug@main
+        uses: nsheaps/ai-mktpl/.github/actions/claude-debug@main
         id: debug
         with:
           working-directory: .
@@ -285,7 +285,7 @@ jobs:
           token: ${{ secrets.ORG_PAT }}
 
       - name: Debug Claude Session
-        uses: nsheaps/.ai/.github/actions/claude-debug@main
+        uses: nsheaps/ai-mktpl/.github/actions/claude-debug@main
         id: debug
         continue-on-error: true
 

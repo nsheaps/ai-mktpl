@@ -1,0 +1,20 @@
+{
+  "description": "Set tmux window/pane titles to agent role on session start. Disables Claude Code LLM-generated titles via env var.",
+  "env": {
+    "CLAUDE_CODE_DISABLE_TERMINAL_TITLE": "1"
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/set-tab-title.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,4 @@
+- Always prefer .yaml over .yml
+- use .md for markdown files, even those that contain frontmatter (don't use .mdc)
+- prefer the use of json5 over json where possible. If json is required, ask the user if they'd like to programatically keep it up to date
+  - an example of this can be found at https://github.com/nsheaps/renovate-config where the default.json5 is preffered due to the use of comments, which are then saved into default.json.

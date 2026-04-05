@@ -2,6 +2,21 @@
 
 Standards for writing and reviewing code.
 
+See mantras-and-incremental-development.md for general principles that also affect code quality.
+
+## Quality guidelines
+
+- Smaller files are easier to understand and parse by humans and machines alike. Aim to keep files under 1000 lines.
+- Smaller functions are more comprehensible and help build abstraction. Aim to keep functions under 50 lines.
+- Proper scoping and placement of functions and files in a large repo is very important
+  - Don't duplicate existing functionality. Ever.
+  - Keep scope of PRs small.
+- Track follow ups separately, rather than continuously increasing scope of the same PR.
+- Start as simple as possible.
+- Make sure logging is good, but not too verbose for a production environment.
+- When stuff goes wrong, there should already be logs to help understand what happened. Don't wait until after the fact to add logging.
+- When stuff is going right, to know that we're successful it's important to be able to measure that success.
+
 ## Git Workflow
 
 ### Clean Working Directory Before Starting Tasks
@@ -91,6 +106,9 @@ cd /path/to/repo && git rm -r .github/actions/old-action
 
 ### Never Remove Git Lock Files
 
+Sometimes a background process is using git when you want to use it. If you get a lock error, try again up to 3 times total.
+If a lock still exists, DO NOT REMOVE IT.
+
 **CRITICAL:** NEVER remove git lock files (`.git/**/index.lock`, `.git/**/HEAD.lock`, etc.) automatically.
 
 When you encounter a git lock file error like:
@@ -135,8 +153,8 @@ Your task is rarely done after making changes. Always:
 
 **CRITICAL:** Don't just make changes - ALWAYS test them to verify they work.
 
-- Run the project's test/check commands (e.g., `just check`, `npm test`, `pytest`)
-- For justfile changes: test each new/modified recipe
+- Run the project's test/check commands (e.g., `mise run check`, `npm test`, `pytest`)
+- For mise task changes: test each new/modified task
 - For workflow changes: verify syntax and test locally where possible
 - For scripts: execute them with test inputs
 - If changes can't be fully tested locally, note what remains untested

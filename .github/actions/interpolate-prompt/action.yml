@@ -1,0 +1,42 @@
+name: 'Interpolate Prompt'
+description: 'Read a prompt template file and interpolate environment variables using envsubst'
+
+branding:
+  icon: 'file-text'
+  color: 'purple'
+
+inputs:
+  template-file:
+    description: 'Path to the prompt template file (relative to repository root)'
+    required: true
+
+outputs:
+  prompt:
+    description: 'The interpolated prompt content'
+    value: ${{ steps.interpolate.outputs.prompt }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Interpolate template
+      id: interpolate
+      shell: bash
+      run: |
+        TEMPLATE_FILE="${{ inputs.template-file }}"
+
+        # Read the template file
+        if [[ ! -f "$TEMPLATE_FILE" ]]; then
+          echo "::error::Template file not found: $TEMPLATE_FILE"
+          exit 1
+        fi
+
+        # Use envsubst to interpolate all environment variables in the template
+        INTERPOLATED=$(envsubst < "$TEMPLATE_FILE")
+
+        # Output the interpolated prompt using a delimiter to handle multiline content
+        DELIMITER="EOF_$(date +%s%N)"
+        {
+          echo "prompt<<$DELIMITER"
+          echo "$INTERPOLATED"
+          echo "$DELIMITER"
+        } >> "$GITHUB_OUTPUT"

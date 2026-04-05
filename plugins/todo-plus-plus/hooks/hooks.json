@@ -1,0 +1,28 @@
+{
+  "description": "Commit enforcement on task completion and ephemeral session awareness on start",
+  "hooks": {
+    "TaskCompleted": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/check-uncommitted.sh",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "IMPORTANT SESSION CONTEXT: You may be running in an ephemeral session (a sub-agent, teammate, or temporary context). The Tasks system (TaskCreate, TaskUpdate, TaskList) is for tracking YOUR local work items within THIS session only. Do NOT use Tasks for persistent project tracking, feature backlogs, or cross-session work items. Those belong in external systems (GitHub Issues, Linear, etc.). Tasks are session-scoped and will not survive session end. Also: when you complete a task, ALWAYS commit and push your changes before marking it complete."
+          }
+        ]
+      }
+    ]
+  }
+}

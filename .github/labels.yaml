@@ -1,0 +1,54 @@
+# Labels for the Claude Code Review workflow
+# These labels control when the review bot runs on PRs
+
+- name: request-review
+  description: Request a one-time review from the Claude review bot (label is removed after review starts)
+  color: 'f19cFb'
+
+- name: always-review
+  description: Always run Claude review bot on this PR, even when in draft state
+  color: 'f19c3b'
+
+- name: ai-review
+  description: Ask claude to review this PR even if you're not on the beta list
+  color: 'f1cd3b'
+
+# Workflow status labels
+- name: status:in-progress
+  description: Actively being worked on
+  color: '0e8a16'
+
+- name: status:blocked
+  description: Cannot proceed - see comments for blocker
+  color: 'b60205'
+
+- name: status:needs-review
+  description: Work complete, awaiting human review
+  color: 'fbca04'
+
+- name: status:on-hold
+  description: Intentionally paused, not abandoned
+  color: 'c5def5'
+
+# Priority labels
+- name: priority:high
+  description: Address soon, blocks other work
+  color: 'd93f0b'
+
+- name: priority:low
+  description: Nice to have, do when convenient
+  color: 'c2e0c6'
+
+# Issue type labels (supplement GitHub defaults)
+- name: chore
+  description: Maintenance, refactoring, cleanup tasks
+  color: 'fef2c0'
+
+# Stale issue management
+- name: stale
+  description: Issue has not had recent activity
+  color: 'ededed'
+
+- name: daily-report
+  description: Automated daily report issue (auto-closed when stale)
+  color: 'd4c5f9'

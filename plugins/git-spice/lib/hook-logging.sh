@@ -1,0 +1,1 @@
+../../../shared/lib/hook-logging.sh

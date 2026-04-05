@@ -1,0 +1,7 @@
+{
+  "name": "agent-teams-skills",
+  "version": "0.1.0",
+  "description": "Skills for working with Claude Code agent teams — orchestration, tmux integration, hooks, and configuration reference.",
+  "author": "nsheaps",
+  "keywords": ["agent-teams", "orchestration", "tmux", "multi-agent"]
+}

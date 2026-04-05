@@ -408,9 +408,9 @@ This action is part of the Claude Code Plugin Marketplace.
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/nsheaps/.ai/issues)
+- **Issues**: [GitHub Issues](https://github.com/nsheaps/ai-mktpl/issues)
 - **Documentation**: [Claude Code Docs](https://code.claude.com/docs)
-- **Discussions**: [GitHub Discussions](https://github.com/nsheaps/.ai/discussions)
+- **Discussions**: [GitHub Discussions](https://github.com/nsheaps/ai-mktpl/discussions)
 
 ## Related Resources
 

@@ -1,0 +1,6 @@
+{
+  "description": "SCM utilities: uncommitted change reminders and git safety checks",
+  "hooks": {
+    "Stop": []
+  }
+}

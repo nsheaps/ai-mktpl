@@ -1,0 +1,12 @@
+{
+  "name": "brain",
+  "version": "0.1.0",
+  "description": "Git-backed memory and prompt tracking. Auto-saves prompts to history, syncs memory files to a configurable git repo, and provides self-checking reminders inspired by the Serena MCP Ralph loop pattern.",
+  "author": {
+    "name": "Nathan Heaps"
+  },
+  "keywords": ["memory", "history", "git", "brain", "prompt-tracking", "self-check"],
+  "homepage": "https://github.com/nsheaps/ai-mktpl",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "hooks": "./hooks/hooks.json"
+}

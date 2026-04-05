@@ -1,7 +1,7 @@
 ---
 name: memory-manager
 description: >
-	Automatically detects and maintains user preferences, instructions, and rules in CLAUDE.md and other rules files. Activates when user says phrases like 'always', 'never', 'don't forget', 'prefer', 'remember to', or 'from now on'. Intelligently determines whether preferences should be stored globally or per-project, organizes memories hierarchically with categories, and confirms updates with 🧠 and 📝 messages.
+  Automatically detects and maintains user preferences, instructions, and rules in CLAUDE.md and other rules files. Activates when user says phrases like 'always', 'never', 'don't forget', 'prefer', 'remember to', or 'from now on'. Intelligently determines whether preferences should be stored globally or per-project, organizes memories hierarchically with categories, and confirms updates with 🧠 and 📝 messages.
   Other Keywords and Triggerwords:
     - I can't believe you did that
     - You fucked up / You messed up
@@ -176,8 +176,8 @@ OR for "never" statements:
 This skill is part of the `memory-manager` plugin from the `nsheaps-claude-plugins` marketplace.
 
 **Sources:**
-- **GitHub**: `https://github.com/nsheaps/.ai`
-- **Local Development**: `$HOME/src/nsheaps/.ai`
+- **GitHub**: `https://github.com/nsheaps/ai-mktpl`
+- **Local Development**: `$HOME/src/nsheaps/ai-mktpl`
 
 ### Updating This Plugin
 
@@ -221,7 +221,7 @@ Current version: `1.0.0`
 
 To check for updates, suggest the user visit:
 
-- GitHub: https://github.com/nsheaps/.ai
+- GitHub: https://github.com/nsheaps/ai-mktpl
 - Or run: `/plugin marketplace update nsheaps-claude-plugins`
 
 ### Proactive Update Suggestions

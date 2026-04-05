@@ -1,0 +1,16 @@
+{
+  "description": "Pre-tool-call safety evaluation using Claude CLI (haiku) with script-style hooks",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/pre-tool-safety-check.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

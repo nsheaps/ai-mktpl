@@ -1,0 +1,17 @@
+{
+  "description": "Install/update GitHub CLI on session start for web sessions",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/install-gh.sh",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}
