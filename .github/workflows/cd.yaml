@@ -245,8 +245,13 @@ jobs:
           skip_push: true
 
       - name: Push all changes
-        if: steps.bump.outputs.has-bumps == 'true'
-        run: git push
+        run: |
+          # Push if there are any unpushed commits (version bumps OR marketplace updates)
+          if [ "$(git rev-list origin/main..HEAD 2>/dev/null | wc -l)" -gt 0 ]; then
+            git push
+          else
+            echo "No unpushed commits, skipping push"
+          fi
 
       - name: Update release tag
         run: |

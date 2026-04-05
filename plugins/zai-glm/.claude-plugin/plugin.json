@@ -1,0 +1,27 @@
+{
+  "name": "zai-glm",
+  "version": "0.1.0",
+  "description": "Skills for using z.ai (Zhipu AI) GLM models and configuring Claude Code to access them via the Anthropic-compatible endpoint or API gateways.",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/zai-glm",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": [
+    "zai",
+    "z-ai",
+    "zhipu",
+    "glm",
+    "glm-5",
+    "glm-4.7",
+    "glm-4.5",
+    "chatglm",
+    "ai-models",
+    "openai-compatible",
+    "anthropic-compatible",
+    "china-ai",
+    "llm-provider"
+  ]
+}
