@@ -11,7 +11,7 @@
     {
       "name": "1pass",
       "description": "Install and manage 1Password CLI (op) and op-exec in Claude Code sessions. Provides session-start auto-install for web sessions and comprehensive workflow skills.",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -280,7 +280,7 @@
     {
       "name": "github",
       "description": "GitHub CLI installation, authentication, and workflow skill for Claude Code sessions. Consolidates gh-tool and github-auth-skill into a single plugin.",
-      "version": "0.1.15",
+      "version": "0.1.16",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -331,7 +331,7 @@
     {
       "name": "google-workspace-cli",
       "description": "Install and manage the Google Workspace CLI (gws) with per-service skills for Gmail, Calendar, Drive, Docs, Sheets, Slides, Chat, Tasks, Contacts, and Admin",
-      "version": "0.1.7",
+      "version": "0.1.8",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -406,7 +406,7 @@
     {
       "name": "mise",
       "description": "Install and manage mise (tool version manager) in Claude Code sessions. Provides session-start auto-install for web sessions and comprehensive workflow skills.",
-      "version": "0.2.18",
+      "version": "0.2.19",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -446,7 +446,7 @@
     {
       "name": "permissions-sync",
       "description": "Merge permission scopes from configurable source settings.json files into settings.local.json on session start. Supports project-level and user-level installation.",
-      "version": "0.1.12",
+      "version": "0.1.13",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -593,7 +593,7 @@
     {
       "name": "sequential-thinking",
       "description": "Set up the sequential-thinking MCP server and auto-configure permissions for its tools on session start.",
-      "version": "0.1.11",
+      "version": "0.1.12",
       "author": {
         "name": "Nathan Heaps"
       },
