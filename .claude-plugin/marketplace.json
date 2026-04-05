@@ -280,7 +280,7 @@
     {
       "name": "github",
       "description": "GitHub CLI installation, authentication, and workflow skill for Claude Code sessions. Consolidates gh-tool and github-auth-skill into a single plugin.",
-      "version": "0.1.15",
+      "version": "0.3.0",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -299,11 +299,7 @@
         "issues",
         "session-start",
         "web-session",
-        "auto-install",
-        "pr-feedback",
-        "code-review",
-        "ci-failures",
-        "review-comments"
+        "auto-install"
       ]
     },
     {
@@ -569,7 +565,7 @@
     {
       "name": "scm-utils",
       "description": "Source control management utilities for improving interactions with branches and PRs, both locally and in CI environments",
-      "version": "0.1.14",
+      "version": "0.1.15",
       "author": {
         "name": "Nathan Heaps"
       },
