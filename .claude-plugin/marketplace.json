@@ -309,7 +309,7 @@
     {
       "name": "github-app",
       "description": "Automatic GitHub App token lifecycle for Claude Code sessions. Generates installation tokens on session start, monitors expiry via PreToolUse hook, and refreshes transparently before commands that need authentication.",
-      "version": "0.1.11",
+      "version": "0.1.12",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -631,7 +631,7 @@
     {
       "name": "skill-required",
       "description": "Enforces that specified skills are loaded before certain tools can be used. Tracks skill reads via PostToolUse and blocks tool use via PreToolUse if the required skill hasn't been recently loaded.",
-      "version": "0.1.3",
+      "version": "0.1.4",
       "author": {
         "name": "Nathan Heaps"
       },
