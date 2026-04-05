@@ -581,7 +581,7 @@
     {
       "name": "self-terminate",
       "description": "Allows Claude to gracefully terminate itself using SIGINT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -687,6 +687,27 @@
       ]
     },
     {
+      "name": "sync-settings",
+      "description": "Automatically sync and merge local Claude Code settings, commands, and files using configurable rules in syncconfig.yaml",
+      "version": "0.2.27",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/sync-settings",
+      "category": "utility",
+      "tags": ["utility"],
+      "keywords": [
+        "sync",
+        "settings",
+        "merge",
+        "json",
+        "symlink",
+        "hooks",
+        "configuration",
+        "local-settings"
+      ]
+    },
+    {
       "name": "task-parallelization",
       "description": "Intelligent skill that helps Claude parallelize Task tool calls when working on repetitive or batch operations, optimizing throughput based on task complexity",
       "version": "0.2.25",
@@ -721,7 +742,7 @@
     {
       "name": "todo-plus-plus",
       "description": "Enforces commit-on-complete for tasks and reminds about ephemeral session awareness",
-      "version": "0.1.4",
+      "version": "0.1.5",
       "author": {
         "name": "Nathan Heaps"
       },
