@@ -687,27 +687,6 @@
       ]
     },
     {
-      "name": "sync-settings",
-      "description": "Automatically sync and merge local Claude Code settings, commands, and files using configurable rules in syncconfig.yaml",
-      "version": "0.2.27",
-      "author": {
-        "name": "Nathan Heaps"
-      },
-      "source": "./plugins/sync-settings",
-      "category": "utility",
-      "tags": ["utility"],
-      "keywords": [
-        "sync",
-        "settings",
-        "merge",
-        "json",
-        "symlink",
-        "hooks",
-        "configuration",
-        "local-settings"
-      ]
-    },
-    {
       "name": "task-parallelization",
       "description": "Intelligent skill that helps Claude parallelize Task tool calls when working on repetitive or batch operations, optimizing throughput based on task complexity",
       "version": "0.2.25",
