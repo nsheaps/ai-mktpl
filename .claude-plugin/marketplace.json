@@ -234,6 +234,18 @@
       ]
     },
     {
+      "name": "datadog-otel-setup",
+      "description": "Configure Claude Code's native OpenTelemetry integration for Datadog observability",
+      "version": "0.0.1",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/datadog-otel-setup",
+      "category": "utility",
+      "tags": ["utility"],
+      "keywords": ["datadog", "opentelemetry", "otel", "observability", "telemetry", "monitoring"]
+    },
+    {
       "name": "edit-utils",
       "description": "File editing utilities: auto-formatting and linting for written/edited files with project-aware configuration",
       "version": "0.1.0",
