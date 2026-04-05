@@ -36,14 +36,13 @@ HOOK_EVENT="${HOOK_EVENT:-PreToolUse}"
 # --- Guards ---
 
 # Only act if the github-app plugin has been configured (credentials in env)
+# No opinion — output nothing, defer to normal permission system
 if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_APP_PRIVATE_KEY_PATH:-}" || -z "${GITHUB_INSTALLATION_ID:-}" ]]; then
-  echo '{"hookSpecificOutput":{"hookEventName":"'"$HOOK_EVENT"'","permissionDecision":"allow"}}'
   exit 0
 fi
 
-# No token file means SessionStart didn't generate one — skip
+# No token file means SessionStart didn't generate one — no opinion
 if [[ ! -f "$TOKEN_FILE" ]]; then
-  echo '{"hookSpecificOutput":{"hookEventName":"'"$HOOK_EVENT"'","permissionDecision":"allow"}}'
   exit 0
 fi
 
@@ -98,7 +97,7 @@ BIN_DIR="$PLUGIN_DIR/bin"
 # --- Allow helper ---
 
 allow_silent() {
-  echo '{"hookSpecificOutput":{"hookEventName":"'"$HOOK_EVENT"'","permissionDecision":"allow"}}'
+  jq -n --arg evt "$HOOK_EVENT" '{"hookSpecificOutput":{"hookEventName":$evt,"permissionDecision":"allow"}}'
   exit 0
 }
 

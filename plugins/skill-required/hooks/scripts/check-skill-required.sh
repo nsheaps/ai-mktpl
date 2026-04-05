@@ -26,13 +26,13 @@ HOOK_EVENT="${HOOK_EVENT:-PreToolUse}"
 
 # Helper functions for PreToolUse hook output
 allow() {
-  echo '{"hookSpecificOutput":{"hookEventName":"'"$HOOK_EVENT"'","permissionDecision":"allow"}}'
+  jq -n --arg evt "$HOOK_EVENT" '{"hookSpecificOutput":{"hookEventName":$evt,"permissionDecision":"allow"}}'
   exit 0
 }
 
 deny() {
   local reason="$1"
-  echo "{\"hookSpecificOutput\":{\"hookEventName\":\"$HOOK_EVENT\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":$(echo "$reason" | jq -Rs .)}}"
+  jq -n --arg evt "$HOOK_EVENT" --arg reason "$reason" '{"hookSpecificOutput":{"hookEventName":$evt,"permissionDecision":"deny","permissionDecisionReason":$reason}}'
   exit 0
 }
 
