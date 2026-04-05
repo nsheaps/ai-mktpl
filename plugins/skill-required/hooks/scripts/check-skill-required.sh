@@ -19,15 +19,20 @@
 #         max_tool_uses_before_reset: 5
 set -euo pipefail
 
+# Read input and extract hook event name for reusable output
+input="$(cat)"
+HOOK_EVENT=$(echo "$input" | jq -r '.hook_event_name // empty' 2>/dev/null)
+HOOK_EVENT="${HOOK_EVENT:-PreToolUse}"
+
 # Helper functions for PreToolUse hook output
 allow() {
-  echo '{"hookSpecificOutput":{"permissionDecision":"allow"}}'
+  jq -n --arg evt "$HOOK_EVENT" '{"hookSpecificOutput":{"hookEventName":$evt,"permissionDecision":"allow"}}'
   exit 0
 }
 
 deny() {
   local reason="$1"
-  echo "{\"hookSpecificOutput\":{\"permissionDecision\":\"deny\",\"permissionDecisionReason\":$(echo "$reason" | jq -Rs .)}}"
+  jq -n --arg evt "$HOOK_EVENT" --arg reason "$reason" '{"hookSpecificOutput":{"hookEventName":$evt,"permissionDecision":"deny","permissionDecisionReason":$reason}}'
   exit 0
 }
 
@@ -35,8 +40,6 @@ deny() {
 if [ "${CLAUDE_PLUGIN_SKILL_REQUIRED_ENABLED:-}" = "false" ]; then
   allow
 fi
-
-input="$(cat)"
 
 tool_name="$(echo "$input" | jq -r '.tool_name // empty' 2>/dev/null || true)"
 
