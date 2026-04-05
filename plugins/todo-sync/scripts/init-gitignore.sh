@@ -9,6 +9,9 @@
 
 set -euo pipefail
 
+# shellcheck source=../lib/hook-output.sh
+source "${CLAUDE_PLUGIN_ROOT}/lib/hook-output.sh"
+
 # Global gitignore location
 global_gitignore="$HOME/.config/git/ignore"
 
@@ -31,4 +34,4 @@ for pattern in "${patterns[@]}"; do
   fi
 done
 
-exit 0
+hook_msg "todo-sync: gitignore patterns configured"

@@ -4,10 +4,13 @@
 # Claude Code merges settings.local.json on top of settings.json at runtime.
 set -euo pipefail
 
+# shellcheck source=../lib/hook-output.sh
+source "${CLAUDE_PLUGIN_ROOT}/lib/hook-output.sh"
+
 # Skip configuration for agent team teammates to avoid race conditions.
 # Only the lead or solo sessions configure.
 if [ -n "${CLAUDE_CODE_PARENT_SESSION_ID:-}" ]; then
-  echo '{}'
+  hook_msg "statusline-iterm: sub-agent session, skipping"
   exit 0
 fi
 
@@ -23,8 +26,8 @@ mkdir -p "$(dirname "$SETTINGS_FILE")"
 # shellcheck source=../lib/safe-settings-write.sh
 SHARED_LIB="${CLAUDE_PLUGIN_ROOT}/lib/safe-settings-write.sh"
 if [ ! -f "$SHARED_LIB" ]; then
-  echo "ERROR: shared lib not found: $SHARED_LIB" >&2
-  exit 2
+  hook_msg "statusline-iterm: ERROR — shared lib not found: $SHARED_LIB"
+  exit 0
 fi
 source "$SHARED_LIB"
 
@@ -37,6 +40,7 @@ fi
 # Case 1: Not present anywhere - set it
 if [ -z "$current_command" ]; then
   safe_write_settings '.statusLine.type = "command" | .statusLine.command = $script'
+  hook_msg "statusline-iterm: configured"
   exit 0
 fi
 
@@ -44,12 +48,12 @@ fi
 # Match if path contains "plugins/statusline-iterm" or "plugins/statusline/" (original plugin)
 if [[ "$current_command" == *"plugins/statusline-iterm"* ]] || [[ "$current_command" == *"plugins/statusline/"* ]]; then
   safe_write_settings '.statusLine.command = $script'
+  hook_msg "statusline-iterm: updated"
   exit 0
 fi
 
 # Case 3: Present and doesn't match - warn and block
-cat <<EOF
-⚠️  statusLine.command is already configured with a different script:
+msg="statusline-iterm: WARNING — statusLine.command is already configured with a different script:
    Current: $current_command
    This plugin wants to use: $STATUSLINE_SCRIPT
 
@@ -58,7 +62,6 @@ To resolve this issue, either:
 2. Manually update ~/.claude/settings.local.json to use this plugin's script
 3. Disable this plugin if they want to keep their current statusline
 
-The statusline-iterm plugin will not override your existing configuration automatically.
-EOF
-
-exit 2
+The statusline-iterm plugin will not override your existing configuration automatically."
+hook_msg "$msg"
+exit 0

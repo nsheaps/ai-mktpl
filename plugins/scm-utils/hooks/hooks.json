@@ -1,5 +1,5 @@
 {
-  "description": "Reminds about uncommitted changes when session stops",
+  "description": "SCM utilities: uncommitted change reminders and git safety checks",
   "hooks": {
     "Stop": []
   }

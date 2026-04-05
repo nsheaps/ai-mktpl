@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+#MISE description="Compare plugin versions between base branch (main) and current HEAD. Usage: mise run _preview-version-bumps [--format=raw|--format=md]"
+set -euo pipefail
+
+FORMAT="${1:---format=raw}"
+
+# Determine base branch (origin/main in CI, main locally)
+BASE_BRANCH="${GITHUB_BASE_REF:-main}"
+if ! git rev-parse --verify "origin/$BASE_BRANCH" >/dev/null 2>&1; then
+  BASE_BRANCH="main"
+else
+  BASE_BRANCH="origin/$BASE_BRANCH"
+fi
+
+case "$FORMAT" in
+  --format=md)
+    echo "| Plugin | Base | Type | Head |"
+    echo "|---|---|---|---|"
+    ;;
+esac
+
+FOUND_CHANGES=0
+for plugin_dir in plugins/*; do
+  if [ ! -d "$plugin_dir" ]; then
+    continue
+  fi
+  PLUGIN_NAME=$(basename "$plugin_dir")
+  PLUGIN_JSON="$plugin_dir/.claude-plugin/plugin.json"
+
+  # Get version from HEAD (current branch)
+  HEAD_VERSION=$(jq -r '.version' "$PLUGIN_JSON" 2>/dev/null || echo "")
+  if [ -z "$HEAD_VERSION" ]; then
+    continue
+  fi
+
+  # Get version from base branch
+  BASE_VERSION=$(git show "$BASE_BRANCH:$PLUGIN_JSON" 2>/dev/null | jq -r '.version' 2>/dev/null || echo "")
+  if [ -z "$BASE_VERSION" ]; then
+    # Plugin doesn't exist in base branch (new plugin)
+    BASE_VERSION="0.0.0"
+  fi
+
+  # Skip if versions are the same
+  if [ "$BASE_VERSION" = "$HEAD_VERSION" ]; then
+    continue
+  fi
+
+  # Determine type of bump
+  IFS='.' read -r -a base_parts <<< "$BASE_VERSION"
+  IFS='.' read -r -a head_parts <<< "$HEAD_VERSION"
+  if [ "${base_parts[0]}" != "${head_parts[0]}" ]; then
+    TYPE="major"
+  elif [ "${base_parts[1]}" != "${head_parts[1]}" ]; then
+    TYPE="minor"
+  elif [ "${base_parts[2]}" != "${head_parts[2]}" ]; then
+    TYPE="patch"
+  else
+    TYPE="unknown"
+  fi
+
+  FOUND_CHANGES=1
+  case "$FORMAT" in
+    --format=raw | '')
+      echo "$PLUGIN_NAME: $BASE_VERSION =( $TYPE )=> $HEAD_VERSION"
+      ;;
+    --format=md)
+      echo "| $PLUGIN_NAME | $BASE_VERSION | $TYPE | $HEAD_VERSION |"
+      ;;
+  esac
+done
+
+if [ "$FOUND_CHANGES" -eq 0 ]; then
+  case "$FORMAT" in
+    --format=md)
+      echo "| *No version changes detected* | | | |"
+      ;;
+    *)
+      echo "No version changes detected"
+      ;;
+  esac
+fi

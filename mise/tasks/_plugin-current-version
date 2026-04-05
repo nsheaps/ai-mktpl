@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+#MISE description="Return the semver of the plugin at PLUGIN_PATH. Usage: mise run _plugin-current-version [PLUGIN_PATH]"
+set -euo pipefail
+
+PLUGIN_PATH="${1:-$PWD}"
+ROOT_DIR="${MISE_PROJECT_ROOT:-$(git rev-parse --show-toplevel)}"
+
+source "$ROOT_DIR/bin/lib/stdlib.sh"
+cd "$PLUGIN_PATH"
+PLUGIN_DIR="$(dirname "$(find_up '.claude-plugin')")"
+cd "$PLUGIN_DIR"
+jq -r '.version' .claude-plugin/plugin.json | xargs

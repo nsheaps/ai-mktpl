@@ -2,11 +2,13 @@
 
 Don't forget these mantras when working on your projects! What they imply is CRITICAL for maintaining high quality code. Think about them after every task to ensure they're followed.
 
+**Start Simple** - Always start with the simplest approach first, only adding extra handling for known use cases. Don't anticipate problems that haven't happened yet.
+
 **KISS** - Keep It Simple, Stupid!
-Always aim for simplicity in your designs and implementations.
+Always aim for simplicity in your designs and implementations. Simplicity is critical to readability and structure.
 
 **YAGNI** - You Aren't Gonna Need It!
-Avoid adding features until they are absolutely necessary.
+Avoid adding features until they are absolutely necessary. Extra complexity for hypothetical scenarios makes code harder to read, test, and maintain.
 
 **DRY** - Don't Repeat Yourself!
 Eliminate redundancy by reusing code and components.

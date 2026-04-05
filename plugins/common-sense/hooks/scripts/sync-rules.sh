@@ -22,6 +22,10 @@ source "${CLAUDE_PLUGIN_ROOT}/lib/plugin-config-read.sh"
 # shellcheck source=../../lib/safe-settings-write.sh
 source "${CLAUDE_PLUGIN_ROOT}/lib/safe-settings-write.sh"
 
+# Source hook logging
+# shellcheck source=../../lib/hook-logging.sh
+source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
+
 # --- Read config ---
 
 ALSO_SYNC_TO_USER="$(plugin_get_config "alsoSyncToUser" "false")"
@@ -49,7 +53,7 @@ setup_symlink() {
       local resolved
       resolved="$(readlink -f "$entry" 2>/dev/null || readlink "$entry" 2>/dev/null || true)"
       if [[ "$resolved" == *"${ai_mktpl_pattern}"* ]]; then
-        echo "common-sense: removing stale symlink ${entry} -> ${resolved}" >&2
+        hook_log "removing stale symlink ${entry} -> ${resolved}"
         rm -f "$entry"
       fi
     fi
@@ -59,12 +63,16 @@ setup_symlink() {
   if [ -L "$link_path" ]; then
     rm -f "$link_path"
   elif [ -d "$link_path" ]; then
-    echo "common-sense: WARNING: ${link_path} is a real directory, not replacing" >&2
+    hook_log_always "WARNING: ${link_path} is a real directory, not replacing with symlink — remove it manually if this is unintentional"
     return 0
   fi
 
-  ln -s "$PLUGIN_RULES_DIR" "$link_path"
-  echo "common-sense: linked ${link_path} -> ${PLUGIN_RULES_DIR}" >&2
+  if ! ln -s "$PLUGIN_RULES_DIR" "$link_path"; then
+    hook_fail "symlink creation" "Failed to create symlink ${link_path} -> ${PLUGIN_RULES_DIR}" \
+      "Check directory permissions for ${target_dir}"
+    return 1
+  fi
+  hook_log "linked ${link_path} -> ${PLUGIN_RULES_DIR}"
 }
 
 # --- Helper: add plugin to a repo's settings file ---
@@ -96,7 +104,7 @@ add_plugin_to_repo() {
   mkdir -p "$(dirname "$target_file")"
   SETTINGS_FILE="$target_file"
   safe_write_settings '.enabledPlugins["common-sense@nsheaps-claude-plugins"] = true'
-  echo "common-sense: enabled plugin in ${target_file}" >&2
+  hook_log "enabled plugin in ${target_file}"
 }
 
 # --- Helper: get GitHub org from a repo's remote ---
@@ -114,16 +122,20 @@ get_repo_org() {
 
 # --- Main ---
 
+hook_log_step "sync-project" "Syncing rules to project scope"
+
 # Always sync to the project scope
 setup_symlink "$PROJECT_RULES_DIR"
 
 # Optionally also sync to user scope
 if [ "$ALSO_SYNC_TO_USER" = "true" ]; then
+  hook_log_step "sync-user" "Syncing rules to user scope"
   setup_symlink "$USER_RULES_DIR"
 fi
 
 # Optionally add plugin to other repos
 if [ -n "$ALSO_ADD_TO_REPOS" ] && command -v jq &>/dev/null; then
+  hook_log_step "sync-repos" "Adding plugin to sibling repos"
   # Find git repos with .claude/ dirs
   # Look in common parent directories for sibling repos
   project_parent="$(dirname "${CLAUDE_PROJECT_DIR:-.}")"
@@ -151,4 +163,6 @@ if [ -n "$ALSO_ADD_TO_REPOS" ] && command -v jq &>/dev/null; then
   done
 fi
 
-echo '{}'
+hook_log "rules synced"
+hook_log_cleanup
+hook_respond

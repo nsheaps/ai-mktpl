@@ -1,0 +1,13 @@
+{
+  "name": "edit-utils",
+  "version": "0.1.0",
+  "description": "File editing utilities: auto-formatting and linting for written/edited files with project-aware configuration",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/edit-utils",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": ["format", "lint", "prettier", "eslint", "edit", "write", "auto-format"]
+}

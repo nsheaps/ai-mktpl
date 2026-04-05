@@ -153,8 +153,8 @@ Your task is rarely done after making changes. Always:
 
 **CRITICAL:** Don't just make changes - ALWAYS test them to verify they work.
 
-- Run the project's test/check commands (e.g., `just check`, `npm test`, `pytest`)
-- For justfile changes: test each new/modified recipe
+- Run the project's test/check commands (e.g., `mise run check`, `npm test`, `pytest`)
+- For mise task changes: test each new/modified task
 - For workflow changes: verify syntax and test locally where possible
 - For scripts: execute them with test inputs
 - If changes can't be fully tested locally, note what remains untested

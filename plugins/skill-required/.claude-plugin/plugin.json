@@ -1,6 +1,6 @@
 {
   "name": "skill-required",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "description": "Enforces that specified skills are loaded before certain tools can be used. Tracks skill reads via PostToolUse and blocks tool use via PreToolUse if the required skill hasn't been recently loaded.",
   "author": {
     "name": "Nathan Heaps",
@@ -10,6 +10,5 @@
   "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/skill-required",
   "repository": "https://github.com/nsheaps/ai-mktpl",
   "license": "MIT",
-  "keywords": ["skill-enforcement", "hooks", "workflow", "quality", "tool-gating"],
-  "hooks": "./hooks/hooks.json"
+  "keywords": ["skill-enforcement", "hooks", "workflow", "quality", "tool-gating"]
 }
