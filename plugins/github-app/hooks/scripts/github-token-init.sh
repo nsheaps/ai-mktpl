@@ -259,6 +259,20 @@ fi
 
 # --- Configure git identity from GitHub App bot account ---
 
+# Write GIT_AUTHOR_*/GIT_COMMITTER_* env vars to the runtime env file so they
+# are available in ALL Bash commands (including sub-agent ones that may not be
+# in a directory with the project's .git/config).
+_write_git_identity_env() {
+  local name="$1" email="$2"
+  [[ -n "${ENV_RUNTIME_FILE:-}" && -f "$ENV_RUNTIME_FILE" && -n "$name" && -n "$email" ]] || return 1
+  cat >> "$ENV_RUNTIME_FILE" <<GITENV
+export GIT_AUTHOR_NAME="$name"
+export GIT_AUTHOR_EMAIL="$email"
+export GIT_COMMITTER_NAME="$name"
+export GIT_COMMITTER_EMAIL="$email"
+GITENV
+}
+
 configure_git_identity() {
   local token="$1"
   local app_id="$2"
@@ -276,13 +290,7 @@ configure_git_identity() {
     local existing_name existing_email
     existing_name=$(git config user.name)
     existing_email=$(git config user.email)
-    if [[ -n "${ENV_RUNTIME_FILE:-}" && -f "$ENV_RUNTIME_FILE" && -n "$existing_name" && -n "$existing_email" ]]; then
-      cat >> "$ENV_RUNTIME_FILE" <<GITENV
-export GIT_AUTHOR_NAME="$existing_name"
-export GIT_AUTHOR_EMAIL="$existing_email"
-export GIT_COMMITTER_NAME="$existing_name"
-export GIT_COMMITTER_EMAIL="$existing_email"
-GITENV
+    if _write_git_identity_env "$existing_name" "$existing_email"; then
       hook_log "Git identity env vars written from existing git config"
     fi
     return 0
@@ -322,16 +330,7 @@ GITENV
   git config user.email "$bot_email"
   hook_log "Configured git identity: $bot_name <$bot_email>"
 
-  # Write GIT_AUTHOR_*/GIT_COMMITTER_* to the runtime env file so they are
-  # available in ALL Bash commands (including sub-agent ones that may not be
-  # in a directory with the project's .git/config).
-  if [[ -n "${ENV_RUNTIME_FILE:-}" && -f "$ENV_RUNTIME_FILE" ]]; then
-    cat >> "$ENV_RUNTIME_FILE" <<GITENV
-export GIT_AUTHOR_NAME="$bot_name"
-export GIT_AUTHOR_EMAIL="$bot_email"
-export GIT_COMMITTER_NAME="$bot_name"
-export GIT_COMMITTER_EMAIL="$bot_email"
-GITENV
+  if _write_git_identity_env "$bot_name" "$bot_email"; then
     hook_log "Git identity env vars written to runtime env file"
   fi
 
