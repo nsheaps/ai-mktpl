@@ -1,7 +1,7 @@
 {
   "name": "github",
-  "version": "0.1.14",
-  "description": "GitHub CLI installation, authentication, PR state tracking, and workflow skill for Claude Code sessions. Monitors comments, reviews, CI status, and merge readiness across multi-project sessions.",
+  "version": "0.1.15",
+  "description": "GitHub CLI installation, authentication, and workflow skill for Claude Code sessions. Consolidates gh-tool and github-auth-skill into a single plugin.",
   "author": {
     "name": "Nathan Heaps",
     "email": "nsheaps@gmail.com",
@@ -22,10 +22,9 @@
     "session-start",
     "web-session",
     "auto-install",
-    "pr-state-tracking",
-    "ci-status",
-    "reviews",
-    "async-hooks",
-    "multi-project"
+    "pr-feedback",
+    "code-review",
+    "ci-failures",
+    "review-comments"
   ]
 }
