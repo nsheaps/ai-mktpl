@@ -1,0 +1,22 @@
+{
+  "description": "Install 1Password CLI/op-exec and inject secrets on session start",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/install-op.sh",
+            "timeout": 120
+          },
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/op-exec-env.sh",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}

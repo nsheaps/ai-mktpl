@@ -4,9 +4,13 @@
 
 set -euo pipefail
 
+PLUGIN_NAME="todo-sync"
+# shellcheck source=../lib/log.sh
+source "${CLAUDE_PLUGIN_ROOT}/lib/log.sh"
+
 # Check for jq dependency
 if ! command -v jq &>/dev/null; then
-  echo "Warning: jq not found, skipping sync" >&2
+  log_warn "jq not found, skipping sync"
   exit 0
 fi
 
@@ -17,7 +21,7 @@ input=$(cat)
 session_id=$(echo "$input" | jq -r '.session_id // empty')
 
 if [ -z "$session_id" ]; then
-  echo "No session_id in hook input, skipping sync" >&2
+  log_warn "No session_id in hook input, skipping sync"
   exit 0
 fi
 
@@ -90,6 +94,6 @@ if [ -d "$global_plans_dir" ]; then
 fi
 
 # Output success message (shown in transcript)
-echo "Synced todos and plans to $project_dir/.claude/"
+log_info "Synced todos and plans to $project_dir/.claude/"
 
 exit 0

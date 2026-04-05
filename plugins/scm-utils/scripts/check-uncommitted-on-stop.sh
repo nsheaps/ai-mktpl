@@ -7,6 +7,10 @@
 
 set -euo pipefail
 
+LOG_PREFIX="scm-utils"
+# shellcheck source=../lib/log.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/lib/log.sh"
+
 # Read hook input from stdin (consume it)
 cat > /dev/null
 
@@ -24,7 +28,7 @@ if [ -z "$status_output" ]; then
   if [ -n "$local_branch" ] && [ "$local_branch" != "HEAD" ]; then
     ahead_count=$(git rev-list --count "@{upstream}..HEAD" 2>/dev/null || echo "0")
     if [ "$ahead_count" -gt 0 ]; then
-      echo "WARNING: You have $ahead_count unpushed commit(s) on '$local_branch'. Push before ending this session." >&2
+      log_warn "You have $ahead_count unpushed commit(s) on '$local_branch'. Push before ending this session."
       exit 2
     fi
   fi
@@ -36,11 +40,11 @@ change_count=$(echo "$status_output" | wc -l | tr -d ' ')
 
 # Output the file list (porcelain format, NOT full diff)
 {
-  echo "WARNING: You have $change_count uncommitted change(s). Commit and push before ending this session:"
-  echo ""
-  echo "$status_output"
-  echo ""
-  echo "Run /commit or use git add + git commit + git push to save your work."
-} >&2
+  log_warn "You have $change_count uncommitted change(s). Commit and push before ending this session:"
+  echo "" >&2
+  echo "$status_output" >&2
+  echo "" >&2
+  log_info "Run /commit or use git add + git commit + git push to save your work."
+}
 
 exit 2

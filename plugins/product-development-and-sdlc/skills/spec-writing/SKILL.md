@@ -9,7 +9,6 @@ description: >
   requirements, user stories, or feature requirements. Guides iterative
   specification development through research, review, and refinement cycles
   rather than one-shot generation.
-version: 0.2.0
 ---
 
 # Spec Writing

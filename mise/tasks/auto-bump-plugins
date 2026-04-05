@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+#MISE description="Auto-bump plugin versions for changed plugins, skipping already-bumped ones. Usage: mise run auto-bump-plugins [--change-base=REF] [--version-base=REF]"
+# --change-base: ref for detecting code changes (default: origin/main)
+# --version-base: ref for version comparison (default: origin/main)
+#
+# On PRs, typically: --change-base=cd/last-release --version-base=origin/main
+# On main, typically: --change-base=cd/last-release --version-base=cd/last-release
+# Locally: defaults work (compares to origin/main for both)
+set -euo pipefail
+
+ROOT_DIR="${MISE_PROJECT_ROOT:-$(git rev-parse --show-toplevel)}"
+
+# Parse args
+CHANGE_BASE="origin/main"
+VERSION_BASE="origin/main"
+for arg in "$@"; do
+  case "$arg" in
+    --change-base=*) CHANGE_BASE="${arg#*=}" ;;
+    --version-base=*) VERSION_BASE="${arg#*=}" ;;
+  esac
+done
+
+# Resolve a git ref: try origin/<ref>, then <ref> directly, then HEAD~1
+resolve_ref() {
+  local ref="$1"
+  if git rev-parse --verify "origin/$ref" >/dev/null 2>&1; then
+    echo "origin/$ref"
+  elif git rev-parse --verify "$ref" >/dev/null 2>&1; then
+    echo "$ref"
+  else
+    echo "HEAD~1"
+  fi
+}
+
+CHANGE_BASE=$(resolve_ref "$CHANGE_BASE")
+VERSION_BASE=$(resolve_ref "$VERSION_BASE")
+
+echo "Change detection base: $CHANGE_BASE" >&2
+echo "Version comparison base: $VERSION_BASE" >&2
+
+[ -f "$ROOT_DIR/.pnp.cjs" ] || mise run setup >&2
+
+BUMPED_PLUGINS=()
+SKIPPED_PLUGINS=()
+REPORT_MD="| Plugin | Base | Current | Action |\n|---|---|---|---|"
+
+for plugin_dir in plugins/*; do
+  [ -d "$plugin_dir" ] || continue
+  PLUGIN_NAME=$(basename "$plugin_dir")
+  PLUGIN_JSON="$plugin_dir/.claude-plugin/plugin.json"
+  [ -f "$PLUGIN_JSON" ] || continue
+
+  # Detect code changes (excluding plugin.json and CHANGELOG.md)
+  HAS_CHANGES=false
+  if git diff --name-only "$CHANGE_BASE..HEAD" -- "$plugin_dir" 2>/dev/null \
+    | grep -v 'CHANGELOG.md$' | grep -v 'plugin.json$' | grep -q .; then
+    HAS_CHANGES=true
+  fi
+
+  # Check symlink target changes
+  if [ "$HAS_CHANGES" = "false" ]; then
+    if mise run _has-symlink-changes "$plugin_dir" "$CHANGE_BASE" >/dev/null 2>/dev/null; then
+      HAS_CHANGES=true
+    fi
+  fi
+
+  [ "$HAS_CHANGES" = "true" ] || continue
+
+  # Get versions
+  BASE_VERSION=$(git show "$VERSION_BASE:$PLUGIN_JSON" 2>/dev/null | jq -r '.version' 2>/dev/null || echo "0.0.0")
+  HEAD_VERSION=$(jq -r '.version' "$PLUGIN_JSON" 2>/dev/null || echo "0.0.0")
+
+  # Skip if already bumped higher than base
+  if [ "$HEAD_VERSION" != "$BASE_VERSION" ]; then
+    HIGHER=$(printf '%s\n%s' "$HEAD_VERSION" "$BASE_VERSION" | sort -V | tail -1)
+    if [ "$HIGHER" = "$HEAD_VERSION" ]; then
+      echo "✅ $PLUGIN_NAME: already bumped $BASE_VERSION → $HEAD_VERSION (keeping)" >&2
+      SKIPPED_PLUGINS+=("$PLUGIN_NAME")
+      REPORT_MD="$REPORT_MD\n| $PLUGIN_NAME | $BASE_VERSION | $HEAD_VERSION | Already bumped |"
+      continue
+    fi
+  fi
+
+  # Auto-bump via release-it (patch increment)
+  echo "⬆️  $PLUGIN_NAME: auto-bumping from $HEAD_VERSION" >&2
+  if ! (cd "plugins/$PLUGIN_NAME" && yarn exec release-it --ci >&2 2>&1); then
+    echo "::error::release-it failed for plugin '$PLUGIN_NAME'" >&2
+    continue
+  fi
+
+  NEW_VERSION=$(jq -r '.version' "$PLUGIN_JSON")
+  BUMPED_PLUGINS+=("$PLUGIN_NAME")
+  REPORT_MD="$REPORT_MD\n| $PLUGIN_NAME | $BASE_VERSION | $NEW_VERSION | Auto-bumped |"
+done
+
+# Output JSON result
+HAS_BUMPS="false"
+if [ ${#BUMPED_PLUGINS[@]} -gt 0 ]; then
+  HAS_BUMPS="true"
+fi
+
+jq -n \
+  --argjson has_bumps "$HAS_BUMPS" \
+  --arg bumped "${BUMPED_PLUGINS[*]:-}" \
+  --arg skipped "${SKIPPED_PLUGINS[*]:-}" \
+  --arg report_md "$(printf '%b' "$REPORT_MD")" \
+  '{
+    has_bumps: $has_bumps,
+    bumped: $bumped,
+    skipped: $skipped,
+    report_md: $report_md
+  }'
