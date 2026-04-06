@@ -109,6 +109,5 @@ Reports are saved to `.claude/tmp/research-<topic>.md` with:
 
 ## References
 
-- [Claude Code Sub-Agents](https://code.claude.com/docs/en/sub-agents)
-- [Claude Code Agent Teams](https://code.claude.com/docs/en/agent-teams)
-- [Community lead-researcher patterns](https://github.com/rewolfiluac/MLFlowDockerSetup/blob/main/.claude/agents/lead-researcher.md)
+- [Claude Code Agents documentation](https://docs.anthropic.com/en/docs/claude-code/agents)
+- [Claude Code Plugins documentation](https://docs.anthropic.com/en/docs/claude-code/plugins)
