@@ -369,6 +369,25 @@
       "keywords": ["linear", "mcp", "hooks", "sync", "issue-tracking", "conflict-detection"]
     },
     {
+      "name": "local-research",
+      "description": "Replicates Claude.ai's Research mode locally using a multi-agent orchestrator-worker pattern. A LeadResearcher agent plans and coordinates parallel search subagents, then a CitationAgent verifies and formats sources.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/local-research",
+      "category": "utility",
+      "tags": ["utility", "command", "skill"],
+      "keywords": [
+        "research",
+        "multi-agent",
+        "web-search",
+        "deep-research",
+        "orchestrator",
+        "citations"
+      ]
+    },
+    {
       "name": "mcp-tooling",
       "description": "Skills for MCP CLI tools, frameworks, proxy daemoning, and gateway patterns. Covers philschmid/mcp-cli, mcp-use, apify/mcpc, mcp-proxy daemoning, and MCP gateway architecture for sharing servers across sessions and networks.",
       "version": "0.1.0",
