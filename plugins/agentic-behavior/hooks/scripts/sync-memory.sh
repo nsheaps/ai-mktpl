@@ -12,11 +12,14 @@
 set -euo pipefail
 
 PLUGIN_NAME="agentic-behavior"
+
+# shellcheck source=../../lib/hook-logging.sh
+source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 source "${CLAUDE_PLUGIN_ROOT}/lib/plugin-config-read.sh"
 
 # Check if plugin is enabled
 if ! plugin_is_enabled; then
-  echo '{}'
+  hook_respond
   exit 0
 fi
 
@@ -25,7 +28,7 @@ git_repo="$(plugin_get_config "gitRepo" "")"
 
 if [ -z "$git_repo" ]; then
   # No git repo configured — skip sync silently
-  echo '{}'
+  hook_respond
   exit 0
 fi
 
@@ -34,8 +37,8 @@ git_repo="${git_repo/#\~/$HOME}"
 
 # Validate the repo exists and is a git repo
 if [ ! -d "$git_repo/.git" ]; then
-  echo "agentic-behavior: Warning — gitRepo '$git_repo' is not a git repository" >&2
-  echo '{}'
+  log_warn "gitRepo '$git_repo' is not a git repository"
+  hook_respond
   exit 0
 fi
 
@@ -63,8 +66,8 @@ branch="$(plugin_get_config "gitBranch" "main")"
 
 # Check for uncommitted changes in the memory repo
 if [ -n "$(cd "$git_repo" && git status --porcelain 2>/dev/null)" ]; then
-  echo "agentic-behavior: Warning — memory repo has uncommitted changes, skipping sync" >&2
-  echo '{}'
+  log_warn "memory repo has uncommitted changes, skipping sync"
+  hook_respond
   exit 0
 fi
 
@@ -116,7 +119,7 @@ Sources: ${memory_sources[*]}" 2>/dev/null || true
     git push origin "$branch" 2>/dev/null || true
   ) &>/dev/null || true
 
-  echo "agentic-behavior: Memory synced to ${git_repo}" >&2
+  hook_log "Memory synced to ${git_repo}"
 fi
 
-echo '{}'
+hook_respond
