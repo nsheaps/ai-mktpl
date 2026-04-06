@@ -1,14 +1,15 @@
-# [Feature/System Name] - Specification
+---
+name: feature-name
+status: draft  # draft | reviewed | in-progress | live | deprecated | archive
+---
 
-**Status:** Draft | Reviewed | In-Progress | Live | Deprecated | Archived
+# [Feature/System Name] - Specification
 
 **Last Updated:** [DATE]
 
 **Author(s):** [Name(s)]
 
 **Version:** [Version number or git commit hash]
-
----
 
 ## Problem & Requirements
 

@@ -31,10 +31,21 @@ between requirements, design, and implementation.
 
 ## Specification Lifecycle
 
-Specifications move through six states, each with a distinct purpose and
-location:
+Specifications move through six states, tracked via a `status` field in the
+frontmatter of each spec file:
 
-### Draft: `docs/specs/draft/<spec-name>.md`
+```yaml
+---
+name: feature-name
+status: draft  # draft | reviewed | in-progress | live | deprecated | archive
+---
+```
+
+The status field replaces file directory organization, allowing specs to remain
+in a single location while their lifecycle state evolves. This approach is
+cleaner and easier to track than moving files between folders.
+
+### Draft Status
 
 **Purpose:** Initial exploration and brainstorming
 
@@ -51,9 +62,9 @@ location:
 - Used for internal refinement and discussion
 - Not yet formally reviewed
 
-**Next step:** Move to `reviewed/` after review and approval
+**Next step:** Update status to `reviewed` after review and approval
 
-### Reviewed: `docs/specs/reviewed/<spec-name>.md`
+### Reviewed Status
 
 **Purpose:** Formally approved specifications ready for implementation
 
@@ -70,9 +81,9 @@ location:
 - Clear acceptance criteria and success metrics
 - Technical design is detailed enough to guide implementation
 
-**Next step:** Move to `in-progress/` when implementation begins
+**Next step:** Update status to `in-progress` when implementation begins
 
-### In-Progress: `docs/specs/in-progress/<spec-name>.md`
+### In-Progress Status
 
 **Purpose:** Specifications actively being implemented
 
@@ -90,9 +101,9 @@ location:
 - May include implementation phase breakdowns or milestone tracking
 - Acts as a reference during implementation and review
 
-**Next step:** Move to `live/` when implementation is complete and deployed
+**Next step:** Update status to `live` when implementation is complete and deployed
 
-### Live: `docs/specs/live/<spec-name>.md`
+### Live Status
 
 **Purpose:** Finalized specifications for actively used features
 
@@ -110,10 +121,10 @@ location:
   lockstep)
 - Long-lived, stable document
 
-**Next step:** Move to `deprecated/` when feature is phased out (while still in
-use), or `archive/` when completely removed
+**Next step:** Update status to `deprecated` when feature is phased out (while still in
+use), or `archive` when completely removed
 
-### Deprecated: `docs/specs/deprecated/<spec-name>.md`
+### Deprecated Status
 
 **Purpose:** Outdated specifications for features still in use
 
@@ -129,9 +140,9 @@ use), or `archive/` when completely removed
 - References the replacement spec (if any)
 - Kept for historical continuity and understanding legacy behavior
 
-**Next step:** Move to `archive/` when feature is fully removed
+**Next step:** Update status to `archive` when feature is fully removed
 
-### Archive: `docs/specs/archive/<spec-name>.md`
+### Archive Status
 
 **Purpose:** Historical reference for removed features
 
@@ -228,6 +239,41 @@ docs/specs/draft/search-feature.md         (parent - 300 lines)
 docs/specs/draft/search-indexing.md        (child - 200 lines)
 docs/specs/draft/search-query-language.md  (child - 250 lines)
 ```
+
+### Folder Organization for Larger Projects
+
+For complex projects with many specs, organize specs into feature-specific
+folders to keep related specs grouped together:
+
+```
+docs/specs/
+├── settings-modal/
+│   ├── settings-modal.md          # parent spec
+│   ├── general-tab.md             # child spec
+│   ├── appearance-tab.md          # child spec
+│   └── keybindings-tab.md         # child spec
+├── auth/
+│   ├── auth-overview.md           # parent spec
+│   ├── oauth-flow.md              # child spec
+│   └── session-management.md      # child spec
+├── search/
+│   ├── search-overview.md         # parent spec
+│   ├── search-indexing.md         # child spec
+│   └── search-query-language.md   # child spec
+```
+
+**Guidelines for folder organization:**
+
+- **Parent specs** define the overall scope, requirements, and success metrics
+  for a feature area
+- **Child specs** detail individual components, flows, or concerns within the
+  parent scope
+- **Related specs across folders** should reference each other using markdown
+  links for traceability
+- **Flat structure is fine for small projects** — Only use folders when you
+  have 8+ specs or when grouping improves clarity
+- **Each spec carries a `status` field** — Status is tracked in frontmatter,
+  not in the directory structure
 
 ## Writing Requirements
 
@@ -354,20 +400,26 @@ Each development cycle should review and update the spec:
 
 ## File Organization
 
-Organize specs according to the project structure:
+Organize specs in a single `docs/specs/` directory, optionally grouped by
+feature if the project has many specs (see "Folder Organization for Larger
+Projects" above). Track the lifecycle status of each spec using the `status`
+field in its frontmatter, not by moving files between directories.
+
+**Basic structure:**
 
 ```
 docs/specs/
-├── draft/           # In exploration/drafting
-├── reviewed/        # Approved, ready for implementation
-├── in-progress/     # Currently being implemented
-├── live/            # Active, deployed features
-├── deprecated/      # Phased out but still in use
-└── archive/         # Removed, historical reference
+├── feature-a.md           # Single spec, all statuses in one file
+├── feature-b.md
+└── feature-group/         # Specs grouped by feature area (optional)
+    ├── parent-spec.md
+    ├── child-spec-1.md
+    └── child-spec-2.md
 ```
 
 **File naming:** Use descriptive names: `user-authentication.md`,
 `search-indexing.md`, `payment-webhook.md` (not `spec1.md`, `tmp.md`, etc.)
+Names should reflect the feature or component, not the status.
 
 ## Additional Resources
 
