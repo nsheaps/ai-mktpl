@@ -1,9 +1,13 @@
 ---
 name: fix-pr
-description: Fix or update the PR description for the current branch to follow best practices
+description: >
+  DEPRECATED: This skill is moving to the sdlc-utils plugin. Use the sdlc-utils:review skill instead.
+  Fix or update the PR description for the current branch to follow best practices.
 argument-hint: "[optional: PR number or URL]"
 allowed-tools: Bash, Read, Grep, Glob
 ---
+
+> **DEPRECATED:** This skill is moving to the sdlc-utils plugin. Use the `/sdlc-utils:review` skill instead.
 
 # Fix PR Description
 

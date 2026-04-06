@@ -1,6 +1,7 @@
 ---
 name: making-great-prs
 description: >
+  DEPRECATED: This skill is moving to the sdlc-utils plugin. Use the sdlc-utils:review skill instead.
   Best practices and procedures for creating and maintaining high-quality pull requests.
   Covers PR creation, body formatting, title conventions, and lifecycle management.
   Triggers on: "create a PR", "update the PR", "open a pull request", "push and PR",
@@ -8,6 +9,8 @@ description: >
   feature branch per the auto-pr-management rule.
 allowed-tools: Bash, Read, Grep, Glob
 ---
+
+> **DEPRECATED:** This skill is moving to the sdlc-utils plugin. Use the `/sdlc-utils:review` skill instead.
 
 # Making Great PRs
 

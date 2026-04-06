@@ -497,22 +497,24 @@
       "keywords": ["plugin", "install", "update", "reload", "management"]
     },
     {
-      "name": "product-development-and-sdlc",
-      "description": "Iterative spec and user story writing with structured SDLC workflows. Guides incremental specification development through research, review, and refinement cycles.",
-      "version": "0.1.1",
+      "name": "sdlc-utils",
+      "description": "Software development lifecycle utilities — skills organized by SDLC phase: plan, implement, review, test, deploy, and maintain.",
+      "version": "0.2.0",
       "author": {
         "name": "Nathan Heaps"
       },
-      "source": "./plugins/product-development-and-sdlc",
+      "source": "./plugins/sdlc-utils",
       "category": "utility",
       "tags": ["utility", "skill"],
       "keywords": [
-        "spec",
-        "specifications",
-        "user-stories",
         "sdlc",
-        "iterative-development",
-        "product-management"
+        "planning",
+        "implementation",
+        "code-review",
+        "testing",
+        "deployment",
+        "maintenance",
+        "software-engineering"
       ]
     },
     {

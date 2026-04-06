@@ -1,20 +1,19 @@
 ---
-name: Spec Writing
+name: plan
 description: >
-  This skill should be used when the user asks to "write a spec", "create a
-  specification", "write user stories", "define requirements", "write a
-  product spec", "create a feature spec", "draft requirements", "iterate on
-  a spec", "refine a spec", "flesh out requirements", "write a PRD", "create
-  a product requirements document", or mentions specifications, product
-  requirements, user stories, or feature requirements. Guides iterative
-  specification development through research, review, and refinement cycles
-  rather than one-shot generation.
+  Planning and requirements for software development. Use when the user asks to
+  "write a spec", "create a specification", "define requirements", "create a
+  feature spec", "draft requirements", "iterate on a spec", "refine a spec",
+  "break down a task", "plan implementation", or mentions specifications,
+  technical requirements, or task breakdown. Guides iterative specification
+  development through research, review, and refinement cycles rather than
+  one-shot generation.
 ---
 
-# Spec Writing
+# Planning and Requirements
 
-Write specifications and user stories through iterative refinement. Each spec
-is a combined document covering both _Problem & Requirements_ (what and why) and
+Write technical specifications through iterative refinement. Each spec is a
+combined document covering both _Problem & Requirements_ (what and why) and
 _Technical Design_ (how). Never attempt to produce a complete specification in
 one pass. Instead, start with the smallest meaningful definition and expand
 through repeated cycles of research, drafting, review, and refinement.
@@ -28,12 +27,12 @@ living document that grows in fidelity through deliberate cycles.
 **The cycle:**
 
 ```
-Seed → Draft → Research → Review → Refine → (repeat until sufficient)
+Seed -> Draft -> Research -> Review -> Refine -> (repeat until sufficient)
 ```
 
 Each pass through the cycle adds detail, resolves ambiguity, and surfaces
 new questions. Stop iterating when the spec is actionable enough for the
-next phase (design, implementation, or stakeholder review).
+next phase (design, implementation, or review).
 
 ## Workflow
 
@@ -42,7 +41,7 @@ next phase (design, implementation, or stakeholder review).
 Start with a one-paragraph problem statement. Capture only:
 
 1. **What problem exists** (1-2 sentences)
-2. **Who has this problem** (target user/persona)
+2. **Who is affected** (developers, users, systems)
 3. **Why it matters now** (urgency or opportunity)
 
 Do NOT attempt to define solutions, features, or acceptance criteria yet.
@@ -57,7 +56,7 @@ Mark unknowns explicitly with `[TBD]` or `[NEEDS RESEARCH]`.
 Key sections to draft first:
 
 - Problem statement (expand from seed)
-- Target users / personas
+- Affected components / systems
 - Success metrics (even rough ones)
 - High-level scope (what's in, what's explicitly out)
 
@@ -65,7 +64,7 @@ Sections to leave sparse:
 
 - Detailed requirements (add in later passes)
 - Technical considerations (add after solution direction is clearer)
-- User stories (add in Phase 3+)
+- Task breakdown (add in Phase 3+)
 
 ### Phase 3: Research Pass
 
@@ -73,11 +72,11 @@ Before adding detail, investigate:
 
 1. **Prior art** - Search the codebase, existing docs, and external sources
    for related work, similar features, or prior attempts
-2. **User context** - Ask the user clarifying questions about personas,
-   constraints, and priorities. Use `AskUserQuestion` for focused queries.
+2. **Context** - Ask clarifying questions about constraints and priorities.
+   Use `AskUserQuestion` for focused queries.
 3. **Technical feasibility** - Explore relevant code, APIs, and
    dependencies to understand what's possible and what's hard
-4. **Competitive/industry patterns** - Use web search to find how others
+4. **Industry patterns** - Use documentation search to find how others
    solve the same problem
 
 Document findings inline in the spec or in a companion research file.
@@ -99,32 +98,25 @@ Refine the document, then decide:
 - **More iteration needed?** Return to Phase 3 with specific research goals
 - **Sufficient for next step?** Proceed to Phase 5
 
-### Phase 5: User Stories
+### Phase 5: Task Breakdown
 
-Once the spec has enough fidelity, decompose requirements into user stories.
-Follow the format:
+Once the spec has enough fidelity, decompose requirements into implementable
+tasks. Each task should be:
 
-```
-As a [persona], I want to [action] so that [benefit].
-```
+- Small enough for a single PR
+- Independently testable
+- Clearly ordered by dependency
 
-**Acceptance criteria** for each story should be concrete and testable:
-
-```
-Given [context], when [action], then [expected result].
-```
-
-Organize stories by priority (must-have, should-have, nice-to-have) or by
-epic/theme grouping. Keep stories small enough to implement in a single PR.
+Organize tasks by priority (must-have, should-have, nice-to-have) or by
+component grouping.
 
 ### Phase 6: Next Steps
 
-After the spec and stories are drafted, define explicit next steps:
+After the spec and tasks are drafted, define explicit next steps:
 
-1. **Stakeholder review** - Who needs to approve this?
-2. **Design phase** - What designs or prototypes are needed?
-3. **Implementation plan** - Break stories into tasks with ordering
-4. **Open questions** - What remains unresolved?
+1. **Review** - Who needs to approve this?
+2. **Implementation plan** - Break tasks into ordered work items
+3. **Open questions** - What remains unresolved?
 
 ## File Organization
 
@@ -139,9 +131,8 @@ docs/specs/deprecated/<spec-name>.md  # Outdated but referenced
 docs/specs/archive/<spec-name>.md     # No longer in use
 ```
 
-If the target location uses a different convention (e.g., an Obsidian vault
-or ideas directory), adapt to that structure while maintaining the iterative
-process.
+If the target location uses a different convention, adapt to that structure
+while maintaining the iterative process.
 
 ## Iteration Guidelines
 
@@ -158,11 +149,11 @@ process.
 | Anti-Pattern               | Instead                                       |
 | -------------------------- | --------------------------------------------- |
 | Writing everything at once | Start with seed, iterate to add detail        |
-| Vague requirements         | Use specific, testable acceptance criteria    |
-| Solution-first thinking    | Define the problem before proposing solutions |
-| Skipping research          | Always investigate before adding detail       |
-| Gold-plating               | Stop when actionable for the next phase       |
-| Orphaned specs             | Always define next steps and ownership        |
+| Vague requirements         | Use specific, testable acceptance criteria     |
+| Solution-first thinking    | Define the problem before proposing solutions  |
+| Skipping research          | Always investigate before adding detail        |
+| Gold-plating               | Stop when actionable for the next phase        |
+| Orphaned specs             | Always define next steps and ownership         |
 
 ## Additional Resources
 
@@ -174,10 +165,8 @@ process.
 
 ### External References
 
-- [Shape Up (Basecamp)](https://basecamp.com/shapeup) - Iterative product
-  development methodology
-- [Writing Good User Stories](https://www.mountaingoatsoftware.com/agile/user-stories)
-  - Mike Cohn's user story guidance
+- [Shape Up (Basecamp)](https://basecamp.com/shapeup) - Iterative development
+  methodology
 - [INVEST Criteria](<https://en.wikipedia.org/wiki/INVEST_(mnemonic)>) -
-  Qualities of good user stories (Independent, Negotiable, Valuable,
+  Qualities of good work items (Independent, Negotiable, Valuable,
   Estimable, Small, Testable)
