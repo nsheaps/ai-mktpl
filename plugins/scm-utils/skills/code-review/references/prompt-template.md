@@ -124,7 +124,8 @@ Questions you leave in past reviews may be answered in the PR body or comments. 
      - **P0 (Critical)**: Must be fixed in this PR before merge. Security vulnerabilities, data loss risks, breaking changes.
      - **P1 (Important)**: Should be fixed in this PR. Bugs, significant code quality issues, missing tests for critical paths.
      - **P2 (Nice-to-have)**: Can be addressed in a follow-up PR. Minor improvements, refactoring suggestions, documentation gaps.
-       All follow-ups MUST be listed — none should be silently dismissed. These MUST be explicitly called out in a dedicated section of your review summary (outside the details block).
+     
+     All follow-ups MUST be listed — none should be silently dismissed. These MUST be explicitly called out in a dedicated section of your review summary (outside the details block).
 9. **Hide your previous reviews** just before submitting your new review.
    CRITICAL: This ensures only your latest review is visible, preventing clutter and confusion.
    CRITICAL: Only hide YOUR OWN previous reviews, never reviews from other users.
