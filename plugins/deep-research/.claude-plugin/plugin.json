@@ -1,0 +1,13 @@
+{
+  "name": "deep-research",
+  "version": "0.2.0",
+  "description": "Multi-agent deep research system for complex investigations. Uses a lead-researcher orchestrator, parallel sub-researchers, and a critical-reviewer to produce evidence-based reports with confidence levels and citations.",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/deep-research",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": ["research", "investigation", "analysis", "synthesis", "agent", "multi-agent", "deep-research"]
+}
