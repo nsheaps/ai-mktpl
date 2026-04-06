@@ -86,7 +86,7 @@ payload="$(jq -n \
 )"
 
 # Best-effort send — never block the hook
-curl -s --max-time 10 -X POST "$api_url" \
+curl -s --max-time 5 -X POST "$api_url" \
   -H "Content-Type: application/json" \
   -d "$payload" \
   >/dev/null 2>&1 || true
