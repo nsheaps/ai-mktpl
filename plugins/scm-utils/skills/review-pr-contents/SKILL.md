@@ -13,15 +13,15 @@ Evaluate PR title, body, labels, and metadata for completeness and clarity.
 
 ## What to Evaluate
 
-| Dimension   | Check for                                                  |
-| ----------- | ---------------------------------------------------------- |
-| Title       | Under 70 chars, starts with verb, descriptive?             |
-| Summary     | Explains what changed and why?                             |
-| Test plan   | Includes verification steps?                               |
-| Links       | References related issues, specs, or discussions?          |
-| Labels      | Appropriate labels applied?                                |
-| Assignees   | Reviewer/assignee set?                                     |
-| Draft state | Draft if still in progress, ready if complete?             |
+| Dimension   | Check for                                         |
+| ----------- | ------------------------------------------------- |
+| Title       | Under 70 chars, starts with verb, descriptive?    |
+| Summary     | Explains what changed and why?                    |
+| Test plan   | Includes verification steps?                      |
+| Links       | References related issues, specs, or discussions? |
+| Labels      | Appropriate labels applied?                       |
+| Assignees   | Reviewer/assignee set?                            |
+| Draft state | Draft if still in progress, ready if complete?    |
 
 ## Process
 

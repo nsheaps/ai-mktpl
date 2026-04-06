@@ -13,13 +13,13 @@ Evaluate commit message quality for clarity, convention, and usefulness.
 
 ## What to Evaluate
 
-| Dimension   | Check for                                                    |
-| ----------- | ------------------------------------------------------------ |
-| Format      | Follows conventional commits or repo convention?             |
-| Subject     | Under 72 chars, imperative mood, no trailing period?         |
-| Body        | Explains "why" not just "what"? Wrapped at 72 chars?         |
-| References  | Links to issues/PRs where relevant?                          |
-| Consistency | All messages on the branch follow the same style?            |
+| Dimension   | Check for                                            |
+| ----------- | ---------------------------------------------------- |
+| Format      | Follows conventional commits or repo convention?     |
+| Subject     | Under 72 chars, imperative mood, no trailing period? |
+| Body        | Explains "why" not just "what"? Wrapped at 72 chars? |
+| References  | Links to issues/PRs where relevant?                  |
+| Consistency | All messages on the branch follow the same style?    |
 
 ## Process
 

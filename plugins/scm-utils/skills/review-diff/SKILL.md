@@ -13,13 +13,13 @@ Evaluate the diff against the base branch for scope, completeness, and coherence
 
 ## What to Evaluate
 
-| Dimension    | Check for                                                |
-| ------------ | -------------------------------------------------------- |
-| Scope        | Does the diff match the stated goal? No unrelated changes? |
-| Completeness | Are all necessary changes included? Nothing missing?     |
-| Coherence    | Do the changes form a logical whole?                     |
-| Reversibility| Could this be cleanly reverted if needed?                |
-| Side effects | Does the diff touch files it shouldn't?                  |
+| Dimension     | Check for                                                  |
+| ------------- | ---------------------------------------------------------- |
+| Scope         | Does the diff match the stated goal? No unrelated changes? |
+| Completeness  | Are all necessary changes included? Nothing missing?       |
+| Coherence     | Do the changes form a logical whole?                       |
+| Reversibility | Could this be cleanly reverted if needed?                  |
+| Side effects  | Does the diff touch files it shouldn't?                    |
 
 ## Process
 

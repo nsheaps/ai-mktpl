@@ -29,9 +29,9 @@ Address issues identified during a code review, working through findings systema
 
 ## Anti-Patterns
 
-| Bad                                    | Good                                       |
-| -------------------------------------- | ------------------------------------------ |
-| Fix everything in one huge commit      | Group fixes logically                      |
-| Add new features while fixing          | Fix only what was found                    |
-| Skip validation after fixing           | Re-run review to confirm resolution        |
-| Dismiss findings without addressing    | Address or explain why not applicable       |
+| Bad                                 | Good                                  |
+| ----------------------------------- | ------------------------------------- |
+| Fix everything in one huge commit   | Group fixes logically                 |
+| Add new features while fixing       | Fix only what was found               |
+| Skip validation after fixing        | Re-run review to confirm resolution   |
+| Dismiss findings without addressing | Address or explain why not applicable |

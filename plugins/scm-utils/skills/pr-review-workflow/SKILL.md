@@ -24,13 +24,13 @@ A complete PR review using all granular review skills in the correct sequence.
 
 ### Phase 2: Review (run in parallel where possible)
 
-| Step | Skill                              | What it covers                  |
-| ---- | ---------------------------------- | ------------------------------- |
-| 2a   | `scm-utils:review-code`           | Code quality, patterns, bugs    |
-| 2b   | `scm-utils:review-diff`           | Diff scope and completeness     |
-| 2c   | `scm-utils:review-commits`        | Commit structure and atomicity  |
-| 2d   | `scm-utils:review-commit-messages`| Commit message quality          |
-| 2e   | `scm-utils:review-pr-contents`    | PR title, body, metadata        |
+| Step | Skill                              | What it covers                 |
+| ---- | ---------------------------------- | ------------------------------ |
+| 2a   | `scm-utils:review-code`            | Code quality, patterns, bugs   |
+| 2b   | `scm-utils:review-diff`            | Diff scope and completeness    |
+| 2c   | `scm-utils:review-commits`         | Commit structure and atomicity |
+| 2d   | `scm-utils:review-commit-messages` | Commit message quality         |
+| 2e   | `scm-utils:review-pr-contents`     | PR title, body, metadata       |
 
 Steps 2a-2e can run in parallel as sub-agents.
 

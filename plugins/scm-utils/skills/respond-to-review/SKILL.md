@@ -33,9 +33,9 @@ Craft appropriate responses to review comments on a pull request.
 
 ## Anti-Patterns
 
-| Bad                              | Good                                        |
-| -------------------------------- | ------------------------------------------- |
-| "Done" with no context           | "Fixed in abc1234 -- moved the check to..." |
-| Ignoring comments                | Respond to every comment, even if briefly   |
-| Arguing without evidence         | Explain with code references or docs        |
-| Bulk "addressed all" response    | Respond to each thread individually         |
+| Bad                           | Good                                        |
+| ----------------------------- | ------------------------------------------- |
+| "Done" with no context        | "Fixed in abc1234 -- moved the check to..." |
+| Ignoring comments             | Respond to every comment, even if briefly   |
+| Arguing without evidence      | Explain with code references or docs        |
+| Bulk "addressed all" response | Respond to each thread individually         |

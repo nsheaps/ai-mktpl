@@ -38,6 +38,7 @@ Use collapsible `<details>/<summary>` with shields.io badges for scores:
 </details>
 
 **Follow-ups:**
+
 - [ ] Item that should be tracked separately
 ```
 

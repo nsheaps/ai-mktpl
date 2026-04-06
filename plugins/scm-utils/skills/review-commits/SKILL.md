@@ -13,13 +13,13 @@ Evaluate commit structure for atomicity, logical grouping, and clean history.
 
 ## What to Evaluate
 
-| Dimension    | Check for                                                  |
-| ------------ | ---------------------------------------------------------- |
-| Atomicity    | Does each commit do exactly one thing?                     |
-| Ordering     | Do commits build logically on each other?                  |
-| Grouping     | Are related changes in the same commit?                    |
-| Bisectability| Could `git bisect` find a bug introduced by one commit?    |
-| No fixups    | Are there "fix typo" or "oops" commits that should be squashed? |
+| Dimension     | Check for                                                       |
+| ------------- | --------------------------------------------------------------- |
+| Atomicity     | Does each commit do exactly one thing?                          |
+| Ordering      | Do commits build logically on each other?                       |
+| Grouping      | Are related changes in the same commit?                         |
+| Bisectability | Could `git bisect` find a bug introduced by one commit?         |
+| No fixups     | Are there "fix typo" or "oops" commits that should be squashed? |
 
 ## Process
 
