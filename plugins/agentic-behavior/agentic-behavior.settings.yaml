@@ -1,4 +1,4 @@
-brain:
+agentic-behavior:
   enabled: true
   # Path to a git repository for storing memory files
   # Leave empty to disable git-backed memory sync

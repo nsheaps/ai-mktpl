@@ -8,12 +8,15 @@
 
 set -euo pipefail
 
-PLUGIN_NAME="brain"
+PLUGIN_NAME="agentic-behavior"
+
+# shellcheck source=../../lib/hook-logging.sh
+source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 source "${CLAUDE_PLUGIN_ROOT}/lib/plugin-config-read.sh"
 
 # Check if plugin is enabled
 if ! plugin_is_enabled; then
-  echo '{}'
+  hook_respond
   exit 0
 fi
 
@@ -32,7 +35,7 @@ fi
 
 # Skip saving if no extractable prompt
 if [ -z "$prompt" ]; then
-  echo '{}'
+  hook_respond
   exit 0
 fi
 
@@ -66,16 +69,16 @@ echo "$entry" >> "$HISTORY_FILE"
 # Configurable via selfCheckReminder: "always" (default), "first", or "none"
 self_check="$(plugin_get_config "selfCheckReminder" "always")"
 
-if [ "$self_check" = "always" ] || { [ "$self_check" = "first" ] && [ ! -f "${HOME}/.claude/.brain-reminded-${CLAUDE_SESSION_ID:-default}" ]; }; then
+if [ "$self_check" = "always" ] || { [ "$self_check" = "first" ] && [ ! -f "${HOME}/.claude/.agentic-behavior-reminded-${CLAUDE_SESSION_ID:-default}" ]; }; then
   cat <<'REMINDER' >&2
 <system-reminder>Prompt saved to ~/.claude/history.jsonl. Don't forget to check your work against what the user asked for to ensure you're implementing the correct thing, both while you work, and an explicit reminder to yourself about the prompt before stop.</system-reminder>
 REMINDER
 
   # Mark that we've shown the reminder this session (for "first" mode)
   if [ "$self_check" = "first" ]; then
-    touch "${HOME}/.claude/.brain-reminded-${CLAUDE_SESSION_ID:-default}"
+    touch "${HOME}/.claude/.agentic-behavior-reminded-${CLAUDE_SESSION_ID:-default}"
   fi
 fi
 
 # Return empty JSON (informational hook, no blocking)
-echo '{}'
+hook_respond
