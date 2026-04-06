@@ -1,0 +1,13 @@
+{
+  "name": "playwright",
+  "version": "0.1.0",
+  "description": "Browser automation via the Playwright MCP server. Provides tools for navigating pages, clicking elements, filling forms, taking screenshots, and more.",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/playwright",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": ["playwright", "browser", "automation", "mcp", "testing", "screenshots"]
+}
