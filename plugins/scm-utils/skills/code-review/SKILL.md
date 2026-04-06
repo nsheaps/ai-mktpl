@@ -8,6 +8,8 @@ description: >
 argument-hint: [PR number | PR URL | branch name]
 ---
 
+**Note:** `scm-utils:automated-code-review` is the recommended skill for new review workflows. This skill is maintained for backward compatibility with Henry's CI review workflow.
+
 > **Note:** This skill covers CI-based automated review via `claude-code-action`. For manual/interactive code review scoring, see also `sdlc-utils:review`.
 
 # Code Review Bot — Claude Code Action
