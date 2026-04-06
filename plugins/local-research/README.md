@@ -1,6 +1,6 @@
 # Local Research Mode
 
-Replicates Claude.ai's Research mode locally using Claude Code's native subagent system. Implements the same multi-agent orchestrator-worker architecture described in [Anthropic's engineering blog](https://www.anthropic.com/engineering/multi-agent-research-system).
+Replicates Claude.ai's Research mode locally using Claude Code's native subagent system. Implements the same multi-agent orchestrator-worker architecture described in [Anthropic's engineering blog](https://www.anthropic.com/engineering/multi-agent-research-system), using the actual system prompts Anthropic published in their [anthropic-cookbook](https://github.com/anthropics/anthropic-cookbook/tree/main/patterns/agents/prompts) repository, adapted for Claude Code's Agent tool.
 
 ## Architecture
 
@@ -81,5 +81,7 @@ Based on research into Anthropic's architecture and existing open-source attempt
 ## References
 
 - [How we built our multi-agent research system](https://www.anthropic.com/engineering/multi-agent-research-system) - Anthropic Engineering
+- [Research agent prompts (anthropic-cookbook)](https://github.com/anthropics/anthropic-cookbook/tree/main/patterns/agents/prompts) - Actual system prompts
 - [Simon Willison's analysis](https://simonwillison.net/2025/Jun/14/multi-agent-research-system/)
 - [Using Research on Claude](https://support.claude.com/en/articles/11088861-using-research-on-claude) - Claude Help Center
+- [Claude Code subagent docs](https://code.claude.com/docs/en/sub-agents) - Subagent configuration reference

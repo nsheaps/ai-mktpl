@@ -123,5 +123,6 @@ simple queries while being thorough on complex ones.
 ## References
 
 - [How we built our multi-agent research system](https://www.anthropic.com/engineering/multi-agent-research-system) - Anthropic Engineering
+- [Research agent prompts (anthropic-cookbook)](https://github.com/anthropics/anthropic-cookbook/tree/main/patterns/agents/prompts) - Actual system prompts published by Anthropic
 - [Simon Willison's analysis](https://simonwillison.net/2025/Jun/14/multi-agent-research-system/)
 - [Using Research on Claude](https://support.claude.com/en/articles/11088861-using-research-on-claude) - Claude Help Center
