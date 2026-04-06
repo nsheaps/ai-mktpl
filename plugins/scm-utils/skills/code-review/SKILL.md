@@ -26,12 +26,12 @@ argument-hint: [PR number | PR URL | branch name]
 
 ## Related Skills
 
-| Skill | Relationship |
-|-------|-------------|
+| Skill                          | Relationship                                                             |
+| ------------------------------ | ------------------------------------------------------------------------ |
 | `scm-utils:iterate-until-good` | Uses code-review as one step in a multi-category scoring loop with fixes |
-| `fix-pr:relentlessly-fix` | Acts on review feedback; code-review produces the feedback |
-| `scm-utils:making-great-prs` | PR formatting; code-review evaluates code quality, not PR structure |
-| `scm-utils:fix-pr` | PR description fixer; code-review reviews code, not PR metadata |
+| `fix-pr:relentlessly-fix`      | Acts on review feedback; code-review produces the feedback               |
+| `scm-utils:making-great-prs`   | PR formatting; code-review evaluates code quality, not PR structure      |
+| `scm-utils:fix-pr`             | PR description fixer; code-review reviews code, not PR metadata          |
 
 ---
 

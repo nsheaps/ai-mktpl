@@ -26,12 +26,12 @@ allowed-tools: Bash, Read, Grep, Glob
 
 ## Related Skills
 
-| Skill | Relationship |
-|-------|-------------|
-| `scm-utils:fix-pr` | Uses making-great-prs standards to evaluate and fix an existing PR's description |
-| `scm-utils:code-review` | Reviews code quality; making-great-prs covers PR structure/formatting |
+| Skill                          | Relationship                                                                        |
+| ------------------------------ | ----------------------------------------------------------------------------------- |
+| `scm-utils:fix-pr`             | Uses making-great-prs standards to evaluate and fix an existing PR's description    |
+| `scm-utils:code-review`        | Reviews code quality; making-great-prs covers PR structure/formatting               |
 | `scm-utils:iterate-until-good` | Quality gate for code; making-great-prs is the formatting reference for PR metadata |
-| `fix-pr:relentlessly-fix` | Reactive CI/review fixer; making-great-prs is the creation/formatting guide |
+| `fix-pr:relentlessly-fix`      | Reactive CI/review fixer; making-great-prs is the creation/formatting guide         |
 
 ---
 

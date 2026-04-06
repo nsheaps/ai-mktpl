@@ -23,12 +23,12 @@ allowed-tools: Bash, Read, Grep, Glob
 
 ## Related Skills
 
-| Skill | Relationship |
-|-------|-------------|
-| `scm-utils:making-great-prs` | The standards this skill evaluates against; use making-great-prs for creation, fix-pr for correction |
-| `scm-utils:code-review` | Reviews code; fix-pr fixes PR metadata only |
-| `scm-utils:iterate-until-good` | Quality gate for code; fix-pr is for PR description only |
-| `fix-pr:relentlessly-fix` | Reactive CI/review fixer; fix-pr only touches the PR title and body |
+| Skill                          | Relationship                                                                                         |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| `scm-utils:making-great-prs`   | The standards this skill evaluates against; use making-great-prs for creation, fix-pr for correction |
+| `scm-utils:code-review`        | Reviews code; fix-pr fixes PR metadata only                                                          |
+| `scm-utils:iterate-until-good` | Quality gate for code; fix-pr is for PR description only                                             |
+| `fix-pr:relentlessly-fix`      | Reactive CI/review fixer; fix-pr only touches the PR title and body                                  |
 
 ---
 

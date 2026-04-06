@@ -25,12 +25,12 @@ argument-hint: "[the requested iteration target, like a branch, PR, repo, notion
 
 ## Related Skills
 
-| Skill | Relationship |
-|-------|-------------|
-| `scm-utils:code-review` | Single-pass review; iterate-until-good uses review as one step in its loop |
-| `fix-pr:relentlessly-fix` | Reactive fix loop for CI/feedback; iterate-until-good is the proactive quality gate |
-| `scm-utils:making-great-prs` | PR formatting reference; iterate-until-good covers code quality, not PR formatting |
-| `scm-utils:fix-pr` | PR description fixer; iterate-until-good covers code, not PR metadata |
+| Skill                        | Relationship                                                                        |
+| ---------------------------- | ----------------------------------------------------------------------------------- |
+| `scm-utils:code-review`      | Single-pass review; iterate-until-good uses review as one step in its loop          |
+| `fix-pr:relentlessly-fix`    | Reactive fix loop for CI/feedback; iterate-until-good is the proactive quality gate |
+| `scm-utils:making-great-prs` | PR formatting reference; iterate-until-good covers code quality, not PR formatting  |
+| `scm-utils:fix-pr`           | PR description fixer; iterate-until-good covers code, not PR metadata               |
 
 ---
 
