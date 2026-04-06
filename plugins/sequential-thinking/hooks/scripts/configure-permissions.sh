@@ -24,6 +24,7 @@ source "${CLAUDE_PLUGIN_ROOT}/lib/add-permission.sh"
 source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 
 SYNC_SETTINGS_TARGET="$(plugin_get_config "syncSettingsTarget" "local")"
+SETTINGS_FILE="$(_resolve_settings_file "$SYNC_SETTINGS_TARGET")"
 
 hook_log_step "add-permission" "Adding sequential-thinking MCP permissions"
 

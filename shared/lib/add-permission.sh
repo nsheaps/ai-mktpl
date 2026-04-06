@@ -36,14 +36,22 @@ _resolve_settings_file() {
       echo "$HOME/.claude/settings.local.json"
       ;;
     shared)
-      echo "${CLAUDE_PROJECT_DIR:-.}/.claude/settings.json"
+      if [ -z "${CLAUDE_PROJECT_DIR:-}" ]; then
+        echo "add-permission: CLAUDE_PROJECT_DIR is not set; cannot resolve 'shared' target" >&2
+        return 1
+      fi
+      echo "${CLAUDE_PROJECT_DIR}/.claude/settings.json"
       ;;
-    project|local|*)
+    project|local)
       if [ -n "${CLAUDE_PROJECT_DIR:-}" ]; then
         echo "${CLAUDE_PROJECT_DIR}/.claude/settings.local.json"
       else
         echo "$HOME/.claude/settings.local.json"
       fi
+      ;;
+    *)
+      echo "add-permission: unknown target '$target' (expected: project, local, user, shared)" >&2
+      return 1
       ;;
   esac
 }
