@@ -485,6 +485,18 @@
       ]
     },
     {
+      "name": "playwright",
+      "description": "Browser automation via the Playwright MCP server. Provides tools for navigating pages, clicking elements, filling forms, taking screenshots, and more.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/playwright",
+      "category": "utility",
+      "tags": ["utility"],
+      "keywords": ["playwright", "browser", "automation", "mcp", "testing", "screenshots"]
+    },
+    {
       "name": "plugin-management",
       "description": "Skill for installing, updating, and managing Claude Code plugins — including what requires a restart and what hot-reloads.",
       "version": "0.1.3",
