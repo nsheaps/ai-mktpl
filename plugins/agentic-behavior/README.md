@@ -20,9 +20,9 @@ Detects time-referencing language in prompts and investigates history before ans
 
 Git-backed memory and prompt tracking with self-checking reminders (see `skills/brain/SKILL.md`).
 
-### /configuring-claude-code
+### /issue-management
 
-Guide for configuring Claude Code across local CLI, CI actions, and Claude Code Web — including plugin management (see `skills/configuring-claude-code/SKILL.md`).
+Create, search, update, and link tickets across ticketing systems with a strong deduplication-first workflow. Always checks for existing issues before creating new ones (see `skills/issue-management/SKILL.md`).
 
 ## Rules
 
@@ -122,4 +122,4 @@ agentic-behavior:
 
 - `jq` (for JSON processing in hook scripts)
 - `git` (for memory sync)
-- Shared library: `plugin-config-read.sh`
+- Shared library: `hook-logging.sh`, `plugin-config-read.sh`

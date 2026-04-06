@@ -61,7 +61,11 @@
         "time-context",
         "claude-code",
         "autonomy",
-        "rules"
+        "rules",
+        "issue-management",
+        "task-tracking",
+        "deduplication",
+        "github-issues"
       ]
     },
     {
@@ -86,6 +90,18 @@
         "self-hosted",
         "homelab"
       ]
+    },
+    {
+      "name": "brain",
+      "description": "Git-backed memory and prompt tracking. Auto-saves prompts to history, syncs memory files to a configurable git repo, and provides self-checking reminders inspired by the Serena MCP Ralph loop pattern.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/brain",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": ["memory", "history", "git", "brain", "prompt-tracking", "self-check"]
     },
     {
       "name": "cloudflare",
@@ -320,7 +336,7 @@
     {
       "name": "github-app",
       "description": "Automatic GitHub App token lifecycle for Claude Code sessions. Generates installation tokens on session start, monitors expiry via PreToolUse hook, and refreshes transparently before commands that need authentication.",
-      "version": "0.1.11",
+      "version": "0.1.12",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -592,7 +608,7 @@
     {
       "name": "self-terminate",
       "description": "Allows Claude to gracefully terminate itself using SIGINT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -642,7 +658,7 @@
     {
       "name": "skill-required",
       "description": "Enforces that specified skills are loaded before certain tools can be used. Tracks skill reads via PostToolUse and blocks tool use via PreToolUse if the required skill hasn't been recently loaded.",
-      "version": "0.1.3",
+      "version": "0.1.4",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -698,27 +714,6 @@
       ]
     },
     {
-      "name": "sync-settings",
-      "description": "Automatically sync and merge local Claude Code settings, commands, and files using configurable rules in syncconfig.yaml",
-      "version": "0.2.26",
-      "author": {
-        "name": "Nathan Heaps"
-      },
-      "source": "./plugins/sync-settings",
-      "category": "utility",
-      "tags": ["utility"],
-      "keywords": [
-        "sync",
-        "settings",
-        "merge",
-        "json",
-        "symlink",
-        "hooks",
-        "configuration",
-        "local-settings"
-      ]
-    },
-    {
       "name": "task-parallelization",
       "description": "Intelligent skill that helps Claude parallelize Task tool calls when working on repetitive or batch operations, optimizing throughput based on task complexity",
       "version": "0.2.25",
@@ -753,7 +748,7 @@
     {
       "name": "todo-plus-plus",
       "description": "Enforces commit-on-complete for tasks and reminds about ephemeral session awareness",
-      "version": "0.1.4",
+      "version": "0.1.5",
       "author": {
         "name": "Nathan Heaps"
       },

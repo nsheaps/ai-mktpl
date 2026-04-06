@@ -5,20 +5,12 @@
 # rules/ directory, making all rules available as Claude Code context.
 set -euo pipefail
 
+PLUGIN_NAME="agentic-behavior"
 PLUGIN_RULES_DIR="${CLAUDE_PLUGIN_ROOT}/rules"
 LINK_NAME="agentic-behavior"
 
-# Resolve lib path relative to plugin root (sibling of hooks/)
-PLUGIN_LIB_DIR="${CLAUDE_PLUGIN_ROOT}/lib"
-
-# Fall back to common-sense lib if no local lib (shared infrastructure)
-if [ ! -f "${PLUGIN_LIB_DIR}/hook-logging.sh" ]; then
-  CS_PLUGIN_ROOT="$(dirname "${CLAUDE_PLUGIN_ROOT}")/common-sense"
-  PLUGIN_LIB_DIR="${CS_PLUGIN_ROOT}/lib"
-fi
-
 # shellcheck source=../../lib/hook-logging.sh
-source "${PLUGIN_LIB_DIR}/hook-logging.sh"
+source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 
 # --- Determine target directory ---
 
@@ -39,7 +31,8 @@ fi
 if ! ln -s "$PLUGIN_RULES_DIR" "$link_path"; then
   hook_fail "symlink creation" "Failed to create symlink ${link_path} -> ${PLUGIN_RULES_DIR}" \
     "Check directory permissions for ${PROJECT_RULES_DIR}"
-  exit 1
+  hook_respond
+  exit 0
 fi
 
 hook_log "linked ${link_path} -> ${PLUGIN_RULES_DIR}"

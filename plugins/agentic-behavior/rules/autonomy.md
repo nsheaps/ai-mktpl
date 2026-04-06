@@ -14,7 +14,7 @@
 <!-- handler feedback #46 -->
 
 - When facing a design decision, research and narrow to a single recommendation with reasoning
-- Format: "I recommend X because Y. Alternatives don't work because Z. Spinach I see: W."
+- Format: "I recommend X because Y. Alternatives don't work because Z. Risks I see: W."
 - Do NOT present "here are 5 options, pick one" — that offloads your job to the handler
 - If you lack enough info to recommend, research more before presenting anything
 

@@ -4,17 +4,10 @@
 # Warns if recommended companion plugins are not available.
 set -euo pipefail
 
-# Resolve lib path relative to plugin root (sibling of hooks/)
-PLUGIN_LIB_DIR="${CLAUDE_PLUGIN_ROOT}/lib"
-
-# Fall back to common-sense lib if no local lib (shared infrastructure)
-if [ ! -f "${PLUGIN_LIB_DIR}/hook-logging.sh" ]; then
-  CS_PLUGIN_ROOT="$(dirname "${CLAUDE_PLUGIN_ROOT}")/common-sense"
-  PLUGIN_LIB_DIR="${CS_PLUGIN_ROOT}/lib"
-fi
+PLUGIN_NAME="agentic-behavior"
 
 # shellcheck source=../../lib/hook-logging.sh
-source "${PLUGIN_LIB_DIR}/hook-logging.sh"
+source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 
 # Check if issue-management plugin is available by looking for its cache directory
 PLUGINS_CACHE="${HOME}/.claude/plugins/cache"
