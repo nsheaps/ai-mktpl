@@ -1,5 +1,5 @@
 {
-  "description": "Agentic behavior hooks: saves prompts to history on submit, syncs rules via symlink, auto-syncs memory to git repo on session start and task completion",
+  "description": "Agentic behavior hooks: saves prompts to history on submit, syncs rules via symlink, auto-syncs memory to git repo on session start and task completion, sends configurable notifications",
   "hooks": {
     "UserPromptSubmit": [
       {
@@ -38,6 +38,18 @@
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/sync-memory.sh",
             "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "CronCreate|CronDelete",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/notify-cron.sh",
+            "timeout": 10
           }
         ]
       }
