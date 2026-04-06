@@ -44,7 +44,7 @@
     {
       "name": "agentic-behavior",
       "description": "Skills for configuring Claude Code, behavior correction, memory tracking, autonomy rules, and time-context awareness. Combines prompt history tracking, git-backed memory sync, and the self-checking Ralph loop pattern.",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -90,18 +90,6 @@
         "self-hosted",
         "homelab"
       ]
-    },
-    {
-      "name": "brain",
-      "description": "Git-backed memory and prompt tracking. Auto-saves prompts to history, syncs memory files to a configurable git repo, and provides self-checking reminders inspired by the Serena MCP Ralph loop pattern.",
-      "version": "0.1.0",
-      "author": {
-        "name": "Nathan Heaps"
-      },
-      "source": "./plugins/brain",
-      "category": "utility",
-      "tags": ["utility", "skill"],
-      "keywords": ["memory", "history", "git", "brain", "prompt-tracking", "self-check"]
     },
     {
       "name": "cloudflare",
