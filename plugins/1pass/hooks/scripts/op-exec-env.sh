@@ -47,12 +47,9 @@ if ! command -v op &>/dev/null; then
   exit 0
 fi
 
-if ! op account list &>/dev/null; then
-  hook_fail "op auth" "Not signed in to 1Password" \
-    "Set OP_SERVICE_ACCOUNT_TOKEN or run 'op signin'"
-  hook_respond
-  exit 0
-fi
+# Auth check removed — op-exec already validates auth and provides clear errors.
+# Duplicating the check here violates DRY and was using the wrong command
+# (op account list) which doesn't work with service account tokens.
 
 # --- Target helpers ---
 
