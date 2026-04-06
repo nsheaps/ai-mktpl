@@ -102,11 +102,11 @@ Re-run automated-code-review
 
 ## Review Verdicts
 
-| Verdict           | When                                                     |
-| ----------------- | -------------------------------------------------------- |
-| `APPROVE`         | No outstanding issues, ready to merge                    |
-| `COMMENT`         | Suggestions but not blocking (won't break if merged)     |
-| `REQUEST_CHANGES` | Must fix before merge (security, correctness, breaking)  |
+| Verdict           | When                                                    |
+| ----------------- | ------------------------------------------------------- |
+| `APPROVE`         | No outstanding issues, ready to merge                   |
+| `COMMENT`         | Suggestions but not blocking (won't break if merged)    |
+| `REQUEST_CHANGES` | Must fix before merge (security, correctness, breaking) |
 
 ## When to Use This Skill
 
