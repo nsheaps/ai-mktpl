@@ -242,8 +242,16 @@
       },
       "source": "./plugins/deep-research",
       "category": "utility",
-      "tags": ["utility", "skill", "agent"],
-      "keywords": ["research", "investigation", "analysis", "synthesis", "agent", "multi-agent", "deep-research"]
+      "tags": ["utility", "skill"],
+      "keywords": [
+        "research",
+        "investigation",
+        "analysis",
+        "synthesis",
+        "agent",
+        "multi-agent",
+        "deep-research"
+      ]
     },
     {
       "name": "edit-utils",

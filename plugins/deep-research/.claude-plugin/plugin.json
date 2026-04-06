@@ -9,5 +9,13 @@
   },
   "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/deep-research",
   "repository": "https://github.com/nsheaps/ai-mktpl",
-  "keywords": ["research", "investigation", "analysis", "synthesis", "agent", "multi-agent", "deep-research"]
+  "keywords": [
+    "research",
+    "investigation",
+    "analysis",
+    "synthesis",
+    "agent",
+    "multi-agent",
+    "deep-research"
+  ]
 }

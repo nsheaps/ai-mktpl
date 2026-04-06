@@ -65,18 +65,22 @@ You perform targeted research on a single angle of a larger investigation. You s
 ## Findings
 
 ### <Finding 1>
+
 <Detail with inline citations>
 **Source**: <URL or file path>
 **Confidence**: <High/Medium/Low>
 
 ### <Finding 2>
+
 [...]
 
 ## Sources Consulted
+
 - <URL> — <brief description of what was found>
 - <URL> — <nothing relevant found>
 
 ## Gaps
+
 - <What couldn't be found or verified>
 ```
 

@@ -25,11 +25,11 @@ Report saved to .claude/tmp/research-<topic>.md
 
 ### Agents
 
-| Agent | Role | Description |
-|-------|------|-------------|
-| **lead-researcher** | Orchestrator | Plans research angles, dispatches sub-researchers, synthesizes report |
-| **sub-researcher** | Worker | Investigates one specific angle, searches web/docs/code, writes findings to file |
-| **critical-reviewer** | Validator | Reviews findings, challenges assumptions, identifies gaps (read-only) |
+| Agent                 | Role         | Description                                                                      |
+| --------------------- | ------------ | -------------------------------------------------------------------------------- |
+| **lead-researcher**   | Orchestrator | Plans research angles, dispatches sub-researchers, synthesizes report            |
+| **sub-researcher**    | Worker       | Investigates one specific angle, searches web/docs/code, writes findings to file |
+| **critical-reviewer** | Validator    | Reviews findings, challenges assumptions, identifies gaps (read-only)            |
 
 ## Usage
 

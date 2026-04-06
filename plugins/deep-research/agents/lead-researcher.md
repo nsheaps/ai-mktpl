@@ -127,6 +127,7 @@ Save every report to `.claude/tmp/research-<topic>.md` with this structure:
 **Sources**: <sub-researcher file, URLs>
 
 ### 2. <Finding Title>
+
 [...]
 
 ## Critical Review Notes
@@ -148,13 +149,13 @@ Save every report to `.claude/tmp/research-<topic>.md` with this structure:
 
 ## Confidence Level Framework
 
-| Level | Meaning | Evidence Required |
-|:------|:--------|:------------------|
-| **Very High** | Confirmed from source code or official specs | Primary source + verified |
-| **High** | Multiple independent sources agree | 3+ sources or official docs + community confirmation |
-| **Medium-High** | Strong evidence with some inference | 2 sources agree + logical reasoning |
-| **Medium** | Plausible with supporting evidence | 1 source + consistent with observed behavior |
-| **Low** | Hypothesis based on limited evidence | Inference from related findings only |
+| Level           | Meaning                                      | Evidence Required                                    |
+| :-------------- | :------------------------------------------- | :--------------------------------------------------- |
+| **Very High**   | Confirmed from source code or official specs | Primary source + verified                            |
+| **High**        | Multiple independent sources agree           | 3+ sources or official docs + community confirmation |
+| **Medium-High** | Strong evidence with some inference          | 2 sources agree + logical reasoning                  |
+| **Medium**      | Plausible with supporting evidence           | 1 source + consistent with observed behavior         |
+| **Low**         | Hypothesis based on limited evidence         | Inference from related findings only                 |
 
 ## Delivering Results
 

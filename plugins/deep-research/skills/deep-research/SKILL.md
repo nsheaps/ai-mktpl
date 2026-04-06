@@ -45,11 +45,11 @@ Report saved to .claude/tmp/research-<topic>.md
 
 ### Agents
 
-| Agent | Role | Tools | Restrictions |
-|-------|------|-------|-------------|
-| **lead-researcher** | Orchestrator -- plans angles, dispatches workers, synthesizes report | Read, Write, Grep, Glob, Agent | No web search (delegates to sub-researchers) |
-| **sub-researcher** | Worker -- investigates one specific angle, writes findings to file | Read, Write, Grep, Glob, WebSearch, WebFetch | No Edit (shouldn't modify existing files) |
-| **critical-reviewer** | Validator -- challenges assumptions, identifies gaps, suggests follow-up | Read, Grep, Glob, WebSearch, WebFetch | No Edit, no Write (read-only reviewer) |
+| Agent                 | Role                                                                     | Tools                                        | Restrictions                                 |
+| --------------------- | ------------------------------------------------------------------------ | -------------------------------------------- | -------------------------------------------- |
+| **lead-researcher**   | Orchestrator -- plans angles, dispatches workers, synthesizes report     | Read, Write, Grep, Glob, Agent               | No web search (delegates to sub-researchers) |
+| **sub-researcher**    | Worker -- investigates one specific angle, writes findings to file       | Read, Write, Grep, Glob, WebSearch, WebFetch | No Edit (shouldn't modify existing files)    |
+| **critical-reviewer** | Validator -- challenges assumptions, identifies gaps, suggests follow-up | Read, Grep, Glob, WebSearch, WebFetch        | No Edit, no Write (read-only reviewer)       |
 
 ## How to Invoke
 
@@ -60,6 +60,7 @@ Agent(lead-researcher, "Investigate how Claude Code spawns teammates -- check so
 ```
 
 The lead-researcher will autonomously:
+
 1. Plan research angles
 2. Dispatch sub-researchers for each angle
 3. Collect and cross-reference findings
@@ -68,14 +69,14 @@ The lead-researcher will autonomously:
 
 ## When to Use Deep Research vs Simple Lookups
 
-| Situation | Use |
-|-----------|-----|
-| "What flag enables X?" | Direct answer -- no agent needed |
-| "How does X work internally?" | lead-researcher -- multi-source investigation |
-| "Compare X vs Y vs Z for our use case" | lead-researcher -- parallel sub-researchers per option |
-| "Find the file that does X" | Grep/Glob -- no agent needed |
-| "Why does X behave differently than documented?" | lead-researcher -- needs source + docs + issues |
-| "What's the best practice for X?" | Context7 or WebSearch -- single source usually sufficient |
+| Situation                                        | Use                                                       |
+| ------------------------------------------------ | --------------------------------------------------------- |
+| "What flag enables X?"                           | Direct answer -- no agent needed                          |
+| "How does X work internally?"                    | lead-researcher -- multi-source investigation             |
+| "Compare X vs Y vs Z for our use case"           | lead-researcher -- parallel sub-researchers per option    |
+| "Find the file that does X"                      | Grep/Glob -- no agent needed                              |
+| "Why does X behave differently than documented?" | lead-researcher -- needs source + docs + issues           |
+| "What's the best practice for X?"                | Context7 or WebSearch -- single source usually sufficient |
 
 ## Output Format
 
@@ -90,13 +91,13 @@ Reports are saved to `.claude/tmp/research-<topic>.md` with:
 
 ## Confidence Level Framework
 
-| Level | Meaning | Evidence Required |
-|:------|:--------|:------------------|
-| **Very High** | Confirmed from source code or official specs | Primary source + verified |
-| **High** | Multiple independent sources agree | 3+ sources or official docs + community |
-| **Medium-High** | Strong evidence with some inference | 2 sources + logical reasoning |
-| **Medium** | Plausible with supporting evidence | 1 source + consistent behavior |
-| **Low** | Hypothesis based on limited evidence | Inference only |
+| Level           | Meaning                                      | Evidence Required                       |
+| :-------------- | :------------------------------------------- | :-------------------------------------- |
+| **Very High**   | Confirmed from source code or official specs | Primary source + verified               |
+| **High**        | Multiple independent sources agree           | 3+ sources or official docs + community |
+| **Medium-High** | Strong evidence with some inference          | 2 sources + logical reasoning           |
+| **Medium**      | Plausible with supporting evidence           | 1 source + consistent behavior          |
+| **Low**         | Hypothesis based on limited evidence         | Inference only                          |
 
 ## Tips
 
