@@ -50,7 +50,7 @@ The seed exists to anchor all future iteration.
 ### Phase 2: First Draft (Skeleton)
 
 Expand the seed into a skeleton spec using the template structure in
-`references/spec-template.md`. Fill in only what is known with confidence.
+`../spec-writing/references/spec-template.md`. Fill in only what is known with confidence.
 Mark unknowns explicitly with `[TBD]` or `[NEEDS RESEARCH]`.
 
 Key sections to draft first:
@@ -159,9 +159,9 @@ while maintaining the iterative process.
 
 ### Reference Files
 
-- **`references/spec-template.md`** - Complete spec template with all sections
-  and guidance for filling each one. Copy this as a starting point for new
-  specs.
+- **`../spec-writing/references/spec-template.md`** - Complete spec template
+  with all sections and guidance for filling each one. Copy this as a starting
+  point for new specs.
 
 ### External References
 

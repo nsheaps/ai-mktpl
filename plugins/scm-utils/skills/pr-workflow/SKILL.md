@@ -9,12 +9,12 @@ allowed-tools: Bash, Read, Grep, Glob
 
 # PR Workflow
 
-End-to-end PR lifecycle from creation to merge. See also: `making-great-prs`, `pr-feedback`.
+End-to-end PR lifecycle from creation to merge. See also: `request-a-review`, `pr-feedback`.
 
 ## 1. Create
 
 - Open as **draft** PR, assign handler, add `request-review` label for CI review bot
-- See `making-great-prs` skill for PR body format and `gh api` commands
+- See `request-a-review` skill for PR body format and `gh api` commands
 
 ## 2. Review Arrives
 

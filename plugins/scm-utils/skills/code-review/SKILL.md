@@ -1,7 +1,6 @@
 ---
 name: code-review
 description: >
-  DEPRECATED: This skill is moving to the sdlc-utils plugin. Use the sdlc-utils:review skill instead.
   Code review a pull request. Triggers on "review this PR", "code review",
   "review PR #123", "request a review", "review bot", "code review CI",
   "automated PR review", "claude review workflow", or when the user wants to
@@ -9,9 +8,7 @@ description: >
 argument-hint: [PR number | PR URL | branch name]
 ---
 
-> **DEPRECATED:** This skill is moving to the sdlc-utils plugin. Use the `/sdlc-utils:review` skill instead.
->
-> **Note:** This skill will be the basis for Henry's QA role (CI-based automated review bot). Keep as-is for now.
+> **Note:** This skill covers CI-based automated review via `claude-code-action`. For manual/interactive code review scoring, see also `sdlc-utils:review`.
 
 # Code Review Bot — Claude Code Action
 

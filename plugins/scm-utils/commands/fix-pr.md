@@ -1,17 +1,13 @@
 ---
 name: fix-pr
-description: >
-  DEPRECATED: This skill is moving to the sdlc-utils plugin. Use the sdlc-utils:review skill instead.
-  Fix or update the PR description for the current branch to follow best practices.
+description: Fix or update the PR description for the current branch to follow best practices
 argument-hint: "[optional: PR number or URL]"
 allowed-tools: Bash, Read, Grep, Glob
 ---
 
-> **DEPRECATED:** This skill is moving to the sdlc-utils plugin. Use the `/sdlc-utils:review` skill instead.
-
 # Fix PR Description
 
-Review and fix the pull request description for the current branch, ensuring it follows the formatting and content standards from the `making-great-prs` skill.
+Review and fix the pull request description for the current branch, ensuring it follows the formatting and content standards from the `request-a-review` skill.
 
 ## Pre-fetched Context
 
@@ -34,7 +30,7 @@ Fetch the current PR details (title, body, commits, changed files) so you unders
 
 ## Step 3: Evaluate and Fix
 
-Check the PR against these standards (from the `making-great-prs` skill):
+Check the PR against these standards (from the `request-a-review` skill):
 
 ### Title
 
