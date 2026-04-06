@@ -162,6 +162,9 @@ while maintaining the iterative process.
 - **`../spec-writing/references/spec-template.md`** - Complete spec template
   with all sections and guidance for filling each one. Copy this as a starting
   point for new specs.
+- **`../../schemas/spec-frontmatter.yaml`** - Formal schema defining required
+  and optional frontmatter fields for spec files. Consult this when creating or
+  validating spec frontmatter.
 
 ### External References
 

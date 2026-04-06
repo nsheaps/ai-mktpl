@@ -158,6 +158,43 @@ use), or `archive` when completely removed
 - Marked clearly as archived/historical
 - May be referenced if that feature is ever reconsidered
 
+## Frontmatter Schema
+
+Every spec file must include YAML frontmatter. The formal schema is defined in
+`schemas/spec-frontmatter.yaml` (relative to the sdlc-utils plugin root).
+
+### Required Fields
+
+| Field    | Type   | Description                                                        |
+| -------- | ------ | ------------------------------------------------------------------ |
+| `name`   | string | Unique identifier for the spec (kebab-case)                        |
+| `status` | string | Lifecycle stage: draft, reviewed, in-progress, live, deprecated, archive |
+
+### Optional Fields
+
+| Field         | Type     | Description                                              |
+| ------------- | -------- | -------------------------------------------------------- |
+| `description` | string   | One-line summary of what the spec covers                 |
+| `parent`      | string   | Name of parent spec (for child specs)                    |
+| `related`     | string[] | Names of related specs to consider together              |
+| `owner`       | string   | Who is responsible for this spec                         |
+| `created`     | date     | When the spec was first created                          |
+| `updated`     | date     | When the spec was last updated                           |
+| `tags`        | string[] | Categorization tags                                      |
+
+### Validating Frontmatter
+
+When creating or reviewing a spec, verify that:
+
+1. **Required fields are present** — `name` and `status` must exist
+2. **`name` is kebab-case** — e.g., `user-authentication`, not `User Authentication`
+3. **`status` is a valid enum value** — one of: draft, reviewed, in-progress, live,
+   deprecated, archive
+4. **Dates use ISO 8601 format** — `YYYY-MM-DD` (e.g., `2026-04-06`)
+5. **`parent` references an existing spec** — if set, the named spec should exist
+6. **`related` entries reference existing specs** — each name should correspond to
+   a real spec file
+
 ## Creating a Specification
 
 ### Structure and Format
