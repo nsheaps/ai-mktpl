@@ -1,0 +1,20 @@
+{
+  "name": "local-research",
+  "version": "0.1.0",
+  "description": "Replicates Claude.ai's Research mode locally using a multi-agent orchestrator-worker pattern. A LeadResearcher agent plans and coordinates parallel search subagents, then a CitationAgent verifies and formats sources.",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/local-research",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": [
+    "research",
+    "multi-agent",
+    "web-search",
+    "deep-research",
+    "orchestrator",
+    "citations"
+  ]
+}
