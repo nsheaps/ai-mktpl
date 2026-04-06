@@ -1,12 +1,12 @@
 ---
 name: iterate-until-good
 description: >
-  DEPRECATED: This skill is moving to the sdlc-utils plugin. Use the sdlc-utils:review skill instead.
+  DEPRECATED: Moved to sdlc-utils. Use sdlc-utils:iterate-until-good instead.
   Evaluates code on a PR or branch across many categories, scores each, and iterates until > 85%.
 argument-hint: "[the requested iteration target, like a branch, PR, repo, notion doc, etc]"
 ---
 
-> **DEPRECATED:** This skill is moving to the sdlc-utils plugin. Use the `/sdlc-utils:review` skill instead.
+> **DEPRECATED:** Moved to sdlc-utils. Use `/sdlc-utils:iterate-until-good` instead.
 
 The process below outlines how to review something in many categories. For the user's requested target (like a branch, PR, repo, notion doc, etc), please run this review process in parallel across all categories, and then iterate on the target until it scores >85% in each category. If any category is below 70%, that is a hard block that must be addressed before merging or shipping.
 
