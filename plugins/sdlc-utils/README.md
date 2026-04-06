@@ -46,6 +46,20 @@ refactoring strategy, and dependency management.
 
 **Triggers:** "bug fix", "tech debt", "refactoring", "maintenance"
 
+### iterate-until-good
+
+Evaluates code across many categories, scores each 0-100, and iterates until
+all categories score > 85%. Uses scm-utils review skills for the review portion.
+
+**Triggers:** "iterate until good", "score this code", "review and fix loop"
+
+### spec-writing
+
+Specification writing and lifecycle management. Covers creating specs, managing
+the spec lifecycle (draft -> live -> archive), and using specs for verification.
+
+**Triggers:** "write a spec", "manage spec lifecycle", "spec template", "update a spec"
+
 ## Installation
 
 Install via the nsheaps-claude-plugins marketplace:

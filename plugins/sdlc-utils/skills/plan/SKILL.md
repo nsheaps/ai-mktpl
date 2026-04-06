@@ -12,6 +12,12 @@ description: >
 
 # Planning and Requirements
 
+> **See also:** `sdlc-utils:spec-writing` covers spec lifecycle management
+> (moving specs through draft -> reviewed -> live -> archive states, updating
+> specs during implementation, and verifying implementation against specs).
+> Use `plan` when starting from scratch or iterating on requirements; use
+> `spec-writing` when managing an existing spec through its lifecycle.
+
 Write technical specifications through iterative refinement. Each spec is a
 combined document covering both _Problem & Requirements_ (what and why) and
 _Technical Design_ (how). Never attempt to produce a complete specification in
