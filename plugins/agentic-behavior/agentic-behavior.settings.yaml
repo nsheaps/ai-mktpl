@@ -28,6 +28,5 @@ agentic-behavior:
     events:
       promptSave: true
       memorySync: true
-      selfCheck: true
       cronCreate: true
       cronDelete: true

@@ -5,7 +5,7 @@
 #   bash notify.sh <event_type> <message>
 #
 # Arguments:
-#   event_type: One of: promptSave, memorySync, selfCheck, cronCreate, cronDelete
+#   event_type: One of: promptSave, memorySync, cronCreate, cronDelete
 #   message:    Human-readable notification text
 #
 # Reads configuration from plugins.settings.yaml under:
@@ -83,7 +83,6 @@ payload="$(jq -n \
   '{
     chat_id: $chat_id,
     text: $text,
-    parse_mode: "HTML",
     disable_notification: false
   }'
 )"
