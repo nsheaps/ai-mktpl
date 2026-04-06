@@ -23,12 +23,14 @@ Agent(deep-researcher, "Investigate how Claude Code sets terminal tab titles —
 ```
 
 Use the agent when:
+
 - The investigation requires checking 3+ sources (docs, issues, source code, web)
 - You need to synthesize findings across multiple sources into a coherent report
 - The answer isn't available in a single document or file
 - You want findings saved to a persistent file for future reference
 
 Do NOT use the agent for:
+
 - Simple lookups ("what flag does X?")
 - Single-source answers (check docs directly)
 - Codebase navigation (use Grep/Glob)
@@ -51,11 +53,13 @@ Start with publicly available information. This is cheap and fast.
 When external research leaves gaps, go to the source code.
 
 **Escalate when:**
+
 - External sources contradict each other
 - Behavior observed doesn't match documentation
 - You need the exact mechanism, not just "what it does"
 
 **Steps:**
+
 1. Locate source material (open-source repos, compiled bundles, package contents)
 2. Search for entry points — start with user-visible behavior and trace backwards
 3. Trace the call chain from the entry point
@@ -88,23 +92,30 @@ When external research leaves gaps, go to the source code.
 **Question**: <The specific question being investigated>
 
 ## Executive Summary
+
 <2-3 sentence answer>
 
 ## Methodology
+
 <Which phases were used, what sources were consulted>
 
 ## Findings
+
 ### 1. <Finding>
+
 <Detail with source references>
 **Confidence**: <Level> — <evidence summary>
 
 ## Corrections to Previous Research
+
 <If applicable — what changed and why>
 
 ## Open Questions
+
 <What remains unanswered>
 
 ## Sources
+
 - <Source with link or file:line reference>
 ```
 
