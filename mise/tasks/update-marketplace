@@ -51,6 +51,9 @@ for plugin_dir in plugins/*; do
   if [ -d "$plugin_dir/skills" ]; then
     TAGS=$(echo "$TAGS" | jq '. += ["skill"]')
   fi
+  if [ -d "$plugin_dir/agents" ]; then
+    TAGS=$(echo "$TAGS" | jq '. += ["agent"]')
+  fi
 
   jq --arg name "$PLUGIN_NAME" \
      --arg version "$VERSION" \
