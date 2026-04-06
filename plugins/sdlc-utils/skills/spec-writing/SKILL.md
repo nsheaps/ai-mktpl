@@ -37,7 +37,7 @@ frontmatter of each spec file:
 ```yaml
 ---
 name: feature-name
-status: draft  # draft | reviewed | in-progress | live | deprecated | archive
+status: draft # draft | reviewed | in-progress | live | deprecated | archive
 ---
 ```
 

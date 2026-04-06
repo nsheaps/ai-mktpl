@@ -1,6 +1,6 @@
 ---
 name: feature-name
-status: draft  # draft | reviewed | in-progress | live | deprecated | archive
+status: draft # draft | reviewed | in-progress | live | deprecated | archive
 ---
 
 # [Feature/System Name] - Specification
