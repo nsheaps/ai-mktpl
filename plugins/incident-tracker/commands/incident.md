@@ -1,3 +1,9 @@
+---
+name: incident
+description: Track behavioral incidents, document corrections, and maintain learned rules
+argument-hint: "<description of the behavioral correction>"
+---
+
 # /incident
 
 Track behavioral incidents, document corrections, and maintain learned rules.
