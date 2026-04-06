@@ -9,11 +9,14 @@
 set -euo pipefail
 
 PLUGIN_NAME="agentic-behavior"
+
+# shellcheck source=../../lib/hook-logging.sh
+source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 source "${CLAUDE_PLUGIN_ROOT}/lib/plugin-config-read.sh"
 
 # Check if plugin is enabled
 if ! plugin_is_enabled; then
-  echo '{}'
+  hook_respond
   exit 0
 fi
 
@@ -32,7 +35,7 @@ fi
 
 # Skip saving if no extractable prompt
 if [ -z "$prompt" ]; then
-  echo '{}'
+  hook_respond
   exit 0
 fi
 
@@ -78,4 +81,4 @@ REMINDER
 fi
 
 # Return empty JSON (informational hook, no blocking)
-echo '{}'
+hook_respond
