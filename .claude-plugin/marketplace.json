@@ -253,6 +253,26 @@
       ]
     },
     {
+      "name": "deep-research",
+      "description": "Multi-agent deep research system for complex investigations. Uses a lead-researcher orchestrator, parallel sub-researchers, and a critical-reviewer to produce evidence-based reports with confidence levels and citations.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/deep-research",
+      "category": "utility",
+      "tags": ["utility", "skill", "agent"],
+      "keywords": [
+        "research",
+        "investigation",
+        "analysis",
+        "synthesis",
+        "agent",
+        "multi-agent",
+        "deep-research"
+      ]
+    },
+    {
       "name": "edit-utils",
       "description": "File editing utilities: auto-formatting and linting for written/edited files with project-aware configuration",
       "version": "0.1.0",
@@ -328,7 +348,7 @@
     {
       "name": "github-app",
       "description": "Automatic GitHub App token lifecycle for Claude Code sessions. Generates installation tokens on session start, monitors expiry via PreToolUse hook, and refreshes transparently before commands that need authentication.",
-      "version": "0.1.13",
+      "version": "0.1.14",
       "author": {
         "name": "Nathan Heaps"
       },
