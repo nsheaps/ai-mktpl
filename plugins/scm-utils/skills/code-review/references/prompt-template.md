@@ -120,15 +120,18 @@ Questions you leave in past reviews may be answered in the PR body or comments. 
    - Overall recommendation (approve, request changes, comment)
    - Key formatting for github flavored markdown including details/summary blocks, emojis, and shields.io badges.
    - Critical review of findings to ensure accuracy and confidence of your assessment.
-   - **Follow-up recommendations** (if any): Items that don't need to block this PR but should be addressed in future PRs.
-     These MUST be explicitly called out in a dedicated section of your review summary (outside the details block).
+   - **Follow-ups** (required): ALL items that need attention, whether in this PR or future work. Each follow-up MUST have a priority level:
+     - **P0 (Critical)**: Must be fixed in this PR before merge. Security vulnerabilities, data loss risks, breaking changes.
+     - **P1 (Important)**: Should be fixed in this PR. Bugs, significant code quality issues, missing tests for critical paths.
+     - **P2 (Nice-to-have)**: Can be addressed in a follow-up PR. Minor improvements, refactoring suggestions, documentation gaps.
+     All follow-ups MUST be listed — none should be silently dismissed. These MUST be explicitly called out in a dedicated section of your review summary (outside the details block).
 9. **Hide your previous reviews** just before submitting your new review.
    CRITICAL: This ensures only your latest review is visible, preventing clutter and confusion.
    CRITICAL: Only hide YOUR OWN previous reviews, never reviews from other users.
 10. **Submit the review**: Use `mcp__github__submit_pending_pull_request_review` to post your review.
     CRITICAL: If there are security, performance, or correctness issues that MUST be addressed before merging, use "REQUEST_CHANGES".
     CRITICAL: If there are no other changes to make, and the PR is ready to merge, use "APPROVE".
-    Use event type "COMMENT" (not "REQUEST_CHANGES") to publish all comments as a non-blocking review if you think there should be changes, but the system won't break if the changes are merged.
+    Use event type "COMMENT" (not "REQUEST_CHANGES") when all remaining follow-ups are P2 (nice-to-have) and the system won't break if merged as-is.
 
 11. **Post-review verification**: After submitting your review, re-read the PR and all comments to ensure correct state.
 
@@ -163,9 +166,10 @@ _🖱️ Click to expand for full details_
 <detailed review sections with L3+ headings>
 </details>
 
-**Recommended follow-ups** (non-blocking):
-- Item 1
-- Item 2
+**Follow-ups:**
+- **P0**: [Critical item — must fix before merge]
+- **P1**: [Important item — should fix before merge]
+- **P2**: [Nice-to-have — can be a follow-up PR]
 
 Notes:[^1][^2]
 [^1]: Workflow Run: [URL]
