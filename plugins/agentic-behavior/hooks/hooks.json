@@ -45,6 +45,7 @@
     "PostToolUse": [
       {
         "matcher": "CronCreate|CronDelete",
+        "async": true,
         "hooks": [
           {
             "type": "command",
