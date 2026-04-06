@@ -63,7 +63,7 @@ session_id="${CLAUDE_SESSION_ID:-unknown}"
 project_dir="${CLAUDE_PROJECT_DIR:-unknown}"
 timestamp="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
-text="$(jq -n \
+text="$(jq -rn \
   --arg event "$event_type" \
   --arg msg "$message" \
   --arg ts "$timestamp" \
@@ -71,8 +71,6 @@ text="$(jq -n \
   --arg proj "$project_dir" \
   '"\(.event) | \(.msg)\nSession: \(.sid)\nProject: \(.proj)\nTime: \(.ts)"'
 )"
-# jq -n with string interpolation returns a quoted JSON string; strip the outer quotes
-text="$(echo "$text" | jq -r '.')"
 
 # --- Send via Telegram Bot API ---
 api_url="https://api.telegram.org/bot${bot_token}/sendMessage"
@@ -88,7 +86,7 @@ payload="$(jq -n \
 )"
 
 # Best-effort send — never block the hook
-curl -s -X POST "$api_url" \
+curl -s --max-time 10 -X POST "$api_url" \
   -H "Content-Type: application/json" \
   -d "$payload" \
   >/dev/null 2>&1 || true
