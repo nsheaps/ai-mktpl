@@ -497,27 +497,6 @@
       "keywords": ["plugin", "install", "update", "reload", "management"]
     },
     {
-      "name": "sdlc-utils",
-      "description": "Software development lifecycle utilities — skills organized by SDLC phase: plan, implement, review, test, deploy, and maintain.",
-      "version": "0.2.0",
-      "author": {
-        "name": "Nathan Heaps"
-      },
-      "source": "./plugins/sdlc-utils",
-      "category": "utility",
-      "tags": ["utility", "skill"],
-      "keywords": [
-        "sdlc",
-        "planning",
-        "implementation",
-        "code-review",
-        "testing",
-        "deployment",
-        "maintenance",
-        "software-engineering"
-      ]
-    },
-    {
       "name": "proxmox",
       "description": "Skills for managing Proxmox VE hosts and LXC containers — creating containers, running Docker in LXC, and hosting services like cloudflared.",
       "version": "0.1.0",
@@ -590,7 +569,7 @@
     {
       "name": "scm-utils",
       "description": "Source control management utilities for improving interactions with branches and PRs, both locally and in CI environments",
-      "version": "0.1.14",
+      "version": "0.1.15",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -598,6 +577,27 @@
       "category": "utility",
       "tags": ["utility", "command", "skill"],
       "keywords": ["git", "branch", "pr", "pull-request", "sync", "merge", "scm", "source-control"]
+    },
+    {
+      "name": "sdlc-utils",
+      "description": "Software development lifecycle utilities — skills organized by SDLC phase: plan, implement, review, test, deploy, and maintain.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/sdlc-utils",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": [
+        "sdlc",
+        "planning",
+        "implementation",
+        "code-review",
+        "testing",
+        "deployment",
+        "maintenance",
+        "software-engineering"
+      ]
     },
     {
       "name": "self-terminate",
