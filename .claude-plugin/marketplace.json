@@ -261,7 +261,7 @@
       },
       "source": "./plugins/deep-research",
       "category": "utility",
-      "tags": ["utility", "skill"],
+      "tags": ["utility", "skill", "agent"],
       "keywords": [
         "research",
         "investigation",
@@ -348,7 +348,7 @@
     {
       "name": "github-app",
       "description": "Automatic GitHub App token lifecycle for Claude Code sessions. Generates installation tokens on session start, monitors expiry via PreToolUse hook, and refreshes transparently before commands that need authentication.",
-      "version": "0.1.13",
+      "version": "0.1.14",
       "author": {
         "name": "Nathan Heaps"
       },
