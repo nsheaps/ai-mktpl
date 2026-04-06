@@ -27,6 +27,7 @@ The LeadResearcher has given you a specific research objective. Execute it thoro
 ### Source Evaluation
 
 For each source you find, evaluate:
+
 - **Authority**: Is this from a recognized expert, institution, or publication?
 - **Recency**: Is the information current enough for the query?
 - **Depth**: Does this source provide substantive detail or just surface-level coverage?

@@ -16,6 +16,7 @@ Delegate the user's research query to the `lead-researcher` agent. Pass
 the complete user query as-is, along with any context they provided.
 
 The lead-researcher agent will:
+
 1. Plan the research strategy
 2. Spawn parallel search-subagent instances to investigate different facets
 3. Synthesize findings from all subagents

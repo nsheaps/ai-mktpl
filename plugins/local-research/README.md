@@ -31,13 +31,13 @@ User Query
 
 ## Components
 
-| Component | Type | Model | Purpose |
-|---|---|---|---|
-| `lead-researcher` | Agent | Opus | Orchestrates research, spawns subagents, synthesizes findings |
-| `search-subagent` | Agent | Sonnet | Executes focused web searches, reads sources, returns findings |
-| `citation-agent` | Agent | Sonnet | Verifies source attribution, formats citations |
-| `research-mode` | Skill | - | Documents the architecture and usage patterns |
-| `/research` | Command | Opus | Quick-launch command for research queries |
+| Component         | Type    | Model  | Purpose                                                        |
+| ----------------- | ------- | ------ | -------------------------------------------------------------- |
+| `lead-researcher` | Agent   | Opus   | Orchestrates research, spawns subagents, synthesizes findings  |
+| `search-subagent` | Agent   | Sonnet | Executes focused web searches, reads sources, returns findings |
+| `citation-agent`  | Agent   | Sonnet | Verifies source attribution, formats citations                 |
+| `research-mode`   | Skill   | -      | Documents the architecture and usage patterns                  |
+| `/research`       | Command | Opus   | Quick-launch command for research queries                      |
 
 ## Usage
 
@@ -57,15 +57,15 @@ The `lead-researcher` agent triggers automatically when it detects research-orie
 
 ## How It Differs from Claude.ai
 
-| Aspect | Claude.ai Research | This Plugin |
-|---|---|---|
-| Search backend | Brave Search (server-side) | WebSearch tool (Claude Code built-in) |
-| Source reading | Internal fetch infrastructure | WebFetch tool |
-| Orchestrator model | Opus | Opus |
-| Worker model | Sonnet | Sonnet |
-| Max subagents | Configurable (server-side) | Limited by Claude Code's subagent system |
-| Google Workspace | Supported | Not supported |
-| Citation verification | CitationAgent | CitationAgent |
+| Aspect                | Claude.ai Research            | This Plugin                              |
+| --------------------- | ----------------------------- | ---------------------------------------- |
+| Search backend        | Brave Search (server-side)    | WebSearch tool (Claude Code built-in)    |
+| Source reading        | Internal fetch infrastructure | WebFetch tool                            |
+| Orchestrator model    | Opus                          | Opus                                     |
+| Worker model          | Sonnet                        | Sonnet                                   |
+| Max subagents         | Configurable (server-side)    | Limited by Claude Code's subagent system |
+| Google Workspace      | Supported                     | Not supported                            |
+| Citation verification | CitationAgent                 | CitationAgent                            |
 
 ## Design Decisions
 

@@ -21,7 +21,9 @@ described in Anthropic's engineering blog post
 The system uses three specialized agents in an orchestrator-worker pattern:
 
 ### LeadResearcher (Opus)
+
 The orchestrating agent that:
+
 - Analyzes the user's query and assesses complexity
 - Develops a research strategy and decomposes it into parallel subtasks
 - Spawns search subagents to investigate each subtask simultaneously
@@ -30,14 +32,18 @@ The orchestrating agent that:
 - Invokes the citation agent for source verification
 
 ### SearchSubagent (Sonnet)
+
 Specialized research workers (typically 3-5 spawned in parallel) that:
+
 - Execute focused web searches with varied query formulations
 - Fetch and read full source content (not just search snippets)
 - Evaluate source quality and authority
 - Return structured findings with URLs for every claim
 
 ### CitationAgent (Sonnet)
+
 A post-processing agent that:
+
 - Audits all factual claims for proper source attribution
 - Spot-checks cited URLs to verify they support the claims
 - Flags dead links, misattributed claims, and unsourced assertions
@@ -57,12 +63,15 @@ A post-processing agent that:
 ## Usage
 
 ### Via Command
+
 ```
 /research What are the current approaches to quantum error correction?
 ```
 
 ### Via Natural Language
+
 Simply ask Claude to research something:
+
 ```
 Research the current state of RISC-V adoption in data centers
 Investigate recent advances in solid-state battery technology
@@ -70,7 +79,9 @@ Do a deep dive into the history and current state of WebAssembly
 ```
 
 ### Effort Levels
+
 The LeadResearcher automatically scales effort based on query complexity:
+
 - **Simple queries**: 1-2 subagents, 3-10 tool calls each
 - **Comparative queries**: 2-4 subagents, 10-15 calls each
 - **Complex/multi-faceted**: 5-10 subagents, 15+ calls each
@@ -101,6 +112,7 @@ These principles are drawn directly from Anthropic's published research:
 ## Token Usage
 
 Research mode is significantly more token-intensive than standard conversation:
+
 - Standard chat: 1x tokens
 - Single-agent research: ~4x tokens
 - Multi-agent research: ~15x tokens

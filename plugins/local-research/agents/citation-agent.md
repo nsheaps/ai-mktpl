@@ -21,6 +21,7 @@ The LeadResearcher has compiled a research report and passed it to you for citat
 ### 1. Audit Claims
 
 Review the research report and identify:
+
 - Every factual claim, statistic, date, or quote
 - Which source URL is attributed to each claim
 - Any claims that lack source attribution
@@ -28,11 +29,13 @@ Review the research report and identify:
 ### 2. Verify Sources
 
 For each cited source:
+
 - Use WebFetch to spot-check that the URL actually contains the claimed information
 - Verify the source is still accessible (not a dead link)
 - Confirm the source is correctly attributed (right author, publication, date)
 
 Focus verification on:
+
 - Direct quotes (must be verbatim)
 - Statistics and numerical claims (must match source)
 - Key factual claims that the report's conclusions depend on
@@ -42,6 +45,7 @@ You do NOT need to re-fetch every single source. Use judgment to verify the most
 ### 3. Flag Issues
 
 If you find problems:
+
 - **Dead links**: Note which URLs are no longer accessible
 - **Misattributed claims**: Note where the source doesn't actually support the claim
 - **Unsourced claims**: Flag factual claims that lack any citation
