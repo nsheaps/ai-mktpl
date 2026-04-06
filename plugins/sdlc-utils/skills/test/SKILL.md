@@ -13,12 +13,12 @@ Guidelines for testing during the software development lifecycle.
 
 ## Test Types
 
-| Type        | Scope                          | When to write               |
-| ----------- | ------------------------------ | --------------------------- |
-| Unit        | Individual functions/modules   | During implementation       |
-| Integration | Component interactions         | After components are built  |
-| E2E         | Full user workflows            | After integration           |
-| Smoke       | Critical path verification     | Before deployment           |
+| Type        | Scope                        | When to write              |
+| ----------- | ---------------------------- | -------------------------- |
+| Unit        | Individual functions/modules | During implementation      |
+| Integration | Component interactions       | After components are built |
+| E2E         | Full user workflows          | After integration          |
+| Smoke       | Critical path verification   | Before deployment          |
 
 ## Workflow
 
@@ -60,10 +60,10 @@ Before writing tests, determine:
 
 ## Anti-Patterns
 
-| Anti-Pattern             | Instead                                        |
-| ------------------------ | ---------------------------------------------- |
-| Testing implementation   | Test behavior and outputs                      |
-| Flaky tests              | Make tests deterministic                       |
-| Testing only happy path  | Cover errors and edge cases                    |
-| Skipping CI validation   | CI is the source of truth                      |
-| Giant test files          | Organize tests to mirror source structure     |
+| Anti-Pattern            | Instead                                   |
+| ----------------------- | ----------------------------------------- |
+| Testing implementation  | Test behavior and outputs                 |
+| Flaky tests             | Make tests deterministic                  |
+| Testing only happy path | Cover errors and edge cases               |
+| Skipping CI validation  | CI is the source of truth                 |
+| Giant test files        | Organize tests to mirror source structure |

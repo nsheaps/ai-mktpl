@@ -34,12 +34,12 @@ Before deploying:
 
 Choose appropriate strategy for the change:
 
-| Strategy       | When to use                          |
-| -------------- | ------------------------------------ |
-| Rolling        | Low-risk changes, stateless services |
-| Blue-green     | Need instant rollback capability     |
-| Canary         | High-risk changes, gradual rollout   |
-| Feature flags  | Decoupling deploy from release       |
+| Strategy      | When to use                          |
+| ------------- | ------------------------------------ |
+| Rolling       | Low-risk changes, stateless services |
+| Blue-green    | Need instant rollback capability     |
+| Canary        | High-risk changes, gradual rollout   |
+| Feature flags | Decoupling deploy from release       |
 
 ### Step 4: Post-Deployment Validation
 
@@ -52,10 +52,10 @@ After deploying:
 
 ## Anti-Patterns
 
-| Anti-Pattern             | Instead                                       |
-| ------------------------ | --------------------------------------------- |
-| Manual deployments       | Automate with CI/CD                           |
-| No rollback plan         | Always have a rollback strategy               |
-| Skipping staging         | Validate in a staging environment first       |
-| Big-bang releases        | Deploy incrementally                          |
-| Deploy on Friday         | Deploy when you can monitor the result        |
+| Anti-Pattern       | Instead                                 |
+| ------------------ | --------------------------------------- |
+| Manual deployments | Automate with CI/CD                     |
+| No rollback plan   | Always have a rollback strategy         |
+| Skipping staging   | Validate in a staging environment first |
+| Big-bang releases  | Deploy incrementally                    |
+| Deploy on Friday   | Deploy when you can monitor the result  |

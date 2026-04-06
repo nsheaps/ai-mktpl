@@ -68,10 +68,10 @@ Before opening a PR, review your own code:
 
 ## Anti-Patterns
 
-| Anti-Pattern                | Instead                                     |
-| --------------------------- | ------------------------------------------- |
-| Reimplementing shared utils | Use existing helpers                        |
-| Giant functions             | Break into smaller, focused functions       |
-| Silent error swallowing     | Handle and log errors properly              |
-| Premature optimization      | Write clear code first, optimize if needed  |
-| Scope creep during coding   | Stick to the spec, file issues for extras   |
+| Anti-Pattern                | Instead                                    |
+| --------------------------- | ------------------------------------------ |
+| Reimplementing shared utils | Use existing helpers                       |
+| Giant functions             | Break into smaller, focused functions      |
+| Silent error swallowing     | Handle and log errors properly             |
+| Premature optimization      | Write clear code first, optimize if needed |
+| Scope creep during coding   | Stick to the spec, file issues for extras  |

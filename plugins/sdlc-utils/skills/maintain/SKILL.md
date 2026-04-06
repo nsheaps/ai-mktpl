@@ -55,10 +55,10 @@ Guidelines for maintaining software after initial deployment.
 
 ## Anti-Patterns
 
-| Anti-Pattern               | Instead                                       |
-| -------------------------- | --------------------------------------------- |
-| Fixing symptoms only       | Find and fix root causes                      |
-| Mixing refactor + feature  | Separate into distinct PRs                    |
-| Ignoring tech debt         | Track and prioritize it                       |
-| Upgrading without testing  | Always run full test suite after upgrades     |
-| One-off bug fixes          | Search for the same pattern across codebase   |
+| Anti-Pattern              | Instead                                     |
+| ------------------------- | ------------------------------------------- |
+| Fixing symptoms only      | Find and fix root causes                    |
+| Mixing refactor + feature | Separate into distinct PRs                  |
+| Ignoring tech debt        | Track and prioritize it                     |
+| Upgrading without testing | Always run full test suite after upgrades   |
+| One-off bug fixes         | Search for the same pattern across codebase |

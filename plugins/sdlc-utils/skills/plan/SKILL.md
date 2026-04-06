@@ -149,11 +149,11 @@ while maintaining the iterative process.
 | Anti-Pattern               | Instead                                       |
 | -------------------------- | --------------------------------------------- |
 | Writing everything at once | Start with seed, iterate to add detail        |
-| Vague requirements         | Use specific, testable acceptance criteria     |
-| Solution-first thinking    | Define the problem before proposing solutions  |
-| Skipping research          | Always investigate before adding detail        |
-| Gold-plating               | Stop when actionable for the next phase        |
-| Orphaned specs             | Always define next steps and ownership         |
+| Vague requirements         | Use specific, testable acceptance criteria    |
+| Solution-first thinking    | Define the problem before proposing solutions |
+| Skipping research          | Always investigate before adding detail       |
+| Gold-plating               | Stop when actionable for the next phase       |
+| Orphaned specs             | Always define next steps and ownership        |
 
 ## Additional Resources
 

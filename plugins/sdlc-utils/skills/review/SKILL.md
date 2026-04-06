@@ -16,24 +16,24 @@ Structured code review for evaluating and improving code quality before merge.
 
 Evaluate code across these dimensions, scoring each 0-100:
 
-| Category          | What to check                                          |
-| ----------------- | ------------------------------------------------------ |
-| Simplicity        | Is the code as simple as it can be?                    |
-| Correctness       | Does it do what the spec says?                         |
-| Security          | Are there vulnerabilities or unsafe patterns?          |
-| Performance       | Are there obvious performance issues?                  |
-| Maintainability   | Can someone else understand and modify this?           |
-| Pattern adherence | Does it follow existing codebase conventions?          |
-| Test coverage     | Are changes covered by tests?                          |
-| Documentation     | Are public APIs and non-obvious logic documented?      |
+| Category          | What to check                                     |
+| ----------------- | ------------------------------------------------- |
+| Simplicity        | Is the code as simple as it can be?               |
+| Correctness       | Does it do what the spec says?                    |
+| Security          | Are there vulnerabilities or unsafe patterns?     |
+| Performance       | Are there obvious performance issues?             |
+| Maintainability   | Can someone else understand and modify this?      |
+| Pattern adherence | Does it follow existing codebase conventions?     |
+| Test coverage     | Are changes covered by tests?                     |
+| Documentation     | Are public APIs and non-obvious logic documented? |
 
 ## Score Thresholds
 
-| Score   | Status | Meaning                                |
-| ------- | ------ | -------------------------------------- |
-| >= 85%  | Pass   | Ready to merge                         |
-| 70-84%  | Warn   | Should address before merge            |
-| < 70%   | Block  | Must address before merge              |
+| Score  | Status | Meaning                     |
+| ------ | ------ | --------------------------- |
+| >= 85% | Pass   | Ready to merge              |
+| 70-84% | Warn   | Should address before merge |
+| < 70%  | Block  | Must address before merge   |
 
 ## Review Workflow
 
@@ -66,20 +66,20 @@ re-review. Repeat until all categories pass.
 
 ## Verdicts
 
-| Verdict           | When                                                   |
-| ----------------- | ------------------------------------------------------ |
-| Approve           | All categories >= 85%, no blocking issues              |
-| Comment           | Suggestions but nothing blocking                       |
-| Request Changes   | Any category < 70% or security/correctness issues      |
+| Verdict         | When                                              |
+| --------------- | ------------------------------------------------- |
+| Approve         | All categories >= 85%, no blocking issues         |
+| Comment         | Suggestions but nothing blocking                  |
+| Request Changes | Any category < 70% or security/correctness issues |
 
 ## Anti-Patterns
 
-| Anti-Pattern              | Instead                                       |
-| ------------------------- | --------------------------------------------- |
-| Rubber-stamping           | Actually read and evaluate the code            |
-| Nitpicking style only     | Focus on substance (correctness, security)     |
-| Vague feedback            | Give specific, actionable comments             |
-| Reviewing only the diff   | Understand the full context                    |
+| Anti-Pattern            | Instead                                    |
+| ----------------------- | ------------------------------------------ |
+| Rubber-stamping         | Actually read and evaluate the code        |
+| Nitpicking style only   | Focus on substance (correctness, security) |
+| Vague feedback          | Give specific, actionable comments         |
+| Reviewing only the diff | Understand the full context                |
 
 ## External References
 
