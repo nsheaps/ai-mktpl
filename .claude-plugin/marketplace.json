@@ -63,7 +63,7 @@
     {
       "name": "arcane",
       "description": "Skills for deploying docker-compose stacks via Arcane GitOps — directory conventions, secrets management with 1Password, and GitHub Actions CI/CD.",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -98,7 +98,7 @@
     {
       "name": "cloudflare",
       "description": "Skills for managing Cloudflare developer platform components including Workers, R2, D1, AI Gateway, Pages, Tunnels, and more — with Pulumi IaC setup for each.",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -348,7 +348,7 @@
     {
       "name": "github-app",
       "description": "Automatic GitHub App token lifecycle for Claude Code sessions. Generates installation tokens on session start, monitors expiry via PreToolUse hook, and refreshes transparently before commands that need authentication.",
-      "version": "0.1.14",
+      "version": "0.1.15",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -538,7 +538,7 @@
     {
       "name": "proxmox",
       "description": "Skills for managing Proxmox VE hosts and LXC containers — creating containers, running Docker in LXC, and hosting services like cloudflared.",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -815,7 +815,7 @@
     {
       "name": "zai-glm",
       "description": "Skills for using z.ai (Zhipu AI) GLM models and configuring Claude Code to access them via the Anthropic-compatible endpoint or API gateways.",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "author": {
         "name": "Nathan Heaps"
       },
