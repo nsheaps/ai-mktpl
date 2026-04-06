@@ -37,7 +37,7 @@ Evaluate the code itself for quality, correctness, and adherence to best practic
 - Specific findings with file and line references
 - Score per dimension
 - Actionable suggestions (what to change, not just what is wrong)
-- Distinguish blocking issues from suggestions
+- Assign priority levels: P0 (critical), P1 (important), P2 (nice-to-have)
 
 ## References
 

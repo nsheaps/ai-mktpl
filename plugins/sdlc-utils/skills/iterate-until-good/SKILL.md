@@ -49,7 +49,7 @@ When all agents complete, review each report and create one overall report:
 
 - Format scores in a table with emoji indicators: `🚨` < 70%, `⚠️` < 85%, `✅` >= 85%
 - If any category has `⚠️`, maximum overall score is 94%
-- For non-blocking comments use `🔕`, for info-only use `ℹ️`
+- For P2 (nice-to-have) items use `🔕`, for info-only use `ℹ️`
 - If overall > 95%, keep the final report to just the table
 
 ### Step 3: Fix
