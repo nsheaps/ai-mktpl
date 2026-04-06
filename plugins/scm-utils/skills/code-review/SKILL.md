@@ -11,7 +11,7 @@ argument-hint: [PR number | PR URL | branch name]
 
 > **DEPRECATED:** This skill is moving to the sdlc-utils plugin. Use the `/sdlc-utils:review` skill instead.
 >
-> **Note:** This skill will be the basis for Henry's QA role (CI-based automated review bot). Keep as-is for now.
+> **Note:** This skill will be refactored into a CI-only review workflow in a future release. Keep as-is for now.
 
 # Code Review Bot — Claude Code Action
 

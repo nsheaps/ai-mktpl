@@ -13,7 +13,7 @@ A local review-and-fix loop. For the user's requested target (branch, PR, repo, 
 
 > **Cross-reference:** The review portion of each iteration uses the granular review skills in `scm-utils` (review-code, review-diff, review-commits, review-commit-messages, review-pr-contents). CI-based review follows the same iterative pattern but uses `scm-utils:code-review` for the review bot workflow.
 
-CRITICAL: This skill improvement depends on your iteration after you utilize it. If any part of this can be improved, please submit a Pull Request to this skill on https://github.com/nsheaps/ai-mktpl. If you choose to contribute, please use a background agent to perform the updates. Future AI agents and humans thank you!
+CRITICAL: If any part of this skill can be improved based on your experience using it, suggest improvements to the user. They can then decide whether to submit changes upstream.
 
 ## Review Categories
 

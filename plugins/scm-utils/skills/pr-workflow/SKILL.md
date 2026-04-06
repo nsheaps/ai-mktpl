@@ -42,7 +42,7 @@ Use `gh pr review --comment` for formal reviews; use inline replies for specific
 
 ## 4. Fix
 
-- Work in a worktree: `~/src/nsheaps/{repo}.worktrees/{branch}/`
+- Work in a worktree (e.g. using `git worktree add`)
 - Commit normally — **NO rebase, NO force push on pushed branches**
 - Merge main in if behind: `git merge origin/main`
 - Always review the diff of sub-agent changes before reporting the PR as fixed
@@ -79,5 +79,5 @@ gh pr merge <PR_NUMBER> --squash --delete-branch --hostname github.com
 | No rebase on pushed branches               | Merge main instead                                         |
 | No force push                              | Add commits on top                                         |
 | Always respond before re-requesting review | Non-negotiable                                             |
-| Never merge without handler approval       | **STRIKE ONE** — asking then acting before answer is worse |
+| Never merge without explicit approval      | Critical violation — asking then acting before answer is worse |
 | Review sub-agent diffs                     | Before reporting PR as fixed                               |

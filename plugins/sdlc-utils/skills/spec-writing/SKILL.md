@@ -12,6 +12,10 @@ description: >
 
 # Specification Writing
 
+> **See also:** `sdlc-utils:plan` for a concise planning workflow covering the
+> iterative spec creation process. This skill covers the full spec lifecycle
+> in depth including phase transitions, verification, and maintenance.
+
 Guide for writing, maintaining, and managing specifications through their
 complete lifecycle. Specifications are a critical tool for ensuring alignment
 between requirements, design, and implementation.
@@ -430,7 +434,7 @@ Names should reflect the feature or component, not the status.
 
 ### Reference Material
 
-- **Related rule in common-sense plugin:**
+- **Related rule (if `common-sense` plugin is installed):**
   `mantras-and-incremental-development.md` — Defines spec-driven development
   and the spec lifecycle directory structure
 - [Shape Up (Basecamp)](https://basecamp.com/shapeup) — Iterative development

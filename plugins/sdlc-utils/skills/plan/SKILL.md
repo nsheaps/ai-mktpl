@@ -12,6 +12,10 @@ description: >
 
 # Planning and Requirements
 
+> **See also:** `sdlc-utils:spec-writing` for detailed spec lifecycle management,
+> phase transitions, and verification workflows. This skill focuses on the
+> concise planning workflow; `spec-writing` covers the full lifecycle in depth.
+
 Write technical specifications through iterative refinement. Each spec is a
 combined document covering both _Problem & Requirements_ (what and why) and
 _Technical Design_ (how). Never attempt to produce a complete specification in
