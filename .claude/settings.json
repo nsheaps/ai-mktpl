@@ -129,6 +129,7 @@
     "mise@ai-mktpl": true,
     "scm-utils@ai-mktpl": true,
     "sequential-thinking@ai-mktpl": false,
+    "deep-research@ai-mktpl": true,
     "todo-sync@ai-mktpl": false,
     "web-auto-approve@ai-mktpl": true
   },
