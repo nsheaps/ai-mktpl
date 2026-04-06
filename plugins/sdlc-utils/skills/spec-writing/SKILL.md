@@ -165,22 +165,22 @@ Every spec file must include YAML frontmatter. The formal schema is defined in
 
 ### Required Fields
 
-| Field    | Type   | Description                                                        |
-| -------- | ------ | ------------------------------------------------------------------ |
-| `name`   | string | Unique identifier for the spec (kebab-case)                        |
+| Field    | Type   | Description                                                              |
+| -------- | ------ | ------------------------------------------------------------------------ |
+| `name`   | string | Unique identifier for the spec (kebab-case)                              |
 | `status` | string | Lifecycle stage: draft, reviewed, in-progress, live, deprecated, archive |
 
 ### Optional Fields
 
-| Field         | Type     | Description                                              |
-| ------------- | -------- | -------------------------------------------------------- |
-| `description` | string   | One-line summary of what the spec covers                 |
-| `parent`      | string   | Name of parent spec (for child specs)                    |
-| `related`     | string[] | Names of related specs to consider together              |
-| `owner`       | string   | Who is responsible for this spec                         |
-| `created`     | date     | When the spec was first created                          |
-| `updated`     | date     | When the spec was last updated                           |
-| `tags`        | string[] | Categorization tags                                      |
+| Field         | Type     | Description                                 |
+| ------------- | -------- | ------------------------------------------- |
+| `description` | string   | One-line summary of what the spec covers    |
+| `parent`      | string   | Name of parent spec (for child specs)       |
+| `related`     | string[] | Names of related specs to consider together |
+| `owner`       | string   | Who is responsible for this spec            |
+| `created`     | date     | When the spec was first created             |
+| `updated`     | date     | When the spec was last updated              |
+| `tags`        | string[] | Categorization tags                         |
 
 ### Validating Frontmatter
 
