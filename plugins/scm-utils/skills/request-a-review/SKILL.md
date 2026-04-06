@@ -1,18 +1,16 @@
 ---
-name: making-great-prs
+name: request-a-review
 description: >
-  DEPRECATED: This skill is moving to the sdlc-utils plugin. Use the sdlc-utils:review skill instead.
   Best practices and procedures for creating and maintaining high-quality pull requests.
-  Covers PR creation, body formatting, title conventions, and lifecycle management.
+  Covers PR creation, body formatting, title conventions, lifecycle management, and
+  requesting reviews. Counterpart to review-code, respond-to-review, and other review-receiving skills.
   Triggers on: "create a PR", "update the PR", "open a pull request", "push and PR",
   "fix PR", "fix PR body", "PR formatting", or automatically after any push to a
   feature branch per the auto-pr-management rule.
 allowed-tools: Bash, Read, Grep, Glob
 ---
 
-> **DEPRECATED:** This skill is moving to the sdlc-utils plugin. Use the `/sdlc-utils:review` skill instead.
-
-# Making Great PRs
+# Requesting a Review
 
 Create and maintain pull requests for feature branches using `gh api` with `--hostname github.com` (required for web sessions where the git remote is a local proxy).
 
