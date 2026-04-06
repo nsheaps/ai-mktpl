@@ -42,6 +42,25 @@
       "keywords": ["tmux", "iterm2", "tab-title", "agent-teams", "pane-title"]
     },
     {
+      "name": "agentic-behavior",
+      "description": "Skills and rules for AI agent behavior patterns — task tracking, issue management, and structured workflows.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/agentic-behavior",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": [
+        "agentic",
+        "issue-management",
+        "task-tracking",
+        "deduplication",
+        "github-issues",
+        "skills"
+      ]
+    },
+    {
       "name": "arcane",
       "description": "Skills for deploying docker-compose stacks via Arcane GitOps — directory conventions, secrets management with 1Password, and GitHub Actions CI/CD.",
       "version": "0.1.0",
@@ -234,6 +253,26 @@
       ]
     },
     {
+      "name": "deep-research",
+      "description": "Multi-agent deep research system for complex investigations. Uses a lead-researcher orchestrator, parallel sub-researchers, and a critical-reviewer to produce evidence-based reports with confidence levels and citations.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/deep-research",
+      "category": "utility",
+      "tags": ["utility", "skill", "agent"],
+      "keywords": [
+        "research",
+        "investigation",
+        "analysis",
+        "synthesis",
+        "agent",
+        "multi-agent",
+        "deep-research"
+      ]
+    },
+    {
       "name": "edit-utils",
       "description": "File editing utilities: auto-formatting and linting for written/edited files with project-aware configuration",
       "version": "0.1.0",
@@ -309,7 +348,7 @@
     {
       "name": "github-app",
       "description": "Automatic GitHub App token lifecycle for Claude Code sessions. Generates installation tokens on session start, monitors expiry via PreToolUse hook, and refreshes transparently before commands that need authentication.",
-      "version": "0.1.12",
+      "version": "0.1.14",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -581,7 +620,7 @@
     {
       "name": "self-terminate",
       "description": "Allows Claude to gracefully terminate itself using SIGINT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -687,27 +726,6 @@
       ]
     },
     {
-      "name": "sync-settings",
-      "description": "Automatically sync and merge local Claude Code settings, commands, and files using configurable rules in syncconfig.yaml",
-      "version": "0.2.26",
-      "author": {
-        "name": "Nathan Heaps"
-      },
-      "source": "./plugins/sync-settings",
-      "category": "utility",
-      "tags": ["utility"],
-      "keywords": [
-        "sync",
-        "settings",
-        "merge",
-        "json",
-        "symlink",
-        "hooks",
-        "configuration",
-        "local-settings"
-      ]
-    },
-    {
       "name": "task-parallelization",
       "description": "Intelligent skill that helps Claude parallelize Task tool calls when working on repetitive or batch operations, optimizing throughput based on task complexity",
       "version": "0.2.25",
@@ -742,7 +760,7 @@
     {
       "name": "todo-plus-plus",
       "description": "Enforces commit-on-complete for tasks and reminds about ephemeral session awareness",
-      "version": "0.1.4",
+      "version": "0.1.5",
       "author": {
         "name": "Nathan Heaps"
       },
