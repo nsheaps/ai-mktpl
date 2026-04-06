@@ -1,8 +1,37 @@
 ---
 name: iterate-until-good
 description: >
-  Use this skill to evaluate the current state of code on a PR or branch in many categories, give it a subjective score, and then iterate on the code until it scores > 85% in each category. Categories include: simplicity, flexibility, usability, documentation and comments (and associated discoverability), security concerns, proper matching of repo patterns/proper introduction of new patterns, adherence to best practices, and general quality assurance and engineering practices.
+  Proactive quality gate: evaluate code across multiple categories, score each 0-100, then
+  iteratively fix issues until every category scores >85%. Use BEFORE the handler sees the PR —
+  this is the comprehensive self-review loop that ensures work meets a quality bar before
+  requesting human review. Categories: simplicity, flexibility, usability, documentation,
+  security, pattern adherence, best practices, and QA.
 argument-hint: "[the requested iteration target, like a branch, PR, repo, notion doc, etc]"
+---
+
+## When to Use This Skill
+
+- You want to **proactively raise quality** before the handler or reviewer sees the work
+- You need a **multi-category scoring framework** with iterative fixing
+- You are preparing a PR for review and want to ensure it meets a quality bar (>85% in each category)
+- The handler asks to "make this good", "polish this", or "iterate until ready"
+
+## When NOT to Use This Skill
+
+- You just need a **single-pass review** with feedback (use `scm-utils:code-review` instead)
+- You need to **fix CI failures or address reviewer comments** reactively (use `fix-pr:relentlessly-fix`)
+- You need to **create or format a PR** (use `scm-utils:making-great-prs`)
+- You need to **fix just the PR title/body** (use `scm-utils:fix-pr`)
+
+## Related Skills
+
+| Skill | Relationship |
+|-------|-------------|
+| `scm-utils:code-review` | Single-pass review; iterate-until-good uses review as one step in its loop |
+| `fix-pr:relentlessly-fix` | Reactive fix loop for CI/feedback; iterate-until-good is the proactive quality gate |
+| `scm-utils:making-great-prs` | PR formatting reference; iterate-until-good covers code quality, not PR formatting |
+| `scm-utils:fix-pr` | PR description fixer; iterate-until-good covers code, not PR metadata |
+
 ---
 
 The process below outlines how to review something in many categories. For the user's requested target (like a branch, PR, repo, notion doc, etc), please run this review process in parallel across all categories, and then iterate on the target until it scores >85% in each category. If any category is below 70%, that is a hard block that must be addressed before merging or shipping.

@@ -1,12 +1,38 @@
 ---
 name: making-great-prs
 description: >
-  Best practices and procedures for creating and maintaining high-quality pull requests.
-  Covers PR creation, body formatting, title conventions, and lifecycle management.
+  PR creation and formatting reference: how to create, structure, and maintain pull requests.
+  Covers draft PR creation, body formatting (Summary + Test plan), title conventions (<70 chars,
+  verb-first), lifecycle (draft -> ready), and gh api usage patterns. Use when creating a new PR
+  or updating an existing PR's structure. Does NOT review code quality or fix CI.
   Triggers on: "create a PR", "update the PR", "open a pull request", "push and PR",
-  "fix PR", "fix PR body", "PR formatting", or automatically after any push to a
-  feature branch per the auto-pr-management rule.
+  "PR formatting", "PR template", or automatically after any push to a feature branch.
 allowed-tools: Bash, Read, Grep, Glob
+---
+
+## When to Use This Skill
+
+- You need to **create a new PR** with proper formatting
+- You need to **update a PR title or body** after pushing new commits
+- You want the **reference procedures** for PR creation via `gh api`
+- The handler asks to "open a PR", "create a pull request", or "update the PR"
+
+## When NOT to Use This Skill
+
+- You need to **review code quality** on a PR (use `scm-utils:code-review`)
+- You want to **iteratively improve code** to meet a quality bar (use `scm-utils:iterate-until-good`)
+- You need to **fix CI failures or address review feedback** (use `fix-pr:relentlessly-fix`)
+- You just need to **fix the PR description** for an existing PR (use `scm-utils:fix-pr` — it references this skill internally)
+
+## Related Skills
+
+| Skill | Relationship |
+|-------|-------------|
+| `scm-utils:fix-pr` | Uses making-great-prs standards to evaluate and fix an existing PR's description |
+| `scm-utils:code-review` | Reviews code quality; making-great-prs covers PR structure/formatting |
+| `scm-utils:iterate-until-good` | Quality gate for code; making-great-prs is the formatting reference for PR metadata |
+| `fix-pr:relentlessly-fix` | Reactive CI/review fixer; making-great-prs is the creation/formatting guide |
+
 ---
 
 # Making Great PRs

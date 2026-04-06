@@ -1,8 +1,35 @@
 ---
 name: fix-pr
-description: Fix or update the PR description for the current branch to follow best practices
+description: >
+  Fix PR metadata only: review and correct the PR title and body to match formatting standards
+  from making-great-prs. Does NOT review code, fix CI, or iterate on quality — it only touches
+  the PR description. Use when the PR body is stale, malformatted, or missing sections.
 argument-hint: "[optional: PR number or URL]"
 allowed-tools: Bash, Read, Grep, Glob
+---
+
+## When to Use This Skill
+
+- The PR **title or body** needs fixing (stale, malformatted, missing Summary/Test plan)
+- You pushed new commits and need to **update the PR description** to reflect them
+- The handler says "fix the PR", "update the PR body", or "the PR description is wrong"
+
+## When NOT to Use This Skill
+
+- You need to **review code quality** (use `scm-utils:code-review`)
+- You want to **iteratively improve code** to meet a quality bar (use `scm-utils:iterate-until-good`)
+- You need to **fix CI failures or address review comments** (use `fix-pr:relentlessly-fix`)
+- You need to **create a brand new PR** (use `scm-utils:making-great-prs`)
+
+## Related Skills
+
+| Skill | Relationship |
+|-------|-------------|
+| `scm-utils:making-great-prs` | The standards this skill evaluates against; use making-great-prs for creation, fix-pr for correction |
+| `scm-utils:code-review` | Reviews code; fix-pr fixes PR metadata only |
+| `scm-utils:iterate-until-good` | Quality gate for code; fix-pr is for PR description only |
+| `fix-pr:relentlessly-fix` | Reactive CI/review fixer; fix-pr only touches the PR title and body |
+
 ---
 
 # Fix PR Description

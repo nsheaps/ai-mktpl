@@ -1,11 +1,38 @@
 ---
 name: code-review
 description: >
-  Code review a pull request. Triggers on "review this PR", "code review",
-  "review PR #123", "request a review", "review bot", "code review CI",
-  "automated PR review", "claude review workflow", or when the user wants to
-  add automated code review to a repository.
+  Single-pass PR review: triggers the CI review bot (preferred) or performs a local review,
+  posting structured inline feedback on a PR. Use when you need feedback on a PR — not when
+  you need to fix issues or iterate to a quality bar. Triggers on "review this PR",
+  "code review", "review PR #123", "request a review", "review bot", "code review CI",
+  "automated PR review", "claude review workflow", or when the user wants to add automated
+  code review to a repository.
 argument-hint: [PR number | PR URL | branch name]
+---
+
+## When to Use This Skill
+
+- You need a **single-pass review** with structured feedback on a PR
+- You want to **trigger the CI review bot** or perform a local review
+- The handler asks to "review this PR", "get a review", or "what does the review bot think"
+- You are setting up automated code review infrastructure for a repository
+
+## When NOT to Use This Skill
+
+- You want to **iteratively fix code until it meets a quality bar** (use `scm-utils:iterate-until-good`)
+- You need to **fix CI failures or address existing review comments** (use `fix-pr:relentlessly-fix`)
+- You need to **create or format a PR** (use `scm-utils:making-great-prs`)
+- You need to **fix just the PR title/body** (use `scm-utils:fix-pr`)
+
+## Related Skills
+
+| Skill | Relationship |
+|-------|-------------|
+| `scm-utils:iterate-until-good` | Uses code-review as one step in a multi-category scoring loop with fixes |
+| `fix-pr:relentlessly-fix` | Acts on review feedback; code-review produces the feedback |
+| `scm-utils:making-great-prs` | PR formatting; code-review evaluates code quality, not PR structure |
+| `scm-utils:fix-pr` | PR description fixer; code-review reviews code, not PR metadata |
+
 ---
 
 # Code Review Bot — Claude Code Action
