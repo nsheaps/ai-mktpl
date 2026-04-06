@@ -23,6 +23,7 @@ What problem are we solving? What is the current pain point or opportunity?
 - Why is this urgent or important now?
 
 **Example:**
+
 > "Users cannot search for documents by metadata (author, date, tags). They
 > must manually scroll through lists, which is slow and error-prone for large
 > datasets. Support receives 5-10 requests daily for better search
@@ -48,6 +49,7 @@ requirements.
 - Usability: [Accessibility, i18n, etc.]
 
 **Example:**
+
 > - Users can search documents by keyword in title/body
 > - Users can filter by author, date range, and tags
 > - Search returns results in <200ms at p95
@@ -72,6 +74,7 @@ How will we know this is successful? Define measurable outcomes.
 - [Metric 1] - Target: [Baseline] → [Goal]
 
 **Example:**
+
 > - Search feature adoption: 60% of users search monthly (vs. 0% today)
 > - Time to find documents: reduced from 5m avg to <30s
 > - Support tickets for search: reduced by 80%
@@ -90,6 +93,7 @@ avoid scope creep.
 - [Related problem not being addressed]
 
 **Example:**
+
 > - Advanced query syntax (boolean operators, fuzzy matching) — Phase 2
 > - Full-text indexing of document contents — Phase 2
 > - Search result ranking/relevance tuning — Phase 2
@@ -153,6 +157,7 @@ How specifically will this be implemented?
 - Integration points with existing systems
 
 **Example:**
+
 > - Use Meilisearch for full-text search (already used in project)
 > - Index built incrementally on document creation/update
 > - Metadata filtering applied client-side after initial search
@@ -176,6 +181,7 @@ scenarios.
 - [Edge case 2]: [Scenario] → [How we handle it]
 
 **Example:**
+
 > - Search index is unavailable → Fallback to database query (slower but
 >   works)
 > - User enters invalid query syntax → Return error with suggested syntax
@@ -208,6 +214,7 @@ How will this be tested?
 - [What to measure] - [Target]
 
 **Example:**
+
 > - Unit: Query parser handles all input formats
 > - Integration: Search endpoint returns correct results for real data
 > - E2E: User can search and filter documents end-to-end
@@ -233,6 +240,7 @@ Any migration steps or phased rollout needed?
 - If [risk scenario], we will [rollback action]
 
 **Example:**
+
 > - Phase 1 (Week 1-2): Deploy search API, run index builder
 > - Phase 2 (Week 3): Beta feature flag for 10% of users
 > - Phase 3 (Week 4): Rollout to all users
@@ -313,11 +321,11 @@ What happens after this spec is approved?
 
 ## Revision History
 
-| Version | Date       | Author   | Change                            |
-| ------- | ---------- | -------- | --------------------------------- |
-| 1.0     | [DATE]     | [Author] | Initial draft                     |
-| 1.1     | [DATE]     | [Author] | [Change summary after review]     |
-| 1.2     | [DATE]     | [Author] | [Change summary during impl]      |
+| Version | Date   | Author   | Change                        |
+| ------- | ------ | -------- | ----------------------------- |
+| 1.0     | [DATE] | [Author] | Initial draft                 |
+| 1.1     | [DATE] | [Author] | [Change summary after review] |
+| 1.2     | [DATE] | [Author] | [Change summary during impl]  |
 
 ---
 

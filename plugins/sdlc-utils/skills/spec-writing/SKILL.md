@@ -163,35 +163,45 @@ documents.
 ## Problem & Requirements
 
 ### Problem Statement
+
 What problem does this solve? Who is affected? Why is it urgent?
 
 ### Requirements
+
 What needs to be true? List specific, testable requirements.
 
 ### Success Metrics
+
 How will we know this is successful?
 
 ### Out of Scope
+
 What deliberately is NOT included?
 
 ## Technical Design
 
 ### Architecture Overview
+
 High-level system design and component interactions.
 
 ### Implementation Details
+
 Specific implementation approach, libraries, patterns, and constraints.
 
 ### Error Handling & Edge Cases
+
 What happens when things go wrong?
 
 ### Testing Strategy
+
 How will this be tested?
 
 ### Migration & Rollout
+
 Any migration steps or phased rollout needed?
 
 ## Next Steps
+
 What remains to be done? Who is responsible?
 ```
 
@@ -223,12 +233,12 @@ docs/specs/draft/search-query-language.md  (child - 250 lines)
 
 Good requirements are **specific, testable, and unambiguous**.
 
-| Poor                           | Better                                      |
-| ------------------------------ | ------------------------------------------- |
-| "Fast API responses"           | "API responds in <200ms at p95"             |
-| "User-friendly interface"      | "Onboarding completes in <3 clicks"         |
-| "Robust error handling"        | "Network errors are retried 3x with backoff" |
-| "Supports various file types"  | "Supports PDF, DOCX, PNG files"             |
+| Poor                          | Better                                       |
+| ----------------------------- | -------------------------------------------- |
+| "Fast API responses"          | "API responds in <200ms at p95"              |
+| "User-friendly interface"     | "Onboarding completes in <3 clicks"          |
+| "Robust error handling"       | "Network errors are retried 3x with backoff" |
+| "Supports various file types" | "Supports PDF, DOCX, PNG files"              |
 
 ## Specification as a Living Document
 
@@ -316,17 +326,17 @@ Never silently ignore divergence. Always document the decision.
 
 ## Anti-Patterns to Avoid
 
-| Anti-Pattern                      | Instead                                      |
-| --------------------------------- | -------------------------------------------- |
-| Writing elaborate specs one-shot  | Iterate through draft → review → refine      |
-| Separating PRD from tech spec     | Use one combined document                    |
-| Specs as decoration               | Living doc, updated as implementation learns |
-| Ignoring spec divergence          | Always resolve and document divergence       |
-| Specs too long (1000+ lines)      | Split into parent + child specs              |
-| Vague requirements                | Specific, measurable, testable criteria      |
-| Outdated specs in "live"          | Update immediately when implementation       |
-|                                   | changes                                      |
-| Specs in wrong directory          | Use correct lifecycle directory              |
+| Anti-Pattern                     | Instead                                      |
+| -------------------------------- | -------------------------------------------- |
+| Writing elaborate specs one-shot | Iterate through draft → review → refine      |
+| Separating PRD from tech spec    | Use one combined document                    |
+| Specs as decoration              | Living doc, updated as implementation learns |
+| Ignoring spec divergence         | Always resolve and document divergence       |
+| Specs too long (1000+ lines)     | Split into parent + child specs              |
+| Vague requirements               | Specific, measurable, testable criteria      |
+| Outdated specs in "live"         | Update immediately when implementation       |
+|                                  | changes                                      |
+| Specs in wrong directory         | Use correct lifecycle directory              |
 
 ## Integration with SDLC Cycle
 
@@ -356,7 +366,7 @@ docs/specs/
 └── archive/         # Removed, historical reference
 ```
 
-**File naming:** Use descriptive names: `user-authentication.md`, 
+**File naming:** Use descriptive names: `user-authentication.md`,
 `search-indexing.md`, `payment-webhook.md` (not `spec1.md`, `tmp.md`, etc.)
 
 ## Additional Resources
