@@ -1,5 +1,5 @@
 {
-  "description": "Brain plugin hooks: saves prompts to history on submit, auto-syncs memory to git repo on session start and task completion",
+  "description": "Agentic behavior hooks: saves prompts to history on submit, syncs rules via symlink, auto-syncs memory to git repo on session start and task completion",
   "hooks": {
     "UserPromptSubmit": [
       {
@@ -17,6 +17,11 @@
       {
         "matcher": "*",
         "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/sync-rules.sh",
+            "timeout": 15
+          },
           {
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/sync-memory.sh",

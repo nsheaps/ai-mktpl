@@ -2,7 +2,7 @@
 # sync-memory.sh — Auto-syncs memory files to a configured git repo
 # Runs on SessionStart and TaskCompleted hooks
 #
-# If a git repo is configured (via brain.gitRepo setting), this script:
+# If a git repo is configured (via agentic-behavior.gitRepo setting), this script:
 # 1. Pulls latest from the memory repo
 # 2. Copies updated memory files (CLAUDE.md, rules, etc.) into the repo
 # 3. Commits and pushes changes if any exist
@@ -11,12 +11,15 @@
 
 set -euo pipefail
 
-PLUGIN_NAME="brain"
+PLUGIN_NAME="agentic-behavior"
+
+# shellcheck source=../../lib/hook-logging.sh
+source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 source "${CLAUDE_PLUGIN_ROOT}/lib/plugin-config-read.sh"
 
 # Check if plugin is enabled
 if ! plugin_is_enabled; then
-  echo '{}'
+  hook_respond
   exit 0
 fi
 
@@ -25,7 +28,7 @@ git_repo="$(plugin_get_config "gitRepo" "")"
 
 if [ -z "$git_repo" ]; then
   # No git repo configured — skip sync silently
-  echo '{}'
+  hook_respond
   exit 0
 fi
 
@@ -34,8 +37,8 @@ git_repo="${git_repo/#\~/$HOME}"
 
 # Validate the repo exists and is a git repo
 if [ ! -d "$git_repo/.git" ]; then
-  echo "brain: Warning — gitRepo '$git_repo' is not a git repository" >&2
-  echo '{}'
+  log_warn "gitRepo '$git_repo' is not a git repository"
+  hook_respond
   exit 0
 fi
 
@@ -63,8 +66,8 @@ branch="$(plugin_get_config "gitBranch" "main")"
 
 # Check for uncommitted changes in the memory repo
 if [ -n "$(cd "$git_repo" && git status --porcelain 2>/dev/null)" ]; then
-  echo "brain: Warning — memory repo has uncommitted changes, skipping sync" >&2
-  echo '{}'
+  log_warn "memory repo has uncommitted changes, skipping sync"
+  hook_respond
   exit 0
 fi
 
@@ -107,7 +110,7 @@ if [ "$changes_made" = true ]; then
     timestamp="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
     session_id="${CLAUDE_SESSION_ID:-unknown}"
 
-    git commit -m "brain: auto-sync memory files
+    git commit -m "agentic-behavior: auto-sync memory files
 
 Session: ${session_id}
 Timestamp: ${timestamp}
@@ -116,7 +119,7 @@ Sources: ${memory_sources[*]}" 2>/dev/null || true
     git push origin "$branch" 2>/dev/null || true
   ) &>/dev/null || true
 
-  echo "brain: Memory synced to ${git_repo}" >&2
+  hook_log "Memory synced to ${git_repo}"
 fi
 
-echo '{}'
+hook_respond
