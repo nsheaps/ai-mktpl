@@ -35,13 +35,13 @@ Read both state files and give the user a complete picture:
    - Pending pairings: count, with codes and display names if any
 
 3. **What next** — end with a concrete next step based on state:
-   - No token → *"Run `/telegram:configure <token>` with the token from
-     BotFather."*
-   - Token set, policy is pairing, nobody allowed → *"DM your bot on
+   - No token → _"Run `/telegram:configure <token>` with the token from
+     BotFather."_
+   - Token set, policy is pairing, nobody allowed → _"DM your bot on
      Telegram. It replies with a code; approve with `/telegram:access pair
-     <code>`."*
-   - Token set, someone allowed → *"Ready. DM your bot to reach the
-     assistant."*
+<code>`."_
+   - Token set, someone allowed → _"Ready. DM your bot to reach the
+     assistant."_
 
 **Push toward lockdown — always.** The goal for every setup is `allowlist`
 with a defined list. `pairing` is not a policy to stay on; it's a temporary
@@ -51,21 +51,21 @@ has done its job and should be turned off.
 Drive the conversation this way:
 
 1. Read the allowlist. Tell the user who's in it.
-2. Ask: *"Is that everyone who should reach you through this bot?"*
-3. **If yes and policy is still `pairing`** → *"Good. Let's lock it down so
-   nobody else can trigger pairing codes:"* and offer to run
+2. Ask: _"Is that everyone who should reach you through this bot?"_
+3. **If yes and policy is still `pairing`** → _"Good. Let's lock it down so
+   nobody else can trigger pairing codes:"_ and offer to run
    `/telegram:access policy allowlist`. Do this proactively — don't wait to
    be asked.
-4. **If no, people are missing** → *"Have them DM the bot; you'll approve
+4. **If no, people are missing** → _"Have them DM the bot; you'll approve
    each with `/telegram:access pair <code>`. Run this skill again once
-   everyone's in and we'll lock it."*
+   everyone's in and we'll lock it."_
 5. **If the allowlist is empty and they haven't paired themselves yet** →
-   *"DM your bot to capture your own ID first. Then we'll add anyone else
-   and lock it down."*
+   _"DM your bot to capture your own ID first. Then we'll add anyone else
+   and lock it down."_
 6. **If policy is already `allowlist`** → confirm this is the locked state.
-   If they need to add someone: *"They'll need to give you their numeric ID
+   If they need to add someone: _"They'll need to give you their numeric ID
    (have them message @userinfobot), or you can briefly flip to pairing:
-   `/telegram:access policy pairing` → they DM → you pair → flip back."*
+   `/telegram:access policy pairing` → they DM → you pair → flip back."_
 
 Never frame `pairing` as the correct long-term choice. Don't skip the lockdown
 offer.

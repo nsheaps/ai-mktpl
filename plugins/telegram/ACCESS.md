@@ -8,23 +8,23 @@ All state lives in `~/.claude/channels/telegram/access.json`. The `/telegram:acc
 
 ## At a glance
 
-| | |
-| --- | --- |
-| Default policy | `pairing` |
-| Sender ID | Numeric user ID (e.g. `412587349`) |
-| Group key | Supergroup ID (negative, `-100…` prefix) |
+|                     |                                                                 |
+| ------------------- | --------------------------------------------------------------- |
+| Default policy      | `pairing`                                                       |
+| Sender ID           | Numeric user ID (e.g. `412587349`)                              |
+| Group key           | Supergroup ID (negative, `-100…` prefix)                        |
 | `ackReaction` quirk | Fixed whitelist only; non-whitelisted emoji silently do nothing |
-| Config file | `~/.claude/channels/telegram/access.json` |
+| Config file         | `~/.claude/channels/telegram/access.json`                       |
 
 ## DM policies
 
 `dmPolicy` controls how DMs from senders not on the allowlist are handled.
 
-| Policy | Behavior |
-| --- | --- |
-| `pairing` (default) | Reply with a pairing code, drop the message. Approve with `/telegram:access pair <code>`. |
-| `allowlist` | Drop silently. No reply. Useful if the bot's username is guessable and pairing replies would attract spam. |
-| `disabled` | Drop everything, including allowlisted users and groups. |
+| Policy              | Behavior                                                                                                   |
+| ------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `pairing` (default) | Reply with a pairing code, drop the message. Approve with `/telegram:access pair <code>`.                  |
+| `allowlist`         | Drop silently. No reply. Useful if the bot's username is guessable and pairing replies would attract spam. |
+| `disabled`          | Drop everything, including allowlisted users and groups.                                                   |
 
 ```
 /telegram:access policy allowlist
@@ -94,17 +94,17 @@ Configure outbound behavior with `/telegram:access set <key> <value>`.
 
 ## Skill reference
 
-| Command | Effect |
-| --- | --- |
-| `/telegram:access` | Print current state: policy, allowlist, pending pairings, enabled groups. |
-| `/telegram:access pair a4f91c` | Approve pairing code `a4f91c`. Adds the sender to `allowFrom` and sends a confirmation on Telegram. |
-| `/telegram:access deny a4f91c` | Discard a pending code. The sender is not notified. |
-| `/telegram:access allow 412587349` | Add a user ID directly. |
-| `/telegram:access remove 412587349` | Remove from the allowlist. |
-| `/telegram:access policy allowlist` | Set `dmPolicy`. Values: `pairing`, `allowlist`, `disabled`. |
-| `/telegram:access group add -1001654782309` | Enable a group. Flags: `--no-mention` (also requires disabling privacy mode), `--allow id1,id2`. |
-| `/telegram:access group rm -1001654782309` | Disable a group. |
-| `/telegram:access set ackReaction 👀` | Set a config key: `ackReaction`, `replyToMode`, `textChunkLimit`, `chunkMode`, `mentionPatterns`. |
+| Command                                     | Effect                                                                                              |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `/telegram:access`                          | Print current state: policy, allowlist, pending pairings, enabled groups.                           |
+| `/telegram:access pair a4f91c`              | Approve pairing code `a4f91c`. Adds the sender to `allowFrom` and sends a confirmation on Telegram. |
+| `/telegram:access deny a4f91c`              | Discard a pending code. The sender is not notified.                                                 |
+| `/telegram:access allow 412587349`          | Add a user ID directly.                                                                             |
+| `/telegram:access remove 412587349`         | Remove from the allowlist.                                                                          |
+| `/telegram:access policy allowlist`         | Set `dmPolicy`. Values: `pairing`, `allowlist`, `disabled`.                                         |
+| `/telegram:access group add -1001654782309` | Enable a group. Flags: `--no-mention` (also requires disabling privacy mode), `--allow id1,id2`.    |
+| `/telegram:access group rm -1001654782309`  | Disable a group.                                                                                    |
+| `/telegram:access set ackReaction 👀`       | Set a config key: `ackReaction`, `replyToMode`, `textChunkLimit`, `chunkMode`, `mentionPatterns`.   |
 
 ## Config file
 
@@ -125,8 +125,8 @@ Configure outbound behavior with `/telegram:access set <key> <value>`.
       // false also requires disabling privacy mode via BotFather.
       "requireMention": true,
       // Restrict triggers to these senders. Empty = any member (subject to requireMention).
-      "allowFrom": []
-    }
+      "allowFrom": [],
+    },
   },
 
   // Case-insensitive regexes that count as a mention.
@@ -142,6 +142,6 @@ Configure outbound behavior with `/telegram:access set <key> <value>`.
   "textChunkLimit": 4096,
 
   // length = cut at limit. newline = prefer paragraph boundaries.
-  "chunkMode": "newline"
+  "chunkMode": "newline",
 }
 ```
