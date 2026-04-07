@@ -478,6 +478,10 @@ const mcp = new Server(
 );
 
 // Stores full permission details for "See more" expansion keyed by request_id.
+// TODO: entries are deleted on approve/deny but if the user never responds,
+// they linger forever.  Consider a TTL (e.g. 10-minute setTimeout per entry)
+// or a size cap (evict oldest when Map exceeds N entries) to avoid unbounded
+// growth in long-running sessions.
 const pendingPermissions = new Map<
   string,
   { tool_name: string; description: string; input_preview: string }

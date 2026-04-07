@@ -48,7 +48,7 @@ These are Claude Code commands — run `claude` to start a session first.
 Install the plugin:
 
 ```
-/plugin install discord@claude-plugins-official
+/plugin install discord@ai-mktpl
 /reload-plugins
 ```
 
@@ -67,7 +67,7 @@ Writes `DISCORD_BOT_TOKEN=...` to `~/.claude/channels/discord/.env`. You can als
 The server won't connect without this — exit your session and start a new one:
 
 ```sh
-claude --channels plugin:discord@claude-plugins-official
+claude --channels plugin:discord@ai-mktpl
 ```
 
 **7. Pair.**
