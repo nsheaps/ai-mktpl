@@ -60,10 +60,16 @@ the spec lifecycle (draft -> live -> archive), and using specs for verification.
 
 **Triggers:** "write a spec", "manage spec lifecycle", "spec template", "update a spec"
 
+## Dependencies
+
+- **scm-utils** — the `iterate-until-good` and `review` skills delegate to scm-utils
+  review skills for code scoring. Install both plugins from the same marketplace.
+
 ## Installation
 
 Install via the nsheaps-claude-plugins marketplace:
 
 ```
 sdlc-utils@nsheaps-claude-plugins
+scm-utils@nsheaps-claude-plugins
 ```
