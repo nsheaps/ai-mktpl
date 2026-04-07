@@ -6,7 +6,7 @@ This is the **ai-mktpl** plugin marketplace repository for Claude Code. It conta
 
 1. Read the repo overview: [README.md](README.md)
 2. Read the plugin schema: [docs/PLUGIN_SCHEMA.md](docs/PLUGIN_SCHEMA.md)
-3. Read the development rules: @.claude/rules/plugin-development.md
+3. Read the development rules: [.claude/rules/plugin-development.md](.claude/rules/plugin-development.md)
 4. Review existing plugins in `plugins/` for patterns before creating anything new
 
 ## Plugin Development Skills (CRITICAL)
@@ -22,7 +22,6 @@ When creating or modifying any plugin component, you MUST recall and follow the 
 | Settings/config | `plugin-dev:plugin-settings`     |
 | Commands        | `plugin-dev:command-development` |
 | Agents          | `plugin-dev:agent-development`   |
-| Creating new    | `plugin-dev:create-plugin`       |
 
 Always recall the relevant skill BEFORE writing code. These skills contain the canonical patterns, schema requirements, and validation steps.
 
