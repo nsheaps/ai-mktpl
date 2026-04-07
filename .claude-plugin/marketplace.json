@@ -513,6 +513,26 @@
       "keywords": ["plugin", "install", "update", "reload", "management"]
     },
     {
+      "name": "poc-shared-rules",
+      "description": "Fetch and sync AI rules from git repository paths into .claude/rules/. Sources are YAML mappings { name: 'owner/repo@ref:/path' }. Supports multiple sources and recursive dependency resolution.",
+      "version": "0.0.1",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/poc-shared-rules",
+      "category": "utility",
+      "tags": ["utility"],
+      "keywords": [
+        "rules",
+        "shared",
+        "behavior",
+        "best-practices",
+        "session-start",
+        "git",
+        "remote"
+      ]
+    },
+    {
       "name": "product-development-and-sdlc",
       "description": "Iterative spec and user story writing with structured SDLC workflows. Guides incremental specification development through research, review, and refinement cycles.",
       "version": "0.1.1",

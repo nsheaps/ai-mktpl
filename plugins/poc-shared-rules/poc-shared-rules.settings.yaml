@@ -1,0 +1,39 @@
+# poc-shared-rules plugin configuration
+#
+# Override per-project via ${CLAUDE_PROJECT_DIR}/.claude/plugins.settings.yaml
+# or per-user via ~/.claude/plugins.settings.yaml under the "poc-shared-rules" key.
+
+poc-shared-rules:
+  enabled: true
+
+  # List of rule sources to fetch and sync.
+  # Each source is a quoted string: "name=owner/repo@ref:/path"
+  #   name  — symlink name created in .claude/rules/
+  #   owner — GitHub organization or user
+  #   repo  — repository name (GitHub only)
+  #   ref   — branch, tag, or commit SHA
+  #   path  — directory path within the repository
+  # See: https://github.com/nsheaps/ai-mktpl/tree/main/plugins/poc-shared-rules
+  #
+  # Examples:
+  #   - "common-sense=nsheaps/ai-mktpl@main:/plugins/common-sense/rules"
+  #   - "team-rules=myorg/my-rules@v2.0.0:/rules"
+  #   - "project-rules=myorg/my-rules@main:/.ai/rules"
+  sources: []
+
+  # Also create symlinks in the user-level ~/.claude/rules/ directory.
+  #   false  — only sync to the project scope (default)
+  #   true   — also sync to user-level ~/.claude/rules/ (WARNING: affects all projects)
+  alsoSyncToUser: false
+
+  # Override the cache directory where clones are stored.
+  # Default: ~/.cache/claude-shared-rules
+  # Leave empty to use the default.
+  cacheDir: ''
+
+  # Follow .shared-rules.yaml dependency files found inside fetched rule directories.
+  #   false  — ignore dependency files (default; safer for untrusted sources)
+  #   true   — recursively fetch transitive dependencies declared by fetched rules
+  # WARNING: enabling this trusts the content of remote .shared-rules.yaml files
+  # to drive additional git clones. Only enable for sources you fully control.
+  followDependencies: false

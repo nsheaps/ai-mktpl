@@ -1,0 +1,14 @@
+{
+  "name": "poc-shared-rules",
+  "version": "0.0.1",
+  "hooks": "./hooks/hooks.json",
+  "description": "Fetch and sync AI rules from git repository paths into .claude/rules/. Sources are YAML mappings { name: 'owner/repo@ref:/path' }. Supports multiple sources and recursive dependency resolution.",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/poc-shared-rules",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": ["rules", "shared", "behavior", "best-practices", "session-start", "git", "remote"]
+}
