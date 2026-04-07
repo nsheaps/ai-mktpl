@@ -28,7 +28,7 @@ These are Claude Code commands — run `claude` to start a session first.
 Install the plugin:
 
 ```
-/plugin install telegram@claude-plugins-official
+/plugin install telegram@ai-mktpl
 ```
 
 **3. Give the server the token.**
@@ -46,7 +46,7 @@ Writes `TELEGRAM_BOT_TOKEN=...` to `~/.claude/channels/telegram/.env`. You can a
 The server won't connect without this — exit your session and start a new one:
 
 ```sh
-claude --channels plugin:telegram@claude-plugins-official
+claude --channels plugin:telegram@ai-mktpl
 ```
 
 **5. Pair.**
@@ -77,6 +77,7 @@ Quick reference: IDs are **numeric user IDs** (get yours from [@userinfobot](htt
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `reply`        | Send to a chat. Takes `chat_id` + `text`, optionally `reply_to` (message ID) for native threading and `files` (absolute paths) for attachments. Images (`.jpg`/`.png`/`.gif`/`.webp`) send as photos with inline preview; other types send as documents. Max 50MB each. Auto-chunks text; files send as separate messages after the text. Returns the sent message ID(s). |
 | `react`        | Add an emoji reaction to a message by ID. **Only Telegram's fixed whitelist** is accepted (👍 👎 ❤ 🔥 👀 etc).                                                                                                                                                                                                                                                            |
+| `download_attachment` | Download a file attachment from a Telegram message to the local inbox. Use when the inbound `<channel>` meta shows `attachment_file_id`. Returns the local file path. Telegram caps bot downloads at 20 MB. |
 | `edit_message` | Edit a message the bot previously sent. Useful for "working…" → result progress updates. Only works on the bot's own messages.                                                                                                                                                                                                                                            |
 
 Inbound messages trigger a typing indicator automatically — Telegram shows
@@ -95,6 +96,6 @@ Telegram's Bot API exposes **neither** message history nor search. The bot
 only sees messages as they arrive — no `fetch_messages` tool exists. If the
 assistant needs earlier context, it will ask you to paste or summarize.
 
-This also means there's no `download_attachment` tool for historical messages
-— photos are downloaded eagerly on arrival since there's no way to fetch them
-later.
+The `download_attachment` tool fetches files from incoming messages by
+`attachment_file_id`, but cannot retrieve historical messages — photos are
+downloaded eagerly on arrival since there is no way to fetch them later.

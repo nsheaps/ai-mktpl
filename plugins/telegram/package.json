@@ -1,6 +1,6 @@
 {
   "name": "claude-channel-telegram",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "license": "Apache-2.0",
   "type": "module",
   "bin": "./server.ts",
@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
-    "grammy": "^1.21.0"
+    "grammy": "^1.21.0",
+    "zod": "^3.22.0"
   }
 }
