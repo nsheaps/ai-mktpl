@@ -28,7 +28,7 @@ When the user asks to review a PR:
    - Inform the user: "Triggered the review bot. It will post a review on the PR shortly."
 
 4. **If review bot workflow does NOT exist**:
-   - Perform a local review using the `pr-review-toolkit:review-pr` skill or the `code-review:code-review` agent
+   - Perform a local review using the `self-review` skill (shared multi-agent review process)
    - Post the review directly on the PR
 
 **Notes:**
@@ -98,11 +98,11 @@ The bot follows a structured review process:
 
 ### Review Verdicts
 
-| Verdict           | When                                                            |
-| ----------------- | --------------------------------------------------------------- |
-| `APPROVE`         | No outstanding issues, ready to merge                           |
-| `COMMENT`         | Suggestions but not blocking (won't break if merged)            |
-| `REQUEST_CHANGES` | Must fix before merge (security, correctness, breaking changes) |
+| Verdict           | When                                                        |
+| ----------------- | ----------------------------------------------------------- |
+| `APPROVE`         | No outstanding issues, ready to merge                       |
+| `COMMENT`         | Genuinely optional, with justification for why not blocking |
+| `REQUEST_CHANGES` | Would improve code and is reasonable to do before merge     |
 
 ### Review Summary Format
 

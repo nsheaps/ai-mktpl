@@ -126,9 +126,28 @@ Questions you leave in past reviews may be answered in the PR body or comments. 
    CRITICAL: This ensures only your latest review is visible, preventing clutter and confusion.
    CRITICAL: Only hide YOUR OWN previous reviews, never reviews from other users.
 10. **Submit the review**: Use `mcp__github__submit_pending_pull_request_review` to post your review.
-    CRITICAL: If there are security, performance, or correctness issues that MUST be addressed before merging, use "REQUEST_CHANGES".
-    CRITICAL: If there are no other changes to make, and the PR is ready to merge, use "APPROVE".
-    Use event type "COMMENT" (not "REQUEST_CHANGES") to publish all comments as a non-blocking review if you think there should be changes, but the system won't break if the changes are merged.
+
+    Use **"REQUEST_CHANGES"** when:
+    - Security, performance, or correctness issues exist that must be fixed before merging
+    - Style or convention violations need correction before merging
+    - Maintainability or complexity issues would degrade the codebase if merged
+    - The code would improve meaningfully from a suggested change and the change is straightforward to make
+    - CRITICAL: If a change would make the code better and it's reasonable to do before merge, it's a requested change, not a suggestion
+
+    Use **"APPROVE"** when:
+    - The PR is ready to merge as-is (barring CI issues which you do not evaluate)
+    - No outstanding issues need to be addressed
+    - Previous feedback has been adequately addressed (e.g., author clarified logic in PR body, commit messages, or code comments)
+    - CRITICAL: If the code changes will break something after merge, do NOT approve
+
+    Use **"COMMENT"** only when ALL of these are true:
+    - The code won't break if merged as-is
+    - The suggestions are genuinely optional improvements that don't affect code quality for the current change
+    - There is a clear, specific reason why each suggestion should NOT be addressed in this PR (e.g., out of scope, requires broader refactoring, needs design discussion first)
+    - CRITICAL: If a suggestion would improve the code and is reasonable to implement before merge, use REQUEST_CHANGES instead. "Non-blocking" must have a justification — vague suggestions that could easily be applied are blocking.
+
+    **The bar for non-blocking feedback:**
+    The goal is to merge high-quality code. If your feedback would improve the code, and the improvement is within the scope of the PR and straightforward to implement, then it IS blocking and should use REQUEST_CHANGES. Non-blocking feedback should be reserved for items that genuinely warrant discussion about whether they should be addressed at all, or that would require work significantly beyond the PR's scope.
 
 11. **Post-review verification**: After submitting your review, re-read the PR and all comments to ensure correct state.
 
@@ -163,9 +182,9 @@ _🖱️ Click to expand for full details_
 <detailed review sections with L3+ headings>
 </details>
 
-**Recommended follow-ups** (non-blocking):
-- Item 1
-- Item 2
+**Recommended follow-ups** (non-blocking — each item MUST explain why it shouldn't be addressed in this PR):
+- [Item] — [Reason it's not blocking]
+- [Item] — [Reason]
 
 Notes:[^1][^2]
 [^1]: Workflow Run: [URL]
@@ -184,6 +203,7 @@ Code changes should follow: KISS, YAGNI, DRY, WET, TDA, SOLID.
 - Do not use CI output to base your review — review the code itself
 - Do not post "test" or "review in progress" comments
 - Your review MUST contain `<details>` and `<summary>` HTML tags
+- NEVER wrap any part of your review output in `<![CDATA[...]]>` tags. CDATA wrappers are invalid in GitHub markdown and will render as literal broken text in PR comments. All output must be plain GitHub-flavored markdown.
 
 ## Extra info to help you
 

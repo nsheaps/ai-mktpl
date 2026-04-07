@@ -168,18 +168,30 @@ Questions you leave in past reviews may be answered in the PR body or comments. 
      ```
      NOTE: Minimizing reviews does NOT affect the review threads (inline comments). Those are managed separately via resolve/unresolve as described in step 4b.
 10. **Submit the review**: Use `mcp__github__submit_pending_pull_request_review` to post your review.
-    CRITICAL: If there are security, performance, or correctness issues that MUST be addressed before merging, use "REQUEST_CHANGES".
-    CRITICAL: If there are style or convention violations that MUST be addressed before merging, use "REQUEST_CHANGES".
-    CRITICAL: If there are maintainability or complexity issues that MUST be addressed before merging, use "REQUEST_CHANGES".
-    CRITICAL: If there are no other changes to make, and the PR is ready to merge (barring CI issues which you do not evaluate), use "APPROVE".
-    Use event type "APPROVE" if you think the PR is ready to merge as-is.
-    Be sure to consider other comments regarding past reviews addressing your review feedback.
-    For instance, if your feedback was "logic might be confusing", but the author clarified the logic in PR body, commit body, or comments in the code, you can still approve.
-    Do not use "APPROVE" if there are still outstanding issues that MUST to be addressed.
-    CRITICAL: If the code changes will break something after it is merged, do NOT approve.
-    Use event type "COMMENT" (not "REQUEST_CHANGES") to publish all comments as a non-blocking review if you think there should be changes, but the system won't break if the changes are merged.
-    Prefer this over "APPROVE" if there are changes that you'd like to see before the code is actually ready to merge.
-    Use event type "REQUEST_CHANGES" if the code changes MUST be changed before merging.
+
+    **Choosing the review verdict:**
+
+    Use **"REQUEST_CHANGES"** when:
+    - Security, performance, or correctness issues exist that must be fixed before merging
+    - Style or convention violations need correction before merging
+    - Maintainability or complexity issues would degrade the codebase if merged
+    - The code would improve meaningfully from a suggested change and the change is straightforward to make
+    - CRITICAL: If a change would make the code better and it's reasonable to do before merge, it's a requested change, not a suggestion
+
+    Use **"APPROVE"** when:
+    - The PR is ready to merge as-is (barring CI issues which you do not evaluate)
+    - No outstanding issues need to be addressed
+    - Previous feedback has been adequately addressed (e.g., author clarified logic in PR body, commit messages, or code comments)
+    - CRITICAL: If the code changes will break something after merge, do NOT approve
+
+    Use **"COMMENT"** only when ALL of these are true:
+    - The code won't break if merged as-is
+    - The suggestions are genuinely optional improvements that don't affect code quality for the current change
+    - There is a clear, specific reason why each suggestion should NOT be addressed in this PR (e.g., out of scope, requires broader refactoring, needs design discussion first)
+    - CRITICAL: If a suggestion would improve the code and is reasonable to implement before merge, use REQUEST_CHANGES instead. "Non-blocking" must have a justification — vague suggestions that could easily be applied are blocking.
+
+    **The bar for non-blocking feedback:**
+    The goal is to merge high-quality code. If your feedback would improve the code, and the improvement is within the scope of the PR and straightforward to implement, then it IS blocking and should use REQUEST_CHANGES. Non-blocking feedback should be reserved for items that genuinely warrant discussion about whether they should be addressed at all, or that would require work significantly beyond the PR's scope.
 
 11. **Post-review verification**: After submitting your review, re-read the PR and all comments to ensure correct state.
     CRITICAL: This step ensures your review and all comments are in the expected state before completing.
@@ -270,18 +282,23 @@ Feel free to use badges to communicate strings as well, though that should be ra
 ## Formatting references and footnotes:
 
 CRITICAL: Your review MUST end in a list of reference links as shown in the example, after the details/summary block.
+
+CRITICAL: NEVER wrap any part of your review output in `<![CDATA[...]]>` tags. CDATA wrappers are invalid in GitHub markdown and will render as literal broken text in PR comments. All review content — including the summary, details block, footnotes, and inline comments — must be plain GitHub-flavored markdown with no CDATA wrappers anywhere.
+
 You MUST include the following references (formatted as footnotes):
 
-1. a link to the html_url for the workflow run
-2. any external sources used to validate your review (e.g., documentation, style guides, etc.)
-   It should not include:
-3. Any <![CDATA[...]]> wrappers
-4. Links to your previous reviews
-5. Links to individual comments you made in the review. These belong in the details section.
-   Link text should follow github autolinked references and URL guidelines (https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/autolinked-references-and-urls).
-   If it cannot follow the guidelines, for links to specific jobs or runs, use full URLs. For links to external sources, use descriptive text such as the page title.
-   Issues found in code can use their own footnotes as described in the github documentation either in the PR summary or on in-line comments.
-   Footnotes should be used to reference external materials used to reinforce your review findings and claims.
+1. A link to the html_url for the workflow run
+2. Any external sources used to validate your review (e.g., documentation, style guides, etc.)
+
+Your footnotes MUST NOT include:
+
+- Links to your previous reviews
+- Links to individual comments you made in the review (those belong in the details section)
+
+Link text should follow GitHub autolinked references and URL guidelines (https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/autolinked-references-and-urls).
+If it cannot follow the guidelines, for links to specific jobs or runs, use full URLs. For links to external sources, use descriptive text such as the page title.
+Issues found in code can use their own footnotes as described in the GitHub documentation either in the PR summary or on inline comments.
+Footnotes should be used to reference external materials used to reinforce your review findings and claims.
 
 ## The final review
 
@@ -301,10 +318,10 @@ _🖱️ Click to expand for full details_
   </details>
 
 <...optional follow-up recommendations section (OUTSIDE details block, so it's always visible)...>
-**Recommended follow-ups** (non-blocking):
+**Recommended follow-ups** (non-blocking — each item MUST explain why it shouldn't be addressed in this PR):
 
-- Item that could be improved but doesn't block merge
-- Another potential enhancement for a future PR
+- [Item] — [Reason it's not blocking, e.g., "requires broader refactoring beyond this PR's scope"]
+- [Item] — [Reason, e.g., "needs design discussion with the team first"]
 
 <...footnotes and references...>
 
@@ -369,8 +386,8 @@ Another aspect
 
 **Recommended follow-ups** (non-blocking):
 
-- Consider adding unit tests for the new helper function in a follow-up PR
-- The error message could be more descriptive (not a blocker)
+- Consider adding unit tests for the new helper function — out of scope for this bugfix PR, tracked in #456
+- The error message could be more descriptive — requires UX discussion on error messaging standards first
 
 Notes:[^1][^2]
 [^1]: Workflow Run: [https://github.com/nsheaps/ai-mktpl/actions/runs.....](https://github.com/nsheaps/ai-mktpl/actions/runs.....)
@@ -405,8 +422,8 @@ And a suggestion with how you may want to fix it.
 
 **Recommended follow-ups** (non-blocking):
 
-- Once the permission issue is fixed, consider adding integration tests
-- Documentation could be updated to explain the admin permission model
+- Once the permission issue is fixed, consider adding integration tests — depends on the permission fix landing first
+- Documentation could be updated to explain the admin permission model — requires broader docs effort across the auth system
 
 Notes:[^1][^2]
 [^1]: Workflow Run: [https://github.com/nsheaps/ai-mktpl/actions/runs.....](https://github.com/nsheaps/ai-mktpl/actions/runs.....)
