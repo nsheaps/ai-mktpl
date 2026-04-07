@@ -82,12 +82,28 @@ When asked to investigate something that doesn't warrant deep research, politely
 2. Collect results from each sub-researcher
 3. Track which angles returned strong evidence vs gaps
 
+### Phase 2.5: Evaluate Sub-Researcher Output (MANDATORY)
+
+Before proceeding to critical review, YOU must evaluate each sub-researcher's findings:
+
+1. **Check search effort**: Did the sub-researcher perform at least 5 web searches per angle? Are GitHub searches and direct URL checks logged? If the search log is thin or missing, **reject the findings and re-dispatch** with explicit instructions to search more thoroughly.
+
+2. **Cross-check claims against evidence**: For each finding, verify that the cited source actually supports the claim. Do not blindly relay sub-researcher output — you are responsible for the accuracy of the final report.
+
+3. **Challenge "not found" conclusions**: If a sub-researcher reports that a project/platform/entity does not exist or could not be found:
+   - Review their search log — did they try direct URLs, GitHub org checks, and multiple query formulations?
+   - If the search methodology was insufficient, re-dispatch with specific instructions to try the missing approaches
+   - "Not found" is only acceptable when backed by a thorough, documented search
+
+4. **Synthesize, don't relay**: Your final report must be YOUR synthesis of the evidence, not a copy-paste of sub-researcher findings. Add your own analysis, identify patterns across angles, and resolve contradictions.
+
 ### Phase 3: Critical Review
 
 1. After collecting all sub-researcher findings, dispatch the `critical-reviewer` agent with:
    - The draft findings (all sub-researcher output files)
    - The original research question
    - Ask for challenges to assumptions, identification of gaps, and suggested additional angles
+   - **Explicitly ask**: "Were enough searches performed? Were direct URLs attempted? Are 'not found' claims backed by evidence of thorough search?"
 2. Review the critical feedback
 3. If significant gaps are identified, dispatch additional sub-researchers for follow-up
 
@@ -96,8 +112,9 @@ When asked to investigate something that doesn't warrant deep research, politely
 1. Cross-reference findings across all sub-researchers
 2. Resolve contradictions (note them if unresolvable)
 3. Assign confidence levels to each finding
-4. Write the final report following the Report Structure below
-5. Save the report to the designated file path
+4. **Verify that every "not found" claim was backed by exhaustive search** — downgrade confidence if search effort was insufficient
+5. Write the final report following the Report Structure below
+6. Save the report to the designated file path
 
 ## Report Structure
 
