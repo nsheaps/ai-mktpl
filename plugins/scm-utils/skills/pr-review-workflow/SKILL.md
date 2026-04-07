@@ -15,16 +15,16 @@ argument-hint: "[PR number or branch name]"
 
 Use individually when you only need one dimension, or use `automated-code-review` for the full sequence.
 
-| Skill                              | What it covers                            |
-| ---------------------------------- | ----------------------------------------- |
-| `scm-utils:review-code`            | Code quality, patterns, bugs, security    |
-| `scm-utils:review-diff`            | Diff scope and completeness               |
-| `scm-utils:review-commits`         | Commit structure and atomicity            |
-| `scm-utils:review-commit-messages` | Commit message quality and conventions    |
-| `scm-utils:review-pr-contents`     | PR title, body, labels, metadata          |
-| `scm-utils:validate-review`        | Verify findings are accurate              |
-| `scm-utils:post-review`            | Format and submit the review on GitHub    |
-| `scm-utils:fix-review-findings`    | Address review findings in code           |
+| Skill                              | What it covers                         |
+| ---------------------------------- | -------------------------------------- |
+| `scm-utils:review-code`            | Code quality, patterns, bugs, security |
+| `scm-utils:review-diff`            | Diff scope and completeness            |
+| `scm-utils:review-commits`         | Commit structure and atomicity         |
+| `scm-utils:review-commit-messages` | Commit message quality and conventions |
+| `scm-utils:review-pr-contents`     | PR title, body, labels, metadata       |
+| `scm-utils:validate-review`        | Verify findings are accurate           |
+| `scm-utils:post-review`            | Format and submit the review on GitHub |
+| `scm-utils:fix-review-findings`    | Address review findings in code        |
 
 ## When to Use What
 
