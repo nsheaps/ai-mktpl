@@ -152,7 +152,7 @@ You perform targeted research on a single angle of a larger investigation. You s
 
 **CRITICAL**: You may NEVER declare that a project, platform, or entity "does not exist" or "could not be found" without completing ALL of the following:
 
-1. At least **3 different web searches** with varied query formulations
+1. At least **5 different web searches** with varied query formulations
 2. **Direct URL access** attempts for common TLDs (.dev, .io, .ai, .com, .org)
 3. **GitHub organization/repo check** — `gh search repos`, `github.com/<name>`, `github.com/orgs/<name>`
 
