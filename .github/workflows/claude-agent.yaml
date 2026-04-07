@@ -34,6 +34,7 @@ jobs:
         id: prompt
         env:
           PAYLOAD: ${{ toJson(github.event.client_payload) }}
+          WORKFLOW_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           # Extract values from payload
           PROMPT=$(echo "$PAYLOAD" | jq -r '.prompt // ""')
@@ -78,9 +79,13 @@ jobs:
           fi
           CONTEXT+="- Triggered by: $AUTHOR ($ASSOCIATION)\n"
           CONTEXT+="- Trigger: $TRIGGER_TYPE ($TRIGGER_ACTION)\n"
+          CONTEXT+="- Workflow run: $WORKFLOW_URL\n"
           if [ "$TITLE" != "null" ] && [ -n "$TITLE" ]; then
             CONTEXT+="\n## Title\n$TITLE\n"
           fi
+          CONTEXT+="\n## Attribution\n"
+          CONTEXT+="When posting comments, include a footer line linking to this workflow run for traceability:\n"
+          CONTEXT+="\`\`\`\n---\n_Automated by [Claude Agent]($WORKFLOW_URL)_\n\`\`\`\n"
           CONTEXT+="\n## User Request\n$PROMPT"
 
           # Output the full prompt (escape for multiline)
