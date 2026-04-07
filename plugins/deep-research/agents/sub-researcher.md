@@ -48,26 +48,26 @@ You perform targeted research on a single angle of a larger investigation. You s
    **Required search layers** (perform ALL that apply):
 
    a. **Web searches** (minimum 5 per angle):
-      - Use different phrasings, synonyms, and specificity levels
-      - Try with and without quotes, site-specific searches, date-restricted searches
-      - Example: If researching "OpenClaw", try: `"OpenClaw"`, `"OpenClaw" AI platform`, `OpenClaw site:github.com`, `"open claw" marketplace`, `OpenClaw launch announcement`
+   - Use different phrasings, synonyms, and specificity levels
+   - Try with and without quotes, site-specific searches, date-restricted searches
+   - Example: If researching "OpenClaw", try: `"OpenClaw"`, `"OpenClaw" AI platform`, `OpenClaw site:github.com`, `"open claw" marketplace`, `OpenClaw launch announcement`
 
    b. **GitHub search** — MANDATORY for any named project, platform, or tool:
-      - Use `gh search repos <name>` to find repositories
-      - Use `gh search code <name>` to find code references
-      - Check `github.com/<name>` and `github.com/orgs/<name>` directly via WebFetch
-      - Search GitHub topics and organization pages
+   - Use `gh search repos <name>` to find repositories
+   - Use `gh search code <name>` to find code references
+   - Check `github.com/<name>` and `github.com/orgs/<name>` directly via WebFetch
+   - Search GitHub topics and organization pages
 
    c. **Direct URL checks** — MANDATORY for any named entity:
-      - Try common TLDs: `<name>.dev`, `<name>.io`, `<name>.ai`, `<name>.com`, `<name>.org`
-      - Try `github.com/<name>`, `<name>.github.io`
-      - Use WebFetch to check each URL — a 404 is a valid data point, not a reason to skip
-      - Log the HTTP status/result for each URL attempted
+   - Try common TLDs: `<name>.dev`, `<name>.io`, `<name>.ai`, `<name>.com`, `<name>.org`
+   - Try `github.com/<name>`, `<name>.github.io`
+   - Use WebFetch to check each URL — a 404 is a valid data point, not a reason to skip
+   - Log the HTTP status/result for each URL attempted
 
    d. **Official documentation** (WebFetch for known URLs)
 
    e. **Local codebases** if applicable (Grep, Glob)
-      - Read 50-100 lines of context around matches — a single grep hit is not enough
+   - Read 50-100 lines of context around matches — a single grep hit is not enough
 
 3. **Log ALL queries and results**: Every search query, URL fetch, and GitHub search MUST be logged in your findings file, categorized as:
    - **Relevant**: Directly answers or informs the research question
@@ -110,21 +110,21 @@ You perform targeted research on a single angle of a larger investigation. You s
 
 ### Web Searches Performed
 
-| # | Query | Results | Relevance | Key Learning |
-|---|-------|---------|-----------|-------------|
-| 1 | "exact query" | N results, top: <url> | Relevant/Possibly/Not | <what was learned> |
-| 2 | ... | ... | ... | ... |
+| #   | Query         | Results               | Relevance             | Key Learning       |
+| --- | ------------- | --------------------- | --------------------- | ------------------ |
+| 1   | "exact query" | N results, top: <url> | Relevant/Possibly/Not | <what was learned> |
+| 2   | ...           | ...                   | ...                   | ...                |
 
 ### Direct URLs Attempted
 
-| URL | Status | Relevance | Key Learning |
-|-----|--------|-----------|-------------|
+| URL                 | Status          | Relevance    | Key Learning       |
+| ------------------- | --------------- | ------------ | ------------------ |
 | https://example.dev | 200/404/timeout | Relevant/Not | <what was learned> |
 
 ### GitHub Searches
 
-| Command | Results | Relevance | Key Learning |
-|---------|---------|-----------|-------------|
+| Command                  | Results   | Relevance    | Key Learning       |
+| ------------------------ | --------- | ------------ | ------------------ |
 | `gh search repos "name"` | N results | Relevant/Not | <what was learned> |
 
 ## Sources Consulted
