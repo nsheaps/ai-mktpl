@@ -4,10 +4,12 @@ description: >
   Specification writing and lifecycle management for software development.
   Use when the user asks to "write a spec", "create a specification", "document
   requirements", "spec out a feature", "manage a spec through its lifecycle",
-  "move a spec to live", "archive a spec", "update a spec", or "verify
-  implementation against a spec". Covers creating specs from requirements,
-  managing the spec lifecycle (draft → reviewed → in-progress → live → deprecated
-  → archive), keeping specs as living documents, and using specs for verification.
+  "move a spec to live", "archive a spec", "update a spec", "verify
+  implementation against a spec", or "spec template". Covers creating formal
+  specs from requirements, managing the spec lifecycle (draft → reviewed →
+  in-progress → live → deprecated → archive), keeping specs as living documents,
+  and using specs for verification. For initial planning and task breakdown
+  before a spec exists, use sdlc-utils:plan instead.
 ---
 
 # Specification Writing

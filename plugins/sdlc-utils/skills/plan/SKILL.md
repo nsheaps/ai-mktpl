@@ -1,13 +1,14 @@
 ---
 name: plan
 description: >
-  Planning and requirements for software development. Use when the user asks to
-  "write a spec", "create a specification", "define requirements", "create a
-  feature spec", "draft requirements", "iterate on a spec", "refine a spec",
-  "break down a task", "plan implementation", or mentions specifications,
-  technical requirements, or task breakdown. Guides iterative specification
-  development through research, review, and refinement cycles rather than
-  one-shot generation.
+  Planning, task breakdown, and initial requirements drafting for software
+  development. Use when the user asks to "plan implementation", "break down a
+  task", "task breakdown", "decompose this feature", "plan the work", "create
+  an implementation plan", "what are the steps", or "outline the approach".
+  Focuses on iterative requirements development from seed to actionable tasks.
+  For managing existing specs through their lifecycle (draft -> reviewed ->
+  live -> archive) or writing formal specifications, use sdlc-utils:spec-writing
+  instead.
 ---
 
 # Planning and Requirements
