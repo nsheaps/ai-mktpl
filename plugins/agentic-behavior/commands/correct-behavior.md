@@ -30,25 +30,17 @@ This command helps correct AI behavior mistakes and ensures they don't happen ag
 
 You MUST follow these steps in order:
 
-### Step 1: Reflect on Recent Work
+### Step 1: Reflect and Understand
 
-Think carefully about:
+Document your reflection in this structure before proceeding:
 
-- What task was I just working on?
-- What was I supposed to do?
-- What did I actually do?
-- How did I get there?
-- Did I stay on task or drift?
+1. **What the handler told you that you did wrong** — Quote or paraphrase the correction as given
+2. **What you think you did wrong** — Your own understanding of the mistake
+3. **How you got there** — Root cause: what led you to make this mistake?
+4. **How you should have gotten to the correct solution** — The right path you should have taken
+5. **The correct solution itself** — What the output should have been
 
-Document your reflection clearly before proceeding.
-
-### Step 2: Understand the Correction
-
-Analyze the user's correction (`$ARGUMENTS`) in context of your recent work:
-
-- What specifically did I do wrong?
-- Where did I start going awry?
-- Was this a one-time mistake or a pattern?
+Analyze whether this was a one-time mistake or a pattern.
 
 **If you're unsure what you did wrong, use the AskUserQuestion tool to clarify before proceeding.**
 
@@ -94,7 +86,12 @@ Identify:
 
 Based on your analysis:
 
-1. **Determine the best place for the rule:**
+1. **Determine the best place for the rule** (in priority order):
+
+   **6. Contributions to fix — apply in this priority order:**
+   - **PLUGINS (1st)** — If the correction applies broadly to all agents, fix in the shared plugin source (`~/src/nsheaps/ai-mktpl/plugins/...`). This benefits all agents.
+   - **SKILLS (2nd)** — If the correction is about how a specific task should be done, update the relevant skill (`SKILL.md` or command file).
+   - **RULES (3rd)** — If neither plugin nor skill is the right home, add to `.claude/rules/` files. Prefer rules in shared plugins over project-local rules when applicable.
 
    | If the correction is...          | Put it in...                                                      |
    | -------------------------------- | ----------------------------------------------------------------- |
@@ -102,7 +99,7 @@ Based on your analysis:
    | Project-specific                 | `<git-root>/.claude/CLAUDE.md` or `<git-root>/.claude/rules/*.md` |
    | About a slash command            | The command file itself                                           |
    | About a skill                    | The skill's `SKILL.md`                                            |
-   | About a plugin                   | The plugin source in `~/src/nsheaps/ai/plugins/...`               |
+   | About a plugin                   | The plugin source in `~/src/nsheaps/ai-mktpl/plugins/...`         |
    | User behavior (shared/backed up) | `~/src/nsheaps/ai/.ai/rules/*.md` (AI-agnostic)                   |
    | Repo contribution rules          | `~/src/nsheaps/ai/.claude/rules/*.md` (Claude-specific)           |
 
