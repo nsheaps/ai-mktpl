@@ -36,8 +36,8 @@ jobs:
           # Match @claude only when preceded by start-of-string, whitespace, or newline
           # and followed by end-of-string, whitespace, newline, or punctuation.
           # This prevents false positives like "plugin-dev@claude-plugins-official".
-          if echo "$COMMENT_BODY" | grep -qP '(^|\s)@claude(\s|$|[[:punct:]])' || \
-             echo "$ISSUE_TITLE"  | grep -qP '(^|\s)@claude(\s|$|[[:punct:]])'; then
+          if printf '%s\n' "$COMMENT_BODY" | grep -qP '(^|\s)@claude(\s|$|[[:punct:]])' || \
+             printf '%s\n' "$ISSUE_TITLE"  | grep -qP '(^|\s)@claude(\s|$|[[:punct:]])'; then
             echo "matched=true" >> "$GITHUB_OUTPUT"
           else
             echo "matched=false" >> "$GITHUB_OUTPUT"
