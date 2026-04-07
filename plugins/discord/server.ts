@@ -110,10 +110,7 @@ type GroupPolicy = {
   allowFrom: string[];
 };
 
-type GuildPolicy = {
-  requireMention: boolean;
-  allowFrom: string[];
-};
+type GuildPolicy = GroupPolicy;
 
 type Access = {
   dmPolicy: "pairing" | "allowlist" | "disabled";
@@ -132,7 +129,7 @@ type Access = {
   /** Max chars per outbound message before splitting. Default: 2000 (Discord's hard cap). */
   textChunkLimit?: number;
   /** Split on paragraph boundaries instead of hard char count. */
-  chunkMode?: "newline" | "length";
+  chunkMode?: "length" | "newline";
 };
 
 function defaultAccess(): Access {
