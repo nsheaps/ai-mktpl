@@ -7,14 +7,7 @@
     "email": "nsheaps@gmail.com",
     "url": "https://github.com/nsheaps"
   },
-  "keywords": [
-    "reddit",
-    "fetcher",
-    "research",
-    "community",
-    "social-media",
-    "api"
-  ],
+  "keywords": ["reddit", "fetcher", "research", "community", "social-media", "api"],
   "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/reddit-fetcher",
   "repository": "https://github.com/nsheaps/ai-mktpl"
 }

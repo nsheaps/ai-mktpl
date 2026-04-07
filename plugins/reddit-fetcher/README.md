@@ -37,21 +37,21 @@ reddit-fetch.sh user someuser --limit 10
 
 ### Subcommands
 
-| Subcommand | Description |
-|---|---|
+| Subcommand         | Description                                                        |
+| ------------------ | ------------------------------------------------------------------ |
 | `subreddit <name>` | List posts from a subreddit (hot, new, top, rising, controversial) |
-| `post <url>` | Fetch a single post with its comment tree (depth capped at 3) |
-| `search <query>` | Search all of Reddit or a specific subreddit |
-| `user <username>` | Fetch a user's recent submitted posts |
+| `post <url>`       | Fetch a single post with its comment tree (depth capped at 3)      |
+| `search <query>`   | Search all of Reddit or a specific subreddit                       |
+| `user <username>`  | Fetch a user's recent submitted posts                              |
 
 ### Common Options
 
-| Option | Description | Default |
-|---|---|---|
-| `--sort` | Sort order (varies by subcommand) | `hot` / `relevance` |
-| `--time` | Time filter for top/controversial | none |
-| `--limit` | Number of results (max 100) | 10 |
-| `--include-nsfw` | Include NSFW posts | excluded |
+| Option           | Description                       | Default             |
+| ---------------- | --------------------------------- | ------------------- |
+| `--sort`         | Sort order (varies by subcommand) | `hot` / `relevance` |
+| `--time`         | Time filter for top/controversial | none                |
+| `--limit`        | Number of results (max 100)       | 10                  |
+| `--include-nsfw` | Include NSFW posts                | excluded            |
 
 ## Rate Limiting
 
@@ -60,6 +60,7 @@ The script enforces a 6-second minimum gap between requests to respect Reddit's 
 ## Output Format
 
 All output is markdown, optimized for LLM consumption:
+
 - Post bodies are truncated at 2000 characters
 - Comments are truncated at 500 characters
 - Comment nesting is capped at 3 levels deep

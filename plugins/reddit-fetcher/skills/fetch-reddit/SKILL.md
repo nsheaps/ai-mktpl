@@ -25,12 +25,14 @@ ${CLAUDE_PLUGIN_ROOT}/scripts/reddit-fetch.sh subreddit <name> [options]
 ```
 
 Options:
+
 - `--sort <hot|new|top|rising|controversial>` (default: hot)
 - `--time <hour|day|week|month|year|all>` (for top/controversial)
 - `--limit <n>` (default: 10, max: 100)
 - `--include-nsfw`
 
 Examples:
+
 ```bash
 # Top posts from r/ClaudeCode this week
 ${CLAUDE_PLUGIN_ROOT}/scripts/reddit-fetch.sh subreddit ClaudeCode --sort top --time week --limit 5
@@ -46,11 +48,13 @@ ${CLAUDE_PLUGIN_ROOT}/scripts/reddit-fetch.sh post <url> [options]
 ```
 
 Options:
+
 - `--include-nsfw`
 
 Accepts full Reddit URLs or paths. Comment depth is capped at 3 levels.
 
 Examples:
+
 ```bash
 # Fetch by full URL
 ${CLAUDE_PLUGIN_ROOT}/scripts/reddit-fetch.sh post "https://www.reddit.com/r/ClaudeCode/comments/abc123/some_title/"
@@ -66,6 +70,7 @@ ${CLAUDE_PLUGIN_ROOT}/scripts/reddit-fetch.sh search <query> [options]
 ```
 
 Options:
+
 - `--subreddit <name>` — restrict search to a specific subreddit
 - `--sort <relevance|hot|new|top|comments>` (default: relevance)
 - `--time <hour|day|week|month|year|all>`
@@ -73,6 +78,7 @@ Options:
 - `--include-nsfw`
 
 Examples:
+
 ```bash
 # Search within a subreddit
 ${CLAUDE_PLUGIN_ROOT}/scripts/reddit-fetch.sh search "MCP server setup" --subreddit ClaudeCode --limit 5
@@ -88,11 +94,13 @@ ${CLAUDE_PLUGIN_ROOT}/scripts/reddit-fetch.sh user <username> [options]
 ```
 
 Options:
+
 - `--sort <hot|new|top|controversial>` (default: new)
 - `--limit <n>` (default: 10, max: 100)
 - `--include-nsfw`
 
 Examples:
+
 ```bash
 ${CLAUDE_PLUGIN_ROOT}/scripts/reddit-fetch.sh user someuser --limit 10
 ```
@@ -100,6 +108,7 @@ ${CLAUDE_PLUGIN_ROOT}/scripts/reddit-fetch.sh user someuser --limit 10
 ## Output Format
 
 All output is markdown. Posts include title, author, score, comment count, date, and permalink. Post bodies and comments are truncated to keep output manageable:
+
 - Post body: max 2000 characters
 - Comment body: max 500 characters
 - Comment depth: max 3 levels
