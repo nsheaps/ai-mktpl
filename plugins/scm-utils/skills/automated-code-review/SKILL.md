@@ -136,6 +136,6 @@ This skill orchestrates these specialized review skills:
 
 ## External References
 
-- [granular review skills](../README.md) — Individual skill documentation
+- [granular review skills](../../README.md) — Individual skill documentation
 - [GitHub API review docs](https://docs.github.com/en/rest/pulls/reviews) — GitHub review API reference
 - [Claude Code MCP tools](https://github.com/anthropics/claude-code-action#mcp-tools) — Available MCP tools for GitHub
