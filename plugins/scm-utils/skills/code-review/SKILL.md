@@ -101,7 +101,7 @@ The bot follows a structured review process:
 | Verdict           | When                                                            |
 | ----------------- | --------------------------------------------------------------- |
 | `APPROVE`         | No outstanding issues, ready to merge                           |
-| `COMMENT`         | Suggestions but not blocking (won't break if merged)            |
+| `COMMENT`         | Only P2 follow-ups remain (won't break if merged)               |
 | `REQUEST_CHANGES` | Must fix before merge (security, correctness, breaking changes) |
 
 ### Review Summary Format
@@ -111,7 +111,7 @@ Reviews use a collapsible `<details>/<summary>` format with:
 - Shields.io badges for quality, security, simplicity, and confidence scores
 - Emoji indicators: `✅` checked, `❔` question, `⚠️` warning, `❌` problem
 - Footnotes with workflow run link and external references
-- Follow-up recommendations section (always visible, outside details block)
+- Prioritized follow-ups section with P0/P1/P2 levels (always visible, outside details block)
 
 ## Concurrency
 
