@@ -14,10 +14,10 @@ Address issues identified during a code review, working through findings systema
 ## Process
 
 1. **Read the review report** or PR review comments to understand all findings
-2. **Triage findings** by severity:
-   - Blocking (security, correctness) -- fix first
-   - Warning (maintainability, patterns) -- fix next
-   - Suggestions (style, minor improvements) -- fix if time permits
+2. **Triage findings** by priority:
+   - P0 (critical: security, correctness) -- fix first
+   - P1 (important: maintainability, patterns) -- fix next
+   - P2 (nice-to-have: style, minor improvements) -- fix if time permits
 3. **Fix each finding**:
    - Make the smallest change that addresses the issue
    - Do not introduce new scope while fixing

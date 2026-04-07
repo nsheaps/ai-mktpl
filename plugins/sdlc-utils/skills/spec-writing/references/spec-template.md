@@ -1,6 +1,15 @@
 ---
 name: feature-name
 status: draft # draft | reviewed | in-progress | live | deprecated | archive
+description: One-line summary of what this spec covers
+parent: # Name of parent spec, if this is a child spec
+related: # Names of related specs
+  # - related-spec-name
+owner: # Who is responsible for this spec
+created: # YYYY-MM-DD
+updated: # YYYY-MM-DD
+tags: # Categorization tags
+  # - category
 ---
 
 # [Feature/System Name] - Specification

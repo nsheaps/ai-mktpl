@@ -4,19 +4,13 @@ description: >
   Specification writing and lifecycle management for software development.
   Use when the user asks to "write a spec", "create a specification", "document
   requirements", "spec out a feature", "manage a spec through its lifecycle",
-  "move a spec to live", "archive a spec", "update a spec", "verify
-  implementation against a spec", or "spec template". Covers creating formal
-  specs from requirements, managing the spec lifecycle (draft → reviewed →
-  in-progress → live → deprecated → archive), keeping specs as living documents,
-  and using specs for verification. For initial planning and task breakdown
-  before a spec exists, use sdlc-utils:plan instead.
+  "move a spec to live", "archive a spec", "update a spec", or "verify
+  implementation against a spec". Covers creating specs from requirements,
+  managing the spec lifecycle (draft → reviewed → in-progress → live → deprecated
+  → archive), keeping specs as living documents, and using specs for verification.
 ---
 
 # Specification Writing
-
-> **See also:** `sdlc-utils:plan` for a concise planning workflow covering the
-> iterative spec creation process. This skill covers the full spec lifecycle
-> in depth including phase transitions, verification, and maintenance.
 
 Guide for writing, maintaining, and managing specifications through their
 complete lifecycle. Specifications are a critical tool for ensuring alignment
@@ -163,6 +157,43 @@ use), or `archive` when completely removed
 - Includes removal date and reason
 - Marked clearly as archived/historical
 - May be referenced if that feature is ever reconsidered
+
+## Frontmatter Schema
+
+Every spec file must include YAML frontmatter. The formal schema is defined in
+`schemas/spec-frontmatter.yaml` (relative to the sdlc-utils plugin root).
+
+### Required Fields
+
+| Field    | Type   | Description                                                              |
+| -------- | ------ | ------------------------------------------------------------------------ |
+| `name`   | string | Unique identifier for the spec (kebab-case)                              |
+| `status` | string | Lifecycle stage: draft, reviewed, in-progress, live, deprecated, archive |
+
+### Optional Fields
+
+| Field         | Type     | Description                                 |
+| ------------- | -------- | ------------------------------------------- |
+| `description` | string   | One-line summary of what the spec covers    |
+| `parent`      | string   | Name of parent spec (for child specs)       |
+| `related`     | string[] | Names of related specs to consider together |
+| `owner`       | string   | Who is responsible for this spec            |
+| `created`     | date     | When the spec was first created             |
+| `updated`     | date     | When the spec was last updated              |
+| `tags`        | string[] | Categorization tags                         |
+
+### Validating Frontmatter
+
+When creating or reviewing a spec, verify that:
+
+1. **Required fields are present** — `name` and `status` must exist
+2. **`name` is kebab-case** — e.g., `user-authentication`, not `User Authentication`
+3. **`status` is a valid enum value** — one of: draft, reviewed, in-progress, live,
+   deprecated, archive
+4. **Dates use ISO 8601 format** — `YYYY-MM-DD` (e.g., `2026-04-06`)
+5. **`parent` references an existing spec** — if set, the named spec should exist
+6. **`related` entries reference existing specs** — each name should correspond to
+   a real spec file
 
 ## Creating a Specification
 
@@ -436,7 +467,7 @@ Names should reflect the feature or component, not the status.
 
 ### Reference Material
 
-- **Related rule (if `common-sense` plugin is installed):**
+- **Related rule in common-sense plugin:**
   `mantras-and-incremental-development.md` — Defines spec-driven development
   and the spec lifecycle directory structure
 - [Shape Up (Basecamp)](https://basecamp.com/shapeup) — Iterative development

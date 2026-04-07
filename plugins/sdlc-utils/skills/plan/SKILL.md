@@ -1,21 +1,22 @@
 ---
 name: plan
 description: >
-  Planning, task breakdown, and initial requirements drafting for software
-  development. Use when the user asks to "plan implementation", "break down a
-  task", "task breakdown", "decompose this feature", "plan the work", "create
-  an implementation plan", "what are the steps", or "outline the approach".
-  Focuses on iterative requirements development from seed to actionable tasks.
-  For managing existing specs through their lifecycle (draft -> reviewed ->
-  live -> archive) or writing formal specifications, use sdlc-utils:spec-writing
-  instead.
+  Planning and requirements for software development. Use when the user asks to
+  "define requirements", "draft requirements", "iterate on a spec", "refine a
+  spec", "break down a task", "plan implementation", or mentions task breakdown
+  and iterative requirements development. Guides iterative specification
+  development through research, review, and refinement cycles rather than
+  one-shot generation. For spec lifecycle management (draft -> reviewed -> live),
+  use sdlc-utils:spec-writing instead.
 ---
 
 # Planning and Requirements
 
-> **See also:** `sdlc-utils:spec-writing` for detailed spec lifecycle management,
-> phase transitions, and verification workflows. This skill focuses on the
-> concise planning workflow; `spec-writing` covers the full lifecycle in depth.
+> **See also:** `sdlc-utils:spec-writing` covers spec lifecycle management
+> (moving specs through draft -> reviewed -> live -> archive states, updating
+> specs during implementation, and verifying implementation against specs).
+> Use `plan` when starting from scratch or iterating on requirements; use
+> `spec-writing` when managing an existing spec through its lifecycle.
 
 Write technical specifications through iterative refinement. Each spec is a
 combined document covering both _Problem & Requirements_ (what and why) and
@@ -55,7 +56,7 @@ The seed exists to anchor all future iteration.
 ### Phase 2: First Draft (Skeleton)
 
 Expand the seed into a skeleton spec using the template structure in
-`references/spec-template.md`. Fill in only what is known with confidence.
+`../spec-writing/references/spec-template.md`. Fill in only what is known with confidence.
 Mark unknowns explicitly with `[TBD]` or `[NEEDS RESEARCH]`.
 
 Key sections to draft first:
@@ -164,9 +165,12 @@ while maintaining the iterative process.
 
 ### Reference Files
 
-- **`references/spec-template.md`** - Complete spec template with all sections
-  and guidance for filling each one. Copy this as a starting point for new
-  specs.
+- **`../spec-writing/references/spec-template.md`** - Complete spec template
+  with all sections and guidance for filling each one. Copy this as a starting
+  point for new specs.
+- **`../../schemas/spec-frontmatter.yaml`** - Formal schema defining required
+  and optional frontmatter fields for spec files. Consult this when creating or
+  validating spec frontmatter.
 
 ### External References
 

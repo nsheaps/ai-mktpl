@@ -6,11 +6,10 @@ Software development lifecycle utilities -- one skill per SDLC phase.
 
 ### plan
 
-Planning, task breakdown, and initial requirements drafting. Guides iterative
-requirements development from seed to actionable tasks through research, review,
-and refinement cycles.
+Planning and requirements. Guides iterative specification development through
+research, review, and refinement cycles. Includes a spec template.
 
-**Triggers:** "plan implementation", "break down a task", "task breakdown", "decompose this feature", "create an implementation plan"
+**Triggers:** "write a spec", "define requirements", "plan implementation", "break down a task"
 
 ### implement
 
@@ -47,14 +46,6 @@ refactoring strategy, and dependency management.
 
 **Triggers:** "bug fix", "tech debt", "refactoring", "maintenance"
 
-### spec-writing
-
-Specification writing and lifecycle management. Covers creating formal specs,
-managing the spec lifecycle (draft -> reviewed -> live -> archive), and using
-specs for verification against implementation.
-
-**Triggers:** "write a spec", "create a specification", "manage spec lifecycle", "spec template", "update a spec"
-
 ### iterate-until-good
 
 Evaluates code across many categories, scores each 0-100, and iterates until
@@ -62,11 +53,17 @@ all categories score > 85%. Uses scm-utils review skills for the review portion.
 
 **Triggers:** "iterate until good", "score this code", "review and fix loop"
 
+### spec-writing
+
+Specification writing and lifecycle management. Covers creating specs, managing
+the spec lifecycle (draft -> live -> archive), and using specs for verification.
+
+**Triggers:** "write a spec", "manage spec lifecycle", "spec template", "update a spec"
+
 ## Dependencies
 
-- **scm-utils** -- the `iterate-until-good` and `review` skills delegate to
-  scm-utils review skills for code scoring. Install both plugins from the same
-  marketplace.
+- **scm-utils** — the `iterate-until-good` and `review` skills delegate to scm-utils
+  review skills for code scoring. Install both plugins from the same marketplace.
 
 ## Installation
 
@@ -74,4 +71,5 @@ Install via the nsheaps-claude-plugins marketplace:
 
 ```
 sdlc-utils@nsheaps-claude-plugins
+scm-utils@nsheaps-claude-plugins
 ```

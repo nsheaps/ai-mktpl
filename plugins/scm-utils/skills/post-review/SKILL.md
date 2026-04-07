@@ -22,7 +22,7 @@ Submit a structured review on a GitHub pull request.
 | Verdict           | When to use                                             |
 | ----------------- | ------------------------------------------------------- |
 | `APPROVE`         | No outstanding issues, ready to merge                   |
-| `COMMENT`         | Suggestions but not blocking                            |
+| `COMMENT`         | Only P2 follow-ups remain (won't break if merged)       |
 | `REQUEST_CHANGES` | Must fix before merge (security, correctness, breaking) |
 
 ## Summary Format
@@ -39,7 +39,9 @@ Use collapsible `<details>/<summary>` with shields.io badges for scores:
 
 **Follow-ups:**
 
-- [ ] Item that should be tracked separately
+- **P0**: [Critical — must fix before merge]
+- **P1**: [Important — should fix before merge]
+- **P2**: [Nice-to-have — can be a follow-up PR]
 ```
 
 ## Guidelines

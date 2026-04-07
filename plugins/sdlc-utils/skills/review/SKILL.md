@@ -56,8 +56,8 @@ For each category:
 
 - Be specific: reference exact lines and files
 - Be actionable: say what to change, not just what is wrong
-- Be proportionate: distinguish blocking issues from suggestions
-- Prefix non-blocking comments with a note indicator
+- Assign priority levels to all findings: P0 (critical), P1 (important), P2 (nice-to-have)
+- All findings must be listed — none should be silently dismissed
 
 ### Step 4: Iterate
 
@@ -68,8 +68,8 @@ re-review. Repeat until all categories pass.
 
 | Verdict         | When                                              |
 | --------------- | ------------------------------------------------- |
-| Approve         | All categories >= 85%, no blocking issues         |
-| Comment         | Suggestions but nothing blocking                  |
+| Approve         | All categories >= 85%, no P0 or P1 issues         |
+| Comment         | Only P2 follow-ups remain                         |
 | Request Changes | Any category < 70% or security/correctness issues |
 
 ## Anti-Patterns
