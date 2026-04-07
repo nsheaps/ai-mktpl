@@ -10,22 +10,22 @@ All state lives in `~/.claude/channels/discord/access.json`. The `/discord:acces
 
 ## At a glance
 
-| | |
-| --- | --- |
-| Default policy | `pairing` |
-| Sender ID | User snowflake (numeric, e.g. `184695080709324800`) |
-| Group key | Channel snowflake — not guild ID |
-| Config file | `~/.claude/channels/discord/access.json` |
+|                |                                                     |
+| -------------- | --------------------------------------------------- |
+| Default policy | `pairing`                                           |
+| Sender ID      | User snowflake (numeric, e.g. `184695080709324800`) |
+| Group key      | Channel snowflake — not guild ID                    |
+| Config file    | `~/.claude/channels/discord/access.json`            |
 
 ## DM policies
 
 `dmPolicy` controls how DMs from senders not on the allowlist are handled.
 
-| Policy | Behavior |
-| --- | --- |
-| `pairing` (default) | Reply with a pairing code, drop the message. Approve with `/discord:access pair <code>`. |
-| `allowlist` | Drop silently. No reply. Use this once everyone who needs access is already on the list, or if pairing replies would attract spam. |
-| `disabled` | Drop everything, including allowlisted users and guild channels. |
+| Policy              | Behavior                                                                                                                           |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `pairing` (default) | Reply with a pairing code, drop the message. Approve with `/discord:access pair <code>`.                                           |
+| `allowlist`         | Drop silently. No reply. Use this once everyone who needs access is already on the list, or if pairing replies would attract spam. |
+| `disabled`          | Drop everything, including allowlisted users and guild channels.                                                                   |
 
 ```
 /discord:access policy allowlist
@@ -91,17 +91,17 @@ Configure outbound behavior with `/discord:access set <key> <value>`.
 
 ## Skill reference
 
-| Command | Effect |
-| --- | --- |
-| `/discord:access` | Print current state: policy, allowlist, pending pairings, enabled channels. |
-| `/discord:access pair a4f91c` | Approve pairing code `a4f91c`. Adds the sender to `allowFrom` and sends a confirmation on Discord. |
-| `/discord:access deny a4f91c` | Discard a pending code. The sender is not notified. |
-| `/discord:access allow 184695080709324800` | Add a user snowflake directly. |
-| `/discord:access remove 184695080709324800` | Remove from the allowlist. |
-| `/discord:access policy allowlist` | Set `dmPolicy`. Values: `pairing`, `allowlist`, `disabled`. |
-| `/discord:access group add 846209781206941736` | Enable a guild channel. Flags: `--no-mention`, `--allow id1,id2`. |
-| `/discord:access group rm 846209781206941736` | Disable a guild channel. |
-| `/discord:access set ackReaction 🔨` | Set a config key: `ackReaction`, `replyToMode`, `textChunkLimit`, `chunkMode`, `mentionPatterns`. |
+| Command                                        | Effect                                                                                             |
+| ---------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `/discord:access`                              | Print current state: policy, allowlist, pending pairings, enabled channels.                        |
+| `/discord:access pair a4f91c`                  | Approve pairing code `a4f91c`. Adds the sender to `allowFrom` and sends a confirmation on Discord. |
+| `/discord:access deny a4f91c`                  | Discard a pending code. The sender is not notified.                                                |
+| `/discord:access allow 184695080709324800`     | Add a user snowflake directly.                                                                     |
+| `/discord:access remove 184695080709324800`    | Remove from the allowlist.                                                                         |
+| `/discord:access policy allowlist`             | Set `dmPolicy`. Values: `pairing`, `allowlist`, `disabled`.                                        |
+| `/discord:access group add 846209781206941736` | Enable a guild channel. Flags: `--no-mention`, `--allow id1,id2`.                                  |
+| `/discord:access group rm 846209781206941736`  | Disable a guild channel.                                                                           |
+| `/discord:access set ackReaction 🔨`           | Set a config key: `ackReaction`, `replyToMode`, `textChunkLimit`, `chunkMode`, `mentionPatterns`.  |
 
 ## Config file
 
@@ -121,8 +121,8 @@ Configure outbound behavior with `/discord:access set <key> <value>`.
       // true: respond only to @mentions and replies.
       "requireMention": true,
       // Restrict triggers to these senders. Empty = any member (subject to requireMention).
-      "allowFrom": []
-    }
+      "allowFrom": [],
+    },
   },
 
   // Case-insensitive regexes that count as a mention.
@@ -138,6 +138,6 @@ Configure outbound behavior with `/discord:access set <key> <value>`.
   "textChunkLimit": 2000,
 
   // length = cut at limit. newline = prefer paragraph boundaries.
-  "chunkMode": "newline"
+  "chunkMode": "newline",
 }
 ```

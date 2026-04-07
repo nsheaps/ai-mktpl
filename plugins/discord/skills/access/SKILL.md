@@ -99,7 +99,7 @@ Parse `$ARGUMENTS` (space-separated). If empty or unrecognized, show status.
 
 1. Read (create default if missing).
 2. Set `groups[<channelId>] = { requireMention: !hasFlag("--no-mention"),
-   allowFrom: parsedAllowList }`.
+allowFrom: parsedAllowList }`.
 3. Write.
 
 ### `group rm <channelId>`
@@ -110,6 +110,7 @@ Parse `$ARGUMENTS` (space-separated). If empty or unrecognized, show status.
 
 Delivery/UX config. Supported keys: `ackReaction`, `replyToMode`,
 `textChunkLimit`, `chunkMode`, `mentionPatterns`. Validate types:
+
 - `ackReaction`: string (emoji) or `""` to disable
 - `replyToMode`: `off` | `first` | `all`
 - `textChunkLimit`: number
