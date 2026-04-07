@@ -269,6 +269,18 @@
       ]
     },
     {
+      "name": "discord",
+      "description": "Discord channel for Claude Code — messaging bridge with built-in access control. Manage pairing, allowlists, and policy via /discord:access.",
+      "version": "0.0.4",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/discord",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": ["discord", "messaging", "channel", "mcp"]
+    },
+    {
       "name": "edit-utils",
       "description": "File editing utilities: auto-formatting and linting for written/edited files with project-aware configuration",
       "version": "0.1.0",
@@ -604,7 +616,7 @@
     {
       "name": "scm-utils",
       "description": "Source control management utilities for improving interactions with branches and PRs, both locally and in CI environments",
-      "version": "0.1.15",
+      "version": "0.1.16",
       "author": {
         "name": "Nathan Heaps"
       },
