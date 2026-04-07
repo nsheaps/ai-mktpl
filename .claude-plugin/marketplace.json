@@ -547,6 +547,18 @@
       ]
     },
     {
+      "name": "reddit-fetcher",
+      "description": "Fetch Reddit posts, comments, and subreddit listings via Reddit's public JSON API. Returns markdown-formatted content suitable for LLM consumption. No authentication required.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/reddit-fetcher",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": ["reddit", "fetcher", "research", "community", "social-media", "api"]
+    },
+    {
       "name": "remote-config",
       "description": "Sync upstream Claude config repo on session start. Pulls latest from a configured git repo to ~/.claude-remote/ and reports update status.",
       "version": "0.1.8",
