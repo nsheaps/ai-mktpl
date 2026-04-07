@@ -11,7 +11,7 @@
     {
       "name": "1pass",
       "description": "Install and manage 1Password CLI (op) and op-exec in Claude Code sessions. Provides session-start auto-install for web sessions and comprehensive workflow skills.",
-      "version": "0.3.1",
+      "version": "0.3.2",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -525,25 +525,6 @@
       "keywords": ["plugin", "install", "update", "reload", "management"]
     },
     {
-      "name": "product-development-and-sdlc",
-      "description": "Iterative spec and user story writing with structured SDLC workflows. Guides incremental specification development through research, review, and refinement cycles.",
-      "version": "0.1.1",
-      "author": {
-        "name": "Nathan Heaps"
-      },
-      "source": "./plugins/product-development-and-sdlc",
-      "category": "utility",
-      "tags": ["utility", "skill"],
-      "keywords": [
-        "spec",
-        "specifications",
-        "user-stories",
-        "sdlc",
-        "iterative-development",
-        "product-management"
-      ]
-    },
-    {
       "name": "proxmox",
       "description": "Skills for managing Proxmox VE hosts and LXC containers — creating containers, running Docker in LXC, and hosting services like cloudflared.",
       "version": "0.1.0",
@@ -616,7 +597,7 @@
     {
       "name": "scm-utils",
       "description": "Source control management utilities for improving interactions with branches and PRs, both locally and in CI environments",
-      "version": "0.1.16",
+      "version": "0.2.0",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -624,6 +605,27 @@
       "category": "utility",
       "tags": ["utility", "command", "skill"],
       "keywords": ["git", "branch", "pr", "pull-request", "sync", "merge", "scm", "source-control"]
+    },
+    {
+      "name": "sdlc-utils",
+      "description": "Software development lifecycle utilities — skills organized by SDLC phase: plan, implement, review, test, deploy, and maintain.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/sdlc-utils",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": [
+        "sdlc",
+        "planning",
+        "implementation",
+        "code-review",
+        "testing",
+        "deployment",
+        "maintenance",
+        "software-engineering"
+      ]
     },
     {
       "name": "self-terminate",

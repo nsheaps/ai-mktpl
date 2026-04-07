@@ -8,6 +8,8 @@ description: >
 argument-hint: [PR number | PR URL | branch name]
 ---
 
+> **Note:** This skill covers CI-based automated review via `claude-code-action` and is maintained for backward compatibility with Henry's CI review workflow. For new review workflows, use `scm-utils:automated-code-review`. For manual/interactive code review scoring, see `sdlc-utils:review`.
+
 # Code Review Bot — Claude Code Action
 
 An automated PR review system powered by [claude-code-action](https://github.com/anthropics/claude-code-action) running in GitHub Actions. It reviews PRs for code quality, security, performance, and maintainability, posting structured inline feedback via GitHub's review API.
