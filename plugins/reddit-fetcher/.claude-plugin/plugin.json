@@ -1,0 +1,20 @@
+{
+  "name": "reddit-fetcher",
+  "version": "0.1.0",
+  "description": "Fetch Reddit posts, comments, and subreddit listings via Reddit's public JSON API. Returns markdown-formatted content suitable for LLM consumption. No authentication required.",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "keywords": [
+    "reddit",
+    "fetcher",
+    "research",
+    "community",
+    "social-media",
+    "api"
+  ],
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/reddit-fetcher",
+  "repository": "https://github.com/nsheaps/ai-mktpl"
+}
