@@ -74,10 +74,10 @@ gh pr merge <PR_NUMBER> --squash --delete-branch --hostname github.com
 
 ## Rules
 
-| Rule                                       | Detail                                                     |
-| ------------------------------------------ | ---------------------------------------------------------- |
-| No rebase on pushed branches               | Merge main instead                                         |
-| No force push                              | Add commits on top                                         |
-| Always respond before re-requesting review | Non-negotiable                                             |
+| Rule                                       | Detail                                                         |
+| ------------------------------------------ | -------------------------------------------------------------- |
+| No rebase on pushed branches               | Merge main instead                                             |
+| No force push                              | Add commits on top                                             |
+| Always respond before re-requesting review | Non-negotiable                                                 |
 | Never merge without explicit approval      | Critical violation — asking then acting before answer is worse |
-| Review sub-agent diffs                     | Before reporting PR as fixed                               |
+| Review sub-agent diffs                     | Before reporting PR as fixed                                   |
