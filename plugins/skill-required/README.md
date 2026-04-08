@@ -10,31 +10,39 @@ Claude Code plugin that enforces skill loading before tool use.
 
 ## Configuration
 
-Create `~/.claude/settings.skill-required.yaml` (user-level) or `${project}/.claude/settings.skill-required.yaml` (project-level):
+Copy `skill-required.settings.yaml` from the plugin root to `~/.claude/settings.skill-required.yaml` (user-level) or `${project}/.claude/settings.skill-required.yaml` (project-level) and customize:
 
 ```yaml
 skill-required:
   enabled: true
   skills:
     - name: "git-spice"
-      required_before: "Bash"
-      command_pattern: "gs |git-spice"
+      required_before:
+        - "Bash"
+      command_pattern:
+        - "gs "
+        - "git-spice"
       max_tool_uses_before_reset: 10
     - name: "scm-utils:commit"
-      required_before: "Bash"
-      command_pattern: "git commit|git push"
+      required_before:
+        - "Bash"
+      command_pattern:
+        - "git commit"
+        - "git push"
       max_tool_uses_before_reset: 5
 ```
 
 ### Config Fields
 
-| Field                                 | Description                                      | Default             |
-| ------------------------------------- | ------------------------------------------------ | ------------------- |
-| `enabled`                             | Enable/disable enforcement                       | `true`              |
-| `skills[].name`                       | Skill name to require                            | required            |
-| `skills[].required_before`            | Tool name(s) to gate (pipe-separated)            | required            |
-| `skills[].command_pattern`            | Regex pattern for Bash commands (pipe-separated) | none (all commands) |
-| `skills[].max_tool_uses_before_reset` | Max tool uses before skill must be reloaded      | `10`                |
+| Field                                 | Description                                         | Default             |
+| ------------------------------------- | --------------------------------------------------- | ------------------- |
+| `enabled`                             | Enable/disable enforcement                          | `true`              |
+| `skills[].name`                       | Skill name to require (colons are supported)        | required            |
+| `skills[].required_before`            | Tool name(s) to gate (YAML array)                   | required            |
+| `skills[].command_pattern`            | Regex patterns for Bash commands (YAML array)       | none (all commands) |
+| `skills[].max_tool_uses_before_reset` | Max tool uses before skill must be reloaded         | `10`                |
+
+> **Note:** `required_before` and `command_pattern` accept YAML arrays (preferred) or legacy pipe-separated strings for backwards compatibility.
 
 ### Environment Override
 
@@ -43,7 +51,7 @@ Set `CLAUDE_PLUGIN_SKILL_REQUIRED_ENABLED=false` to disable enforcement.
 ## Dependencies
 
 - `jq` — for JSON processing
-- `yq` — Go version ([mikefarah/yq](https://github.com/mikefarah/yq)) for YAML config parsing
+- `yq` — Go version ([mikefarah/yq](https://github.com/mikefarah/yq)) for YAML config parsing (declared in `mise.toml`)
 
 ## Cache
 
