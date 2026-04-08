@@ -84,8 +84,13 @@ jobs:
             CONTEXT+="\n## Title\n$TITLE\n"
           fi
           CONTEXT+="\n## Attribution\n"
-          CONTEXT+="When posting comments, include a footer line linking to this workflow run for traceability:\n"
-          CONTEXT+="\`\`\`\n---\n_Automated by [Claude Agent]($WORKFLOW_URL)_\n\`\`\`\n"
+          CONTEXT+="When posting comments, append GitHub-flavored markdown footnotes at the end for traceability:\n"
+          CONTEXT+="[^1]: Workflow Run: [$REPO actions/runs/${{ github.run_id }}]($WORKFLOW_URL)\n"
+          if [ "$PR_NUM" != "null" ] && [ -n "$PR_NUM" ]; then
+            CONTEXT+="[^2]: PR: [$REPO#$PR_NUM](${{ github.server_url }}/${{ github.repository }}/pull/$PR_NUM)\n"
+          elif [ "$ISSUE_NUM" != "null" ] && [ -n "$ISSUE_NUM" ]; then
+            CONTEXT+="[^2]: Issue: [$REPO#$ISSUE_NUM](${{ github.server_url }}/${{ github.repository }}/issues/$ISSUE_NUM)\n"
+          fi
           CONTEXT+="\n## User Request\n$PROMPT"
 
           # Output the full prompt (escape for multiline)
