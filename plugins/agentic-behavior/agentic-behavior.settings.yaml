@@ -1,0 +1,14 @@
+agentic-behavior:
+  enabled: true
+  # Path to a git repository for storing memory files
+  # Leave empty to disable git-backed memory sync
+  gitRepo: ''
+  # Git branch to use for memory storage
+  gitBranch: 'main'
+  # When to show the self-check reminder: "always", "first" (once per session), or "none"
+  selfCheckReminder: 'always'
+  # Files to sync to the memory repo
+  # Default: ~/.claude/CLAUDE.md, ~/.claude/history.jsonl, and project CLAUDE.md
+  # memorySources:
+  #   - "~/.claude/CLAUDE.md"
+  #   - "~/.claude/history.jsonl"

@@ -11,7 +11,7 @@
     {
       "name": "1pass",
       "description": "Install and manage 1Password CLI (op) and op-exec in Claude Code sessions. Provides session-start auto-install for web sessions and comprehensive workflow skills.",
-      "version": "0.3.0",
+      "version": "0.3.2",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -42,6 +42,33 @@
       "keywords": ["tmux", "iterm2", "tab-title", "agent-teams", "pane-title"]
     },
     {
+      "name": "agentic-behavior",
+      "description": "Skills for configuring Claude Code, behavior correction, memory tracking, autonomy rules, and time-context awareness. Combines prompt history tracking, git-backed memory sync, and the self-checking Ralph loop pattern.",
+      "version": "0.1.1",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/agentic-behavior",
+      "category": "utility",
+      "tags": ["utility", "command", "skill"],
+      "keywords": [
+        "configuration",
+        "behavior",
+        "correction",
+        "memory",
+        "prompt-tracking",
+        "self-check",
+        "time-context",
+        "claude-code",
+        "autonomy",
+        "rules",
+        "issue-management",
+        "task-tracking",
+        "deduplication",
+        "github-issues"
+      ]
+    },
+    {
       "name": "arcane",
       "description": "Skills for deploying docker-compose stacks via Arcane GitOps — directory conventions, secrets management with 1Password, and GitHub Actions CI/CD.",
       "version": "0.1.1",
@@ -63,18 +90,6 @@
         "self-hosted",
         "homelab"
       ]
-    },
-    {
-      "name": "brain",
-      "description": "Git-backed memory and prompt tracking. Auto-saves prompts to history, syncs memory files to a configurable git repo, and provides self-checking reminders inspired by the Serena MCP Ralph loop pattern.",
-      "version": "0.1.0",
-      "author": {
-        "name": "Nathan Heaps"
-      },
-      "source": "./plugins/brain",
-      "category": "utility",
-      "tags": ["utility", "skill"],
-      "keywords": ["memory", "history", "git", "brain", "prompt-tracking", "self-check"]
     },
     {
       "name": "cloudflare",
@@ -234,6 +249,38 @@
       ]
     },
     {
+      "name": "deep-research",
+      "description": "Multi-agent deep research system for complex investigations. Uses a lead-researcher orchestrator, parallel sub-researchers, and a critical-reviewer to produce evidence-based reports with confidence levels and citations.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/deep-research",
+      "category": "utility",
+      "tags": ["utility", "skill", "agent"],
+      "keywords": [
+        "research",
+        "investigation",
+        "analysis",
+        "synthesis",
+        "agent",
+        "multi-agent",
+        "deep-research"
+      ]
+    },
+    {
+      "name": "discord",
+      "description": "Discord channel for Claude Code — messaging bridge with built-in access control. Manage pairing, allowlists, and policy via /discord:access.",
+      "version": "0.0.4",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/discord",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": ["discord", "messaging", "channel", "mcp"]
+    },
+    {
       "name": "edit-utils",
       "description": "File editing utilities: auto-formatting and linting for written/edited files with project-aware configuration",
       "version": "0.1.0",
@@ -309,7 +356,7 @@
     {
       "name": "github-app",
       "description": "Automatic GitHub App token lifecycle for Claude Code sessions. Generates installation tokens on session start, monitors expiry via PreToolUse hook, and refreshes transparently before commands that need authentication.",
-      "version": "0.1.13",
+      "version": "0.1.15",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -478,25 +525,6 @@
       "keywords": ["plugin", "install", "update", "reload", "management"]
     },
     {
-      "name": "product-development-and-sdlc",
-      "description": "Iterative spec and user story writing with structured SDLC workflows. Guides incremental specification development through research, review, and refinement cycles.",
-      "version": "0.1.1",
-      "author": {
-        "name": "Nathan Heaps"
-      },
-      "source": "./plugins/product-development-and-sdlc",
-      "category": "utility",
-      "tags": ["utility", "skill"],
-      "keywords": [
-        "spec",
-        "specifications",
-        "user-stories",
-        "sdlc",
-        "iterative-development",
-        "product-management"
-      ]
-    },
-    {
       "name": "proxmox",
       "description": "Skills for managing Proxmox VE hosts and LXC containers — creating containers, running Docker in LXC, and hosting services like cloudflared.",
       "version": "0.1.1",
@@ -569,7 +597,7 @@
     {
       "name": "scm-utils",
       "description": "Source control management utilities for improving interactions with branches and PRs, both locally and in CI environments",
-      "version": "0.1.14",
+      "version": "0.2.0",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -579,9 +607,30 @@
       "keywords": ["git", "branch", "pr", "pull-request", "sync", "merge", "scm", "source-control"]
     },
     {
+      "name": "sdlc-utils",
+      "description": "Software development lifecycle utilities — skills organized by SDLC phase: plan, implement, review, test, deploy, and maintain.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/sdlc-utils",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": [
+        "sdlc",
+        "planning",
+        "implementation",
+        "code-review",
+        "testing",
+        "deployment",
+        "maintenance",
+        "software-engineering"
+      ]
+    },
+    {
       "name": "self-terminate",
       "description": "Allows Claude to gracefully terminate itself using SIGINT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -687,27 +736,6 @@
       ]
     },
     {
-      "name": "sync-settings",
-      "description": "Automatically sync and merge local Claude Code settings, commands, and files using configurable rules in syncconfig.yaml",
-      "version": "0.2.26",
-      "author": {
-        "name": "Nathan Heaps"
-      },
-      "source": "./plugins/sync-settings",
-      "category": "utility",
-      "tags": ["utility"],
-      "keywords": [
-        "sync",
-        "settings",
-        "merge",
-        "json",
-        "symlink",
-        "hooks",
-        "configuration",
-        "local-settings"
-      ]
-    },
-    {
       "name": "task-parallelization",
       "description": "Intelligent skill that helps Claude parallelize Task tool calls when working on repetitive or batch operations, optimizing throughput based on task complexity",
       "version": "0.2.25",
@@ -728,6 +756,18 @@
       ]
     },
     {
+      "name": "telegram",
+      "description": "Telegram channel for Claude Code — messaging bridge with built-in access control. Manage pairing, allowlists, and policy via /telegram:access.",
+      "version": "0.0.4",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/telegram",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": ["telegram", "messaging", "channel", "mcp"]
+    },
+    {
       "name": "tmux-subagent",
       "description": "Launch independent Claude sub-agents in tmux sessions with custom configurations, tool restrictions, and iTerm integration",
       "version": "0.2.25",
@@ -742,7 +782,7 @@
     {
       "name": "todo-plus-plus",
       "description": "Enforces commit-on-complete for tasks and reminds about ephemeral session awareness",
-      "version": "0.1.4",
+      "version": "0.1.5",
       "author": {
         "name": "Nathan Heaps"
       },
