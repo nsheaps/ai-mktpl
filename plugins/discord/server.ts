@@ -831,14 +831,13 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
       }
       case "get_channel_info": {
         const ch = await fetchAllowedChannel(args.channel_id as string);
-        const lines: string[] = [
-          `id: ${ch.id}`,
-          `type: ${ChannelType[ch.type] ?? ch.type}`,
-        ];
+        const lines: string[] = [`id: ${ch.id}`, `type: ${ChannelType[ch.type] ?? ch.type}`];
         if ("name" in ch && ch.name) lines.push(`name: ${ch.name}`);
         if ("topic" in ch && ch.topic) lines.push(`topic: ${ch.topic}`);
-        if ("parent" in ch && ch.parent) lines.push(`category: ${ch.parent.name} (id: ${ch.parent.id})`);
-        if ("position" in ch && typeof ch.position === "number") lines.push(`position: ${ch.position}`);
+        if ("parent" in ch && ch.parent)
+          lines.push(`category: ${ch.parent.name} (id: ${ch.parent.id})`);
+        if ("position" in ch && typeof ch.position === "number")
+          lines.push(`position: ${ch.position}`);
         if ("nsfw" in ch && typeof ch.nsfw === "boolean") lines.push(`nsfw: ${ch.nsfw}`);
         if ("rateLimitPerUser" in ch && typeof ch.rateLimitPerUser === "number") {
           lines.push(`slowmode_seconds: ${ch.rateLimitPerUser}`);
@@ -870,7 +869,9 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
         if (!("threads" in ch)) {
           throw new Error(`channel ${args.channel_id} does not support threads`);
         }
-        const threadManager = (ch as { threads: { fetchActive(): Promise<{ threads: Map<string, ThreadChannel> }> } }).threads;
+        const threadManager = (
+          ch as { threads: { fetchActive(): Promise<{ threads: Map<string, ThreadChannel> }> } }
+        ).threads;
         const result = await threadManager.fetchActive();
         const threads = [...result.threads.values()];
         if (threads.length === 0) {
