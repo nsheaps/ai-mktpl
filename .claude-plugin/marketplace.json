@@ -43,21 +43,29 @@
     },
     {
       "name": "agentic-behavior",
-      "description": "Skills and rules for AI agent behavior patterns — task tracking, issue management, and structured workflows.",
-      "version": "0.1.0",
+      "description": "Skills for configuring Claude Code, behavior correction, memory tracking, autonomy rules, and time-context awareness. Combines prompt history tracking, git-backed memory sync, and the self-checking Ralph loop pattern.",
+      "version": "0.1.1",
       "author": {
         "name": "Nathan Heaps"
       },
       "source": "./plugins/agentic-behavior",
       "category": "utility",
-      "tags": ["utility", "skill"],
+      "tags": ["utility", "command", "skill"],
       "keywords": [
-        "agentic",
+        "configuration",
+        "behavior",
+        "correction",
+        "memory",
+        "prompt-tracking",
+        "self-check",
+        "time-context",
+        "claude-code",
+        "autonomy",
+        "rules",
         "issue-management",
         "task-tracking",
         "deduplication",
-        "github-issues",
-        "skills"
+        "github-issues"
       ]
     },
     {
@@ -82,18 +90,6 @@
         "self-hosted",
         "homelab"
       ]
-    },
-    {
-      "name": "brain",
-      "description": "Git-backed memory and prompt tracking. Auto-saves prompts to history, syncs memory files to a configurable git repo, and provides self-checking reminders inspired by the Serena MCP Ralph loop pattern.",
-      "version": "0.1.0",
-      "author": {
-        "name": "Nathan Heaps"
-      },
-      "source": "./plugins/brain",
-      "category": "utility",
-      "tags": ["utility", "skill"],
-      "keywords": ["memory", "history", "git", "brain", "prompt-tracking", "self-check"]
     },
     {
       "name": "cloudflare",
@@ -271,6 +267,18 @@
         "multi-agent",
         "deep-research"
       ]
+    },
+    {
+      "name": "discord",
+      "description": "Discord channel for Claude Code — messaging bridge with built-in access control. Manage pairing, allowlists, and policy via /discord:access.",
+      "version": "0.0.4",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/discord",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": ["discord", "messaging", "channel", "mcp"]
     },
     {
       "name": "edit-utils",
@@ -517,25 +525,6 @@
       "keywords": ["plugin", "install", "update", "reload", "management"]
     },
     {
-      "name": "product-development-and-sdlc",
-      "description": "Iterative spec and user story writing with structured SDLC workflows. Guides incremental specification development through research, review, and refinement cycles.",
-      "version": "0.1.1",
-      "author": {
-        "name": "Nathan Heaps"
-      },
-      "source": "./plugins/product-development-and-sdlc",
-      "category": "utility",
-      "tags": ["utility", "skill"],
-      "keywords": [
-        "spec",
-        "specifications",
-        "user-stories",
-        "sdlc",
-        "iterative-development",
-        "product-management"
-      ]
-    },
-    {
       "name": "proxmox",
       "description": "Skills for managing Proxmox VE hosts and LXC containers — creating containers, running Docker in LXC, and hosting services like cloudflared.",
       "version": "0.1.0",
@@ -608,7 +597,7 @@
     {
       "name": "scm-utils",
       "description": "Source control management utilities for improving interactions with branches and PRs, both locally and in CI environments",
-      "version": "0.1.14",
+      "version": "0.2.0",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -616,6 +605,27 @@
       "category": "utility",
       "tags": ["utility", "command", "skill"],
       "keywords": ["git", "branch", "pr", "pull-request", "sync", "merge", "scm", "source-control"]
+    },
+    {
+      "name": "sdlc-utils",
+      "description": "Software development lifecycle utilities — skills organized by SDLC phase: plan, implement, review, test, deploy, and maintain.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/sdlc-utils",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": [
+        "sdlc",
+        "planning",
+        "implementation",
+        "code-review",
+        "testing",
+        "deployment",
+        "maintenance",
+        "software-engineering"
+      ]
     },
     {
       "name": "self-terminate",
@@ -744,6 +754,18 @@
         "optimization",
         "concurrent"
       ]
+    },
+    {
+      "name": "telegram",
+      "description": "Telegram channel for Claude Code — messaging bridge with built-in access control. Manage pairing, allowlists, and policy via /telegram:access.",
+      "version": "0.0.4",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/telegram",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": ["telegram", "messaging", "channel", "mcp"]
     },
     {
       "name": "tmux-subagent",
