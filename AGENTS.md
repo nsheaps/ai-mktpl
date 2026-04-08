@@ -9,7 +9,7 @@
 | Plugin Development | `.claude/rules/plugin-development.md` |
 | Versioning         | `.claude/rules/versioning.md`         |
 | CI/CD Conventions  | `.claude/rules/ci-cd/conventions.md`  |
-| Project Summary    | `.claude/CLAUDE.md`                   |
+| Project Summary    | `CLAUDE.md`                           |
 
 ## Repository Overview
 
