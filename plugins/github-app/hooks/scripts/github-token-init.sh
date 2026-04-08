@@ -259,6 +259,20 @@ fi
 
 # --- Configure git identity from GitHub App bot account ---
 
+# Write GIT_AUTHOR_*/GIT_COMMITTER_* env vars to the runtime env file so they
+# are available in ALL Bash commands (including sub-agent ones that may not be
+# in a directory with the project's .git/config).
+_write_git_identity_env() {
+  local name="$1" email="$2"
+  [[ -n "${ENV_RUNTIME_FILE:-}" && -f "$ENV_RUNTIME_FILE" && -n "$name" && -n "$email" ]] || return 1
+  cat >> "$ENV_RUNTIME_FILE" <<GITENV
+export GIT_AUTHOR_NAME="$name"
+export GIT_AUTHOR_EMAIL="$email"
+export GIT_COMMITTER_NAME="$name"
+export GIT_COMMITTER_EMAIL="$email"
+GITENV
+}
+
 configure_git_identity() {
   local token="$1"
   local app_id="$2"
@@ -271,6 +285,14 @@ configure_git_identity() {
   # Skip if git user.name is already configured (don't override user's settings)
   if git config user.name &>/dev/null && git config user.email &>/dev/null; then
     hook_log "git user.name/email already configured, skipping"
+    # Still write env vars from existing git config so sub-agent Bash commands
+    # inherit the correct identity regardless of their working directory.
+    local existing_name existing_email
+    existing_name=$(git config user.name)
+    existing_email=$(git config user.email)
+    if _write_git_identity_env "$existing_name" "$existing_email"; then
+      hook_log "Git identity env vars written from existing git config"
+    fi
     return 0
   fi
 
@@ -307,6 +329,10 @@ configure_git_identity() {
   git config user.name "$bot_name"
   git config user.email "$bot_email"
   hook_log "Configured git identity: $bot_name <$bot_email>"
+
+  if _write_git_identity_env "$bot_name" "$bot_email"; then
+    hook_log "Git identity env vars written to runtime env file"
+  fi
 
   # Save slug for use by PreToolUse hook output
   APP_SLUG="$app_slug"
