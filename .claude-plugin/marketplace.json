@@ -11,7 +11,7 @@
     {
       "name": "1pass",
       "description": "Install and manage 1Password CLI (op) and op-exec in Claude Code sessions. Provides session-start auto-install for web sessions and comprehensive workflow skills.",
-      "version": "0.1.11",
+      "version": "0.3.2",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -42,6 +42,87 @@
       "keywords": ["tmux", "iterm2", "tab-title", "agent-teams", "pane-title"]
     },
     {
+      "name": "agentic-behavior",
+      "description": "Skills for configuring Claude Code, behavior correction, memory tracking, autonomy rules, and time-context awareness. Combines prompt history tracking, git-backed memory sync, and the self-checking Ralph loop pattern.",
+      "version": "0.1.1",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/agentic-behavior",
+      "category": "utility",
+      "tags": ["utility", "command", "skill"],
+      "keywords": [
+        "configuration",
+        "behavior",
+        "correction",
+        "memory",
+        "prompt-tracking",
+        "self-check",
+        "time-context",
+        "claude-code",
+        "autonomy",
+        "rules",
+        "issue-management",
+        "task-tracking",
+        "deduplication",
+        "github-issues"
+      ]
+    },
+    {
+      "name": "arcane",
+      "description": "Skills for deploying docker-compose stacks via Arcane GitOps — directory conventions, secrets management with 1Password, and GitHub Actions CI/CD.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/arcane",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": [
+        "arcane",
+        "gitops",
+        "docker-compose",
+        "deployment",
+        "1password",
+        "secrets",
+        "docker",
+        "containers",
+        "self-hosted",
+        "homelab"
+      ]
+    },
+    {
+      "name": "cloudflare",
+      "description": "Skills for managing Cloudflare developer platform components including Workers, R2, D1, AI Gateway, Pages, Tunnels, and more — with Pulumi IaC setup for each.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/cloudflare",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": [
+        "cloudflare",
+        "workers",
+        "r2",
+        "d1",
+        "kv",
+        "pages",
+        "tunnels",
+        "ai-gateway",
+        "zero-trust",
+        "durable-objects",
+        "queues",
+        "vectorize",
+        "dns",
+        "pulumi",
+        "infrastructure-as-code",
+        "iac",
+        "serverless",
+        "edge-computing"
+      ]
+    },
+    {
       "name": "code-simplifier",
       "description": "Simplify and refine code for clarity, consistency, and maintainability. Requires pr-review-toolkit plugin.",
       "version": "0.1.1",
@@ -68,7 +149,7 @@
     {
       "name": "common-sense",
       "description": "Common-sense rules for AI assistant behavior. On session start, symlinks bundled rules into the project's .claude/rules/common-sense directory so they are automatically loaded as context.",
-      "version": "1.3.12",
+      "version": "1.3.13",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -168,6 +249,38 @@
       ]
     },
     {
+      "name": "deep-research",
+      "description": "Multi-agent deep research system for complex investigations. Uses a lead-researcher orchestrator, parallel sub-researchers, and a critical-reviewer to produce evidence-based reports with confidence levels and citations.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/deep-research",
+      "category": "utility",
+      "tags": ["utility", "skill", "agent"],
+      "keywords": [
+        "research",
+        "investigation",
+        "analysis",
+        "synthesis",
+        "agent",
+        "multi-agent",
+        "deep-research"
+      ]
+    },
+    {
+      "name": "discord",
+      "description": "Discord channel for Claude Code — messaging bridge with built-in access control. Manage pairing, allowlists, and policy via /discord:access.",
+      "version": "0.0.4",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/discord",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": ["discord", "messaging", "channel", "mcp"]
+    },
+    {
       "name": "edit-utils",
       "description": "File editing utilities: auto-formatting and linting for written/edited files with project-aware configuration",
       "version": "0.1.0",
@@ -194,7 +307,7 @@
     {
       "name": "git-spice",
       "description": "Skill for managing stacked Git branches with git-spice (gs) CLI tool",
-      "version": "0.2.6",
+      "version": "0.2.7",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -214,7 +327,7 @@
     {
       "name": "github",
       "description": "GitHub CLI installation, authentication, and workflow skill for Claude Code sessions. Consolidates gh-tool and github-auth-skill into a single plugin.",
-      "version": "0.1.12",
+      "version": "0.1.15",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -233,13 +346,17 @@
         "issues",
         "session-start",
         "web-session",
-        "auto-install"
+        "auto-install",
+        "pr-feedback",
+        "code-review",
+        "ci-failures",
+        "review-comments"
       ]
     },
     {
       "name": "github-app",
       "description": "Automatic GitHub App token lifecycle for Claude Code sessions. Generates installation tokens on session start, monitors expiry via PreToolUse hook, and refreshes transparently before commands that need authentication.",
-      "version": "0.1.10",
+      "version": "0.1.14",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -261,7 +378,7 @@
     {
       "name": "google-workspace-cli",
       "description": "Install and manage the Google Workspace CLI (gws) with per-service skills for Gmail, Calendar, Drive, Docs, Sheets, Slides, Chat, Tasks, Contacts, and Admin",
-      "version": "0.1.6",
+      "version": "0.1.7",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -299,6 +416,29 @@
       "keywords": ["linear", "mcp", "hooks", "sync", "issue-tracking", "conflict-detection"]
     },
     {
+      "name": "mcp-tooling",
+      "description": "Skills for MCP CLI tools, frameworks, proxy daemoning, and gateway patterns. Covers philschmid/mcp-cli, mcp-use, apify/mcpc, mcp-proxy daemoning, and MCP gateway architecture for sharing servers across sessions and networks.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/mcp-tooling",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": [
+        "mcp",
+        "mcp-cli",
+        "mcp-use",
+        "mcpc",
+        "mcp-proxy",
+        "mcp-gateway",
+        "model-context-protocol",
+        "tool-discovery",
+        "server-sharing",
+        "daemon"
+      ]
+    },
+    {
       "name": "memory-manager",
       "description": "Intelligent memory management for CLAUDE.md files. Automatically detects and stores user preferences, rules, and instructions with smart scope detection and hierarchical organization.",
       "version": "0.2.26",
@@ -313,7 +453,7 @@
     {
       "name": "mise",
       "description": "Install and manage mise (tool version manager) in Claude Code sessions. Provides session-start auto-install for web sessions and comprehensive workflow skills.",
-      "version": "0.2.16",
+      "version": "0.2.18",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -353,7 +493,7 @@
     {
       "name": "permissions-sync",
       "description": "Merge permission scopes from configurable source settings.json files into settings.local.json on session start. Supports project-level and user-level installation.",
-      "version": "0.1.11",
+      "version": "0.1.12",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -385,22 +525,25 @@
       "keywords": ["plugin", "install", "update", "reload", "management"]
     },
     {
-      "name": "product-development-and-sdlc",
-      "description": "Iterative spec and user story writing with structured SDLC workflows. Guides incremental specification development through research, review, and refinement cycles.",
-      "version": "0.1.1",
+      "name": "proxmox",
+      "description": "Skills for managing Proxmox VE hosts and LXC containers — creating containers, running Docker in LXC, and hosting services like cloudflared.",
+      "version": "0.1.0",
       "author": {
         "name": "Nathan Heaps"
       },
-      "source": "./plugins/product-development-and-sdlc",
+      "source": "./plugins/proxmox",
       "category": "utility",
       "tags": ["utility", "skill"],
       "keywords": [
-        "spec",
-        "specifications",
-        "user-stories",
-        "sdlc",
-        "iterative-development",
-        "product-management"
+        "proxmox",
+        "pve",
+        "lxc",
+        "containers",
+        "virtualization",
+        "homelab",
+        "self-hosted",
+        "docker",
+        "infrastructure"
       ]
     },
     {
@@ -454,19 +597,40 @@
     {
       "name": "scm-utils",
       "description": "Source control management utilities for improving interactions with branches and PRs, both locally and in CI environments",
-      "version": "0.1.13",
+      "version": "0.2.0",
       "author": {
         "name": "Nathan Heaps"
       },
       "source": "./plugins/scm-utils",
       "category": "utility",
-      "tags": ["utility", "skill"],
+      "tags": ["utility", "command", "skill"],
       "keywords": ["git", "branch", "pr", "pull-request", "sync", "merge", "scm", "source-control"]
+    },
+    {
+      "name": "sdlc-utils",
+      "description": "Software development lifecycle utilities — skills organized by SDLC phase: plan, implement, review, test, deploy, and maintain.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/sdlc-utils",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": [
+        "sdlc",
+        "planning",
+        "implementation",
+        "code-review",
+        "testing",
+        "deployment",
+        "maintenance",
+        "software-engineering"
+      ]
     },
     {
       "name": "self-terminate",
       "description": "Allows Claude to gracefully terminate itself using SIGINT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -478,7 +642,7 @@
     {
       "name": "sequential-thinking",
       "description": "Set up the sequential-thinking MCP server and auto-configure permissions for its tools on session start.",
-      "version": "0.1.10",
+      "version": "0.1.11",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -516,7 +680,7 @@
     {
       "name": "skill-required",
       "description": "Enforces that specified skills are loaded before certain tools can be used. Tracks skill reads via PostToolUse and blocks tool use via PreToolUse if the required skill hasn't been recently loaded.",
-      "version": "0.1.3",
+      "version": "0.1.4",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -572,27 +736,6 @@
       ]
     },
     {
-      "name": "sync-settings",
-      "description": "Automatically sync and merge local Claude Code settings, commands, and files using configurable rules in syncconfig.yaml",
-      "version": "0.2.26",
-      "author": {
-        "name": "Nathan Heaps"
-      },
-      "source": "./plugins/sync-settings",
-      "category": "utility",
-      "tags": ["utility"],
-      "keywords": [
-        "sync",
-        "settings",
-        "merge",
-        "json",
-        "symlink",
-        "hooks",
-        "configuration",
-        "local-settings"
-      ]
-    },
-    {
       "name": "task-parallelization",
       "description": "Intelligent skill that helps Claude parallelize Task tool calls when working on repetitive or batch operations, optimizing throughput based on task complexity",
       "version": "0.2.25",
@@ -613,6 +756,18 @@
       ]
     },
     {
+      "name": "telegram",
+      "description": "Telegram channel for Claude Code — messaging bridge with built-in access control. Manage pairing, allowlists, and policy via /telegram:access.",
+      "version": "0.0.4",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/telegram",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": ["telegram", "messaging", "channel", "mcp"]
+    },
+    {
       "name": "tmux-subagent",
       "description": "Launch independent Claude sub-agents in tmux sessions with custom configurations, tool restrictions, and iTerm integration",
       "version": "0.2.25",
@@ -627,7 +782,7 @@
     {
       "name": "todo-plus-plus",
       "description": "Enforces commit-on-complete for tasks and reminds about ephemeral session awareness",
-      "version": "0.1.4",
+      "version": "0.1.5",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -677,6 +832,32 @@
         "categorization",
         "workflow",
         "hooks"
+      ]
+    },
+    {
+      "name": "zai-glm",
+      "description": "Skills for using z.ai (Zhipu AI) GLM models and configuring Claude Code to access them via the Anthropic-compatible endpoint or API gateways.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/zai-glm",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": [
+        "zai",
+        "z-ai",
+        "zhipu",
+        "glm",
+        "glm-5",
+        "glm-4.7",
+        "glm-4.5",
+        "chatglm",
+        "ai-models",
+        "openai-compatible",
+        "anthropic-compatible",
+        "china-ai",
+        "llm-provider"
       ]
     }
   ]
