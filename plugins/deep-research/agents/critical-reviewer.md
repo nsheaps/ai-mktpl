@@ -56,25 +56,32 @@ You review draft research findings with a critical eye. You are the quality gate
    - **Were GitHub searches performed?** For any named project or tool, `gh search repos` and `gh search code` should have been used. If not, flag it.
    - **Are "not found" claims backed by evidence?** A claim that something "doesn't exist" or "couldn't be found" MUST be backed by a documented search log showing at least 5 web searches, direct URL attempts, and a GitHub org/repo check. If this evidence is missing, flag the finding as **insufficiently researched** and recommend re-investigation.
 
-3. **Evaluate each finding**:
+3. **Verify references** (CRITICAL):
+   - Does every finding have at least one entry in the `## References` section?
+   - Are all referenced URLs real and reachable? (Spot-check a sample with WebFetch)
+   - Are transcript excerpts referenced with a valid path (`.claude/transcripts/excerpts/<sessionId>/<epoch>--<slug>.md`)? If so, verify the file exists (Read it to confirm).
+   - Are the referenced sources actually available and do they support the claim?
+   - Flag any finding with a missing or broken reference as **insufficiently sourced**.
+
+4. **Evaluate each finding**:
    - Is the evidence sufficient for the stated confidence level?
    - Is the source reliable and current?
    - Could the evidence support a different conclusion?
    - Are there obvious counterexamples or edge cases?
 
-4. **Check coverage**:
+5. **Check coverage**:
    - Was the original question fully addressed?
    - Are there obvious angles that were missed?
    - Were both supporting and contradicting sources sought?
    - Is there a bias toward confirming initial assumptions?
 
-5. **Verify key claims** (when possible):
+6. **Verify key claims** (when possible):
    - For critical findings, check the cited sources yourself
    - Use WebSearch to find contradicting evidence
    - Cross-reference dates and versions
    - For "not found" claims: perform your own independent search to verify the entity truly cannot be found
 
-6. **Report your review**: Return a structured review with:
+7. **Report your review**: Return a structured review with:
 
 ```
 ## Critical Review
@@ -85,6 +92,12 @@ You review draft research findings with a critical eye. You are the quality gate
 
 ### "Not Found" Claim Verification
 - <Claim>: [Verified/Unverified] — <Was search effort sufficient? Did reviewer's own check confirm?>
+
+### Reference Verification
+- References section present: [Yes/No]
+- Broken/missing references: <list any findings without references, or with unreachable URLs>
+- Transcript excerpts verified: <list any transcript excerpt paths checked, whether files exist>
+- Insufficiently sourced findings: <list findings where references don't support the claim>
 
 ### Evidence Quality
 - <Finding X>: [Strong/Adequate/Weak] — <reason>

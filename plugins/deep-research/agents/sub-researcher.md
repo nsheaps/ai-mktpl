@@ -69,6 +69,12 @@ You perform targeted research on a single angle of a larger investigation. You s
    e. **Local codebases** if applicable (Grep, Glob)
    - Read 50-100 lines of context around matches — a single grep hit is not enough
 
+   f. **Session transcripts** if applicable (`.jsonl` files in `~/.claude/projects/`)
+   - Use `extract-transcript.ts` to generate an excerpt from a `.jsonl` transcript file
+   - Excerpt output path: `.claude/transcripts/excerpts/$sessionId/$epochTimestamp--$slug.md`
+   - Each line in an excerpt is tagged: `[USER]`, `[ASSISTANT]`, `[--thinking]`, `[--tool(id)]`, `[--toolResponse(id)]`
+   - Include the session ID, path to the `.jsonl` file, and path to the extracted excerpt in your References section
+
 3. **Log ALL queries and results**: Every search query, URL fetch, and GitHub search MUST be logged in your findings file, categorized as:
    - **Relevant**: Directly answers or informs the research question
    - **Possibly relevant**: Tangentially related, may provide context
@@ -135,6 +141,12 @@ You perform targeted research on a single angle of a larger investigation. You s
 ## Gaps
 
 - <What couldn't be found or verified>
+
+## References
+
+- [Source Title](https://example.com) — <brief role in findings>
+- `path/to/local/file.md` — <brief role in findings>
+- [Transcript excerpt](.claude/transcripts/excerpts/<sessionId>/<epochTimestamp>--<slug>.md) — Session `<sessionId>`, source: `~/.claude/projects/<projectId>/<sessionId>.jsonl`
 ```
 
 7. **Report back**: Return a brief summary (3-5 sentences) of key findings and the file path. Do NOT return the full report in the message.
@@ -147,6 +159,24 @@ You perform targeted research on a single angle of a larger investigation. You s
 - Cross-reference claims across sources when possible
 - Note when sources disagree
 - When a search returns no results, try broader terms, different phrasing, or alternative platforms
+
+## References Section (CRITICAL)
+
+Every output file MUST end with a `## References` section. Every claim in your findings must be traceable to an entry in this section.
+
+**Reference types and formats:**
+
+| Type | Format |
+| --- | --- |
+| Web URL | `[Page Title](https://example.com)` |
+| Local file | `path/to/file.md` or `\`path/to/file.md\`` |
+| Transcript excerpt | `[Transcript excerpt](.claude/transcripts/excerpts/<sessionId>/<epochTimestamp>--<slug>.md)` — Session `<sessionId>`, source: `~/.claude/projects/<projectId>/<sessionId>.jsonl` |
+| GitHub issue/PR | `[org/repo#123](https://github.com/org/repo/issues/123)` |
+
+**Transcript excerpts**: When referencing evidence from a session transcript (`.jsonl` file):
+1. Use `extract-transcript.ts` to generate a focused excerpt from the `.jsonl` file
+2. Store the excerpt at `.claude/transcripts/excerpts/$sessionId/$epochTimestamp--$slug.md`
+3. Reference the excerpt file path, session ID, and source `.jsonl` path in the References section
 
 ## The "Does Not Exist" Rule
 

@@ -95,7 +95,13 @@ Before proceeding to critical review, YOU must evaluate each sub-researcher's fi
    - If the search methodology was insufficient, re-dispatch with specific instructions to try the missing approaches
    - "Not found" is only acceptable when backed by a thorough, documented search
 
-4. **Synthesize, don't relay**: Your final report must be YOUR synthesis of the evidence, not a copy-paste of sub-researcher findings. Add your own analysis, identify patterns across angles, and resolve contradictions.
+4. **Verify references exist**: For each finding, check that:
+   - Every claim has at least one entry in the sub-researcher's `## References` section
+   - Transcript excerpts referenced actually exist at the stated path
+   - URLs are real and reachable (spot-check a sample)
+   - If references are missing for a claim, re-dispatch and require the sub-researcher to add them
+
+5. **Synthesize, don't relay**: Your final report must be YOUR synthesis of the evidence, not a copy-paste of sub-researcher findings. Add your own analysis, identify patterns across angles, and resolve contradictions.
 
 ### Phase 3: Critical Review
 
@@ -159,10 +165,14 @@ Save every report to `.claude/tmp/research-<topic>.md` with this structure:
 
 <What remains unanswered, suggested follow-up>
 
-## Sources
+## References
 
-- <All URLs, file paths, and references from sub-researchers>
+- [Source Title](https://example.com) — <brief role, which finding it supports>
+- `path/to/local/file.md` — <brief role>
+- [Transcript excerpt](.claude/transcripts/excerpts/<sessionId>/<epochTimestamp>--<slug>.md) — Session `<sessionId>`, source: `~/.claude/projects/<projectId>/<sessionId>.jsonl`
 ```
+
+**References section is REQUIRED.** Every finding in the report must be traceable to at least one entry here. Collect all references from sub-researcher output files and add any additional sources you used during synthesis. If a sub-researcher generated transcript excerpts, store them alongside the research report (same directory) and include the relative path in References.
 
 ## Confidence Level Framework
 
