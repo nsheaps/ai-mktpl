@@ -8,6 +8,8 @@ description: >
 argument-hint: [PR number | PR URL | branch name]
 ---
 
+> **Note:** This skill covers CI-based automated review via `claude-code-action` and is maintained for backward compatibility with Henry's CI review workflow. For new review workflows, use `scm-utils:automated-code-review`. For manual/interactive code review scoring, see `sdlc-utils:review`.
+
 # Code Review Bot — Claude Code Action
 
 An automated PR review system powered by [claude-code-action](https://github.com/anthropics/claude-code-action) running in GitHub Actions. It reviews PRs for code quality, security, performance, and maintainability, posting structured inline feedback via GitHub's review API.
@@ -101,7 +103,7 @@ The bot follows a structured review process:
 | Verdict           | When                                                            |
 | ----------------- | --------------------------------------------------------------- |
 | `APPROVE`         | No outstanding issues, ready to merge                           |
-| `COMMENT`         | Suggestions but not blocking (won't break if merged)            |
+| `COMMENT`         | Only P2 follow-ups remain (won't break if merged)               |
 | `REQUEST_CHANGES` | Must fix before merge (security, correctness, breaking changes) |
 
 ### Review Summary Format
@@ -111,7 +113,7 @@ Reviews use a collapsible `<details>/<summary>` format with:
 - Shields.io badges for quality, security, simplicity, and confidence scores
 - Emoji indicators: `✅` checked, `❔` question, `⚠️` warning, `❌` problem
 - Footnotes with workflow run link and external references
-- Follow-up recommendations section (always visible, outside details block)
+- Prioritized follow-ups section with P0/P1/P2 levels (always visible, outside details block)
 
 ## Concurrency
 
