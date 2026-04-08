@@ -1,0 +1,17 @@
+{
+  "description": "Auto-approve Edit/Write/Bash permission requests in web sessions",
+  "hooks": {
+    "PermissionRequest": [
+      {
+        "matcher": "Edit|Write|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -n \"$CLAUDE_CODE_REMOTE\" ] && echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PermissionRequest\",\"decision\":{\"behavior\":\"allow\"}}}' || true",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

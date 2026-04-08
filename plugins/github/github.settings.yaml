@@ -1,0 +1,28 @@
+# github plugin configuration
+#
+# Override per-project via ${CLAUDE_PROJECT_DIR}/.claude/plugins.settings.yaml
+# or per-user via ~/.claude/plugins.settings.yaml under the "github" key.
+#
+# Set enabled: false to disable auto-install without uninstalling the plugin.
+
+github:
+  enabled: true
+
+  # Download and install the gh binary if not already on PATH.
+  # Set to false when gh is managed externally (e.g. via mise with gh in mise.toml).
+  # When false, the plugin still runs autoAuthCheck if configured.
+  autoInstall: true
+
+  # Install gh to $CLAUDE_PROJECT_DIR/bin/.local on web sessions.
+  # Only used when autoInstall is true.
+  installToProject: true
+
+  # Run installation in the background (non-blocking session start)
+  backgroundInstall: false
+
+  # Specific gh version to install (default: latest)
+  # version: "2.87.3"
+  version: 'latest'
+
+  # Auto-run `gh auth status` after install to verify authentication
+  autoAuthCheck: true

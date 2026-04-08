@@ -1,0 +1,1 @@
+../../../shared/lib/hook-output.sh

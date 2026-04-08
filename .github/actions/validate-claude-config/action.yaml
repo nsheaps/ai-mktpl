@@ -1,0 +1,26 @@
+name: Validate Claude Config
+description: |
+  Validates Claude Code configuration consistency:
+  - enabledPlugins keys match plugins in the marketplace
+  - Plugin directory names match plugin.json names
+  - Plugin hook file references are valid
+
+inputs:
+  settings-file:
+    description: Path to Claude settings.json
+    required: false
+    default: '.claude/settings.json'
+  marketplace-file:
+    description: Path to marketplace.json
+    required: false
+    default: '.claude-plugin/marketplace.json'
+
+runs:
+  using: composite
+  steps:
+    - name: mise run validate-claude-config
+      shell: bash
+      run: |
+        mise run validate-claude-config \
+          "${{ inputs.settings-file }}" \
+          "${{ inputs.marketplace-file }}"

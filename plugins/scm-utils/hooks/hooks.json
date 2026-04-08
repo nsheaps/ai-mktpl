@@ -1,14 +1,14 @@
 {
-  "description": "Reminds about uncommitted changes when session stops",
+  "description": "SCM workflow hooks for branch and PR management",
   "hooks": {
-    "Stop": [
+    "PostToolUse": [
       {
-        "matcher": "*",
+        "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/check-uncommitted-on-stop.sh",
-            "timeout": 10
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/post-git-push-reminder.sh",
+            "timeout": 5
           }
         ]
       }

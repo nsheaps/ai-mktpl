@@ -1,0 +1,32 @@
+# mise plugin configuration
+#
+# Override per-project via ${CLAUDE_PROJECT_DIR}/.claude/plugins.settings.yaml
+# or per-user via ~/.claude/plugins.settings.yaml under the "mise" key.
+#
+# Set enabled: false to disable auto-install without uninstalling the plugin.
+
+mise:
+  enabled: true
+
+  # Download and install the mise binary if not already on PATH.
+  # Set to false when mise is managed externally (e.g. by a workspace hook or
+  # container image). The plugin will still activate mise and write to
+  # CLAUDE_ENV_FILE when mise is found on PATH.
+  autoInstall: true
+
+  # Install mise to $CLAUDE_PROJECT_DIR/bin/.local on web sessions.
+  # Only used when autoInstall is true.
+  installToProject: true
+
+  # Run installation in the background (non-blocking session start)
+  backgroundInstall: false
+
+  # Specific mise version to install (default: latest)
+  # version: "2024.12.16"
+  version: 'latest'
+
+  # Auto-run `mise install` after mise is available
+  autoInstallTools: true
+
+  # Auto-run `mise trust` for the project's mise.toml
+  autoTrust: true

@@ -16,7 +16,7 @@ if command -v mise &> /dev/null; then
     # if not installed via a package manager, having an out of date
     # version of mise can result in strange errors when installing node due to gpg
     # signing, so we'll just eat the error
-    mise self-update >/dev/null 2>&1 || true
+    mise self-update --yes >/dev/null 2>&1 || true
     # TODO: if claude or CI, run as verbose
     mise trust --quiet
     mise install -y
@@ -31,4 +31,4 @@ else
     exit 1
 fi
 
-watch_file "${ROOT_DIR}/.mise.toml"
+watch_file "${ROOT_DIR}/mise.toml"

@@ -42,18 +42,13 @@ jobs:
       actions: read
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-        with:
-          persist-credentials: false
-          fetch-depth: 50
-
-      - name: Authenticate as GitHub App
+      - name: Checkout and authenticate as GitHub App
         id: auth
-        uses: ./.github/actions/github-app-auth
+        uses: nsheaps/github-actions/.github/actions/checkout-as-app@603052841cd49b9fdc99bc32979ff9c45c9b669e # checkout-as-app@main
         with:
           app-id: ${{ secrets.REVIEW_GITHUB_APP_ID }}
           private-key: ${{ secrets.REVIEW_GITHUB_APP_PRIVATE_KEY }}
+          fetch-depth: '50'
 
       - name: Remove request-review label
         if: github.event.action == 'labeled' && github.event.label.name == 'request-review'
@@ -189,7 +184,7 @@ jobs:
           # won't find the past comments since it's looking for github-actions[bot], not the auth it uses to post the comment.
           bot_id: ${{ steps.auth.outputs.user-id }}
           bot_name: ${{ steps.auth.outputs.user-name }}
-          allowed_bots: 'github-actions[bot],renovate[bot],claude[bot],automation-nsheaps[bot]'
+          allowed_bots: 'github-actions[bot],renovate[bot],claude[bot],automation-nsheaps[bot],jack-nsheaps[bot]'
           github_token: ${{ steps.auth.outputs.token }}
           settings: ${{ env.INPUT_SETTINGS_JSON }}
           additional_permissions: |
