@@ -1,0 +1,37 @@
+# Spec Frontmatter Schema
+# Referenced by sdlc-utils skills to validate spec files
+required:
+  name:
+    type: string
+    description: Unique identifier for the spec (kebab-case)
+  status:
+    type: string
+    enum: [draft, reviewed, in-progress, live, deprecated, archive]
+    description: Current lifecycle stage
+
+optional:
+  description:
+    type: string
+    description: One-line summary of what the spec covers
+  parent:
+    type: string
+    description: Name of parent spec (for child specs in hierarchical projects)
+  related:
+    type: array
+    items: string
+    description: Names of related specs that should be considered together
+  owner:
+    type: string
+    description: Who is responsible for this spec
+  created:
+    type: string
+    format: date
+    description: When the spec was first created
+  updated:
+    type: string
+    format: date
+    description: When the spec was last updated
+  tags:
+    type: array
+    items: string
+    description: Categorization tags
