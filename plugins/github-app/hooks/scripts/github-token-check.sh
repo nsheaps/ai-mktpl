@@ -6,7 +6,7 @@
 #
 # Behavior:
 #   - Bash commands using gh/git: synchronous check before execution
-#     - If token valid but close to expiry: allow + background refresh
+#     - If token valid but close to expiry (<=45 min): allow + background refresh
 #     - If token expired: synchronous refresh, then allow
 #   - All other tools: async check, never blocks
 #   - Successful refreshes update the runtime env file so subsequent
@@ -22,7 +22,8 @@ set -euo pipefail
 # --- Configuration ---
 
 DEBOUNCE_FILE="${HOME}/.config/agent/github-app-last-check"
-DEBOUNCE_SECONDS=30  # Don't check more often than every 30 seconds
+DEBOUNCE_SECONDS=30    # Don't check more often than every 30 seconds
+REFRESH_THRESHOLD=45   # Proactively refresh when <=45 min remain (token lasts 1h)
 TOKEN_FILE="${GITHUB_TOKEN_FILE:-$HOME/.config/agent/github-token}"
 META_FILE="${TOKEN_FILE}.meta"
 
@@ -128,7 +129,7 @@ if uses_token; then
       allow_silent
       ;;
     *)
-      if (( MINUTES <= 30 )); then
+      if (( MINUTES <= REFRESH_THRESHOLD )); then
         # Valid but close to expiry — allow + background refresh
         echo "github-app: token valid, but close to expiration, refreshing in the background" >&2
         "$BIN_DIR/token-check.sh" --quiet 2>/dev/null &
@@ -160,7 +161,7 @@ else
       allow_silent
       ;;
     *)
-      if (( MINUTES <= 30 )); then
+      if (( MINUTES <= REFRESH_THRESHOLD )); then
         echo "github-app: token valid, but close to expiration, refreshing in the background" >&2
         "$BIN_DIR/token-check.sh" --quiet 2>/dev/null &
         disown

@@ -37,7 +37,7 @@ META_FILE="${TOKEN_FILE}.meta"
 ENV_RUNTIME_FILE="${GITHUB_APP_ENV_FILE:-$HOME/.config/agent/github-app-env}"
 LOCKFILE="${TOKEN_FILE}.lock"
 COOLDOWN_FILE="${TOKEN_FILE}.cooldown"
-REFRESH_THRESHOLD_MINUTES=30
+REFRESH_THRESHOLD_MINUTES=45  # Proactively refresh when <=45 min remain (token lasts 1h)
 MAX_RETRIES=3
 COOLDOWN_SECONDS=300
 
