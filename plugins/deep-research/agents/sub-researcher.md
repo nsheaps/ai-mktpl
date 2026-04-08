@@ -166,14 +166,15 @@ Every output file MUST end with a `## References` section. Every claim in your f
 
 **Reference types and formats:**
 
-| Type | Format |
-| --- | --- |
-| Web URL | `[Page Title](https://example.com)` |
-| Local file | `path/to/file.md` or `\`path/to/file.md\`` |
+| Type               | Format                                                                                                                                                                           |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Web URL            | `[Page Title](https://example.com)`                                                                                                                                              |
+| Local file         | `path/to/file.md` or `\`path/to/file.md\``                                                                                                                                       |
 | Transcript excerpt | `[Transcript excerpt](.claude/transcripts/excerpts/<sessionId>/<epochTimestamp>--<slug>.md)` — Session `<sessionId>`, source: `~/.claude/projects/<projectId>/<sessionId>.jsonl` |
-| GitHub issue/PR | `[org/repo#123](https://github.com/org/repo/issues/123)` |
+| GitHub issue/PR    | `[org/repo#123](https://github.com/org/repo/issues/123)`                                                                                                                         |
 
 **Transcript excerpts**: When referencing evidence from a session transcript (`.jsonl` file):
+
 1. Use `extract-transcript.ts` to generate a focused excerpt from the `.jsonl` file
 2. Store the excerpt at `.claude/transcripts/excerpts/$sessionId/$epochTimestamp--$slug.md`
 3. Reference the excerpt file path, session ID, and source `.jsonl` path in the References section
