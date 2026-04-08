@@ -34,13 +34,13 @@ skill-required:
 
 ### Config Fields
 
-| Field                                 | Description                                         | Default             |
-| ------------------------------------- | --------------------------------------------------- | ------------------- |
-| `enabled`                             | Enable/disable enforcement                          | `true`              |
-| `skills[].name`                       | Skill name to require (colons are supported)        | required            |
-| `skills[].required_before`            | Tool name(s) to gate (YAML array)                   | required            |
-| `skills[].command_pattern`            | Regex patterns for Bash commands (YAML array)       | none (all commands) |
-| `skills[].max_tool_uses_before_reset` | Max tool uses before skill must be reloaded         | `10`                |
+| Field                                 | Description                                   | Default             |
+| ------------------------------------- | --------------------------------------------- | ------------------- |
+| `enabled`                             | Enable/disable enforcement                    | `true`              |
+| `skills[].name`                       | Skill name to require (colons are supported)  | required            |
+| `skills[].required_before`            | Tool name(s) to gate (YAML array)             | required            |
+| `skills[].command_pattern`            | Regex patterns for Bash commands (YAML array) | none (all commands) |
+| `skills[].max_tool_uses_before_reset` | Max tool uses before skill must be reloaded   | `10`                |
 
 > **Note:** `required_before` and `command_pattern` accept YAML arrays (preferred) or legacy pipe-separated strings for backwards compatibility.
 
