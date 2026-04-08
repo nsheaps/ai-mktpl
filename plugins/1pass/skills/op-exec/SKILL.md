@@ -150,6 +150,47 @@ also in bash sessions.
 - **Both (default)**: Most common — ensures secrets are available everywhere
   during the session and to all tool types.
 
+## ENVIRONMENT Aggregator Pattern
+
+The `ENVIRONMENT` item in 1Password (e.g., `op://AI-Jack/ENVIRONMENT`) serves as the
+canonical aggregator for all environment variables. Instead of adding separate items to
+`opExec.items`, add new secrets as fields to the ENVIRONMENT item:
+
+1. In 1Password, add a new field to the ENVIRONMENT item with the desired env var name
+   as the label (e.g., `DISCORD_BOT_TOKEN`)
+2. Set the field value to an `op://` reference pointing to the actual secret
+   (e.g., `op://AI-Jack/discord--jack_oat_bot/token`)
+3. op-exec resolves references recursively, so the field value will be the actual secret
+   at runtime
+4. The field label becomes the exported env var name (converted to UPPER_SNAKE_CASE)
+
+This pattern means you only need one item in `opExec.items` (the ENVIRONMENT item) to
+manage all secrets. Adding separate items should be avoided unless the secret doesn't
+fit the aggregator pattern.
+
+### Example
+
+```
+ENVIRONMENT item fields:
+- TELEGRAM_BOT_TOKEN = op://AI-Jack/telegram-bot/token
+- DISCORD_BOT_TOKEN = op://AI-Jack/discord--jack_oat_bot/token
+- BRAINTRUST_API_KEY = op://AI-Jack/braintrust/api-key
+```
+
+### Plugin Config with Aggregator
+
+When using the aggregator pattern, the plugin config is minimal — just one item:
+
+```yaml
+1pass:
+  opExec:
+    items:
+      - "op://AI-Jack/ENVIRONMENT"
+```
+
+All env vars are managed by adding/removing fields on that single 1Password item,
+rather than editing plugin configuration.
+
 ## Troubleshooting
 
 ### "op-exec: command not found"
