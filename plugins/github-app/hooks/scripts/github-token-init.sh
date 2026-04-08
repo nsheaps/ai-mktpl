@@ -227,6 +227,20 @@ if [[ -f "$META_FILE" ]]; then
   EXPIRES_AT=$(jq -r '.expires_at // empty' "$META_FILE" 2>/dev/null)
 fi
 
+# --- GH_CONFIG_DIR isolation ---
+# Create an agent-specific, empty gh config directory so that gh never falls
+# back to the handler's personal keyring when the App token expires.
+# The directory is scoped to the agent (using CLAUDE_PROJECT_DIR if available,
+# otherwise HOME/.config/agent) so multiple agents don't share config.
+
+hook_log_step "gh-config-dir" "Creating isolated GH_CONFIG_DIR"
+
+_GH_CONFIG_SCOPE="${CLAUDE_PROJECT_DIR:-$HOME}"
+GH_CONFIG_DIR="${_GH_CONFIG_SCOPE}/.claude/tmp/gh-config"
+mkdir -p "$GH_CONFIG_DIR"
+chmod 700 "$GH_CONFIG_DIR"
+hook_log "GH_CONFIG_DIR isolated at $GH_CONFIG_DIR"
+
 # --- Write runtime env file ---
 # This file is sourced via CLAUDE_ENV_FILE so that subsequent Bash commands
 # always pick up the latest token. The PreToolUse hook updates this file
@@ -245,6 +259,7 @@ export GITHUB_APP_ID="$GITHUB_APP_ID"
 export GITHUB_APP_PRIVATE_KEY_PATH="$GITHUB_APP_PRIVATE_KEY_PATH"
 export GITHUB_INSTALLATION_ID="$GITHUB_INSTALLATION_ID"
 export GITHUB_APP_ENV_FILE="$ENV_RUNTIME_FILE"
+export GH_CONFIG_DIR="$GH_CONFIG_DIR"
 ENVEOF
 [[ -n "${GITHUB_APP_CLIENT_ID:-}" ]] && echo "export GITHUB_APP_CLIENT_ID=\"$GITHUB_APP_CLIENT_ID\"" >> "$ENV_RUNTIME_FILE"
 [[ -n "${GITHUB_APP_CLIENT_SECRET:-}" ]] && echo "export GITHUB_APP_CLIENT_SECRET=\"$GITHUB_APP_CLIENT_SECRET\"" >> "$ENV_RUNTIME_FILE"

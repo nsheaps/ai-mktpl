@@ -108,6 +108,8 @@ export GITHUB_APP_ENV_FILE="$ENV_RUNTIME_FILE"
 ENVEOF
   [[ -n "${GITHUB_APP_CLIENT_ID:-}" ]] && echo "export GITHUB_APP_CLIENT_ID=\"$GITHUB_APP_CLIENT_ID\"" >> "$ENV_RUNTIME_FILE"
   [[ -n "${GITHUB_APP_CLIENT_SECRET:-}" ]] && echo "export GITHUB_APP_CLIENT_SECRET=\"$GITHUB_APP_CLIENT_SECRET\"" >> "$ENV_RUNTIME_FILE"
+  # Preserve GH_CONFIG_DIR isolation across token refreshes
+  [[ -n "${GH_CONFIG_DIR:-}" ]] && echo "export GH_CONFIG_DIR=\"$GH_CONFIG_DIR\"" >> "$ENV_RUNTIME_FILE"
   chmod 600 "$ENV_RUNTIME_FILE"
 }
 
