@@ -1,20 +1,29 @@
 {
   "name": "agentic-behavior",
-  "version": "0.1.0",
-  "description": "Skills and rules for AI agent behavior patterns — task tracking, issue management, and structured workflows.",
+  "version": "0.1.1",
+  "description": "Skills for configuring Claude Code, behavior correction, memory tracking, autonomy rules, and time-context awareness. Combines prompt history tracking, git-backed memory sync, and the self-checking Ralph loop pattern.",
   "author": {
     "name": "Nathan Heaps",
     "email": "nsheaps@gmail.com",
     "url": "https://github.com/nsheaps"
   },
-  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/agentic-behavior",
-  "repository": "https://github.com/nsheaps/ai-mktpl",
   "keywords": [
-    "agentic",
+    "configuration",
+    "behavior",
+    "correction",
+    "memory",
+    "prompt-tracking",
+    "self-check",
+    "time-context",
+    "claude-code",
+    "autonomy",
+    "rules",
     "issue-management",
     "task-tracking",
     "deduplication",
-    "github-issues",
-    "skills"
-  ]
+    "github-issues"
+  ],
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/agentic-behavior",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "hooks": "./hooks/hooks.json"
 }
