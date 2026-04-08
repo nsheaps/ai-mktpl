@@ -15,7 +15,7 @@ agentic-behavior:
 
   # --- Notification settings ---
   # Send notifications when key agent events occur.
-  # Requires user configuration: set chatId and ensure botToken env var is available.
+  # Both telegram and discord are optional. Configure one or both.
   notifications:
     # Global toggle for all notifications
     enabled: false
@@ -24,6 +24,11 @@ agentic-behavior:
       chatId: ''
       # Bot token — use env var reference; injected at runtime (e.g., by 1Password)
       botToken: '${TELEGRAM_BOT_TOKEN}'
+    discord:
+      # Discord channel ID to send notifications to (required — no default)
+      channelId: ''
+      # Bot token — use env var reference; injected at runtime (e.g., by 1Password)
+      botToken: '${DISCORD_BOT_TOKEN}'
     # Per-event toggles (all default to true when notifications.enabled is true)
     events:
       promptSave: true
