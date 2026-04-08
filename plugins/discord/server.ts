@@ -25,6 +25,7 @@ import {
   type Message,
   type Attachment,
   type Interaction,
+  type ThreadChannel,
 } from "discord.js";
 import { randomBytes } from "crypto";
 import {
@@ -630,6 +631,65 @@ mcp.setRequestHandler(ListToolsRequestSchema, async () => ({
         required: ["channel"],
       },
     },
+    {
+      name: "get_thread_info",
+      description:
+        "Get metadata about a Discord thread: name/title, creation date, parent channel ID, archived status, member count, and message count.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          channel_id: {
+            type: "string",
+            description: "The thread channel ID (chat_id from inbound message if in a thread).",
+          },
+        },
+        required: ["channel_id"],
+      },
+    },
+    {
+      name: "get_channel_info",
+      description:
+        "Get metadata about a Discord channel: name, type, topic, category, and position.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          channel_id: {
+            type: "string",
+            description: "The channel ID.",
+          },
+        },
+        required: ["channel_id"],
+      },
+    },
+    {
+      name: "get_server_info",
+      description:
+        "Get metadata about the Discord server (guild): name, member count, and channel list.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          channel_id: {
+            type: "string",
+            description: "Any channel ID in the guild — used to look up which guild to query.",
+          },
+        },
+        required: ["channel_id"],
+      },
+    },
+    {
+      name: "list_threads",
+      description: "List active (non-archived) threads in a Discord channel.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          channel_id: {
+            type: "string",
+            description: "The parent channel ID to list threads from.",
+          },
+        },
+        required: ["channel_id"],
+      },
+    },
   ],
 }));
 
@@ -749,6 +809,78 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
             },
           ],
         };
+      }
+      case "get_thread_info": {
+        const ch = await fetchAllowedChannel(args.channel_id as string);
+        if (!ch.isThread()) {
+          throw new Error(`channel ${args.channel_id} is not a thread`);
+        }
+        const thread = ch as ThreadChannel;
+        const info = [
+          `name: ${thread.name}`,
+          `id: ${thread.id}`,
+          `parent_channel_id: ${thread.parentId ?? "none"}`,
+          `created_at: ${thread.createdAt?.toISOString() ?? "unknown"}`,
+          `archived: ${thread.archived ?? false}`,
+          `locked: ${thread.locked ?? false}`,
+          `member_count: ${thread.memberCount ?? "unknown"}`,
+          `message_count: ${thread.messageCount ?? "unknown"}`,
+          `type: ${ChannelType[thread.type] ?? thread.type}`,
+        ].join("\n");
+        return { content: [{ type: "text", text: info }] };
+      }
+      case "get_channel_info": {
+        const ch = await fetchAllowedChannel(args.channel_id as string);
+        const lines: string[] = [
+          `id: ${ch.id}`,
+          `type: ${ChannelType[ch.type] ?? ch.type}`,
+        ];
+        if ("name" in ch && ch.name) lines.push(`name: ${ch.name}`);
+        if ("topic" in ch && ch.topic) lines.push(`topic: ${ch.topic}`);
+        if ("parent" in ch && ch.parent) lines.push(`category: ${ch.parent.name} (id: ${ch.parent.id})`);
+        if ("position" in ch && typeof ch.position === "number") lines.push(`position: ${ch.position}`);
+        if ("nsfw" in ch && typeof ch.nsfw === "boolean") lines.push(`nsfw: ${ch.nsfw}`);
+        if ("rateLimitPerUser" in ch && typeof ch.rateLimitPerUser === "number") {
+          lines.push(`slowmode_seconds: ${ch.rateLimitPerUser}`);
+        }
+        return { content: [{ type: "text", text: lines.join("\n") }] };
+      }
+      case "get_server_info": {
+        const ch = await fetchAllowedChannel(args.channel_id as string);
+        const guildId = "guildId" in ch ? (ch.guildId as string) : null;
+        if (!guildId) throw new Error("channel is not in a guild (DM channels have no server)");
+        const guild = await client.guilds.fetch(guildId);
+        const fullGuild = await guild.fetch();
+        const channels = await fullGuild.channels.fetch();
+        const channelList = [...channels.values()]
+          .filter(Boolean)
+          .map((c) => `  ${ChannelType[c!.type] ?? c!.type} ${c!.name} (id: ${c!.id})`)
+          .join("\n");
+        const info = [
+          `name: ${fullGuild.name}`,
+          `id: ${fullGuild.id}`,
+          `member_count: ${fullGuild.memberCount}`,
+          `channel_count: ${channels.size}`,
+          `channels:\n${channelList}`,
+        ].join("\n");
+        return { content: [{ type: "text", text: info }] };
+      }
+      case "list_threads": {
+        const ch = await fetchAllowedChannel(args.channel_id as string);
+        if (!("threads" in ch)) {
+          throw new Error(`channel ${args.channel_id} does not support threads`);
+        }
+        const threadManager = (ch as { threads: { fetchActive(): Promise<{ threads: Map<string, ThreadChannel> }> } }).threads;
+        const result = await threadManager.fetchActive();
+        const threads = [...result.threads.values()];
+        if (threads.length === 0) {
+          return { content: [{ type: "text", text: "(no active threads)" }] };
+        }
+        const lines = threads.map(
+          (t) =>
+            `${t.name} (id: ${t.id}, messages: ${t.messageCount ?? "?"}, members: ${t.memberCount ?? "?"})`,
+        );
+        return { content: [{ type: "text", text: lines.join("\n") }] };
       }
       default:
         return {
