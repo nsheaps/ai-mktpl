@@ -33,11 +33,13 @@ jobs:
           COMMENT_BODY: ${{ github.event.comment.body || github.event.review.body || github.event.issue.body || '' }}
           ISSUE_TITLE: ${{ github.event.issue.title || '' }}
         run: |
-          # Match @claude only when preceded by start-of-string, whitespace, or newline
-          # and followed by end-of-string, whitespace, newline, or punctuation.
-          # This prevents false positives like "plugin-dev@claude-plugins-official".
-          if printf '%s\n' "$COMMENT_BODY" | grep -qP '(^|\s)@claude(\s|$|[[:punct:]])' || \
-             printf '%s\n' "$ISSUE_TITLE"  | grep -qP '(^|\s)@claude(\s|$|[[:punct:]])'; then
+          # Match @claude only when preceded by start-of-string or whitespace,
+          # and followed by end-of-string, whitespace, or a character that is NOT
+          # a word character or hyphen. [[:punct:]] includes '-', which caused
+          # @claude-code and @claude-* variants to incorrectly match. Using a
+          # negated class [^a-zA-Z0-9_-] explicitly excludes hyphens.
+          if printf '%s\n' "$COMMENT_BODY" | grep -qP '(^|\s)@claude(\s|$|[^a-zA-Z0-9_-])' || \
+             printf '%s\n' "$ISSUE_TITLE"  | grep -qP '(^|\s)@claude(\s|$|[^a-zA-Z0-9_-])'; then
             echo "matched=true" >> "$GITHUB_OUTPUT"
           else
             echo "matched=false" >> "$GITHUB_OUTPUT"
