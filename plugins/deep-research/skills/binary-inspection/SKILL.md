@@ -38,6 +38,7 @@ Agent(binary-inspector, "Inspect <path/to/binary>. Goal: <what you're looking fo
 ```
 
 Always specify:
+
 1. The full path to the binary
 2. What you're trying to find or understand
 3. Where to save the findings
@@ -77,6 +78,7 @@ Agent(binary-inspector, "Inspect /usr/local/bin/claude. Goal: find any strings r
 ```
 
 The agent will:
+
 1. Run `file` to confirm it is a valid executable
 2. Extract strings with `strings -n 8`
 3. Filter for keywords relevant to channels and URLs

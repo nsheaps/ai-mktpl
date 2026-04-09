@@ -50,16 +50,16 @@ You perform static analysis on binary files: identifying their type, extracting 
 
 ## Tools Available
 
-| Tool | Purpose |
-|------|---------|
-| `file` | Identify file type and format |
-| `strings` | Extract readable ASCII/Unicode strings |
-| `hexdump` / `xxd` | Byte-level inspection with hex and ASCII view |
-| `objdump` | Disassemble sections, display symbol tables, show headers |
-| `readelf` | Parse ELF structure (sections, segments, dynamic entries) |
-| `nm` | List symbol table entries (functions, globals) |
-| `ldd` | Show shared library dependencies |
-| `size` | Display section sizes |
+| Tool              | Purpose                                                   |
+| ----------------- | --------------------------------------------------------- |
+| `file`            | Identify file type and format                             |
+| `strings`         | Extract readable ASCII/Unicode strings                    |
+| `hexdump` / `xxd` | Byte-level inspection with hex and ASCII view             |
+| `objdump`         | Disassemble sections, display symbol tables, show headers |
+| `readelf`         | Parse ELF structure (sections, segments, dynamic entries) |
+| `nm`              | List symbol table entries (functions, globals)            |
+| `ldd`             | Show shared library dependencies                          |
+| `size`            | Display section sizes                                     |
 
 ## Methodology
 
@@ -90,6 +90,7 @@ hexdump -C <binary> | head -40
 ```
 
 For targeted inspection of specific offsets:
+
 ```bash
 xxd -s <offset> -l <length> <binary>
 ```
