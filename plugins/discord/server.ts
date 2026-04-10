@@ -110,11 +110,15 @@ type GroupPolicy = {
   allowFrom: string[];
 };
 
+type GuildPolicy = GroupPolicy;
+
 type Access = {
   dmPolicy: "pairing" | "allowlist" | "disabled";
   allowFrom: string[];
   /** Keyed on channel ID (snowflake), not guild ID. One entry per guild channel. */
   groups: Record<string, GroupPolicy>;
+  /** Keyed on guild ID (snowflake). Applies to ALL channels in the guild unless overridden by groups. */
+  guilds?: Record<string, GuildPolicy>;
   pending: Record<string, PendingEntry>;
   mentionPatterns?: string[];
   // delivery/UX config — optional, defaults live in the reply handler
@@ -166,6 +170,7 @@ function readAccessFile(): Access {
       dmPolicy: parsed.dmPolicy ?? "pairing",
       allowFrom: parsed.allowFrom ?? [],
       groups: parsed.groups ?? {},
+      guilds: parsed.guilds,
       pending: parsed.pending ?? {},
       mentionPatterns: parsed.mentionPatterns,
       ackReaction: parsed.ackReaction,
@@ -283,18 +288,25 @@ async function gate(msg: Message): Promise<GateResult> {
     return { action: "pair", code, isResend: false };
   }
 
-  // We key on channel ID (not guild ID) — simpler, and lets the user
-  // opt in per-channel rather than per-server. Threads inherit their
-  // parent channel's opt-in; the reply still goes to msg.channelId
-  // (the thread), this is only the gate lookup.
+  // Resolve the effective channel ID for gate lookups. Threads inherit
+  // their parent channel's opt-in.
   const channelId = msg.channel.isThread()
     ? (msg.channel.parentId ?? msg.channelId)
     : msg.channelId;
-  const policy = access.groups[channelId];
+
+  // Per-channel policy takes precedence over guild-wide policy.
+  const channelPolicy = access.groups[channelId];
+
+  // Fall back to guild-wide policy if no per-channel entry exists.
+  const guildId = msg.guildId;
+  const guildPolicy = guildId ? access.guilds?.[guildId] : undefined;
+
+  const policy = channelPolicy ?? guildPolicy;
   if (!policy) return { action: "drop" };
-  const groupAllowFrom = policy.allowFrom ?? [];
+
+  const policyAllowFrom = policy.allowFrom ?? [];
   const requireMention = policy.requireMention ?? true;
-  if (groupAllowFrom.length > 0 && !groupAllowFrom.includes(senderId)) {
+  if (policyAllowFrom.length > 0 && !policyAllowFrom.includes(senderId)) {
     return { action: "drop" };
   }
   if (requireMention && !(await isMentioned(msg, access.mentionPatterns))) {

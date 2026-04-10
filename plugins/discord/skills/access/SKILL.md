@@ -37,6 +37,9 @@ Arguments passed: `$ARGUMENTS`
   "groups": {
     "<channelId>": { "requireMention": true, "allowFrom": [] }
   },
+  "guilds": {
+    "<guildId>": { "requireMention": false, "allowFrom": [] }
+  },
   "pending": {
     "<6-char-code>": {
       "senderId": "...", "chatId": "...",
@@ -59,7 +62,7 @@ Parse `$ARGUMENTS` (space-separated). If empty or unrecognized, show status.
 
 1. Read `~/.claude/channels/discord/access.json` (handle missing file).
 2. Show: dmPolicy, allowFrom count and list, pending count with codes +
-   sender IDs + age, groups count.
+   sender IDs + age, groups count, guilds count and list.
 
 ### `pair <code>`
 
@@ -105,6 +108,18 @@ allowFrom: parsedAllowList }`.
 ### `group rm <channelId>`
 
 1. Read, `delete groups[<channelId>]`, write.
+
+### `guild add <guildId>` (optional: `--no-mention`, `--allow id1,id2`)
+
+1. Read (create default if missing).
+2. Ensure `guilds` object exists (`access.guilds ??= {}`).
+3. Set `guilds[<guildId>] = { requireMention: !hasFlag("--no-mention"),
+allowFrom: parsedAllowList }`.
+4. Write.
+
+### `guild rm <guildId>`
+
+1. Read, `delete guilds[<guildId>]` (if `guilds` is now empty, delete the key entirely), write.
 
 ### `set <key> <value>`
 
