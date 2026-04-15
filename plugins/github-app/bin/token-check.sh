@@ -33,7 +33,9 @@ done
 # --- Configuration ---
 
 # shellcheck source=../lib/agent-paths.sh
-source "$(cd "$(dirname "$0")/.." && pwd)/lib/agent-paths.sh"
+_self="${BASH_SOURCE[0]}"
+while [ -L "$_self" ]; do _self="$(readlink -f "$_self")"; done
+source "$(cd "$(dirname "$_self")/.." && pwd)/lib/agent-paths.sh"
 
 TOKEN_FILE="${GITHUB_TOKEN_FILE:-${AGENT_CONFIG_DIR}/github-token}"
 META_FILE="${TOKEN_FILE}.meta"

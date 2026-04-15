@@ -23,7 +23,7 @@ github-app:
   #      Sources KEY=VALUE pairs from a file. Relative paths (./...)
   #      resolve against the project directory.
   #      Example: ref: "env-file://./.env.github-app"
-  #      Example: ref: "env-file://~/.config/agent/github-app.env"
+  #      Example: ref: "env-file://~/.agents/<agent-name>/.config/github-app.env"
   #
   # 2. secrets.*: Individual secret references. Each value can be:
   #    - A literal value:         secrets.github_app_id: "12345"
@@ -51,7 +51,7 @@ github-app:
 
   # --- Option 3: Legacy flat settings ---
   # github_app_id: "12345"
-  # private_key_path: "~/.config/agent/github-app.pem"
+  # private_key_path: "~/.agents/<agent-name>/.config/github-app.pem"
   # github_installation_id: "67890"
 
   # --- Other settings ---
@@ -62,5 +62,5 @@ github-app:
   # Set to false to disable.
   autoGitConfig: true
 
-  # Where to write the token (default: ~/.config/agent/github-token)
-  # tokenFile: "~/.config/agent/github-token"
+  # Where to write the token (default: ~/.agents/<agent-name>/.config/github-token)
+  # tokenFile: "~/.agents/<agent-name>/.config/github-token"
