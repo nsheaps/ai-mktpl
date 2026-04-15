@@ -32,9 +32,12 @@ done
 
 # --- Configuration ---
 
-TOKEN_FILE="${GITHUB_TOKEN_FILE:-$HOME/.config/agent/github-token}"
+# shellcheck source=../lib/agent-paths.sh
+source "$(cd "$(dirname "$0")/.." && pwd)/lib/agent-paths.sh"
+
+TOKEN_FILE="${GITHUB_TOKEN_FILE:-${AGENT_CONFIG_DIR}/github-token}"
 META_FILE="${TOKEN_FILE}.meta"
-ENV_RUNTIME_FILE="${GITHUB_APP_ENV_FILE:-$HOME/.config/agent/github-app-env}"
+ENV_RUNTIME_FILE="${GITHUB_APP_ENV_FILE:-${AGENT_CONFIG_DIR}/github-app-env}"
 LOCKFILE="${TOKEN_FILE}.lock"
 COOLDOWN_FILE="${TOKEN_FILE}.cooldown"
 REFRESH_THRESHOLD_MINUTES=30

@@ -10,7 +10,10 @@
 # Output: JSON object with token status
 set -euo pipefail
 
-TOKEN_FILE="${GITHUB_TOKEN_FILE:-$HOME/.config/agent/github-token}"
+# shellcheck source=../lib/agent-paths.sh
+source "$(cd "$(dirname "$0")/.." && pwd)/lib/agent-paths.sh"
+
+TOKEN_FILE="${GITHUB_TOKEN_FILE:-${AGENT_CONFIG_DIR}/github-token}"
 META_FILE="${TOKEN_FILE}.meta"
 
 # Check if token exists

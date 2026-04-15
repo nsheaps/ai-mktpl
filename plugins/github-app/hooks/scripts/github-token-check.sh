@@ -21,11 +21,12 @@ set -euo pipefail
 
 # --- Configuration ---
 
-_AGENT_CONFIG_DIR="${HOME}/.agents/${AGENT_NAME:-.default}/.config"
-mkdir -p "$_AGENT_CONFIG_DIR"
-DEBOUNCE_FILE="${_AGENT_CONFIG_DIR}/github-app-last-check"
+# shellcheck source=../../lib/agent-paths.sh
+source "$(cd "$(dirname "$0")/../.." && pwd)/lib/agent-paths.sh"
+
+DEBOUNCE_FILE="${AGENT_CONFIG_DIR}/github-app-last-check"
 DEBOUNCE_SECONDS=30  # Don't check more often than every 30 seconds
-TOKEN_FILE="${GITHUB_TOKEN_FILE:-${_AGENT_CONFIG_DIR}/github-token}"
+TOKEN_FILE="${GITHUB_TOKEN_FILE:-${AGENT_CONFIG_DIR}/github-token}"
 META_FILE="${TOKEN_FILE}.meta"
 
 # --- Read hook input ---
