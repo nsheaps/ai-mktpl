@@ -18,11 +18,7 @@ Enable in your project or user settings:
 
 ```yaml
 # .claude/settings.json
-{
-  "enabledPlugins": {
-    "dangerous-bypass@ai-mktpl": true
-  }
-}
+{ "enabledPlugins": { "dangerous-bypass@ai-mktpl": true } }
 ```
 
 ## When to Use
