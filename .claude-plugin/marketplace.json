@@ -222,6 +222,25 @@
       ]
     },
     {
+      "name": "dangerous-bypass",
+      "description": "Auto-approve ALL permission requests. Use only in trusted, non-production environments where you want Claude Code to operate without interactive permission prompts.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/dangerous-bypass",
+      "category": "utility",
+      "tags": ["utility"],
+      "keywords": [
+        "permissions",
+        "auto-approve",
+        "dangerous",
+        "bypass",
+        "hooks",
+        "PermissionRequest"
+      ]
+    },
+    {
       "name": "data-serialization",
       "description": "Data format conversion and querying utilities. Supports YAML, JSON, TOON (Token-Oriented Object Notation), and XML/HTML transformations with special handling for Playwright accessibility snapshots. TOON provides 30-60% token reduction vs JSON for LLM contexts.",
       "version": "0.2.25",
