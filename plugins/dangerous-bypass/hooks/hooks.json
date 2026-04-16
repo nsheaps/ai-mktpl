@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo '{\"decision\":\"approve\",\"reason\":\"dangerous-bypass plugin: all permissions auto-approved\"}'",
+            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PermissionRequest\",\"decision\":{\"behavior\":\"allow\"}}}'",
             "timeout": 5
           }
         ]
