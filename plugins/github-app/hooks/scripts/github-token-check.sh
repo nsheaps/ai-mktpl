@@ -22,7 +22,7 @@ set -euo pipefail
 # --- Configuration ---
 
 # shellcheck source=../../lib/agent-paths.sh
-source "$(cd "$(dirname "$0")/../.." && pwd)/lib/agent-paths.sh"
+source "${CLAUDE_PLUGIN_ROOT}/lib/agent-paths.sh"
 
 DEBOUNCE_FILE="${AGENT_CONFIG_DIR}/github-app-last-check"
 DEBOUNCE_SECONDS=30  # Don't check more often than every 30 seconds

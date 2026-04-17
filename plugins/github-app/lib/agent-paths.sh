@@ -8,4 +8,7 @@
 # Usage: source "$(dirname "$0")/../lib/agent-paths.sh"
 #   or:  source "${CLAUDE_PLUGIN_ROOT}/lib/agent-paths.sh"
 
+[[ -n "${_AGENT_PATHS_LOADED:-}" ]] && return 0
+_AGENT_PATHS_LOADED=1
+
 AGENT_CONFIG_DIR="${HOME}/.agents/${AGENT_NAME:-_UNKNOWN}/.config"

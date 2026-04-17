@@ -191,6 +191,29 @@ plugins/github-app/
 └── README.md
 ```
 
+## Upgrading from 0.1.x
+
+### Migration
+
+v0.2.0 moves credential storage from `~/.config/agent/` to `~/.agents/${AGENT_NAME}/.config/`. On first session start after upgrading, a fresh token is generated under the new path. The old files at `~/.config/agent/` become orphaned and can be safely deleted:
+
+```bash
+rm -rf ~/.config/agent/github-token ~/.config/agent/github-token.meta ~/.config/agent/github-app-env
+```
+
+### AGENT_NAME for git credential helper
+
+`bin/git-credential-github-app.sh` is invoked by **git itself** outside the Claude harness. Git inherits the user's shell environment, where `AGENT_NAME` may not be set. To ensure the credential helper finds the correct per-agent token, export `AGENT_NAME` in your shell profile:
+
+```bash
+# ~/.bashrc or ~/.zshrc
+export AGENT_NAME="jack"  # or "henry", etc.
+```
+
+Or in a systemd unit: `Environment=AGENT_NAME=jack`
+
+If `AGENT_NAME` is not set, the credential helper falls back to `~/.agents/_UNKNOWN/.config/`, which may collide with other unconfigured agents.
+
 ## Related
 
 - **[github](../github)** plugin — GitHub CLI installation, usage skill, and general auth

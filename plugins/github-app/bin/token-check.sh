@@ -94,7 +94,7 @@ release_lock() {
 }
 
 # Get token minutes remaining (shared utility)
-PLUGIN_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+PLUGIN_DIR="$(cd "$(dirname "$_self")/.." && pwd)"
 source "$PLUGIN_DIR/lib/token-utils.sh"
 
 # Update the runtime env file with current token
