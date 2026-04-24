@@ -19,6 +19,8 @@ if ! command -v jq &>/dev/null; then
   exit 0
 fi
 
+# NOTE: `.tool_result` may need to be `.tool_response` when providers are implemented —
+# verify the actual hook payload schema at that time.
 task_id=$(echo "$input" | jq -r '.tool_result.taskId // empty' 2>/dev/null || echo "")
 task_title=$(echo "$input" | jq -r '.tool_result.subject // empty' 2>/dev/null || echo "")
 

@@ -22,7 +22,7 @@ These overlap in concern, share no config namespace, and require three separate 
 2. Provider-based task sync — pluggable backends (filesystem, GitHub issues, extensible to others)
 3. Complete task lifecycle management (session restore, commit guard, stop guard)
 4. Parallelization skill migrated in
-5. Clean migration path with no behavior regression
+5. Clean migration path with no behavior regression for todo-plus-plus / task-parallelization users
 
 ## Non-Goals
 
@@ -116,7 +116,7 @@ task-utils:
 **Source**: todo-plus-plus `Stop` hook — **migrated from agent repo to plugin**  
 **Behavior**: When the session is about to end, warn if any tasks remain `in_progress`. Reminds the agent to complete or hand off work.  
 **Advisory**: Yes — warns, does not block  
-**Status**: Migrated in but **commented out initially** pending validation in plugin context  
+**Status**: Registered as a **no-op stub, full logic deferred to v1.1**  
 **Configurable**: `stopGuard.enabled` (default: `true`)
 
 ### 5. `PostToolUse:TaskCreate` — Sync New Task to Providers

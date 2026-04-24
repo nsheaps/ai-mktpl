@@ -8,9 +8,9 @@ See the full spec at [`docs/spec.md`](docs/spec.md).
 
 - **Commit-on-Complete** (`TaskCompleted` hook): Blocks task completion if there are uncommitted or unpushed changes
 - **Session Awareness** (`SessionStart` hook): Reminds agents that Tasks are session-scoped and not persistent; to always commit before completing tasks
-- **Active-Task Guard** (`PreToolUse` hook, advisory): Warns when a tool is used with no active task
-- **Stop Guard** (`Stop` hook, advisory): Warns when a session ends with in-progress tasks
-- **Provider-based Task Sync** (`PostToolUse:TaskCreate/TaskUpdate`): Syncs task state to configured backends (Filesystem, GitHub Issues)
+- **Active-Task Guard** (`PreToolUse` hook, advisory): Warns when a tool is used with no active task (scaffold — no-op in this release)
+- **Stop Guard** (`Stop` hook, advisory): Warns when a session ends with in-progress tasks (scaffold — no-op in this release)
+- **Provider-based Task Sync** (`PostToolUse:TaskCreate/TaskUpdate`): Syncs task state to configured backends (Filesystem, GitHub Issues) (scaffold — no-op in this release)
 - **Task Parallelization skill**: Migrated from `task-parallelization` — guidance on running parallel sub-agents
 - **Task Management skill**: New skill covering the full task lifecycle, naming conventions, and delegation patterns
 
