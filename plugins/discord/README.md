@@ -32,49 +32,46 @@ Navigate to **OAuth2** → **URL Generator**.
 
 **Scopes:** `bot`, `applications.commands`
 
-Under **Bot Permissions**, enable the following (28 total):
+Under **Bot Permissions**, enable the permissions below.
 
-_General Permissions:_
+_Required — used by the plugin today:_
 
-- View Audit Log
-- Manage Roles
-- Manage Channels
-- Manage Expressions
-- Create Expressions
 - View Channels
-- Manage Events
-- Create Events
-- View Server Insights
-- View Server Subscription Insights
-
-_Text Permissions:_
-
 - Send Messages
+- Send Messages in Threads
+- Read Message History
+- Attach Files
+- Add Reactions
+- Embed Links
+
+_Recommended — useful for richer bot behaviour:_
+
 - Create Public Threads
 - Create Private Threads
-- Send Messages in Threads
-- Manage Messages
-- Pin Messages
 - Manage Threads
-- Embed Links
-- Attach Files
-- Read Message History
-- Mention Everyone
+- Manage Channels
+- Pin Messages
 - Use External Emojis
-- Use External Stickers
-- Add Reactions
 - Use Slash Commands
-- Use Embedded Activities
+- Manage Roles
+- Manage Events
+- Create Events
+- View Audit Log
+- View Server Insights
+- Manage Expressions
+- Create Expressions
+- Use External Stickers
 - Use External Apps
 - Create Polls
-
-_Voice Permissions:_
-
-- Use Embedded Activities (shared with Text above — only voice entry)
+- Bypass Slowmode
+- Mention Everyone
+- Manage Messages
+- Use Embedded Activities
+- View Server Subscription Insights
 
 > **Privileged Gateway Intents:** Message Content Intent is required (configured in step 1).
 >
-> **Intentionally NOT enabled:** Administrator, Manage Server, Kick/Ban Members, Moderate Members, and most voice permissions. These are not needed for normal bot operation.
+> **Intentionally NOT enabled:** Administrator, Manage Server, Kick/Ban Members, Moderate Members, and voice-only permissions. These are not needed for normal bot operation.
 
 Integration type: **Guild Install**. Copy the **Generated URL**, open it, and add the bot to any server you're in.
 
