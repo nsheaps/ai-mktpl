@@ -883,7 +883,11 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
         ) {
           throw new Error(`channel ${args.chat_id} does not support threads`);
         }
-        const result = await (ch as TextChannel).threads.fetchActive();
+        // Runtime guard above ensures ch is GuildText | GuildAnnouncement | GuildForum,
+        // all of which have .threads. Use a union cast instead of TextChannel alone,
+        // since GuildForumChannel is not a subtype of TextChannel in discord.js.
+        const threadable = ch as TextChannel | import("discord.js").NewsChannel | import("discord.js").ForumChannel;
+        const result = await threadable.threads.fetchActive();
         const threads = [...result.threads.values()];
         if (threads.length === 0) {
           return { content: [{ type: "text", text: "(no active threads)" }] };
