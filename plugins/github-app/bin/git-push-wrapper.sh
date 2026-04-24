@@ -6,9 +6,9 @@
 # Checks if GH_TOKEN is set. If not, sources the token from the runtime env file
 # (GITHUB_APP_ENV_FILE, defaults to ~/.agents/<AGENT_NAME>/.config/github-app-env).
 #
-# If a token is available after sourcing, rewrites the remote URL on-the-fly to
-# use https token auth (x-access-token) without permanently modifying git config.
-# Falls back to plain git push if no token is available.
+# If a token is available after sourcing, uses GIT_ASKPASS to authenticate
+# without exposing the token in the process list. Falls back to plain git push
+# if no token is available.
 #
 # Exit codes mirror git push exit codes.
 
@@ -26,15 +26,36 @@ if [[ -n "${GH_TOKEN:-}" ]]; then
   # Parse args: collect flags (anything starting with -) and find the first
   # non-flag positional argument as the remote name, defaulting to 'origin'.
   # This correctly handles patterns like: git push -u origin main
+  #
+  # Known limitation: only well-known git-push flags with space-separated
+  # values are handled. Unknown flags that take a value argument may still
+  # cause misidentification of the remote name.
   REMOTE="origin"
   REMOTE_FOUND=false
+  SKIP_NEXT=false
   ARGS_WITHOUT_REMOTE=()
   for arg in "$@"; do
+    if [[ "$SKIP_NEXT" == true ]]; then
+      # This arg is a value for the previous flag, not a remote name
+      SKIP_NEXT=false
+      ARGS_WITHOUT_REMOTE+=("$arg")
+      continue
+    fi
+
+    # Flags that take a space-separated value argument (git push docs)
+    case "$arg" in
+      --push-option|-o|--receive-pack|--exec|--repo|--recurse-submodules|--signed)
+        SKIP_NEXT=true
+        ARGS_WITHOUT_REMOTE+=("$arg")
+        continue
+        ;;
+    esac
+
     if [[ "$REMOTE_FOUND" == false && "$arg" != -* ]]; then
       REMOTE="$arg"
       REMOTE_FOUND=true
       # Do NOT add the remote name to ARGS_WITHOUT_REMOTE — it will be
-      # replaced by the TOKEN_URL when using token-based auth.
+      # replaced by the auth URL when using token-based auth.
     else
       ARGS_WITHOUT_REMOTE+=("$arg")
     fi
@@ -43,23 +64,29 @@ if [[ -n "${GH_TOKEN:-}" ]]; then
   REMOTE_URL=$(git remote get-url "$REMOTE" 2>/dev/null || true)
 
   if [[ -n "$REMOTE_URL" ]] && [[ "$REMOTE_URL" == https://github.com/* ]]; then
-    # Rewrite URL to embed token credentials without storing them in git config.
+    # Use GIT_ASKPASS to supply the token without exposing it in the process
+    # list. Embedding the token in the URL (https://x-access-token:TOKEN@...)
+    # makes it visible in `ps aux` output. GIT_ASKPASS avoids that by providing
+    # the password only on stdout when git's credential system asks for it.
     REPO_PATH="${REMOTE_URL#https://github.com/}"
-    TOKEN_URL="https://x-access-token:${GH_TOKEN}@github.com/${REPO_PATH}"
+    AUTH_URL="https://x-access-token@github.com/${REPO_PATH}"
 
-    # Run git push with the token URL substituted for the remote name.
-    # ARGS_WITHOUT_REMOTE contains all original args except the remote name,
-    # so git receives: push <TOKEN_URL> [flags...] [refspecs...]
-    # (The remote name is NOT passed again — it was replaced by the URL.)
-    #
-    # Capture exit code and wait for the sed process substitution to flush
-    # before exiting. Without wait, bash may exit before sed drains the pipe,
-    # which can truncate or drop error output (defeating the token masking).
+    # Create a temporary GIT_ASKPASS helper that reads the token from the
+    # GH_TOKEN env var (already exported). The helper script itself contains
+    # no secrets — only a reference to the env var.
+    ASKPASS_HELPER=$(mktemp "${TMPDIR:-/tmp}/git-askpass-XXXXXX")
+    printf '#!/bin/sh\nprintf "%%s" "$GH_TOKEN"\n' > "$ASKPASS_HELPER"
+    chmod +x "$ASKPASS_HELPER"
+    trap 'rm -f "$ASKPASS_HELPER"' EXIT
+
+    # Run git push with the auth URL (no embedded password) and the
+    # ASKPASS helper supplying the token on demand.
     set +e
-    git push "$TOKEN_URL" "${ARGS_WITHOUT_REMOTE[@]}" 2> >(sed "s|x-access-token:[^@]*@|x-access-token:***@|g" >&2)
+    GIT_ASKPASS="$ASKPASS_HELPER" git push "$AUTH_URL" "${ARGS_WITHOUT_REMOTE[@]}" 2>&1
     rc=$?
     set -e
-    wait 2>/dev/null || true
+    rm -f "$ASKPASS_HELPER"
+    trap - EXIT
     exit "$rc"
   fi
 

@@ -349,6 +349,12 @@ configure_git_identity_env() {
     export GIT_COMMITTER_NAME="$existing_name"
     export GIT_COMMITTER_EMAIL="$existing_email"
     write_runtime_env_file "$TOKEN"
+    # Defense-in-depth: also write the stable identity file so it persists
+    # even if the runtime env file template drifts in future changes.
+    write_git_identity_file "$existing_name" "$existing_email"
+    if [[ -n "${CLAUDE_ENV_FILE:-}" ]]; then
+      echo "source \"$GIT_IDENTITY_FILE\"" >> "$CLAUDE_ENV_FILE"
+    fi
     return 0
   fi
 
