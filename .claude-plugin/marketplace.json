@@ -757,7 +757,7 @@
     {
       "name": "task-utils",
       "description": "Unified task management plugin — commit-on-complete, session awareness, active-task guard, stop guard, and provider-based task sync. Consolidates todo-plus-plus, todo-sync, and task-parallelization.",
-      "version": "1.0.0",
+      "version": "0.1.0",
       "author": {
         "name": "Nathan Heaps"
       },
