@@ -25,7 +25,8 @@ set -euo pipefail
 source "${CLAUDE_PLUGIN_ROOT}/lib/agent-paths.sh"
 
 DEBOUNCE_FILE="${AGENT_CONFIG_DIR}/github-app-last-check"
-DEBOUNCE_SECONDS=30  # Don't check more often than every 30 seconds
+DEBOUNCE_SECONDS=30    # Don't check more often than every 30 seconds
+REFRESH_THRESHOLD=45   # Proactively refresh when <=45 min remain (token lasts 1h)
 TOKEN_FILE="${GITHUB_TOKEN_FILE:-${AGENT_CONFIG_DIR}/github-token}"
 META_FILE="${TOKEN_FILE}.meta"
 
@@ -131,7 +132,7 @@ if uses_token; then
       allow_silent
       ;;
     *)
-      if (( MINUTES <= 30 )); then
+      if (( MINUTES <= REFRESH_THRESHOLD )); then
         # Valid but close to expiry — allow + background refresh
         echo "github-app: token valid, but close to expiration, refreshing in the background" >&2
         "$BIN_DIR/token-check.sh" --quiet 2>/dev/null &
@@ -163,7 +164,7 @@ else
       allow_silent
       ;;
     *)
-      if (( MINUTES <= 30 )); then
+      if (( MINUTES <= REFRESH_THRESHOLD )); then
         echo "github-app: token valid, but close to expiration, refreshing in the background" >&2
         "$BIN_DIR/token-check.sh" --quiet 2>/dev/null &
         disown
