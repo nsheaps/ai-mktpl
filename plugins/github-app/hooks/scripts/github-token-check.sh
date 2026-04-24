@@ -21,9 +21,12 @@ set -euo pipefail
 
 # --- Configuration ---
 
-DEBOUNCE_FILE="${HOME}/.config/agent/github-app-last-check"
+# shellcheck source=../../lib/agent-paths.sh
+source "${CLAUDE_PLUGIN_ROOT}/lib/agent-paths.sh"
+
+DEBOUNCE_FILE="${AGENT_CONFIG_DIR}/github-app-last-check"
 DEBOUNCE_SECONDS=30  # Don't check more often than every 30 seconds
-TOKEN_FILE="${GITHUB_TOKEN_FILE:-$HOME/.config/agent/github-token}"
+TOKEN_FILE="${GITHUB_TOKEN_FILE:-${AGENT_CONFIG_DIR}/github-token}"
 META_FILE="${TOKEN_FILE}.meta"
 
 # --- Read hook input ---
@@ -88,11 +91,11 @@ uses_token() {
 
 # --- Token status check ---
 
-# Resolve the bin/lib directories relative to this script (handles both plugin and symlink cases)
-PLUGIN_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
+# Resolve the bin/lib directories via CLAUDE_PLUGIN_ROOT (set by the harness for hook scripts)
+PLUGIN_DIR="${CLAUDE_PLUGIN_ROOT}"
 source "$PLUGIN_DIR/lib/token-utils.sh"
 
-BIN_DIR="$PLUGIN_DIR/bin"
+BIN_DIR="${CLAUDE_PLUGIN_ROOT}/bin"
 
 # --- Allow helper ---
 

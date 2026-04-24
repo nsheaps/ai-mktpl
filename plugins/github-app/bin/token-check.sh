@@ -32,9 +32,14 @@ done
 
 # --- Configuration ---
 
-TOKEN_FILE="${GITHUB_TOKEN_FILE:-$HOME/.config/agent/github-token}"
+# shellcheck source=../lib/agent-paths.sh
+_self="${BASH_SOURCE[0]}"
+while [ -L "$_self" ]; do _self="$(readlink -f "$_self")"; done
+source "$(cd "$(dirname "$_self")/.." && pwd)/lib/agent-paths.sh"
+
+TOKEN_FILE="${GITHUB_TOKEN_FILE:-${AGENT_CONFIG_DIR}/github-token}"
 META_FILE="${TOKEN_FILE}.meta"
-ENV_RUNTIME_FILE="${GITHUB_APP_ENV_FILE:-$HOME/.config/agent/github-app-env}"
+ENV_RUNTIME_FILE="${GITHUB_APP_ENV_FILE:-${AGENT_CONFIG_DIR}/github-app-env}"
 LOCKFILE="${TOKEN_FILE}.lock"
 COOLDOWN_FILE="${TOKEN_FILE}.cooldown"
 REFRESH_THRESHOLD_MINUTES=30
@@ -89,7 +94,7 @@ release_lock() {
 }
 
 # Get token minutes remaining (shared utility)
-PLUGIN_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+PLUGIN_DIR="$(cd "$(dirname "$_self")/.." && pwd)"
 source "$PLUGIN_DIR/lib/token-utils.sh"
 
 # Update the runtime env file with current token
@@ -114,7 +119,7 @@ ENVEOF
 # Generate a new token (full re-auth from keys)
 do_generate_token() {
   local script_dir
-  script_dir="$(cd "$(dirname "$0")" && pwd)"
+  script_dir="$(cd "$(dirname "$_self")" && pwd)"
 
   if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_APP_PRIVATE_KEY_PATH:-}" || -z "${GITHUB_INSTALLATION_ID:-}" ]]; then
     log_error "missing credentials (APP_ID, PRIVATE_KEY_PATH, or INSTALLATION_ID)"

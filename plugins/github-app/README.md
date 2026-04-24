@@ -48,7 +48,7 @@ github-app:
 github-app:
   ref: "env-file://./.env.github-app" # relative to project
   # or
-  ref: "env-file://~/.config/agent/github-app.env" # absolute
+  ref: "env-file://~/.agents/<agent-name>/.config/github-app.env" # absolute
 ```
 
 The source should provide fields named:
@@ -81,7 +81,7 @@ Set before the session starts:
 
 ```bash
 export GITHUB_APP_ID="12345"
-export GITHUB_APP_PRIVATE_KEY_PATH="~/.config/agent/github-app.pem"
+export GITHUB_APP_PRIVATE_KEY_PATH="~/.agents/<agent-name>/.config/github-app.pem"
 export GITHUB_INSTALLATION_ID="67890"
 ```
 
@@ -90,7 +90,7 @@ export GITHUB_INSTALLATION_ID="67890"
 ```yaml
 github-app:
   github_app_id: "12345"
-  private_key_path: "~/.config/agent/github-app.pem"
+  private_key_path: "~/.agents/<agent-name>/.config/github-app.pem"
   github_installation_id: "67890"
 ```
 
@@ -104,15 +104,15 @@ The private key can be provided as:
 When using a PEM file directly, ensure correct permissions:
 
 ```bash
-chmod 600 ~/.config/agent/github-app.pem
+chmod 600 ~/.agents/<agent-name>/.config/github-app.pem
 ```
 
 ## How It Works
 
 1. **Session starts**: Hook reads App credentials, generates JWT, exchanges for installation token
-2. **Token stored**: Written to `~/.config/agent/github-token` with 600 permissions
+2. **Token stored**: Written to `~/.agents/${AGENT_NAME}/.config/github-token` with 600 permissions (where `AGENT_NAME` defaults to `_UNKNOWN` if unset)
 3. **Git identity configured**: Sets `git config user.name` and `user.email` to the App's bot identity (e.g., `my-app[bot]` / `12345+my-app[bot]@users.noreply.github.com`)
-4. **Runtime env file**: `GH_TOKEN` and `GITHUB_TOKEN` written to `~/.config/agent/github-app-env`, sourced by `CLAUDE_ENV_FILE`
+4. **Runtime env file**: `GH_TOKEN` and `GITHUB_TOKEN` written to `~/.agents/${AGENT_NAME}/.config/github-app-env`, sourced by `CLAUDE_ENV_FILE`
 5. **PreToolUse monitoring**: Before each tool call, checks token expiry (debounced to every 30s)
 6. **Smart refresh**: Commands using `gh`/`git push` get synchronous checks; others get async background refresh
 7. **Retry with backoff**: Failed refreshes retry up to 3 times, then back off for 5 minutes
@@ -152,7 +152,7 @@ github-app:
     github_installation_id: "${GITHUB_INSTALLATION_ID}"
 
   # Other settings
-  tokenFile: "~/.config/agent/github-token"
+  tokenFile: "~/.agents/<agent-name>/.config/github-token"
   autoGitConfig: true
 ```
 
@@ -190,6 +190,29 @@ plugins/github-app/
 │   └── reference/                   # Archived implementations
 └── README.md
 ```
+
+## Upgrading from 0.1.x
+
+### Migration
+
+v0.2.0 moves credential storage from `~/.config/agent/` to `~/.agents/${AGENT_NAME}/.config/`. On first session start after upgrading, a fresh token is generated under the new path. The old files at `~/.config/agent/` become orphaned and can be safely deleted:
+
+```bash
+rm -rf ~/.config/agent/github-token ~/.config/agent/github-token.meta ~/.config/agent/github-app-env
+```
+
+### AGENT_NAME for git credential helper
+
+`bin/git-credential-github-app.sh` is invoked by **git itself** outside the Claude harness. Git inherits the user's shell environment, where `AGENT_NAME` may not be set. To ensure the credential helper finds the correct per-agent token, export `AGENT_NAME` in your shell profile:
+
+```bash
+# ~/.bashrc or ~/.zshrc
+export AGENT_NAME="jack"  # or "henry", etc.
+```
+
+Or in a systemd unit: `Environment=AGENT_NAME=jack`
+
+If `AGENT_NAME` is not set, the credential helper falls back to `~/.agents/_UNKNOWN/.config/`, which may collide with other unconfigured agents.
 
 ## Related
 
