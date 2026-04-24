@@ -30,6 +30,10 @@ Create, search, update, and link tickets across ticketing systems with a strong 
 
 Rules for autonomous decision-making, recommendation style, merge approval, and research-first patterns. Synced into project `.claude/rules/` via the SessionStart hook.
 
+### work-tracking.md
+
+Rules for how tasks, PRs, milestones, and communication threads relate to each other. Covers thread ownership by role (SE vs PM), linking requirements (task thread → GitHub issue → milestone), thread discipline (first message as source of truth), and milestone management.
+
 ## Features
 
 ### Prompt History Tracking
