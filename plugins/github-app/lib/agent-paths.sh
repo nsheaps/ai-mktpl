@@ -5,8 +5,9 @@
 # All github-app plugin scripts should source this instead of
 # computing the path independently.
 #
-# Usage: source "$(dirname "$0")/../lib/agent-paths.sh"
-#   or:  source "${CLAUDE_PLUGIN_ROOT}/lib/agent-paths.sh"
+# Usage (hooks):  source "${CLAUDE_PLUGIN_ROOT}/lib/agent-paths.sh"
+# Usage (bin/):   _self="${BASH_SOURCE[0]}"; while [ -L "$_self" ]; do _self="$(readlink -f "$_self")"; done
+#                 source "$(cd "$(dirname "$_self")/.." && pwd)/lib/agent-paths.sh"
 
 [[ -n "${_AGENT_PATHS_LOADED:-}" ]] && return 0
 _AGENT_PATHS_LOADED=1
