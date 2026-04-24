@@ -2,6 +2,8 @@
 
 Cross-cutting rules for how tasks, PRs, milestones, and communication threads relate to each other.
 
+> **Applicability:** These rules assume a multi-agent setup with coordinating roles (SE, PM, etc.). In single-agent setups, treat "thread" as the handler's primary communication surface (e.g., a Discord channel or Telegram chat).
+
 ## 1. Thread Ownership by Role
 
 - **Task threads** — created by the SE (software engineer) agent. Track active work: testing, reviews, PRs, research, coordination.
@@ -26,7 +28,7 @@ If any don't exist, coordinate with the PM to create them.
 ### PRs MUST be developed against merged specs
 
 - Specs live on default branches in the relevant repos
-- Issues are coordination ground ("tickets to assign"), NOT the source of truth for specs
+- Issues are coordination ground ("tickets to assign"), NOT the source of truth for specs (see `github-issues-task-management.md` for issue-tracking conventions)
 - All specs should be merged (and reviewed if required) before PR work begins
 
 ## 3. Thread Discipline
@@ -62,5 +64,5 @@ When a task moves milestones:
 
 ## Source
 
-- https://discord.com/channels/1490863845252665415/1490890535878131792/1497248350947381399
-- https://discord.com/channels/1490863845252665415/1490890535878131792/1497248448125337793
+- [Thread ownership and linking requirements](https://discord.com/channels/1490863845252665415/1490890535878131792/1497248350947381399)
+- [Thread discipline and milestone moves](https://discord.com/channels/1490863845252665415/1490890535878131792/1497248448125337793)
