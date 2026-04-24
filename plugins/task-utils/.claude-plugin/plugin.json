@@ -7,5 +7,14 @@
     "email": "nsheaps@gmail.com",
     "url": "https://github.com/nsheaps"
   },
-  "keywords": ["tasks", "commit", "workflow", "ephemeral", "parallelization", "sync", "agent-teams", "productivity"]
+  "keywords": [
+    "tasks",
+    "commit",
+    "workflow",
+    "ephemeral",
+    "parallelization",
+    "sync",
+    "agent-teams",
+    "productivity"
+  ]
 }

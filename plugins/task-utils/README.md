@@ -25,19 +25,19 @@ Add `task-utils` to your `enabledPlugins` in `settings.json`. Remove `todo-plus-
 task-utils:
   providers:
     filesystem:
-      enabled: true                   # writes task state to $CLAUDE_PROJECT_DIR/.claude/tasks/
+      enabled: true # writes task state to $CLAUDE_PROJECT_DIR/.claude/tasks/
     githubIssues:
-      enabled: false                  # set true to enable GitHub issue sync
-      repo: "owner/repo"              # required if enabled: true
+      enabled: false # set true to enable GitHub issue sync
+      repo: "owner/repo" # required if enabled: true
       labels:
         - "agent-task"
       closeOnComplete: true
   commitCheck:
-    enabled: true                     # block TaskCompleted if uncommitted changes exist
+    enabled: true # block TaskCompleted if uncommitted changes exist
   stopGuard:
-    enabled: true                     # warn on Stop if in_progress tasks remain
+    enabled: true # warn on Stop if in_progress tasks remain
   activeTaskGuard:
-    enabled: true                     # warn on tool use if no active task
+    enabled: true # warn on tool use if no active task
 ```
 
 ## File Structure

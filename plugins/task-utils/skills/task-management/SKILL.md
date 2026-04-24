@@ -33,11 +33,13 @@ User: "Fix the bug in the login flow"
 Tasks MUST always include the task ID in the subject and activeForm.
 
 **GOOD:**
+
 ```
 #23: Fix the bug in the login flow
 ```
 
 **BAD:**
+
 ```
 Fix the bug in the login flow
 ```
@@ -48,6 +50,7 @@ Fix the bug in the login flow
 - If a task relates to a PR, include the PR number if the user is referencing change sets by PR number.
 
 **Examples:**
+
 ```
 #23: [GH-456] Fix the authentication bug
 #24: [PR #789] Review and address feedback
@@ -93,13 +96,13 @@ When working on a task, prefer delegating to an appropriate sub-agent rather tha
 
 ### When to Delegate
 
-| Task Type | Delegate? |
-|-----------|-----------|
+| Task Type                            | Delegate?                          |
+| ------------------------------------ | ---------------------------------- |
 | Codebase investigation / exploration | Yes — use Explore agent with haiku |
-| Architectural decisions | Yes — use Plan agent |
-| Implementation tasks (3+ files) | Yes — use general-purpose agent |
-| Simple 1-file edits | No — execute directly |
-| Quick lookups | No — execute directly |
+| Architectural decisions              | Yes — use Plan agent               |
+| Implementation tasks (3+ files)      | Yes — use general-purpose agent    |
+| Simple 1-file edits                  | No — execute directly              |
+| Quick lookups                        | No — execute directly              |
 
 ### Sub-Agent Prompt Pattern
 
