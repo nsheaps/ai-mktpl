@@ -91,11 +91,11 @@ uses_token() {
 
 # --- Token status check ---
 
-# Resolve the bin/lib directories relative to this script (handles both plugin and symlink cases)
-PLUGIN_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
+# Resolve the bin/lib directories via CLAUDE_PLUGIN_ROOT (set by the harness for hook scripts)
+PLUGIN_DIR="${CLAUDE_PLUGIN_ROOT}"
 source "$PLUGIN_DIR/lib/token-utils.sh"
 
-BIN_DIR="$PLUGIN_DIR/bin"
+BIN_DIR="${CLAUDE_PLUGIN_ROOT}/bin"
 
 # --- Allow helper ---
 

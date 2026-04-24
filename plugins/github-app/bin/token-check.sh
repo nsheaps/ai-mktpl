@@ -119,7 +119,7 @@ ENVEOF
 # Generate a new token (full re-auth from keys)
 do_generate_token() {
   local script_dir
-  script_dir="$(cd "$(dirname "$0")" && pwd)"
+  script_dir="$(cd "$(dirname "$_self")" && pwd)"
 
   if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_APP_PRIVATE_KEY_PATH:-}" || -z "${GITHUB_INSTALLATION_ID:-}" ]]; then
     log_error "missing credentials (APP_ID, PRIVATE_KEY_PATH, or INSTALLATION_ID)"
