@@ -73,11 +73,11 @@ The response includes the created thread object with `id` (the new thread's chan
 
 ## Common Errors
 
-| Error                                         | Cause                         | Fix                                                                                     |
-| --------------------------------------------- | ----------------------------- | --------------------------------------------------------------------------------------- |
+| Error                                         | Cause                         | Fix                                                                                                                                              |
+| --------------------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **403 Forbidden**                             | Bot lacks permissions         | Grant **Send Messages** + **Create Public Threads** on the parent forum channel. `Manage Threads` is **not** required to create your own thread. |
-| **400 Bad Request** "Invalid channel type"    | Target channel is not a forum | Forum channels have type `15`. Verify with `GET /channels/{id}`                         |
-| **400 Bad Request** "Missing message content" | No `message` field in body    | Forum threads require an initial message                                                |
+| **400 Bad Request** "Invalid channel type"    | Target channel is not a forum | Forum channels have type `15`. Verify with `GET /channels/{id}`                                                                                  |
+| **400 Bad Request** "Missing message content" | No `message` field in body    | Forum threads require an initial message                                                                                                         |
 
 ## MCP Reply Tool Limitation
 

@@ -875,10 +875,7 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
       }
       case "list_threads": {
         const ch = await fetchAllowedChannel(args.channel_id as string);
-        if (
-          ch.type !== ChannelType.GuildText &&
-          ch.type !== ChannelType.GuildAnnouncement
-        ) {
+        if (ch.type !== ChannelType.GuildText && ch.type !== ChannelType.GuildAnnouncement) {
           throw new Error(`channel ${args.channel_id} does not support threads`);
         }
         const result = await (ch as import("discord.js").TextChannel).threads.fetchActive();
