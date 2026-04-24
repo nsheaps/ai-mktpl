@@ -62,6 +62,11 @@ When a task moves milestones:
 2. Update the NEW milestone thread (add the task)
 3. Both updates should be in the first message of each thread
 
+## Definitions
+
+- **task thread** — A Discord forum thread in the #tasks channel (ID: `1490930156553109708`) that tracks a specific unit of work. Each thread has a title prefix (`feat:`, `fix:`, etc.) and a first-message that serves as the canonical state.
+- **handler** — The human operator who manages and directs the AI agent. The handler provides direction, approves merges, and makes final decisions. In this context, this is typically the repository owner.
+
 ## Source
 
 - [Thread ownership and linking requirements](https://discord.com/channels/1490863845252665415/1490890535878131792/1497248350947381399)
