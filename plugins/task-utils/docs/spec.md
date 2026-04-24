@@ -76,13 +76,13 @@ The provider list is open — future providers (e.g., Linear, Jira, Slack) can b
 task-utils:
   providers:
     filesystem:
-      enabled: true                   # writes to $CLAUDE_PROJECT_DIR/.claude/tasks/
+      enabled: true # writes to $CLAUDE_PROJECT_DIR/.claude/tasks/
     githubIssues:
-      enabled: false                  # set true to enable GitHub issue sync
-      repo: "owner/repo"              # required if enabled: true
-      labels:                         # optional labels to apply to created/updated issues
+      enabled: false # set true to enable GitHub issue sync
+      repo: "owner/repo" # required if enabled: true
+      labels: # optional labels to apply to created/updated issues
         - "agent-task"
-      closeOnComplete: true           # close issue when task completes
+      closeOnComplete: true # close issue when task completes
 ```
 
 ## Hooks (7 total)
@@ -98,6 +98,7 @@ task-utils:
 
 **Source**: todo-plus-plus `SessionStart` hook  
 **Behavior**:
+
 - Injects task-awareness context into the session (reminder to use TaskCreate on every action request)
 - Restores any `in_progress` tasks from the previous session, prompting the agent to resume or triage them
 
@@ -132,7 +133,7 @@ task-utils:
 **Configurable**: per-provider `enabled` flags  
 **Advisory**: No (when enabled) — failure emits warning but does not block
 
-### 7. `PostToolUse:TodoWrite` — Sync Todo JSON *(deferred post-MVP)*
+### 7. `PostToolUse:TodoWrite` — Sync Todo JSON _(deferred post-MVP)_
 
 **Source**: todo-sync  
 **Behavior**: After `TodoWrite`, sync the todo list to a GitHub issue or comment for visibility.  
@@ -148,6 +149,7 @@ Documents how to run multiple tasks in parallel using background agents.
 ### `task-management` (new)
 
 New skill covering:
+
 - When and how to use TaskCreate, TaskUpdate, TaskList, TaskGet
 - Task naming conventions (include ID and ticket number)
 - The full task lifecycle (created → in_progress → completed/cancelled)
@@ -161,19 +163,19 @@ Full configuration reference via `plugins.settings.yaml` in the consuming agent'
 task-utils:
   providers:
     filesystem:
-      enabled: true                   # writes task state to $CLAUDE_PROJECT_DIR/.claude/tasks/
+      enabled: true # writes task state to $CLAUDE_PROJECT_DIR/.claude/tasks/
     githubIssues:
-      enabled: false                  # set true to enable GitHub issue sync
-      repo: "owner/repo"              # required if enabled: true
+      enabled: false # set true to enable GitHub issue sync
+      repo: "owner/repo" # required if enabled: true
       labels:
         - "agent-task"
       closeOnComplete: true
   commitCheck:
-    enabled: true                     # block TaskCompleted if uncommitted changes exist
+    enabled: true # block TaskCompleted if uncommitted changes exist
   stopGuard:
-    enabled: true                     # warn on Stop if in_progress tasks remain (commented out initially)
+    enabled: true # warn on Stop if in_progress tasks remain (commented out initially)
   activeTaskGuard:
-    enabled: true                     # warn on tool use if no active task
+    enabled: true # warn on tool use if no active task
 ```
 
 ## Migration Path
@@ -191,18 +193,18 @@ No data migration required — task state lives in Claude Code's native store.
 
 ## MVP Scope (v1)
 
-| Feature | Status |
-|---|---|
-| TaskCompleted commit check | In scope |
-| SessionStart restore + awareness | In scope |
-| PreToolUse active-task guard | In scope |
-| Stop guard (migrated, commented out initially) | In scope |
-| FilesystemProvider | In scope |
-| GitHubIssuesProvider (find-or-create via haiku sub-agent) | In scope |
-| task-parallelization skill (migrated) | In scope |
-| task-management skill (new) | In scope |
-| PostToolUse:TodoWrite sync | **Deferred** |
-| TodoWrite gitignore init | **Deferred** |
+| Feature                                                   | Status       |
+| --------------------------------------------------------- | ------------ |
+| TaskCompleted commit check                                | In scope     |
+| SessionStart restore + awareness                          | In scope     |
+| PreToolUse active-task guard                              | In scope     |
+| Stop guard (migrated, commented out initially)            | In scope     |
+| FilesystemProvider                                        | In scope     |
+| GitHubIssuesProvider (find-or-create via haiku sub-agent) | In scope     |
+| task-parallelization skill (migrated)                     | In scope     |
+| task-management skill (new)                               | In scope     |
+| PostToolUse:TodoWrite sync                                | **Deferred** |
+| TodoWrite gitignore init                                  | **Deferred** |
 
 ## Deferred Items (post-MVP)
 
