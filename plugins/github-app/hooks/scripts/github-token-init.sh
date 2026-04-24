@@ -166,10 +166,10 @@ GITHUB_INSTALLATION_ID="${GITHUB_INSTALLATION_ID:-$(plugin_get_config "github_in
 source "${CLAUDE_PLUGIN_ROOT}/lib/wait-for-env.sh"
 
 if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_INSTALLATION_ID:-}" ]]; then
-  hook_log "credentials not yet available, waiting for another plugin to inject them..."
-  if wait_for_env GITHUB_APP_ID GITHUB_INSTALLATION_ID --timeout 15; then
+  hook_log "credentials not yet available, waiting for another plugin to write them to CLAUDE_ENV_FILE..."
+  if wait_for_env_file GITHUB_APP_ID GITHUB_INSTALLATION_ID --timeout 15; then
     # Check for private key (value or path)
-    if wait_for_env GITHUB_APP_PRIVATE_KEY_PATH --timeout 2 || wait_for_env GITHUB_APP_PRIVATE_KEY --timeout 2; then
+    if wait_for_env_file GITHUB_APP_PRIVATE_KEY_PATH --timeout 2 || wait_for_env_file GITHUB_APP_PRIVATE_KEY --timeout 2; then
       hook_log "credentials became available after waiting for another plugin"
     else
       hook_log "timeout waiting for private key — GitHub App not configured, skipping"
