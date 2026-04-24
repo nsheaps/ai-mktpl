@@ -51,8 +51,16 @@ if [[ -n "${GH_TOKEN:-}" ]]; then
     # ARGS_WITHOUT_REMOTE contains all original args except the remote name,
     # so git receives: push <TOKEN_URL> [flags...] [refspecs...]
     # (The remote name is NOT passed again — it was replaced by the URL.)
+    #
+    # Capture exit code and wait for the sed process substitution to flush
+    # before exiting. Without wait, bash may exit before sed drains the pipe,
+    # which can truncate or drop error output (defeating the token masking).
+    set +e
     git push "$TOKEN_URL" "${ARGS_WITHOUT_REMOTE[@]}" 2> >(sed "s|x-access-token:[^@]*@|x-access-token:***@|g" >&2)
-    exit $?
+    rc=$?
+    set -e
+    wait 2>/dev/null || true
+    exit "$rc"
   fi
 
   # Non-https or non-github remote — fall through to plain git push.

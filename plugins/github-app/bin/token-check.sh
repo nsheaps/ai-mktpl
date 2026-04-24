@@ -5,7 +5,7 @@
 #
 # Checks the current GitHub App token and:
 #   - If valid and not close to expiry: exits silently (exit 0)
-#   - If valid but within 30 minutes of expiry: refreshes
+#   - If valid but within 45 minutes of expiry: refreshes
 #   - If expired or invalid: re-authenticates from scratch
 #
 # Retries up to 3 times with backoff before hard-failing (5 min cooldown).

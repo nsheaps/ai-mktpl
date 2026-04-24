@@ -52,6 +52,11 @@ export GIT_AUTHOR_NAME="${GIT_AUTHOR_NAME:-}"
 export GIT_AUTHOR_EMAIL="${GIT_AUTHOR_EMAIL:-}"
 export GIT_COMMITTER_NAME="${GIT_COMMITTER_NAME:-}"
 export GIT_COMMITTER_EMAIL="${GIT_COMMITTER_EMAIL:-}"
+# Note: the ${GIT_*:-} defaults above preserve identity across token refreshes
+# only because CLAUDE_ENV_FILE is sourced before PreToolUse runs, so the vars
+# are already exported in the caller's environment. If token-check.sh is ever
+# run in a context that doesn't source CLAUDE_ENV_FILE first, these vars would
+# be written as empty strings and identity would be lost.
 ENVEOF
   [[ -n "${GITHUB_APP_CLIENT_ID:-}" ]] && echo "export GITHUB_APP_CLIENT_ID=\"$GITHUB_APP_CLIENT_ID\"" >> "$ENV_RUNTIME_FILE"
   [[ -n "${GITHUB_APP_CLIENT_SECRET:-}" ]] && echo "export GITHUB_APP_CLIENT_SECRET=\"$GITHUB_APP_CLIENT_SECRET\"" >> "$ENV_RUNTIME_FILE"
@@ -62,7 +67,10 @@ ENVEOF
 
 # GIT_IDENTITY_FILE — path to the stable git identity file
 # Written once at session start; never overwritten by token refresh.
-GIT_IDENTITY_FILE="${HOME}/.config/agent/github-git-identity"
+# Uses AGENT_CONFIG_DIR (per-agent) so multiple agents on the same machine
+# don't stomp on each other's identity file. Falls back to a HOME-scoped
+# path if AGENT_CONFIG_DIR is not yet set (should not happen in normal usage).
+GIT_IDENTITY_FILE="${AGENT_CONFIG_DIR:-${HOME}/.agents/_UNKNOWN/.config}/github-git-identity"
 
 # write_git_identity_file BOT_NAME BOT_EMAIL
 #

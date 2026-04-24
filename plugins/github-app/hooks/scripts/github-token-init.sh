@@ -295,13 +295,12 @@ fi
 # --- GH_CONFIG_DIR isolation ---
 # Create an agent-specific, empty gh config directory so that gh never falls
 # back to the handler's personal keyring when the App token expires.
-# The directory is scoped to the agent (using CLAUDE_PROJECT_DIR if available,
-# otherwise HOME/.config/agent) so multiple agents don't share config.
+# Scoped to AGENT_CONFIG_DIR (per-agent) so multiple agents on the same
+# machine or in the same project don't share gh config.
 
 hook_log_step "gh-config-dir" "Creating isolated GH_CONFIG_DIR"
 
-_GH_CONFIG_SCOPE="${CLAUDE_PROJECT_DIR:-$HOME}"
-GH_CONFIG_DIR="${_GH_CONFIG_SCOPE}/.claude/tmp/gh-config"
+GH_CONFIG_DIR="${AGENT_CONFIG_DIR}/gh-config"
 mkdir -p "$GH_CONFIG_DIR"
 chmod 700 "$GH_CONFIG_DIR"
 export GH_CONFIG_DIR
@@ -335,15 +334,41 @@ configure_git_identity_env() {
   auto_git_config="$(plugin_get_config "autoGitConfig" "true")"
   [[ "$auto_git_config" == "true" ]] || return 0
 
-  hook_log_step "git-identity" "Configuring git identity env vars from GitHub App"
+  hook_log_step "git-identity" "Configuring git identity env vars"
 
-  # Fetch the App's slug (name) from the API using the already-set GH_TOKEN
+  # If the user already has git identity configured, export it as env vars so
+  # sub-agents inherit the right identity without overriding the user's intent.
+  local existing_name existing_email
+  existing_name=$(git config user.name 2>/dev/null || true)
+  existing_email=$(git config user.email 2>/dev/null || true)
+
+  if [[ -n "$existing_name" && -n "$existing_email" ]]; then
+    hook_log "Existing git identity found ($existing_name <$existing_email>), exporting as env vars"
+    export GIT_AUTHOR_NAME="$existing_name"
+    export GIT_AUTHOR_EMAIL="$existing_email"
+    export GIT_COMMITTER_NAME="$existing_name"
+    export GIT_COMMITTER_EMAIL="$existing_email"
+    write_runtime_env_file "$TOKEN"
+    return 0
+  fi
+
+  # No existing identity — fetch the App's slug and bot ID from the GitHub API.
+  # Using curl (no PATH dependency) rather than gh to avoid SessionStart hook
+  # ordering issues with mise-installed gh.
   local app_slug bot_id
-  app_slug=$(GH_TOKEN="$TOKEN" gh api /app --jq '.slug // empty' 2>/dev/null) || true
+  app_slug=$(curl -sf \
+    -H "Authorization: Bearer $TOKEN" \
+    -H "Accept: application/vnd.github+json" \
+    "https://api.github.com/app" 2>/dev/null \
+    | jq -r '.slug // empty') || true
   [[ -n "$app_slug" ]] || return 0
 
-  # Get the bot user ID for the noreply email
-  bot_id=$(GH_TOKEN="$TOKEN" gh api "/users/${app_slug}[bot]" --jq '.id // empty' 2>/dev/null) || true
+  # URL-encode [bot] as %5Bbot%5D for the API request
+  bot_id=$(curl -sf \
+    -H "Authorization: Bearer $TOKEN" \
+    -H "Accept: application/vnd.github+json" \
+    "https://api.github.com/users/${app_slug}%5Bbot%5D" 2>/dev/null \
+    | jq -r '.id // empty') || true
 
   local bot_name="${app_slug}[bot]"
   local bot_email
