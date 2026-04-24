@@ -26,6 +26,7 @@ import {
   type Attachment,
   type Interaction,
   type ThreadChannel,
+  type TextChannel,
 } from "discord.js";
 import { randomBytes } from "crypto";
 import {
@@ -638,12 +639,12 @@ mcp.setRequestHandler(ListToolsRequestSchema, async () => ({
       inputSchema: {
         type: "object",
         properties: {
-          channel_id: {
+          chat_id: {
             type: "string",
             description: "The thread channel ID (chat_id from inbound message if in a thread).",
           },
         },
-        required: ["channel_id"],
+        required: ["chat_id"],
       },
     },
     {
@@ -653,12 +654,12 @@ mcp.setRequestHandler(ListToolsRequestSchema, async () => ({
       inputSchema: {
         type: "object",
         properties: {
-          channel_id: {
+          chat_id: {
             type: "string",
             description: "The channel ID.",
           },
         },
-        required: ["channel_id"],
+        required: ["chat_id"],
       },
     },
     {
@@ -668,12 +669,12 @@ mcp.setRequestHandler(ListToolsRequestSchema, async () => ({
       inputSchema: {
         type: "object",
         properties: {
-          channel_id: {
+          chat_id: {
             type: "string",
             description: "Any channel ID in the guild — used to look up which guild to query.",
           },
         },
-        required: ["channel_id"],
+        required: ["chat_id"],
       },
     },
     {
@@ -682,12 +683,12 @@ mcp.setRequestHandler(ListToolsRequestSchema, async () => ({
       inputSchema: {
         type: "object",
         properties: {
-          channel_id: {
+          chat_id: {
             type: "string",
             description: "The parent channel ID to list threads from.",
           },
         },
-        required: ["channel_id"],
+        required: ["chat_id"],
       },
     },
   ],
@@ -811,9 +812,9 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
         };
       }
       case "get_thread_info": {
-        const ch = await fetchAllowedChannel(args.channel_id as string);
+        const ch = await fetchAllowedChannel(args.chat_id as string);
         if (!ch.isThread()) {
-          throw new Error(`channel ${args.channel_id} is not a thread`);
+          throw new Error(`channel ${args.chat_id} is not a thread`);
         }
         const thread = ch as ThreadChannel;
         const info = [
@@ -830,7 +831,7 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
         return { content: [{ type: "text", text: info }] };
       }
       case "get_channel_info": {
-        const ch = await fetchAllowedChannel(args.channel_id as string);
+        const ch = await fetchAllowedChannel(args.chat_id as string);
         const lines: string[] = [`id: ${ch.id}`, `type: ${ChannelType[ch.type] ?? ch.type}`];
         if ("name" in ch && ch.name) lines.push(`name: ${ch.name}`);
         if ("topic" in ch && ch.topic) lines.push(`topic: ${ch.topic}`);
@@ -845,7 +846,7 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
         return { content: [{ type: "text", text: lines.join("\n") }] };
       }
       case "get_server_info": {
-        const ch = await fetchAllowedChannel(args.channel_id as string);
+        const ch = await fetchAllowedChannel(args.chat_id as string);
         const guildId = "guildId" in ch ? (ch.guildId as string) : null;
         if (!guildId) throw new Error("channel is not in a guild (DM channels have no server)");
         const guild = await client.guilds.fetch(guildId);
@@ -874,11 +875,15 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
         return { content: [{ type: "text", text: info }] };
       }
       case "list_threads": {
-        const ch = await fetchAllowedChannel(args.channel_id as string);
-        if (ch.type !== ChannelType.GuildText && ch.type !== ChannelType.GuildAnnouncement) {
-          throw new Error(`channel ${args.channel_id} does not support threads`);
+        const ch = await fetchAllowedChannel(args.chat_id as string);
+        if (
+          ch.type !== ChannelType.GuildText &&
+          ch.type !== ChannelType.GuildAnnouncement &&
+          ch.type !== ChannelType.GuildForum
+        ) {
+          throw new Error(`channel ${args.chat_id} does not support threads`);
         }
-        const result = await (ch as import("discord.js").TextChannel).threads.fetchActive();
+        const result = await (ch as TextChannel).threads.fetchActive();
         const threads = [...result.threads.values()];
         if (threads.length === 0) {
           return { content: [{ type: "text", text: "(no active threads)" }] };
