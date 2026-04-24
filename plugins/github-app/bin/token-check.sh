@@ -174,7 +174,7 @@ do_refresh_with_retries() {
 # wait here to handle the case where another plugin is still injecting
 # credentials (hook ordering race).
 if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_APP_PRIVATE_KEY_PATH:-}" || -z "${GITHUB_INSTALLATION_ID:-}" ]]; then
-  source "$PLUGIN_DIR/lib/wait-for-env.sh"
+  source "$PLUGIN_DIR/lib/resolve-secrets.sh"
   if ! wait_for_env_file GITHUB_APP_ID GITHUB_APP_PRIVATE_KEY_PATH GITHUB_INSTALLATION_ID --timeout 5; then
     exit 2
   fi

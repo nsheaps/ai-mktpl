@@ -6,10 +6,12 @@
 # an env-file to populate them before this hook runs.
 #
 # Supported secret sources via the `ref` setting:
+#   - op://vault/item         → resolve fields directly from 1Password (primary)
 #   - env-file://path/to/file → source KEY=VALUE pairs from a file
 # Individual secrets via `secrets.*`:
 #   - Literal values
 #   - ${VAR_NAME}             → expand from environment
+#   - op://vault/item/field   → resolve a single field from 1Password
 #
 # Required env vars (set directly or via ref/secrets config):
 #   GITHUB_APP_ID, GITHUB_APP_PRIVATE_KEY or GITHUB_APP_PRIVATE_KEY_PATH,
@@ -24,6 +26,7 @@ PLUGIN_NAME="github-app"
 source "${CLAUDE_PLUGIN_ROOT}/lib/plugin-config-read.sh"
 source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 source "${CLAUDE_PLUGIN_ROOT}/lib/agent-paths.sh"
+source "${CLAUDE_PLUGIN_ROOT}/lib/resolve-secrets.sh"
 
 # --- Guards ---
 
@@ -33,6 +36,7 @@ plugin_is_enabled || { hook_log "plugin disabled, skipping"; hook_respond; exit 
 
 # Resolve a secret value from one of:
 #   - ${VAR_NAME}  → expand from environment
+#   - op://...     → resolve from 1Password directly
 #   - literal      → use as-is
 resolve_secret() {
   local raw="$1"
@@ -53,6 +57,24 @@ resolve_secret() {
     fi
     echo "$resolved"
     return
+  fi
+
+  # 1Password reference: op://vault/item/field
+  if [[ "$raw" == op://* ]]; then
+    if _op_available; then
+      local resolved
+      resolved=$(op read "$raw" 2>/dev/null) || {
+        hook_log "WARNING: Failed to resolve $name from 1Password ($raw)"
+        echo ""
+        return
+      }
+      echo "$resolved"
+      return
+    else
+      hook_log "WARNING: op:// reference for $name but op CLI not available or OP_SERVICE_ACCOUNT_TOKEN not set"
+      echo ""
+      return
+    fi
   fi
 
   # Literal value
@@ -84,7 +106,21 @@ hook_log_step "load-secrets" "Loading secrets from configured source"
 REF="$(plugin_get_config "ref" "")"
 
 if [[ -n "$REF" ]]; then
-  if [[ "$REF" == env-file://* ]]; then
+  if [[ "$REF" == op://* ]]; then
+    # 1Password item reference — resolve all fields directly
+    if _op_available; then
+      hook_log "Resolving secrets directly from 1Password: $REF"
+      GITHUB_APP_ID="${GITHUB_APP_ID:-$(op read "${REF}/GITHUB_APP_ID" 2>/dev/null || true)}"
+      GITHUB_APP_CLIENT_ID="${GITHUB_APP_CLIENT_ID:-$(op read "${REF}/GITHUB_APP_CLIENT_ID" 2>/dev/null || true)}"
+      GITHUB_APP_CLIENT_SECRET="${GITHUB_APP_CLIENT_SECRET:-$(op read "${REF}/GITHUB_APP_CLIENT_SECRET" 2>/dev/null || true)}"
+      GITHUB_APP_PRIVATE_KEY="${GITHUB_APP_PRIVATE_KEY:-$(op read "${REF}/GITHUB_APP_PRIVATE_KEY" 2>/dev/null || true)}"
+      GITHUB_INSTALLATION_ID="${GITHUB_INSTALLATION_ID:-$(op read "${REF}/GITHUB_INSTALLATION_ID" 2>/dev/null || true)}"
+      hook_log "Resolved secrets from 1Password item"
+    else
+      hook_log "op:// ref configured but op CLI not available or OP_SERVICE_ACCOUNT_TOKEN not set"
+    fi
+
+  elif [[ "$REF" == env-file://* ]]; then
     # Env file reference — source KEY=VALUE pairs
     ENV_FILE_PATH="$(resolve_env_file_path "$REF")"
 
@@ -118,7 +154,7 @@ if [[ -n "$REF" ]]; then
 
   else
     hook_fail "ref config" "Unsupported ref format: $REF" \
-      "Use env-file:///path/to/file format. For 1Password secrets, configure the 1pass plugin to expose them as environment variables instead."
+      "Use op://vault/item or env-file:///path/to/file format."
     hook_respond; exit 0
   fi
 fi
@@ -155,22 +191,21 @@ fi
 GITHUB_APP_ID="${GITHUB_APP_ID:-$(plugin_get_config "github_app_id" "")}"
 GITHUB_INSTALLATION_ID="${GITHUB_INSTALLATION_ID:-$(plugin_get_config "github_installation_id" "")}"
 
-# --- Wait for credentials (hook ordering) ---
+# --- Wait for credentials (hook ordering fallback) ---
 #
 # Claude Code doesn't guarantee SessionStart hook execution order.
-# If another plugin (e.g., 1pass) is expected to inject credentials
-# via env vars, wait for them to become available before giving up.
-# The wait runs before private-key resolution so that GITHUB_APP_PRIVATE_KEY
-# (inline content) can still be written to a temp file if it arrives late.
-
-source "${CLAUDE_PLUGIN_ROOT}/lib/wait-for-env.sh"
+# Primary path: credentials resolved via op:// ref or secrets.* config above.
+# Fallback path: poll CLAUDE_ENV_FILE in case another plugin (e.g., 1pass)
+# writes them there. The wait runs before private-key resolution so that
+# GITHUB_APP_PRIVATE_KEY (inline content) can still be written to a temp
+# file if it arrives late.
 
 if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_INSTALLATION_ID:-}" ]]; then
-  hook_log "credentials not yet available, waiting for another plugin to write them to CLAUDE_ENV_FILE..."
+  hook_log "credentials not yet available, checking CLAUDE_ENV_FILE..."
   if wait_for_env_file GITHUB_APP_ID GITHUB_INSTALLATION_ID --timeout 15; then
     # Check for private key (value or path)
     if wait_for_env_file GITHUB_APP_PRIVATE_KEY_PATH --timeout 2 || wait_for_env_file GITHUB_APP_PRIVATE_KEY --timeout 2; then
-      hook_log "credentials became available after waiting for another plugin"
+      hook_log "credentials found in CLAUDE_ENV_FILE"
     else
       hook_log "timeout waiting for private key — GitHub App not configured, skipping"
       hook_log_cleanup
