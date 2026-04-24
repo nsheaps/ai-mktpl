@@ -375,6 +375,7 @@ configure_git_identity_env() {
   if [[ -n "$bot_id" ]]; then
     bot_email="${bot_id}+${app_slug}[bot]@users.noreply.github.com"
   else
+    hook_log "WARNING: Could not resolve bot user ID for ${app_slug}[bot]; falling back to APP_ID (${GITHUB_APP_ID}). Commits will use APP_ID-based email which may not map to the bot account on GitHub."
     bot_email="${GITHUB_APP_ID}+${app_slug}[bot]@users.noreply.github.com"
   fi
 
