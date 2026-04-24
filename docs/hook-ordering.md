@@ -33,10 +33,10 @@ fi
 
 ### Recommended Timeouts
 
-| Hook type    | Timeout  | Rationale                                          |
-| ------------ | -------- | -------------------------------------------------- |
-| SessionStart | 15s      | Startup allows more wait time                      |
-| PreToolUse   | 5s       | Per-tool hooks have a tighter latency budget       |
+| Hook type    | Timeout | Rationale                                    |
+| ------------ | ------- | -------------------------------------------- |
+| SessionStart | 15s     | Startup allows more wait time                |
+| PreToolUse   | 5s      | Per-tool hooks have a tighter latency budget |
 
 ## Where to Apply This Pattern
 
