@@ -4,7 +4,7 @@
 # Usage: git-push-wrapper.sh [git push arguments...]
 #
 # Checks if GH_TOKEN is set. If not, sources the token from the runtime env file
-# (GITHUB_APP_ENV_FILE, defaults to ~/.config/agent/github-app-env).
+# (GITHUB_APP_ENV_FILE, defaults to ~/.agents/<AGENT_NAME>/.config/github-app-env).
 #
 # If a token is available after sourcing, rewrites the remote URL on-the-fly to
 # use https token auth (x-access-token) without permanently modifying git config.
@@ -15,7 +15,7 @@
 set -euo pipefail
 
 if [[ -z "${GH_TOKEN:-}" ]]; then
-  ENV_FILE="${GITHUB_APP_ENV_FILE:-$HOME/.config/agent/github-app-env}"
+  ENV_FILE="${GITHUB_APP_ENV_FILE:-${HOME}/.agents/${AGENT_NAME:-_UNKNOWN}/.config/github-app-env}"
   if [[ -f "$ENV_FILE" ]]; then
     # shellcheck source=/dev/null
     source "$ENV_FILE"

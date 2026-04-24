@@ -43,7 +43,6 @@ write_runtime_env_file() {
 export GH_TOKEN="$token"
 export GITHUB_TOKEN="$token"
 export GITHUB_TOKEN_FILE="$TOKEN_FILE"
-export GITHUB_APP_TOKEN_FILE="$TOKEN_FILE"
 export GITHUB_APP_ENV_FILE="$ENV_RUNTIME_FILE"
 export GITHUB_APP_ID="${GITHUB_APP_ID:-}"
 export GITHUB_APP_PRIVATE_KEY_PATH="${GITHUB_APP_PRIVATE_KEY_PATH:-}"

@@ -26,7 +26,7 @@
 set -euo pipefail
 
 if [[ -z "${GH_TOKEN:-}" ]]; then
-  ENV_FILE="${GITHUB_APP_ENV_FILE:-$HOME/.config/agent/github-app-env}"
+  ENV_FILE="${GITHUB_APP_ENV_FILE:-${HOME}/.agents/${AGENT_NAME:-_UNKNOWN}/.config/github-app-env}"
   if [[ -f "$ENV_FILE" ]]; then
     # shellcheck source=/dev/null
     source "$ENV_FILE"
