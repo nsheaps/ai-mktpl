@@ -155,6 +155,34 @@ fi
 GITHUB_APP_ID="${GITHUB_APP_ID:-$(plugin_get_config "github_app_id" "")}"
 GITHUB_INSTALLATION_ID="${GITHUB_INSTALLATION_ID:-$(plugin_get_config "github_installation_id" "")}"
 
+# --- Wait for credentials (hook ordering) ---
+#
+# Claude Code doesn't guarantee SessionStart hook execution order.
+# If another plugin (e.g., 1pass) is expected to inject credentials
+# via env vars, wait for them to become available before giving up.
+# The wait runs before private-key resolution so that GITHUB_APP_PRIVATE_KEY
+# (inline content) can still be written to a temp file if it arrives late.
+
+source "${CLAUDE_PLUGIN_ROOT}/lib/wait-for-env.sh"
+
+if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_INSTALLATION_ID:-}" ]]; then
+  hook_log "credentials not yet available, waiting for another plugin to inject them..."
+  if wait_for_env GITHUB_APP_ID GITHUB_INSTALLATION_ID --timeout 15; then
+    # Check for private key (value or path)
+    if wait_for_env GITHUB_APP_PRIVATE_KEY_PATH --timeout 2 || wait_for_env GITHUB_APP_PRIVATE_KEY --timeout 2; then
+      hook_log "credentials became available after waiting for another plugin"
+    else
+      hook_log "timeout waiting for private key — GitHub App not configured, skipping"
+      hook_log_cleanup
+      hook_respond; exit 0
+    fi
+  else
+    hook_log "timeout waiting for credentials — GitHub App not configured, skipping"
+    hook_log_cleanup
+    hook_respond; exit 0
+  fi
+fi
+
 # --- Handle private key (value vs file path) ---
 
 # GITHUB_APP_PRIVATE_KEY contains the key content directly (e.g., from env var)
