@@ -35,12 +35,12 @@ The bot token is available via the `$DISCORD_BOT_TOKEN` environment variable. Ne
 }
 ```
 
-| Field | Value | Notes |
-|-------|-------|-------|
-| `name` | string | Thread title (max 100 chars) |
-| `type` | `11` | Public thread (required for forum channels) |
-| `auto_archive_duration` | `10080` | 7 days in minutes (max value) |
-| `message.content` | string | The first message in the thread (required for forum threads) |
+| Field                   | Value   | Notes                                                        |
+| ----------------------- | ------- | ------------------------------------------------------------ |
+| `name`                  | string  | Thread title (max 100 chars)                                 |
+| `type`                  | `11`    | Public thread (required for forum channels)                  |
+| `auto_archive_duration` | `10080` | 7 days in minutes (max value)                                |
+| `message.content`       | string  | The first message in the thread (required for forum threads) |
 
 ## Full Example
 
@@ -62,11 +62,11 @@ The response includes the created thread object with `id` (the new thread's chan
 
 ## Common Errors
 
-| Error | Cause | Fix |
-|-------|-------|-----|
-| **403 Forbidden** | Bot lacks permissions | Grant **Manage Threads** and **Create Public Threads** permissions in the forum channel |
-| **400 Bad Request** "Invalid channel type" | Target channel is not a forum | Forum channels have type `15`. Verify with `GET /channels/{id}` |
-| **400 Bad Request** "Missing message content" | No `message` field in body | Forum threads require an initial message |
+| Error                                         | Cause                         | Fix                                                                                     |
+| --------------------------------------------- | ----------------------------- | --------------------------------------------------------------------------------------- |
+| **403 Forbidden**                             | Bot lacks permissions         | Grant **Manage Threads** and **Create Public Threads** permissions in the forum channel |
+| **400 Bad Request** "Invalid channel type"    | Target channel is not a forum | Forum channels have type `15`. Verify with `GET /channels/{id}`                         |
+| **400 Bad Request** "Missing message content" | No `message` field in body    | Forum threads require an initial message                                                |
 
 ## MCP Reply Tool Limitation
 
