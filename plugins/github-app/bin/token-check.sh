@@ -156,9 +156,15 @@ do_refresh_with_retries() {
 
 # --- Main logic ---
 
-# Check credentials exist
+# Check credentials exist.
+# PreToolUse has a shorter time budget than SessionStart, so we use a 5s
+# wait here to handle the case where another plugin is still injecting
+# credentials (hook ordering race).
 if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_APP_PRIVATE_KEY_PATH:-}" || -z "${GITHUB_INSTALLATION_ID:-}" ]]; then
-  exit 2
+  source "$PLUGIN_DIR/lib/resolve-secrets.sh"
+  if ! wait_for_env_file GITHUB_APP_ID GITHUB_APP_PRIVATE_KEY_PATH GITHUB_INSTALLATION_ID --timeout 5; then
+    exit 2
+  fi
 fi
 
 # Check cooldown

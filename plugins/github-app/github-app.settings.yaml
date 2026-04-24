@@ -15,8 +15,12 @@ github-app:
   # 1. ref: A URI that loads ALL secrets at once. Supported schemes:
   #
   #    op://vault/item
-  #      Fetches all fields from a 1Password item via nsheaps/op-exec.
-  #      Field labels become env var names (e.g., GITHUB_APP_ID).
+  #      Resolves all fields directly from a 1Password item using the op CLI.
+  #      Requires op to be installed and OP_SERVICE_ACCOUNT_TOKEN to be set
+  #      (injected by the agent launcher). Self-contained: does NOT require
+  #      the 1pass plugin. Field labels must match the expected env var names:
+  #      GITHUB_APP_ID, GITHUB_APP_CLIENT_ID, GITHUB_APP_CLIENT_SECRET,
+  #      GITHUB_APP_PRIVATE_KEY, GITHUB_INSTALLATION_ID.
   #      Example: ref: "op://vault/github-app--repo--my-repo"
   #
   #    env-file://path/to/file
@@ -29,6 +33,7 @@ github-app:
   #    - A literal value:         secrets.github_app_id: "12345"
   #    - An env var reference:    secrets.github_app_id: "${GITHUB_APP_ID}"
   #    - A 1Password field ref:   secrets.github_app_id: "op://vault/item/GITHUB_APP_ID"
+  #      (resolved directly via op CLI — no 1pass plugin needed)
   #    Individual secrets override ref values for the same field.
   #
   # 3. Environment variables: GITHUB_APP_ID, GITHUB_APP_PRIVATE_KEY_PATH, etc.
@@ -37,8 +42,8 @@ github-app:
   # 4. Legacy flat settings: github_app_id, private_key_path, github_installation_id
   #    Kept for backwards compatibility. Lowest priority.
 
-  # --- Option 1: Bulk secret reference ---
-  # ref: "op://vault/github-app--repo--my-repo"
+  # --- Option 1: Bulk secret reference (recommended) ---
+  # ref: "op://vault/github-app--repo--my-repo"   # Resolved directly via op CLI
   # ref: "env-file://./.env.github-app"
 
   # --- Option 2: Individual secrets ---

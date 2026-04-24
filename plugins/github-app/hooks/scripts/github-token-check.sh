@@ -45,9 +45,23 @@ if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_APP_PRIVATE_KEY_PATH:-}" || -z "${
   exit 0
 fi
 
-# No token file means SessionStart didn't generate one — no opinion
+# No token file means SessionStart didn't generate one.
+# This can happen if SessionStart's wait timed out but credentials appeared
+# later (another plugin finished injecting them). If credentials are now
+# available, generate the token synchronously before proceeding.
 if [[ ! -f "$TOKEN_FILE" ]]; then
-  exit 0
+  if [[ -n "${GITHUB_APP_ID:-}" && -n "${GITHUB_APP_PRIVATE_KEY_PATH:-}" && -n "${GITHUB_INSTALLATION_ID:-}" ]]; then
+    echo "github-app: token file missing but credentials available, generating token now..." >&2
+    BIN_DIR_EARLY="${CLAUDE_PLUGIN_ROOT}/bin"
+    if "$BIN_DIR_EARLY/token-check.sh" --sync --quiet; then
+      : # Token generated — continue with the rest of the hook
+    else
+      echo "github-app: WARNING: on-demand token generation failed" >&2
+      exit 0
+    fi
+  else
+    exit 0
+  fi
 fi
 
 # --- Debounce/throttle ---
