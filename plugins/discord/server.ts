@@ -850,29 +850,38 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
         if (!guildId) throw new Error("channel is not in a guild (DM channels have no server)");
         const guild = await client.guilds.fetch(guildId);
         const fullGuild = await guild.fetch();
+        // Intentional scope expansion: entry is gated by one allowlisted
+        // channel in the guild, but the returned list includes every channel
+        // the bot can see — not just allowlisted ones. Channel names/ids are
+        // visible to any server member, so this doesn't reveal anything
+        // beyond what a human in the guild already sees; the tradeoff is a
+        // model with allowlist access to one channel can enumerate the
+        // guild's layout. See access.groups scoping in fetchAllowedChannel.
         const channels = await fullGuild.channels.fetch();
-        const channelList = [...channels.values()]
-          .filter(Boolean)
-          .map((c) => `  ${ChannelType[c!.type] ?? c!.type} ${c!.name} (id: ${c!.id})`)
+        const visibleChannels = [...channels.values()].filter(Boolean) as NonNullable<
+          ReturnType<(typeof channels)["get"]>
+        >[];
+        const channelList = visibleChannels
+          .map((c) => `  ${ChannelType[c.type] ?? c.type} ${c.name} (id: ${c.id})`)
           .join("\n");
         const info = [
           `name: ${fullGuild.name}`,
           `id: ${fullGuild.id}`,
           `member_count: ${fullGuild.memberCount}`,
-          `channel_count: ${channels.size}`,
+          `channel_count: ${visibleChannels.length}`,
           `channels:\n${channelList}`,
         ].join("\n");
         return { content: [{ type: "text", text: info }] };
       }
       case "list_threads": {
         const ch = await fetchAllowedChannel(args.channel_id as string);
-        if (!("threads" in ch)) {
+        if (
+          ch.type !== ChannelType.GuildText &&
+          ch.type !== ChannelType.GuildAnnouncement
+        ) {
           throw new Error(`channel ${args.channel_id} does not support threads`);
         }
-        const threadManager = (
-          ch as { threads: { fetchActive(): Promise<{ threads: Map<string, ThreadChannel> }> } }
-        ).threads;
-        const result = await threadManager.fetchActive();
+        const result = await (ch as import("discord.js").TextChannel).threads.fetchActive();
         const threads = [...result.threads.values()];
         if (threads.length === 0) {
           return { content: [{ type: "text", text: "(no active threads)" }] };

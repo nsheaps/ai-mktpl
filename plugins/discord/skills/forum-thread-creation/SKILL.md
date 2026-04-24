@@ -1,3 +1,11 @@
+---
+name: forum-thread-creation
+description: Create a new thread in a Discord forum channel by calling the Discord REST API. Use when the Discord `reply` MCP tool fails against a forum channel (type 15) because forum channels only accept thread creation, not plain messages. After creation, use `reply` with the returned thread id for follow-up messages.
+user-invocable: false
+allowed-tools:
+  - Bash(curl:*)
+---
+
 # Forum Thread Creation via Discord API
 
 Create threads in Discord forum channels using the REST API. The Discord MCP `reply` tool cannot create new forum threads -- it can only reply to existing messages. Use the API directly for thread creation.
@@ -20,7 +28,7 @@ Authorization: Bot ${DISCORD_BOT_TOKEN}
 Content-Type: application/json
 ```
 
-The bot token is available via the `$DISCORD_BOT_TOKEN` environment variable. Never hardcode it.
+The bot token is stored in `~/.claude/channels/discord/.env` (or `$DISCORD_STATE_DIR/.env` if overridden). Source it before calling curl — it is **not** automatically in the agent's Bash environment.
 
 ## Request Body
 
@@ -45,6 +53,9 @@ The bot token is available via the `$DISCORD_BOT_TOKEN` environment variable. Ne
 ## Full Example
 
 ```bash
+# Source the bot token from the Discord state directory
+set -a; . "${DISCORD_STATE_DIR:-$HOME/.claude/channels/discord}/.env"; set +a
+
 curl -X POST "https://discord.com/api/v10/channels/${FORUM_CHANNEL_ID}/threads" \
   -H "Authorization: Bot ${DISCORD_BOT_TOKEN}" \
   -H "Content-Type: application/json" \
@@ -64,7 +75,7 @@ The response includes the created thread object with `id` (the new thread's chan
 
 | Error                                         | Cause                         | Fix                                                                                     |
 | --------------------------------------------- | ----------------------------- | --------------------------------------------------------------------------------------- |
-| **403 Forbidden**                             | Bot lacks permissions         | Grant **Manage Threads** and **Create Public Threads** permissions in the forum channel |
+| **403 Forbidden**                             | Bot lacks permissions         | Grant **Send Messages** + **Create Public Threads** on the parent forum channel. `Manage Threads` is **not** required to create your own thread. |
 | **400 Bad Request** "Invalid channel type"    | Target channel is not a forum | Forum channels have type `15`. Verify with `GET /channels/{id}`                         |
 | **400 Bad Request** "Missing message content" | No `message` field in body    | Forum threads require an initial message                                                |
 
