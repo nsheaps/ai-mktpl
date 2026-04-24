@@ -81,20 +81,18 @@ jobs:
           git fetch origin "$BASE_REF":refs/remotes/origin/"$BASE_REF"
           git fetch origin --tags
 
-      - name: Resolve change-detection base from release tag
+      - name: Resolve change-detection base for PR
         if: steps.check-skip.outputs.skip != 'true'
         id: resolve-base
         env:
           BASE_REF: ${{ github.base_ref }}
         run: |
-          TAG_NAME="cd/last-release"
-          if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
-            echo "change-base=$TAG_NAME" >> $GITHUB_OUTPUT
-            echo "Using release tag '$TAG_NAME' ($(git rev-parse --short $TAG_NAME)) for change detection"
-          else
-            echo "change-base=$BASE_REF" >> $GITHUB_OUTPUT
-            echo "Release tag '$TAG_NAME' not found, falling back to base branch '$BASE_REF'"
-          fi
+          # For PRs, always diff against the base branch to detect only THIS PR's changes.
+          # Using cd/last-release here is wrong — if main advanced past the tag,
+          # the diff would include changes from other merged PRs, causing incorrect bumps.
+          # See: https://github.com/nsheaps/ai-mktpl/issues/249
+          echo "change-base=origin/$BASE_REF" >> $GITHUB_OUTPUT
+          echo "Using PR base branch 'origin/$BASE_REF' for change detection"
 
       - name: mise install -y
         if: steps.check-skip.outputs.skip != 'true'
