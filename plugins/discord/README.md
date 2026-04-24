@@ -34,7 +34,8 @@ Navigate to **OAuth2** → **URL Generator**.
 
 Under **Bot Permissions**, enable the following (28 total):
 
-*General Permissions:*
+_General Permissions:_
+
 - View Audit Log
 - Manage Roles
 - Manage Channels
@@ -46,7 +47,8 @@ Under **Bot Permissions**, enable the following (28 total):
 - View Server Insights
 - View Server Subscription Insights
 
-*Text Permissions:*
+_Text Permissions:_
+
 - Send Messages
 - Create Public Threads
 - Create Private Threads
@@ -66,7 +68,8 @@ Under **Bot Permissions**, enable the following (28 total):
 - Use External Apps
 - Create Polls
 
-*Voice Permissions:*
+_Voice Permissions:_
+
 - Use Embedded Activities (shared with Text above — only voice entry)
 
 > **Privileged Gateway Intents:** Message Content Intent is required (configured in step 1).
