@@ -28,14 +28,50 @@ Still on the **Bot** page, scroll up to **Token** and press **Reset Token**. Cop
 
 Discord won't let you DM a bot unless you share a server with it.
 
-Navigate to **OAuth2** → **URL Generator**. Select the `bot` scope. Under **Bot Permissions**, enable:
+Navigate to **OAuth2** → **URL Generator**.
 
+**Scopes:** `bot`, `applications.commands`
+
+Under **Bot Permissions**, enable the following (28 total):
+
+*General Permissions:*
+- View Audit Log
+- Manage Roles
+- Manage Channels
+- Manage Expressions
+- Create Expressions
 - View Channels
+- Manage Events
+- Create Events
+- View Server Insights
+- View Server Subscription Insights
+
+*Text Permissions:*
 - Send Messages
+- Create Public Threads
+- Create Private Threads
 - Send Messages in Threads
-- Read Message History
+- Manage Messages
+- Pin Messages
+- Manage Threads
+- Embed Links
 - Attach Files
+- Read Message History
+- Mention Everyone
+- Use External Emojis
+- Use External Stickers
 - Add Reactions
+- Use Slash Commands
+- Use Embedded Activities
+- Use External Apps
+- Create Polls
+
+*Voice Permissions:*
+- Use Embedded Activities (shared with Text above — only voice entry)
+
+> **Privileged Gateway Intents:** Message Content Intent is required (configured in step 1).
+>
+> **Intentionally NOT enabled:** Administrator, Manage Server, Kick/Ban Members, Moderate Members, and most voice permissions. These are not needed for normal bot operation.
 
 Integration type: **Guild Install**. Copy the **Generated URL**, open it, and add the bot to any server you're in.
 
