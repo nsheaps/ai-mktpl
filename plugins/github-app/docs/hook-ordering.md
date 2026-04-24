@@ -24,6 +24,7 @@ github-app:
 ```
 
 The plugin reads each expected field from the item:
+
 - `GITHUB_APP_ID`
 - `GITHUB_APP_CLIENT_ID`
 - `GITHUB_APP_CLIENT_SECRET`
