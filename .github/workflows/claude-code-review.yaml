@@ -1,213 +1,70 @@
 name: Claude Code Review
 
+# Dispatches PR review requests to the Henry review agent (nsheaps/.ai-agent-henry).
+# Henry is the source of truth for review execution, prompts, and check status reporting.
+# This workflow handles trigger detection, label management, and dispatch only.
+
 on:
   pull_request:
     types: [opened, synchronize, ready_for_review, labeled]
-    # Optional: Only run on specific file changes
-    # paths:
-    #   - "src/**/*.ts"
-    #   - "src/**/*.tsx"
-    #   - "src/**/*.js"
-    #   - "src/**/*.jsx"
-    # Don't run this when this file is modified in the PR since it will fail (for security reasons)
-    # Sometimes claude will reject to review the PR if it sees this file changed (programatically) but it doesn't
-    # seem consistent
-    # paths-ignore:
-    #   - ".github/workflows/claude-code-review.yaml"
 
 concurrency:
-  group: ${{ github.event_name == 'pull_request' && format('claude-review-{0}', github.event.pull_request.number) || format('claude-review-{0}-{1}', github.ref, github.sha) }}
-  # always let a previous review finish (so that time isn't wasted), but queued builds will still
-  # be cancelled if a newer build is pushed
-  # NOTE THIS IS NOT GUARANTEED AT THE JOB LEVEL
+  group: claude-review-${{ github.event.pull_request.number }}
+  # Let a previous dispatch finish before starting a new one.
+  # Queued dispatches will still be cancelled if a newer push arrives.
   cancel-in-progress: false
 
 jobs:
-  claude-review:
+  dispatch-review:
     # Triggers:
     # - Automatically on all open (non-draft) PRs
-    # - On draft PRs only when 'request-review' label is added (label is removed after review starts)
-    #
-    # Logic: (not a draft) OR (labeled event with request-review)
+    # - On draft PRs only when 'request-review' label is added (label is removed after dispatch)
     if: |
       github.event.pull_request.draft != true ||
-      ( github.event.action == 'labeled' && github.event.label.name == 'request-review')
+      (github.event.action == 'labeled' && github.event.label.name == 'request-review')
 
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
       pull-requests: write
-      issues: write
-      id-token: write
-      actions: read
 
     steps:
-      - name: Checkout and authenticate as GitHub App
+      - name: Generate review bot token
         id: auth
-        uses: nsheaps/github-actions/.github/actions/checkout-as-app@603052841cd49b9fdc99bc32979ff9c45c9b669e # checkout-as-app@main
+        uses: actions/create-github-app-token@v2
         with:
           app-id: ${{ secrets.REVIEW_GITHUB_APP_ID }}
           private-key: ${{ secrets.REVIEW_GITHUB_APP_PRIVATE_KEY }}
-          fetch-depth: '50'
+          owner: nsheaps
 
       - name: Remove request-review label
         if: github.event.action == 'labeled' && github.event.label.name == 'request-review'
         env:
           GH_TOKEN: ${{ steps.auth.outputs.token }}
         run: |
-          gh pr edit ${{ github.event.pull_request.number }} --remove-label "request-review"
+          gh pr edit ${{ github.event.pull_request.number }} \
+            --remove-label "request-review" \
+            --repo "${{ github.repository }}"
 
-      - name: Get additional job context
-        uses: qoomon/actions--context@v5
-        if: ${{ !cancelled() }}
-        id: additional-context
-        continue-on-error: true
-
-      - name: Ensure gh has the review extension to aid in getting review comments (not PR comments)
-        # Used by claude to fetch PR review comments rather than direct API queries.
-        # See https://github.com/cli/cli/discussions/3993
-        # See https://github.com/cli/cli/issues/8409
-        shell: bash
-        run: |
-          gh extension install agynio/gh-pr-review || echo "gh-pr-review extension already installed"
-
-      - name: Interpolate review prompt
-        id: prompt
-        uses: ./.github/actions/interpolate-prompt
-        env:
-          REPO: ${{ github.repository }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          JOB_CONTEXT: ${{ toJson(steps.additional-context.outputs) }}
+      - name: Dispatch review to Henry
+        uses: peter-evans/repository-dispatch@v4
         with:
-          template-file: .github/prompts/claude-code-review.md
-
-      - name: Run Claude Code Review
-        id: claude-review
-        uses: anthropics/claude-code-action@v1
-        env:
-          GH_TOKEN: '${{ steps.auth.outputs.token }}'
-          GITHUB_TOKEN: '${{ steps.auth.outputs.token }}'
-          # These are in addition to any parsed settings.json files
-          # Prefer this over claude_args, almost everything can be specified via settings json or env vars
-          # While Bash is allowed, the list here is passed directly to the agent, so explicitly defining them
-          # causes the agent to see those Bash commands as more relevant and will use them more often.
-          # Ref: https://code.claude.com/docs/en/settings
-          INPUT_SETTINGS_JSON: |
+          token: ${{ steps.auth.outputs.token }}
+          repository: nsheaps/.ai-agent-henry
+          event-type: pull_request/review
+          client-payload: |
             {
-              "permissions": {
-                "additionalDirectories": ["/tmp/"],
-                "allow":[
-                  "Task",
-                  "Glob",
-                  "Grep",
-                  "LS",
-                  "ExitPlanMode",
-                  "Read",
-                  "Edit",
-                  "Write",
-                  "Replace",
-                  "MultiEdit",
-                  "NotebookRead",
-                  "NotebookEdit",
-                  "TodoWrite",
-                  "WebSearch",
-                  "WebFetch",
-                  "Bash",
-                  "BashOutput",
-                  "KillBash",
-                  "ListMcpResourcesTool",
-                  "ReadMcpResourceTool",
-                  "SlashCommand",
-                  "Skill",
-
-                  "mcp__github__github_support_docs_search",
-                  "mcp__github__get_pull_request",
-                  "mcp__github__get_pull_request_diff",
-                  "mcp__github__get_pull_request_files",
-                  "mcp__github__get_pull_request_review_comments",
-                  "mcp__github__get_pull_request_reviews",
-                  "mcp__github__get_pull_request_status",
-                  "mcp__github__create_pending_pull_request_review",
-                  "mcp__github__add_comment_to_pending_review",
-                  "mcp__github__submit_pending_pull_request_review",
-
-                  "Bash(git log:*)",
-                  "Bash(git diff:*)",
-                  "Bash(git status:*)",
-                  "Bash(git rev-parse:*)",
-                  "Bash(git fetch:*)",
-                  "Bash(git show:*)",
-                  "Bash(git merge:*)",
-                  "Bash(git remote get-url:*)",
-                  "Bash(git rm:*)",
-                  "Bash(gh issue view:*)",
-                  "Bash(gh search:*)",
-                  "Bash(gh issue list:*)",
-                  "Bash(gh pr comment:*)",
-                  "Bash(gh pr diff:*)",
-                  "Bash(gh pr view:*)",
-                  "Bash(gh pr-review:*)",
-                  "Bash(gh pr-review review view:*)",
-                  "Bash(gh pr list:*)",
-                  "Bash(gh run list:*)",
-                  "Bash(gh run view:*)",
-                  "Bash(gh extension list:*)"
-                ],
-                "_denyComment": "It will wait for it's own check run to complete, not to mention it should review the code.",
-                "deny": [
-                  "mcp__github_ci__get_ci_status",
-                  "mcp__github_ci__get_workflow_run_details",
-                  "mcp__github_ci__download_job_log",
-                  "Bash(gh pr checks:*)",
-                  "Bash(git push:*)"
-                ]
+              "referer": "${{ github.repository }}/.github/workflows/claude-code-review.yaml",
+              "source": {
+                "repo": "${{ github.repository }}",
+                "pr_number": ${{ github.event.pull_request.number }},
+                "head_sha": "${{ github.event.pull_request.head.sha }}",
+                "head_ref": "${{ github.event.pull_request.head.ref }}",
+                "base_ref": "${{ github.event.pull_request.base.ref }}"
               },
-              "model": "opus",
-              "env": {
-                "GH_TOKEN": "${{ steps.auth.outputs.token }}",
-                "GITHUB_TOKEN": "${{ steps.auth.outputs.token }}",
-                "_GH_PAGER_COMMENT": "disable gh from being able to treat the terminal as interactive",
-                "GH_PAGER": "cat",
-                "GH_PROMPT_DISABLED": "true",
-                "_GH_BROWSER_COMMENT": "what app to open URLs with, since claude is not interactive, we use curl to pipe it to stdout",
-                "GH_BROWSER": "curl",
-                "CLAUDE_CODE_REMOTE": "true"
+              "trigger": {
+                "event": "pull_request",
+                "action": "${{ github.event.action }}",
+                "label": ${{ toJson(github.event.label.name || '') }}
               }
             }
-        with:
-          anthropic_api_key: ${{ secrets.REVIEW_ANTHROPIC_API_KEY || secrets.ANTHROPIC_API_KEY || '' }}
-          claude_code_oauth_token: ${{ (secrets.REVIEW_ANTHROPIC_API_KEY || secrets.ANTHROPIC_API_KEY) && '' || secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          # WARNING: PRINTS FULL JSON OUTPUT WHICH MAY INCLUDE SECRETS.
-          # ONLY USE IN PRIVATE ENVIRONMENTS.
-          show_full_output: true
-          # bug: https://github.com/anthropics/claude-code-action/issues/759
-          # won't find the past comments since it's looking for github-actions[bot], not the auth it uses to post the comment.
-          bot_id: ${{ steps.auth.outputs.user-id }}
-          bot_name: ${{ steps.auth.outputs.user-name }}
-          allowed_bots: 'github-actions[bot],renovate[bot],claude[bot],automation-nsheaps[bot],jack-nsheaps[bot]'
-          github_token: ${{ steps.auth.outputs.token }}
-          settings: ${{ env.INPUT_SETTINGS_JSON }}
-          additional_permissions: |
-            actions: read
-          # Prompt is loaded from external template file via interpolate-prompt action
-          prompt: ${{ steps.prompt.outputs.prompt }}
-          # Prefer using settings.json, but some are needed to be set here for the action
-          # to automatically enable the MCP servers. Placing anything with `mcp__github__` prefix will enable the github mcp server.
-          # See https://github.com/anthropics/claude-code-action/issues/723#issuecomment-3716307305
-          # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
-          # or https://docs.claude.com/en/docs/claude-code/cli-reference for available options
-          # Note: We intentionally do NOT include 'github_comment' (used for Claude's persistent "working on it" comment)
-          # or 'github_inline_comment' (used for inline comments outside of reviews) in the allowed tools / claude_args,
-          # to prevent Claude from posting persistent status comments or inline comments outside of proper reviews.
-          claude_args: >-
-            --allowedTools
-            mcp__github__github_support_docs_search,
-            mcp__github__get_pull_request,
-            mcp__github__get_pull_request_diff,
-            mcp__github__get_pull_request_files,
-            mcp__github__get_pull_request_review_comments,
-            mcp__github__get_pull_request_reviews,
-            mcp__github__get_pull_request_status,
-            mcp__github__create_pending_pull_request_review,
-            mcp__github__add_comment_to_pending_review,
-            mcp__github__submit_pending_pull_request_review
