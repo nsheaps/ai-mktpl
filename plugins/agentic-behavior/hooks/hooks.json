@@ -1,5 +1,5 @@
 {
-  "description": "Agentic behavior hooks: saves prompts to history on submit, syncs rules via symlink, auto-syncs memory to git repo on session start and task completion",
+  "description": "Agentic behavior hooks: saves prompts to history on submit, syncs rules via symlink, auto-syncs memory to git repo on session start and task completion, sends configurable notifications",
   "hooks": {
     "UserPromptSubmit": [
       {
@@ -38,6 +38,30 @@
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/sync-memory.sh",
             "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|Bash|Agent",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Check if there is an active task (status: in_progress) in the task list. If there is NO in_progress task and the tool being used is a significant action (Edit, Write, Bash, or Agent), respond with a systemMessage reminding the agent to create or update a task before proceeding. Do NOT block the tool — just remind. If there IS an in_progress task, respond with nothing."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "CronCreate|CronDelete",
+        "async": true,
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/notify-cron.sh",
+            "timeout": 10
           }
         ]
       }

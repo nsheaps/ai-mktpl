@@ -80,5 +80,13 @@ REMINDER
   fi
 fi
 
+# Send notification (best-effort)
+# Truncate prompt for notification
+notify_prompt="$prompt"
+if [ "${#notify_prompt}" -gt 80 ]; then
+  notify_prompt="${notify_prompt:0:80}..."
+fi
+bash "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/notify.sh" "promptSave" "Prompt saved: ${notify_prompt}" &>/dev/null &
+
 # Return empty JSON (informational hook, no blocking)
 hook_respond

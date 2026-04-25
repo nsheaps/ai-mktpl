@@ -120,6 +120,9 @@ Sources: ${memory_sources[*]}" 2>/dev/null || true
   ) &>/dev/null || true
 
   hook_log "Memory synced to ${git_repo}"
+
+  # Send notification (best-effort)
+  bash "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/notify.sh" "memorySync" "Memory synced to ${git_repo}" || true
 fi
 
 hook_respond
