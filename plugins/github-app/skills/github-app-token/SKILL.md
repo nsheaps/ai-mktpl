@@ -39,7 +39,7 @@ Session Start
   │   └─ Prints: app name, expiry time, env var names
   │
   └─ PreToolUse Hook (github-token-check.sh)
-      ├─ Debounced: checks at most every 30 seconds
+      ├─ Debounced: checks at most every 300 seconds (5 minutes)
       ├─ For gh/git commands: synchronous check
       │   ├─ Valid + >30min: silent allow
       │   ├─ Valid + <30min: allow + background refresh

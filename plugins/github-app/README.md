@@ -111,22 +111,22 @@ chmod 600 ~/.agents/<agent-name>/.config/github-app.pem
 
 1. **Session starts**: Hook reads App credentials, generates JWT, exchanges for installation token
 2. **Token stored**: Written to `~/.agents/${AGENT_NAME}/.config/github-token` with 600 permissions (where `AGENT_NAME` defaults to `_UNKNOWN` if unset)
-3. **Git identity configured**: Sets `git config user.name` and `user.email` to the App's bot identity (e.g., `my-app[bot]` / `12345+my-app[bot]@users.noreply.github.com`)
+3. **Git identity configured**: Sets `GIT_AUTHOR_*`/`GIT_COMMITTER_*` env vars to the App's bot identity (e.g., `my-app[bot]` / `12345+my-app[bot]@users.noreply.github.com`). Only configures if `user.name`/`user.email` are not already set in git config.
 4. **Runtime env file**: `GH_TOKEN` and `GITHUB_TOKEN` written to `~/.agents/${AGENT_NAME}/.config/github-app-env`, sourced by `CLAUDE_ENV_FILE`
 5. **PreToolUse monitoring**: Before each tool call, checks token expiry (debounced to every 30s)
 6. **Smart refresh**: Commands using `gh`/`git push` get synchronous checks; others get async background refresh
 7. **Retry with backoff**: Failed refreshes retry up to 3 times, then back off for 5 minutes
 8. **Git integration**: Credential helper reads from token file for `git push`
 
-Git identity is only configured if `user.name`/`user.email` are not already set. Disable with `autoGitConfig: false` in plugin settings.
+Git identity is only configured if `user.name`/`user.email` are not already set in git config. When they are, the existing config is exported as env vars so sub-agents inherit the right identity. Disable with `autoGitConfig: false` in plugin settings.
 
 ### Token Refresh Behavior
 
 | Scenario                                          | Behavior                                  |
 | ------------------------------------------------- | ----------------------------------------- |
-| Token valid, >30 min remaining                    | Silent, no action                         |
-| Token valid, <30 min remaining, non-token command | Background refresh, prints status         |
-| Token valid, <30 min remaining, gh/git command    | Allow + background refresh, prints status |
+| Token valid, >45 min remaining                    | Silent, no action                         |
+| Token valid, <45 min remaining, non-token command | Background refresh, prints status         |
+| Token valid, <45 min remaining, gh/git command    | Allow + background refresh, prints status |
 | Token expired, gh/git command                     | Synchronous refresh before allowing       |
 | Token expired, non-token command                  | Background refresh                        |
 | Refresh fails                                     | Retry up to 3x with exponential backoff   |
