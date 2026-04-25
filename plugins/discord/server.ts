@@ -623,13 +623,13 @@ mcp.setRequestHandler(ListToolsRequestSchema, async () => ({
       inputSchema: {
         type: "object",
         properties: {
-          channel: { type: "string" },
+          chat_id: { type: "string" },
           limit: {
             type: "number",
             description: "Max messages (default 20, Discord caps at 100).",
           },
         },
-        required: ["channel"],
+        required: ["chat_id"],
       },
     },
     {
@@ -756,7 +756,7 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
         return { content: [{ type: "text", text: result }] };
       }
       case "fetch_messages": {
-        const ch = await fetchAllowedChannel(args.channel as string);
+        const ch = await fetchAllowedChannel(args.chat_id as string);
         const limit = Math.min((args.limit as number) ?? 20, 100);
         const msgs = await ch.messages.fetch({ limit });
         const me = client.user?.id;
