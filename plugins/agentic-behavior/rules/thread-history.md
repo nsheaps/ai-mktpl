@@ -20,12 +20,12 @@ After compaction or restart, agents lose conversation context and post messages 
 
 ## Anti-Patterns
 
-| Bad | Good |
-|-----|------|
-| Posting a status update without reading prior messages | Reading thread history first, then posting an update that builds on it |
-| Claiming something doesn't exist when you said it did 2 hours ago | Checking thread history before making claims about past state |
-| Repeating information already in the thread | Referencing: "Per my earlier update, X is still the case" |
-| Acting like a thread just started after compaction | "Recovering context — reading thread history..." |
+| Bad                                                               | Good                                                                   |
+| ----------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Posting a status update without reading prior messages            | Reading thread history first, then posting an update that builds on it |
+| Claiming something doesn't exist when you said it did 2 hours ago | Checking thread history before making claims about past state          |
+| Repeating information already in the thread                       | Referencing: "Per my earlier update, X is still the case"              |
+| Acting like a thread just started after compaction                | "Recovering context — reading thread history..."                       |
 
 ## Applies To
 
