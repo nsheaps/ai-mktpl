@@ -64,7 +64,7 @@ When a task moves milestones:
 
 ## Definitions
 
-- **task thread** — A Discord forum thread in the #tasks channel (ID: `1490930156553109708`) that tracks a specific unit of work. Each thread has a title prefix (`feat:`, `fix:`, etc.) and a first-message that serves as the canonical state.
+- **task thread** — A forum thread in the designated tasks channel that tracks a specific unit of work. Each thread has a title prefix (`feat:`, `fix:`, etc.) and a first-message that serves as the canonical state. The specific channel is project-dependent.
 - **handler** — The human operator who manages and directs the AI agent. The handler provides direction, approves merges, and makes final decisions. In this context, this is typically the repository owner.
 
 ## Source

@@ -62,33 +62,41 @@ PR.
 
 ## Labels
 
+Labels vary by project. Always conform to whatever the project's `.github/labels.yaml`
+defines as the single source of truth. The categories below are common conventions.
+
 ### Priority Labels
 
-| Label | Meaning                                              |
-| ----- | ---------------------------------------------------- |
-| `p0`  | Critical -- blocking all other work, fix immediately |
-| `p1`  | High -- should be resolved this sprint/cycle         |
-| `p2`  | Normal -- important but not urgent                   |
-| `p3`  | Low -- nice to have, backlog                         |
+Common conventions include `p0`/`p1`/`p2`/`p3` or `priority:high`/`priority:low`.
+Check the project's `.github/labels.yaml` for the actual label names and use those.
+
+| Concept  | Meaning                                              |
+| -------- | ---------------------------------------------------- |
+| Critical | Blocking all other work, fix immediately             |
+| High     | Should be resolved this sprint/cycle                 |
+| Normal   | Important but not urgent                             |
+| Low      | Nice to have, backlog                                |
 
 ### Type Labels
 
-| Label         | Meaning                               |
+Common type labels (exact names may differ per project):
+
+| Concept       | Meaning                               |
 | ------------- | ------------------------------------- |
-| `bug`         | Something is broken                   |
-| `enhancement` | Improvement to existing functionality |
-| `chore`       | Maintenance, refactoring, tooling     |
-| `question`    | Needs discussion or clarification     |
+| bug           | Something is broken                   |
+| enhancement   | Improvement to existing functionality |
+| chore         | Maintenance, refactoring, tooling     |
+| question      | Needs discussion or clarification     |
 
 ### Status Labels (optional)
 
 Use sparingly -- GitHub Projects board columns often replace these:
 
-| Label          | Meaning                        |
+| Concept        | Meaning                        |
 | -------------- | ------------------------------ |
-| `needs-triage` | Not yet prioritized            |
-| `blocked`      | Waiting on external dependency |
-| `in-progress`  | Actively being worked          |
+| needs-triage   | Not yet prioritized            |
+| blocked        | Waiting on external dependency |
+| in-progress    | Actively being worked          |
 
 ## GitHub Projects
 
@@ -166,11 +174,11 @@ require `owner/repo#N`.
 
 ## Relationship to Other Skills
 
-| Skill                                        | Scope                                                                    |
-| -------------------------------------------- | ------------------------------------------------------------------------ |
-| `issue-management`                           | Mechanics: how to create, search, update, close issues via CLI           |
-| `github-issues-task-management` (this skill) | Methodology: how to organize work, manage projects, consolidate tracking |
-| `discord-work-tracking`                      | Discord-side patterns for threads that supplement GitHub Issues          |
+| Skill / Rule                                             | Scope                                                                    |
+| -------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `issue-management`                                       | Mechanics: how to create, search, update, close issues via CLI           |
+| `github-issues-task-management` (this skill)             | Methodology: how to organize work, manage projects, consolidate tracking |
+| `agentic-behavior/rules/work-tracking.md`                | Thread-side discipline: linking, ownership, and milestone coordination   |
 
 ## Anti-Patterns
 
