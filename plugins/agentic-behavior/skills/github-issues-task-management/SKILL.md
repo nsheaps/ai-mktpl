@@ -70,33 +70,33 @@ defines as the single source of truth. The categories below are common conventio
 Common conventions include `p0`/`p1`/`p2`/`p3` or `priority:high`/`priority:low`.
 Check the project's `.github/labels.yaml` for the actual label names and use those.
 
-| Concept  | Meaning                                              |
-| -------- | ---------------------------------------------------- |
-| Critical | Blocking all other work, fix immediately             |
-| High     | Should be resolved this sprint/cycle                 |
-| Normal   | Important but not urgent                             |
-| Low      | Nice to have, backlog                                |
+| Concept  | Meaning                                  |
+| -------- | ---------------------------------------- |
+| Critical | Blocking all other work, fix immediately |
+| High     | Should be resolved this sprint/cycle     |
+| Normal   | Important but not urgent                 |
+| Low      | Nice to have, backlog                    |
 
 ### Type Labels
 
 Common type labels (exact names may differ per project):
 
-| Concept       | Meaning                               |
-| ------------- | ------------------------------------- |
-| bug           | Something is broken                   |
-| enhancement   | Improvement to existing functionality |
-| chore         | Maintenance, refactoring, tooling     |
-| question      | Needs discussion or clarification     |
+| Concept     | Meaning                               |
+| ----------- | ------------------------------------- |
+| bug         | Something is broken                   |
+| enhancement | Improvement to existing functionality |
+| chore       | Maintenance, refactoring, tooling     |
+| question    | Needs discussion or clarification     |
 
 ### Status Labels (optional)
 
 Use sparingly -- GitHub Projects board columns often replace these:
 
-| Concept        | Meaning                        |
-| -------------- | ------------------------------ |
-| needs-triage   | Not yet prioritized            |
-| blocked        | Waiting on external dependency |
-| in-progress    | Actively being worked          |
+| Concept      | Meaning                        |
+| ------------ | ------------------------------ |
+| needs-triage | Not yet prioritized            |
+| blocked      | Waiting on external dependency |
+| in-progress  | Actively being worked          |
 
 ## GitHub Projects
 
@@ -174,11 +174,11 @@ require `owner/repo#N`.
 
 ## Relationship to Other Skills
 
-| Skill / Rule                                             | Scope                                                                    |
-| -------------------------------------------------------- | ------------------------------------------------------------------------ |
-| `issue-management`                                       | Mechanics: how to create, search, update, close issues via CLI           |
-| `github-issues-task-management` (this skill)             | Methodology: how to organize work, manage projects, consolidate tracking |
-| `agentic-behavior/rules/work-tracking.md`                | Thread-side discipline: linking, ownership, and milestone coordination   |
+| Skill / Rule                                 | Scope                                                                    |
+| -------------------------------------------- | ------------------------------------------------------------------------ |
+| `issue-management`                           | Mechanics: how to create, search, update, close issues via CLI           |
+| `github-issues-task-management` (this skill) | Methodology: how to organize work, manage projects, consolidate tracking |
+| `agentic-behavior/rules/work-tracking.md`    | Thread-side discipline: linking, ownership, and milestone coordination   |
 
 ## Anti-Patterns
 
