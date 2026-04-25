@@ -25,7 +25,7 @@ set -euo pipefail
 source "${CLAUDE_PLUGIN_ROOT}/lib/agent-paths.sh"
 
 DEBOUNCE_FILE="${AGENT_CONFIG_DIR}/github-app-last-check"
-DEBOUNCE_SECONDS=30    # Don't check more often than every 30 seconds
+DEBOUNCE_SECONDS=300   # Don't check more often than every 5 minutes (token lasts ~1 hour)
 REFRESH_THRESHOLD=45   # Proactively refresh when <=45 min remain (token lasts 1h)
 TOKEN_FILE="${GITHUB_TOKEN_FILE:-${AGENT_CONFIG_DIR}/github-token}"
 META_FILE="${TOKEN_FILE}.meta"

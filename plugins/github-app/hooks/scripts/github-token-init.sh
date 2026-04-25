@@ -381,7 +381,13 @@ configure_git_identity_env() {
   if [[ -n "$bot_id" ]]; then
     bot_email="${bot_id}+${app_slug}[bot]@users.noreply.github.com"
   else
-    hook_log "WARNING: Could not resolve bot user ID for ${app_slug}[bot]; falling back to APP_ID (${GITHUB_APP_ID}). Commits will use APP_ID-based email which may not map to the bot account on GitHub."
+    # LIMITATION: The bot user ID (needed for correct noreply email) could not be
+    # resolved via the GitHub API. Using GITHUB_APP_ID as a placeholder, but note
+    # that the App ID and bot user ID are different numbers — commits with this
+    # email will NOT be attributed to the bot account on GitHub. This fallback
+    # exists so git identity is always configured (avoiding "Author identity
+    # unknown" errors), even when the API is unreachable.
+    hook_log "WARNING: Could not resolve bot user ID for ${app_slug}[bot] via API. Falling back to APP_ID (${GITHUB_APP_ID}) in noreply email. This email will NOT map to the bot account on GitHub — the App ID and bot user ID are different numbers."
     bot_email="${GITHUB_APP_ID}+${app_slug}[bot]@users.noreply.github.com"
   fi
 
