@@ -1,0 +1,7 @@
+# renovate plugin configuration
+#
+# This plugin provides skills for setting up and debugging Renovate auto-merge.
+# It has no runtime hooks or binaries — skills only.
+
+renovate:
+  enabled: true
