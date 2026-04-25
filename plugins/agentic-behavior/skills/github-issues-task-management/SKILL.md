@@ -64,31 +64,31 @@ PR.
 
 ### Priority Labels
 
-| Label | Meaning |
-|---|---|
-| `p0` | Critical -- blocking all other work, fix immediately |
-| `p1` | High -- should be resolved this sprint/cycle |
-| `p2` | Normal -- important but not urgent |
-| `p3` | Low -- nice to have, backlog |
+| Label | Meaning                                              |
+| ----- | ---------------------------------------------------- |
+| `p0`  | Critical -- blocking all other work, fix immediately |
+| `p1`  | High -- should be resolved this sprint/cycle         |
+| `p2`  | Normal -- important but not urgent                   |
+| `p3`  | Low -- nice to have, backlog                         |
 
 ### Type Labels
 
-| Label | Meaning |
-|---|---|
-| `bug` | Something is broken |
+| Label         | Meaning                               |
+| ------------- | ------------------------------------- |
+| `bug`         | Something is broken                   |
 | `enhancement` | Improvement to existing functionality |
-| `chore` | Maintenance, refactoring, tooling |
-| `question` | Needs discussion or clarification |
+| `chore`       | Maintenance, refactoring, tooling     |
+| `question`    | Needs discussion or clarification     |
 
 ### Status Labels (optional)
 
 Use sparingly -- GitHub Projects board columns often replace these:
 
-| Label | Meaning |
-|---|---|
-| `needs-triage` | Not yet prioritized |
-| `blocked` | Waiting on external dependency |
-| `in-progress` | Actively being worked |
+| Label          | Meaning                        |
+| -------------- | ------------------------------ |
+| `needs-triage` | Not yet prioritized            |
+| `blocked`      | Waiting on external dependency |
+| `in-progress`  | Actively being worked          |
 
 ## GitHub Projects
 
@@ -113,12 +113,12 @@ gh project item-add PROJECT_NUMBER --owner nsheaps --url https://github.com/nshe
 
 Standard column layout:
 
-| Column | Purpose |
-|---|---|
-| Backlog | Triaged but not started |
-| In Progress | Actively being worked |
-| In Review | PR open, awaiting review |
-| Done | Merged and verified |
+| Column      | Purpose                  |
+| ----------- | ------------------------ |
+| Backlog     | Triaged but not started  |
+| In Progress | Actively being worked    |
+| In Review   | PR open, awaiting review |
+| Done        | Merged and verified      |
 
 ## Consolidation Strategy
 
@@ -166,21 +166,21 @@ require `owner/repo#N`.
 
 ## Relationship to Other Skills
 
-| Skill | Scope |
-|---|---|
-| `issue-management` | Mechanics: how to create, search, update, close issues via CLI |
+| Skill                                        | Scope                                                                    |
+| -------------------------------------------- | ------------------------------------------------------------------------ |
+| `issue-management`                           | Mechanics: how to create, search, update, close issues via CLI           |
 | `github-issues-task-management` (this skill) | Methodology: how to organize work, manage projects, consolidate tracking |
-| `discord-work-tracking` | Discord-side patterns for threads that supplement GitHub Issues |
+| `discord-work-tracking`                      | Discord-side patterns for threads that supplement GitHub Issues          |
 
 ## Anti-Patterns
 
-| Anti-Pattern | Instead |
-|---|---|
-| Tracking work only in Discord threads | Create a GitHub Issue; use Discord for discussion |
-| One issue per tiny sub-task | Consolidate into a parent issue with a checklist |
-| Short-form references across repos (`#N`) | Use `owner/repo#N` for cross-repo links |
-| No labels on issues | Add at least type + priority labels |
-| Closing issues without explanation | Comment with resolution and link to PR/commit |
+| Anti-Pattern                                          | Instead                                                |
+| ----------------------------------------------------- | ------------------------------------------------------ |
+| Tracking work only in Discord threads                 | Create a GitHub Issue; use Discord for discussion      |
+| One issue per tiny sub-task                           | Consolidate into a parent issue with a checklist       |
+| Short-form references across repos (`#N`)             | Use `owner/repo#N` for cross-repo links                |
+| No labels on issues                                   | Add at least type + priority labels                    |
+| Closing issues without explanation                    | Comment with resolution and link to PR/commit          |
 | Using issue body as a living document without history | Use comments for updates; keep body as canonical state |
 
 ## References

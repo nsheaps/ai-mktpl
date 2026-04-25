@@ -58,7 +58,7 @@ status: draft | reviewed | in-progress | live | deprecated | archived
 version: "0.1.0"
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
-pr: "<owner/repo#N or URL>"  # PR that introduced or last updated this spec
+pr: "<owner/repo#N or URL>" # PR that introduced or last updated this spec
 ---
 ```
 
@@ -141,14 +141,14 @@ When reviewing a PR that includes a spec:
 
 ## Anti-Patterns
 
-| Anti-Pattern | Instead |
-|---|---|
-| PR changes plugin behavior with no spec update | Include spec update in the same PR |
-| Separate PRD and technical spec documents | Use combined format in one file |
-| Spec only has narrative, no testable criteria | Add Given/When/Then acceptance criteria |
-| 800-line mega-spec | Split into parent + child specs |
-| Spec lives in a random location | Co-locate under `plugins/<name>/docs/specs/` |
-| Starting implementation before spec exists | Write at least a draft spec first |
+| Anti-Pattern                                   | Instead                                      |
+| ---------------------------------------------- | -------------------------------------------- |
+| PR changes plugin behavior with no spec update | Include spec update in the same PR           |
+| Separate PRD and technical spec documents      | Use combined format in one file              |
+| Spec only has narrative, no testable criteria  | Add Given/When/Then acceptance criteria      |
+| 800-line mega-spec                             | Split into parent + child specs              |
+| Spec lives in a random location                | Co-locate under `plugins/<name>/docs/specs/` |
+| Starting implementation before spec exists     | Write at least a draft spec first            |
 
 ## References
 
