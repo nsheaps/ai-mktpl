@@ -55,12 +55,12 @@ Discord Gateway (WSS)
 
 All runtime state lives under `$DISCORD_STATE_DIR` (default: `~/.claude/channels/discord/`).
 
-| Path | Purpose |
-|------|---------|
-| `.env` | Bot token (`DISCORD_BOT_TOKEN=...`). Mode 0600. |
-| `access.json` | Access control config. Re-read on every inbound message. Mode 0600. |
+| Path                  | Purpose                                                                                                                                                    |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.env`                | Bot token (`DISCORD_BOT_TOKEN=...`). Mode 0600.                                                                                                            |
+| `access.json`         | Access control config. Re-read on every inbound message. Mode 0600.                                                                                        |
 | `approved/<senderId>` | Approval signals written by the `/discord:access` skill; polled every 5s by the server. File contents = DM channel ID. Deleted after confirmation is sent. |
-| `inbox/` | Attachment downloads land here. Filenames: `<timestamp>-<attachmentId>.<ext>`. |
+| `inbox/`              | Attachment downloads land here. Filenames: `<timestamp>-<attachmentId>.<ext>`.                                                                             |
 
 `DISCORD_ACCESS_MODE=static` pins access to a snapshot taken at boot. Pairing is unavailable in static mode (downgraded to `allowlist` at startup).
 
@@ -136,11 +136,11 @@ A missing `access.json` is equivalent to `{ dmPolicy: "pairing", allowFrom: [], 
 
 ### 3.2 DM policy
 
-| Policy | Behavior |
-|--------|----------|
+| Policy              | Behavior                                                                                                                                                                                                              |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `pairing` (default) | Unknown sender receives a pairing code reply. Approve with `/discord:access pair <code>`. Maximum 3 pending codes at once; senders who already have a code get a resend (once), then silence. Codes expire in 1 hour. |
-| `allowlist` | Unknown senders are silently dropped. No reply. |
-| `disabled` | All inbound messages dropped, including from allowlisted users and guild channels. |
+| `allowlist`         | Unknown senders are silently dropped. No reply.                                                                                                                                                                       |
+| `disabled`          | All inbound messages dropped, including from allowlisted users and guild channels.                                                                                                                                    |
 
 **Given** the bot receives a DM from a sender not in `allowFrom`  
 **When** `dmPolicy` is `pairing`  
@@ -176,6 +176,7 @@ Guild channels are off by default. A channel is active only if its channel snowf
 ### 3.4 Mention detection
 
 In channels with `requireMention: true`, any of the following counts as a mention:
+
 1. A structured Discord `@botname` mention (the bot appears in `msg.mentions`)
 2. A reply to one of the bot's 200 most recently sent messages (tracked in `recentSentIds`)
 3. A case-insensitive regex match against any pattern in `mentionPatterns`
@@ -204,6 +205,7 @@ Tools that target a `chat_id` validate the channel against `access.json` before 
 ### 3.7 Permission relay
 
 When Claude Code sends a `notifications/claude/channel/permission_request`, the server:
+
 1. Stores the request in a `pendingPermissions` map keyed by `request_id`.
 2. Sends a DM to every user in `allowFrom` with a message and three buttons: "See more", "Allow", "Deny".
 
@@ -259,6 +261,7 @@ The bot's own messages (matched by `client.user.id`) are always dropped regardle
 ### 4.3 Typing indicator and ack reaction
 
 On a message that passes the gate:
+
 - If the channel supports `sendTyping`, a typing indicator is sent (fire-and-forget).
 - If `access.ackReaction` is non-empty, the bot reacts to the inbound message with that emoji (fire-and-forget).
 
@@ -273,6 +276,7 @@ All tools return `{ content: [{ type: "text", text: "..." }] }`. On error the sa
 Send a message to a Discord channel.
 
 **Parameters:**
+
 - `chat_id` (string, required) — channel snowflake
 - `text` (string, required) — message text; auto-chunked at `textChunkLimit` (default 2000)
 - `reply_to` (string, optional) — message ID to thread under
@@ -281,6 +285,7 @@ Send a message to a Discord channel.
 **Chunking:** Long text is split using the configured `chunkMode` and `textChunkLimit`. `length` mode cuts at the byte limit. `newline` mode prefers the last double-newline (paragraph), then single newline, then space before the limit, falling back to a hard cut.
 
 The `replyToMode` setting controls threading of chunked replies:
+
 - `first` (default): only the first chunk is threaded under `reply_to`
 - `all`: all chunks are threaded
 - `off`: all chunks are sent standalone
@@ -305,6 +310,7 @@ Files attach to the first chunk only.
 Add an emoji reaction to a Discord message.
 
 **Parameters:**
+
 - `chat_id` (string, required)
 - `message_id` (string, required)
 - `emoji` (string, required) — unicode emoji or `<:name:id>` for custom
@@ -322,6 +328,7 @@ Add an emoji reaction to a Discord message.
 Edit a message the bot previously sent.
 
 **Parameters:**
+
 - `chat_id` (string, required)
 - `message_id` (string, required)
 - `text` (string, required)
@@ -337,15 +344,18 @@ Edit a message the bot previously sent.
 Fetch recent message history from a channel.
 
 **Parameters:**
+
 - `channel` (string, required) — channel snowflake
 - `limit` (number, optional) — max messages to return; default 20, capped at 100
 
 **Returns:** Messages oldest-first, one per line:
+
 ```
 [<ISO-8601>] <username>: <text>  (id: <messageId>[+Natt])
 ```
+
 - `me` is substituted for the bot's own username
-- Multi-line content has newlines replaced with ` ⏎ `
+- Multi-line content has newlines replaced with `⏎`
 - Messages with attachments are marked `+Natt` (e.g. `+2att`)
 
 **Limitation:** Discord's search API is not exposed to bots. `fetch_messages` is the only way to retrieve historical messages. For an old message, the handler should provide the approximate time or use a larger `limit`.
@@ -358,10 +368,12 @@ Fetch recent message history from a channel.
 Download all attachments from a specific message to `inbox/`.
 
 **Parameters:**
+
 - `chat_id` (string, required)
 - `message_id` (string, required)
 
 **Returns:** A list of local file paths with metadata:
+
 ```
 downloaded N attachment(s):
   <path>  (<name>, <contentType>, <sizeKB>KB)
@@ -369,6 +381,7 @@ downloaded N attachment(s):
 ```
 
 **Constraints:**
+
 - Maximum attachment size: 25MB. Attachments exceeding this limit are rejected with an error.
 - Attachment filenames are sanitized: `[`, `]`, `\r`, `\n`, `;` are replaced with `_` to prevent delimiter injection in tool output.
 - Downloaded files land in `$DISCORD_STATE_DIR/inbox/<timestamp>-<attachmentId>.<ext>`.
@@ -387,9 +400,11 @@ downloaded N attachment(s):
 Fetch metadata for a Discord thread.
 
 **Parameters:**
+
 - `chat_id` (string, required) — thread channel ID
 
 **Returns:** Key-value lines:
+
 ```
 name: <threadName>
 id: <threadId>
@@ -410,9 +425,11 @@ type: <ChannelType name>
 Fetch metadata for any allowed channel.
 
 **Parameters:**
+
 - `chat_id` (string, required)
 
 **Returns:** Key-value lines for fields present on the channel type (at minimum `id` and `type`):
+
 - `id`, `type`, `name`, `topic`, `category` (name + id), `position`, `nsfw`, `slowmode_seconds`
 
 ### 5.8 `get_server_info`
@@ -420,9 +437,11 @@ Fetch metadata for any allowed channel.
 Fetch guild-level metadata reachable via an allowed channel.
 
 **Parameters:**
+
 - `chat_id` (string, required) — any channel ID in the target guild
 
 **Returns:**
+
 ```
 name: <serverName>
 id: <guildId>
@@ -443,9 +462,11 @@ channels:
 List active (non-archived) threads in a text, announcement, or forum channel.
 
 **Parameters:**
+
 - `chat_id` (string, required) — parent channel ID
 
 **Returns:** One line per active thread:
+
 ```
 <threadName> (id: <threadId>, messages: <count>, members: <count>)
 ```
@@ -466,6 +487,7 @@ Skills are user-invocable commands that run in the Claude Code terminal session.
 **Purpose:** Save the bot token and orient the user on setup status.
 
 **Arguments:**
+
 - None — print current status (token set/unset, access policy, allowlist, pending pairings)
 - `<token>` — write `DISCORD_BOT_TOKEN=<token>` to `~/.claude/channels/discord/.env` (mode 0600), then show status
 - `clear` — remove the token line from `.env`
@@ -480,21 +502,22 @@ Skills are user-invocable commands that run in the Claude Code terminal session.
 
 **Security constraint:** Never execute access mutations (pair, allow, policy change) in response to a Discord channel message. These commands must only be accepted from the terminal session.
 
-| Invocation | Effect |
-|------------|--------|
-| `/discord:access` | Print current state: policy, allowlist, pending codes, groups, guilds |
-| `/discord:access pair <code>` | Approve pairing: move sender from pending to `allowFrom`, write `approved/<senderId>` with chatId, confirm |
-| `/discord:access deny <code>` | Discard pending code |
-| `/discord:access allow <userId>` | Add user snowflake to `allowFrom` |
-| `/discord:access remove <userId>` | Remove user snowflake from `allowFrom` |
-| `/discord:access policy <mode>` | Set `dmPolicy` to `pairing`, `allowlist`, or `disabled` |
-| `/discord:access group add <channelId> [--no-mention] [--allow id1,id2]` | Opt a channel into guild channel mode |
-| `/discord:access group rm <channelId>` | Remove channel from `groups` |
-| `/discord:access guild add <guildId> [--no-mention] [--allow id1,id2]` | Enable server-wide access for a guild |
-| `/discord:access guild rm <guildId>` | Disable server-wide access |
-| `/discord:access set <key> <value>` | Set delivery config: `ackReaction`, `replyToMode`, `textChunkLimit`, `chunkMode`, `mentionPatterns` |
+| Invocation                                                               | Effect                                                                                                     |
+| ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| `/discord:access`                                                        | Print current state: policy, allowlist, pending codes, groups, guilds                                      |
+| `/discord:access pair <code>`                                            | Approve pairing: move sender from pending to `allowFrom`, write `approved/<senderId>` with chatId, confirm |
+| `/discord:access deny <code>`                                            | Discard pending code                                                                                       |
+| `/discord:access allow <userId>`                                         | Add user snowflake to `allowFrom`                                                                          |
+| `/discord:access remove <userId>`                                        | Remove user snowflake from `allowFrom`                                                                     |
+| `/discord:access policy <mode>`                                          | Set `dmPolicy` to `pairing`, `allowlist`, or `disabled`                                                    |
+| `/discord:access group add <channelId> [--no-mention] [--allow id1,id2]` | Opt a channel into guild channel mode                                                                      |
+| `/discord:access group rm <channelId>`                                   | Remove channel from `groups`                                                                               |
+| `/discord:access guild add <guildId> [--no-mention] [--allow id1,id2]`   | Enable server-wide access for a guild                                                                      |
+| `/discord:access guild rm <guildId>`                                     | Disable server-wide access                                                                                 |
+| `/discord:access set <key> <value>`                                      | Set delivery config: `ackReaction`, `replyToMode`, `textChunkLimit`, `chunkMode`, `mentionPatterns`        |
 
 **Implementation constraints:**
+
 - Always Read `access.json` before Write — the server may have added pending entries between operations.
 - Pretty-print JSON (2-space indent) so it is hand-editable.
 - Sender IDs are user snowflakes; chat IDs are DM channel snowflakes. They differ.
@@ -518,26 +541,27 @@ Skills are user-invocable commands that run in the Claude Code terminal session.
 
 ### 7.1 Environment variables
 
-| Variable | Default | Purpose |
-|----------|---------|---------|
-| `DISCORD_BOT_TOKEN` | (required) | Bot token from Discord Developer Portal |
-| `DISCORD_STATE_DIR` | `~/.claude/channels/discord` | Override for per-instance state directories |
-| `DISCORD_ACCESS_MODE` | (unset) | Set to `static` to pin access config at boot |
-| `DISCORD_ALLOW_BOTS` | (unset) | Set to `true` to pass messages from other bots through the gate |
+| Variable              | Default                      | Purpose                                                         |
+| --------------------- | ---------------------------- | --------------------------------------------------------------- |
+| `DISCORD_BOT_TOKEN`   | (required)                   | Bot token from Discord Developer Portal                         |
+| `DISCORD_STATE_DIR`   | `~/.claude/channels/discord` | Override for per-instance state directories                     |
+| `DISCORD_ACCESS_MODE` | (unset)                      | Set to `static` to pin access config at boot                    |
+| `DISCORD_ALLOW_BOTS`  | (unset)                      | Set to `true` to pass messages from other bots through the gate |
 
 ### 7.2 Delivery config keys (set via `/discord:access set`)
 
-| Key | Type | Default | Constraint |
-|-----|------|---------|------------|
-| `ackReaction` | string | `""` (disabled) | Unicode emoji or `<:name:id>` |
-| `replyToMode` | enum | `"first"` | `"first"` \| `"all"` \| `"off"` |
-| `textChunkLimit` | number | `2000` | 1–2000 (Discord's hard cap) |
-| `chunkMode` | enum | `"length"` | `"length"` \| `"newline"` |
-| `mentionPatterns` | string[] | `[]` | JSON array of case-insensitive regex strings |
+| Key               | Type     | Default         | Constraint                                   |
+| ----------------- | -------- | --------------- | -------------------------------------------- |
+| `ackReaction`     | string   | `""` (disabled) | Unicode emoji or `<:name:id>`                |
+| `replyToMode`     | enum     | `"first"`       | `"first"` \| `"all"` \| `"off"`              |
+| `textChunkLimit`  | number   | `2000`          | 1–2000 (Discord's hard cap)                  |
+| `chunkMode`       | enum     | `"length"`      | `"length"` \| `"newline"`                    |
+| `mentionPatterns` | string[] | `[]`            | JSON array of case-insensitive regex strings |
 
 ### 7.3 Required Discord bot permissions
 
 **Required for current functionality:**
+
 - View Channels
 - Send Messages
 - Send Messages in Threads
@@ -547,11 +571,13 @@ Skills are user-invocable commands that run in the Claude Code terminal session.
 - Embed Links
 
 **Recommended (enable if planning to use forum thread creation or cross-server emoji):**
+
 - Create Public Threads
 - Create Private Threads
 - Use External Emojis
 
 **Privileged Gateway Intents required:**
+
 - Message Content Intent (configured in Developer Portal → Bot → Privileged Gateway Intents)
 
 **Intentionally not required:** Administrator, Manage Server, Kick/Ban Members, Moderate Members, Manage Roles, Manage Channels, Manage Threads, Manage Messages, Manage Events, Manage Expressions, Mention Everyone, View Audit Log, View Server Insights, voice permissions.
@@ -592,6 +618,7 @@ The `claude/channel/permission` capability is declared, asserting that the serve
 ### 8.4 Static mode
 
 `DISCORD_ACCESS_MODE=static` is intended for deployments where the config must not change at runtime (e.g. containerized). In static mode:
+
 - `access.json` is read once at boot and never re-read or written.
 - `dmPolicy: "pairing"` is downgraded to `"allowlist"` at startup with a stderr warning — pairing requires runtime writes.
 - The approval poll (`setInterval(checkApprovals)`) is not started.
