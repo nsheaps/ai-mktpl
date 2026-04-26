@@ -1,9 +1,8 @@
-# Default owner for all files
-* @nsheaps
+# Default owner for all files -- commented so I don't block when agent can review
+# * @nsheaps
 
-# Explicitly mark workflow and action files as sensitive
-# These rules are functionally redundant with the default above,
-# but signal to reviewers that these paths require extra scrutiny.
-.github/workflows/ @nsheaps
-.github/actions/ @nsheaps
-.github/CODEOWNERS @nsheaps
+# This stuff fundamentally changes how this stuff works. Unreviewed changes could break a lot of stuff
+.github/ @nsheaps
+.claude/ @nsheaps
+mise/ @nsheaps
+mise.toml @nsheaps
