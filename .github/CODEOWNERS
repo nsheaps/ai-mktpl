@@ -1,1 +1,8 @@
-* @nsheaps
+# Default owner for all files -- commented so I don't block when agent can review
+# * @nsheaps
+
+# This stuff fundamentally changes how this stuff works. Unreviewed changes could break a lot of stuff
+.github/ @nsheaps
+.claude/ @nsheaps
+mise/ @nsheaps
+mise.toml @nsheaps
