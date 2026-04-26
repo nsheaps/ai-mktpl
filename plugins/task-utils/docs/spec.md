@@ -196,18 +196,18 @@ No data migration required — task state lives in Claude Code's native store.
 
 ## MVP Scope (v1)
 
-| Feature                                                   | Status                     |
-| --------------------------------------------------------- | -------------------------- |
-| TaskCompleted commit check                                | **Implemented**            |
-| SessionStart awareness message                            | **Implemented**            |
-| PreToolUse active-task guard                              | **Stub** (no-op, v1.1)    |
-| Stop guard                                                | **Stub** (no-op, v1.1)    |
-| FilesystemProvider                                        | **Stub** (no-op, v1.1)    |
-| GitHubIssuesProvider (find-or-create via haiku sub-agent) | **Stub** (no-op, v1.1)    |
-| task-parallelization skill (migrated)                     | **Implemented**            |
-| task-management skill (new)                               | **Implemented**            |
-| PostToolUse:TodoWrite sync                                | **Deferred**               |
-| TodoWrite gitignore init                                  | **Deferred**               |
+| Feature                                                   | Status                 |
+| --------------------------------------------------------- | ---------------------- |
+| TaskCompleted commit check                                | **Implemented**        |
+| SessionStart awareness message                            | **Implemented**        |
+| PreToolUse active-task guard                              | **Stub** (no-op, v1.1) |
+| Stop guard                                                | **Stub** (no-op, v1.1) |
+| FilesystemProvider                                        | **Stub** (no-op, v1.1) |
+| GitHubIssuesProvider (find-or-create via haiku sub-agent) | **Stub** (no-op, v1.1) |
+| task-parallelization skill (migrated)                     | **Implemented**        |
+| task-management skill (new)                               | **Implemented**        |
+| PostToolUse:TodoWrite sync                                | **Deferred**           |
+| TodoWrite gitignore init                                  | **Deferred**           |
 
 ## Deferred Items (post-MVP)
 
