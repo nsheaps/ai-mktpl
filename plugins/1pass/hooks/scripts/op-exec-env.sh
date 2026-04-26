@@ -174,6 +174,7 @@ process_item() {
     hook_fail "op-exec" "Failed to evaluate op-exec output for: $item_ref${err_msg:+ — $err_msg}" \
       "The op-exec output may contain syntax that bash cannot evaluate"
     rm -f "$eval_stderr" "$eval_output"
+    trap - INT TERM HUP
     return 0
   fi
 
@@ -202,6 +203,8 @@ process_item() {
     fi
   done < "$eval_output"
   rm -f "$eval_output"
+  # Restore default signal handlers — trap is process-global, not function-scoped
+  trap - INT TERM HUP
 
   hook_log "exported $count env vars from $item_ref"
 }
