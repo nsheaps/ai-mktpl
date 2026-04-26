@@ -147,23 +147,33 @@ process_item() {
     return 0
   fi
 
-  # Parse export statements and write to targets
+  # Evaluate op-exec output in a clean subshell to resolve heredocs/complex syntax.
+  # op-exec can output heredoc-style assignments (e.g. export VAR=$(cat <<'EOF'...))
+  # which break line-by-line parsing. By eval'ing in env -i, only the exported vars
+  # appear in the output — no inherited env to filter.
+  local resolved
+  if ! resolved="$(env -i HOME="$HOME" PATH="$PATH" bash -c "
+    eval \"\$1\"
+    env
+  " _ "$exports" 2>/dev/null)"; then
+    hook_fail "op-exec" "Failed to evaluate op-exec output for: $item_ref" \
+      "The op-exec output may contain syntax that bash cannot evaluate"
+    return 0
+  fi
+
+  # Parse the clean KEY=VALUE output from the isolated subshell
   local count=0
   while IFS= read -r line; do
-    # op-exec outputs: export VAR_NAME=value
-    # Strip "export " prefix, then split on first "="
-    local assignment="${line#export }"
-    local env_name="${assignment%%=*}"
-    local env_value="${assignment#*=}"
-
-    # Remove shell quoting from value (op-exec uses printf %q)
-    env_value="$(printf '%b' "$env_value" 2>/dev/null || echo "$env_value")"
-
+    [ -z "$line" ] && continue
+    local env_name="${line%%=*}"
+    local env_value="${line#*=}"
+    # Skip vars injected for bash to work (not from op-exec)
+    [[ "$env_name" == "HOME" || "$env_name" == "PATH" || "$env_name" == "PWD" || "$env_name" == "SHLVL" || "$env_name" == "_" ]] && continue
     if [ -n "$env_name" ]; then
       write_to_targets "$env_name" "$env_value"
       count=$((count + 1))
     fi
-  done <<< "$exports"
+  done <<< "$resolved"
 
   hook_log "exported $count env vars from $item_ref"
 }
