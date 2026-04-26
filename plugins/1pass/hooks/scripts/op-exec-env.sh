@@ -151,29 +151,53 @@ process_item() {
   # op-exec can output heredoc-style assignments (e.g. export VAR=$(cat <<'EOF'...))
   # which break line-by-line parsing. By eval'ing in env -i, only the exported vars
   # appear in the output — no inherited env to filter.
-  local resolved
-  if ! resolved="$(env -i HOME="$HOME" PATH="$PATH" bash -c "
+  #
+  # We use `env -0` to NUL-delimit records, which correctly handles multi-line
+  # values (e.g. PEM keys). NUL bytes can't appear in env values, so this is
+  # the only safe delimiter. We read via process substitution because bash
+  # strips NULs from $() command substitution output.
+  local eval_stderr
+  eval_stderr="$(mktemp)"
+  local eval_exit=0
+  env -i HOME="$HOME" PATH="$PATH" bash -c "
     eval \"\$1\"
-    env
-  " _ "$exports" 2>/dev/null)"; then
-    hook_fail "op-exec" "Failed to evaluate op-exec output for: $item_ref" \
+    env -0
+  " _ "$exports" 2>"$eval_stderr" > "$TMP_DIR/op-exec-env-output" || eval_exit=$?
+
+  if [[ $eval_exit -ne 0 ]]; then
+    local err_msg=""
+    [[ -s "$eval_stderr" ]] && err_msg="$(cat "$eval_stderr")"
+    hook_fail "op-exec" "Failed to evaluate op-exec output for: $item_ref${err_msg:+ — $err_msg}" \
       "The op-exec output may contain syntax that bash cannot evaluate"
+    rm -f "$eval_stderr" "$TMP_DIR/op-exec-env-output"
     return 0
   fi
 
-  # Parse the clean KEY=VALUE output from the isolated subshell
+  # Log any stderr even on success (diagnostics, not fatal)
+  if [[ -s "$eval_stderr" ]]; then
+    while IFS= read -r line; do
+      hook_log "[eval stderr] $line"
+    done < "$eval_stderr"
+  fi
+  rm -f "$eval_stderr"
+
+  # Parse NUL-delimited KEY=VALUE records from the isolated subshell.
+  # This correctly handles multi-line values (e.g. PEM keys with embedded newlines).
   local count=0
-  while IFS= read -r line; do
-    [ -z "$line" ] && continue
-    local env_name="${line%%=*}"
-    local env_value="${line#*=}"
-    # Skip vars injected for bash to work (not from op-exec)
-    [[ "$env_name" == "HOME" || "$env_name" == "PATH" || "$env_name" == "PWD" || "$env_name" == "SHLVL" || "$env_name" == "_" ]] && continue
+  while IFS= read -r -d '' record; do
+    [ -z "$record" ] && continue
+    local env_name="${record%%=*}"
+    local env_value="${record#*=}"
+    # Skip vars injected for the isolated bash to work (not from op-exec)
+    case "$env_name" in
+      HOME|PATH|PWD|OLDPWD|SHLVL|_) continue ;;
+    esac
     if [ -n "$env_name" ]; then
       write_to_targets "$env_name" "$env_value"
       count=$((count + 1))
     fi
-  done <<< "$resolved"
+  done < "$TMP_DIR/op-exec-env-output"
+  rm -f "$TMP_DIR/op-exec-env-output"
 
   hook_log "exported $count env vars from $item_ref"
 }
