@@ -156,20 +156,21 @@ process_item() {
   # values (e.g. PEM keys). NUL bytes can't appear in env values, so this is
   # the only safe delimiter. We read via process substitution because bash
   # strips NULs from $() command substitution output.
-  local eval_stderr
+  local eval_stderr eval_output
   eval_stderr="$(mktemp)"
+  eval_output="$(mktemp)"
   local eval_exit=0
   env -i HOME="$HOME" PATH="$PATH" bash -c "
     eval \"\$1\"
     env -0
-  " _ "$exports" 2>"$eval_stderr" > "$TMP_DIR/op-exec-env-output" || eval_exit=$?
+  " _ "$exports" 2>"$eval_stderr" > "$eval_output" || eval_exit=$?
 
   if [[ $eval_exit -ne 0 ]]; then
     local err_msg=""
     [[ -s "$eval_stderr" ]] && err_msg="$(cat "$eval_stderr")"
     hook_fail "op-exec" "Failed to evaluate op-exec output for: $item_ref${err_msg:+ — $err_msg}" \
       "The op-exec output may contain syntax that bash cannot evaluate"
-    rm -f "$eval_stderr" "$TMP_DIR/op-exec-env-output"
+    rm -f "$eval_stderr" "$eval_output"
     return 0
   fi
 
@@ -196,8 +197,8 @@ process_item() {
       write_to_targets "$env_name" "$env_value"
       count=$((count + 1))
     fi
-  done < "$TMP_DIR/op-exec-env-output"
-  rm -f "$TMP_DIR/op-exec-env-output"
+  done < "$eval_output"
+  rm -f "$eval_output"
 
   hook_log "exported $count env vars from $item_ref"
 }
