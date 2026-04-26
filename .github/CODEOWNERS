@@ -1,7 +1,9 @@
-# Default: all files require handler approval
+# Default owner for all files
 * @nsheaps
 
-# Workflow and CI changes require explicit handler approval
+# Explicitly mark workflow and action files as sensitive
+# These rules are functionally redundant with the default above,
+# but signal to reviewers that these paths require extra scrutiny.
 .github/workflows/ @nsheaps
 .github/actions/ @nsheaps
 .github/CODEOWNERS @nsheaps

@@ -44,10 +44,10 @@ The correct file name changed from `default.json` to `default.json5`:
 ```json5
 // renovate.json5
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "github>nsheaps/renovate-config"   // uses default.json5 automatically
-  ]
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: [
+    "github>nsheaps/renovate-config", // uses default.json5 automatically
+  ],
 }
 ```
 
@@ -59,33 +59,41 @@ settings, schedule, package rules, etc.).
 When a Renovate PR is stuck and not auto-merging:
 
 1. **Repo setting enabled?**
+
    ```bash
    gh api repos/nsheaps/<repo> --jq '.allow_auto_merge'
    # should return: true
    ```
 
 2. **PR has auto-merge queued?**
+
    ```bash
    gh pr view <N> --repo nsheaps/<repo> --json autoMergeRequest
    # autoMergeRequest should be non-null
    ```
+
    If null, enable it:
+
    ```bash
    gh pr merge <N> --repo nsheaps/<repo> --auto --squash
    ```
 
 3. **Branch protection / rulesets blocking?**
+
    ```bash
    gh api repos/nsheaps/<repo>/rules/branches/main
    ```
+
    Common blockers:
    - `pull_request` rule requiring `required_approving_review_count: 1` → approve the PR
    - Required status checks that aren't running → check CI config
 
 4. **Required status checks failing?**
+
    ```bash
    gh pr view <N> --repo nsheaps/<repo> --json statusCheckRollup
    ```
+
    Empty `statusCheckRollup` + BLOCKED usually means a required check is
    configured but no CI run has happened (missing workflow trigger or CI never ran).
 
