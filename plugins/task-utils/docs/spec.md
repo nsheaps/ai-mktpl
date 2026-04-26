@@ -1,6 +1,6 @@
 ---
 name: task-utils
-status: draft
+status: in-progress
 description: Unified task management plugin consolidating todo-plus-plus, todo-sync, and task-parallelization into a single cohesive plugin with provider-based task sync.
 ---
 
@@ -100,7 +100,7 @@ task-utils:
 **Behavior**:
 
 - Injects task-awareness context into the session (reminder to use TaskCreate on every action request)
-- Restores any `in_progress` tasks from the previous session, prompting the agent to resume or triage them
+- Task restore is **deferred to v1.1** — currently emits a static awareness message only
 
 **Advisory**: No — always runs
 
@@ -109,7 +109,8 @@ task-utils:
 **Source**: New (fills gap in todo-plus-plus)  
 **Behavior**: When a non-conversational tool is invoked and no task is `in_progress`, emit an advisory warning reminding the agent to create/activate a task.  
 **Advisory**: Yes — warns, does not block  
-**Configurable**: `activeTaskGuard.enabled` (default: `true`)
+**Configurable**: `activeTaskGuard.enabled` (default: `true`)  
+**Status**: **Deferred to v1.1** — script exists but is not wired in `hooks.json`. Running a no-op on every tool call adds per-call overhead for zero benefit; will be wired when guard logic is implemented.
 
 ### 4. `Stop` (advisory) — In-Progress Task Warning
 
@@ -157,7 +158,9 @@ New skill covering:
 
 ## Configuration
 
-Full configuration reference via `plugins.settings.yaml` in the consuming agent's repo:
+> **Not yet implemented.** The configuration below is the planned interface for v1.1. In v0.1.0, no `plugin_get_config` calls exist and no `plugins.settings.yaml` is read — all hooks use hardcoded defaults.
+
+Full configuration reference via `plugins.settings.yaml` in the consuming agent's repo (planned):
 
 ```yaml
 task-utils:
@@ -189,22 +192,22 @@ For agents currently using the three separate plugins:
 
 No data migration required — task state lives in Claude Code's native store.
 
-**Note**: TodoWrite gitignore initialization (from todo-sync's `SessionStart`) is deferred post-MVP. If you relied on this, keep `todo-sync` installed until v1.1.
+**Note**: TodoWrite gitignore initialization (from todo-sync's `SessionStart`) is deferred post-MVP.
 
 ## MVP Scope (v1)
 
-| Feature                                                   | Status       |
-| --------------------------------------------------------- | ------------ |
-| TaskCompleted commit check                                | In scope     |
-| SessionStart restore + awareness                          | In scope     |
-| PreToolUse active-task guard                              | In scope     |
-| Stop guard (migrated, commented out initially)            | In scope     |
-| FilesystemProvider                                        | In scope     |
-| GitHubIssuesProvider (find-or-create via haiku sub-agent) | In scope     |
-| task-parallelization skill (migrated)                     | In scope     |
-| task-management skill (new)                               | In scope     |
-| PostToolUse:TodoWrite sync                                | **Deferred** |
-| TodoWrite gitignore init                                  | **Deferred** |
+| Feature                                                   | Status                     |
+| --------------------------------------------------------- | -------------------------- |
+| TaskCompleted commit check                                | **Implemented**            |
+| SessionStart awareness message                            | **Implemented**            |
+| PreToolUse active-task guard                              | **Stub** (no-op, v1.1)    |
+| Stop guard                                                | **Stub** (no-op, v1.1)    |
+| FilesystemProvider                                        | **Stub** (no-op, v1.1)    |
+| GitHubIssuesProvider (find-or-create via haiku sub-agent) | **Stub** (no-op, v1.1)    |
+| task-parallelization skill (migrated)                     | **Implemented**            |
+| task-management skill (new)                               | **Implemented**            |
+| PostToolUse:TodoWrite sync                                | **Deferred**               |
+| TodoWrite gitignore init                                  | **Deferred**               |
 
 ## Deferred Items (post-MVP)
 

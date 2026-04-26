@@ -20,8 +20,10 @@ Add `task-utils` to your `enabledPlugins` in `settings.json`. Remove `todo-plus-
 
 ## Configuration
 
+> **Not yet implemented.** The configuration knobs below are planned for v1.1. In v0.1.0, all hooks use hardcoded defaults — `commitCheck` is always on, stub hooks always exit 0, and no provider sync runs. No `plugins.settings.yaml` is read.
+
 ```yaml
-# plugins.settings.yaml
+# plugins.settings.yaml (planned — not read in v0.1.0)
 task-utils:
   providers:
     filesystem:
@@ -52,7 +54,7 @@ task-utils/
 │   ├── hooks.json
 │   └── scripts/
 │       ├── check-uncommitted.sh      # TaskCompleted — commit guard
-│       ├── session-start.sh          # SessionStart — awareness + restore
+│       ├── session-start.sh          # SessionStart — awareness message
 │       ├── active-task-guard.sh      # PreToolUse — active task advisory
 │       ├── stop-guard.sh             # Stop — in-progress task advisory
 │       ├── sync-task-create.sh       # PostToolUse:TaskCreate — provider sync
@@ -76,8 +78,6 @@ If you used `todo-plus-plus`, `todo-sync`, and/or `task-parallelization`:
 3. Configure `providers.githubIssues` if you used todo-sync's GitHub sync
 
 No data migration required — task state lives in Claude Code's native task store.
-
-**Note**: TodoWrite gitignore initialization (from todo-sync's `SessionStart`) is deferred to v1.1. If you relied on this, keep `todo-sync` installed until then.
 
 ## License
 

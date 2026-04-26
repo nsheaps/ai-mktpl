@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# session-start.sh — Injects task-awareness context and restores in-progress tasks
+# session-start.sh — Injects task-awareness context into the session
 # Triggered by SessionStart hook
 #
 # Source: migrated and extended from todo-plus-plus v0.1.5 SessionStart hook
