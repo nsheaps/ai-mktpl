@@ -159,8 +159,11 @@ process_item() {
   local eval_stderr eval_output
   eval_stderr="$(mktemp)"
   eval_output="$(mktemp)"
+  # Clean up tempfiles on signal — they may contain resolved secrets
+  trap 'rm -f "$eval_stderr" "$eval_output"' INT TERM HUP
   local eval_exit=0
   env -i HOME="$HOME" PATH="$PATH" bash -c "
+    set -e
     eval \"\$1\"
     env -0
   " _ "$exports" 2>"$eval_stderr" > "$eval_output" || eval_exit=$?
