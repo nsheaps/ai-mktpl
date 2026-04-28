@@ -44,7 +44,7 @@
     {
       "name": "agentic-behavior",
       "description": "Skills for configuring Claude Code, behavior correction, memory tracking, autonomy rules, and time-context awareness. Combines prompt history tracking, git-backed memory sync, and the self-checking Ralph loop pattern.",
-      "version": "0.1.2",
+      "version": "0.1.3",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -616,7 +616,7 @@
     {
       "name": "scm-utils",
       "description": "Source control management utilities for improving interactions with branches and PRs, both locally and in CI environments",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "author": {
         "name": "Nathan Heaps"
       },

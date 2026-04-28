@@ -1,6 +1,6 @@
 {
   "name": "agentic-behavior",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Skills for configuring Claude Code, behavior correction, memory tracking, autonomy rules, and time-context awareness. Combines prompt history tracking, git-backed memory sync, and the self-checking Ralph loop pattern.",
   "author": {
     "name": "Nathan Heaps",
@@ -24,6 +24,5 @@
     "github-issues"
   ],
   "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/agentic-behavior",
-  "repository": "https://github.com/nsheaps/ai-mktpl",
-  "hooks": "./hooks/hooks.json"
+  "repository": "https://github.com/nsheaps/ai-mktpl"
 }
