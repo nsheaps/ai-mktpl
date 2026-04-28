@@ -67,19 +67,41 @@ if [[ -z "$TOKEN" ]]; then
   exit 3
 fi
 
-# --- Step 3: Write token and metadata ---
+# --- Step 3: Resolve app slug and bot ID (using JWT, not installation token) ---
+# The /app endpoint requires JWT auth. The JWT is still valid here (10min TTL).
+# We resolve the slug + bot ID now and store them in metadata so that downstream
+# consumers (github-token-init.sh) don't need to regenerate a JWT.
+
+APP_SLUG=$(curl -sf \
+  -H "Authorization: Bearer ${JWT}" \
+  -H "Accept: application/vnd.github+json" \
+  "https://api.github.com/app" 2>/dev/null \
+  | jq -r '.slug // empty') || true
+
+BOT_ID=""
+if [[ -n "$APP_SLUG" ]]; then
+  BOT_ID=$(curl -sf \
+    -H "Authorization: Bearer ${JWT}" \
+    -H "Accept: application/vnd.github+json" \
+    "https://api.github.com/users/${APP_SLUG}%5Bbot%5D" 2>/dev/null \
+    | jq -r '.id // empty') || true
+fi
+
+# --- Step 4: Write token and metadata ---
 
 mkdir -p "$(dirname "$TOKEN_FILE")"
 echo "$TOKEN" > "$TOKEN_FILE"
 chmod 600 "$TOKEN_FILE"
 
-# Write metadata for status checks
+# Write metadata for status checks + identity resolution
 cat > "${TOKEN_FILE}.meta" <<METAEOF
 {
   "expires_at": "$EXPIRES_AT",
   "app_id": "$GITHUB_APP_ID",
   "installation_id": "$INSTALLATION_ID",
   "permissions": $PERMISSIONS,
+  "app_slug": "${APP_SLUG:-}",
+  "bot_id": "${BOT_ID:-}",
   "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 }
 METAEOF

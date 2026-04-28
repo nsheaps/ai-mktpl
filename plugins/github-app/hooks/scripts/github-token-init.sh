@@ -339,26 +339,17 @@ configure_git_identity_env() {
   # BUG-7 fix: Never preserve existing git identity from the host machine.
   # On shared machines all agents run as the same OS user and inherit the
   # handler's ~/.gitconfig. We ALWAYS resolve the bot identity from the
-  # GitHub App API and write an isolated GIT_CONFIG_GLOBAL so agents never
+  # token metadata and write an isolated GIT_CONFIG_GLOBAL so agents never
   # commit as the handler.
 
-  # Fetch the App's slug and bot ID from the GitHub API.
-  # Using curl (no PATH dependency) rather than gh to avoid SessionStart hook
-  # ordering issues with mise-installed gh.
+  # Read app slug and bot ID from token metadata (written by generate-token.sh
+  # which has JWT auth needed for the /app endpoint — installation tokens
+  # cannot access /app).
   local app_slug bot_id
-  app_slug=$(curl -sf \
-    -H "Authorization: Bearer $TOKEN" \
-    -H "Accept: application/vnd.github+json" \
-    "https://api.github.com/app" 2>/dev/null \
-    | jq -r '.slug // empty') || true
-  [[ -n "$app_slug" ]] || return 0
+  app_slug=$(jq -r '.app_slug // empty' "$META_FILE" 2>/dev/null) || true
+  [[ -n "$app_slug" ]] || { hook_log "WARNING: app_slug not in metadata — git identity not configured"; return 0; }
 
-  # URL-encode [bot] as %5Bbot%5D for the API request
-  bot_id=$(curl -sf \
-    -H "Authorization: Bearer $TOKEN" \
-    -H "Accept: application/vnd.github+json" \
-    "https://api.github.com/users/${app_slug}%5Bbot%5D" 2>/dev/null \
-    | jq -r '.id // empty') || true
+  bot_id=$(jq -r '.bot_id // empty' "$META_FILE" 2>/dev/null) || true
 
   local bot_name="${app_slug}[bot]"
   local bot_email
