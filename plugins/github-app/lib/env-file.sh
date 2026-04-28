@@ -25,6 +25,11 @@
 if [ "${_ENV_FILE_LOADED:-}" = "true" ]; then return 0; fi
 _ENV_FILE_LOADED="true"
 
+# Source agent-paths for AGENT_CONFIG_DIR
+_env_file_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=agent-paths.sh
+[[ "${_AGENT_PATHS_LOADED:-}" == "true" ]] || source "$_env_file_dir/agent-paths.sh"
+
 # _safe_val VALUE
 #
 # Escapes a value for safe embedding in a double-quoted shell assignment.
@@ -131,4 +136,45 @@ GITEOF
   } >> "$GIT_IDENTITY_FILE"
 
   chmod 600 "$GIT_IDENTITY_FILE"
+}
+
+# GIT_CONFIG_GLOBAL_FILE — path to the isolated gitconfig file
+# Written at session start and rewritten on every token refresh so
+# identity stays fresh if the GitHub App slug changes mid-session.
+# Respects GIT_CONFIG_GLOBAL if already set (SessionStart sets it before calling).
+GIT_CONFIG_GLOBAL_FILE="${GIT_CONFIG_GLOBAL:-${AGENT_CONFIG_DIR:-${HOME}/.agents/_UNKNOWN/.config}/git/config}"
+
+# write_git_config_global [CREDENTIAL_HELPER_PATH]
+#
+# Rewrites the isolated gitconfig with current identity from env vars
+# (GIT_AUTHOR_NAME, GIT_AUTHOR_EMAIL) plus the credential helper.
+# Git reads GIT_CONFIG_GLOBAL on every operation, so changes take
+# effect immediately on the next git command.
+#
+# Args:
+#   $1  — (optional) path to credential helper script. If omitted,
+#         reuses the existing [credential] section or omits it.
+write_git_config_global() {
+  local cred_helper="${1:-}"
+  local bot_name="${GIT_AUTHOR_NAME:-}"
+  local bot_email="${GIT_AUTHOR_EMAIL:-}"
+
+  [[ -n "$bot_name" && -n "$bot_email" ]] || return 0
+
+  mkdir -p "$(dirname "$GIT_CONFIG_GLOBAL_FILE")"
+
+  cat > "$GIT_CONFIG_GLOBAL_FILE" <<GCEOF
+[user]
+    name = ${bot_name}
+    email = ${bot_email}
+GCEOF
+
+  if [[ -n "$cred_helper" ]]; then
+    cat >> "$GIT_CONFIG_GLOBAL_FILE" <<GCEOF
+[credential "https://github.com"]
+    helper = !${cred_helper}
+GCEOF
+  fi
+
+  chmod 600 "$GIT_CONFIG_GLOBAL_FILE"
 }

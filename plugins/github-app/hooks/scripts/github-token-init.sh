@@ -385,16 +385,8 @@ configure_git_identity_env() {
   local git_config_file="${agent_base}/git/config"
   mkdir -p "$(dirname "$git_config_file")"
 
-  local credential_helper="${CLAUDE_PLUGIN_ROOT}/bin/git-credential-github-app.sh"
-  cat > "$git_config_file" <<GCEOF
-[user]
-    name = ${bot_name}
-    email = ${bot_email}
-[credential "https://github.com"]
-    helper = !${credential_helper}
-GCEOF
-  chmod 600 "$git_config_file"
   export GIT_CONFIG_GLOBAL="$git_config_file"
+  write_git_config_global "${CLAUDE_PLUGIN_ROOT}/bin/git-credential-github-app.sh"
   hook_log "GIT_CONFIG_GLOBAL isolated at $git_config_file (with credential helper)"
 
   # Defense-in-depth: also set GIT_AUTHOR_*/GIT_COMMITTER_* env vars.

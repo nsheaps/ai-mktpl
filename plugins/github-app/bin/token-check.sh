@@ -98,9 +98,10 @@ PLUGIN_DIR="$(cd "$(dirname "$_self")/.." && pwd)"
 source "$PLUGIN_DIR/lib/token-utils.sh"
 source "$PLUGIN_DIR/lib/env-file.sh"
 
-# update_runtime_env TOKEN — thin wrapper around the shared write function
+# update_runtime_env TOKEN — rewrites runtime env file AND gitconfig on each refresh
 update_runtime_env() {
   write_runtime_env_file "$1"
+  write_git_config_global "${PLUGIN_DIR}/bin/git-credential-github-app.sh"
 }
 
 # Generate a new token (full re-auth from keys)
