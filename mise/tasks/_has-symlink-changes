@@ -9,6 +9,10 @@
 PLUGIN_DIR="${1:?Usage: mise run _has-symlink-changes <PLUGIN_DIR> <BASE_REF>}"
 BASE_REF="${2:?Usage: mise run _has-symlink-changes <PLUGIN_DIR> <BASE_REF>}"
 
+# Bail if plugin dir doesn't exist — prevents ABS_PLUGIN_DIR from being empty,
+# which would make the guard pattern "/"* match every absolute path.
+[ -d "$PLUGIN_DIR" ] || exit 1
+
 # Resolve the plugin directory to an absolute path for comparison
 ABS_PLUGIN_DIR=$(cd "$PLUGIN_DIR" && pwd -P)
 
