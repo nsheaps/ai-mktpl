@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
-# check-uncommitted.sh - Blocks task completion if there are uncommitted changes
+# check-uncommitted.sh — Blocks task completion if there are uncommitted changes
 # Triggered by TaskCompleted hook
 #
 # Exit code 2 = block completion and send stderr as feedback to Claude
 # Exit code 0 = allow completion
+#
+# Source: migrated from todo-plus-plus v0.1.5
 
 set -euo pipefail
 
-LOG_PREFIX="todo-plus-plus"
-# shellcheck source=../lib/log.sh
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/lib/log.sh"
+LOG_PREFIX="task-utils"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/lib/log.sh"
 
 # Read hook input from stdin (consume it so the pipe doesn't break)
 cat > /dev/null

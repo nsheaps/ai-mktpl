@@ -130,7 +130,6 @@
     "mise@ai-mktpl": true,
     "scm-utils@ai-mktpl": true,
     "sequential-thinking@ai-mktpl": false,
-    "todo-sync@ai-mktpl": false,
     "web-auto-approve@ai-mktpl": true
   },
   "extraKnownMarketplaces": {

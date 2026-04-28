@@ -755,23 +755,24 @@
       ]
     },
     {
-      "name": "task-parallelization",
-      "description": "Intelligent skill that helps Claude parallelize Task tool calls when working on repetitive or batch operations, optimizing throughput based on task complexity",
-      "version": "0.2.25",
+      "name": "task-utils",
+      "description": "Unified task management plugin — commit-on-complete, session awareness, active-task guard, stop guard, and provider-based task sync. Consolidates todo-plus-plus, todo-sync, and task-parallelization.",
+      "version": "0.1.0",
       "author": {
         "name": "Nathan Heaps"
       },
-      "source": "./plugins/task-parallelization",
+      "source": "./plugins/task-utils",
       "category": "utility",
       "tags": ["utility", "skill"],
       "keywords": [
+        "tasks",
+        "commit",
+        "workflow",
+        "ephemeral",
         "parallelization",
-        "task",
-        "agent",
-        "batch",
-        "performance",
-        "optimization",
-        "concurrent"
+        "sync",
+        "agent-teams",
+        "productivity"
       ]
     },
     {
@@ -797,30 +798,6 @@
       "category": "utility",
       "tags": ["utility", "command", "skill"],
       "keywords": ["tmux", "subagent", "parallel", "iterm", "terminal", "isolation", "delegation"]
-    },
-    {
-      "name": "todo-plus-plus",
-      "description": "Enforces commit-on-complete for tasks and reminds about ephemeral session awareness",
-      "version": "0.1.5",
-      "author": {
-        "name": "Nathan Heaps"
-      },
-      "source": "./plugins/todo-plus-plus",
-      "category": "utility",
-      "tags": ["utility", "skill"],
-      "keywords": ["tasks", "commit", "workflow", "ephemeral", "agent-teams"]
-    },
-    {
-      "name": "todo-sync",
-      "description": "Automatically syncs todos and plans from ~/.claude/ to the current project's .claude/ directory",
-      "version": "0.2.4",
-      "author": {
-        "name": "Nathan Heaps"
-      },
-      "source": "./plugins/todo-sync",
-      "category": "utility",
-      "tags": ["utility", "skill"],
-      "keywords": ["todos", "plans", "sync", "workflow", "productivity"]
     },
     {
       "name": "web-auto-approve",
