@@ -138,18 +138,16 @@ GITEOF
   chmod 600 "$GIT_IDENTITY_FILE"
 }
 
-# GIT_CONFIG_GLOBAL_FILE — path to the isolated gitconfig file
-# Written at session start and rewritten on every token refresh so
-# identity stays fresh if the GitHub App slug changes mid-session.
-# Respects GIT_CONFIG_GLOBAL if already set (SessionStart sets it before calling).
-GIT_CONFIG_GLOBAL_FILE="${GIT_CONFIG_GLOBAL:-${AGENT_CONFIG_DIR:-${HOME}/.agents/_UNKNOWN/.config}/git/config}"
-
 # write_git_config_global [CREDENTIAL_HELPER_PATH]
 #
 # Rewrites the isolated gitconfig with current identity from env vars
 # (GIT_AUTHOR_NAME, GIT_AUTHOR_EMAIL) plus the credential helper.
 # Git reads GIT_CONFIG_GLOBAL on every operation, so changes take
 # effect immediately on the next git command.
+#
+# The target path is computed at call-time (not source-time) so the
+# function always uses the current value of GIT_CONFIG_GLOBAL, avoiding
+# order-dependent bugs when callers source this lib at different points.
 #
 # Args:
 #   $1  — (optional) path to credential helper script. If omitted,
@@ -158,23 +156,24 @@ write_git_config_global() {
   local cred_helper="${1:-}"
   local bot_name="${GIT_AUTHOR_NAME:-}"
   local bot_email="${GIT_AUTHOR_EMAIL:-}"
+  local target="${GIT_CONFIG_GLOBAL:-${AGENT_CONFIG_DIR:-${HOME}/.agents/_UNKNOWN/.config}/git/config}"
 
   [[ -n "$bot_name" && -n "$bot_email" ]] || return 0
 
-  mkdir -p "$(dirname "$GIT_CONFIG_GLOBAL_FILE")"
+  mkdir -p "$(dirname "$target")"
 
-  cat > "$GIT_CONFIG_GLOBAL_FILE" <<GCEOF
+  cat > "$target" <<GCEOF
 [user]
     name = ${bot_name}
     email = ${bot_email}
 GCEOF
 
   if [[ -n "$cred_helper" ]]; then
-    cat >> "$GIT_CONFIG_GLOBAL_FILE" <<GCEOF
+    cat >> "$target" <<GCEOF
 [credential "https://github.com"]
     helper = !${cred_helper}
 GCEOF
   fi
 
-  chmod 600 "$GIT_CONFIG_GLOBAL_FILE"
+  chmod 600 "$target"
 }
