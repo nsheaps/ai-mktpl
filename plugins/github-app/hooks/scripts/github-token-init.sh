@@ -380,10 +380,10 @@ configure_git_identity_env() {
   # to it. This prevents git from reading the handler's ~/.gitconfig, which is
   # the root cause of BUG-7 (agents committing as the handler on shared machines).
   # This mirrors the GH_CONFIG_DIR pattern already used for gh CLI isolation.
-  local git_config_dir="${AGENT_CONFIG_DIR:-${GH_CONFIG_DIR:+$(dirname "$GH_CONFIG_DIR")}}"
-  git_config_dir="${git_config_dir:-${HOME}/.agents/github-app/.config}"
-  local git_config_file="${git_config_dir}/gitconfig"
-  mkdir -p "$git_config_dir"
+  local agent_base="${AGENT_CONFIG_DIR:-${GH_CONFIG_DIR:+$(dirname "$GH_CONFIG_DIR")}}"
+  agent_base="${agent_base:-${HOME}/.agents/github-app/.config}"
+  local git_config_file="${agent_base}/git/config"
+  mkdir -p "$(dirname "$git_config_file")"
 
   cat > "$git_config_file" <<GCEOF
 [user]
