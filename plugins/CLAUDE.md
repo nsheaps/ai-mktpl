@@ -47,23 +47,23 @@ Only use `"hooks"` in plugin.json if the hooks file is at a **non-standard path*
 
 All known hook events and their compatibility with plugin `hooks.json`:
 
-| Event | Plugin hooks.json | Notes |
-|-------|:-:|-------|
-| SessionStart | Works | Fires on session init |
-| UserPromptSubmit | Works | Fires on each user message |
-| PreToolUse | Bug — does not fire | Use settings.json workaround ([#6305](https://github.com/anthropics/claude-code/issues/6305)) |
-| PostToolUse | Bug — does not fire | Same as PreToolUse |
-| PostToolUseFailure | Bug — does not fire | Same as PreToolUse |
-| PermissionRequest | Bug — does not fire | Same as PreToolUse |
-| Stop | Works | Fires on session end / clear / resume / compact |
-| PreCompact | Works | Fires before compaction (matcher: "manual" or "auto") |
-| PostCompact | Works | Fires after compaction (receives summary) |
-| Notification | Works | Fires on notification events |
-| TaskCompleted | Works | Fires when a task is marked completed |
-| TaskCreated | Untested | Fires when a task is created |
-| SubagentStart | Untested | Fires when a sub-agent launches |
-| SubagentStop | Untested | Fires when a sub-agent completes |
-| UserPromptExpansion | Untested | Fires during prompt expansion |
+| Event               |  Plugin hooks.json  | Notes                                                                                         |
+| ------------------- | :-----------------: | --------------------------------------------------------------------------------------------- |
+| SessionStart        |        Works        | Fires on session init                                                                         |
+| UserPromptSubmit    |        Works        | Fires on each user message                                                                    |
+| PreToolUse          | Bug — does not fire | Use settings.json workaround ([#6305](https://github.com/anthropics/claude-code/issues/6305)) |
+| PostToolUse         | Bug — does not fire | Same as PreToolUse                                                                            |
+| PostToolUseFailure  | Bug — does not fire | Same as PreToolUse                                                                            |
+| PermissionRequest   | Bug — does not fire | Same as PreToolUse                                                                            |
+| Stop                |        Works        | Fires on session end / clear / resume / compact                                               |
+| PreCompact          |        Works        | Fires before compaction (matcher: "manual" or "auto")                                         |
+| PostCompact         |        Works        | Fires after compaction (receives summary)                                                     |
+| Notification        |        Works        | Fires on notification events                                                                  |
+| TaskCompleted       |        Works        | Fires when a task is marked completed                                                         |
+| TaskCreated         |      Untested       | Fires when a task is created                                                                  |
+| SubagentStart       |      Untested       | Fires when a sub-agent launches                                                               |
+| SubagentStop        |      Untested       | Fires when a sub-agent completes                                                              |
+| UserPromptExpansion |      Untested       | Fires during prompt expansion                                                                 |
 
 **Note:** Events marked "Bug — does not fire" are tool-dispatch events that use a separate registry from where plugin hooks are stored. Only settings.json hooks fire for these events. See [#6305](https://github.com/anthropics/claude-code/issues/6305) and [#40506](https://github.com/anthropics/claude-code/issues/40506).
 
