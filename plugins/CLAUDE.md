@@ -45,15 +45,15 @@ Only use `"hooks"` in plugin.json if the hooks file is at a **non-standard path*
 
 ## Hook Event Types
 
-| Event | Plugin hooks.json | Notes |
-|-------|:--:|-------|
-| SessionStart | Works | Fires on session init |
-| UserPromptSubmit | Works | Fires on each user message |
-| PreToolUse | Known bug — does not fire from plugins | Use settings.json as workaround ([#6305](https://github.com/anthropics/claude-code/issues/6305)) |
-| PostToolUse | Known bug — does not fire from plugins | Same issue as PreToolUse |
-| Stop | Works | Fires on session end |
-| PreCompact | Works | Fires before compaction |
-| PostCompact | Works | Fires after compaction |
+| Event            |           Plugin hooks.json            | Notes                                                                                            |
+| ---------------- | :------------------------------------: | ------------------------------------------------------------------------------------------------ |
+| SessionStart     |                 Works                  | Fires on session init                                                                            |
+| UserPromptSubmit |                 Works                  | Fires on each user message                                                                       |
+| PreToolUse       | Known bug — does not fire from plugins | Use settings.json as workaround ([#6305](https://github.com/anthropics/claude-code/issues/6305)) |
+| PostToolUse      | Known bug — does not fire from plugins | Same issue as PreToolUse                                                                         |
+| Stop             |                 Works                  | Fires on session end                                                                             |
+| PreCompact       |                 Works                  | Fires before compaction                                                                          |
+| PostCompact      |                 Works                  | Fires after compaction                                                                           |
 
 ## Version Bumping
 
