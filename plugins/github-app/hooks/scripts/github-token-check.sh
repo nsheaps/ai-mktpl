@@ -65,8 +65,34 @@ if [[ ! -f "$TOKEN_FILE" ]]; then
 fi
 
 # --- Debounce/throttle ---
+# Throttle (not debounce): skip redundant "refresh early" checks when
+# the token is still valid. NEVER skip a check when the token is
+# already expired — always refresh immediately in that case.
+
+is_token_expired() {
+  if [[ ! -f "$META_FILE" ]]; then
+    return 0  # No metadata = assume expired
+  fi
+  local expires_at
+  expires_at=$(jq -r '.expires_at // empty' "$META_FILE" 2>/dev/null)
+  if [[ -z "$expires_at" ]]; then
+    return 0  # No expiry info = assume expired
+  fi
+  local expires_epoch now
+  expires_epoch=$(date -d "$expires_at" +%s 2>/dev/null || echo 0)
+  now=$(date +%s)
+  if (( now >= expires_epoch )); then
+    return 0  # Expired
+  fi
+  return 1  # Still valid
+}
 
 should_check() {
+  # Always check if token is expired — no throttle bypass for expired tokens
+  if is_token_expired; then
+    return 0
+  fi
+  # Token is valid — throttle proactive refresh checks
   if [[ ! -f "$DEBOUNCE_FILE" ]]; then
     return 0  # Never checked
   fi
@@ -76,7 +102,7 @@ should_check() {
   now=$(date +%s)
   local elapsed=$(( now - last_check ))
   if (( elapsed < DEBOUNCE_SECONDS )); then
-    return 1  # Too soon
+    return 1  # Too soon, and token is still valid
   fi
   return 0
 }
