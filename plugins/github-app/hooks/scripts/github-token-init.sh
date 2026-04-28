@@ -336,29 +336,13 @@ configure_git_identity_env() {
 
   hook_log_step "git-identity" "Configuring git identity env vars"
 
-  # If the user already has git identity configured, export it as env vars so
-  # sub-agents inherit the right identity without overriding the user's intent.
-  local existing_name existing_email
-  existing_name=$(git config user.name 2>/dev/null || true)
-  existing_email=$(git config user.email 2>/dev/null || true)
+  # BUG-7 fix: Never preserve existing git identity from the host machine.
+  # On shared machines all agents run as the same OS user and inherit the
+  # handler's ~/.gitconfig. We ALWAYS resolve the bot identity from the
+  # GitHub App API and write an isolated GIT_CONFIG_GLOBAL so agents never
+  # commit as the handler.
 
-  if [[ -n "$existing_name" && -n "$existing_email" ]]; then
-    hook_log "Existing git identity found ($existing_name <$existing_email>), exporting as env vars"
-    export GIT_AUTHOR_NAME="$existing_name"
-    export GIT_AUTHOR_EMAIL="$existing_email"
-    export GIT_COMMITTER_NAME="$existing_name"
-    export GIT_COMMITTER_EMAIL="$existing_email"
-    write_runtime_env_file "$TOKEN"
-    # Defense-in-depth: also write the stable identity file so it persists
-    # even if the runtime env file template drifts in future changes.
-    write_git_identity_file "$existing_name" "$existing_email"
-    if [[ -n "${CLAUDE_ENV_FILE:-}" ]]; then
-      echo "source \"$GIT_IDENTITY_FILE\"" >> "$CLAUDE_ENV_FILE"
-    fi
-    return 0
-  fi
-
-  # No existing identity — fetch the App's slug and bot ID from the GitHub API.
+  # Fetch the App's slug and bot ID from the GitHub API.
   # Using curl (no PATH dependency) rather than gh to avoid SessionStart hook
   # ordering issues with mise-installed gh.
   local app_slug bot_id
@@ -391,7 +375,28 @@ configure_git_identity_env() {
     bot_email="${GITHUB_APP_ID}+${app_slug}[bot]@users.noreply.github.com"
   fi
 
-  # Export into current process so write_runtime_env_file picks them up
+  # --- GIT_CONFIG_GLOBAL isolation ---
+  # Write an agent-specific gitconfig file and set GIT_CONFIG_GLOBAL to point
+  # to it. This prevents git from reading the handler's ~/.gitconfig, which is
+  # the root cause of BUG-7 (agents committing as the handler on shared machines).
+  # This mirrors the GH_CONFIG_DIR pattern already used for gh CLI isolation.
+  local git_config_dir="${AGENT_CONFIG_DIR:-${GH_CONFIG_DIR:+$(dirname "$GH_CONFIG_DIR")}}"
+  git_config_dir="${git_config_dir:-${HOME}/.agents/github-app/.config}"
+  local git_config_file="${git_config_dir}/gitconfig"
+  mkdir -p "$git_config_dir"
+
+  cat > "$git_config_file" <<GCEOF
+[user]
+    name = ${bot_name}
+    email = ${bot_email}
+GCEOF
+  chmod 600 "$git_config_file"
+  export GIT_CONFIG_GLOBAL="$git_config_file"
+  hook_log "GIT_CONFIG_GLOBAL isolated at $git_config_file"
+
+  # Defense-in-depth: also set GIT_AUTHOR_*/GIT_COMMITTER_* env vars.
+  # These take precedence over gitconfig, so even if GIT_CONFIG_GLOBAL is
+  # somehow bypassed, commits still use the bot identity.
   export GIT_AUTHOR_NAME="$bot_name"
   export GIT_AUTHOR_EMAIL="$bot_email"
   export GIT_COMMITTER_NAME="$bot_name"
@@ -408,7 +413,9 @@ configure_git_identity_env() {
   # Source the stable git identity file from CLAUDE_ENV_FILE after the
   # runtime env file. It takes precedence if the runtime env file ever
   # loses the identity vars (e.g., due to future template drift).
+  # Also persist GIT_CONFIG_GLOBAL so subprocesses inherit gitconfig isolation.
   if [[ -n "${CLAUDE_ENV_FILE:-}" ]]; then
+    echo "export GIT_CONFIG_GLOBAL=\"$git_config_file\"" >> "$CLAUDE_ENV_FILE"
     echo "source \"$GIT_IDENTITY_FILE\"" >> "$CLAUDE_ENV_FILE"
   fi
 
