@@ -6,21 +6,21 @@
 
 When mentioning artifacts in channel messages, always use the full markdown link format:
 
-| Artifact | Format | Example |
-|----------|--------|---------|
-| PR | `[PR #N](url)` | [PR #458](https://github.com/nsheaps/ai-mktpl/pull/458) |
-| Issue | `[#N](url)` or `[nsheaps/repo#N](url)` | [#40](https://github.com/nsheaps/.ai-agent-jack/issues/40) |
-| Commit | `[\`abc1234\`](url)` | [`dcffa5a`](https://github.com/nsheaps/ai-mktpl/commit/dcffa5a) |
-| External link | `[description](url)` | [upstream bug](https://github.com/anthropics/claude-code/issues/6305) |
+| Artifact      | Format                                 | Example                                                               |
+| ------------- | -------------------------------------- | --------------------------------------------------------------------- |
+| PR            | `[PR #N](url)`                         | [PR #458](https://github.com/nsheaps/ai-mktpl/pull/458)               |
+| Issue         | `[#N](url)` or `[nsheaps/repo#N](url)` | [#40](https://github.com/nsheaps/.ai-agent-jack/issues/40)            |
+| Commit        | `[\`abc1234\`](url)`                   | [`dcffa5a`](https://github.com/nsheaps/ai-mktpl/commit/dcffa5a)       |
+| External link | `[description](url)`                   | [upstream bug](https://github.com/anthropics/claude-code/issues/6305) |
 
 ## Anti-Patterns
 
-| Bad | Good |
-|-----|------|
-| `PR #458 fixes the duplicate hooks` | `[PR #458](https://github.com/nsheaps/ai-mktpl/pull/458) fixes the duplicate hooks` |
-| `Fixed in commit dcffa5a` | `Fixed in [\`dcffa5a\`](https://github.com/nsheaps/ai-mktpl/commit/dcffa5a)` |
-| `See issue 40` | `See [#40](https://github.com/nsheaps/.ai-agent-jack/issues/40)` |
-| `https://github.com/nsheaps/ai-mktpl/pull/458` | `[PR #458](https://github.com/nsheaps/ai-mktpl/pull/458)` |
+| Bad                                            | Good                                                                                |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `PR #458 fixes the duplicate hooks`            | `[PR #458](https://github.com/nsheaps/ai-mktpl/pull/458) fixes the duplicate hooks` |
+| `Fixed in commit dcffa5a`                      | `Fixed in [\`dcffa5a\`](https://github.com/nsheaps/ai-mktpl/commit/dcffa5a)`        |
+| `See issue 40`                                 | `See [#40](https://github.com/nsheaps/.ai-agent-jack/issues/40)`                    |
+| `https://github.com/nsheaps/ai-mktpl/pull/458` | `[PR #458](https://github.com/nsheaps/ai-mktpl/pull/458)`                           |
 
 ## Why
 
