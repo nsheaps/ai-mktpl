@@ -52,53 +52,45 @@ Parse the arguments to determine scope:
 
 ### Step 3: Review Existing Rules
 
-**ALWAYS review BOTH user and project rules, regardless of where the correction will be made:**
+**ALWAYS review ALL sources to determine where existing rules lie, regardless of where the correction will be made:**
 
-1. **User-level rules:**
-   - `~/.claude/CLAUDE.md`
-   - `~/.claude/rules/*.md` (if exists)
-
-2. **Project-level rules:**
-   - Find git root: `git rev-parse --show-toplevel`
-   - Check: `<git-root>/CLAUDE.md` or `<git-root>/.claude/CLAUDE.md`
-   - Check: `<git-root>/.claude/rules/*.md`
-   - Check: `<git-root>/CLAUDE.local.md` (local only, don't modify)
-
-3. **Related commands/skills:**
-   - `~/.claude/commands/*.md`
-   - `<git-root>/.claude/commands/*.md`
-   - Check if behavior is controlled by a skill or command
-
-4. **Marketplace repo (if relevant):**
-   - `~/src/nsheaps/ai-mktpl/.claude/rules/*.md` - rules for modifying the repo itself
-   - `~/src/nsheaps/ai-mktpl/.ai/rules/*.md` - user behavior rules (AI-agnostic, syncs to user config)
-   - `~/src/nsheaps/ai-mktpl/plugins/*/commands/*.md` - plugin commands
+1. **Prefer capturing functionality in reusable plugins** in https://github.com/nsheaps/ai-mktpl
+2. **Some changes may be more functional than claude-code related**, and may live in the agents monorepo https://github.com/nsheaps/agents
+3. **Other configurations may exist in repos that share configs and rulesets, like organization configs** which might be located at https://github.com/nsheaps/.org
+4. **Consider agent configs as well, which act as user-configs when running the agent harness** agents like [jack](https://github.com/nsheaps/.ai-agent-jack), [alex](https://github.com/nsheaps/.ai-agent-alex), [henry](https://github.com/nsheaps/.ai-agent-henry) have configurations built from plugins and shared code, so opt to keep it re-useable, even if it is unique to our set of agents.
+5. **Still, if there's reason to be project specific, you can add changes to project configs** to capture requirements like linting and rules specific to folders.
+6. CRITICAL: While possible, avoid directly making changes to the user config, most sessions will want to be run differently. Few exceptions exist for this, like setting up proxy info, or base level permissions allow/deny (which can be set by plugins) and other important settings.
 
 Identify:
 
-- Are there existing rules about this behavior?
+- Are there existing plugins, hooks, rules, skills, documentation, about this behavior?
 - If yes, why weren't they followed?
-- Are there conflicting rules? **If so, STOP and ask the user what to do about the conflict.**
+- Are there conflicting definitions? **If so, STOP and ask the user what to do about the conflict.**
+  - conflicting can be inter-plugin or intra-plugin. 
 
 ### Step 4: Plan and Execute the Correction
 
+Analyse your collected data on what went wrong. use the issue-management skill to document the failure to learn from it further.
+
 Based on your analysis:
 
-1. **Contribution priority order** — apply corrections in this order of preference:
+1. **Contribution priority order** — apply corrections in this order of preference (for internal to plugins, the same priority order applies sans the plugins-first comment):
    - **PLUGINS first** — shared plugin source, benefits all agents using the plugin
-   - **SKILLS second** — task-specific how-to documentation
-   - **RULES third** — fallback if neither plugin nor skill fits
+   - **HOOKS second** — programmatic execution always wins over natural language execution
+   - **AGENTS third** — making an entire task delegateable is great for context preservation
+   - **SKILLS fourth** — task-specific how-to documentation that can be shared between agents
+   - **RULES fifth** — fallback if neither plugin nor skill fits
 
 2. **Determine the best place for the rule:**
 
    | If the correction is...          | Put it in...                                                      |
    | -------------------------------- | ----------------------------------------------------------------- |
-   | General user behavior            | `~/.claude/CLAUDE.md` or `~/.claude/rules/*.md`                   |
-   | Project-specific                 | `<git-root>/.claude/CLAUDE.md` or `<git-root>/.claude/rules/*.md` |
-   | About a slash command            | The command file itself                                           |
+   | General user behavior            | a re-usable plugin that exists or will be created                 |
+   | Project-specific                 | `<git-root>/.../CLAUDE.md` or `<git-root>/.claude/rules/*.md`     |
+   | About a slash command            | A skill to replace the slash command                              |
    | About a skill                    | The skill's `SKILL.md`                                            |
    | About a plugin                   | The plugin source in `~/src/nsheaps/ai-mktpl/plugins/...`         |
-   | User behavior (shared/backed up) | `~/src/nsheaps/ai-mktpl/.ai/rules/*.md` (AI-agnostic)             |
+   | Agent behavior                   | henry, jack, or alex's repo (for example)                         |
    | Repo contribution rules          | `~/src/nsheaps/ai-mktpl/.claude/rules/*.md` (Claude-specific)     |
 
 3. **Write the correction:**
@@ -125,7 +117,7 @@ Based on your analysis:
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `user`                      | Changes go to `~/.claude/...` immediately. Source of truth is `~/src/nsheaps/ai-mktpl/.ai/rules/`. Ask user if they want changes synced there (requires PR). |
 | `project`                   | Remind user to commit changes to the project repo                                                                                                            |
-| `slash-commands` / `skills` | If in `~/.claude/...`, ask about syncing to `~/src/nsheaps/ai-mktpl/...`                                                                                     |
+| `skills` (previously `slash-commands`) | If in `~/.claude/...`, ask about syncing to `~/src/nsheaps/ai-mktpl/...`                                                                                     |
 | `plugins` / `marketplace`   | Changes are in `~/src/nsheaps/ai-mktpl/...`. Create a PR and assign to user.                                                                                 |
 
 **Directory Structure in `~/src/nsheaps/ai-mktpl/`:**
