@@ -20,9 +20,9 @@ Detects time-referencing language in prompts and investigates history before ans
 
 Git-backed memory and prompt tracking with self-checking reminders (see `skills/brain/SKILL.md`).
 
-### /issue-management
+### /issue-management (moved to sdlc-utils)
 
-Create, search, update, and link tickets across ticketing systems with a strong deduplication-first workflow. Always checks for existing issues before creating new ones (see `skills/issue-management/SKILL.md`).
+Issue management is an SDLC concern. This skill now lives in the `sdlc-utils` plugin.
 
 ### /spec-management
 

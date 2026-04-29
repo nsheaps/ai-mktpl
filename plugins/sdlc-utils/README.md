@@ -69,6 +69,15 @@ of the abstract work-tracking rules defined in `agentic-behavior`.
 
 **Triggers:** "set up projects", "create a project board", "organize issues", "milestone planning", "consolidate tickets"
 
+### issue-management
+
+Create, search, update, and link tickets across ticketing systems with a strong
+deduplication-first workflow. Always checks for existing issues before creating
+new ones. Platform-agnostic with GitHub Issues as the current default. Moved
+from `agentic-behavior` — issue management is an SDLC concern.
+
+**Triggers:** "make an issue", "create an issue", "file a bug", "track this", "open a ticket", "add to backlog", "create a feature request"
+
 ## Dependencies
 
 - **scm-utils** — the `iterate-until-good` and `review` skills delegate to scm-utils
