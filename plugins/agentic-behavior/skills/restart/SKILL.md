@@ -51,13 +51,13 @@ The launcher script or SessionStart hook can then read the continuation prompt o
 
 ## Difference from Exit
 
-| Aspect | `/exit` | `/restart` |
-| --- | --- | --- |
-| Intent | End the session | Restart with fresh state |
-| Mechanism | SIGINT | SIGINT (same) |
-| Launcher behavior | Session ends | Launcher restarts Claude |
-| State preservation | Not expected | Save continuation prompt |
-| Git validation | Required | Required |
+| Aspect             | `/exit`         | `/restart`               |
+| ------------------ | --------------- | ------------------------ |
+| Intent             | End the session | Restart with fresh state |
+| Mechanism          | SIGINT          | SIGINT (same)            |
+| Launcher behavior  | Session ends    | Launcher restarts Claude |
+| State preservation | Not expected    | Save continuation prompt |
+| Git validation     | Required        | Required                 |
 
 ## See Also
 
