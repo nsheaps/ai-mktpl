@@ -144,24 +144,21 @@ $CLAUDE_PLUGIN_ROOT/bin/token-check.sh --sync
 
 ## Git Credential Helper
 
-The SessionStart hook automatically installs a stateless credential helper to:
-
-```
-$CLAUDE_SETTINGS_DIR/plugins/data/github-app/git-credential-helper.sh
-```
-
-And writes the gitconfig entry with both the resolved script path and the
-resolved token file path embedded:
+The SessionStart hook configures git to use `gh auth git-credential` directly.
+No script file is installed. The gitconfig entry is:
 
 ```ini
 [credential "https://github.com"]
-    helper = !<resolved-install-path> <resolved-token-file-path>
+    helper =
+    helper = !gh auth git-credential
 ```
 
-No manual configuration is required. The installed helper path is stable across
-plugin upgrades (no version number in the path). Manual `git config` commands
-pointing at old `bin/git-credential-github-app.sh` paths are no longer needed
-and should be removed.
+`gh auth git-credential` reads `$GH_TOKEN` from the process environment. Since
+`CLAUDE_ENV_FILE` is sourced before any Bash tool runs, the token is always
+current. No manual configuration is required. Any old `git config` entries
+pointing at `bin/git-credential-github-app.sh` or
+`$CLAUDE_SETTINGS_DIR/plugins/data/github-app/git-credential-helper.sh`
+should be removed.
 
 ## Agent Team Usage
 

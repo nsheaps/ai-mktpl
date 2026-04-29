@@ -183,9 +183,7 @@ plugins/github-app/
 │   ├── generate-token.sh            # JWT generation + token exchange
 │   ├── token-check.sh               # Token validity check + refresh logic
 │   └── token-status.sh              # Token status JSON output
-├── data/
-│   └── git-credential-helper.sh     # Canonical credential helper (installed to
-│                                    # $CLAUDE_SETTINGS_DIR/plugins/data/github-app/)
+├── data/                            # (empty — credential helper removed in 0.3.6)
 ├── lib/                             # Shared libraries (symlinks)
 ├── docs/
 │   ├── token-refresh-spec.md        # Original design spec
@@ -205,30 +203,29 @@ rm -rf ~/.config/agent/github-token ~/.config/agent/github-token.meta ~/.config/
 
 ### Git credential helper
 
-The plugin installs a stateless credential helper script to:
-
-```
-$CLAUDE_SETTINGS_DIR/plugins/data/github-app/git-credential-helper.sh
-```
-
-This path is stable across plugin upgrades and contains **no hardcoded `$HOME`
-references**. The gitconfig entry written by the SessionStart hook embeds the
-resolved token file path as an argument:
+The plugin configures git to use `gh auth git-credential` as the credential
+helper. No script file is copied or installed. The gitconfig entry written by
+the SessionStart hook is:
 
 ```ini
 [credential "https://github.com"]
-    helper = !~/.claude/plugins/data/github-app/git-credential-helper.sh ~/.agents/jack/.config/github-token
+    helper =
+    helper = !gh auth git-credential
 ```
 
-Git passes the token file path as `$1` and the action (`get`/`store`/`erase`)
-as `$2` when invoking the helper. Because the token file path is embedded in
-the gitconfig at write time (not in the script), the same script binary serves
-every user and agent on the machine — each with their own gitconfig pointing at
-their own token file. No `AGENT_NAME` environment variable is required at
-`git push` time.
+`gh auth git-credential` reads `$GH_TOKEN` from the process environment — which
+is always current because `CLAUDE_ENV_FILE` is sourced before any git command
+runs. `GH_CONFIG_DIR` is already exported per-agent by `bin/agent`, so `gh`
+resolves the correct per-agent config.
 
-The helper is installed and the gitconfig is written automatically by the
-`github-token-init.sh` SessionStart hook. Manual configuration is not required.
+This approach is fully version-independent: the gitconfig entry never references
+a versioned path, so it remains valid across `gh` upgrades. The gitconfig is
+written automatically by `github-token-init.sh`; no manual configuration is needed.
+
+**Requirement:** `gh` must be on PATH when git invokes the credential helper.
+In standard Claude Code sessions managed by mise, this is always the case.
+If `gh` is not found at gitconfig-write time, the credential section is skipped
+and a warning is logged.
 
 ## Related
 

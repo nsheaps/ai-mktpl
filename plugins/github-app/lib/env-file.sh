@@ -21,6 +21,12 @@
 #   GIT_AUTHOR_EMAIL
 #   GIT_COMMITTER_NAME
 #   GIT_COMMITTER_EMAIL
+#
+# Git credential helper:
+#   The plugin configures git via write_git_config_global(), which writes
+#   `credential.helper = !gh auth git-credential` into the per-agent gitconfig.
+#   gh reads GH_TOKEN from the process environment (always fresh via CLAUDE_ENV_FILE).
+#   No script file is copied or installed.
 
 if [ "${_ENV_FILE_LOADED:-}" = "true" ]; then return 0; fi
 _ENV_FILE_LOADED="true"
@@ -138,84 +144,26 @@ GITEOF
   chmod 600 "$GIT_IDENTITY_FILE"
 }
 
-# GIT_CREDENTIAL_HELPER_FILE — stable, version-independent install path for the
-# credential helper script. Lives under $CLAUDE_SETTINGS_DIR/plugins/data/ —
-# the non-versioned plugin data area — rather than $AGENT_CONFIG_DIR (which
-# embeds $HOME) so the path is derived from a proper env var and works for
-# both user-direct (Nate) and agent (Jack, Alex, Henry) sessions.
-#
-# CLAUDE_SETTINGS_DIR is set by the Claude Code harness. Default: ~/.claude.
-# After agents#116, each agent will have its own CLAUDE_SETTINGS_DIR so the
-# installed helper path will be unique per agent without any $HOME assumptions.
-#
-# The script itself (data/git-credential-helper.sh in the source tree) takes
-# the token file path as $1, so it contains NO hardcoded paths. The resolved
-# token file path is embedded in the gitconfig credential.helper line at
-# gitconfig-write time by the hooks.
-_cred_helper_settings_dir="${CLAUDE_SETTINGS_DIR:-${HOME}/.claude}"
-GIT_CREDENTIAL_HELPER_FILE="${_cred_helper_settings_dir}/plugins/data/github-app/git-credential-helper.sh"
-
-# write_stable_credential_helper
-#
-# Installs the canonical credential helper script from the plugin's data/
-# directory to the stable, non-versioned path at:
-#   $CLAUDE_SETTINGS_DIR/plugins/data/github-app/git-credential-helper.sh
-#
-# Unlike pointing gitconfig at ${CLAUDE_PLUGIN_ROOT}/bin/... (which embeds
-# the plugin version and becomes stale on upgrade), this path never changes
-# across plugin upgrades. The script itself reads the token file path from
-# $1 (embedded in the gitconfig credential.helper line), so the installed
-# script contains NO hardcoded $HOME or token paths — it is identical for
-# every user/agent on the machine.
-#
-# The function is idempotent: safe to call on every session start.
-# CLAUDE_PLUGIN_ROOT must be set (it is, by the Claude Code harness for hooks;
-# for bin/ scripts it is derived from the script's own location via _self).
-write_stable_credential_helper() {
-  # Locate the canonical source script. Prefer CLAUDE_PLUGIN_ROOT (set by
-  # Claude Code harness for hooks); fall back to PLUGIN_DIR (set by bin/
-  # scripts via their self-locating pattern at the top of each bin script).
-  local plugin_root="${CLAUDE_PLUGIN_ROOT:-${PLUGIN_DIR:-}}"
-  if [[ -z "$plugin_root" ]]; then
-    echo "write_stable_credential_helper: neither CLAUDE_PLUGIN_ROOT nor PLUGIN_DIR is set" >&2
-    return 1
-  fi
-
-  local source="${plugin_root}/data/git-credential-helper.sh"
-  local target="${GIT_CREDENTIAL_HELPER_FILE}"
-  mkdir -p "$(dirname "$target")"
-
-  if [[ ! -f "$source" ]]; then
-    echo "write_stable_credential_helper: source script not found: $source" >&2
-    return 1
-  fi
-
-  cp "$source" "$target"
-  chmod 700 "$target"
-}
-
-# write_git_config_global [CREDENTIAL_HELPER_EXPR]
+# write_git_config_global
 #
 # Rewrites the isolated gitconfig with current identity from env vars
-# (GIT_AUTHOR_NAME, GIT_AUTHOR_EMAIL) plus the credential helper.
-# Git reads GIT_CONFIG_GLOBAL on every operation, so changes take
+# (GIT_AUTHOR_NAME, GIT_AUTHOR_EMAIL) and installs a gh-based credential
+# helper. Git reads GIT_CONFIG_GLOBAL on every operation, so changes take
 # effect immediately on the next git command.
+#
+# The credential helper is written as `!gh auth git-credential` — no absolute
+# path, no custom script file. gh reads $GH_TOKEN from the process environment
+# (always fresh via CLAUDE_ENV_FILE) and returns the correct credentials.
+# This is version-independent: the gitconfig entry never changes when gh upgrades.
 #
 # The target path is computed at call-time (not source-time) so the
 # function always uses the current value of GIT_CONFIG_GLOBAL, avoiding
 # order-dependent bugs when callers source this lib at different points.
 #
-# Args:
-#   $1  — (optional) full credential helper shell expression written into
-#         the gitconfig as "helper = !<expr>". Callers should pass the
-#         resolved script path AND the resolved token file path together:
-#           write_git_config_global "${GIT_CREDENTIAL_HELPER_FILE} ${TOKEN_FILE}"
-#         Git will call the helper as: <script> <token-file> get|store|erase
-#         Both paths MUST be fully resolved (no env vars) since gitconfig
-#         does not perform shell expansion.
-#         If omitted, the [credential] section is not written.
+# Guard: if gh is not on PATH, the credential section is skipped and a warning
+# is logged. Git operations requiring auth will fail with a clear error rather
+# than silently misconfiguring.
 write_git_config_global() {
-  local cred_helper="${1:-}"
   local bot_name="${GIT_AUTHOR_NAME:-}"
   local bot_email="${GIT_AUTHOR_EMAIL:-}"
   local target="${GIT_CONFIG_GLOBAL:-${AGENT_CONFIG_DIR:-${HOME}/.agents/_UNKNOWN/.config}/git/config}"
@@ -230,11 +178,18 @@ write_git_config_global() {
     email = ${bot_email}
 GCEOF
 
-  if [[ -n "$cred_helper" ]]; then
-    cat >> "$target" <<GCEOF
+  if command -v gh >/dev/null 2>&1; then
+    # gh auth git-credential reads $GH_TOKEN from env — no script file needed,
+    # no versioned path embedded. The double-reset (helper = empty then helper = !gh)
+    # clears any previously-configured credential helper before setting ours,
+    # matching the pattern git itself uses when resetting helpers.
+    cat >> "$target" <<'GCEOF'
 [credential "https://github.com"]
-    helper = !${cred_helper}
+    helper =
+    helper = !gh auth git-credential
 GCEOF
+  else
+    echo "write_git_config_global: gh not found on PATH — credential.helper not configured. Git operations requiring auth may fail." >&2
   fi
 
   chmod 600 "$target"

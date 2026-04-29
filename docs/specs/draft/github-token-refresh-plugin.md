@@ -175,21 +175,22 @@ echo "GitHub App token generated (expires: ${EXPIRES_AT})"
 - Less ideal because env vars are set at process start and can't be updated
 - Would require agents to re-read from file anyway
 
-**Git credential helper** (installed to `$CLAUDE_SETTINGS_DIR/plugins/data/github-app/git-credential-helper.sh`):
+**Git credential helper** (`gh auth git-credential`):
 
-The SessionStart hook installs a stateless helper script and writes the gitconfig
-entry automatically. The script reads the token file path from `$1` (embedded in
-the gitconfig helper line at write time), so it contains no hardcoded `$HOME`
-references and works for every user/agent on the machine.
+The SessionStart hook writes a gitconfig entry automatically — no script file is
+installed. `gh auth git-credential` reads `$GH_TOKEN` from the process environment,
+which is always current because `CLAUDE_ENV_FILE` is sourced before Bash runs.
 
 Example gitconfig entry written by the hook:
 
 ```ini
 [credential "https://github.com"]
-    helper = !~/.claude/plugins/data/github-app/git-credential-helper.sh ~/.agents/jack/.config/github-token
+    helper =
+    helper = !gh auth git-credential
 ```
 
-No manual `git config` is required.
+No manual `git config` is required. The entry is version-independent: no binary
+path is embedded, so it survives `gh` upgrades without modification.
 
 ### Plugin Structure
 
@@ -204,9 +205,7 @@ plugins/github-token-refresh/
 ├── bin/
 │   ├── generate-jwt.sh               # JWT generation helper
 │   └── refresh-token.sh              # Token refresh helper
-├── data/
-│   └── git-credential-helper.sh      # Canonical credential helper (installed to
-│                                     # $CLAUDE_SETTINGS_DIR/plugins/data/github-app/)
+├── data/                              # (empty — credential helper removed in 0.3.6)
 └── README.md
 ```
 
