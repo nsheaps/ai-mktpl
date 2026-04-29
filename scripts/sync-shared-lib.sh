@@ -23,7 +23,12 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SHARED_LIB="${REPO_ROOT}/shared/lib"
 PLUGINS_DIR="${REPO_ROOT}/plugins"
-CHECK_MODE="${1:-}"
+CHECK_MODE=""
+case "${1:-}" in
+  --check) CHECK_MODE="--check" ;;
+  "") ;;
+  *) echo "ERROR: unknown argument: $1" >&2; exit 2 ;;
+esac
 
 updated=0
 already_up_to_date=0
@@ -38,13 +43,13 @@ fi
 while IFS= read -r vendored_file; do
   # Extract the source filename from line 1 of the header comment
   # Header line format: # ⚠️  VENDORED FROM shared/lib/<name>.sh
-  source_name=$(head -1 "$vendored_file" | sed 's|.*VENDORED FROM shared/lib/||')
-
-  if [ -z "$source_name" ]; then
-    echo "WARN: could not extract source name from vendoring header in: ${vendored_file}" >&2
+  header=$(head -1 "$vendored_file")
+  if ! [[ "$header" =~ VENDORED\ FROM\ shared/lib/([A-Za-z0-9._-]+\.sh)$ ]]; then
+    echo "WARN: malformed vendoring header in: ${vendored_file}" >&2
     errors=$((errors + 1))
     continue
   fi
+  source_name="${BASH_REMATCH[1]}"
 
   source_file="${SHARED_LIB}/${source_name}"
   if [ ! -f "$source_file" ]; then

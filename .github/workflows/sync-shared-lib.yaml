@@ -48,6 +48,18 @@ jobs:
           # If branch protection blocks the bot, swap this for a PAT secret.
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Reject symlinks in plugin lib dirs
+        run: |
+          SYMLINKS="$(find plugins/*/lib -type l 2>/dev/null || true)"
+          if [ -n "$SYMLINKS" ]; then
+            echo "ERROR: Symlinks found in plugins/*/lib — use the vendoring workflow instead."
+            echo "  See .claude/rules/shared-libs.md and docs/shared-logging.md for instructions."
+            echo "  Symlinks found:"
+            echo "$SYMLINKS" | sed 's/^/    /'
+            exit 1
+          fi
+          echo "No symlinks in plugins/*/lib — OK"
+
       - name: Run sync script
         run: bash scripts/sync-shared-lib.sh
 
@@ -76,21 +88,39 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Run sync script (dry-run via working tree)
+      - name: Reject symlinks in plugin lib dirs
+        run: |
+          SYMLINKS="$(find plugins/*/lib -type l 2>/dev/null || true)"
+          if [ -n "$SYMLINKS" ]; then
+            echo "ERROR: Symlinks found in plugins/*/lib — use the vendoring workflow instead."
+            echo "  See .claude/rules/shared-libs.md and docs/shared-logging.md for instructions."
+            echo "  Symlinks found:"
+            echo "$SYMLINKS" | sed 's/^/    /'
+            echo ""
+            echo "  Workaround required due to anthropics/claude-code#53948 (drops symlinks on install)."
+            echo "  Fix: copy the shared lib file, add the 3-line VENDORED FROM header, run scripts/sync-shared-lib.sh"
+            exit 1
+          fi
+          echo "No symlinks in plugins/*/lib — OK"
+
+      - name: Run sync script (check mode — fails if vendored copies drifted)
+        run: bash scripts/sync-shared-lib.sh --check
+        continue-on-error: true
+        id: drift_check
+
+      - name: Re-run in update mode to capture drifted file list for the comment
+        if: steps.drift_check.outcome == 'failure'
         run: bash scripts/sync-shared-lib.sh
 
       - name: Comment if vendored copies drifted
+        if: steps.drift_check.outcome == 'failure'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if [ -z "$(git status --porcelain)" ]; then
-            echo "No vendored-copy drift detected — PR is clean."
-            exit 0
-          fi
           DRIFTED="$(git status --porcelain | awk '{print $2}' | xargs)"
           gh pr comment ${{ github.event.pull_request.number }} \
             --repo ${{ github.repository }} \
-            --body "$(cat <<'EOF'
+            --body "$(cat <<EOF
           ### Vendored shared-lib copies are out of sync
 
           The vendored copies of \`shared/lib/\` inside \`plugins/*/lib/\` have drifted
@@ -103,7 +133,7 @@ jobs:
           git push
           \`\`\`
 
-          **Drifted files:** \`$DRIFTED\`
+          **Drifted files:** \`${DRIFTED}\`
 
           > This check exists as a workaround for
           > [anthropics/claude-code#53948](https://github.com/anthropics/claude-code/issues/53948),
@@ -111,3 +141,7 @@ jobs:
           > [#474](https://github.com/nsheaps/ai-mktpl/issues/474) for context.
           EOF
           )"
+
+      - name: Fail job if drift was detected
+        if: steps.drift_check.outcome == 'failure'
+        run: exit 1
