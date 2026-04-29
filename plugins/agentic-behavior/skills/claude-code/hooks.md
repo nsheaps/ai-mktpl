@@ -94,11 +94,11 @@ Five types. `prompt` and `agent` are LLM-driven; the rest are deterministic.
 > **Not every event accepts every type.** Most events accept all five, but a
 > few are restricted:
 >
-> | Event                  | Allowed types        |
-> | ---------------------- | -------------------- |
-> | `SessionStart`         | `command`, `mcp_tool` |
-> | `Setup`                | `command`, `mcp_tool` |
-> | `WorktreeCreate`       | `command`, `http`     |
+> | Event            | Allowed types         |
+> | ---------------- | --------------------- |
+> | `SessionStart`   | `command`, `mcp_tool` |
+> | `Setup`          | `command`, `mcp_tool` |
+> | `WorktreeCreate` | `command`, `http`     |
 >
 > Other events not listed above accept all five types (per the live docs as
 > of 2026-04-29). If you write a `prompt` hook for `SessionStart`, it will
@@ -320,8 +320,8 @@ Output:
 - `permissionDecision: "allow"` — run without prompting the user
 - `"deny"` — refuse; the reason is shown to Claude
 - `"ask"` — fall through to the user permission prompt
-- `"defer"` *(non-interactive `claude -p` mode only, v2.1.89+, single tool calls;
-  not for batches)* — pauses the tool call and exits the process with
+- `"defer"` _(non-interactive `claude -p` mode only, v2.1.89+, single tool calls;
+  not for batches)_ — pauses the tool call and exits the process with
   `stop_reason: "tool_deferred"`. The caller resumes via
   `claude -p --resume <session-id>` with a follow-up `"allow"` + `updatedInput`.
   **Do not use in interactive sessions** — behavior is undefined there.
