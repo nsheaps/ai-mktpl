@@ -8,7 +8,11 @@ bun = "latest"
 "npm:@anthropic-ai/claude-code" = "latest"
 "npm:prettier" = "latest"
 "npm:eslint" = "latest"
-yarn = "latest"
+# Pinned to match package.json `packageManager` so the lockfile metadata version
+# (currently 8) is not migrated by a newer yarn. Bump in lockstep with
+# package.json's `packageManager` field — Renovate updates package.json but not
+# this pin, so a coordinated change is required.
+yarn = "4.13.0"
 
 # 1Password CLI and op-exec
 "github:nsheaps/op-exec" = "latest"
