@@ -1,7 +1,7 @@
 {
   "name": "correct-behavior",
   "version": "0.2.25",
-  "description": "Command to correct AI behavior mistakes and update rules to prevent recurrence",
+  "description": "DEPRECATED: Use agentic-behavior plugin instead, which includes the correct-behavior skill.",
   "author": {
     "name": "Nathan Heaps",
     "email": "nsheaps@gmail.com",
