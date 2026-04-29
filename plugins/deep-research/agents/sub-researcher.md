@@ -164,7 +164,13 @@ Every output file MUST end with a `## References` section. Every claim in your f
 | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Web URL            | `[Page Title](https://example.com)`                                                                                                                                              |
 | Local file         | `path/to/file.md` or `\`path/to/file.md\``                                                                                                                                       |
-| Transcript excerpt | `[Transcript excerpt](.claude/transcripts/excerpts/<sessionId>/<epochTimestamp>--<slug>.md)` — Session `<sessionId>`, source: `~/.claude/projects/<projectId>/<sessionId>.jsonl` |
+| Type               | Format                                                                                                                                                                           |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Web URL            | `[Page Title](https://example.com)`                                                                                                                                              |
+| Local file         | `path/to/file.md` or `\`path/to/file.md\``                                                                                                                                       |
+| Transcript excerpt (file)  | `[Transcript excerpt](.claude/transcripts/excerpts/<sessionId>/<epochTimestamp>--<slug>.md)` — Session `<sessionId>`, source: `~/.claude/projects/<projectId>/<sessionId>.jsonl` |
+| Transcript excerpt (inline) | Session `<sessionId>`, source: `~/.claude/projects/<projectId>/<sessionId>.jsonl` — followed by a fenced quote of the relevant lines tagged `[USER]`/`[ASSISTANT]`/etc.     |
+| GitHub issue/PR    | `[org/repo#123](https://github.com/org/repo/issues/123)`                                                                                                                         |
 | GitHub issue/PR    | `[org/repo#123](https://github.com/org/repo/issues/123)`                                                                                                                         |
 
 **Transcript excerpts**: When referencing evidence from a session transcript (`.jsonl` file):
