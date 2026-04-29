@@ -29,7 +29,7 @@ When reporting that a task is complete, you MUST include **every applicable** it
 
 **Good:**
 
-> "I created the spec at `/repo/docs/specs/draft/feature-x.md` and opened [#42](https://github.com/org/repo/issues/42) for tracking. Commit: `a1b2c3d`."
+> "I created the spec at [`docs/specs/draft/feature-x.md`](https://github.com/nsheaps/ai-mktpl/blob/main/docs/specs/draft/feature-x.md) and opened [#42](https://github.com/org/repo/issues/42) for tracking. Commit: `a1b2c3d`."
 
 **Bad (team lead reporting sub-agent work):**
 
@@ -37,7 +37,7 @@ When reporting that a task is complete, you MUST include **every applicable** it
 
 **Good (team lead reporting sub-agent work):**
 
-> "Road Runner completed the research on teammate launch behavior. Report saved to `/repo/.claude/tmp/teammate-launch-research.md`. Key findings: spawn is not customizable, delegate mode has a bug ([#25037](https://github.com/anthropics/claude-code/issues/25037))."
+> "Road Runner completed the research on teammate launch behavior. Report saved to [`docs/research/teammate-launch-research.md`](https://github.com/nsheaps/ai-mktpl/blob/main/docs/research/teammate-launch-research.md) (research belongs in `docs/research/` per `file-placement.md`, not `.claude/tmp/`). Key findings: spawn is not customizable, delegate mode has a bug ([#25037](https://github.com/anthropics/claude-code/issues/25037))."
 
 ## Links Must Be Reachable — No Local Paths, No `file://` URLs
 
@@ -62,9 +62,11 @@ When reporting that a task is complete, you MUST include **every applicable** it
 
 If the file is mid-stream (active sub-agent editing it, in-flight rebase, secrets need to be scrubbed), say so explicitly and link the latest pushed version, then describe the local-only delta. Do NOT silently fall back to a local path.
 
-### Trigger: any path mention without a GitHub link
+### Trigger: any handler-facing path mention without a GitHub link
 
-Any time you would mention a file path in a handler-facing message — `~/`, `/tmp/`, `file://`, `.claude/...`, `docs/...` without a corresponding `https://github.com/...` link — STOP. If you generated the file, you have time to push it. Do that first, then link.
+Any time you mention a file path **the handler is expected to open** — and the same message does NOT already include a corresponding `https://github.com/...` link to that file — STOP. Watch especially for `~/`, `/tmp/`, `file://`, `.claude/...`, and any repo-relative path you're handing to the handler as an artifact reference. If you generated the file, you have time to push it. Do that first, then link.
+
+This rule is about **handler-facing artifact references** (plans, research, specs, transcripts, generated docs) — not incidental code-edit references inside a PR description that already links to the diff, or pointers to known docs by filename. The test: would the handler want to *open* this path right now? If yes, it must be a GitHub link.
 
 ### Why
 
