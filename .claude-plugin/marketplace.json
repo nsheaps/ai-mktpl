@@ -11,7 +11,7 @@
     {
       "name": "1pass",
       "description": "Install and manage 1Password CLI (op) and op-exec in Claude Code sessions. Provides session-start auto-install for web sessions and comprehensive workflow skills.",
-      "version": "0.3.3",
+      "version": "0.3.4",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -332,7 +332,7 @@
     {
       "name": "git-spice",
       "description": "Skill for managing stacked Git branches with git-spice (gs) CLI tool",
-      "version": "0.2.7",
+      "version": "0.2.8",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -352,7 +352,7 @@
     {
       "name": "github",
       "description": "GitHub CLI installation, authentication, and workflow skill for Claude Code sessions. Consolidates gh-tool and github-auth-skill into a single plugin.",
-      "version": "0.1.15",
+      "version": "0.1.16",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -403,7 +403,7 @@
     {
       "name": "google-workspace-cli",
       "description": "Install and manage the Google Workspace CLI (gws) with per-service skills for Gmail, Calendar, Drive, Docs, Sheets, Slides, Chat, Tasks, Contacts, and Admin",
-      "version": "0.1.7",
+      "version": "0.1.8",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -478,7 +478,7 @@
     {
       "name": "mise",
       "description": "Install and manage mise (tool version manager) in Claude Code sessions. Provides session-start auto-install for web sessions and comprehensive workflow skills.",
-      "version": "0.2.18",
+      "version": "0.2.19",
       "author": {
         "name": "Nathan Heaps"
       },

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # install-op.sh — SessionStart hook for 1pass plugin
 #
-# On web sessions: installs/updates 1Password CLI (op) and op-exec.
-# On all sessions: injects configured 1Password secrets as environment variables.
+# Installs/updates 1Password CLI (op) and op-exec when not already on PATH,
+# and injects configured 1Password secrets as environment variables.
 #
 # When installToProject is true, installs to $CLAUDE_PROJECT_DIR/bin/.local/
 # which is gitignored and added to PATH.
@@ -332,16 +332,26 @@ inject_secrets() {
 # --- Main ---
 
 do_install() {
-  # Install op CLI (web sessions only)
+  # Install op CLI and op-exec when not already on PATH
   local op_bin=""
   local op_exec_bin=""
 
-  if tool_is_web_session; then
+  # Platform detection must happen before EITHER tool install — both op and
+  # op-exec download helpers need DETECTED_OS / DETECTED_ARCH.
+  if ! tool_is_available op || ! tool_is_available op-exec; then
     detect_platform || return 0
+  fi
+
+  if ! tool_is_available op; then
     op_bin="$(resolve_op_bin)" || true
+  else
+    hook_log "op already available at $(command -v op), skipping op install"
+  fi
+
+  if ! tool_is_available op-exec; then
     op_exec_bin="$(resolve_op_exec_bin)" || true
   else
-    hook_log "local session, skipping op install"
+    hook_log "op-exec already available at $(command -v op-exec), skipping op-exec install"
   fi
 
   # Inject secrets (all sessions — requires op to be available and authenticated)
