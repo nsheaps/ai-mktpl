@@ -345,7 +345,7 @@ Fetch recent message history from a channel.
 
 **Parameters:**
 
-- `channel` (string, required) — channel snowflake
+- `chat_id` (string, required) — channel snowflake
 - `limit` (number, optional) — max messages to return; default 20, capped at 100
 
 **Returns:** Messages oldest-first, one per line:
