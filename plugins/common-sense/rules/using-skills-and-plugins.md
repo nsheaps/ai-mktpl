@@ -28,9 +28,9 @@ If no skill matches and the work is non-trivial or recurring, **create a new ski
 
 ### Anti-patterns
 
-| Pattern | Problem |
-|---------|---------|
-| Acting on a cron/scheduled prompt without checking its skill first | Stale config in the prompt may differ from the skill's current instructions |
-| Delegating to a sub-agent without telling it to read the relevant skill | Sub-agent will use defaults or stale context instead of the skill's instructions |
-| Using a tool (Discord API, GitHub API, etc.) from memory without checking its skill | Miss post-action checklists, formatting requirements, or destination changes |
-| Skipping skill recall because "I just read it recently" | Skill content may have been updated since your last read |
+| Pattern                                                                             | Problem                                                                          |
+| ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Acting on a cron/scheduled prompt without checking its skill first                  | Stale config in the prompt may differ from the skill's current instructions      |
+| Delegating to a sub-agent without telling it to read the relevant skill             | Sub-agent will use defaults or stale context instead of the skill's instructions |
+| Using a tool (Discord API, GitHub API, etc.) from memory without checking its skill | Miss post-action checklists, formatting requirements, or destination changes     |
+| Skipping skill recall because "I just read it recently"                             | Skill content may have been updated since your last read                         |
