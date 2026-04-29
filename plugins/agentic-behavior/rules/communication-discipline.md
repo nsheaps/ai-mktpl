@@ -80,6 +80,7 @@ Agent(prompt="Fix the trailing comma in labels.yaml")  # blocks until done
 Default to **sonnet** for all sub-agent work. Reserve opus only for tasks that genuinely require deep multi-step reasoning or complex tradeoff analysis.
 
 **Use sonnet for:**
+
 - PR creation and updates
 - Single-file edits
 - Label/issue management
@@ -88,6 +89,7 @@ Default to **sonnet** for all sub-agent work. Reserve opus only for tasks that g
 - Routine execution of a known procedure
 
 **Use opus only for:**
+
 - Complex architectural planning with many interdependencies
 - Tasks where the wrong judgment call has large downstream consequences
 
