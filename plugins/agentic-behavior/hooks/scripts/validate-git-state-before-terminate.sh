@@ -4,16 +4,18 @@
 
 set -euo pipefail
 
-# Only intercept when running the self-terminate script
-TOOL_NAME=$(echo "$PRETOOLUSE_TOOL" | jq -r '.tool // empty')
-COMMAND=$(echo "$PRETOOLUSE_TOOL" | jq -r '.command // empty')
+# --- Read hook input from stdin (Claude Code PreToolUse convention) ---
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 
-# Check if this is a Bash tool call running self-terminate
+# Only intercept Bash tool calls
 if [[ "$TOOL_NAME" != "Bash" ]]; then
     exit 0  # Allow - not a bash command
 fi
 
-if [[ "$COMMAND" != *"self-terminate"* ]]; then
+# Only intercept self-terminate invocations (script path or kill -INT against parent)
+if [[ "$COMMAND" != *"self-terminate.sh"* && "$COMMAND" != *"kill -INT"* ]]; then
     exit 0  # Allow - not running self-terminate
 fi
 

@@ -19,21 +19,17 @@ This skill enables Claude to gracefully terminate its own session by sending a S
 
 ## Automatic Git State Validation
 
-This plugin includes a PreToolUse hook that automatically validates git state before termination:
+This plugin includes a PreToolUse hook that validates git state before termination. The hook intercepts Bash tool calls that invoke `self-terminate.sh` or `kill -INT` and checks the working directory.
 
-✅ **Automatically checks:**
+**Checks performed:**
 
 1. No uncommitted changes (staged or unstaged)
 2. No unpushed commits
 3. No untracked files
 
-❌ **Blocks termination if:**
+If any check fails, the hook blocks the tool call (exit 2) and provides a message explaining what needs to be resolved.
 
-- Working directory is dirty
-- Commits haven't been pushed
-- Untracked files exist
-
-The hook provides clear error messages explaining what needs to be resolved before termination can proceed.
+**Note:** The manual method (`kill -INT $PPID`) is also intercepted by the hook. However, if you bypass the Bash tool entirely (e.g., running a signal from outside Claude), the hook cannot intercept it.
 
 ## How It Works
 
