@@ -28,6 +28,14 @@ Issue management is an SDLC concern. This skill now lives in the `sdlc-utils` pl
 
 Manage specification documents co-located with plugins. Covers the spec lifecycle (draft through archive), combined format with Given/When/Then acceptance criteria, and the rule that every plugin change PR must include a spec update (see `skills/spec-management/SKILL.md`).
 
+### /exit
+
+Gracefully exit the Claude Code session by sending SIGINT to the Claude process. Includes git state validation to prevent exiting with uncommitted or unpushed work (see `skills/exit/SKILL.md`).
+
+### /restart
+
+Restart the Claude Code session by gracefully exiting so the launcher loop restarts it. Use when you need to pick up config changes, plugin updates, or env var changes (see `skills/restart/SKILL.md`).
+
 ## Rules
 
 ### autonomy.md

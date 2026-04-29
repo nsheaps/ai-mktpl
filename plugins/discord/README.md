@@ -28,7 +28,13 @@ Still on the **Bot** page, scroll up to **Token** and press **Reset Token**. Cop
 
 Discord won't let you DM a bot unless you share a server with it.
 
-Navigate to **OAuth2** → **URL Generator**. Select the `bot` scope. Under **Bot Permissions**, enable:
+Navigate to **OAuth2** → **URL Generator**.
+
+**Scopes:** `bot`, `applications.commands`
+
+Under **Bot Permissions**, enable the permissions below.
+
+_Required — used by the plugin today:_
 
 - View Channels
 - Send Messages
@@ -36,6 +42,17 @@ Navigate to **OAuth2** → **URL Generator**. Select the `bot` scope. Under **Bo
 - Read Message History
 - Attach Files
 - Add Reactions
+- Embed Links
+
+_Recommended — enable if you plan to use the forum thread creation skill or cross-server emoji:_
+
+- Create Public Threads
+- Create Private Threads
+- Use External Emojis
+
+> **Privileged Gateway Intents:** Message Content Intent is required (configured in step 1).
+>
+> **Intentionally NOT enabled:** Administrator, Manage Server, Kick/Ban Members, Moderate Members, Manage Roles, Manage Channels, Manage Threads, Manage Messages, Manage Events, Manage Expressions, Mention Everyone, View Audit Log, View Server Insights, and voice-only permissions. These grant destructive or unnecessary capabilities the plugin never uses.
 
 Integration type: **Guild Install**. Copy the **Generated URL**, open it, and add the bot to any server you're in.
 
@@ -99,6 +116,10 @@ Quick reference: IDs are Discord **snowflakes** (numeric — enable Developer Mo
 | `edit_message`        | Edit a message the bot previously sent. Useful for "working…" → result progress updates. Only works on the bot's own messages.                                                                                                                                       |
 | `fetch_messages`      | Pull recent history from a channel (oldest-first). Capped at 100 per call. Each line includes the message ID so the model can `reply_to` it; messages with attachments are marked `+Natt`. Discord's search API isn't exposed to bots, so this is the only lookback. |
 | `download_attachment` | Download all attachments from a specific message by ID to `~/.claude/channels/discord/inbox/`. Returns file paths + metadata. Use when `fetch_messages` shows a message has attachments.                                                                             |
+| `get_thread_info`     | Fetch metadata for a thread by channel ID: name, parent, created time, archived/locked state, member and message counts.                                                                                                                                             |
+| `get_channel_info`    | Fetch metadata for any allowed channel by ID: type, name, topic, category, position, NSFW flag, and slowmode setting.                                                                                                                                                |
+| `get_server_info`     | Fetch guild-level metadata reachable via an allowed channel: server name, ID, member count, and a full channel listing. Entry is gated by one allowlisted channel but returns all channels the bot can see.                                                          |
+| `list_threads`        | List all active threads in a text, announcement, or forum channel. Returns thread name, ID, message count, and member count for each active thread.                                                                                                                  |
 
 Inbound messages trigger a typing indicator automatically — Discord shows
 "botname is typing…" while the assistant works on a response.

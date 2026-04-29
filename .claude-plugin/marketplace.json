@@ -11,7 +11,7 @@
     {
       "name": "1pass",
       "description": "Install and manage 1Password CLI (op) and op-exec in Claude Code sessions. Provides session-start auto-install for web sessions and comprehensive workflow skills.",
-      "version": "0.3.3",
+      "version": "0.3.4",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -43,8 +43,8 @@
     },
     {
       "name": "agentic-behavior",
-      "description": "Skills for configuring Claude Code, behavior correction, memory tracking, autonomy rules, and time-context awareness. Combines prompt history tracking, git-backed memory sync, and the self-checking Ralph loop pattern.",
-      "version": "0.1.5",
+      "description": "Skills for configuring Claude Code, behavior correction, memory tracking, autonomy rules, time-context awareness, and session exit/restart. Combines prompt history tracking, git-backed memory sync, the self-checking Ralph loop pattern, and graceful session exit via SIGINT.",
+      "version": "0.2.1",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -63,7 +63,15 @@
         "autonomy",
         "rules",
         "work-tracking",
-        "milestones"
+        "milestones",
+        "issue-management",
+        "task-tracking",
+        "deduplication",
+        "github-issues",
+        "exit",
+        "restart",
+        "sigint",
+        "session-management"
       ]
     },
     {
@@ -147,7 +155,7 @@
     {
       "name": "common-sense",
       "description": "Common-sense rules for AI assistant behavior. On session start, symlinks bundled rules into the project's .claude/rules/common-sense directory so they are automatically loaded as context.",
-      "version": "1.3.16",
+      "version": "1.3.17",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -177,8 +185,8 @@
     },
     {
       "name": "correct-behavior",
-      "description": "Command to correct AI behavior mistakes and update rules to prevent recurrence",
-      "version": "0.2.25",
+      "description": "[DEPRECATED — use agentic-behavior, which bundles this skill] Correct AI behavior mistakes and update rules to prevent recurrence",
+      "version": "0.2.26",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -288,7 +296,7 @@
     {
       "name": "discord",
       "description": "Discord channel for Claude Code — messaging bridge with built-in access control. Manage pairing, allowlists, and policy via /discord:access.",
-      "version": "0.0.4",
+      "version": "0.1.0",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -324,7 +332,7 @@
     {
       "name": "git-spice",
       "description": "Skill for managing stacked Git branches with git-spice (gs) CLI tool",
-      "version": "0.2.7",
+      "version": "0.2.8",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -344,7 +352,7 @@
     {
       "name": "github",
       "description": "GitHub CLI installation, authentication, and workflow skill for Claude Code sessions. Consolidates gh-tool and github-auth-skill into a single plugin.",
-      "version": "0.1.15",
+      "version": "0.1.16",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -395,7 +403,7 @@
     {
       "name": "google-workspace-cli",
       "description": "Install and manage the Google Workspace CLI (gws) with per-service skills for Gmail, Calendar, Drive, Docs, Sheets, Slides, Chat, Tasks, Contacts, and Admin",
-      "version": "0.1.7",
+      "version": "0.1.8",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -470,7 +478,7 @@
     {
       "name": "mise",
       "description": "Install and manage mise (tool version manager) in Claude Code sessions. Provides session-start auto-install for web sessions and comprehensive workflow skills.",
-      "version": "0.2.18",
+      "version": "0.2.19",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -577,8 +585,8 @@
     },
     {
       "name": "review-changes",
-      "description": "Review code changes with detailed feedback on quality, security, performance, and maintainability",
-      "version": "0.2.25",
+      "description": "[DEPRECATED — use scm-utils, which bundles these skills] Detailed code review feedback on quality, security, performance, and maintainability",
+      "version": "0.2.26",
       "author": {
         "name": "Nathan Heaps"
       },
