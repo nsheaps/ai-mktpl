@@ -40,6 +40,7 @@ README.md                    # High-level overview, quick start
 **Structure:**
 
 A drilldown skill's `SKILL.md` typically:
+
 - Has a generic name (e.g. `message-formatting`)
 - Lists or auto-discovers child skills (e.g. via `!`bash`` directory listing)
 - @-references shared excerpts on how to consume drilldown skills
