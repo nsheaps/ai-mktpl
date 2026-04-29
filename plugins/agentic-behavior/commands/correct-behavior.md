@@ -21,8 +21,8 @@ This command helps correct AI behavior mistakes and ensures they don't happen ag
 | `project`                     | Rules for the current project   | `<git-root>/.claude/CLAUDE.md` or `<git-root>/.claude/rules/*.md` |
 | `slash-commands` / `commands` | User's slash commands           | `~/.claude/commands/*.md`                                         |
 | `skills`                      | User's skills                   | `~/.claude/skills/*/SKILL.md`                                     |
-| `plugins`                     | Plugin source code              | `~/src/nsheaps/ai/plugins/...`                                    |
-| `marketplace`                 | The AI config marketplace repo  | `~/src/nsheaps/ai/...`                                            |
+| `plugins`                     | Plugin source code              | `~/src/nsheaps/ai-mktpl/plugins/...`                                    |
+| `marketplace`                 | The AI config marketplace repo  | `~/src/nsheaps/ai-mktpl/...`                                            |
 
 **Note:** If scope is obvious from context (e.g., correcting a slash command behavior), infer it. Otherwise, ask the user.
 
@@ -30,29 +30,19 @@ This command helps correct AI behavior mistakes and ensures they don't happen ag
 
 You MUST follow these steps in order:
 
-### Step 1: Reflect on Recent Work
+### Step 1: Reflect and Understand
 
-Think carefully about:
+Before doing anything else, document these 5 items concretely:
 
-- What task was I just working on?
-- What was I supposed to do?
-- What did I actually do?
-- How did I get there?
-- Did I stay on task or drift?
+1. **What the handler told you that you did wrong** — Quote or paraphrase their correction (`$ARGUMENTS`)
+2. **What you think you did wrong** — Your own understanding, in your own words
+3. **How you got there** — Root cause analysis: what decisions or assumptions led to the mistake?
+4. **How you should have gotten to the correct solution** — The right path you should have followed
+5. **The correct solution itself** — What the expected output/behavior should have been
 
-Document your reflection clearly before proceeding.
+**If you're unsure about any of these items, use the AskUserQuestion tool to clarify before proceeding.**
 
-### Step 2: Understand the Correction
-
-Analyze the user's correction (`$ARGUMENTS`) in context of your recent work:
-
-- What specifically did I do wrong?
-- Where did I start going awry?
-- Was this a one-time mistake or a pattern?
-
-**If you're unsure what you did wrong, use the AskUserQuestion tool to clarify before proceeding.**
-
-### Step 3: Determine Scope
+### Step 2: Determine Scope
 
 Parse the arguments to determine scope:
 
@@ -60,7 +50,7 @@ Parse the arguments to determine scope:
 - If scope is obvious from context (e.g., the correction is about a slash command you just wrote), infer it
 - If scope is unclear, ask the user using AskUserQuestion with options for relevant scopes
 
-### Step 4: Review Existing Rules
+### Step 3: Review Existing Rules
 
 **ALWAYS review BOTH user and project rules, regardless of where the correction will be made:**
 
@@ -80,9 +70,9 @@ Parse the arguments to determine scope:
    - Check if behavior is controlled by a skill or command
 
 4. **Marketplace repo (if relevant):**
-   - `~/src/nsheaps/ai/.claude/rules/*.md` - rules for modifying the repo itself
-   - `~/src/nsheaps/ai/.ai/rules/*.md` - user behavior rules (AI-agnostic, syncs to user config)
-   - `~/src/nsheaps/ai/plugins/*/commands/*.md` - plugin commands
+   - `~/src/nsheaps/ai-mktpl/.claude/rules/*.md` - rules for modifying the repo itself
+   - `~/src/nsheaps/ai-mktpl/.ai/rules/*.md` - user behavior rules (AI-agnostic, syncs to user config)
+   - `~/src/nsheaps/ai-mktpl/plugins/*/commands/*.md` - plugin commands
 
 Identify:
 
@@ -90,11 +80,16 @@ Identify:
 - If yes, why weren't they followed?
 - Are there conflicting rules? **If so, STOP and ask the user what to do about the conflict.**
 
-### Step 5: Plan and Execute the Correction
+### Step 4: Plan and Execute the Correction
 
 Based on your analysis:
 
-1. **Determine the best place for the rule:**
+1. **Contribution priority order** — apply corrections in this order of preference:
+   - **PLUGINS first** — shared plugin source, benefits all agents using the plugin
+   - **SKILLS second** — task-specific how-to documentation
+   - **RULES third** — fallback if neither plugin nor skill fits
+
+2. **Determine the best place for the rule:**
 
    | If the correction is...          | Put it in...                                                      |
    | -------------------------------- | ----------------------------------------------------------------- |
@@ -102,43 +97,43 @@ Based on your analysis:
    | Project-specific                 | `<git-root>/.claude/CLAUDE.md` or `<git-root>/.claude/rules/*.md` |
    | About a slash command            | The command file itself                                           |
    | About a skill                    | The skill's `SKILL.md`                                            |
-   | About a plugin                   | The plugin source in `~/src/nsheaps/ai/plugins/...`               |
-   | User behavior (shared/backed up) | `~/src/nsheaps/ai/.ai/rules/*.md` (AI-agnostic)                   |
-   | Repo contribution rules          | `~/src/nsheaps/ai/.claude/rules/*.md` (Claude-specific)           |
+   | About a plugin                   | The plugin source in `~/src/nsheaps/ai-mktpl/plugins/...`               |
+   | User behavior (shared/backed up) | `~/src/nsheaps/ai-mktpl/.ai/rules/*.md` (AI-agnostic)                   |
+   | Repo contribution rules          | `~/src/nsheaps/ai-mktpl/.claude/rules/*.md` (Claude-specific)           |
 
-2. **Write the correction:**
+3. **Write the correction:**
    - Be specific and actionable
    - Use clear, imperative language
    - Include context for why (prevents similar mistakes)
    - **NEVER write to `*.local.md` files** - these are personal and not saved
 
-3. **Structure appropriately:**
+4. **Structure appropriately:**
    - If adding to CLAUDE.md: find the appropriate section or create one
    - If creating a new rule file: use descriptive filename in appropriate `rules/` directory
    - Keep rules focused and organized
 
-4. **Review your changes:**
+5. **Review your changes:**
    - Re-read what you wrote
    - Verify it will actually prevent the behavior
    - Ensure it doesn't conflict with existing rules
 
-### Step 6: Ensure Changes Are Committed
+### Step 5: Ensure Changes Are Committed
 
 **CRITICAL: All changes must end up committed somewhere.**
 
 | Scope                       | Commit Strategy                                                                                                                                        |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `user`                      | Changes go to `~/.claude/...` immediately. Source of truth is `~/src/nsheaps/ai/.ai/rules/`. Ask user if they want changes synced there (requires PR). |
+| `user`                      | Changes go to `~/.claude/...` immediately. Source of truth is `~/src/nsheaps/ai-mktpl/.ai/rules/`. Ask user if they want changes synced there (requires PR). |
 | `project`                   | Remind user to commit changes to the project repo                                                                                                      |
-| `slash-commands` / `skills` | If in `~/.claude/...`, ask about syncing to `~/src/nsheaps/ai/...`                                                                                     |
-| `plugins` / `marketplace`   | Changes are in `~/src/nsheaps/ai/...`. Create a PR and assign to user.                                                                                 |
+| `slash-commands` / `skills` | If in `~/.claude/...`, ask about syncing to `~/src/nsheaps/ai-mktpl/...`                                                                                     |
+| `plugins` / `marketplace`   | Changes are in `~/src/nsheaps/ai-mktpl/...`. Create a PR and assign to user.                                                                                 |
 
-**Directory Structure in `~/src/nsheaps/ai/`:**
+**Directory Structure in `~/src/nsheaps/ai-mktpl/`:**
 
 - `.claude/rules/` - Rules for working on this repo (Claude-specific)
 - `.ai/rules/` - User behavior rules that sync to user's config (AI-agnostic, can be used by other AI tools)
 
-When making changes to `~/src/nsheaps/ai/...`:
+When making changes to `~/src/nsheaps/ai-mktpl/...`:
 
 1. Check current git status
 2. Create a feature branch if not already on one
@@ -146,7 +141,7 @@ When making changes to `~/src/nsheaps/ai/...`:
 4. Push and create PR using `gh pr create --assignee <user>`
 5. Open PR in browser with `gh pr view --web`
 
-### Step 7: Correct the Original Work
+### Step 6: Correct the Original Work
 
 Go back to the work you just did and fix what was done incorrectly:
 
@@ -156,7 +151,7 @@ Go back to the work you just did and fix what was done incorrectly:
 
 ## Important Notes
 
-- **Always commit:** Changes must always end up committed somewhere. User config changes should be synced to `~/src/nsheaps/ai/.ai/rules/` as source of truth.
+- **Always commit:** Changes must always end up committed somewhere. User config changes should be synced to `~/src/nsheaps/ai-mktpl/.ai/rules/` as source of truth.
 
 - **Never guess:** If uncertain about the scope or the correction, always ask the user.
 
@@ -178,7 +173,7 @@ Go back to the work you just did and fix what was done incorrectly:
 /correct-behavior user don't commit unless I tell you
 ```
 
-Would add to `~/.claude/CLAUDE.md` and offer to sync to `~/src/nsheaps/ai/.ai/rules/`:
+Would add to `~/.claude/CLAUDE.md` and offer to sync to `~/src/nsheaps/ai-mktpl/.ai/rules/`:
 
 ```markdown
 - NEVER commit changes to git unless the user explicitly asks you to commit.
@@ -212,4 +207,4 @@ Would prompt:
 >
 > - USER (applies to all your projects)
 > - PROJECT (just this codebase)
-> - MARKETPLACE (shared with others via ~/src/nsheaps/ai)
+> - MARKETPLACE (shared with others via ~/src/nsheaps/ai-mktpl)
