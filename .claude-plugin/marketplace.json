@@ -625,7 +625,7 @@
     },
     {
       "name": "sdlc-utils",
-      "description": "Software development lifecycle utilities — skills organized by SDLC phase: plan, implement, review, test, deploy, and maintain. Includes relentless PR fixing.",
+      "description": "Software development lifecycle utilities — skills organized by SDLC phase: plan, implement, review, test, deploy, and maintain.",
       "version": "0.3.0",
       "author": {
         "name": "Nathan Heaps"
