@@ -6,11 +6,7 @@ Skills for configuring Claude Code, behavior correction, memory tracking, autono
 
 ### /correct-behavior
 
-Corrects AI behavior mistakes and updates rules to prevent recurrence. Invocable manually via `/correct-behavior` or auto-triggered by Claude when it detects corrective feedback.
-
-```bash
-/correct-behavior [SCOPE] <description of what went wrong>
-```
+Corrects AI behavior mistakes and updates rules to prevent recurrence. Auto-triggered by Claude when it detects corrective feedback, or invoke explicitly as `/agentic-behavior:correct-behavior [SCOPE] <description>` (see `skills/correct-behavior/SKILL.md`).
 
 ### /time-context
 
