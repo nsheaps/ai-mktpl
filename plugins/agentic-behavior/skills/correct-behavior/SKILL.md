@@ -10,9 +10,9 @@ argument-hint: "[SCOPE] <description of what I did wrong>"
 allowed-tools: Read, Glob, Grep, Edit, Write, Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git rev-parse:*), Bash(git add:*), Bash(git commit:*), Bash(git push:*), Bash(git checkout:*), Bash(gh pr:*), Bash(ls:*), Bash(pwd:*), Bash(mkdir:*), AskUserQuestion
 ---
 
-# Behavior Correction Command
+# Behavior Correction
 
-This command helps correct AI behavior mistakes and ensures they don't happen again by updating the appropriate rules files.
+This skill helps correct AI behavior mistakes and ensures they don't happen again by updating the appropriate rules, skills, plugins, or hooks.
 
 ## Context
 
@@ -64,18 +64,18 @@ Parse the arguments to determine scope:
 3. **Other configurations may exist in repos that share configs and rulesets, like organization configs** which might be located at https://github.com/nsheaps/.org
 4. **Consider agent configs as well, which act as user-configs when running the agent harness** agents like [jack](https://github.com/nsheaps/.ai-agent-jack), [alex](https://github.com/nsheaps/.ai-agent-alex), [henry](https://github.com/nsheaps/.ai-agent-henry) have configurations built from plugins and shared code, so opt to keep it re-useable, even if it is unique to our set of agents.
 5. **Still, if there's reason to be project specific, you can add changes to project configs** to capture requirements like linting and rules specific to folders.
-6. CRITICAL: While possible, avoid directly making changes to the user config, most sessions will want to be run differently. Few exceptions exist for this, like setting up proxy info, or base level permissions allow/deny (which can be set by plugins) and other important settings.
+6. **CRITICAL: avoid directly making changes to the user config** — most sessions will want to be run differently. Few exceptions exist, like setting up proxy info or base-level permissions allow/deny (which can be set by plugins) and other important settings.
 
 Identify:
 
-- Are there existing plugins, hooks, rules, skills, documentation, about this behavior?
+- Are there existing plugins, hooks, rules, skills, or documentation about this behavior?
 - If yes, why weren't they followed?
 - Are there conflicting definitions? **If so, STOP and ask the user what to do about the conflict.**
-  - conflicting can be inter-plugin or intra-plugin.
+  - Conflicting can be inter-plugin or intra-plugin.
 
 ### Step 4: Plan and Execute the Correction
 
-Analyse your collected data on what went wrong. use the issue-management skill to document the failure to learn from it further.
+Analyse your collected data on what went wrong. Use the `issue-management` skill to document the failure to learn from it further.
 
 Based on your analysis:
 
@@ -102,7 +102,7 @@ Based on your analysis:
    - Be specific and actionable
    - Use clear, imperative language
    - Include context for why (prevents similar mistakes)
-   - **NEVER write to `*.local.md` files** - these are personal and not saved
+   - **NEVER write to `*.local.md` files** — these are personal and not saved
 
 4. **Structure appropriately:**
    - If adding to CLAUDE.md: find the appropriate section or create one
@@ -127,8 +127,8 @@ Based on your analysis:
 
 **Directory Structure in `~/src/nsheaps/ai-mktpl/`:**
 
-- `.claude/rules/` - Rules for working on this repo (Claude-specific)
-- `.ai/rules/` - User behavior rules that sync to user's config (AI-agnostic, can be used by other AI tools)
+- `.claude/rules/` — Rules for working on this repo (Claude-specific)
+- `.ai/rules/` — User behavior rules that sync to user's config (AI-agnostic, can be used by other AI tools)
 
 When making changes to `~/src/nsheaps/ai-mktpl/...`:
 
@@ -160,7 +160,7 @@ Go back to the work you just did and fix what was done incorrectly:
 
 - **Use claude-code-guide agent:** You can and should consider using the `claude-code-guide` agent to help you with any changes needed to Claude Code configuration files.
 
-- **Work on main branch:** When correcting behavior, make the change directly on the main branch and `/commit` and push after completing the correction.
+- **Work on main branch:** When correcting behavior, make the change directly on the main branch and commit + push after completing the correction.
 
 ## Example Corrections
 
