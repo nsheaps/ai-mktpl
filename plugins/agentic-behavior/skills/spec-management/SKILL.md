@@ -153,4 +153,4 @@ When reviewing a PR that includes a spec:
 ## References
 
 - [Spec directory conventions](../../../common-sense/rules/mantras-and-incremental-development.md) -- defines the draft/reviewed/in-progress/live/deprecated/archive lifecycle
-- [Handler feedback on specs](https://discord.com/channels/1490863845252665415/1490890535878131792/1497248350947381399) -- source discussion on spec requirements
+- Handler feedback on specs -- originated from org Discord discussion on requiring specs for every plugin change PR and developing PRs against merged specs

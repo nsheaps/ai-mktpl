@@ -6,6 +6,8 @@ Cross-cutting rules for how tasks, PRs, milestones, and communication threads re
 
 ## 1. Thread Ownership by Role
 
+In multi-agent setups, thread ownership is split by role. In single-agent setups, the single agent owns all threads and fulfills both roles.
+
 - **Task threads** — created by the SE (software engineer) agent. Track active work: testing, reviews, PRs, research, coordination.
 - **Milestone threads** — created by the PM agent. Track milestone/project status and communicate overall progress to the handler.
 
@@ -28,7 +30,7 @@ If any don't exist, coordinate with the PM to create them.
 ### PRs MUST be developed against merged specs
 
 - Specs live on default branches in the relevant repos
-- Issues are coordination ground ("tickets to assign"), NOT the source of truth for specs (see `github-issues-task-management.md` for issue-tracking conventions)
+- Issues are coordination ground ("tickets to assign"), NOT the source of truth for specs (see the [`/github-issues-task-management` skill](../skills/github-issues-task-management/SKILL.md) for issue-tracking conventions)
 - All specs should be merged (and reviewed if required) before PR work begins
 
 ## 3. Thread Discipline

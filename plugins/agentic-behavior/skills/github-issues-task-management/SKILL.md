@@ -51,8 +51,16 @@ Fixes nsheaps/ai-mktpl#15
 Closes #7
 ```
 
-Use `Fixes` for bug fixes, `Closes` for features/enhancements. For cross-repo
-links, always use the full `owner/repo#N` format.
+**Semantic convention** (GitHub treats all linking keywords identically, but we
+use them to signal intent to human readers):
+
+- `Fixes` — the PR satisfies/resolves the issue described (bug fix, feature
+  implementation). The issue represents work that is now complete.
+- `Closes` — the PR supersedes or replaces another PR or issue without
+  necessarily implementing it (e.g., a rewrite that obsoletes an older PR, or
+  closing a duplicate).
+
+For cross-repo links, always use the full `owner/repo#N` format.
 
 ### Closing Issues
 

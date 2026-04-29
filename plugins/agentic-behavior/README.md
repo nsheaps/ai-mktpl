@@ -24,6 +24,14 @@ Git-backed memory and prompt tracking with self-checking reminders (see `skills/
 
 Create, search, update, and link tickets across ticketing systems with a strong deduplication-first workflow. Always checks for existing issues before creating new ones (see `skills/issue-management/SKILL.md`).
 
+### /spec-management
+
+Manage specification documents co-located with plugins. Covers the spec lifecycle (draft through archive), combined format with Given/When/Then acceptance criteria, and the rule that every plugin change PR must include a spec update (see `skills/spec-management/SKILL.md`).
+
+### /github-issues-task-management
+
+Methodology for organizing work via GitHub Issues and Projects. Covers issue lifecycle, PR-to-issue linking, label conventions, consolidation strategy, and cross-repo references (see `skills/github-issues-task-management/SKILL.md`).
+
 ## Rules
 
 ### autonomy.md
