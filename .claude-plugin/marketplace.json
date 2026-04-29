@@ -177,7 +177,7 @@
     },
     {
       "name": "correct-behavior",
-      "description": "DEPRECATED: Use agentic-behavior plugin instead, which includes the correct-behavior skill.",
+      "description": "[DEPRECATED — use agentic-behavior, which bundles this skill] Correct AI behavior mistakes and update rules to prevent recurrence",
       "version": "0.2.26",
       "author": {
         "name": "Nathan Heaps"
@@ -577,7 +577,7 @@
     },
     {
       "name": "review-changes",
-      "description": "DEPRECATED: Use scm-utils plugin instead, which includes review-code, review-diff, and automated-code-review skills.",
+      "description": "[DEPRECATED — use scm-utils, which bundles these skills] Detailed code review feedback on quality, security, performance, and maintainability",
       "version": "0.2.26",
       "author": {
         "name": "Nathan Heaps"
