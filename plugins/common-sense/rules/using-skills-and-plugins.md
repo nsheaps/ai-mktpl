@@ -22,7 +22,7 @@
 2. **Invoke each relevant skill** via the Skill tool to load its current content into context. Do this even if you "remember" the skill — the content may have changed since your last read.
 3. **Only then** start the work, following the skill's instructions.
 4. **If the skill disagrees with other sources** (yaml, rules, memory), the skill wins. Update the other sources to match after finishing the work.
-5. **If delegating to a sub-agent**, the sub-agent MUST also follow this rule — include explicit instructions in the prompt to read the relevant skill first, and link to its path.
+5. **If delegating to a sub-agent**, the sub-agent MUST also follow this rule — include explicit instructions in the prompt to invoke the relevant skill via the Skill tool by name (and pass the SKILL.md path as a fallback in case the sub-agent does not have access to the skill).
 
 If no skill matches and the work is non-trivial or recurring, **create a new skill capturing what you learn** as you do it.
 
