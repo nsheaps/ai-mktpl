@@ -35,6 +35,7 @@
      - Workflow stays SKIPPED for ~6 minutes after the label was applied → the workflow gate likely didn't trigger. Re-apply the label (remove + re-add) to force a re-fire. If still SKIPPED after one retry, escalate to the handler — workflow misconfig.
 
      **Do not claim "PR ready for human review" until the AI review has actually landed and any blocking findings are addressed.** "PR ready for AI review" (milestone 4) and "PR ready for human review" (milestone 5) are distinct — never collapse them. After every push to a PR with `request-review`, re-arm the monitor; the workflow re-fires on push.
+
   6. Once that state is achieved, use your best judgement to determine if the PR should be merged, and follow up actions to take (eg wait for homebrew tap to publish, bump versions in mise.toml, install new versions of tools and plugins, restart agents/services). If the PR is reviewed, but the review requirement isn't satisfied, you MUST tag Nate (your handler) in discord.
   7. After the PR merges, coordinate with the PM agent (Henry) to update linked tickets and close any bugs the change resolves:
      1. Identify all tickets/issues linked to the PR (PR body, commits, thread)
