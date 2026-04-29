@@ -626,7 +626,7 @@
     {
       "name": "sdlc-utils",
       "description": "Software development lifecycle utilities — skills organized by SDLC phase: plan, implement, review, test, deploy, and maintain.",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "author": {
         "name": "Nathan Heaps"
       },
