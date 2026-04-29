@@ -20,15 +20,31 @@ Detects time-referencing language in prompts and investigates history before ans
 
 Git-backed memory and prompt tracking with self-checking reminders (see `skills/brain/SKILL.md`).
 
-### /issue-management
+### /issue-management (moved to sdlc-utils)
 
-Create, search, update, and link tickets across ticketing systems with a strong deduplication-first workflow. Always checks for existing issues before creating new ones (see `skills/issue-management/SKILL.md`).
+Issue management is an SDLC concern. This skill now lives in the `sdlc-utils` plugin.
+
+### /spec-management
+
+Manage specification documents co-located with plugins. Covers the spec lifecycle (draft through archive), combined format with Given/When/Then acceptance criteria, and the rule that every plugin change PR must include a spec update (see `skills/spec-management/SKILL.md`).
+
+### /exit
+
+Gracefully exit the Claude Code session by sending SIGINT to the Claude process. Includes git state validation to prevent exiting with uncommitted or unpushed work (see `skills/exit/SKILL.md`).
+
+### /restart
+
+Restart the Claude Code session by gracefully exiting so the launcher loop restarts it. Use when you need to pick up config changes, plugin updates, or env var changes (see `skills/restart/SKILL.md`).
 
 ## Rules
 
 ### autonomy.md
 
 Rules for autonomous decision-making, recommendation style, merge approval, and research-first patterns. Synced into project `.claude/rules/` via the SessionStart hook.
+
+### work-tracking.md
+
+Platform-agnostic rules for how tasks, PRs, and milestones relate to each other. Covers linking requirements (work items to milestones, PRs to work items), status tracking, and milestone management. Concrete implementations (GitHub Issues, Linear, etc.) are provided by separate skills in appropriate plugins.
 
 ## Features
 

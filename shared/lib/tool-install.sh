@@ -27,7 +27,7 @@ if [ "${_TOOL_INSTALL_LOADED:-}" = "true" ]; then
 fi
 _TOOL_INSTALL_LOADED="true"
 
-# Check if running in a web session. Returns 0 if web, 1 if local.
+# DEPRECATED: Use tool_is_available instead. Install unconditionally, gate on presence.
 tool_is_web_session() {
   [ "${CLAUDE_CODE_REMOTE:-}" = "true" ]
 }
