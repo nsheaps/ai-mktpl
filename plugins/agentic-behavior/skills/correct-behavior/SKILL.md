@@ -26,13 +26,13 @@ It can be triggered two ways:
 
 ## Supported Scopes
 
-| Scope           | Description                     | Location                                                          |
-| --------------- | ------------------------------- | ----------------------------------------------------------------- |
-| `user`          | Personal rules for all projects | `~/.claude/CLAUDE.md` or `~/.claude/rules/*.md`                   |
-| `project`       | Rules for the current project   | `<git-root>/.claude/CLAUDE.md` or `<git-root>/.claude/rules/*.md` |
-| `skills`        | User's skills                   | `~/.claude/skills/*/SKILL.md`                                     |
-| `plugins`       | Plugin source code              | `~/src/nsheaps/ai-mktpl/plugins/...`                              |
-| `marketplace`   | The AI config marketplace repo  | `~/src/nsheaps/ai-mktpl/...`                                      |
+| Scope         | Description                     | Location                                                          |
+| ------------- | ------------------------------- | ----------------------------------------------------------------- |
+| `user`        | Personal rules for all projects | `~/.claude/CLAUDE.md` or `~/.claude/rules/*.md`                   |
+| `project`     | Rules for the current project   | `<git-root>/.claude/CLAUDE.md` or `<git-root>/.claude/rules/*.md` |
+| `skills`      | User's skills                   | `~/.claude/skills/*/SKILL.md`                                     |
+| `plugins`     | Plugin source code              | `~/src/nsheaps/ai-mktpl/plugins/...`                              |
+| `marketplace` | The AI config marketplace repo  | `~/src/nsheaps/ai-mktpl/...`                                      |
 
 **Note on slash commands (deprecated):** Slash commands (`~/.claude/commands/*.md`) are deprecated. If the correction is about a slash command's behavior, migrate it to a user-invocable skill (`user-invocable: true` in frontmatter) under `~/.claude/skills/<name>/SKILL.md` or in the appropriate plugin. Skills supersede slash commands and offer richer features (auto-recall, supporting files, frontmatter controls).
 
@@ -128,12 +128,12 @@ Based on your analysis:
 
 **CRITICAL: All changes must end up committed somewhere.**
 
-| Scope                     | Commit Strategy                                                                                                                                              |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `user`                    | Changes go to `~/.claude/...` immediately. Source of truth is `~/src/nsheaps/ai-mktpl/.ai/rules/`. Ask user if they want changes synced there (requires PR). |
-| `project`                 | Remind user to commit changes to the project repo                                                                                                            |
+| Scope                     | Commit Strategy                                                                                                                                               |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `user`                    | Changes go to `~/.claude/...` immediately. Source of truth is `~/src/nsheaps/ai-mktpl/.ai/rules/`. Ask user if they want changes synced there (requires PR).  |
+| `project`                 | Remind user to commit changes to the project repo                                                                                                             |
 | `skills`                  | If in `~/.claude/...`, ask about syncing to `~/src/nsheaps/ai-mktpl/...`. Slash commands being corrected should be migrated to skills (see Supported Scopes). |
-| `plugins` / `marketplace` | Changes are in `~/src/nsheaps/ai-mktpl/...`. Create a PR and assign to user.                                                                                 |
+| `plugins` / `marketplace` | Changes are in `~/src/nsheaps/ai-mktpl/...`. Create a PR and assign to user.                                                                                  |
 
 **Directory Structure in `~/src/nsheaps/ai-mktpl/`:**
 
