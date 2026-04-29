@@ -26,7 +26,7 @@ Manage specification documents co-located with plugins. Covers the spec lifecycl
 
 ### /incident-tracker
 
-Track behavioral incidents with structured incident files (severity, tags, status), derive reusable rules, and maintain footnote references between rules and source incidents. Auto-discovers the workspace rules file (CLAUDE.md, AGENTS.md, or a configured override) so rules land in the right place. Complementary to `correct-behavior` -- use `incident-tracker` when the goal is producing a durable audit trail of *what happened*, and `correct-behavior` for active fixes (see `skills/incident-tracker/SKILL.md`).
+Track behavioral incidents with structured incident files (severity, tags, status), derive reusable rules, and maintain footnote references between rules and source incidents. Auto-discovers the workspace rules file (CLAUDE.md, AGENTS.md, or a configured override) so rules land in the right place. Complementary to `correct-behavior` -- use `incident-tracker` when the goal is producing a durable audit trail of _what happened_, and `correct-behavior` for active fixes (see `skills/incident-tracker/SKILL.md`).
 
 ### /exit
 

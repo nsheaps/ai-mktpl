@@ -28,7 +28,7 @@ Both skills handle behavior corrections. They are complementary:
   when the goal is fixing the behavior across the system.
 - **`agentic-behavior:incident-tracker`** — structured incident log format
   (severity, tags, footnoted rules). Use when the goal is producing a durable
-  audit trail of *what happened*, in addition to or instead of fixing the
+  audit trail of _what happened_, in addition to or instead of fixing the
   behavior in code.
 
 When in doubt, prefer `correct-behavior` for active fixes and add an incident
@@ -108,11 +108,11 @@ If the user disagrees, edit the incident file and rule before continuing.
 
 ## Severity Levels
 
-| Level    | When to Use                                                |
-| -------- | ---------------------------------------------------------- |
-| `low`    | Minor inconvenience, no lasting impact                     |
-| `medium` | Affected user workflow, required correction                |
-| `high`   | Data loss, security issue, or significant trust impact     |
+| Level    | When to Use                                            |
+| -------- | ------------------------------------------------------ |
+| `low`    | Minor inconvenience, no lasting impact                 |
+| `medium` | Affected user workflow, required correction            |
+| `high`   | Data loss, security issue, or significant trust impact |
 
 Pick the most accurate severity based on impact, not on how badly you feel
 about the mistake. If the user explicitly classifies it differently, use
@@ -126,7 +126,7 @@ their classification.
 - **Rules should be actionable and specific.** "Be more careful" is not a
   rule. "Always confirm before running `git push --force`" is a rule.
 - **Footnote references link rules back to incidents.** Future maintainers
-  (and future you) need to know *why* a rule exists.
+  (and future you) need to know _why_ a rule exists.
 - **Never skip the confirmation step.** A mischaracterized incident is
   worse than no incident — it teaches the wrong lesson.
 
