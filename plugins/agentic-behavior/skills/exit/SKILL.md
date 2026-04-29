@@ -1,25 +1,26 @@
 ---
-name: self-terminate
+name: exit
 description: |
-  Gracefully terminate the Claude Code session by sending SIGINT to the Claude process.
+  Gracefully exit the Claude Code session by sending SIGINT to the Claude process.
   Works for local CLI sessions and Claude Code Web (remote sessions).
-  Use when you make a change that requires a restart, or when the user requests termination.
+  Use when you need to exit the session cleanly, or when the user requests exit/termination.
 ---
 
-# Self-Terminate Skill
+# Exit
 
-This skill enables Claude to gracefully terminate its own session by sending a SIGINT signal to its process.
+This skill enables Claude to gracefully exit its own session by sending a SIGINT signal to its process.
 
 ## When to Use This Skill
 
-- When the user explicitly asks Claude to exit or terminate
-- When Claude needs to restart with a fresh session (e.g., after configuration changes)
-- When running Claude Code Web and you make a change that requires a session restart
+- When the user explicitly asks Claude to exit or stop
+- When Claude needs to exit for any reason (e.g., cleanup, session end)
+- When running Claude Code Web and you need to exit the session
 - When testing process management or signal handling
+- See also: `/restart` skill for restarting (exit + launcher picks up again)
 
 ## Automatic Git State Validation
 
-This plugin includes a PreToolUse hook that validates git state before termination. The hook intercepts Bash tool calls that invoke `self-terminate.sh` or `kill -INT` and checks the working directory.
+This plugin includes a PreToolUse hook that validates git state before exit. The hook intercepts Bash tool calls that invoke `exit.sh` or `kill -INT` and checks the working directory.
 
 **Checks performed:**
 
@@ -42,18 +43,18 @@ Sending `SIGINT` (signal 2) to the Claude process triggers a graceful shutdown, 
 The easiest way is to execute the provided script:
 
 ```bash
-${CLAUDE_PLUGIN_ROOT}/bin/self-terminate.sh
+${CLAUDE_PLUGIN_ROOT}/bin/exit.sh
 ```
 
 Or via the installed plugin cache path (varies by installation):
 
 ```bash
-~/.claude/plugins/cache/ai-mktpl/agentic-behavior/*/bin/self-terminate.sh
+~/.claude/plugins/cache/ai-mktpl/agentic-behavior/*/bin/exit.sh
 ```
 
 ## Manual Method
 
-If the script is unavailable, Claude can terminate itself manually:
+If the script is unavailable, Claude can exit itself manually:
 
 ### Step 1: Identify the Claude Process
 
@@ -98,7 +99,7 @@ iTerm/Terminal
 
 ## What Happens After
 
-After termination:
+After exit:
 
 1. The Claude session ends immediately
 2. Any in-progress work is interrupted
@@ -133,7 +134,7 @@ Example stop hook location: `~/.claude/stop-hook-git-check.sh`
 
 ## Alternative Methods (Claude Code Web Only)
 
-For Claude Code Web sessions, you can also terminate by:
+For Claude Code Web sessions, you can also exit by:
 
 1. **Idle timeout** - Stop sending messages and wait for auto-shutdown
 2. **Close browser tab** - Session terminates gracefully

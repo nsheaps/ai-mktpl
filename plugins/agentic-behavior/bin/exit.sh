@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Self-terminate script for Claude Code
+# Exit script for Claude Code
 # Sends SIGINT to the Claude process that spawned this shell
 
 set -euo pipefail
 
-LOG_PREFIX="self-terminate"
+LOG_PREFIX="exit"
 # shellcheck source=../lib/log.sh
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/lib/log.sh"
 

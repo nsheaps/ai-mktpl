@@ -1,7 +1,7 @@
 {
   "name": "agentic-behavior",
   "version": "0.2.0",
-  "description": "Skills for configuring Claude Code, behavior correction, memory tracking, autonomy rules, time-context awareness, and self-termination. Combines prompt history tracking, git-backed memory sync, the self-checking Ralph loop pattern, and graceful session termination via SIGINT.",
+  "description": "Skills for configuring Claude Code, behavior correction, memory tracking, autonomy rules, time-context awareness, and session exit/restart. Combines prompt history tracking, git-backed memory sync, the self-checking Ralph loop pattern, and graceful session exit via SIGINT.",
   "author": {
     "name": "Nathan Heaps",
     "email": "nsheaps@gmail.com",
@@ -24,10 +24,10 @@
     "task-tracking",
     "deduplication",
     "github-issues",
-    "terminate",
     "exit",
+    "restart",
     "sigint",
-    "self-terminate"
+    "session-management"
   ],
   "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/agentic-behavior",
   "repository": "https://github.com/nsheaps/ai-mktpl"
