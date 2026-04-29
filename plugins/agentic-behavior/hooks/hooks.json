@@ -10,6 +10,16 @@
             "prompt": "Check the agent prompt/description for file output instructions. Sub-agents MUST save substantial output to a file (not return it inline) to avoid context bloat.\n\nLook for instructions like 'save to file', 'write output to', 'save findings to', 'write results to', or a specified output file path.\n\nIf the prompt does NOT include file output instructions, respond with a systemMessage reminding the caller to add file output instructions. Do NOT block the call — just remind.\n\nIf file output instructions ARE present, approve silently."
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/validate-git-state-before-exit.sh",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "UserPromptSubmit": [
