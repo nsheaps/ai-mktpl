@@ -25,6 +25,8 @@ import {
   type Message,
   type Attachment,
   type Interaction,
+  type ThreadChannel,
+  type TextChannel,
 } from "discord.js";
 import { randomBytes } from "crypto";
 import {
@@ -621,13 +623,72 @@ mcp.setRequestHandler(ListToolsRequestSchema, async () => ({
       inputSchema: {
         type: "object",
         properties: {
-          channel: { type: "string" },
+          chat_id: { type: "string" },
           limit: {
             type: "number",
             description: "Max messages (default 20, Discord caps at 100).",
           },
         },
-        required: ["channel"],
+        required: ["chat_id"],
+      },
+    },
+    {
+      name: "get_thread_info",
+      description:
+        "Get metadata about a Discord thread: name/title, creation date, parent channel ID, archived status, member count, and message count.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          chat_id: {
+            type: "string",
+            description: "The thread channel ID (chat_id from inbound message if in a thread).",
+          },
+        },
+        required: ["chat_id"],
+      },
+    },
+    {
+      name: "get_channel_info",
+      description:
+        "Get metadata about a Discord channel: name, type, topic, category, and position.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          chat_id: {
+            type: "string",
+            description: "The channel ID.",
+          },
+        },
+        required: ["chat_id"],
+      },
+    },
+    {
+      name: "get_server_info",
+      description:
+        "Get metadata about the Discord server (guild): name, member count, and channel list.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          chat_id: {
+            type: "string",
+            description: "Any channel ID in the guild — used to look up which guild to query.",
+          },
+        },
+        required: ["chat_id"],
+      },
+    },
+    {
+      name: "list_threads",
+      description: "List active (non-archived) threads in a Discord channel.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          chat_id: {
+            type: "string",
+            description: "The parent channel ID to list threads from.",
+          },
+        },
+        required: ["chat_id"],
       },
     },
   ],
@@ -695,7 +756,7 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
         return { content: [{ type: "text", text: result }] };
       }
       case "fetch_messages": {
-        const ch = await fetchAllowedChannel(args.channel as string);
+        const ch = await fetchAllowedChannel(args.chat_id as string);
         const limit = Math.min((args.limit as number) ?? 20, 100);
         const msgs = await ch.messages.fetch({ limit });
         const me = client.user?.id;
@@ -749,6 +810,96 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
             },
           ],
         };
+      }
+      case "get_thread_info": {
+        const ch = await fetchAllowedChannel(args.chat_id as string);
+        if (!ch.isThread()) {
+          throw new Error(`channel ${args.chat_id} is not a thread`);
+        }
+        const thread = ch as ThreadChannel;
+        const info = [
+          `name: ${thread.name}`,
+          `id: ${thread.id}`,
+          `parent_channel_id: ${thread.parentId ?? "none"}`,
+          `created_at: ${thread.createdAt?.toISOString() ?? "unknown"}`,
+          `archived: ${thread.archived ?? false}`,
+          `locked: ${thread.locked ?? false}`,
+          `member_count: ${thread.memberCount ?? "unknown"}`,
+          `message_count: ${thread.messageCount ?? "unknown"}`,
+          `type: ${ChannelType[thread.type] ?? thread.type}`,
+        ].join("\n");
+        return { content: [{ type: "text", text: info }] };
+      }
+      case "get_channel_info": {
+        const ch = await fetchAllowedChannel(args.chat_id as string);
+        const lines: string[] = [`id: ${ch.id}`, `type: ${ChannelType[ch.type] ?? ch.type}`];
+        if ("name" in ch && ch.name) lines.push(`name: ${ch.name}`);
+        if ("topic" in ch && ch.topic) lines.push(`topic: ${ch.topic}`);
+        if ("parent" in ch && ch.parent)
+          lines.push(`category: ${ch.parent.name} (id: ${ch.parent.id})`);
+        if ("position" in ch && typeof ch.position === "number")
+          lines.push(`position: ${ch.position}`);
+        if ("nsfw" in ch && typeof ch.nsfw === "boolean") lines.push(`nsfw: ${ch.nsfw}`);
+        if ("rateLimitPerUser" in ch && typeof ch.rateLimitPerUser === "number") {
+          lines.push(`slowmode_seconds: ${ch.rateLimitPerUser}`);
+        }
+        return { content: [{ type: "text", text: lines.join("\n") }] };
+      }
+      case "get_server_info": {
+        const ch = await fetchAllowedChannel(args.chat_id as string);
+        const guildId = "guildId" in ch ? (ch.guildId as string) : null;
+        if (!guildId) throw new Error("channel is not in a guild (DM channels have no server)");
+        const guild = await client.guilds.fetch(guildId);
+        const fullGuild = await guild.fetch();
+        // Intentional scope expansion: entry is gated by one allowlisted
+        // channel in the guild, but the returned list includes every channel
+        // the bot can see — not just allowlisted ones. Channel names/ids are
+        // visible to any server member, so this doesn't reveal anything
+        // beyond what a human in the guild already sees; the tradeoff is a
+        // model with allowlist access to one channel can enumerate the
+        // guild's layout. See access.groups scoping in fetchAllowedChannel.
+        const channels = await fullGuild.channels.fetch();
+        const visibleChannels = [...channels.values()].filter(Boolean) as NonNullable<
+          ReturnType<(typeof channels)["get"]>
+        >[];
+        const channelList = visibleChannels
+          .map((c) => `  ${ChannelType[c.type] ?? c.type} ${c.name} (id: ${c.id})`)
+          .join("\n");
+        const info = [
+          `name: ${fullGuild.name}`,
+          `id: ${fullGuild.id}`,
+          `member_count: ${fullGuild.memberCount}`,
+          `channel_count: ${visibleChannels.length}`,
+          `channels:\n${channelList}`,
+        ].join("\n");
+        return { content: [{ type: "text", text: info }] };
+      }
+      case "list_threads": {
+        const ch = await fetchAllowedChannel(args.chat_id as string);
+        if (
+          ch.type !== ChannelType.GuildText &&
+          ch.type !== ChannelType.GuildAnnouncement &&
+          ch.type !== ChannelType.GuildForum
+        ) {
+          throw new Error(`channel ${args.chat_id} does not support threads`);
+        }
+        // Runtime guard above ensures ch is GuildText | GuildAnnouncement | GuildForum,
+        // all of which have .threads. Use a union cast instead of TextChannel alone,
+        // since GuildForumChannel is not a subtype of TextChannel in discord.js.
+        const threadable = ch as
+          | TextChannel
+          | import("discord.js").NewsChannel
+          | import("discord.js").ForumChannel;
+        const result = await threadable.threads.fetchActive();
+        const threads = [...result.threads.values()];
+        if (threads.length === 0) {
+          return { content: [{ type: "text", text: "(no active threads)" }] };
+        }
+        const lines = threads.map(
+          (t) =>
+            `${t.name} (id: ${t.id}, messages: ${t.messageCount ?? "?"}, members: ${t.memberCount ?? "?"})`,
+        );
+        return { content: [{ type: "text", text: lines.join("\n") }] };
       }
       default:
         return {
