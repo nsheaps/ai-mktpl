@@ -4,7 +4,6 @@ description: >-
   Session recovery skill. Use on startup, after compaction, or when resuming
   work after any interruption. Restores crons, audits recent history to
   determine current state, and identifies what to work on next.
-argument-hint: "[optional: specific area to focus on]"
 allowed-tools: Read, Glob, Grep, Bash(git log:*), Bash(git status:*), Bash(ls:*), CronCreate, CronList, CronDelete, TaskCreate, TaskUpdate, TaskList, Agent
 ---
 
@@ -64,7 +63,7 @@ Determine what you were working on by checking these sources in order:
 1. **TaskList** — check for in_progress tasks (fastest signal)
 2. **Git status** — any uncommitted changes? What branch?
 3. **Git log** — recent commits (last 5-10) to see what was just done
-4. **Discord threads** — check active work threads for recent messages
+4. **Communication channels** — check active work threads or channels for recent messages
 5. **`.claude/tmp/`** — any intermediate work files?
 6. **Recent transcript** — if available, check the last few messages for context
 
@@ -79,7 +78,7 @@ For each piece of active work found, determine:
 
 ### 4. Report & Resume
 
-Post a brief status summary (to Discord if handler is there, or terminal):
+Post a brief status summary (to the handler's active channel, or terminal):
 
 ```
 Session recovered. State:
