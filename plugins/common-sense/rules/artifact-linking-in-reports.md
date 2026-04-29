@@ -6,17 +6,17 @@
 
 When reporting that a task is complete, you MUST include **every applicable** item from this checklist:
 
-| Artifact Type         | Format                                                                 |
-| --------------------- | ---------------------------------------------------------------------- |
-| GitHub Issue          | `[org/repo#123](https://github.com/org/repo/issues/123)`                       |
-| Pull Request          | `[org/repo#456](https://github.com/org/repo/pull/456)`                      |
-| Commit                | `[org/repo@abc1234](https://github.com/org/repo/commit/abc1234)`                                                   |
-| File created/modified | Always refer to files on the github remote (you must push first) <br> `[path/file.md](https://github.com/org/repo/blob/<ref>/path/file.md)` |
-| External URL          | Full URL as markdown link                                              |
-| Branch                | `[org/repo@main](https://github.com/org/repo/tree/main/)`                                                            |
-| Message on discord        | feel free to truncate the message to only include relevant info: `[Nate: do a thing...but make it green](https://discord.com/channels/1490863845252665415/1497431286661517353/1499108530622431375)`                                                            |
-| thread on discord        | same as message reference, just to the first message in the thread (with the thread message or forum post title as the text) `[chore: the thread title](https://discord.com/channels/1490863845252665415/1497431286661517353/1499108530622431375)`                                                            |
-| channel on discord        | always show the human readable channel name, not the ID `[#agent-human-resources](https://discord.com/channels/1490863845252665415/1497019970851442808)`                                                            |
+| Artifact Type         | Format                                                                                                                                                                                                                                             |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GitHub Issue          | `[org/repo#123](https://github.com/org/repo/issues/123)`                                                                                                                                                                                           |
+| Pull Request          | `[org/repo#456](https://github.com/org/repo/pull/456)`                                                                                                                                                                                             |
+| Commit                | `[org/repo@abc1234](https://github.com/org/repo/commit/abc1234)`                                                                                                                                                                                   |
+| File created/modified | Always refer to files on the github remote (you must push first) <br> `[path/file.md](https://github.com/org/repo/blob/<ref>/path/file.md)`                                                                                                        |
+| External URL          | Full URL as markdown link                                                                                                                                                                                                                          |
+| Branch                | `[org/repo@main](https://github.com/org/repo/tree/main/)`                                                                                                                                                                                          |
+| Message on discord    | feel free to truncate the message to only include relevant info: `[Nate: do a thing...but make it green](https://discord.com/channels/1490863845252665415/1497431286661517353/1499108530622431375)`                                                |
+| thread on discord     | same as message reference, just to the first message in the thread (with the thread message or forum post title as the text) `[chore: the thread title](https://discord.com/channels/1490863845252665415/1497431286661517353/1499108530622431375)` |
+| channel on discord    | always show the human readable channel name, not the ID `[#agent-human-resources](https://discord.com/channels/1490863845252665415/1497019970851442808)`                                                                                           |
 
 > [!NOTE]
 > At a later point we will also introduce resources to plugin mcp servers/channels that will go alongside this. Those resources are important for fetching them and we'll need a mechanism to convert the above into something like the below:
