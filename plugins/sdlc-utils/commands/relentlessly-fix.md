@@ -2,7 +2,7 @@
 argument-hint: "[pr(s) to review] OR [instructions for what to relentlessly attempt to do]"
 description: |
   Keep trying to fix a PR until it passes in CI (or there is a valid reason it cannot) and is self-reviewed thoroughly.
-model: claude-4-5-opus
+model: opus
 ---
 
 - If no PR to review is provided, assume the current branch has an open PR and use that. If you cannot find it, ask the user.
