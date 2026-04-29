@@ -1,6 +1,6 @@
 {
   "name": "github",
-  "version": "0.1.16",
+  "version": "0.1.17",
   "description": "GitHub CLI installation, authentication, and workflow skill for Claude Code sessions. Consolidates gh-tool and github-auth-skill into a single plugin.",
   "author": {
     "name": "Nathan Heaps",
