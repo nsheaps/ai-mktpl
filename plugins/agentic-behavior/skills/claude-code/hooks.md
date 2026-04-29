@@ -55,6 +55,30 @@ Plugin-layer shape (wrapped):
 }
 ```
 
+> ⚠️ **Known limitations of plugin-bundled `hooks/hooks.json`**
+>
+> Several tool-dispatch events **do not fire** when configured inside a
+> plugin's `hooks/hooks.json` — they only fire when defined in
+> `<repo>/.claude/settings.json` (or another settings layer):
+>
+> - `PreToolUse`
+> - `PostToolUse`
+> - `PostToolUseFailure`
+> - `PermissionRequest`
+>
+> Root cause: tool-dispatch events use a separate registry from where plugin
+> hooks are stored. **Workaround**: if your plugin needs to hook one of these
+> events, ship a setup script that writes the hook into
+> `<repo>/.claude/settings.json` instead of bundling it as plugin hooks.
+>
+> Source: [`plugins/CLAUDE.md`](../../../CLAUDE.md) (the canonical project
+> table of plugin-bundled hook bugs), upstream issue
+> [anthropics/claude-code#6305](https://github.com/anthropics/claude-code/issues/6305)
+> (Pre/PostToolUse not firing) and
+> [#40506](https://github.com/anthropics/claude-code/issues/40506)
+> (PreToolUse not firing in `claude -p`). Both upstream issues remain open as
+> of 2026-04-29; one of these is also tracked locally as BUG-1.
+
 ## Hook types (the `type` field)
 
 Five types. `prompt` and `agent` are LLM-driven; the rest are deterministic.
@@ -66,6 +90,19 @@ Five types. `prompt` and `agent` are LLM-driven; the rest are deterministic.
 | `mcp_tool` | Invokes an MCP tool with given input   | —          | Tool result                     | Delegate to a custom MCP service                 |
 | `prompt`   | Asks an LLM to evaluate the event      | —          | Model returns the JSON response | Context-aware validation, "should I block this?" |
 | `agent`    | Runs a sub-agent with full tool access | —          | Sub-agent's structured output   | Complex multi-step decisions                     |
+
+> **Not every event accepts every type.** Most events accept all five, but a
+> few are restricted:
+>
+> | Event                  | Allowed types        |
+> | ---------------------- | -------------------- |
+> | `SessionStart`         | `command`, `mcp_tool` |
+> | `Setup`                | `command`, `mcp_tool` |
+> | `WorktreeCreate`       | `command`, `http`     |
+>
+> Other events not listed above accept all five types (per the live docs as
+> of 2026-04-29). If you write a `prompt` hook for `SessionStart`, it will
+> simply never run — there's no error.
 
 Common config fields across types:
 
@@ -175,7 +212,8 @@ Exception: `WorktreeCreate` aborts on any non-zero exit code.
 ## SessionStart
 
 Fires when a session starts or resumes. Matcher: `startup` | `resume` |
-`clear` | `compact`. Supports `CLAUDE_ENV_FILE`.
+`clear` | `compact`. Supports `CLAUDE_ENV_FILE`. **Allowed hook types:
+`command`, `mcp_tool`** (no `http`/`prompt`/`agent`).
 
 Input adds `source` (matches the matcher), `model`, optional `agent_type`.
 
@@ -205,7 +243,8 @@ control — side effects (cleanup, logging) only.
 
 Fires only under `claude --init-only` or `claude -p --init / --maintenance`.
 Matcher: `init` | `maintenance`. Supports `CLAUDE_ENV_FILE`. Input adds
-`trigger`. Output shape matches SessionStart.
+`trigger`. Output shape matches SessionStart. **Allowed hook types:
+`command`, `mcp_tool`** (no `http`/`prompt`/`agent`).
 
 ## UserPromptSubmit
 
@@ -267,7 +306,7 @@ Output:
 {
   "hookSpecificOutput": {
     "hookEventName": "PreToolUse",
-    "permissionDecision": "allow" | "deny" | "ask" | "defer",
+    "permissionDecision": "allow" | "deny" | "ask",
     "permissionDecisionReason": "...",
     "updatedInput": { "command": "git status --porcelain" },
     "additionalContext": "..."
@@ -281,7 +320,11 @@ Output:
 - `permissionDecision: "allow"` — run without prompting the user
 - `"deny"` — refuse; the reason is shown to Claude
 - `"ask"` — fall through to the user permission prompt
-- `"defer"` — don't decide; let other hooks / the default flow handle it
+- `"defer"` *(non-interactive `claude -p` mode only, v2.1.89+, single tool calls;
+  not for batches)* — pauses the tool call and exits the process with
+  `stop_reason: "tool_deferred"`. The caller resumes via
+  `claude -p --resume <session-id>` with a follow-up `"allow"` + `updatedInput`.
+  **Do not use in interactive sessions** — behavior is undefined there.
 - `updatedInput` rewrites the tool's arguments before it runs (e.g.
   refreshing a GH token by re-sourcing an env file before `Bash`)
 
@@ -431,7 +474,8 @@ Fires when a worktree is being created. No matcher. Input adds
 `isolation_mode: "worktree" | "docker"`. Command hooks print the worktree
 path on stdout; HTTP hooks return `hookSpecificOutput.worktreePath`.
 **Any non-zero exit aborts worktree creation** — the only event with this
-behavior.
+behavior. **Allowed hook types: `command`, `http`** (no
+`mcp_tool`/`prompt`/`agent`).
 
 ## WorktreeRemove
 
