@@ -8,11 +8,11 @@ After compaction or restart, agents lose conversation context and post messages 
 
 ## Rules
 
-1. **Before posting in any thread:** Read recent thread history using `fetch_messages` to understand what's already been discussed.
+1. **Before posting in any thread:** Read recent thread history using available channel tools (e.g., `fetch_messages` on Discord, or equivalent on other platforms) to understand what's already been discussed.
 
 2. **Reference prior messages:** If you're updating status on something already discussed in the thread, reference the earlier message or decision. Don't restate from scratch as if nothing happened before.
 
-3. **First message is canonical:** The first message in a task/milestone thread is the source of truth for status. When posting updates, check whether the first message needs updating too (per `work-tracking.md`).
+3. **First message is canonical:** The first message in a task/milestone thread is the source of truth for status. When posting updates, check whether the first message needs updating too (see work-tracking rules in the agentic-behavior plugin).
 
 4. **After compaction/restart:** If you've lost context, explicitly say so: "Session was compacted — catching up on thread history." Then read the thread before acting.
 
@@ -35,5 +35,5 @@ After compaction or restart, agents lose conversation context and post messages 
 
 ## Related
 
-- `work-tracking.md` — first message in threads is canonical state
+- Work-tracking rules (see agentic-behavior plugin, being added in PR #428) -- first message in threads is canonical state
 - `continue-work` skill — session recovery process includes thread audit

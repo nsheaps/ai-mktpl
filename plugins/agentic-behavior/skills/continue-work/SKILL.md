@@ -5,7 +5,7 @@ description: >-
   work after any interruption. Restores crons, audits recent history to
   determine current state, and identifies what to work on next.
 argument-hint: "[optional: specific area to focus on]"
-allowed-tools: Read, Glob, Grep, Bash(cat:*), Bash(git log:*), Bash(git status:*), Bash(ls:*), CronCreate, CronList, CronDelete, TaskCreate, TaskUpdate, TaskList, Agent
+allowed-tools: Read, Glob, Grep, Bash(git log:*), Bash(git status:*), Bash(ls:*), CronCreate, CronList, CronDelete, TaskCreate, TaskUpdate, TaskList, Agent
 ---
 
 # Continue Work
@@ -31,9 +31,26 @@ Read `.claude/scheduled-tasks.yaml` and recreate ALL enabled crons:
    - Call CronCreate with the task's cron expression and prompt
    - Use recurring: true for recurring tasks, false for one-shot
 3. Verify with CronList that all expected crons are active
-4. Catch-up check: if a recurring cron should have fired while
-   the session was down, fire its prompt immediately
+4. Catch-up check (see staleness rules below)
 ```
+
+#### Catch-Up Staleness Rules
+
+When a session was down and crons were missed, apply these rules to decide
+whether to fire a catch-up run:
+
+- **Recurring crons:** Fire **once** (not N times) if the most recent missed
+  firing was within **2x the cron interval** (e.g., a 15-minute cron catches up
+  if the session was down less than 30 minutes). Beyond that window, skip the
+  catch-up and wait for the next scheduled firing.
+- **One-shot crons:** Catch up only if the scheduled time was within the
+  **last 24 hours**. Older one-shots are considered stale -- log them as missed
+  rather than firing.
+- **Daily tasks** (morning briefing, lessons, etc.): Catch up only if today's
+  scheduled time has already passed and the task has not yet run today.
+- **Never replay a backlog:** The goal is "make sure the most recent run
+  happened," not "replay every missed interval." One catch-up firing per cron
+  is the maximum.
 
 **CRITICAL:** CronCreate state is session-only. It does NOT survive compaction
 or restart. You MUST recreate crons from the YAML file every time this skill
@@ -83,7 +100,7 @@ Then continue working on the highest-priority active item.
 
 ## References
 
-- `rules/scheduled-tasks.md` — cron persistence rules
+- Cron persistence rules live in the agent's project repo (`.claude/rules/scheduled-tasks.md`), not in this plugin
 - `rules/autonomy.md` — when to act vs when to ask
 - Investigation: Henry lost 15m cron across 24 compactions because cron
   restoration was never triggered after compaction (2026-04-25)
