@@ -206,6 +206,7 @@ rm -rf ~/.config/agent/github-token ~/.config/agent/github-token.meta ~/.config/
 ### Git credential helper
 
 The plugin installs a stateless credential helper script to:
+
 ```
 $CLAUDE_SETTINGS_DIR/plugins/data/github-app/git-credential-helper.sh
 ```

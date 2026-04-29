@@ -145,6 +145,7 @@ $CLAUDE_PLUGIN_ROOT/bin/token-check.sh --sync
 ## Git Credential Helper
 
 The SessionStart hook automatically installs a stateless credential helper to:
+
 ```
 $CLAUDE_SETTINGS_DIR/plugins/data/github-app/git-credential-helper.sh
 ```

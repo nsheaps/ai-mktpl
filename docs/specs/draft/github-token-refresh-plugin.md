@@ -183,6 +183,7 @@ the gitconfig helper line at write time), so it contains no hardcoded `$HOME`
 references and works for every user/agent on the machine.
 
 Example gitconfig entry written by the hook:
+
 ```ini
 [credential "https://github.com"]
     helper = !~/.claude/plugins/data/github-app/git-credential-helper.sh ~/.agents/jack/.config/github-token
