@@ -59,7 +59,7 @@ When reporting that a task is complete, you MUST include **every applicable** it
 
 ## Links Must Be Reachable — No Local Paths, No `file://` URLs
 
-**CRITICAL:** When you reference a file the user may want to open (a plan, research note, draft spec, generated doc, transcript, anything in a local repo), commit and push it FIRST, then link to the **GitHub URL**. The user is on a  remote system and cannot open paths that only exist on the agent's host (which may also be ephemeral).
+**CRITICAL:** When you reference a file the user may want to open (a plan, research note, draft spec, generated doc, transcript, anything in a local repo), commit and push it FIRST, then link to the **GitHub URL**. The user is on a remote system and cannot open paths that only exist on the agent's host (which may also be ephemeral).
 
 ### Acceptable link formats
 
