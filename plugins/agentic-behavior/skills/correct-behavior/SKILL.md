@@ -71,7 +71,7 @@ Identify:
 - Are there existing plugins, hooks, rules, skills, documentation, about this behavior?
 - If yes, why weren't they followed?
 - Are there conflicting definitions? **If so, STOP and ask the user what to do about the conflict.**
-  - conflicting can be inter-plugin or intra-plugin. 
+  - conflicting can be inter-plugin or intra-plugin.
 
 ### Step 4: Plan and Execute the Correction
 
@@ -88,15 +88,15 @@ Based on your analysis:
 
 2. **Determine the best place for the rule:**
 
-   | If the correction is...          | Put it in...                                                      |
-   | -------------------------------- | ----------------------------------------------------------------- |
-   | General user behavior            | a re-usable plugin that exists or will be created                 |
-   | Project-specific                 | `<git-root>/.../CLAUDE.md` or `<git-root>/.claude/rules/*.md`     |
-   | About a slash command            | A skill to replace the slash command                              |
-   | About a skill                    | The skill's `SKILL.md`                                            |
-   | About a plugin                   | The plugin source in `~/src/nsheaps/ai-mktpl/plugins/...`         |
-   | Agent behavior                   | henry, jack, or alex's repo (for example)                         |
-   | Repo contribution rules          | `~/src/nsheaps/ai-mktpl/.claude/rules/*.md` (Claude-specific)     |
+   | If the correction is... | Put it in...                                                  |
+   | ----------------------- | ------------------------------------------------------------- |
+   | General user behavior   | a re-usable plugin that exists or will be created             |
+   | Project-specific        | `<git-root>/.../CLAUDE.md` or `<git-root>/.claude/rules/*.md` |
+   | About a slash command   | A skill to replace the slash command                          |
+   | About a skill           | The skill's `SKILL.md`                                        |
+   | About a plugin          | The plugin source in `~/src/nsheaps/ai-mktpl/plugins/...`     |
+   | Agent behavior          | henry, jack, or alex's repo (for example)                     |
+   | Repo contribution rules | `~/src/nsheaps/ai-mktpl/.claude/rules/*.md` (Claude-specific) |
 
 3. **Write the correction:**
    - Be specific and actionable
@@ -118,12 +118,12 @@ Based on your analysis:
 
 **CRITICAL: All changes must end up committed somewhere.**
 
-| Scope                       | Commit Strategy                                                                                                                                              |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `user`                      | Changes go to `~/.claude/...` immediately. Source of truth is `~/src/nsheaps/ai-mktpl/.ai/rules/`. Ask user if they want changes synced there (requires PR). |
-| `project`                   | Remind user to commit changes to the project repo                                                                                                            |
+| Scope                                  | Commit Strategy                                                                                                                                              |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `user`                                 | Changes go to `~/.claude/...` immediately. Source of truth is `~/src/nsheaps/ai-mktpl/.ai/rules/`. Ask user if they want changes synced there (requires PR). |
+| `project`                              | Remind user to commit changes to the project repo                                                                                                            |
 | `skills` (previously `slash-commands`) | If in `~/.claude/...`, ask about syncing to `~/src/nsheaps/ai-mktpl/...`                                                                                     |
-| `plugins` / `marketplace`   | Changes are in `~/src/nsheaps/ai-mktpl/...`. Create a PR and assign to user.                                                                                 |
+| `plugins` / `marketplace`              | Changes are in `~/src/nsheaps/ai-mktpl/...`. Create a PR and assign to user.                                                                                 |
 
 **Directory Structure in `~/src/nsheaps/ai-mktpl/`:**
 
