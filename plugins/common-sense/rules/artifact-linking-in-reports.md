@@ -59,7 +59,7 @@ When reporting that a task is complete, you MUST include **every applicable** it
 
 ## Links Must Be Reachable — No Local Paths, No `file://` URLs
 
-**CRITICAL:** When you reference a file the user may want to open (a plan, research note, draft spec, generated doc, transcript, anything in a local repo), commit and push it FIRST, then link to the **GitHub URL**. The user is on a remote system and cannot open paths that only exist on the agent's host (which may also be ephemeral).
+**CRITICAL:** When you reference a file any reader of the message might want to open (the handler, a teammate agent, a reviewer reading the PR, your future self re-reading the message) — a plan, research note, draft spec, generated doc, transcript, anything in a local repo — commit and push it FIRST, then link to the **GitHub URL**. Readers of the message are typically not on the host running the agent (Discord/Telegram users, GitHub PR reviewers, other agents in different sessions/repos), so paths that only exist locally are not actionable.
 
 ### Acceptable link formats
 
@@ -73,22 +73,22 @@ When reporting that a task is complete, you MUST include **every applicable** it
 
 - Local paths like `.claude/tasks/31/plan.md`, `~/src/foo/bar.md`, `docs/research/x.md` (without a link)
 - `file://` URLs of any kind (`file:///tmp/...`, `file:///home/...`)
-- `/tmp/...` or `.claude/tmp/...` paths handed to the handler
-- Output-file paths produced by background sub-agents — those are local to the agent's runtime and invisible to the handler
+- `/tmp/...` or `.claude/tmp/...` paths handed to any reader off the agent's host
+- Output-file paths produced by background sub-agents — those are local to the agent's runtime and invisible to anyone reading the message elsewhere
 
 ### When you can't push yet
 
 If the file is mid-stream (active sub-agent editing it, in-flight rebase, secrets need to be scrubbed), say so explicitly and link the latest pushed version, then describe the local-only delta. Do NOT silently fall back to a local path.
 
-### Trigger: any handler-facing path mention without a GitHub link
+### Trigger: any reader-facing path mention without a GitHub link
 
-Any time you mention a file path **the handler is expected to open** — and the same message does NOT already include a corresponding `https://github.com/...` link to that file — STOP. Watch especially for `~/`, `/tmp/`, `file://`, `.claude/...`, and any repo-relative path you're handing to the handler as an artifact reference. If you generated the file, you have time to push it. Do that first, then link.
+Any time you mention a file path **a reader of the message is expected to open** — and the same message does NOT already include a corresponding `https://github.com/...` link to that file — STOP. Watch especially for `~/`, `/tmp/`, `file://`, `.claude/...`, and any repo-relative path you're handing to a reader as an artifact reference. If you generated the file, you have time to push it. Do that first, then link.
 
-This rule is about **handler-facing artifact references** (plans, research, specs, transcripts, generated docs) — not incidental code-edit references inside a PR description that already links to the diff, or pointers to known docs by filename. The test: would the handler want to _open_ this path right now? If yes, it must be a GitHub link.
+This rule is about **reader-facing artifact references** (plans, research, specs, transcripts, generated docs that anyone consuming the message — handler, teammate agent, reviewer, future maintainer — might want to navigate to) — not incidental code-edit references inside a PR description that already links to the diff, or pointers to known docs by filename. The test: would a reader want to _open_ this path right now? If yes, it must be a GitHub link.
 
 ### Why
 
-The handler's chat surface (Discord/Telegram) renders GitHub links inline and they're clickable. Local paths and `file://` URLs are unreachable — they look like text the handler has to translate, and most of the time they can't (the agent's host filesystem is invisible to them). Pushed-and-linked is the only artifact surface the handler can actually act on.
+Readers' surfaces (Discord/Telegram, GitHub PR threads, other agents' sessions) render GitHub links inline and they're clickable. Local paths and `file://` URLs are unreachable from those surfaces — they look like text the reader has to translate, and most of the time they can't (the agent's host filesystem is invisible to them). Pushed-and-linked is the only artifact surface readers off the host can actually act on.
 
 ## Applies To
 
@@ -96,4 +96,4 @@ The handler's chat surface (Discord/Telegram) renders GitHub links inline and th
 - Sub-agent work summarized by the orchestrator/team lead
 - Status updates that reference completed work
 - Any message that says "done", "complete", "finished", or equivalent
-- Inline file references in milestone updates, PR-thread comments, or chat messages — **every** path mention to the handler needs a reachable link, not just "completion" reports
+- Inline file references in milestone updates, PR-thread comments, or chat messages — **every** path mention to a reader off the agent's host needs a reachable link, not just "completion" reports
