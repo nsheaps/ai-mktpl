@@ -66,7 +66,7 @@ If the file is mid-stream (active sub-agent editing it, in-flight rebase, secret
 
 Any time you mention a file path **the handler is expected to open** — and the same message does NOT already include a corresponding `https://github.com/...` link to that file — STOP. Watch especially for `~/`, `/tmp/`, `file://`, `.claude/...`, and any repo-relative path you're handing to the handler as an artifact reference. If you generated the file, you have time to push it. Do that first, then link.
 
-This rule is about **handler-facing artifact references** (plans, research, specs, transcripts, generated docs) — not incidental code-edit references inside a PR description that already links to the diff, or pointers to known docs by filename. The test: would the handler want to *open* this path right now? If yes, it must be a GitHub link.
+This rule is about **handler-facing artifact references** (plans, research, specs, transcripts, generated docs) — not incidental code-edit references inside a PR description that already links to the diff, or pointers to known docs by filename. The test: would the handler want to _open_ this path right now? If yes, it must be a GitHub link.
 
 ### Why
 
