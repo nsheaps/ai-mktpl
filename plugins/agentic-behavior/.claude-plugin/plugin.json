@@ -18,10 +18,8 @@
     "claude-code",
     "autonomy",
     "rules",
-    "issue-management",
-    "task-tracking",
-    "deduplication",
-    "github-issues"
+    "work-tracking",
+    "milestones"
   ],
   "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/agentic-behavior",
   "repository": "https://github.com/nsheaps/ai-mktpl"

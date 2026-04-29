@@ -2,17 +2,17 @@
 name: github-issues-task-management
 description: >
   This skill should be used when organizing work via GitHub Issues and Projects,
-  creating project boards, managing milestones, or when transitioning from
-  Discord thread-based tracking to GitHub-native tracking. Trigger phrases:
+  creating project boards, managing milestones, or when consolidating fragmented
+  tracking into GitHub-native tracking. Trigger phrases:
   "set up projects", "create a project board", "organize issues", "milestone
   planning", "what issues need attention", "consolidate tickets".
 ---
 
 # GitHub Issues Task Management
 
-GitHub Issues and Projects are the canonical system for tracking work. Discord
-threads are supplementary communication channels, not the source of truth for
-task status or assignments.
+GitHub Issues and Projects are one concrete implementation of project-management
+tracking. This skill covers the methodology for using GitHub as the canonical
+system for tracking work items, milestones, and project status.
 
 ## Core Principles
 
@@ -22,9 +22,9 @@ task status or assignments.
    narrow ones. A single issue for "implement feature X" is better than five
    issues for each sub-task unless the sub-tasks will be worked independently
    by different people or across different PRs.
-3. **Discord supplements, not replaces.** Discord threads are for real-time
-   discussion, status pings, and coordination. The issue is where decisions,
-   acceptance criteria, and resolution are recorded.
+3. **Communication channels supplement, not replace.** Real-time channels (chat,
+   threads) are for discussion, status pings, and coordination. The issue is
+   where decisions, acceptance criteria, and resolution are recorded.
 4. **Link everything.** PRs link to issues. Issues link to project boards.
    Cross-repo references use full `owner/repo#N` format.
 
@@ -54,9 +54,9 @@ Closes #7
 **Semantic convention** (GitHub treats all linking keywords identically, but we
 use them to signal intent to human readers):
 
-- `Fixes` — the PR satisfies/resolves the issue described (bug fix, feature
+- `Fixes` -- the PR satisfies/resolves the issue described (bug fix, feature
   implementation). The issue represents work that is now complete.
-- `Closes` — the PR supersedes or replaces another PR or issue without
+- `Closes` -- the PR supersedes or replaces another PR or issue without
   necessarily implementing it (e.g., a rewrite that obsoletes an older PR, or
   closing a duplicate).
 
@@ -138,8 +138,7 @@ Standard column layout:
 
 ## Consolidation Strategy
 
-When transitioning from fragmented tracking (many small Discord threads, many
-narrow issues) to consolidated GitHub tracking:
+When transitioning from fragmented tracking to consolidated GitHub tracking:
 
 ### Step 1 -- Audit existing issues
 
@@ -159,7 +158,7 @@ Group issues that track the same feature, bug, or initiative. Look for:
 
 - Close duplicates with a comment linking to the canonical issue
 - Merge sub-tasks into a parent issue (add as checklist items in the body)
-- Transfer context from Discord threads into issue comments
+- Transfer context from communication channels into issue comments
 
 ### Step 4 -- Organize into project
 
@@ -186,14 +185,14 @@ require `owner/repo#N`.
 | -------------------------------------------- | ------------------------------------------------------------------------ |
 | `issue-management`                           | Mechanics: how to create, search, update, close issues via CLI           |
 | `github-issues-task-management` (this skill) | Methodology: how to organize work, manage projects, consolidate tracking |
-| `agentic-behavior/rules/work-tracking.md`    | Thread-side discipline: linking, ownership, and milestone coordination   |
+| `agentic-behavior/rules/work-tracking.md`    | Abstract linking and milestone rules (platform-agnostic)                 |
 
 ## Anti-Patterns
 
 | Anti-Pattern                                          | Instead                                                |
 | ----------------------------------------------------- | ------------------------------------------------------ |
-| Tracking work only in Discord threads                 | Create a GitHub Issue; use Discord for discussion      |
-| One issue per tiny sub-task                           | Consolidate into a parent issue with a checklist       |
+| Tracking work only in chat threads                    | Create a GitHub Issue; use chat for discussion          |
+| One issue per tiny sub-task                           | Consolidate into a parent issue with a checklist        |
 | Short-form references across repos (`#N`)             | Use `owner/repo#N` for cross-repo links                |
 | No labels on issues                                   | Add at least type + priority labels                    |
 | Closing issues without explanation                    | Comment with resolution and link to PR/commit          |
@@ -203,5 +202,3 @@ require `owner/repo#N`.
 
 - [GitHub Issues documentation](https://docs.github.com/en/issues)
 - [GitHub Projects documentation](https://docs.github.com/en/issues/planning-and-tracking-with-projects)
-- [`issue-management` skill](../issue-management/SKILL.md) -- CLI mechanics for issue operations
-- [`gh` CLI skill](../../../github/skills/gh/SKILL.md) -- full gh CLI reference

@@ -28,10 +28,6 @@ Create, search, update, and link tickets across ticketing systems with a strong 
 
 Manage specification documents co-located with plugins. Covers the spec lifecycle (draft through archive), combined format with Given/When/Then acceptance criteria, and the rule that every plugin change PR must include a spec update (see `skills/spec-management/SKILL.md`).
 
-### /github-issues-task-management
-
-Methodology for organizing work via GitHub Issues and Projects. Covers issue lifecycle, PR-to-issue linking, label conventions, consolidation strategy, and cross-repo references (see `skills/github-issues-task-management/SKILL.md`).
-
 ## Rules
 
 ### autonomy.md
@@ -40,7 +36,7 @@ Rules for autonomous decision-making, recommendation style, merge approval, and 
 
 ### work-tracking.md
 
-Rules for how tasks, PRs, milestones, and communication threads relate to each other. Covers thread ownership by role (SE vs PM), linking requirements (task thread → GitHub issue → milestone), thread discipline (first message as source of truth), and milestone management.
+Platform-agnostic rules for how tasks, PRs, and milestones relate to each other. Covers linking requirements (work items to milestones, PRs to work items), status tracking, and milestone management. Concrete implementations (GitHub Issues, Linear, etc.) are provided by separate skills in appropriate plugins.
 
 ## Features
 

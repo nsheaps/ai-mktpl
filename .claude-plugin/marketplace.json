@@ -62,10 +62,8 @@
         "claude-code",
         "autonomy",
         "rules",
-        "issue-management",
-        "task-tracking",
-        "deduplication",
-        "github-issues"
+        "work-tracking",
+        "milestones"
       ]
     },
     {
@@ -643,7 +641,10 @@
         "testing",
         "deployment",
         "maintenance",
-        "software-engineering"
+        "software-engineering",
+        "github-issues",
+        "task-tracking",
+        "project-management"
       ]
     },
     {
