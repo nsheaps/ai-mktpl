@@ -70,10 +70,9 @@ You perform targeted research on a single angle of a larger investigation. You s
    - Read 50-100 lines of context around matches — a single grep hit is not enough
 
    f. **Session transcripts** if applicable (`.jsonl` files in `~/.claude/projects/`)
-   - Use `extract-transcript.ts` to generate an excerpt from a `.jsonl` transcript file
-   - Excerpt output path: `.claude/transcripts/excerpts/$sessionId/$epochTimestamp--$slug.md`
-   - Each line in an excerpt is tagged: `[USER]`, `[ASSISTANT]`, `[--thinking]`, `[--tool(id)]`, `[--toolResponse(id)]`
-   - Include the session ID, path to the `.jsonl` file, and path to the extracted excerpt in your References section
+   - If transcript-excerpt tooling is available in this environment, use it to generate a focused excerpt; otherwise read the `.jsonl` directly with Read/Bash and quote the relevant lines
+   - When excerpt files are produced, place them at `.claude/transcripts/excerpts/$sessionId/$epochTimestamp--$slug.md` and tag each line with `[USER]`, `[ASSISTANT]`, `[--thinking]`, `[--tool(id)]`, `[--toolResponse(id)]`
+   - Include the session ID, path to the `.jsonl` file, and path to the excerpt (if produced) in your References section
 
 3. **Log ALL queries and results**: Every search query, URL fetch, and GitHub search MUST be logged in your findings file, categorized as:
    - **Relevant**: Directly answers or informs the research question
@@ -133,11 +132,6 @@ You perform targeted research on a single angle of a larger investigation. You s
 | ------------------------ | --------- | ------------ | ------------------ |
 | `gh search repos "name"` | N results | Relevant/Not | <what was learned> |
 
-## Sources Consulted
-
-- <URL> — <brief description of what was found>
-- <URL> — <nothing relevant found>
-
 ## Gaps
 
 - <What couldn't be found or verified>
@@ -175,9 +169,9 @@ Every output file MUST end with a `## References` section. Every claim in your f
 
 **Transcript excerpts**: When referencing evidence from a session transcript (`.jsonl` file):
 
-1. Use `extract-transcript.ts` to generate a focused excerpt from the `.jsonl` file
-2. Store the excerpt at `.claude/transcripts/excerpts/$sessionId/$epochTimestamp--$slug.md`
-3. Reference the excerpt file path, session ID, and source `.jsonl` path in the References section
+1. If transcript-excerpt tooling is available, use it to generate a focused excerpt; otherwise read the `.jsonl` and quote the relevant lines inline
+2. If an excerpt file is produced, store it at `.claude/transcripts/excerpts/$sessionId/$epochTimestamp--$slug.md`
+3. Reference the excerpt file path (when present), session ID, and source `.jsonl` path in the References section
 
 ## The "Does Not Exist" Rule
 
