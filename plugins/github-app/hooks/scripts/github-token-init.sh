@@ -351,19 +351,59 @@ configure_git_identity_env() {
 
   bot_id=$(jq -r '.bot_id // empty' "$META_FILE" 2>/dev/null) || true
 
+  # Runtime fallback: if metadata is missing bot_id (older metadata file, or the
+  # API was unreachable at token-generation time), try to resolve it now via the
+  # PUBLIC /users/<slug>[bot] endpoint. This endpoint requires NO authentication
+  # (passing a bearer token there causes 401 — see BUG-7).
+  if [[ -z "$bot_id" ]]; then
+    hook_log "bot_id missing from metadata — attempting runtime resolution via /users/${app_slug}[bot]"
+    local user_resp user_code user_body
+    user_resp=$(curl -s -w "\n%{http_code}" \
+      -H "Accept: application/vnd.github+json" \
+      "https://api.github.com/users/${app_slug}%5Bbot%5D" 2>/dev/null) || true
+    user_code=$(echo "$user_resp" | tail -1)
+    user_body=$(echo "$user_resp" | sed '$d')
+    if [[ "$user_code" == "200" ]]; then
+      bot_id=$(echo "$user_body" | jq -r '.id // empty' 2>/dev/null) || true
+      if [[ -n "$bot_id" ]]; then
+        hook_log "Runtime-resolved bot user ID for ${app_slug}[bot]: ${bot_id}"
+        # Persist into metadata so we don't repeat the API call on every
+        # session start. Use a temp file + mv for atomic update.
+        if command -v jq >/dev/null 2>&1 && [[ -w "$META_FILE" ]]; then
+          local tmp_meta="${META_FILE}.tmp.$$"
+          if jq --arg bid "$bot_id" '.bot_id = $bid' "$META_FILE" > "$tmp_meta" 2>/dev/null; then
+            mv "$tmp_meta" "$META_FILE"
+            chmod 600 "$META_FILE"
+          else
+            rm -f "$tmp_meta"
+          fi
+        fi
+      fi
+    else
+      hook_log "Runtime resolution failed (HTTP ${user_code}): ${user_body}"
+    fi
+  fi
+
   local bot_name="${app_slug}[bot]"
   local bot_email
   if [[ -n "$bot_id" ]]; then
     bot_email="${bot_id}+${app_slug}[bot]@users.noreply.github.com"
   else
-    # LIMITATION: The bot user ID (needed for correct noreply email) could not be
-    # resolved via the GitHub API. Using GITHUB_APP_ID as a placeholder, but note
-    # that the App ID and bot user ID are different numbers — commits with this
-    # email will NOT be attributed to the bot account on GitHub. This fallback
-    # exists so git identity is always configured (avoiding "Author identity
-    # unknown" errors), even when the API is unreachable.
-    hook_log "WARNING: Could not resolve bot user ID for ${app_slug}[bot] via API. Falling back to APP_ID (${GITHUB_APP_ID}) in noreply email. This email will NOT map to the bot account on GitHub — the App ID and bot user ID are different numbers."
-    bot_email="${GITHUB_APP_ID}+${app_slug}[bot]@users.noreply.github.com"
+    # FAIL LOUD: We cannot determine the correct bot user ID. Falling back to
+    # GITHUB_APP_ID is wrong — the App ID and bot user ID are different numbers,
+    # and commits authored with the App ID in the noreply email will NOT be
+    # attributed to the bot account on GitHub. This was the root cause of BUG-7.
+    #
+    # Rather than silently produce miscredited commits, refuse to configure
+    # git identity. Subsequent commits will fail with "Author identity unknown",
+    # which is loud and recoverable. The handler can rerun token generation or
+    # fix network/API access. Commits silently miscredited to the App ID are
+    # NOT recoverable without rewriting history.
+    hook_log "ERROR: Could not resolve bot user ID for ${app_slug}[bot]."
+    hook_log "ERROR: The /users/${app_slug}[bot] API call failed both at token-generation time and at session-start runtime."
+    hook_log "ERROR: Refusing to configure git identity with the wrong email (App ID ${GITHUB_APP_ID} != bot user ID)."
+    hook_log "ERROR: Resolve by ensuring api.github.com is reachable, then regenerate the token (delete ${META_FILE} or run bin/generate-token.sh)."
+    return 0
   fi
 
   # --- GIT_CONFIG_GLOBAL isolation ---

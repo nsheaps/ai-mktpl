@@ -67,24 +67,47 @@ if [[ -z "$TOKEN" ]]; then
   exit 3
 fi
 
-# --- Step 3: Resolve app slug and bot ID (using JWT, not installation token) ---
-# The /app endpoint requires JWT auth. The JWT is still valid here (10min TTL).
-# We resolve the slug + bot ID now and store them in metadata so that downstream
-# consumers (github-token-init.sh) don't need to regenerate a JWT.
+# --- Step 3: Resolve app slug and bot ID ---
+# The /app endpoint requires JWT auth (App-as-app). The /users/<slug>[bot]
+# endpoint is a PUBLIC users endpoint and MUST be called without Authorization
+# (passing the JWT bearer there causes a 401 — see BUG-7).
+# We resolve the slug + bot ID now (while the JWT is still valid for /app)
+# and store them in metadata so downstream consumers don't need to regenerate
+# a JWT.
 
-APP_SLUG=$(curl -sf \
+APP_RESPONSE=$(curl -s -w "\n%{http_code}" \
   -H "Authorization: Bearer ${JWT}" \
   -H "Accept: application/vnd.github+json" \
-  "https://api.github.com/app" 2>/dev/null \
-  | jq -r '.slug // empty') || true
+  "https://api.github.com/app")
+APP_HTTP_CODE=$(echo "$APP_RESPONSE" | tail -1)
+APP_BODY=$(echo "$APP_RESPONSE" | sed '$d')
+
+APP_SLUG=""
+if [[ "$APP_HTTP_CODE" == "200" ]]; then
+  APP_SLUG=$(echo "$APP_BODY" | jq -r '.slug // empty')
+else
+  echo "WARNING: /app lookup failed (HTTP $APP_HTTP_CODE): $APP_BODY" >&2
+fi
 
 BOT_ID=""
 if [[ -n "$APP_SLUG" ]]; then
-  BOT_ID=$(curl -sf \
-    -H "Authorization: Bearer ${JWT}" \
+  # PUBLIC endpoint — do NOT send Authorization header (causes 401).
+  USER_RESPONSE=$(curl -s -w "\n%{http_code}" \
     -H "Accept: application/vnd.github+json" \
-    "https://api.github.com/users/${APP_SLUG}%5Bbot%5D" 2>/dev/null \
-    | jq -r '.id // empty') || true
+    "https://api.github.com/users/${APP_SLUG}%5Bbot%5D")
+  USER_HTTP_CODE=$(echo "$USER_RESPONSE" | tail -1)
+  USER_BODY=$(echo "$USER_RESPONSE" | sed '$d')
+
+  if [[ "$USER_HTTP_CODE" == "200" ]]; then
+    BOT_ID=$(echo "$USER_BODY" | jq -r '.id // empty')
+    if [[ -n "$BOT_ID" ]]; then
+      echo "Resolved bot user ID for ${APP_SLUG}[bot]: ${BOT_ID}" >&2
+    else
+      echo "WARNING: /users/${APP_SLUG}[bot] returned 200 but no .id field" >&2
+    fi
+  else
+    echo "WARNING: /users/${APP_SLUG}[bot] lookup failed (HTTP $USER_HTTP_CODE): $USER_BODY" >&2
+  fi
 fi
 
 # --- Step 4: Write token and metadata ---
