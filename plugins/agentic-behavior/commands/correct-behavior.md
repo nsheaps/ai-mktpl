@@ -21,8 +21,8 @@ This command helps correct AI behavior mistakes and ensures they don't happen ag
 | `project`                     | Rules for the current project   | `<git-root>/.claude/CLAUDE.md` or `<git-root>/.claude/rules/*.md` |
 | `slash-commands` / `commands` | User's slash commands           | `~/.claude/commands/*.md`                                         |
 | `skills`                      | User's skills                   | `~/.claude/skills/*/SKILL.md`                                     |
-| `plugins`                     | Plugin source code              | `~/src/nsheaps/ai-mktpl/plugins/...`                                    |
-| `marketplace`                 | The AI config marketplace repo  | `~/src/nsheaps/ai-mktpl/...`                                            |
+| `plugins`                     | Plugin source code              | `~/src/nsheaps/ai-mktpl/plugins/...`                              |
+| `marketplace`                 | The AI config marketplace repo  | `~/src/nsheaps/ai-mktpl/...`                                      |
 
 **Note:** If scope is obvious from context (e.g., correcting a slash command behavior), infer it. Otherwise, ask the user.
 
@@ -97,9 +97,9 @@ Based on your analysis:
    | Project-specific                 | `<git-root>/.claude/CLAUDE.md` or `<git-root>/.claude/rules/*.md` |
    | About a slash command            | The command file itself                                           |
    | About a skill                    | The skill's `SKILL.md`                                            |
-   | About a plugin                   | The plugin source in `~/src/nsheaps/ai-mktpl/plugins/...`               |
-   | User behavior (shared/backed up) | `~/src/nsheaps/ai-mktpl/.ai/rules/*.md` (AI-agnostic)                   |
-   | Repo contribution rules          | `~/src/nsheaps/ai-mktpl/.claude/rules/*.md` (Claude-specific)           |
+   | About a plugin                   | The plugin source in `~/src/nsheaps/ai-mktpl/plugins/...`         |
+   | User behavior (shared/backed up) | `~/src/nsheaps/ai-mktpl/.ai/rules/*.md` (AI-agnostic)             |
+   | Repo contribution rules          | `~/src/nsheaps/ai-mktpl/.claude/rules/*.md` (Claude-specific)     |
 
 3. **Write the correction:**
    - Be specific and actionable
@@ -121,10 +121,10 @@ Based on your analysis:
 
 **CRITICAL: All changes must end up committed somewhere.**
 
-| Scope                       | Commit Strategy                                                                                                                                        |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Scope                       | Commit Strategy                                                                                                                                              |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `user`                      | Changes go to `~/.claude/...` immediately. Source of truth is `~/src/nsheaps/ai-mktpl/.ai/rules/`. Ask user if they want changes synced there (requires PR). |
-| `project`                   | Remind user to commit changes to the project repo                                                                                                      |
+| `project`                   | Remind user to commit changes to the project repo                                                                                                            |
 | `slash-commands` / `skills` | If in `~/.claude/...`, ask about syncing to `~/src/nsheaps/ai-mktpl/...`                                                                                     |
 | `plugins` / `marketplace`   | Changes are in `~/src/nsheaps/ai-mktpl/...`. Create a PR and assign to user.                                                                                 |
 
