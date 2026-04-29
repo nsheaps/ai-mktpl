@@ -62,4 +62,4 @@ The launcher script or SessionStart hook can then read the continuation prompt o
 ## See Also
 
 - `/exit` -- graceful session exit without restart
-- `self-restart` skill in the project repo -- may contain project-specific restart procedures
+- `restart` skill in the project repo -- may contain project-specific restart procedures

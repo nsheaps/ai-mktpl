@@ -15,7 +15,7 @@ if [[ "$TOOL_NAME" != "Bash" ]]; then
 fi
 
 # Only intercept exit invocations (script path or kill -INT against parent)
-if [[ "$COMMAND" != *"exit.sh"* && "$COMMAND" != *"kill -INT"* ]]; then
+if [[ "$COMMAND" != *"bin/exit.sh"* && "$COMMAND" != *"kill -INT"* ]]; then
     exit 0  # Allow - not running exit
 fi
 
