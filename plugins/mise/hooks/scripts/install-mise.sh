@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # install-mise.sh — SessionStart hook for mise plugin
 #
-# Installs or updates mise (tool version manager) if not already available on PATH.
+# Installs or updates mise (tool version manager), then activates it,
+# trusts project configs, and auto-installs tools from mise.toml.
 # When installToProject is true, installs to $CLAUDE_PROJECT_DIR/bin/.local/
 # which is gitignored and added to PATH.
 set -euo pipefail
@@ -14,7 +15,8 @@ source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 # --- Guards ---
 
 plugin_is_enabled || { hook_log "plugin disabled, skipping"; hook_respond; exit 0; }
-tool_is_available mise && { hook_log "mise already available at $(command -v mise), skipping install"; hook_respond; exit 0; }
+# NOTE: No early exit when mise is on PATH — activation, trust, and tool
+# install must still run.  resolve_mise_bin() skips the download internally.
 
 # --- Read config ---
 

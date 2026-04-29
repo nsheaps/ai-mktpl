@@ -16,7 +16,8 @@ source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 # --- Guards ---
 
 plugin_is_enabled || { hook_log "plugin disabled, skipping"; hook_respond; exit 0; }
-tool_is_available gs-stack-status && { hook_log "gs-stack-status already available, skipping install"; hook_respond; exit 0; }
+# NOTE: No early exit guard here — the existing check at "Check if already
+# available" below already handles gs-stack-status being on PATH.
 
 # --- Read config ---
 

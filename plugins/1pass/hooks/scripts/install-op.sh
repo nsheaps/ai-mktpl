@@ -336,8 +336,13 @@ do_install() {
   local op_bin=""
   local op_exec_bin=""
 
-  if ! tool_is_available op; then
+  # Platform detection must happen before EITHER tool install — both op and
+  # op-exec download helpers need DETECTED_OS / DETECTED_ARCH.
+  if ! tool_is_available op || ! tool_is_available op-exec; then
     detect_platform || return 0
+  fi
+
+  if ! tool_is_available op; then
     op_bin="$(resolve_op_bin)" || true
   else
     hook_log "op already available at $(command -v op), skipping op install"

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # install-gws.sh — SessionStart hook for google-workspace-cli plugin
 #
-# Installs or updates the Google Workspace CLI (gws) if not already available on PATH.
+# Installs or updates the Google Workspace CLI (gws), then runs auth check.
 # Prefers mise (ubi backend) for installation, falls back to direct binary download
 # from GitHub releases.
 set -euo pipefail
@@ -14,7 +14,8 @@ source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 # --- Guards ---
 
 plugin_is_enabled || { hook_log "plugin disabled, skipping"; hook_respond; exit 0; }
-tool_is_available gws && { hook_log "gws already available at $(command -v gws), skipping install"; hook_respond; exit 0; }
+# NOTE: No early exit when gws is on PATH — auth check must still run.
+# resolve_gws_bin() skips the download internally.
 
 # --- Read config ---
 

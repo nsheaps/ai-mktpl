@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # install-gh.sh — SessionStart hook for github plugin
 #
-# Installs GitHub CLI (gh) if not already available on PATH.
+# Installs or updates GitHub CLI (gh), then runs auth check.
 # When installToProject is true, installs to $CLAUDE_PROJECT_DIR/bin/.local/
 # which is gitignored and added to PATH.
 set -euo pipefail
@@ -14,7 +14,8 @@ source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 # --- Guards ---
 
 plugin_is_enabled || { hook_log "plugin disabled, skipping"; hook_respond; exit 0; }
-tool_is_available gh && { hook_log "gh already available at $(command -v gh), skipping install"; hook_respond; exit 0; }
+# NOTE: No early exit when gh is on PATH — auth check and version=latest
+# self-update must still run.  resolve_gh_bin() skips the download internally.
 
 # --- Read config ---
 
