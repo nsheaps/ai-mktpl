@@ -55,11 +55,11 @@ The `.ai/rules/` directory is synced to `~/.claude/rules/` via automation (symli
 
 | Plugin                                                                     | Description                                                     |
 | :------------------------------------------------------------------------- | :-------------------------------------------------------------- |
-| **[review-changes](./plugins/review-changes)**                             | `/review-changes` — detailed code review feedback               |
+| ~~**[review-changes](./plugins/review-changes)**~~                         | ~~`/review-changes` — detailed code review feedback~~ **DEPRECATED** → use [scm-utils](./plugins/scm-utils) |
 | **[code-simplifier](./plugins/code-simplifier)**                           | `/simplify` — refine code for clarity and maintainability       |
 | **[create-command](./plugins/create-command)**                             | `/create-command` — guided slash command creation               |
-| **[correct-behavior](./plugins/correct-behavior)**                         | `/correct-behavior` — fix AI behavior mistakes and update rules |
-| **[product-development-and-sdlc](./plugins/product-development-and-sdlc)** | Iterative PRD writing with structured SDLC workflows            |
+| ~~**[correct-behavior](./plugins/correct-behavior)**~~                     | ~~`/correct-behavior` — fix AI behavior mistakes and update rules~~ **DEPRECATED** → use [agentic-behavior](./plugins/agentic-behavior) |
+| **[sdlc-utils](./plugins/sdlc-utils)**                                    | Iterative PRD writing with structured SDLC workflows            |
 
 ### Task & Session Management
 
