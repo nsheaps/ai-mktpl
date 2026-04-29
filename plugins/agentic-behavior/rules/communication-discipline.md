@@ -11,7 +11,7 @@ Source: [Handler directive 2026-04-29T20:29Z](https://discord.com/channels/14908
 When working on a task that has a plan document:
 
 - **All discussion belongs in the plan doc** — design decisions, open questions, blockers, trade-offs. Not in the channel.
-- **Ping the channel only when handler input is required.** Format: "I have a question in `<plan-doc-path>` — please review §N." Do not paste the question into the channel.
+- **Ping the channel only when (a) input is required from someone else (a human or another agent), or (b) the handler explicitly asked for a status post.** Format: "I have a question in `<plan-doc-path>` — please review §N." Do not paste the question into the channel.
 - **Updates that don't need handler approval go directly into the plan doc** — no channel message needed.
 
 ### Good
