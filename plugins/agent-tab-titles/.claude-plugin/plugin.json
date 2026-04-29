@@ -9,11 +9,5 @@
   },
   "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/agent-tab-titles",
   "repository": "https://github.com/nsheaps/ai-mktpl",
-  "keywords": [
-    "tmux",
-    "iterm2",
-    "tab-title",
-    "agent-teams",
-    "pane-title"
-  ]
+  "keywords": ["tmux", "iterm2", "tab-title", "agent-teams", "pane-title"]
 }

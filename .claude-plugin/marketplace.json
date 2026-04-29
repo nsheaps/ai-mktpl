@@ -17,10 +17,7 @@
       },
       "source": "./plugins/1pass",
       "category": "utility",
-      "tags": [
-        "utility",
-        "skill"
-      ],
+      "tags": ["utility", "skill"],
       "keywords": [
         "1password",
         "op",
@@ -41,16 +38,8 @@
       },
       "source": "./plugins/agent-tab-titles",
       "category": "utility",
-      "tags": [
-        "utility"
-      ],
-      "keywords": [
-        "tmux",
-        "iterm2",
-        "tab-title",
-        "agent-teams",
-        "pane-title"
-      ]
+      "tags": ["utility"],
+      "keywords": ["tmux", "iterm2", "tab-title", "agent-teams", "pane-title"]
     },
     {
       "name": "agentic-behavior",
@@ -61,10 +50,7 @@
       },
       "source": "./plugins/agentic-behavior",
       "category": "utility",
-      "tags": [
-        "utility",
-        "skill"
-      ],
+      "tags": ["utility", "skill"],
       "keywords": [
         "configuration",
         "behavior",
@@ -102,10 +88,7 @@
       },
       "source": "./plugins/arcane",
       "category": "utility",
-      "tags": [
-        "utility",
-        "skill"
-      ],
+      "tags": ["utility", "skill"],
       "keywords": [
         "arcane",
         "gitops",
@@ -128,10 +111,7 @@
       },
       "source": "./plugins/cloudflare",
       "category": "utility",
-      "tags": [
-        "utility",
-        "skill"
-      ],
+      "tags": ["utility", "skill"],
       "keywords": [
         "cloudflare",
         "workers",
@@ -162,17 +142,8 @@
       },
       "source": "./plugins/code-simplifier",
       "category": "utility",
-      "tags": [
-        "utility",
-        "command",
-        "skill"
-      ],
-      "keywords": [
-        "refactoring",
-        "code-quality",
-        "simplification",
-        "cleanup"
-      ]
+      "tags": ["utility", "command", "skill"],
+      "keywords": ["refactoring", "code-quality", "simplification", "cleanup"]
     },
     {
       "name": "command-help-skill",
@@ -183,19 +154,8 @@
       },
       "source": "./plugins/command-help-skill",
       "category": "utility",
-      "tags": [
-        "utility",
-        "skill"
-      ],
-      "keywords": [
-        "commands",
-        "help",
-        "discovery",
-        "skill",
-        "slash-commands",
-        "ai",
-        "assistant"
-      ]
+      "tags": ["utility", "skill"],
+      "keywords": ["commands", "help", "discovery", "skill", "slash-commands", "ai", "assistant"]
     },
     {
       "name": "common-sense",
@@ -206,9 +166,7 @@
       },
       "source": "./plugins/common-sense",
       "category": "utility",
-      "tags": [
-        "utility"
-      ],
+      "tags": ["utility"],
       "keywords": [
         "rules",
         "common-sense",
@@ -227,16 +185,8 @@
       },
       "source": "./plugins/context-bloat-prevention",
       "category": "utility",
-      "tags": [
-        "utility"
-      ],
-      "keywords": [
-        "context-management",
-        "performance",
-        "agent-teams",
-        "hooks",
-        "output-management"
-      ]
+      "tags": ["utility"],
+      "keywords": ["context-management", "performance", "agent-teams", "hooks", "output-management"]
     },
     {
       "name": "correct-behavior",
@@ -247,17 +197,8 @@
       },
       "source": "./plugins/correct-behavior",
       "category": "utility",
-      "tags": [
-        "utility",
-        "command"
-      ],
-      "keywords": [
-        "behavior",
-        "correction",
-        "rules",
-        "memory",
-        "learning"
-      ]
+      "tags": ["utility", "command"],
+      "keywords": ["behavior", "correction", "rules", "memory", "learning"]
     },
     {
       "name": "create-command",
@@ -268,18 +209,8 @@
       },
       "source": "./plugins/create-command",
       "category": "utility",
-      "tags": [
-        "utility",
-        "command",
-        "skill"
-      ],
-      "keywords": [
-        "slash-command",
-        "command",
-        "create",
-        "automation",
-        "workflow"
-      ]
+      "tags": ["utility", "command", "skill"],
+      "keywords": ["slash-command", "command", "create", "automation", "workflow"]
     },
     {
       "name": "daily-report",
@@ -290,10 +221,7 @@
       },
       "source": "./plugins/daily-report",
       "category": "utility",
-      "tags": [
-        "utility",
-        "skill"
-      ],
+      "tags": ["utility", "skill"],
       "keywords": [
         "daily-report",
         "org-report",
@@ -313,9 +241,7 @@
       },
       "source": "./plugins/dangerous-bypass",
       "category": "utility",
-      "tags": [
-        "utility"
-      ],
+      "tags": ["utility"],
       "keywords": [
         "permissions",
         "auto-approve",
@@ -334,10 +260,7 @@
       },
       "source": "./plugins/data-serialization",
       "category": "utility",
-      "tags": [
-        "utility",
-        "skill"
-      ],
+      "tags": ["utility", "skill"],
       "keywords": [
         "yaml",
         "json",
@@ -364,11 +287,7 @@
       },
       "source": "./plugins/deep-research",
       "category": "utility",
-      "tags": [
-        "utility",
-        "skill",
-        "agent"
-      ],
+      "tags": ["utility", "skill", "agent"],
       "keywords": [
         "research",
         "investigation",
@@ -388,16 +307,8 @@
       },
       "source": "./plugins/discord",
       "category": "utility",
-      "tags": [
-        "utility",
-        "skill"
-      ],
-      "keywords": [
-        "discord",
-        "messaging",
-        "channel",
-        "mcp"
-      ]
+      "tags": ["utility", "skill"],
+      "keywords": ["discord", "messaging", "channel", "mcp"]
     },
     {
       "name": "edit-utils",
@@ -408,19 +319,8 @@
       },
       "source": "./plugins/edit-utils",
       "category": "utility",
-      "tags": [
-        "utility",
-        "skill"
-      ],
-      "keywords": [
-        "format",
-        "lint",
-        "prettier",
-        "eslint",
-        "edit",
-        "write",
-        "auto-format"
-      ]
+      "tags": ["utility", "skill"],
+      "keywords": ["format", "lint", "prettier", "eslint", "edit", "write", "auto-format"]
     },
     {
       "name": "fix-pr",
@@ -431,18 +331,8 @@
       },
       "source": "./plugins/fix-pr",
       "category": "utility",
-      "tags": [
-        "utility",
-        "command"
-      ],
-      "keywords": [
-        "pr",
-        "ci",
-        "fix",
-        "review",
-        "iteration",
-        "relentless"
-      ]
+      "tags": ["utility", "command"],
+      "keywords": ["pr", "ci", "fix", "review", "iteration", "relentless"]
     },
     {
       "name": "git-spice",
@@ -453,10 +343,7 @@
       },
       "source": "./plugins/git-spice",
       "category": "git",
-      "tags": [
-        "utility",
-        "skill"
-      ],
+      "tags": ["utility", "skill"],
       "keywords": [
         "git",
         "git-spice",
@@ -476,10 +363,7 @@
       },
       "source": "./plugins/github",
       "category": "git",
-      "tags": [
-        "utility",
-        "skill"
-      ],
+      "tags": ["utility", "skill"],
       "keywords": [
         "github",
         "gh",
@@ -508,10 +392,7 @@
       },
       "source": "./plugins/github-app",
       "category": "git",
-      "tags": [
-        "utility",
-        "skill"
-      ],
+      "tags": ["utility", "skill"],
       "keywords": [
         "github",
         "github-app",
@@ -533,10 +414,7 @@
       },
       "source": "./plugins/google-workspace-cli",
       "category": "utility",
-      "tags": [
-        "utility",
-        "skill"
-      ],
+      "tags": ["utility", "skill"],
       "keywords": [
         "google-workspace",
         "gws",
@@ -564,17 +442,8 @@
       },
       "source": "./plugins/linear-mcp-sync",
       "category": "utility",
-      "tags": [
-        "utility"
-      ],
-      "keywords": [
-        "linear",
-        "mcp",
-        "hooks",
-        "sync",
-        "issue-tracking",
-        "conflict-detection"
-      ]
+      "tags": ["utility"],
+      "keywords": ["linear", "mcp", "hooks", "sync", "issue-tracking", "conflict-detection"]
     },
     {
       "name": "mcp-tooling",
@@ -585,10 +454,7 @@
       },
       "source": "./plugins/mcp-tooling",
       "category": "utility",
-      "tags": [
-        "utility",
-        "skill"
-      ],
+      "tags": ["utility", "skill"],
       "keywords": [
         "mcp",
         "mcp-cli",
@@ -611,17 +477,8 @@
       },
       "source": "./plugins/memory-manager",
       "category": "utility",
-      "tags": [
-        "utility",
-        "skill"
-      ],
-      "keywords": [
-        "memory",
-        "preferences",
-        "claude.md",
-        "context",
-        "instructions"
-      ]
+      "tags": ["utility", "skill"],
+      "keywords": ["memory", "preferences", "claude.md", "context", "instructions"]
     },
     {
       "name": "mise",
@@ -632,10 +489,7 @@
       },
       "source": "./plugins/mise",
       "category": "utility",
-      "tags": [
-        "utility",
-        "skill"
-      ],
+      "tags": ["utility", "skill"],
       "keywords": [
         "mise",
         "tool-manager",
@@ -654,10 +508,7 @@
       },
       "source": "./plugins/og-image",
       "category": "utility",
-      "tags": [
-        "utility",
-        "skill"
-      ],
+      "tags": ["utility", "skill"],
       "keywords": [
         "generation",
         "image",
@@ -678,9 +529,7 @@
       },
       "source": "./plugins/permissions-sync",
       "category": "utility",
-      "tags": [
-        "utility"
-      ],
+      "tags": ["utility"],
       "keywords": [
         "permissions",
         "settings",
@@ -702,17 +551,8 @@
       },
       "source": "./plugins/plugin-management",
       "category": "utility",
-      "tags": [
-        "utility",
-        "skill"
-      ],
-      "keywords": [
-        "plugin",
-        "install",
-        "update",
-        "reload",
-        "management"
-      ]
+      "tags": ["utility", "skill"],
+      "keywords": ["plugin", "install", "update", "reload", "management"]
     },
     {
       "name": "proxmox",
@@ -723,10 +563,7 @@
       },
       "source": "./plugins/proxmox",
       "category": "utility",
-      "tags": [
-        "utility",
-        "skill"
-      ],
+      "tags": ["utility", "skill"],
       "keywords": [
         "proxmox",
         "pve",
@@ -748,15 +585,8 @@
       },
       "source": "./plugins/remote-config",
       "category": "utility",
-      "tags": [
-        "utility"
-      ],
-      "keywords": [
-        "remote-config",
-        "sync",
-        "dotfiles",
-        "claude-config"
-      ]
+      "tags": ["utility"],
+      "keywords": ["remote-config", "sync", "dotfiles", "claude-config"]
     },
     {
       "name": "review-changes",
@@ -767,17 +597,8 @@
       },
       "source": "./plugins/review-changes",
       "category": "utility",
-      "tags": [
-        "utility",
-        "command"
-      ],
-      "keywords": [
-        "code-review",
-        "review",
-        "quality",
-        "security",
-        "lint"
-      ]
+      "tags": ["utility", "command"],
+      "keywords": ["code-review", "review", "quality", "security", "lint"]
     },
     {
       "name": "safety-evaluation-prompt",
@@ -788,17 +609,8 @@
       },
       "source": "./plugins/safety-evaluation-prompt",
       "category": "utility",
-      "tags": [
-        "utility"
-      ],
-      "keywords": [
-        "safety",
-        "security",
-        "hooks",
-        "pre-tool-call",
-        "evaluation",
-        "prompt"
-      ]
+      "tags": ["utility"],
+      "keywords": ["safety", "security", "hooks", "pre-tool-call", "evaluation", "prompt"]
     },
     {
       "name": "safety-evaluation-script",
@@ -809,17 +621,8 @@
       },
       "source": "./plugins/safety-evaluation-script",
       "category": "utility",
-      "tags": [
-        "utility"
-      ],
-      "keywords": [
-        "safety",
-        "security",
-        "hooks",
-        "pre-tool-call",
-        "evaluation",
-        "haiku"
-      ]
+      "tags": ["utility"],
+      "keywords": ["safety", "security", "hooks", "pre-tool-call", "evaluation", "haiku"]
     },
     {
       "name": "scm-utils",
@@ -830,21 +633,8 @@
       },
       "source": "./plugins/scm-utils",
       "category": "utility",
-      "tags": [
-        "utility",
-        "command",
-        "skill"
-      ],
-      "keywords": [
-        "git",
-        "branch",
-        "pr",
-        "pull-request",
-        "sync",
-        "merge",
-        "scm",
-        "source-control"
-      ]
+      "tags": ["utility", "command", "skill"],
+      "keywords": ["git", "branch", "pr", "pull-request", "sync", "merge", "scm", "source-control"]
     },
     {
       "name": "sdlc-utils",
@@ -855,11 +645,7 @@
       },
       "source": "./plugins/sdlc-utils",
       "category": "utility",
-      "tags": [
-        "utility",
-        "command",
-        "skill"
-      ],
+      "tags": ["utility", "command", "skill"],
       "keywords": [
         "sdlc",
         "planning",
@@ -887,17 +673,8 @@
       },
       "source": "./plugins/self-terminate",
       "category": "utility",
-      "tags": [
-        "utility",
-        "skill"
-      ],
-      "keywords": [
-        "terminate",
-        "exit",
-        "sigint",
-        "process",
-        "self-destruct"
-      ]
+      "tags": ["utility", "skill"],
+      "keywords": ["terminate", "exit", "sigint", "process", "self-destruct"]
     },
     {
       "name": "sequential-thinking",
@@ -908,10 +685,7 @@
       },
       "source": "./plugins/sequential-thinking",
       "category": "utility",
-      "tags": [
-        "utility",
-        "skill"
-      ],
+      "tags": ["utility", "skill"],
       "keywords": [
         "sequential-thinking",
         "mcp",
@@ -930,10 +704,7 @@
       },
       "source": "./plugins/session-report",
       "category": "utility",
-      "tags": [
-        "utility",
-        "skill"
-      ],
+      "tags": ["utility", "skill"],
       "keywords": [
         "session-report",
         "daily-summary",
@@ -952,16 +723,8 @@
       },
       "source": "./plugins/skill-required",
       "category": "utility",
-      "tags": [
-        "utility"
-      ],
-      "keywords": [
-        "skill-enforcement",
-        "hooks",
-        "workflow",
-        "quality",
-        "tool-gating"
-      ]
+      "tags": ["utility"],
+      "keywords": ["skill-enforcement", "hooks", "workflow", "quality", "tool-gating"]
     },
     {
       "name": "skills-maintenance",
@@ -972,18 +735,8 @@
       },
       "source": "./plugins/skills-maintenance",
       "category": "utility",
-      "tags": [
-        "utility",
-        "skill"
-      ],
-      "keywords": [
-        "skills",
-        "maintenance",
-        "update",
-        "improve",
-        "refactor",
-        "documentation"
-      ]
+      "tags": ["utility", "skill"],
+      "keywords": ["skills", "maintenance", "update", "improve", "refactor", "documentation"]
     },
     {
       "name": "statusline",
@@ -994,17 +747,8 @@
       },
       "source": "./plugins/statusline",
       "category": "utility",
-      "tags": [
-        "utility"
-      ],
-      "keywords": [
-        "statusline",
-        "status",
-        "ui",
-        "git",
-        "workflow",
-        "productivity"
-      ]
+      "tags": ["utility"],
+      "keywords": ["statusline", "status", "ui", "git", "workflow", "productivity"]
     },
     {
       "name": "statusline-iterm",
@@ -1015,9 +759,7 @@
       },
       "source": "./plugins/statusline-iterm",
       "category": "utility",
-      "tags": [
-        "utility"
-      ],
+      "tags": ["utility"],
       "keywords": [
         "statusline",
         "status",
@@ -1039,10 +781,7 @@
       },
       "source": "./plugins/task-parallelization",
       "category": "utility",
-      "tags": [
-        "utility",
-        "skill"
-      ],
+      "tags": ["utility", "skill"],
       "keywords": [
         "parallelization",
         "task",
@@ -1062,16 +801,8 @@
       },
       "source": "./plugins/telegram",
       "category": "utility",
-      "tags": [
-        "utility",
-        "skill"
-      ],
-      "keywords": [
-        "telegram",
-        "messaging",
-        "channel",
-        "mcp"
-      ]
+      "tags": ["utility", "skill"],
+      "keywords": ["telegram", "messaging", "channel", "mcp"]
     },
     {
       "name": "tmux-subagent",
@@ -1082,20 +813,8 @@
       },
       "source": "./plugins/tmux-subagent",
       "category": "utility",
-      "tags": [
-        "utility",
-        "command",
-        "skill"
-      ],
-      "keywords": [
-        "tmux",
-        "subagent",
-        "parallel",
-        "iterm",
-        "terminal",
-        "isolation",
-        "delegation"
-      ]
+      "tags": ["utility", "command", "skill"],
+      "keywords": ["tmux", "subagent", "parallel", "iterm", "terminal", "isolation", "delegation"]
     },
     {
       "name": "todo-plus-plus",
@@ -1106,17 +825,8 @@
       },
       "source": "./plugins/todo-plus-plus",
       "category": "utility",
-      "tags": [
-        "utility",
-        "skill"
-      ],
-      "keywords": [
-        "tasks",
-        "commit",
-        "workflow",
-        "ephemeral",
-        "agent-teams"
-      ]
+      "tags": ["utility", "skill"],
+      "keywords": ["tasks", "commit", "workflow", "ephemeral", "agent-teams"]
     },
     {
       "name": "todo-sync",
@@ -1127,17 +837,8 @@
       },
       "source": "./plugins/todo-sync",
       "category": "utility",
-      "tags": [
-        "utility",
-        "skill"
-      ],
-      "keywords": [
-        "todos",
-        "plans",
-        "sync",
-        "workflow",
-        "productivity"
-      ]
+      "tags": ["utility", "skill"],
+      "keywords": ["todos", "plans", "sync", "workflow", "productivity"]
     },
     {
       "name": "web-auto-approve",
@@ -1148,16 +849,8 @@
       },
       "source": "./plugins/web-auto-approve",
       "category": "utility",
-      "tags": [
-        "utility"
-      ],
-      "keywords": [
-        "permissions",
-        "web-session",
-        "auto-approve",
-        "hooks",
-        "PermissionRequest"
-      ]
+      "tags": ["utility"],
+      "keywords": ["permissions", "web-session", "auto-approve", "hooks", "PermissionRequest"]
     },
     {
       "name": "word-vomit",
@@ -1168,10 +861,7 @@
       },
       "source": "./plugins/word-vomit",
       "category": "utility",
-      "tags": [
-        "utility",
-        "skill"
-      ],
+      "tags": ["utility", "skill"],
       "keywords": [
         "word-vomit",
         "exec-assist",
@@ -1190,10 +880,7 @@
       },
       "source": "./plugins/zai-glm",
       "category": "utility",
-      "tags": [
-        "utility",
-        "skill"
-      ],
+      "tags": ["utility", "skill"],
       "keywords": [
         "zai",
         "z-ai",

@@ -9,13 +9,5 @@
   },
   "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/edit-utils",
   "repository": "https://github.com/nsheaps/ai-mktpl",
-  "keywords": [
-    "format",
-    "lint",
-    "prettier",
-    "eslint",
-    "edit",
-    "write",
-    "auto-format"
-  ]
+  "keywords": ["format", "lint", "prettier", "eslint", "edit", "write", "auto-format"]
 }
