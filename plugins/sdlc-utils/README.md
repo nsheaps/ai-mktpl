@@ -60,6 +60,15 @@ the spec lifecycle (draft -> live -> archive), and using specs for verification.
 
 **Triggers:** "write a spec", "manage spec lifecycle", "spec template", "update a spec"
 
+### github-issues-task-management
+
+Methodology for organizing work via GitHub Issues and Projects. Covers issue
+lifecycle, PR-to-issue linking, label conventions, project board setup,
+consolidation strategy, and cross-repo references. One concrete implementation
+of the abstract work-tracking rules defined in `agentic-behavior`.
+
+**Triggers:** "set up projects", "create a project board", "organize issues", "milestone planning", "consolidate tickets"
+
 ## Dependencies
 
 - **scm-utils** — the `iterate-until-good` and `review` skills delegate to scm-utils

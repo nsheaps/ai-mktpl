@@ -1,6 +1,6 @@
 {
   "name": "scm-utils",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Source control management utilities for improving interactions with branches and PRs, both locally and in CI environments",
   "author": {
     "name": "Nathan Heaps",
@@ -9,6 +9,5 @@
   },
   "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/scm-utils",
   "repository": "https://github.com/nsheaps/ai-mktpl",
-  "keywords": ["git", "branch", "pr", "pull-request", "sync", "merge", "scm", "source-control"],
-  "hooks": "./hooks/hooks.json"
+  "keywords": ["git", "branch", "pr", "pull-request", "sync", "merge", "scm", "source-control"]
 }

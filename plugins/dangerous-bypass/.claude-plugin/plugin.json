@@ -1,0 +1,13 @@
+{
+  "name": "dangerous-bypass",
+  "version": "0.1.0",
+  "description": "Auto-approve ALL permission requests. Use only in trusted, non-production environments where you want Claude Code to operate without interactive permission prompts.",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/dangerous-bypass",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": ["permissions", "auto-approve", "dangerous", "bypass", "hooks", "PermissionRequest"]
+}

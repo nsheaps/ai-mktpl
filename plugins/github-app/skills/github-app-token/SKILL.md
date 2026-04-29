@@ -32,14 +32,14 @@ Session Start
   │   ├─ Reads GITHUB_APP_ID, PRIVATE_KEY_PATH, INSTALLATION_ID
   │   ├─ Generates JWT from PEM key
   │   ├─ Exchanges JWT for installation token (1 hour validity)
-  │   ├─ Writes token to ~/.config/agent/github-token
-  │   ├─ Creates runtime env file (~/.config/agent/github-app-env)
+  │   ├─ Writes token to ~/.agents/${AGENT_NAME}/.config/github-token
+  │   ├─ Creates runtime env file (~/.agents/${AGENT_NAME}/.config/github-app-env)
   │   ├─ Sources env file via CLAUDE_ENV_FILE
   │   ├─ Configures git identity (bot user)
   │   └─ Prints: app name, expiry time, env var names
   │
   └─ PreToolUse Hook (github-token-check.sh)
-      ├─ Debounced: checks at most every 30 seconds
+      ├─ Debounced: checks at most every 300 seconds (5 minutes)
       ├─ For gh/git commands: synchronous check
       │   ├─ Valid + >30min: silent allow
       │   ├─ Valid + <30min: allow + background refresh
@@ -53,7 +53,7 @@ Session Start
 
 1. **Generation**: JWT created from App private key (10-min validity)
 2. **Exchange**: JWT exchanged for installation token via GitHub API
-3. **Storage**: Token written to `~/.config/agent/github-token` (permissions 600)
+3. **Storage**: Token written to `~/.agents/${AGENT_NAME}/.config/github-token` (permissions 600)
 4. **Monitoring**: PreToolUse hook checks expiry before each tool call (debounced)
 5. **Refresh**: When within 30 min of expiry, token is regenerated
 6. **Expiry**: Tokens valid for 1 hour; refreshed with 30-minute buffer
@@ -100,7 +100,7 @@ github-app:
 
 ```bash
 export GITHUB_APP_ID="12345"
-export GITHUB_APP_PRIVATE_KEY_PATH="~/.config/agent/github-app.pem"
+export GITHUB_APP_PRIVATE_KEY_PATH="~/.agents/${AGENT_NAME}/.config/github-app.pem"
 export GITHUB_INSTALLATION_ID="67890"
 ```
 
@@ -115,10 +115,10 @@ The private key can be provided as:
 
 ```bash
 # Ensure correct permissions
-chmod 600 ~/.config/agent/github-app.pem
+chmod 600 ~/.agents/${AGENT_NAME}/.config/github-app.pem
 
 # Verify the key
-openssl rsa -in ~/.config/agent/github-app.pem -check -noout
+openssl rsa -in ~/.agents/${AGENT_NAME}/.config/github-app.pem -check -noout
 ```
 
 ## Checking Token Status
@@ -126,14 +126,14 @@ openssl rsa -in ~/.config/agent/github-app.pem -check -noout
 Run the token status script directly:
 
 ```bash
-~/.config/agent/github-app-env  # source to get vars
+~/.agents/${AGENT_NAME}/.config/github-app-env  # source to get vars
 $CLAUDE_PLUGIN_ROOT/bin/token-status.sh
 ```
 
 Or check the metadata file:
 
 ```bash
-cat ~/.config/agent/github-token.meta | jq .
+cat ~/.agents/${AGENT_NAME}/.config/github-token.meta | jq .
 ```
 
 ## Forcing a Token Refresh
@@ -158,7 +158,7 @@ This reads the token from the shared file, so `git push` always uses the latest 
 
 For agent teams (tmux panes), all agents share the same token file:
 
-- Token file: `~/.config/agent/github-token`
+- Token file: `~/.agents/${AGENT_NAME}/.config/github-token`
 - All agents read from the same file
 - PreToolUse hook in each agent monitors and refreshes as needed
 - File-based locking prevents concurrent refresh races
@@ -194,7 +194,7 @@ The installation ID is wrong or the App is no longer installed on the target acc
 Check that the runtime env file exists and is being sourced:
 
 ```bash
-cat ~/.config/agent/github-app-env
+cat ~/.agents/${AGENT_NAME}/.config/github-app-env
 ```
 
 If missing, the SessionStart hook may have failed. Check stderr output from session start.
@@ -210,7 +210,7 @@ The plugin failed to refresh 3 times consecutively and is backing off for 5 minu
 To clear the cooldown manually:
 
 ```bash
-rm ~/.config/agent/github-token.cooldown
+rm ~/.agents/${AGENT_NAME}/.config/github-token.cooldown
 ```
 
 ### Permissions Issues

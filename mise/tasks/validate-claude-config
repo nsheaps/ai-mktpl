@@ -75,6 +75,14 @@ for plugin_dir in plugins/*; do
   HOOKS_REF=$(jq -r '.hooks // empty' "$PLUGIN_JSON" 2>/dev/null || true)
 
   if [ -n "$HOOKS_REF" ]; then
+    # Check for duplicate: if hooks ref points to the auto-discovered standard path,
+    # it will be loaded twice (once by auto-discovery, once by manifest reference)
+    RESOLVED=$(cd "$plugin_dir" && realpath -m "$HOOKS_REF" 2>/dev/null || echo "$HOOKS_REF")
+    STANDARD=$(cd "$plugin_dir" && realpath -m "./hooks/hooks.json" 2>/dev/null || echo "hooks/hooks.json")
+    if [ "$RESOLVED" = "$STANDARD" ] && [ -f "$plugin_dir/hooks/hooks.json" ]; then
+      ERRORS+=("Plugin '$DIR_NAME': manifest 'hooks' field points to './hooks/hooks.json' which is auto-discovered — remove the 'hooks' field from plugin.json to avoid duplicate loading")
+    fi
+
     HOOKS_FILE="$plugin_dir/$HOOKS_REF"
     if [ ! -f "$HOOKS_FILE" ]; then
       ERRORS+=("Plugin '$DIR_NAME': hooks file '$HOOKS_REF' referenced in plugin.json does not exist (expected at $HOOKS_FILE)")

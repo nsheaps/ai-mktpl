@@ -78,6 +78,8 @@ jobs:
           REPO: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           JOB_CONTEXT: ${{ toJson(steps.additional-context.outputs) }}
+          REVIEWER_BOT_NAME: ${{ steps.auth.outputs.user-name }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
         with:
           template-file: .github/prompts/claude-code-review.md
 

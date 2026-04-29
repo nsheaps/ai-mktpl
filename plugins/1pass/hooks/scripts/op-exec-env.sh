@@ -11,6 +11,12 @@ PLUGIN_NAME="1pass"
 source "${CLAUDE_PLUGIN_ROOT}/lib/plugin-config-read.sh"
 source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 
+# Script-level tmpdir for secret-bearing tempfiles. EXIT trap ensures cleanup
+# on any exit path (normal, error, signal). All tempfiles in process_item()
+# are created here so no per-function trap scoping is needed.
+_OP_EXEC_TMPDIR="$(mktemp -d)"
+trap 'rm -rf "$_OP_EXEC_TMPDIR"' EXIT
+
 # --- Guards ---
 
 plugin_is_enabled || { hook_log "plugin disabled, skipping op-exec env"; hook_respond; exit 0; }
@@ -147,23 +153,59 @@ process_item() {
     return 0
   fi
 
-  # Parse export statements and write to targets
+  # Evaluate op-exec output in a clean subshell to resolve heredocs/complex syntax.
+  # op-exec can output heredoc-style assignments (e.g. export VAR=$(cat <<'EOF'...))
+  # which break line-by-line parsing. By eval'ing in env -i, only the exported vars
+  # appear in the output — no inherited env to filter.
+  #
+  # We use `env -0` to NUL-delimit records, which correctly handles multi-line
+  # values (e.g. PEM keys). NUL bytes can't appear in env values, so this is
+  # the only safe delimiter. We read via process substitution because bash
+  # strips NULs from $() command substitution output.
+  local eval_stderr eval_output
+  eval_stderr="$(mktemp -p "$_OP_EXEC_TMPDIR")"
+  eval_output="$(mktemp -p "$_OP_EXEC_TMPDIR")"
+  local eval_exit=0
+  env -i HOME="$HOME" PATH="$PATH" bash -c "
+    set -e
+    eval \"\$1\"
+    env -0
+  " _ "$exports" 2>"$eval_stderr" > "$eval_output" || eval_exit=$?
+
+  if [[ $eval_exit -ne 0 ]]; then
+    local err_msg=""
+    [[ -s "$eval_stderr" ]] && err_msg="$(cat "$eval_stderr")"
+    hook_fail "op-exec" "Failed to evaluate op-exec output for: $item_ref${err_msg:+ — $err_msg}" \
+      "The op-exec output may contain syntax that bash cannot evaluate"
+    rm -f "$eval_stderr" "$eval_output"
+    return 0
+  fi
+
+  # Log any stderr even on success (diagnostics, not fatal)
+  if [[ -s "$eval_stderr" ]]; then
+    while IFS= read -r line; do
+      hook_log "[eval stderr] $line"
+    done < "$eval_stderr"
+  fi
+  rm -f "$eval_stderr"
+
+  # Parse NUL-delimited KEY=VALUE records from the isolated subshell.
+  # This correctly handles multi-line values (e.g. PEM keys with embedded newlines).
   local count=0
-  while IFS= read -r line; do
-    # op-exec outputs: export VAR_NAME=value
-    # Strip "export " prefix, then split on first "="
-    local assignment="${line#export }"
-    local env_name="${assignment%%=*}"
-    local env_value="${assignment#*=}"
-
-    # Remove shell quoting from value (op-exec uses printf %q)
-    env_value="$(printf '%b' "$env_value" 2>/dev/null || echo "$env_value")"
-
+  while IFS= read -r -d '' record; do
+    [ -z "$record" ] && continue
+    local env_name="${record%%=*}"
+    local env_value="${record#*=}"
+    # Skip vars injected for the isolated bash to work (not from op-exec)
+    case "$env_name" in
+      HOME|PATH|PWD|OLDPWD|SHLVL|_) continue ;;
+    esac
     if [ -n "$env_name" ]; then
       write_to_targets "$env_name" "$env_value"
       count=$((count + 1))
     fi
-  done <<< "$exports"
+  done < "$eval_output"
+  rm -f "$eval_output"
 
   hook_log "exported $count env vars from $item_ref"
 }

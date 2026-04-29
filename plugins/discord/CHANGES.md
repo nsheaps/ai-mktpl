@@ -13,3 +13,8 @@ marketplace:
 - **Self-message guard** -- an explicit check against the bot's own user ID
   (`client.user.id`) replaces the blanket `message.author.bot` filter, so only
   the bot's own messages are dropped.
+- **Thread/channel/server metadata tools** -- added four new MCP tools:
+  `get_thread_info` (thread title, creation date, parent channel, archived
+  status, member/message counts), `get_channel_info` (channel name, type,
+  topic, category, position), `get_server_info` (server name, member count,
+  full channel list), and `list_threads` (active threads in a channel).
