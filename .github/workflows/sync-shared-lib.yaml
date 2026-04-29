@@ -1,0 +1,113 @@
+name: Sync vendored shared/lib copies
+
+# Self-healing workflow for BUG-17 vendoring workaround.
+#
+# On push to main: auto-commits any drift in vendored copies back to main,
+# keeping the branch always consistent with shared/lib.
+#
+# On PRs touching shared/lib or plugins/*/lib: detects drift and leaves a
+# comment instructing the author to run the sync script locally. Does NOT
+# auto-commit to the PR branch to avoid mid-review surprises.
+#
+# NOTE on GITHUB_TOKEN push permissions:
+# The sync-on-push job pushes directly to main using GITHUB_TOKEN. This
+# requires that your branch protection rules either:
+#   (a) allow GitHub Actions to bypass required status checks, OR
+#   (b) are not configured to enforce required reviewers on the Actions bot.
+# If the push fails with "refusing to allow a GitHub App to create or update
+# a workflow file" or a branch protection error, configure a repository secret
+# SYNC_BOT_PAT (a PAT with `repo` scope) and replace `secrets.GITHUB_TOKEN`
+# with `secrets.SYNC_BOT_PAT` in the sync-on-push job checkout token field.
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    paths:
+      - 'shared/lib/**'
+      - 'plugins/*/lib/**'
+
+concurrency:
+  group: sync-shared-lib-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sync-on-push:
+    name: Auto-sync vendored copies on push to main
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout with push token
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # Token must have contents:write to push back to main.
+          # If branch protection blocks the bot, swap this for a PAT secret.
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run sync script
+        run: bash scripts/sync-shared-lib.sh
+
+      - name: Commit and push if vendored copies drifted
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "No vendored-copy drift detected — nothing to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "chore: auto-sync vendored shared/lib (BUG-17)"
+          git push
+
+  check-pr-drift:
+    name: Detect vendored-copy drift on PRs
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run sync script (dry-run via working tree)
+        run: bash scripts/sync-shared-lib.sh
+
+      - name: Comment if vendored copies drifted
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "No vendored-copy drift detected — PR is clean."
+            exit 0
+          fi
+          DRIFTED="$(git status --porcelain | awk '{print $2}' | xargs)"
+          gh pr comment ${{ github.event.pull_request.number }} \
+            --repo ${{ github.repository }} \
+            --body "$(cat <<'EOF'
+          ### Vendored shared-lib copies are out of sync
+
+          The vendored copies of \`shared/lib/\` inside \`plugins/*/lib/\` have drifted
+          from their source. Please sync them locally before this PR can merge:
+
+          \`\`\`bash
+          bash scripts/sync-shared-lib.sh
+          git add plugins/
+          git commit -m "chore: sync vendored shared/lib"
+          git push
+          \`\`\`
+
+          **Drifted files:** \`$DRIFTED\`
+
+          > This check exists as a workaround for
+          > [anthropics/claude-code#53948](https://github.com/anthropics/claude-code/issues/53948),
+          > which drops symlinks during plugin installation. See
+          > [#474](https://github.com/nsheaps/ai-mktpl/issues/474) for context.
+          EOF
+          )"
