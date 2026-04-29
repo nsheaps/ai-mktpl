@@ -417,13 +417,21 @@ configure_git_identity_env() {
   mkdir -p "$(dirname "$git_config_file")"
 
   export GIT_CONFIG_GLOBAL="$git_config_file"
-  # BUG-12 fix: write a stable, version-independent credential helper script to
-  # a non-versioned path under AGENT_CONFIG_DIR, then point gitconfig at that
-  # stable path. Previously we pointed at ${CLAUDE_PLUGIN_ROOT}/bin/..., which
-  # embeds the plugin version number and becomes stale when the plugin upgrades.
-  write_stable_credential_helper "$TOKEN_FILE"
-  write_git_config_global "$GIT_CREDENTIAL_HELPER_FILE"
-  hook_log "GIT_CONFIG_GLOBAL isolated at $git_config_file (credential helper: $GIT_CREDENTIAL_HELPER_FILE)"
+  # BUG-12 fix: install the canonical credential helper script to a stable,
+  # non-versioned path under $CLAUDE_SETTINGS_DIR/plugins/data/github-app/.
+  # Previously we pointed at ${CLAUDE_PLUGIN_ROOT}/bin/..., which embeds the
+  # plugin version number and becomes stale when the plugin upgrades.
+  #
+  # The installed script is stateless — it reads the token from the path
+  # passed as $1 by git (embedded in the gitconfig credential.helper line
+  # at write time below). This means the same script binary works for every
+  # user/agent on the machine; isolation comes from each agent's gitconfig
+  # pointing at its own token file.
+  write_stable_credential_helper
+  # Pass the RESOLVED script path + RESOLVED token file path together.
+  # gitconfig does not expand env vars, so both must be absolute paths.
+  write_git_config_global "${GIT_CREDENTIAL_HELPER_FILE} ${TOKEN_FILE}"
+  hook_log "GIT_CONFIG_GLOBAL isolated at $git_config_file (credential helper: $GIT_CREDENTIAL_HELPER_FILE <token-file>)"
 
   # Defense-in-depth: also set GIT_AUTHOR_*/GIT_COMMITTER_* env vars.
   # These take precedence over gitconfig, so even if GIT_CONFIG_GLOBAL is

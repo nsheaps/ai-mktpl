@@ -101,10 +101,16 @@ source "$PLUGIN_DIR/lib/env-file.sh"
 # update_runtime_env TOKEN — rewrites runtime env file AND gitconfig on each refresh
 update_runtime_env() {
   write_runtime_env_file "$1"
-  # BUG-12 fix: use the stable credential helper path (written by github-token-init.sh
-  # at session start) rather than the versioned plugin path. GIT_CREDENTIAL_HELPER_FILE
-  # is exported by env-file.sh and lives at a non-versioned AGENT_CONFIG_DIR path.
-  write_git_config_global "${GIT_CREDENTIAL_HELPER_FILE}"
+  # BUG-12 fix: use the stable credential helper path under
+  # $CLAUDE_SETTINGS_DIR/plugins/data/github-app/ rather than the versioned
+  # plugin path. The gitconfig entry embeds BOTH the resolved script path and
+  # the resolved token file path so the stateless script can serve any agent.
+  #
+  # Defense-in-depth: also (re)install the helper script here so token-check is
+  # self-sufficient if the file was deleted or SessionStart short-circuited
+  # before write_stable_credential_helper ran. The install is idempotent.
+  write_stable_credential_helper
+  write_git_config_global "${GIT_CREDENTIAL_HELPER_FILE} ${TOKEN_FILE}"
 }
 
 # Generate a new token (full re-auth from keys)

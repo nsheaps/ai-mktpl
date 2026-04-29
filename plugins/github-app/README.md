@@ -182,8 +182,10 @@ plugins/github-app/
 ├── bin/
 │   ├── generate-token.sh            # JWT generation + token exchange
 │   ├── token-check.sh               # Token validity check + refresh logic
-│   ├── token-status.sh              # Token status JSON output
-│   └── git-credential-github-app.sh # Git credential helper
+│   └── token-status.sh              # Token status JSON output
+├── data/
+│   └── git-credential-helper.sh     # Canonical credential helper (installed to
+│                                    # $CLAUDE_SETTINGS_DIR/plugins/data/github-app/)
 ├── lib/                             # Shared libraries (symlinks)
 ├── docs/
 │   ├── token-refresh-spec.md        # Original design spec
@@ -201,18 +203,31 @@ v0.2.0 moves credential storage from `~/.config/agent/` to `~/.agents/${AGENT_NA
 rm -rf ~/.config/agent/github-token ~/.config/agent/github-token.meta ~/.config/agent/github-app-env
 ```
 
-### AGENT_NAME for git credential helper
+### Git credential helper
 
-`bin/git-credential-github-app.sh` is invoked by **git itself** outside the Claude harness. Git inherits the user's shell environment, where `AGENT_NAME` may not be set. To ensure the credential helper finds the correct per-agent token, export `AGENT_NAME` in your shell profile:
-
-```bash
-# ~/.bashrc or ~/.zshrc
-export AGENT_NAME="jack"  # or "henry", etc.
+The plugin installs a stateless credential helper script to:
+```
+$CLAUDE_SETTINGS_DIR/plugins/data/github-app/git-credential-helper.sh
 ```
 
-Or in a systemd unit: `Environment=AGENT_NAME=jack`
+This path is stable across plugin upgrades and contains **no hardcoded `$HOME`
+references**. The gitconfig entry written by the SessionStart hook embeds the
+resolved token file path as an argument:
 
-If `AGENT_NAME` is not set, the credential helper falls back to `~/.agents/_UNKNOWN/.config/`, which may collide with other unconfigured agents.
+```ini
+[credential "https://github.com"]
+    helper = !~/.claude/plugins/data/github-app/git-credential-helper.sh ~/.agents/jack/.config/github-token
+```
+
+Git passes the token file path as `$1` and the action (`get`/`store`/`erase`)
+as `$2` when invoking the helper. Because the token file path is embedded in
+the gitconfig at write time (not in the script), the same script binary serves
+every user and agent on the machine — each with their own gitconfig pointing at
+their own token file. No `AGENT_NAME` environment variable is required at
+`git push` time.
+
+The helper is installed and the gitconfig is written automatically by the
+`github-token-init.sh` SessionStart hook. Manual configuration is not required.
 
 ## Related
 

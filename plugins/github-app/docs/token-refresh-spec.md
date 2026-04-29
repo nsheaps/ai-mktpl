@@ -159,16 +159,18 @@ Standalone script invoked by both the PreToolUse hook (sync or background) and p
 Consumers:
 
 - **`gh` CLI**: Via `$GH_TOKEN` environment variable (set by runtime env file)
-- **`git push/pull`**: Via git credential helper (`bin/git-credential-github-app.sh`)
+- **`git push/pull`**: Via git credential helper (installed to `$CLAUDE_SETTINGS_DIR/plugins/data/github-app/git-credential-helper.sh` by SessionStart hook)
 - **Direct reads**: Scripts can `cat $GITHUB_TOKEN_FILE`
 
 The runtime env file (`~/.agents/${AGENT_NAME}/.config/github-app-env`) is sourced via `CLAUDE_ENV_FILE` before each Bash command, ensuring `$GH_TOKEN` and `$GITHUB_TOKEN` always reflect the latest token.
 
-**Git credential helper** (`bin/git-credential-github-app.sh`):
+**Git credential helper** (installed to `$CLAUDE_SETTINGS_DIR/plugins/data/github-app/git-credential-helper.sh`):
 
-- Responds to `get` requests by reading the token file
-- No-ops on `store`/`erase` (lifecycle managed by hooks)
-- Configure via: `git config --global credential.https://github.com.helper '!/path/to/git-credential-github-app.sh'`
+- Canonical source lives at `data/git-credential-helper.sh` in the plugin source tree
+- Installed automatically by the SessionStart hook — no manual `git config` needed
+- Stateless: reads the token file path from `$1` (embedded in the gitconfig helper line at write time)
+- Responds to `get` requests; no-ops on `store`/`erase` (lifecycle managed by hooks)
+- Path is stable across plugin upgrades (no version number embedded); contains no `$HOME` references
 
 ### Plugin Structure
 
@@ -184,8 +186,10 @@ plugins/github-app/
 ├── bin/
 │   ├── generate-token.sh             # JWT generation + token exchange
 │   ├── token-check.sh                # Token validation + refresh with retries/locking
-│   ├── token-status.sh               # JSON status report (used by diagnostics)
-│   └── git-credential-github-app.sh  # Git credential helper
+│   └── token-status.sh               # JSON status report (used by diagnostics)
+├── data/
+│   └── git-credential-helper.sh      # Canonical credential helper (installed to
+│                                     # $CLAUDE_SETTINGS_DIR/plugins/data/github-app/)
 ├── lib/
 │   └── token-utils.sh                # Shared: get_minutes_remaining()
 ├── skills/
