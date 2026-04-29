@@ -7,10 +7,10 @@ identical.
 
 ## Two scopes
 
-| Scope | Location | Purpose | Shared? |
-| ----- | -------- | ------- | ------- |
-| **User** | `~/.claude/` | Cross-project state for the current OS user | Shared across all projects this user opens |
-| **Project** | `<repo>/.claude/` | State and config specific to one repo | Committed to the repo (or gitignored as appropriate) |
+| Scope       | Location          | Purpose                                     | Shared?                                              |
+| ----------- | ----------------- | ------------------------------------------- | ---------------------------------------------------- |
+| **User**    | `~/.claude/`      | Cross-project state for the current OS user | Shared across all projects this user opens           |
+| **Project** | `<repo>/.claude/` | State and config specific to one repo       | Committed to the repo (or gitignored as appropriate) |
 
 A project repo can also have `.claude/settings.local.json` for personal
 overrides; that file is conventionally gitignored.
@@ -19,30 +19,30 @@ overrides; that file is conventionally gitignored.
 
 Top-level files and dirs you'll actually encounter:
 
-| Path | Purpose |
-| ---- | ------- |
-| `CLAUDE.md` | Personal instructions loaded into every session |
-| `settings.json` | User-scope settings (committed-equivalent) |
-| `settings.local.json` (rare at user scope) | Personal overrides; **may contain secrets at the root** — never `cat` it, always read specific keys |
-| `history.jsonl` | Append-only log of all prompts (one JSON per line). The `conversation-history-search` agent reads this. |
-| `.credentials.json` | Anthropic OAuth credentials. Do not read or print. |
-| `projects/` | Per-project session transcripts. Subdir name is the project's absolute path with `/` and `.` both replaced by `-` (see "Project path encoding" below). |
-| `sessions/` | Active session metadata |
-| `session-env/<session-id>/` | **Per-session env propagation files** — see "Session env" below |
-| `plugins/` | Plugin marketplaces, cache, and bookkeeping (see "Plugins" below) |
-| `agents/` | User-scope subagents (`<name>.md`). May not exist if you've only ever used plugin-bundled agents. |
-| `commands/` | User-scope slash commands (deprecated; use skills instead) |
-| `skills/<name>/SKILL.md` | User-scope skills. Auto-recalled when their description matches. |
-| `hooks/` | User-scope hook scripts (referenced from `settings.json`) |
-| `debug/` | Debug logs from recent sessions |
-| `tmp/` | Ephemeral scratch (Claude itself uses this; do not confuse with project `.claude/tmp/`) |
-| `todos/`, `tasks/` | Task tracking persistence |
-| `shell-snapshots/` | Captured shell state for Bash tool calls |
-| `paste-cache/` | Cached pasted content |
-| `statsig/`, `telemetry/`, `usage-data/`, `stats-cache.json` | Anonymous telemetry buckets |
-| `state/`, `cache/` | Misc internal state |
-| `channels/` | Used by the `discord` and `telegram` plugins for chat-channel access state |
-| `ide/` | IDE integration sockets / state |
+| Path                                                        | Purpose                                                                                                                                                |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `CLAUDE.md`                                                 | Personal instructions loaded into every session                                                                                                        |
+| `settings.json`                                             | User-scope settings (committed-equivalent)                                                                                                             |
+| `settings.local.json` (rare at user scope)                  | Personal overrides; **may contain secrets at the root** — never `cat` it, always read specific keys                                                    |
+| `history.jsonl`                                             | Append-only log of all prompts (one JSON per line). The `conversation-history-search` agent reads this.                                                |
+| `.credentials.json`                                         | Anthropic OAuth credentials. Do not read or print.                                                                                                     |
+| `projects/`                                                 | Per-project session transcripts. Subdir name is the project's absolute path with `/` and `.` both replaced by `-` (see "Project path encoding" below). |
+| `sessions/`                                                 | Active session metadata                                                                                                                                |
+| `session-env/<session-id>/`                                 | **Per-session env propagation files** — see "Session env" below                                                                                        |
+| `plugins/`                                                  | Plugin marketplaces, cache, and bookkeeping (see "Plugins" below)                                                                                      |
+| `agents/`                                                   | User-scope subagents (`<name>.md`). May not exist if you've only ever used plugin-bundled agents.                                                      |
+| `commands/`                                                 | User-scope slash commands (deprecated; use skills instead)                                                                                             |
+| `skills/<name>/SKILL.md`                                    | User-scope skills. Auto-recalled when their description matches.                                                                                       |
+| `hooks/`                                                    | User-scope hook scripts (referenced from `settings.json`)                                                                                              |
+| `debug/`                                                    | Debug logs from recent sessions                                                                                                                        |
+| `tmp/`                                                      | Ephemeral scratch (Claude itself uses this; do not confuse with project `.claude/tmp/`)                                                                |
+| `todos/`, `tasks/`                                          | Task tracking persistence                                                                                                                              |
+| `shell-snapshots/`                                          | Captured shell state for Bash tool calls                                                                                                               |
+| `paste-cache/`                                              | Cached pasted content                                                                                                                                  |
+| `statsig/`, `telemetry/`, `usage-data/`, `stats-cache.json` | Anonymous telemetry buckets                                                                                                                            |
+| `state/`, `cache/`                                          | Misc internal state                                                                                                                                    |
+| `channels/`                                                 | Used by the `discord` and `telegram` plugins for chat-channel access state                                                                             |
+| `ide/`                                                      | IDE integration sockets / state                                                                                                                        |
 
 ### Project path encoding
 
@@ -122,15 +122,15 @@ session **is** a correctness issue, which is why launchers clean them up.
 
 ### Plugins: `~/.claude/plugins/`
 
-| Path | Purpose |
-| ---- | ------- |
-| `marketplaces/<name>/` | Cloned marketplace repos (e.g. `ai-mktpl/`, `claude-plugins-official/`). The source-of-truth checkout for installable plugins. |
+| Path                                      | Purpose                                                                                                                                                  |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `marketplaces/<name>/`                    | Cloned marketplace repos (e.g. `ai-mktpl/`, `claude-plugins-official/`). The source-of-truth checkout for installable plugins.                           |
 | `cache/<marketplace>/<plugin>/<version>/` | Materialized plugin contents at the version currently enabled. **This is the path your hook scripts and `${CLAUDE_PLUGIN_ROOT}` resolve to at runtime.** |
-| `installed_plugins.json` | Which plugins are enabled, at which version, from which marketplace |
-| `known_marketplaces.json` | Registered marketplaces |
-| `install-counts-cache.json` | Telemetry |
-| `blocklist.json` | User-blocked plugins |
-| `data/<plugin>/` | Per-plugin persistent data (`${CLAUDE_PLUGIN_DATA}` resolves here) |
+| `installed_plugins.json`                  | Which plugins are enabled, at which version, from which marketplace                                                                                      |
+| `known_marketplaces.json`                 | Registered marketplaces                                                                                                                                  |
+| `install-counts-cache.json`               | Telemetry                                                                                                                                                |
+| `blocklist.json`                          | User-blocked plugins                                                                                                                                     |
+| `data/<plugin>/`                          | Per-plugin persistent data (`${CLAUDE_PLUGIN_DATA}` resolves here)                                                                                       |
 
 So a plugin file at
 `plugins/agentic-behavior/skills/claude-code/SKILL.md` in the
@@ -147,20 +147,20 @@ the cache.
 
 Mirrors the user-scope structure but for a single repo. Common entries:
 
-| Path | Purpose |
-| ---- | ------- |
-| `CLAUDE.md` | Project instructions |
-| `settings.json` | Project settings (committed) |
-| `settings.local.json` | Personal overrides (gitignored). **May contain secrets at root** — same `jq 'keys'` discipline as user scope. |
-| `rules/*.md` | Project rules, loaded into every session in this repo |
-| `skills/<name>/SKILL.md` | Project-scope skills |
-| `agents/*.md` | Project-scope subagents |
-| `commands/` | Project slash commands (deprecated; prefer skills) |
-| `hooks/` | Project hook scripts referenced from `.claude/settings.json` |
-| `plans/` | Implementation plans (this repo's convention) |
-| `scratch/` | Working notes |
-| `tmp/` | Ephemeral scratch — DO use this, do NOT use system `/tmp` (shared between agents) |
-| `MEMORY.md`, `memory/*.md` | File-based memory (Jack uses this pattern) |
+| Path                       | Purpose                                                                                                       |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `CLAUDE.md`                | Project instructions                                                                                          |
+| `settings.json`            | Project settings (committed)                                                                                  |
+| `settings.local.json`      | Personal overrides (gitignored). **May contain secrets at root** — same `jq 'keys'` discipline as user scope. |
+| `rules/*.md`               | Project rules, loaded into every session in this repo                                                         |
+| `skills/<name>/SKILL.md`   | Project-scope skills                                                                                          |
+| `agents/*.md`              | Project-scope subagents                                                                                       |
+| `commands/`                | Project slash commands (deprecated; prefer skills)                                                            |
+| `hooks/`                   | Project hook scripts referenced from `.claude/settings.json`                                                  |
+| `plans/`                   | Implementation plans (this repo's convention)                                                                 |
+| `scratch/`                 | Working notes                                                                                                 |
+| `tmp/`                     | Ephemeral scratch — DO use this, do NOT use system `/tmp` (shared between agents)                             |
+| `MEMORY.md`, `memory/*.md` | File-based memory (Jack uses this pattern)                                                                    |
 
 Project-scope skills, agents, commands, and hooks **stack** with user-scope
 ones — both are loaded. Plugin-scope versions also stack on top.

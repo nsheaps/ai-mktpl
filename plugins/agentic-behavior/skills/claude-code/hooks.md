@@ -48,7 +48,9 @@ Plugin-layer shape (wrapped):
 {
   "description": "optional human-readable summary",
   "hooks": {
-    "PreToolUse": [ /* same shape as above */ ]
+    "PreToolUse": [
+      /* same shape as above */
+    ]
   }
 }
 ```
@@ -57,54 +59,54 @@ Plugin-layer shape (wrapped):
 
 Five types. `prompt` and `agent` are LLM-driven; the rest are deterministic.
 
-| Type | What it does | Stdin | Stdout / response | Where you'd use it |
-| ---- | ------------ | ----- | ----------------- | ------------------ |
-| `command` | Runs a shell command | Event JSON | JSON on stdout (or none) | Fast deterministic checks, env propagation |
-| `http` | POSTs event JSON to a URL | — | JSON response body | External policy service, audit sink |
-| `mcp_tool` | Invokes an MCP tool with given input | — | Tool result | Delegate to a custom MCP service |
-| `prompt` | Asks an LLM to evaluate the event | — | Model returns the JSON response | Context-aware validation, "should I block this?" |
-| `agent` | Runs a sub-agent with full tool access | — | Sub-agent's structured output | Complex multi-step decisions |
+| Type       | What it does                           | Stdin      | Stdout / response               | Where you'd use it                               |
+| ---------- | -------------------------------------- | ---------- | ------------------------------- | ------------------------------------------------ |
+| `command`  | Runs a shell command                   | Event JSON | JSON on stdout (or none)        | Fast deterministic checks, env propagation       |
+| `http`     | POSTs event JSON to a URL              | —          | JSON response body              | External policy service, audit sink              |
+| `mcp_tool` | Invokes an MCP tool with given input   | —          | Tool result                     | Delegate to a custom MCP service                 |
+| `prompt`   | Asks an LLM to evaluate the event      | —          | Model returns the JSON response | Context-aware validation, "should I block this?" |
+| `agent`    | Runs a sub-agent with full tool access | —          | Sub-agent's structured output   | Complex multi-step decisions                     |
 
 Common config fields across types:
 
-| Field | Type | Notes |
-| ----- | ---- | ----- |
-| `timeout` | number (seconds) | Defaults: command 600, http 30, mcp_tool 60, prompt 30, agent 60 |
-| `if` | string | Permission-rule syntax — extra gate beyond the matcher |
-| `statusMessage` | string | Shown in the UI while the hook runs |
-| `once` | bool | For skills/agents only; runs the hook at most once per session |
+| Field           | Type             | Notes                                                            |
+| --------------- | ---------------- | ---------------------------------------------------------------- |
+| `timeout`       | number (seconds) | Defaults: command 600, http 30, mcp_tool 60, prompt 30, agent 60 |
+| `if`            | string           | Permission-rule syntax — extra gate beyond the matcher           |
+| `statusMessage` | string           | Shown in the UI while the hook runs                              |
+| `once`          | bool             | For skills/agents only; runs the hook at most once per session   |
 
 `command`-only:
 
-| Field | Type | Notes |
-| ----- | ---- | ----- |
-| `command` | string | Full command line; required |
-| `shell` | `"bash"` \| `"powershell"` | Default `bash` |
-| `async` | bool | Fire-and-forget; output is ignored |
-| `asyncRewake` | bool | If `async`, wake Claude when the hook completes |
+| Field         | Type                       | Notes                                           |
+| ------------- | -------------------------- | ----------------------------------------------- |
+| `command`     | string                     | Full command line; required                     |
+| `shell`       | `"bash"` \| `"powershell"` | Default `bash`                                  |
+| `async`       | bool                       | Fire-and-forget; output is ignored              |
+| `asyncRewake` | bool                       | If `async`, wake Claude when the hook completes |
 
 `http`-only:
 
-| Field | Type | Notes |
-| ----- | ---- | ----- |
-| `url` | string | Required |
-| `headers` | object | Optional request headers |
+| Field            | Type     | Notes                                           |
+| ---------------- | -------- | ----------------------------------------------- |
+| `url`            | string   | Required                                        |
+| `headers`        | object   | Optional request headers                        |
 | `allowedEnvVars` | string[] | Env vars whose names+values get sent to the URL |
 
 `mcp_tool`-only:
 
-| Field | Type | Notes |
-| ----- | ---- | ----- |
-| `server` | string | MCP server name |
-| `tool` | string | Tool name on that server |
-| `input` | object | Arguments to pass |
+| Field    | Type   | Notes                    |
+| -------- | ------ | ------------------------ |
+| `server` | string | MCP server name          |
+| `tool`   | string | Tool name on that server |
+| `input`  | object | Arguments to pass        |
 
 `prompt` / `agent`-only:
 
-| Field | Type | Notes |
-| ----- | ---- | ----- |
+| Field    | Type   | Notes                                    |
+| -------- | ------ | ---------------------------------------- |
 | `prompt` | string | Required. The prompt the model evaluates |
-| `model` | string | Optional model override |
+| `model`  | string | Optional model override                  |
 
 ## Matcher syntax
 
@@ -112,11 +114,11 @@ Most tool/permission events take a `matcher` field. Stop / SessionStart /
 SessionEnd / CwdChanged / etc. either don't have a matcher or use a fixed
 enum (see each event below).
 
-| Pattern | Treated as | Examples |
-| ------- | ---------- | -------- |
-| `"*"`, `""`, or omitted | Match all | Fires on every occurrence |
-| Letters/digits/`_`/`\|` only | Exact name or `\|`-separated list | `Bash`, `Read\|Write\|Edit` |
-| Anything else | JavaScript regex | `^Notebook`, `mcp__memory__.*`, `mcp__.*__delete.*` |
+| Pattern                      | Treated as                        | Examples                                            |
+| ---------------------------- | --------------------------------- | --------------------------------------------------- |
+| `"*"`, `""`, or omitted      | Match all                         | Fires on every occurrence                           |
+| Letters/digits/`_`/`\|` only | Exact name or `\|`-separated list | `Bash`, `Read\|Write\|Edit`                         |
+| Anything else                | JavaScript regex                  | `^Notebook`, `mcp__memory__.*`, `mcp__.*__delete.*` |
 
 Matchers are case-sensitive. MCP tool names follow `mcp__<server>__<tool>`.
 
@@ -143,26 +145,26 @@ A hook can return JSON on stdout (command), as the HTTP response body, or as
 the model's structured output (prompt/agent). All of these are optional —
 returning nothing is the same as `{}`.
 
-| Field | Type | Effect |
-| ----- | ---- | ------ |
-| `continue` | bool, default `true` | If `false`, halts Claude entirely (with `stopReason`) |
-| `stopReason` | string | Reason shown to the user when `continue: false` |
-| `suppressOutput` | bool, default `false` | Hide the hook's stdout from the transcript |
-| `systemMessage` | string | Warning/info shown to the user (and seen by Claude) |
-| `decision` | `"block"` or absent | Event-specific. Blocks the action when supported |
-| `reason` | string | Why the decision was made |
-| `hookSpecificOutput` | object | Event-specific shape (see each event) |
+| Field                | Type                  | Effect                                                |
+| -------------------- | --------------------- | ----------------------------------------------------- |
+| `continue`           | bool, default `true`  | If `false`, halts Claude entirely (with `stopReason`) |
+| `stopReason`         | string                | Reason shown to the user when `continue: false`       |
+| `suppressOutput`     | bool, default `false` | Hide the hook's stdout from the transcript            |
+| `systemMessage`      | string                | Warning/info shown to the user (and seen by Claude)   |
+| `decision`           | `"block"` or absent   | Event-specific. Blocks the action when supported      |
+| `reason`             | string                | Why the decision was made                             |
+| `hookSpecificOutput` | object                | Event-specific shape (see each event)                 |
 
 `hookSpecificOutput.hookEventName` is required when you populate
 `hookSpecificOutput`, and must match the event you're handling.
 
 ### Exit codes (command hooks)
 
-| Code | Behavior |
-| ---- | -------- |
-| `0` | Success. Stdout is parsed as JSON; for `UserPromptSubmit` / `UserPromptExpansion` / `SessionStart`, stdout is also added to context Claude can see |
-| `2` | Blocking error. Stdout/JSON ignored; stderr fed to Claude. Blocks the action if the event supports blocking |
-| other | Non-blocking error. First line of stderr in transcript, full stderr in debug log; execution continues |
+| Code  | Behavior                                                                                                                                           |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `0`   | Success. Stdout is parsed as JSON; for `UserPromptSubmit` / `UserPromptExpansion` / `SessionStart`, stdout is also added to context Claude can see |
+| `2`   | Blocking error. Stdout/JSON ignored; stderr fed to Claude. Blocks the action if the event supports blocking                                        |
+| other | Non-blocking error. First line of stderr in transcript, full stderr in debug log; execution continues                                              |
 
 Exception: `WorktreeCreate` aborts on any non-zero exit code.
 
@@ -240,8 +242,8 @@ minus `sessionTitle`.
 Fires before a tool call executes. Use this to allow / deny / modify the
 call, or to inject extra context.
 
-| | |
-| --- | --- |
+|                |                                                                                                                                                                       |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Matcher values | tool names: `Bash`, `Edit`, `Write`, `Read`, `Glob`, `Grep`, `Agent`, `WebFetch`, `WebSearch`, `AskUserQuestion`, `ExitPlanMode`, MCP tools (`mcp__<server>__<tool>`) |
 
 Input:

@@ -24,15 +24,15 @@ detail when the task warrants it.**
 
 ## When to read which doc
 
-| Task | Doc |
-| ---- | --- |
-| "Where does Claude store sessions / projects / plugins?" | [folder-structure.md](folder-structure.md) |
-| "What's in `~/.claude/session-env/<id>/` and is it a leak?" | [folder-structure.md](folder-structure.md) (session-env section) |
-| "How is project path encoded under `~/.claude/projects/`?" | [folder-structure.md](folder-structure.md) |
-| "What hook events exist? When does X fire?" | [hooks.md](hooks.md) |
-| "What JSON does a `PreToolUse` hook receive / return?" | [hooks.md](hooks.md) |
-| "Difference between `command`, `prompt`, `agent`, `http`, `mcp_tool` hook types" | [hooks.md](hooks.md) |
-| "How do SessionStart hooks propagate env to Bash calls?" | [hooks.md](hooks.md) (CLAUDE_ENV_FILE section) |
+| Task                                                                             | Doc                                                              |
+| -------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| "Where does Claude store sessions / projects / plugins?"                         | [folder-structure.md](folder-structure.md)                       |
+| "What's in `~/.claude/session-env/<id>/` and is it a leak?"                      | [folder-structure.md](folder-structure.md) (session-env section) |
+| "How is project path encoded under `~/.claude/projects/`?"                       | [folder-structure.md](folder-structure.md)                       |
+| "What hook events exist? When does X fire?"                                      | [hooks.md](hooks.md)                                             |
+| "What JSON does a `PreToolUse` hook receive / return?"                           | [hooks.md](hooks.md)                                             |
+| "Difference between `command`, `prompt`, `agent`, `http`, `mcp_tool` hook types" | [hooks.md](hooks.md)                                             |
+| "How do SessionStart hooks propagate env to Bash calls?"                         | [hooks.md](hooks.md) (CLAUDE_ENV_FILE section)                   |
 
 ## Quick orientation
 
