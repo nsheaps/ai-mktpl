@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # install-gh.sh — SessionStart hook for github plugin
 #
-# Installs or updates GitHub CLI (gh) for Claude Code web sessions.
+# Installs GitHub CLI (gh) if not already available on PATH.
 # When installToProject is true, installs to $CLAUDE_PROJECT_DIR/bin/.local/
 # which is gitignored and added to PATH.
 set -euo pipefail
@@ -14,7 +14,7 @@ source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 # --- Guards ---
 
 plugin_is_enabled || { hook_log "plugin disabled, skipping"; hook_respond; exit 0; }
-tool_is_web_session || { hook_log "not a web session, skipping"; hook_respond; exit 0; }
+tool_is_available gh && { hook_log "gh already available at $(command -v gh), skipping install"; hook_respond; exit 0; }
 
 # --- Read config ---
 

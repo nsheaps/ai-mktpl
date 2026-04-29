@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # install-gws.sh — SessionStart hook for google-workspace-cli plugin
 #
-# Installs or updates the Google Workspace CLI (gws) for Claude Code web sessions.
+# Installs or updates the Google Workspace CLI (gws) if not already available on PATH.
 # Prefers mise (ubi backend) for installation, falls back to direct binary download
 # from GitHub releases.
 set -euo pipefail
@@ -14,7 +14,7 @@ source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 # --- Guards ---
 
 plugin_is_enabled || { hook_log "plugin disabled, skipping"; hook_respond; exit 0; }
-tool_is_web_session || { hook_log "not a web session, skipping"; hook_respond; exit 0; }
+tool_is_available gws && { hook_log "gws already available at $(command -v gws), skipping install"; hook_respond; exit 0; }
 
 # --- Read config ---
 

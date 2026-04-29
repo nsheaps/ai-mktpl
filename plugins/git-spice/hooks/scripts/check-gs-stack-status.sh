@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # check-gs-stack-status.sh — SessionStart hook for git-spice plugin
 #
-# Checks if gs-stack-status is installed; auto-installs via mise in web sessions
+# Checks if gs-stack-status is installed; auto-installs via mise if not already on PATH
 # when autoInstall is enabled. Follows the shared tool-install pattern.
 set -euo pipefail
 
@@ -16,7 +16,7 @@ source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
 # --- Guards ---
 
 plugin_is_enabled || { hook_log "plugin disabled, skipping"; hook_respond; exit 0; }
-tool_is_web_session || { hook_log "not a web session, skipping"; hook_respond; exit 0; }
+tool_is_available gs-stack-status && { hook_log "gs-stack-status already available, skipping install"; hook_respond; exit 0; }
 
 # --- Read config ---
 

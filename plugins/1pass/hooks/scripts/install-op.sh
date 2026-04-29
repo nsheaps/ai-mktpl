@@ -336,12 +336,17 @@ do_install() {
   local op_bin=""
   local op_exec_bin=""
 
-  if tool_is_web_session; then
+  if ! tool_is_available op; then
     detect_platform || return 0
     op_bin="$(resolve_op_bin)" || true
+  else
+    hook_log "op already available at $(command -v op), skipping op install"
+  fi
+
+  if ! tool_is_available op-exec; then
     op_exec_bin="$(resolve_op_exec_bin)" || true
   else
-    hook_log "local session, skipping op install"
+    hook_log "op-exec already available at $(command -v op-exec), skipping op-exec install"
   fi
 
   # Inject secrets (all sessions — requires op to be available and authenticated)
