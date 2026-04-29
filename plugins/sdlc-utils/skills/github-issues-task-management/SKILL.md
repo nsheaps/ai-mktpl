@@ -191,8 +191,8 @@ require `owner/repo#N`.
 
 | Anti-Pattern                                          | Instead                                                |
 | ----------------------------------------------------- | ------------------------------------------------------ |
-| Tracking work only in chat threads                    | Create a GitHub Issue; use chat for discussion          |
-| One issue per tiny sub-task                           | Consolidate into a parent issue with a checklist        |
+| Tracking work only in chat threads                    | Create a GitHub Issue; use chat for discussion         |
+| One issue per tiny sub-task                           | Consolidate into a parent issue with a checklist       |
 | Short-form references across repos (`#N`)             | Use `owner/repo#N` for cross-repo links                |
 | No labels on issues                                   | Add at least type + priority labels                    |
 | Closing issues without explanation                    | Comment with resolution and link to PR/commit          |
