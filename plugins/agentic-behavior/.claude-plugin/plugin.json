@@ -27,7 +27,12 @@
     "exit",
     "restart",
     "sigint",
-    "session-management"
+    "session-management",
+    "incident-tracking",
+    "incidents",
+    "spec-management",
+    "spec-template",
+    "footnotes"
   ],
   "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/agentic-behavior",
   "repository": "https://github.com/nsheaps/ai-mktpl"

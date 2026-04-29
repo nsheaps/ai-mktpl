@@ -152,5 +152,7 @@ When reviewing a PR that includes a spec:
 
 ## References
 
+- `references/spec-template.md` -- starter template for plugin/PR-scoped specs, with sections for Problem, Requirements, Technical Design, and acceptance criteria. Copy this as the starting point for a new spec.
 - [Spec directory conventions](../../../common-sense/rules/mantras-and-incremental-development.md) -- defines the draft/reviewed/in-progress/live/deprecated/archive lifecycle
+- For full software-product specs (with detailed user stories, NFRs, and design decision tables), see also `sdlc-utils:spec-writing` and its more comprehensive template at `plugins/sdlc-utils/skills/spec-writing/references/spec-template.md`.
 - Handler feedback on specs -- requiring specs for every plugin change PR and developing PRs against merged specs
