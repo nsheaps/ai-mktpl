@@ -1,6 +1,6 @@
 {
   "name": "correct-behavior",
-  "version": "0.2.25",
+  "version": "0.2.26",
   "description": "DEPRECATED: Use agentic-behavior plugin instead, which includes the correct-behavior skill.",
   "author": {
     "name": "Nathan Heaps",

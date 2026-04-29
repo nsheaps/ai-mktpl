@@ -1,6 +1,6 @@
 {
   "name": "review-changes",
-  "version": "0.2.25",
+  "version": "0.2.26",
   "description": "DEPRECATED: Use scm-utils plugin instead, which includes review-code, review-diff, and automated-code-review skills.",
   "author": {
     "name": "Nathan Heaps",
