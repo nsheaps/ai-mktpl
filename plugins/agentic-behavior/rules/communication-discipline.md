@@ -6,6 +6,8 @@ Source: [Handler directive 2026-04-29T20:29Z](https://discord.com/channels/14908
 
 ## 1. Plan-Doc-First Communication
 
+> **Plan doc** = a markdown file at `.claude/tasks/<task-id>/plan.md` that captures the task's goal, scope, decisions, and progress. Discussion about a task lives in the plan doc, not in chat threads.
+
 When working on a task that has a plan document:
 
 - **All discussion belongs in the plan doc** — design decisions, open questions, blockers, trade-offs. Not in the channel.
@@ -15,7 +17,7 @@ When working on a task that has a plan document:
 ### Good
 
 ```
-🤖 Question in .claude/tasks/34/plan.md §3 — please review and answer there.
+🤖 Question in [.claude/tasks/34/plan.md §3](https://github.com/nsheaps/ai-mktpl/blob/main/.claude/tasks/34/plan.md) — please review and answer there.
 ```
 
 ### Bad
@@ -40,7 +42,7 @@ Status updates posted to channels (Discord, Telegram, etc.) MUST be ≤ 3 senten
 ### Good
 
 ```
-🤖 [PR #472](url) ready — glossary restructured as per-term files. claude-review running.
+🤖 [PR #472](url) ready — glossary restructured as per-term files. CI review requested via `request-review` label.
 ```
 
 ### Bad
@@ -58,10 +60,10 @@ The bad example is a content dump. The good example gives the handler what they 
 
 ## 3. Sub-Agent Dispatch Defaults
 
-**ALWAYS** use `run_in_background: true` when dispatching sub-agents. No exceptions unless the result is needed synchronously for the immediate next step (e.g., a one-line lookup whose output is the next tool call's input).
+**ALWAYS** use `run_in_background: true` when dispatching sub-agents whose output is not needed for the next step in the main loop. Dispatch in the background by default; use the foreground only when you genuinely need the result before you can proceed (e.g., a lookup whose output is the next tool call's input, or a research agent whose findings inform the next decision).
 
-- Omitting `run_in_background` blocks the main session, prevents handler messages from being seen, and violates the responsiveness rule.
-- "I dispatched a sub-agent and am waiting" is not a valid reason to block — dispatch in background and acknowledge the handler immediately.
+- Backgrounding work that does not block the next step keeps the main session responsive so handler messages are seen promptly.
+- "I dispatched a sub-agent and am waiting" is not a valid reason to block when the main loop has other work it could be doing — dispatch in background and acknowledge the handler immediately.
 
 ### Good
 
@@ -94,3 +96,5 @@ Default to **sonnet** for all sub-agent work. Reserve opus only for tasks that g
 - Tasks where the wrong judgment call has large downstream consequences
 
 Setting `model: sonnet` in the sub-agent call or frontmatter is the correct default. Do not default to opus out of caution — sonnet handles the vast majority of agentic work correctly.
+
+- **When dispatching to sonnet, use `sequential-thinking` heavily.** Sonnet's reasoning quality is significantly better when paired with explicit step-by-step thinking; without it, sonnet sub-agents tend to skip context and produce shallow work.
