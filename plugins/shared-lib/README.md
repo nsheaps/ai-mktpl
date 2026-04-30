@@ -16,12 +16,23 @@ no longer preserved when plugins are copied to the cache, so every plugin's
 This plugin is the fix:
 
 1. The libraries live here, in `plugins/shared-lib/lib/*.sh`.
-2. A `SessionStart` hook copies them from the plugin root to
-   `${CLAUDE_PLUGIN_DATA}/lib/` once per session (with a manifest-hash check
-   so we only re-copy when content changes).
-3. Other plugins declare a dependency on `shared-lib` in their
+2. A `Setup` hook (matcher `"init"`) copies them from the plugin root to
+   `${CLAUDE_PLUGIN_DATA}/lib/` (with a manifest-hash check so we only
+   re-copy when content changes).
+3. The agent launcher fires a `claude --init-only --dangerously-skip-permissions`
+   pre-pass before the interactive session. The pre-pass fires
+   `Setup{trigger:"init"}` plus `SessionStart{source:"startup"}` and then
+   exits. This is the critical ordering guarantee: the libs are written
+   to disk before any dependent plugin's `SessionStart` hook runs in the
+   interactive session.
+4. Other plugins declare a dependency on `shared-lib` in their
    `plugin.json`, then source the libs out of the shared-lib data
-   directory.
+   directory (with a wait-and-source guard as defense-in-depth).
+
+See `docs/research/claude-maintenance-flag-verification.md` in the agent
+repo for the full launcher-contract analysis (why `--init-only` and not
+`--maintenance`, what carries over between the pre-pass and interactive
+launch).
 
 ## How dependent plugins consume it
 
@@ -84,13 +95,27 @@ strips the dependent plugin's own data-dir name and rebuilds the path to
 | `safe-settings-write.sh` | Atomic JSON edits to `settings.json`                         |
 | `tool-install.sh`        | Helpers for installing tools to project-local install dirs   |
 
-## Hook ordering caveat
+## Hook ordering
 
-Hooks across plugins run in parallel and the docs do not guarantee
-ordering. The wait-loop in dependents handles the case where a dependent's
-hook fires before this plugin's `sync-lib.sh` finishes the copy. After the
-first session, the libs persist in `${CLAUDE_PLUGIN_DATA}` across
-restarts, so the wait is normally a no-op.
+Setup hooks fire in the `--init-only` pre-pass, which exits before the
+interactive session starts. The interactive session sees the libs already
+on disk in `${CLAUDE_PLUGIN_DATA}/lib/` before any dependent plugin's
+`SessionStart` hook fires.
+
+The wait-loop in dependent plugins is retained as defense-in-depth: it
+handles edge cases where the launcher pre-pass may not have run (e.g.,
+the user invokes `claude` directly outside the launcher), and is a no-op
+on the hot path since the libs persist across sessions.
+
+### What carries over between pre-pass and interactive launch
+
+- **Disk side effects (carry over):** plugin dirs, files written under
+  `${CLAUDE_PLUGIN_DATA}`, marketplace cache.
+- **Conversation/in-memory state (does NOT carry over):** the pre-pass
+  process exits and the interactive session is a fully independent
+  process. Setup hooks that need to inject env vars via `CLAUDE_ENV_FILE`
+  would not affect the interactive session unless the launcher captures
+  and re-injects them.
 
 ## Releasing
 
