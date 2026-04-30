@@ -160,9 +160,9 @@ GITEOF
 # function always uses the current value of GIT_CONFIG_GLOBAL, avoiding
 # order-dependent bugs when callers source this lib at different points.
 #
-# Guard: if gh is not on PATH, the credential section is skipped and a warning
-# is logged. Git operations requiring auth will fail with a clear error rather
-# than silently misconfiguring.
+# Guard: if gh is not on PATH, the function prints an error to stderr and returns 1.
+# The caller (hook) runs with set -euo pipefail, so SessionStart will abort and
+# surface the error rather than leaving gitconfig without a [credential] section.
 write_git_config_global() {
   local bot_name="${GIT_AUTHOR_NAME:-}"
   local bot_email="${GIT_AUTHOR_EMAIL:-}"
@@ -189,7 +189,8 @@ GCEOF
     helper = !gh auth git-credential
 GCEOF
   else
-    echo "write_git_config_global: gh not found on PATH — credential.helper not configured. Git operations requiring auth may fail." >&2
+    echo "write_git_config_global: gh not found on PATH — cannot configure credential.helper. Install gh (github.com/cli/cli) and ensure it is on PATH before starting a session." >&2
+    return 1
   fi
 
   chmod 600 "$target"

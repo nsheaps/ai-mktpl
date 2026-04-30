@@ -186,7 +186,6 @@ plugins/github-app/
 │   ├── generate-token.sh             # JWT generation + token exchange
 │   ├── token-check.sh                # Token validation + refresh with retries/locking
 │   └── token-status.sh               # JSON status report (used by diagnostics)
-├── data/                              # (empty — credential helper removed in 0.3.6)
 ├── lib/
 │   └── token-utils.sh                # Shared: get_minutes_remaining()
 ├── skills/

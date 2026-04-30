@@ -205,7 +205,6 @@ plugins/github-token-refresh/
 ├── bin/
 │   ├── generate-jwt.sh               # JWT generation helper
 │   └── refresh-token.sh              # Token refresh helper
-├── data/                              # (empty — credential helper removed in 0.3.6)
 └── README.md
 ```
 

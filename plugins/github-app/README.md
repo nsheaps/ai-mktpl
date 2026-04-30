@@ -183,7 +183,6 @@ plugins/github-app/
 │   ├── generate-token.sh            # JWT generation + token exchange
 │   ├── token-check.sh               # Token validity check + refresh logic
 │   └── token-status.sh              # Token status JSON output
-├── data/                            # (empty — credential helper removed in 0.3.6)
 ├── lib/                             # Shared libraries (symlinks)
 ├── docs/
 │   ├── token-refresh-spec.md        # Original design spec
@@ -222,10 +221,11 @@ This approach is fully version-independent: the gitconfig entry never references
 a versioned path, so it remains valid across `gh` upgrades. The gitconfig is
 written automatically by `github-token-init.sh`; no manual configuration is needed.
 
-**Requirement:** `gh` must be on PATH when git invokes the credential helper.
+**Requirement:** `gh` must be on PATH when the SessionStart hook runs.
 In standard Claude Code sessions managed by mise, this is always the case.
-If `gh` is not found at gitconfig-write time, the credential section is skipped
-and a warning is logged.
+If `gh` is not found at gitconfig-write time, the hook hard-fails with an error
+so the problem is immediately visible rather than silently leaving git without
+a credential helper.
 
 ## Related
 
