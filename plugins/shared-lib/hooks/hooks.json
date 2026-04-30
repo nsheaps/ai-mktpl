@@ -1,0 +1,17 @@
+{
+  "description": "Copy bundled lib/ files from CLAUDE_PLUGIN_ROOT into CLAUDE_PLUGIN_DATA on session start so dependent plugins can source them via a stable path.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/sync-lib.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

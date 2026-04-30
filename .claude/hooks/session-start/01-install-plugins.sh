@@ -3,10 +3,13 @@
 # Locally, Claude Code auto-resolves enabled plugins; web sessions need this explicit step.
 set -euo pipefail
 
-# Source shared logging library
+# Inlined log helpers (this hook runs BEFORE any plugins are installed, so it
+# cannot depend on the shared-lib plugin's helpers). Mirrors shared-lib/lib/log.sh.
 LOG_PREFIX="01-install-plugins"
-# shellcheck source=../../../shared/lib/log.sh
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../../../shared/lib/log.sh"
+log_info() { echo "${LOG_PREFIX}: $1" >&2; }
+log_warn() { echo "${LOG_PREFIX}: [warn] $1" >&2; }
+log_error() { echo "${LOG_PREFIX}: [error] $1" >&2; }
+log_step() { echo "${LOG_PREFIX}: [$1] $2" >&2; }
 
 log_info "Hook started at $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 log_info "CLAUDE_CODE_REMOTE=${CLAUDE_CODE_REMOTE:-<not set>}"
@@ -136,14 +139,25 @@ run_plugin_session_hooks() {
         return 0
     fi
 
+    # Compute CLAUDE_PLUGIN_DATA per the documented format:
+    # `~/.claude/plugins/data/{plugin-id}/` where plugin-id is
+    # `{plugin-name}-{marketplace-name}` with non-[a-zA-Z0-9_-] chars replaced
+    # by `-`. See https://code.claude.com/docs/en/plugins-reference#persistent-data-directory
+    local plugin_id="${plugin_name}-${marketplace}"
+    plugin_id="${plugin_id//[^a-zA-Z0-9_-]/-}"
+    local plugin_data="${HOME}/.claude/plugins/data/${plugin_id}"
+    mkdir -p "$plugin_data"
+
     log_step "hooks" "Running SessionStart hooks for $plugin_name..."
     while IFS= read -r cmd; do
         [ -z "$cmd" ] && continue
-        # Replace ${CLAUDE_PLUGIN_ROOT} with the actual plugin directory
+        # Replace ${CLAUDE_PLUGIN_ROOT} and ${CLAUDE_PLUGIN_DATA} with actual paths
         local resolved_cmd="${cmd//\$\{CLAUDE_PLUGIN_ROOT\}/$plugin_dir}"
+        resolved_cmd="${resolved_cmd//\$\{CLAUDE_PLUGIN_DATA\}/$plugin_data}"
         log_step "hooks" "  -> $resolved_cmd"
         (
             export CLAUDE_PLUGIN_ROOT="$plugin_dir"
+            export CLAUDE_PLUGIN_DATA="$plugin_data"
             cd "$CLAUDE_PROJECT_DIR"
             eval "$resolved_cmd"
         ) || log_warn "[hooks] Hook command failed for $plugin_name (exit $?), continuing..."
