@@ -83,59 +83,127 @@ for plugin in "${PLUGINS[@]}"; do
 done
 log_info "Plugin installation complete."
 
-# --- Run SessionStart hooks for newly installed plugins ---
-# On a fresh session, plugins are installed above but their SessionStart hooks
-# never fire because the SessionStart event already happened before plugins existed.
-# We manually discover and execute those hooks here.
+# --- Run plugin lifecycle hooks for newly installed plugins ---
+# On a fresh session, plugins are installed above but their lifecycle hooks
+# (Setup{init} and SessionStart) never fire because those events already
+# happened before plugins existed. We manually discover and execute those
+# hooks here, mirroring what the agent launcher does via `claude --init-only`
+# in interactive sessions.
+#
+# Order matters:
+#   1. Setup{trigger:"init"} hooks fire first — these set up persistent
+#      data (e.g. shared-lib copies bundled libs into CLAUDE_PLUGIN_DATA).
+#   2. SessionStart hooks fire second — by then any state Setup hooks
+#      created is on disk for SessionStart hooks to consume.
+#
+# We also walk the dependency graph: a plugin in INSTALLED_PLUGINS may pull
+# in transitive deps (e.g. mise depends on shared-lib) that were installed
+# by `claude plugin install` but aren't in `enabledPlugins` themselves.
+# Those deps' lifecycle hooks must also fire here, otherwise dependents'
+# wait-and-source guards will time out.
 
 PLUGIN_CACHE="${HOME}/.claude/plugins/cache"
 
-run_plugin_session_hooks() {
-    local plugin_spec="$1"  # e.g. "mise@ai-mktpl"
+# Resolve the plugin cache directory for a given spec ("name@marketplace").
+# Prints the resolved directory on stdout. Returns non-zero on failure.
+_resolve_plugin_dir() {
+    local plugin_spec="$1"
+    local plugin_name marketplace cache_base plugin_dir
+    plugin_name="${plugin_spec%%@*}"
+    marketplace="${plugin_spec##*@}"
+    if [ -z "$marketplace" ] || [ "$marketplace" = "$plugin_spec" ]; then
+        return 1
+    fi
+    cache_base="${PLUGIN_CACHE}/${marketplace}/${plugin_name}"
+    [ -d "$cache_base" ] || return 1
+    plugin_dir="$(ls -1d "${cache_base}/"*/ 2>/dev/null | sort -V | tail -1)"
+    [ -n "$plugin_dir" ] || return 1
+    printf "%s" "${plugin_dir%/}"
+}
+
+# Read transitive dependencies declared in a plugin's plugin.json.
+# Prints "name@marketplace" specs on stdout, one per line.
+# Per Claude Code plugin-deps docs, deps default to the same marketplace
+# as the parent plugin if `.marketplace` is not set on the dep entry.
+_discover_dependencies() {
+    local plugin_spec="$1"
+    local marketplace="${plugin_spec##*@}"
+    local plugin_dir plugin_json
+    plugin_dir="$(_resolve_plugin_dir "$plugin_spec")" || return 0
+    plugin_json="${plugin_dir}/.claude-plugin/plugin.json"
+    [ -f "$plugin_json" ] || return 0
+    jq -r --arg m "$marketplace" '
+        .dependencies // [] | .[] |
+        "\(.name)@\(.marketplace // $m)"
+    ' "$plugin_json" 2>/dev/null
+}
+
+# Build the full set of installed plugins by walking dependencies BFS-style.
+# Result is in ALL_PLUGIN_SPECS (in discovery order: roots before transitive deps).
+ALL_PLUGIN_SPECS=()
+declare -A _seen_plugin
+_walk_deps() {
+    local queue=("$@")
+    while [ ${#queue[@]} -gt 0 ]; do
+        local spec="${queue[0]}"
+        queue=("${queue[@]:1}")
+        if [ -n "${_seen_plugin[$spec]:-}" ]; then
+            continue
+        fi
+        _seen_plugin[$spec]=1
+        ALL_PLUGIN_SPECS+=("$spec")
+        # Append discovered deps to the queue
+        while IFS= read -r dep; do
+            [ -z "$dep" ] && continue
+            queue+=("$dep")
+        done < <(_discover_dependencies "$spec")
+    done
+}
+
+# Run lifecycle hooks for a single plugin.
+#   $1 — plugin spec ("name@marketplace")
+#   $2 — event name ("Setup" or "SessionStart")
+#   $3 — matcher ("init" for Setup{init}, empty to match all matchers)
+run_plugin_hooks() {
+    local plugin_spec="$1"
+    local event="$2"
+    local matcher="${3:-}"
     local plugin_name marketplace plugin_dir hooks_file
 
-    # Parse plugin@marketplace
     plugin_name="${plugin_spec%%@*}"
     marketplace="${plugin_spec##*@}"
 
-    if [ -z "$marketplace" ] || [ "$marketplace" = "$plugin_spec" ]; then
-        log_step "hooks" "Cannot parse marketplace from '$plugin_spec', skipping"
+    plugin_dir="$(_resolve_plugin_dir "$plugin_spec")" || {
+        log_step "hooks" "Cannot resolve plugin dir for '$plugin_spec', skipping"
         return 0
-    fi
-
-    # Find the plugin cache directory (pick latest version by modification time)
-    local cache_base="${PLUGIN_CACHE}/${marketplace}/${plugin_name}"
-    if [ ! -d "$cache_base" ]; then
-        log_step "hooks" "No cache dir for $plugin_spec, skipping"
-        return 0
-    fi
-
-    # Get the latest version directory by semver sorting
-    plugin_dir="$(ls -1d "${cache_base}/"*/ 2>/dev/null | sort -V | tail -1)"
-    if [ -z "$plugin_dir" ]; then
-        log_step "hooks" "No version dir in $cache_base, skipping"
-        return 0
-    fi
-    # Remove trailing slash
-    plugin_dir="${plugin_dir%/}"
+    }
 
     hooks_file="${plugin_dir}/hooks/hooks.json"
     if [ ! -f "$hooks_file" ]; then
-        log_step "hooks" "No hooks.json for $plugin_name, skipping"
         return 0
     fi
 
-    # Extract SessionStart hook commands from hooks.json
-    # Use `local commands=$(...)` so `local` swallows jq's exit code under set -e
-    local commands=$(jq -r '
-        .hooks.SessionStart // [] | .[] |
-        .hooks // [] | .[] |
-        select(.type == "command") |
-        .command
-    ' "$hooks_file" 2>/dev/null)
+    # Extract command strings for this event (and matcher, if specified).
+    # Use `local commands=$(...)` so `local` swallows jq's exit code under set -e.
+    local commands
+    if [ -n "$matcher" ]; then
+        commands=$(jq -r --arg evt "$event" --arg m "$matcher" '
+            .hooks[$evt] // [] | .[] |
+            select((.matcher // "") == $m) |
+            .hooks // [] | .[] |
+            select(.type == "command") |
+            .command
+        ' "$hooks_file" 2>/dev/null)
+    else
+        commands=$(jq -r --arg evt "$event" '
+            .hooks[$evt] // [] | .[] |
+            .hooks // [] | .[] |
+            select(.type == "command") |
+            .command
+        ' "$hooks_file" 2>/dev/null)
+    fi
 
     if [ -z "$commands" ]; then
-        log_step "hooks" "No SessionStart hooks for $plugin_name"
         return 0
     fi
 
@@ -148,7 +216,9 @@ run_plugin_session_hooks() {
     local plugin_data="${HOME}/.claude/plugins/data/${plugin_id}"
     mkdir -p "$plugin_data"
 
-    log_step "hooks" "Running SessionStart hooks for $plugin_name..."
+    local label="$event"
+    [ -n "$matcher" ] && label="${event}{${matcher}}"
+    log_step "hooks" "Running ${label} hooks for $plugin_name..."
     while IFS= read -r cmd; do
         [ -z "$cmd" ] && continue
         # Replace ${CLAUDE_PLUGIN_ROOT} and ${CLAUDE_PLUGIN_DATA} with actual paths
@@ -160,16 +230,31 @@ run_plugin_session_hooks() {
             export CLAUDE_PLUGIN_DATA="$plugin_data"
             cd "$CLAUDE_PROJECT_DIR"
             eval "$resolved_cmd"
-        ) || log_warn "[hooks] Hook command failed for $plugin_name (exit $?), continuing..."
+        ) || log_warn "[hooks] ${label} hook command failed for $plugin_name (exit $?), continuing..."
     done <<< "$commands"
 }
 
 if [ ${#INSTALLED_PLUGINS[@]} -gt 0 ]; then
-    log_info "Running SessionStart hooks for installed plugins..."
-    for plugin in "${INSTALLED_PLUGINS[@]}"; do
-        run_plugin_session_hooks "$plugin"
+    log_info "Discovering plugin dependency graph..."
+    _walk_deps "${INSTALLED_PLUGINS[@]}"
+    log_info "Plugins to process (incl. transitive deps): ${ALL_PLUGIN_SPECS[*]}"
+
+    # Phase 1: Setup{trigger:"init"} hooks across all plugins.
+    # This is the web-session equivalent of `claude --init-only`'s pre-pass:
+    # it lets infrastructure plugins (e.g. shared-lib) prepare persistent data
+    # before any SessionStart hook in a dependent plugin tries to consume it.
+    log_info "Running Setup{init} hooks..."
+    for plugin in "${ALL_PLUGIN_SPECS[@]}"; do
+        run_plugin_hooks "$plugin" "Setup" "init"
     done
-    log_info "Plugin SessionStart hooks complete."
+    log_info "Setup{init} hooks complete."
+
+    # Phase 2: SessionStart hooks across all plugins.
+    log_info "Running SessionStart hooks..."
+    for plugin in "${ALL_PLUGIN_SPECS[@]}"; do
+        run_plugin_hooks "$plugin" "SessionStart" ""
+    done
+    log_info "SessionStart hooks complete."
 else
-    log_info "No plugins installed, skipping SessionStart hooks."
+    log_info "No plugins installed, skipping lifecycle hooks."
 fi

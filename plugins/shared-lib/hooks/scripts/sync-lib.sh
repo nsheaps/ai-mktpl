@@ -55,12 +55,21 @@ if [ "$NEW_MANIFEST" = "$OLD_MANIFEST" ] && [ -n "$OLD_MANIFEST" ]; then
 fi
 
 # Manifest differs (first run, plugin update, or content drift).
-# Copy each file individually (avoid `cp -r src/.` quirks across systems).
+# Copy each file via mktemp + mv for atomic replacement. `cp -f` is NOT
+# atomic — it opens dst with O_TRUNC and writes sequentially, so a concurrent
+# reader (e.g. a dependent plugin's wait-and-source guard during an update)
+# could observe a partially-written file. `mv` on the same filesystem is a
+# rename(2) syscall, which atomically replaces the destination.
+# The temp prefix (".<base>.XXXXXX") keeps temp files alphabetically distinct
+# and out of the way of dependents that glob for "*.sh".
 log "syncing lib/ to ${DST_DIR}"
 copied=0
 for f in "$SRC_DIR"/*.sh; do
   [ -e "$f" ] || continue
-  cp -f "$f" "$DST_DIR/"
+  base="$(basename "$f")"
+  tmp="$(mktemp "$DST_DIR/.${base}.XXXXXX")"
+  cp -f "$f" "$tmp"
+  mv -f "$tmp" "$DST_DIR/$base"
   copied=$((copied + 1))
 done
 

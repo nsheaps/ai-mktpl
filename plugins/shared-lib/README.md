@@ -6,7 +6,7 @@ plugins in this marketplace.
 ## Why this plugin exists
 
 Many plugins in `nsheaps/ai-mktpl` share the same bash helpers
-(`logging.sh`, `hook-logging.sh`, `plugin-config-read.sh`, etc.). Historically
+(`log.sh`, `hook-logging.sh`, `plugin-config-read.sh`, etc.). Historically
 these were file-level symlinks from each plugin's `lib/` to the repo's
 `shared/lib/`. After Claude Code v2.1.117 ([upstream
 issue](https://github.com/anthropics/claude-code/issues/53948)), symlinks are
@@ -82,6 +82,31 @@ strips the dependent plugin's own data-dir name and rebuilds the path to
 `shared-lib`'s data dir. (Plugin data dir IDs are deterministic:
 `{plugin-name}-{marketplace-name}` per the
 [plugins reference](https://code.claude.com/docs/en/plugins-reference#persistent-data-directory).)
+
+### Marketplace name constraint
+
+The hardcoded `shared-lib-ai-mktpl` suffix in the path above means **this
+marketplace must be installed under the canonical name `ai-mktpl`** for
+dependent plugins to resolve `shared-lib`'s data dir.
+
+Claude Code lets users alias a marketplace at install time:
+
+```bash
+# WRONG — aliasing breaks shared-lib resolution:
+claude plugin marketplace add nsheaps/ai-mktpl --name nsheaps-ai
+
+# CORRECT — keep the default name:
+claude plugin marketplace add nsheaps/ai-mktpl
+```
+
+If you alias to anything other than `ai-mktpl`, every dependent plugin's
+`_wait_for_shared_lib` guard will time out after 10s because the
+hardcoded path expression won't resolve to the actual data dir.
+
+This constraint is repeated in `.claude/rules/shared-libs.md` and in the
+bootstrap stanza of every dependent plugin (23 sites today). A future
+refactor (tracked as a follow-up) may derive the marketplace suffix from
+`CLAUDE_PLUGIN_DATA` instead of hardcoding it.
 
 ## Bundled libraries
 
