@@ -300,7 +300,7 @@ fi
 
 hook_log_step "gh-config-dir" "Creating isolated GH_CONFIG_DIR"
 
-GH_CONFIG_DIR="${AGENT_CONFIG_DIR}/gh-config"
+GH_CONFIG_DIR="${AGENT_CONFIG_DIR}/gh"
 mkdir -p "$GH_CONFIG_DIR"
 chmod 700 "$GH_CONFIG_DIR"
 export GH_CONFIG_DIR
