@@ -16,5 +16,6 @@
     "session-start",
     "web-session",
     "auto-install"
-  ]
+  ],
+  "dependencies": [{ "name": "shared-lib", "version": "^1.0" }]
 }

@@ -1,6 +1,15 @@
 # Shared Logging Libraries
 
-This document describes the shared logging libraries available in `shared/lib/` for use by plugins and project hooks.
+This document describes the shared logging libraries bundled in
+`plugins/shared-lib/lib/`. Other plugins declare `shared-lib` as a dependency
+and source these libs from its persistent data directory at runtime.
+
+> **Note:** As of the BUG-17 redesign, these libraries live in the dedicated
+> `shared-lib` plugin (formerly `shared/lib/`). See
+> [`.claude/rules/shared-libs.md`](../.claude/rules/shared-libs.md) for the
+> current consumption pattern (`_wait_for_shared_lib` + `source
+"$SHARED_LIB_DIR/..."`). The function signatures and behaviors below are
+> unchanged.
 
 ## Overview
 

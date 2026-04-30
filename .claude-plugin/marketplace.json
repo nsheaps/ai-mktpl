@@ -715,6 +715,18 @@
       ]
     },
     {
+      "name": "shared-lib",
+      "description": "Shared bash libraries used by other ai-mktpl plugins (logging, hook output, config reading, settings writing, tool install). Other plugins declare this as a dependency and source the libs from this plugin's persistent data directory at runtime.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/shared-lib",
+      "category": "utility",
+      "tags": ["utility"],
+      "keywords": ["shared", "library", "bash", "logging", "hooks", "infrastructure"]
+    },
+    {
       "name": "skill-required",
       "description": "Enforces that specified skills are loaded before certain tools can be used. Tracks skill reads via PostToolUse and blocks tool use via PreToolUse if the required skill hasn't been recently loaded.",
       "version": "0.1.4",
