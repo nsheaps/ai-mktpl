@@ -87,27 +87,29 @@ export GITHUB_TOKEN_FILE="$TOKEN_FILE"
 source "${CLAUDE_PLUGIN_ROOT}/lib/token-utils.sh"
 
 # --- Refresh or regenerate ---
+#
+# Decision: try refresh only when the token is healthy and within the refresh
+# window (≤ 45 min remaining). Otherwise (missing/expired/refresh-failed),
+# regenerate from scratch via JWT signing. One linear path, one fallback.
 
 hook_log_step "token" "Refreshing or regenerating installation token"
 
 _minutes="$(get_minutes_remaining)"
-_regen_needed=false
+_should_regen=true
 case "$_minutes" in
-  missing|expired) _regen_needed=true ;;
+  missing|expired) ;;  # regen
+  *)
+    if (( _minutes > 45 )); then
+      _should_regen=false  # token healthy, no action
+    elif "${CLAUDE_PLUGIN_ROOT}/bin/token-check.sh" --sync --quiet; then
+      _should_regen=false  # refresh succeeded
+    else
+      hook_log "token-check refresh failed; falling back to fresh generation"
+    fi
+    ;;
 esac
 
-# If we have a token but it's close to expiry, try the refresh path first;
-# fall back to a fresh generation on failure.
-if [[ "$_regen_needed" == "false" ]]; then
-  if (( _minutes <= 45 )); then
-    if ! "${CLAUDE_PLUGIN_ROOT}/bin/token-check.sh" --sync --quiet; then
-      hook_log "token-check refresh failed; falling back to fresh generation"
-      _regen_needed=true
-    fi
-  fi
-fi
-
-if [[ "$_regen_needed" == "true" ]]; then
+if [[ "$_should_regen" == "true" ]]; then
   TOKEN_OUTPUT="$("${CLAUDE_PLUGIN_ROOT}/bin/generate-token.sh" \
     "$GITHUB_APP_ID" \
     "$GITHUB_APP_PRIVATE_KEY_PATH" \

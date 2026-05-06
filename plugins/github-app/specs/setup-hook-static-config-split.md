@@ -162,21 +162,20 @@ sources the resulting `.env.local` and unsets contaminating vars before exec).
 
 ## Future work (intentionally out of scope)
 
-The current architecture is a stopgap until the in-flight TS rewrite. Several
-follow-ups are tracked for after that lands:
+One follow-up remains, tracked in [ai-mktpl#491](https://github.com/nsheaps/ai-mktpl/issues/491):
 
-- **Move 1pass secret fetching into a Setup hook** (today it's done by
-  `bin/agent` sourcing `.env.local` produced by the 1pass plugin's hook). This
-  is blocked on MCP server env propagation: MCP servers spawn before
-  SessionStart, so they need env populated by the launcher today.
-- **mcpmon-style watcher** for `.env.local` change → restart MCP servers
-  (companion to the above).
-- **CLAUDE_ENV_FILE source-of-source pattern**: the plugin should write *only*
-  `source` directives into CLAUDE_ENV_FILE pointing at `static.env` /
-  `runtime.env` / `git-identity.env`, never inline values, so re-sourcing
-  reflects current state.
-- **TS rewrite**: the whole bash plumbing will likely be replaced. Don't
-  invest heavily in further refinement here.
+- **mcpmon-style watcher** for `.env.local` change → restart MCP servers,
+  *combined with* moving the 1pass secret fetch into a Setup hook. These two
+  pieces share the same blocker — MCP server env propagation — and should
+  ship together. Once the watcher exists, the plugin can stop relying on
+  `bin/agent` to source `.env.local`.
+
+The TS rewrite of plugin bash scripts is tracked separately in
+[ai-mktpl#312](https://github.com/nsheaps/ai-mktpl/issues/312); it does not
+gate on this spec.
+
+The `CLAUDE_ENV_FILE` source-of-source pattern is implemented inline in this
+PR — see "SessionStart hook" steps 4 above.
 
 ## Test plan
 

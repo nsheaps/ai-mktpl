@@ -100,8 +100,9 @@ TOKEN_FILE="${GITHUB_APP_CONFIG_DIR}/token"
   "${GITHUB_INSTALLATION_ID}" \
   "${TOKEN_FILE}"
 
-# --- Migrate from pre-0.4.0 flat layout (kept one cycle for auto-cleanup) ---
-migrate_legacy_layout
+# Note: migrate_legacy_layout runs unconditionally in github-token-init.sh
+# (SessionStart) every session, so we don't duplicate it here. The Setup hook
+# fires before SessionStart, and on first run there's nothing to migrate.
 
 hook_log "Setup complete: ${GITHUB_APP_CONFIG_DIR}"
 hook_log_cleanup
