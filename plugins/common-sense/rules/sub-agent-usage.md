@@ -52,3 +52,53 @@ Trivial single-command sub-agents where the plan is obvious from the prompt (e.g
 - ALL sub-agents, regardless of purpose (implementation, research, review, etc.)
 - Background agents dispatched via the Agent tool
 - Any spawned execution where the parent agent won't see intermediate progress before the work is complete
+
+## Verify Sub-Agent Output Against the ORIGINAL Ask
+
+**CRITICAL:** A sub-agent's "PASS" / "DONE" report only proves the work it built passes the assertions IT wrote. It does NOT prove the work matches what the user originally asked for. You as the orchestrator are responsible for that match — the sub-agent cannot be, because it never sees the user's original message, only the prompt you gave it (your interpretation).
+
+### The Failure Mode
+
+You delegate Task X to a sub-agent. The sub-agent (correctly, on its own scope) builds a subset of X, writes assertions for that subset, and reports PASS. You forward that PASS to the user as "Task X done." The user — who has the original spec in their head — points out the delivered work doesn't match. The sub-agent didn't lie; you skipped the comparison.
+
+### Required Verification Step
+
+Before reporting any delegated task as done, EVERY TIME:
+
+1. Re-read the user's ORIGINAL ask verbatim (not your interpretation, not the sub-agent's prompt, not the plan)
+2. Enumerate its concrete requirements as a checklist
+3. For each requirement, point to specific evidence in the sub-agent's deliverable that satisfies it (file path + line, log line, test name, commit hash)
+4. If ANY requirement isn't met or isn't verifiable from the deliverable, the task is NOT done. Either iterate the sub-agent on the gap or take the work back over yourself.
+
+### Why "PASS" Doesn't Mean "Done"
+
+- Sub-agents assert against their own understood scope — by default narrower than the original ask
+- Sub-agents are optimistic: they want to report success and will define success in terms they can prove
+- Sub-agents never see the user's original message — only the prompt you gave them
+- A passing test suite is necessary but not sufficient
+
+### Anti-Pattern
+
+```
+Sub-agent: "PASS — 15/15 assertions green, commit abc1234"
+You → user: "Task #N done."
+```
+
+### Correct Pattern
+
+```
+Sub-agent: "PASS — 15/15 assertions green, commit abc1234"
+You: [re-read original ask] → [build checklist] → [verify each item against deliverable]
+You → user: "Original ask required A, B, C, D, E. Verified:
+  - A ✓ (assert 3 in test file)
+  - B ✓ (commit abc1234 lines 50-70)
+  - C ✗ (sub-agent didn't implement)
+  - D, E ✓
+C is missing — task is not done. Continuing on it."
+```
+
+### Applies To
+
+- All sub-agent-delegated tasks before reporting completion to the user
+- Especially when the task originated from a user request (vs. internal planning)
+- The handoff from sub-agent back to you is the highest-risk moment for false-completion claims
