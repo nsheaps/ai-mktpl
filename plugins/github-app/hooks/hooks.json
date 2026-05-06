@@ -1,6 +1,18 @@
 {
-  "description": "GitHub App token lifecycle: generate on session start, refresh before expiry via PreToolUse hook",
+  "description": "GitHub App token lifecycle: provision static config + initial token via Setup{init}, refresh on SessionStart and PreToolUse",
   "hooks": {
+    "Setup": [
+      {
+        "matcher": "init",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/install.sh",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "matcher": "*",

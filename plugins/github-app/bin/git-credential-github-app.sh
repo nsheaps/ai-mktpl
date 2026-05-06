@@ -14,9 +14,16 @@ set -euo pipefail
 # shellcheck source=../lib/agent-paths.sh
 _self="${BASH_SOURCE[0]}"
 while [ -L "$_self" ]; do _self="$(readlink -f "$_self")"; done
+# git invokes this helper in subprocesses where AGENT_NAME may already be
+# exported. If GITHUB_TOKEN_FILE is explicitly set (typical when SessionStart
+# has run), we skip the agent-name guard since the token path is already
+# resolved.
+if [[ -n "${GITHUB_TOKEN_FILE:-}" ]]; then
+  GITHUB_APP_ALLOW_UNKNOWN_AGENT=1
+fi
 source "$(cd "$(dirname "$_self")/.." && pwd)/lib/agent-paths.sh"
 
-TOKEN_FILE="${GITHUB_TOKEN_FILE:-${AGENT_CONFIG_DIR}/github-token}"
+TOKEN_FILE="${GITHUB_TOKEN_FILE:-${GITHUB_APP_CONFIG_DIR}/token}"
 
 # Only respond to "get" requests
 case "${1:-}" in

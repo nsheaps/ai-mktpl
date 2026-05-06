@@ -37,9 +37,8 @@ _self="${BASH_SOURCE[0]}"
 while [ -L "$_self" ]; do _self="$(readlink -f "$_self")"; done
 source "$(cd "$(dirname "$_self")/.." && pwd)/lib/agent-paths.sh"
 
-TOKEN_FILE="${GITHUB_TOKEN_FILE:-${AGENT_CONFIG_DIR}/github-token}"
+TOKEN_FILE="${GITHUB_TOKEN_FILE:-${GITHUB_APP_CONFIG_DIR}/token}"
 META_FILE="${TOKEN_FILE}.meta"
-ENV_RUNTIME_FILE="${GITHUB_APP_ENV_FILE:-${AGENT_CONFIG_DIR}/github-app-env}"
 LOCKFILE="${TOKEN_FILE}.lock"
 COOLDOWN_FILE="${TOKEN_FILE}.cooldown"
 REFRESH_THRESHOLD_MINUTES=45  # Proactively refresh when <=45 min remain (token lasts 1h)
@@ -97,6 +96,13 @@ release_lock() {
 PLUGIN_DIR="$(cd "$(dirname "$_self")/.." && pwd)"
 source "$PLUGIN_DIR/lib/token-utils.sh"
 source "$PLUGIN_DIR/lib/env-file.sh"
+
+# Load static config — the source of truth for APP_ID / installation / PEM
+# (BUG-19). NEVER trust process env for these fields.
+if ! read_static_env_file 2>/dev/null; then
+  log_error "static.env missing or invalid — run \`claude --init-only\` to provision"
+  exit 2
+fi
 
 # update_runtime_env TOKEN — rewrites runtime env file AND gitconfig on each refresh
 update_runtime_env() {
@@ -157,16 +163,10 @@ do_refresh_with_retries() {
 
 # --- Main logic ---
 
-# Check credentials exist.
-# PreToolUse has a shorter time budget than SessionStart, so we use a 5s
-# wait here to handle the case where another plugin is still injecting
-# credentials (hook ordering race).
-if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_APP_PRIVATE_KEY_PATH:-}" || -z "${GITHUB_INSTALLATION_ID:-}" ]]; then
-  source "$PLUGIN_DIR/lib/resolve-secrets.sh"
-  if ! wait_for_env_file GITHUB_APP_ID GITHUB_APP_PRIVATE_KEY_PATH GITHUB_INSTALLATION_ID --timeout 5; then
-    exit 2
-  fi
-fi
+# Static config has already been sourced above via read_static_env_file —
+# GITHUB_APP_ID / _PATH / INSTALLATION_ID are guaranteed set at this point.
+# We deliberately do NOT fall back to CLAUDE_ENV_FILE-injected values: that
+# was the BUG-19 contamination vector.
 
 # Check cooldown
 check_cooldown || exit $?

@@ -15,7 +15,7 @@ _self="${BASH_SOURCE[0]}"
 while [ -L "$_self" ]; do _self="$(readlink -f "$_self")"; done
 source "$(cd "$(dirname "$_self")/.." && pwd)/lib/agent-paths.sh"
 
-TOKEN_FILE="${GITHUB_TOKEN_FILE:-${AGENT_CONFIG_DIR}/github-token}"
+TOKEN_FILE="${GITHUB_TOKEN_FILE:-${GITHUB_APP_CONFIG_DIR}/token}"
 META_FILE="${TOKEN_FILE}.meta"
 
 # Check if token exists
