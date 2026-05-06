@@ -58,11 +58,11 @@ prevent one agent from clobbering another's files.
 
 ### Lifecycle ownership
 
-| Phase            | Hook event              | Trigger              | Writes                                | Reads                                       |
-|------------------|-------------------------|----------------------|---------------------------------------|---------------------------------------------|
-| Install/upgrade  | `Setup{matcher: init}`  | `claude --init-only` | static.env, private-key.pem, initial token + meta | plugin config (`ref:` op://, `secrets.*`)   |
-| Session start    | `SessionStart`          | every session        | runtime.env, git-identity.env, gitconfig | static.env, token + meta                |
-| Pre-tool-use     | `PreToolUse`            | every Bash tool call | runtime.env (token only)              | static.env, token + meta                    |
+| Phase           | Hook event             | Trigger              | Writes                                            | Reads                                     |
+| --------------- | ---------------------- | -------------------- | ------------------------------------------------- | ----------------------------------------- |
+| Install/upgrade | `Setup{matcher: init}` | `claude --init-only` | static.env, private-key.pem, initial token + meta | plugin config (`ref:` op://, `secrets.*`) |
+| Session start   | `SessionStart`         | every session        | runtime.env, git-identity.env, gitconfig          | static.env, token + meta                  |
+| Pre-tool-use    | `PreToolUse`           | every Bash tool call | runtime.env (token only)                          | static.env, token + meta                  |
 
 The Setup hook is the **only** writer of static config. SessionStart and
 PreToolUse exclusively read it; they never re-derive APP_ID etc. from process
@@ -199,6 +199,7 @@ If Setup fails, the next `claude --init-only` retries from scratch. There is
 no cooldown for Setup itself.
 
 ### SessionStart hook (`hooks/scripts/session-start.sh`, renamed from
+
 `github-token-init.sh`)
 
 1. Source `lib/agent-paths.sh` (fails loud on unknown agent).
@@ -215,8 +216,8 @@ no cooldown for Setup itself.
    - `missing|expired` → call `bin/generate-token.sh` (full re-auth from PEM).
    - valid but `<= 45 min` → call `bin/token-check.sh --sync` (refresh).
    - valid → no-op for token, just rewrite runtime.env.
-   If refresh fails, fall back to `generate-token` (so the initial token's 1h
-   TTL having expired by the next session is harmless).
+     If refresh fails, fall back to `generate-token` (so the initial token's 1h
+     TTL having expired by the next session is harmless).
 6. Resolve the bot identity from `token.meta` (`app_slug`, `bot_id`). If
    `bot_id` missing, fall back to the existing public-`/users/<slug>[bot]`
    resolution. If still unresolvable, refuse to write git identity (existing
@@ -232,6 +233,7 @@ no cooldown for Setup itself.
    ```
 
 ### PreToolUse hook (`hooks/scripts/pre-tool-use.sh`, renamed from
+
 `github-token-check.sh`)
 
 1. Source `lib/agent-paths.sh`.
@@ -323,12 +325,12 @@ and `hooks/scripts/`. New scripts must pass shellcheck-clean.
 
 ## Migration risks
 
-| Risk                                                | Mitigation                                                      |
-|-----------------------------------------------------|-----------------------------------------------------------------|
-| Existing sessions running 0.3.5 mid-flight          | SessionStart fallback calls install.sh if static.env missing    |
-| `tokenFile` setting overrides the new default path  | Honored unchanged; migration only touches the default location  |
-| User has manually placed a PEM at the old path      | Setup canonicalizes any configured path; doesn't move user PEMs |
-| Old `github-app-env` was the only proof-of-config   | Setup re-resolves from `ref:`/`secrets.*`, so it is reproducible |
+| Risk                                               | Mitigation                                                       |
+| -------------------------------------------------- | ---------------------------------------------------------------- |
+| Existing sessions running 0.3.5 mid-flight         | SessionStart fallback calls install.sh if static.env missing     |
+| `tokenFile` setting overrides the new default path | Honored unchanged; migration only touches the default location   |
+| User has manually placed a PEM at the old path     | Setup canonicalizes any configured path; doesn't move user PEMs  |
+| Old `github-app-env` was the only proof-of-config  | Setup re-resolves from `ref:`/`secrets.*`, so it is reproducible |
 
 ## Version
 
