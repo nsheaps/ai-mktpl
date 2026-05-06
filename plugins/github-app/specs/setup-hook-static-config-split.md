@@ -22,7 +22,7 @@ permanently — every subsequent refresh re-cemented the wrong values.
    files, owned by distinct hooks.
 3. **Refuse to run with an unknown agent identity.** If `AGENT_NAME` is unset or
    `_UNKNOWN`, hard-fail rather than write into a shared path.
-4. **Adopt an XDG-style per-app subdirectory** (`${AGENT_CONFIG_DIR}/github-app/`).
+4. **Adopt the XDG Base Directory spec** — derive paths from `${XDG_CONFIG_HOME}/github-app/` (the launcher sets XDG_CONFIG_HOME to the agent's config root).
 5. **Self-migrate** existing agents away from the pre-0.4.0 flat env file.
 
 ## Design
