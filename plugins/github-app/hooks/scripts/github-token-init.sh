@@ -56,11 +56,23 @@ if ! read_static_env_file; then
   rc=$?
   if [[ $rc -eq 1 ]]; then
     hook_log "static.env missing — running Setup (install.sh) inline as fallback"
-    if ! bash "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/install.sh" >/dev/null 2>&1; then
+    # Capture stderr to a temp file so we can surface real diagnostics on
+    # failure (op CLI missing, vault unreachable, PEM perms wrong, etc.).
+    # Discarding stderr here would leave operators with an opaque "fallback
+    # failed" line. (See PR #487 review.)
+    _install_stderr="$(mktemp)"
+    if ! bash "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/install.sh" >/dev/null 2>"$_install_stderr"; then
       hook_log "install.sh fallback failed; plugin not configured, skipping"
+      if [[ -s "$_install_stderr" ]]; then
+        while IFS= read -r line; do
+          hook_log "[install.sh] $line"
+        done < "$_install_stderr"
+      fi
+      rm -f "$_install_stderr"
       hook_log_cleanup
       hook_respond; exit 0
     fi
+    rm -f "$_install_stderr"
     if ! read_static_env_file; then
       hook_log "static.env still missing after install.sh; skipping"
       hook_log_cleanup
