@@ -173,7 +173,7 @@ sources the resulting `.env.local` and unsets contaminating vars before exec).
 One follow-up remains, tracked in [ai-mktpl#491](https://github.com/nsheaps/ai-mktpl/issues/491):
 
 - **mcpmon-style watcher** for `.env.local` change → restart MCP servers,
-  *combined with* moving the 1pass secret fetch into a Setup hook. These two
+  _combined with_ moving the 1pass secret fetch into a Setup hook. These two
   pieces share the same blocker — MCP server env propagation — and should
   ship together. Once the watcher exists, the plugin can stop relying on
   `bin/agent` to source `.env.local`.
