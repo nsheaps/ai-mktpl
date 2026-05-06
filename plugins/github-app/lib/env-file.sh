@@ -27,10 +27,13 @@
 if [ "${_ENV_FILE_LOADED:-}" = "true" ]; then return 0; fi
 _ENV_FILE_LOADED="true"
 
-# Source agent-paths for AGENT_CONFIG_DIR / GITHUB_APP_CONFIG_DIR
+# Source agent-paths for AGENT_CONFIG_DIR / GITHUB_APP_CONFIG_DIR.
+# `agent-paths.sh` self-guards on `[[ -n "${_AGENT_PATHS_LOADED:-}" ]]` and sets
+# the flag to `1`, so we match the same string-presence check here rather than
+# comparing to the literal "true". (See PR #487 review.)
 _env_file_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=agent-paths.sh
-[[ "${_AGENT_PATHS_LOADED:-}" == "true" ]] || source "$_env_file_dir/agent-paths.sh"
+[[ -n "${_AGENT_PATHS_LOADED:-}" ]] || source "$_env_file_dir/agent-paths.sh"
 
 # Canonical paths under GITHUB_APP_CONFIG_DIR. Callers may override TOKEN_FILE
 # (via GITHUB_TOKEN_FILE / config "tokenFile") but not the static/runtime paths.
