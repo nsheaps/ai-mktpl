@@ -165,16 +165,27 @@ fi
 #   - an op:// reference ("op://vault/item/field")
 # Disallowed:
 #   - bash-style ${VAR} interpolation — hard-fail with a clear message.
-_resolve_static_secret_value() {
+
+# Reject ${VAR} interpolation BEFORE calling the resolver — the resolver runs
+# in a $() subshell, so exit 0 there would only kill the subshell and let a
+# corrupt static.env get written (the captured stdout, including the hook log
+# dump from `hook_respond`, would become the field value). Done in the main
+# shell context, `exit 0` actually halts the script.
+# (See https://github.com/nsheaps/ai-mktpl/pull/487#discussion_r3196956510)
+_reject_static_interpolation() {
   local raw="$1" name="$2"
-  [[ -z "$raw" ]] && { echo ""; return 0; }
-  if [[ "$raw" =~ ^\$\{[A-Za-z_][A-Za-z0-9_]*\}$ ]]; then
+  if [[ -n "$raw" && "$raw" =~ ^\$\{[A-Za-z_][A-Za-z0-9_]*\}$ ]]; then
     hook_fail "secrets-interpolation" \
       "secrets.${name} uses \${VAR} interpolation, which is forbidden for static fields (BUG-19)" \
       "Use a literal value or an op:// reference; \${VAR} would let process env contaminate static.env"
     hook_respond
     exit 0
   fi
+}
+
+_resolve_static_secret_value() {
+  local raw="$1" name="$2"
+  [[ -z "$raw" ]] && { echo ""; return 0; }
   if [[ "$raw" == op://* ]]; then
     if _op_available; then
       op read "$raw" 2>/dev/null || { hook_log "WARNING: failed to resolve $name from $raw"; echo ""; return 0; }
@@ -191,6 +202,14 @@ _sec_installation_id="$(plugin_get_config "secrets.github_installation_id" "")"
 _sec_client_id="$(plugin_get_config "secrets.github_app_client_id" "")"
 _sec_client_secret="$(plugin_get_config "secrets.github_app_client_secret" "")"
 _sec_private_key="$(plugin_get_config "secrets.github_app_private_key" "")"
+
+# Validate-before-resolve: any ${VAR} interpolation halts the script in the
+# main shell context, before any $() substitution can swallow the exit.
+_reject_static_interpolation "$_sec_app_id"          github_app_id
+_reject_static_interpolation "$_sec_installation_id" github_installation_id
+_reject_static_interpolation "$_sec_client_id"       github_app_client_id
+_reject_static_interpolation "$_sec_client_secret"   github_app_client_secret
+_reject_static_interpolation "$_sec_private_key"     github_app_private_key
 
 [[ -n "$_sec_app_id" ]]          && _app_id="$(_resolve_static_secret_value "$_sec_app_id" github_app_id)"
 [[ -n "$_sec_installation_id" ]] && _installation_id="$(_resolve_static_secret_value "$_sec_installation_id" github_installation_id)"
