@@ -29,11 +29,11 @@ permanently — every subsequent refresh re-cemented the wrong values.
 
 ### Lifecycle
 
-| Phase           | Hook                   | Trigger              | Writes                              | Reads                                  |
-| --------------- | ---------------------- | -------------------- | ----------------------------------- | -------------------------------------- |
-| Install/upgrade | `Setup{matcher: init}` | `claude --init-only` | `static.env`, initial token + meta  | process env (set by launcher + 1pass)  |
-| Session start   | `SessionStart`         | every session        | `runtime.env`, `git-identity.env`   | `static.env`, token + meta             |
-| Pre-tool-use    | `PreToolUse`           | every Bash tool call | `runtime.env` (token only)          | `static.env`, token + meta             |
+| Phase           | Hook                   | Trigger              | Writes                             | Reads                                 |
+| --------------- | ---------------------- | -------------------- | ---------------------------------- | ------------------------------------- |
+| Install/upgrade | `Setup{matcher: init}` | `claude --init-only` | `static.env`, initial token + meta | process env (set by launcher + 1pass) |
+| Session start   | `SessionStart`         | every session        | `runtime.env`, `git-identity.env`  | `static.env`, token + meta            |
+| Pre-tool-use    | `PreToolUse`           | every Bash tool call | `runtime.env` (token only)         | `static.env`, token + meta            |
 
 The Setup hook is the **only** writer of static config. SessionStart and
 PreToolUse exclusively read it.
@@ -175,7 +175,7 @@ The TS rewrite of plugin bash scripts is tracked separately in
 gate on this spec.
 
 The `CLAUDE_ENV_FILE` source-of-source pattern is implemented inline in this
-PR — see "SessionStart hook" steps 4 above.
+PR — see "SessionStart hook" step 4 above.
 
 ## Test plan
 
@@ -185,17 +185,17 @@ PR — see "SessionStart hook" steps 4 above.
 - `write_static_env_file` writes the expected fields including `GH_CONFIG_DIR` /
   `GIT_CONFIG_GLOBAL`, chmods 600.
 - Setup with required env vars set writes static.env and mints a token.
-- Setup with required env vars *unset* fails loudly (and does not write a
+- Setup with required env vars _unset_ fails loudly (and does not write a
   partial static.env).
 - Migration: pre-0.4.0 layout is removed after install.sh runs.
 
 ## Migration risks
 
-| Risk                                       | Mitigation                                                       |
-| ------------------------------------------ | ---------------------------------------------------------------- |
-| Existing 0.3.5 sessions running mid-flight | SessionStart fallback calls install.sh if static.env missing     |
-| `tokenFile` config override                | Honored unchanged                                                |
-| User has a manually placed PEM             | Setup canonicalizes any configured path; doesn't move user PEMs  |
+| Risk                                       | Mitigation                                                      |
+| ------------------------------------------ | --------------------------------------------------------------- |
+| Existing 0.3.5 sessions running mid-flight | SessionStart fallback calls install.sh if static.env missing    |
+| `tokenFile` config override                | Honored unchanged                                               |
+| User has a manually placed PEM             | Setup canonicalizes any configured path; doesn't move user PEMs |
 
 ## Version
 
