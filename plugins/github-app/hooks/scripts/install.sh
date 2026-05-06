@@ -98,9 +98,39 @@ if [[ -n "$REF" ]]; then
           "Create the env file or update the 'ref' setting in plugin config"
         hook_respond; exit 0
       fi
-      # Source in a SUBSHELL so the file's contents do not pollute our process env;
-      # then read out the specific fields we want.
-      while IFS='=' read -r k v; do
+      # Source in an isolated SUBSHELL so the file's contents do not pollute our
+      # process env; then read out the specific fields we want.
+      #
+      # We use NUL-delimited records (`env -0`) to correctly handle multi-line
+      # values like PEM keys. NUL bytes can't appear in env values, so this is
+      # the only safe delimiter. Pattern mirrors 1pass/op-exec-env.sh which
+      # solved the same multi-line problem. (See PR #487 review.)
+      _env_eval_stderr="$(mktemp)"
+      _env_eval_output="$(mktemp)"
+      _env_eval_exit=0
+      # shellcheck disable=SC2016  # $1 is for the inner bash, not this shell
+      env -i HOME="$HOME" PATH="$PATH" bash -c '
+        set -e
+        set -a
+        # shellcheck disable=SC1090
+        source "$1"
+        set +a
+        env -0
+      ' _ "$_env_path" 2>"$_env_eval_stderr" > "$_env_eval_output" || _env_eval_exit=$?
+
+      if [[ $_env_eval_exit -ne 0 ]]; then
+        _err_msg=""
+        [[ -s "$_env_eval_stderr" ]] && _err_msg="$(cat "$_env_eval_stderr")"
+        rm -f "$_env_eval_stderr" "$_env_eval_output"
+        hook_fail "env-file" "Failed to source env file: $_env_path${_err_msg:+ — $_err_msg}" \
+          "Check the file is valid bash syntax (quoted multi-line values are OK)"
+        hook_respond; exit 0
+      fi
+
+      while IFS= read -r -d '' record; do
+        [[ -z "$record" ]] && continue
+        k="${record%%=*}"
+        v="${record#*=}"
         case "$k" in
           GITHUB_APP_ID)              _app_id="$v" ;;
           GITHUB_INSTALLATION_ID)     _installation_id="$v" ;;
@@ -109,14 +139,8 @@ if [[ -n "$REF" ]]; then
           GITHUB_APP_CLIENT_ID)       _client_id="$v" ;;
           GITHUB_APP_CLIENT_SECRET)   _client_secret="$v" ;;
         esac
-      done < <(
-        # shellcheck disable=SC1090
-        ( set -a; source "$_env_path"; set +a;
-          for var in GITHUB_APP_ID GITHUB_INSTALLATION_ID GITHUB_APP_PRIVATE_KEY \
-                     GITHUB_APP_PRIVATE_KEY_PATH GITHUB_APP_CLIENT_ID GITHUB_APP_CLIENT_SECRET; do
-            printf '%s=%s\n' "$var" "$(eval "printf %s \"\${$var:-}\"")"
-          done )
-      )
+      done < "$_env_eval_output"
+      rm -f "$_env_eval_stderr" "$_env_eval_output"
       hook_log "Loaded secrets from env file: $_env_path"
       ;;
     *)
@@ -127,24 +151,37 @@ if [[ -n "$REF" ]]; then
   esac
 fi
 
-# Per-field overrides (secrets.*) — each value can be a literal, ${VAR}, or op://field.
-_resolve_secret_value() {
+# Per-field overrides (secrets.*).
+#
+# CRITICAL (BUG-19 / PR #487 review): for static fields (app_id, installation_id,
+# private_key, client_id, client_secret) we MUST NOT resolve ${VAR} from process
+# env. The whole point of the static/runtime split is that process env never
+# flows into static.env. A user with `secrets.github_app_id: "${GITHUB_APP_ID}"`
+# in their settings would otherwise re-introduce the contamination vector at
+# Setup time.
+#
+# Allowed values for a secrets.* override of a static field:
+#   - a literal value ("123456")
+#   - an op:// reference ("op://vault/item/field")
+# Disallowed:
+#   - bash-style ${VAR} interpolation — hard-fail with a clear message.
+_resolve_static_secret_value() {
   local raw="$1" name="$2"
-  [[ -z "$raw" ]] && { echo ""; return; }
-  if [[ "$raw" =~ ^\$\{([A-Za-z_][A-Za-z0-9_]*)\}$ ]]; then
-    # NOTE: env-var interpolation in secrets.* IS still supported here for
-    # NON-static fields (private-key path can come from launcher env). For
-    # static fields this is dangerous — see "_app_id reset" below.
-    echo "${!BASH_REMATCH[1]:-}"
-    return
+  [[ -z "$raw" ]] && { echo ""; return 0; }
+  if [[ "$raw" =~ ^\$\{[A-Za-z_][A-Za-z0-9_]*\}$ ]]; then
+    hook_fail "secrets-interpolation" \
+      "secrets.${name} uses \${VAR} interpolation, which is forbidden for static fields (BUG-19)" \
+      "Use a literal value or an op:// reference; \${VAR} would let process env contaminate static.env"
+    hook_respond
+    exit 0
   fi
   if [[ "$raw" == op://* ]]; then
     if _op_available; then
-      op read "$raw" 2>/dev/null || { hook_log "WARNING: failed to resolve $name from $raw"; echo ""; return; }
-      return
+      op read "$raw" 2>/dev/null || { hook_log "WARNING: failed to resolve $name from $raw"; echo ""; return 0; }
+      return 0
     fi
     hook_log "WARNING: op:// for $name but op unavailable"
-    echo ""; return
+    echo ""; return 0
   fi
   echo "$raw"
 }
@@ -155,11 +192,11 @@ _sec_client_id="$(plugin_get_config "secrets.github_app_client_id" "")"
 _sec_client_secret="$(plugin_get_config "secrets.github_app_client_secret" "")"
 _sec_private_key="$(plugin_get_config "secrets.github_app_private_key" "")"
 
-[[ -n "$_sec_app_id" ]]          && _app_id="$(_resolve_secret_value "$_sec_app_id" github_app_id)"
-[[ -n "$_sec_installation_id" ]] && _installation_id="$(_resolve_secret_value "$_sec_installation_id" github_installation_id)"
-[[ -n "$_sec_client_id" ]]       && _client_id="$(_resolve_secret_value "$_sec_client_id" github_app_client_id)"
-[[ -n "$_sec_client_secret" ]]   && _client_secret="$(_resolve_secret_value "$_sec_client_secret" github_app_client_secret)"
-[[ -n "$_sec_private_key" ]]     && _private_key="$(_resolve_secret_value "$_sec_private_key" github_app_private_key)"
+[[ -n "$_sec_app_id" ]]          && _app_id="$(_resolve_static_secret_value "$_sec_app_id" github_app_id)"
+[[ -n "$_sec_installation_id" ]] && _installation_id="$(_resolve_static_secret_value "$_sec_installation_id" github_installation_id)"
+[[ -n "$_sec_client_id" ]]       && _client_id="$(_resolve_static_secret_value "$_sec_client_id" github_app_client_id)"
+[[ -n "$_sec_client_secret" ]]   && _client_secret="$(_resolve_static_secret_value "$_sec_client_secret" github_app_client_secret)"
+[[ -n "$_sec_private_key" ]]     && _private_key="$(_resolve_static_secret_value "$_sec_private_key" github_app_private_key)"
 
 # Legacy flat settings (backwards compatibility)
 [[ -z "$_app_id" ]]          && _app_id="$(plugin_get_config "github_app_id" "")"
@@ -178,8 +215,10 @@ fi
 
 if [[ -z "$_private_key_path" && -n "$_private_key" ]]; then
   _private_key_path="${GITHUB_APP_CONFIG_DIR}/private-key.pem"
-  printf '%s' "$_private_key" > "$_private_key_path"
-  chmod 600 "$_private_key_path"
+  # Atomic write: avoids the TOCTOU window where the file would briefly exist
+  # with default umask perms before chmod 600. Mirrors how every other
+  # on-disk artifact in this plugin is written. (See PR #487 review.)
+  printf '%s' "$_private_key" | _atomic_write "$_private_key_path" 600
   hook_log "Wrote private key to $_private_key_path"
 fi
 
