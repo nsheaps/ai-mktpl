@@ -37,10 +37,13 @@ WRONG_INSTALLATION_ID="888888"
 WRONG_PEM="$TMPDIR/wrong.pem"
 echo "fake-pem-wrong" > "$WRONG_PEM"
 
-# Fake AGENT_HOME_DIR isolation root.
+# Fake AGENT_HOME_DIR / XDG_CONFIG_HOME isolation root. The launcher
+# (bin/agent) sets XDG_CONFIG_HOME=$AGENT_HOME_DIR/.config in production;
+# we mimic that here.
 export AGENT_NAME="testagent"
 export AGENT_HOME_DIR="$TMPDIR/agent-home"
-mkdir -p "$AGENT_HOME_DIR"
+export XDG_CONFIG_HOME="$AGENT_HOME_DIR/.config"
+mkdir -p "$XDG_CONFIG_HOME"
 
 # Source the plugin's own libs to exercise the same code paths.
 export CLAUDE_PLUGIN_ROOT="$PLUGIN_ROOT"

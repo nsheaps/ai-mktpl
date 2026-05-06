@@ -7,7 +7,7 @@ Tracks: BUG-19
 
 ## Background — what's broken (BUG-19)
 
-The pre-0.4.0 SessionStart hook sourced `${AGENT_CONFIG_DIR}/github-app-env` and
+The pre-0.4.0 SessionStart hook sourced `${XDG_CONFIG_HOME}/github-app-env` and
 re-derived `GITHUB_APP_ID` / `GITHUB_INSTALLATION_ID` / `GITHUB_APP_PRIVATE_KEY_PATH`
 from `${VAR:-}` in process env on every refresh, then persisted the result back
 to disk. Any one-time cross-agent env contamination (the wrong agent's `GITHUB_APP_ID`
@@ -54,11 +54,19 @@ claude. By the time install.sh runs, these are present in process env:
 from any 1pass secret). The Setup hook uses them — and only them — to derive
 isolation paths:
 
-- `GH_CONFIG_DIR=${AGENT_HOME_DIR}/.config/gh`
-- `GIT_CONFIG_GLOBAL=${AGENT_HOME_DIR}/.config/git/config`
+- `GH_CONFIG_DIR=${XDG_CONFIG_HOME}/gh`
+- `GIT_CONFIG_GLOBAL=${XDG_CONFIG_HOME}/git/config`
 
-This mirrors the standard XDG-style `${HOME}/.config/<appname>/` layout for
-each app, scoped to the agent's home directory.
+The launcher (`bin/agent`) sets `XDG_CONFIG_HOME=${AGENT_HOME_DIR}/.config` —
+along with `XDG_DATA_HOME`, `XDG_STATE_HOME`, `XDG_CACHE_HOME`, and prepending
+the agent dirs onto `XDG_CONFIG_DIRS` / `XDG_DATA_DIRS` per the
+[XDG Base Directory spec](https://wiki.archlinux.org/title/XDG_Base_Directory).
+This means every app that honors XDG (gh, git, jq, mise, op, …) writes into
+the agent's namespace automatically without per-app env vars. Reads still fall
+back to system defaults for anything not per-agent. `GITHUB_APP_CONFIG_DIR`
+derives from `XDG_CONFIG_HOME` in `lib/agent-paths.sh` — if the launcher
+doesn't set XDG_CONFIG_HOME, the plugin hard-fails rather than writing into
+the user's shared `~/.config`.
 
 If any required env var is unset, install.sh fails loudly with a one-line
 message naming the missing var. There's no fallback, retry, or interpolation —
@@ -80,7 +88,7 @@ ${AGENT_HOME_DIR}/.config/
 └── git/config                  # GIT_CONFIG_GLOBAL (isolation)
 ```
 
-The pre-0.4.0 flat file at `${AGENT_CONFIG_DIR}/github-app-env` is removed by
+The pre-0.4.0 flat file at `${XDG_CONFIG_HOME}/github-app-env` is removed by
 `migrate_legacy_layout`, which is kept one cycle for auto-cleanup.
 
 ### static.env contents

@@ -2,7 +2,7 @@
 # env-file.sh — Shared env-file writers for the github-app plugin
 #
 # This file owns the on-disk layout of the plugin's config under
-# ${GITHUB_APP_CONFIG_DIR} (= ${AGENT_CONFIG_DIR}/github-app/). Two separate
+# ${GITHUB_APP_CONFIG_DIR} (= ${XDG_CONFIG_HOME}/github-app/). Two separate
 # files exist by design (BUG-19):
 #
 #   static.env        — immutable JWT-signing inputs. Written ONLY by
@@ -27,7 +27,7 @@
 if [ "${_ENV_FILE_LOADED:-}" = "true" ]; then return 0; fi
 _ENV_FILE_LOADED="true"
 
-# Source agent-paths for AGENT_CONFIG_DIR / GITHUB_APP_CONFIG_DIR.
+# Source agent-paths for GITHUB_APP_CONFIG_DIR (derived from XDG_CONFIG_HOME).
 # `agent-paths.sh` self-guards on `[[ -n "${_AGENT_PATHS_LOADED:-}" ]]` and sets
 # the flag to `1`, so we match the same string-presence check here rather than
 # comparing to the literal "true". (See PR #487 review.)
@@ -197,10 +197,13 @@ GCEOF
 
 # migrate_legacy_layout
 #
-# Removes the pre-0.4.0 flat env file at ${AGENT_CONFIG_DIR}/github-app-env
-# if it exists. Idempotent. Logs to stderr when a file is removed.
+# Removes the pre-0.4.0 flat env file. Pre-0.4.0 wrote to
+# ${HOME}/.agents/${AGENT_NAME}/.config/github-app-env, which under XDG today
+# is ${XDG_CONFIG_HOME}/github-app-env (since launcher sets
+# XDG_CONFIG_HOME=$AGENT_HOME_DIR/.config). Idempotent. Logs to stderr when a
+# file is removed.
 migrate_legacy_layout() {
-  local legacy="${AGENT_CONFIG_DIR}/github-app-env"
+  local legacy="${XDG_CONFIG_HOME}/github-app-env"
   if [[ -f "$legacy" ]]; then
     echo "github-app: removing legacy env file $legacy (pre-0.4.0 layout)" >&2
     rm -f "$legacy"
