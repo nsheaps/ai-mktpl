@@ -66,7 +66,7 @@ _atomic_write() {
   mv -f "$tmp" "$target"
 }
 
-# write_static_env_file APP_ID INSTALLATION_ID PEM_PATH [CLIENT_ID] [CLIENT_SECRET] [REF_PROVENANCE]
+# write_static_env_file APP_ID INSTALLATION_ID PEM_PATH [CLIENT_ID] [CLIENT_SECRET] [REF_PROVENANCE] [GH_CONFIG_DIR] [GIT_CONFIG_GLOBAL]
 #
 # Called only by install.sh during Setup. Writes the immutable JWT-signing
 # inputs to ${STATIC_ENV_FILE} from explicit positional arguments — values
@@ -79,6 +79,8 @@ write_static_env_file() {
   local client_id="${4:-}"
   local client_secret="${5:-}"
   local ref_provenance="${6:-}"
+  local gh_config_dir="${7:-}"
+  local git_config_global="${8:-}"
   local written_at
   written_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
@@ -89,14 +91,16 @@ write_static_env_file() {
 # is intentionally NOT rewritten on token refresh. To regenerate, rerun
 # `claude --init-only` or delete this file and start a new session.
 STATICEOF
-    printf 'export GITHUB_APP_ID="%s"\n' "$(_safe_val "$app_id")"
-    printf 'export GITHUB_INSTALLATION_ID="%s"\n' "$(_safe_val "$installation_id")"
-    printf 'export GITHUB_APP_PRIVATE_KEY_PATH="%s"\n' "$(_safe_val "$pem_path")"
-    [[ -n "$client_id" ]]     && printf 'export GITHUB_APP_CLIENT_ID="%s"\n' "$(_safe_val "$client_id")"
-    [[ -n "$client_secret" ]] && printf 'export GITHUB_APP_CLIENT_SECRET="%s"\n' "$(_safe_val "$client_secret")"
-    printf 'export GITHUB_APP_STATIC_REF="%s"\n' "$(_safe_val "$ref_provenance")"
-    printf 'export GITHUB_APP_STATIC_WRITTEN_AT="%s"\n' "$(_safe_val "$written_at")"
-  } | _atomic_write "$STATIC_ENV_FILE" 600
+    printf 'export GITHUB_APP_ID="%s"\n' "$(_safe_val "${app_id}")"
+    printf 'export GITHUB_INSTALLATION_ID="%s"\n' "$(_safe_val "${installation_id}")"
+    printf 'export GITHUB_APP_PRIVATE_KEY_PATH="%s"\n' "$(_safe_val "${pem_path}")"
+    [[ -n "${client_id}" ]]          && printf 'export GITHUB_APP_CLIENT_ID="%s"\n' "$(_safe_val "${client_id}")"
+    [[ -n "${client_secret}" ]]      && printf 'export GITHUB_APP_CLIENT_SECRET="%s"\n' "$(_safe_val "${client_secret}")"
+    [[ -n "${gh_config_dir}" ]]      && printf 'export GH_CONFIG_DIR="%s"\n' "$(_safe_val "${gh_config_dir}")"
+    [[ -n "${git_config_global}" ]]  && printf 'export GIT_CONFIG_GLOBAL="%s"\n' "$(_safe_val "${git_config_global}")"
+    printf 'export GITHUB_APP_STATIC_REF="%s"\n' "$(_safe_val "${ref_provenance}")"
+    printf 'export GITHUB_APP_STATIC_WRITTEN_AT="%s"\n' "$(_safe_val "${written_at}")"
+  } | _atomic_write "${STATIC_ENV_FILE}" 600
 }
 
 # read_static_env_file -- sources STATIC_ENV_FILE and verifies required fields.

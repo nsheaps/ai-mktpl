@@ -54,32 +54,20 @@ plugin_is_enabled || { hook_log "plugin disabled, skipping"; hook_respond; exit 
 
 if ! read_static_env_file; then
   rc=$?
-  if [[ $rc -eq 1 ]]; then
+  if [[ ${rc} -eq 1 ]]; then
     hook_log "static.env missing — running Setup (install.sh) inline as fallback"
-    # Capture stderr to a temp file so we can surface real diagnostics on
-    # failure (op CLI missing, vault unreachable, PEM perms wrong, etc.).
-    # Discarding stderr here would leave operators with an opaque "fallback
-    # failed" line. (See PR #487 review.)
-    _install_stderr="$(mktemp)"
-    if ! bash "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/install.sh" >/dev/null 2>"$_install_stderr"; then
+    if ! bash "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/install.sh" 2>&1; then
       hook_log "install.sh fallback failed; plugin not configured, skipping"
-      if [[ -s "$_install_stderr" ]]; then
-        while IFS= read -r line; do
-          hook_log "[install.sh] $line"
-        done < "$_install_stderr"
-      fi
-      rm -f "$_install_stderr"
       hook_log_cleanup
       hook_respond; exit 0
     fi
-    rm -f "$_install_stderr"
     if ! read_static_env_file; then
       hook_log "static.env still missing after install.sh; skipping"
       hook_log_cleanup
       hook_respond; exit 0
     fi
   else
-    hook_log "static.env malformed (rc=$rc); skipping"
+    hook_log "static.env malformed (rc=${rc}); skipping"
     hook_log_cleanup
     hook_respond; exit 0
   fi
@@ -135,15 +123,15 @@ TOKEN="$(cat "$TOKEN_FILE")"
 EXPIRES_AT="$(jq -r '.expires_at // empty' "$META_FILE" 2>/dev/null || true)"
 
 # --- gh + git isolation directories ---
+# GH_CONFIG_DIR / GIT_CONFIG_GLOBAL are set in static.env (sourced above) by
+# the Setup hook, derived from AGENT_HOME_DIR. We just ensure the dirs exist.
 
-GH_CONFIG_DIR="${GITHUB_APP_CONFIG_DIR}/gh"
-mkdir -p "$GH_CONFIG_DIR"
-chmod 700 "$GH_CONFIG_DIR"
-export GH_CONFIG_DIR
-
-GIT_CONFIG_GLOBAL="${GITHUB_APP_CONFIG_DIR}/git/config"
-mkdir -p "$(dirname "$GIT_CONFIG_GLOBAL")"
-export GIT_CONFIG_GLOBAL
+: "${GH_CONFIG_DIR:?github-token-init: GH_CONFIG_DIR not in static.env (rerun claude --init-only)}"
+: "${GIT_CONFIG_GLOBAL:?github-token-init: GIT_CONFIG_GLOBAL not in static.env (rerun claude --init-only)}"
+mkdir -p "${GH_CONFIG_DIR}"
+chmod 700 "${GH_CONFIG_DIR}"
+mkdir -p "$(dirname "${GIT_CONFIG_GLOBAL}")"
+export GH_CONFIG_DIR GIT_CONFIG_GLOBAL
 
 # --- Bot identity from token metadata ---
 
