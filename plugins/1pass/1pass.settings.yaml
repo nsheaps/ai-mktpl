@@ -66,8 +66,12 @@
   #
   # targets: where to write the resolved env vars (list, multiple allowed)
   #   - sessionStartBashEnv  — append to CLAUDE_ENV_FILE (session-scoped, bash tool only)
-  #   - userSettings         — write to ~/.claude/settings.local.json .env (persistent, all tools)
-  #   Defaults to both sessionStartBashEnv and userSettings.
+  #   - projectEnvLocal      — write to $CLAUDE_PROJECT_DIR/.env.local
+  #                            (per-repo, gitignored, direnv-consumable, truncated each session)
+  #   - userSettings         — write to ~/.claude/settings.local.json .env
+  #                            (DEPRECATED for opExec — kept for back-compat;
+  #                             user-global, persistent, all tools)
+  #   Defaults to sessionStartBashEnv and projectEnvLocal.
   #
   # Note: op-exec always resolves op:// references in field values recursively
   # (max depth 5). This is built-in behavior and not configurable.
@@ -75,4 +79,4 @@
     items: []
     targets:
       - sessionStartBashEnv
-      - userSettings
+      - projectEnvLocal

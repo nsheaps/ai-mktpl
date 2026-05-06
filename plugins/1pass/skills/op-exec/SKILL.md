@@ -121,10 +121,11 @@ the resolved environment variables to multiple targets.
       - "op://MyVault/extra-secrets"
 
     # Where to write the resolved env vars (multiple allowed)
-    # Defaults to both targets when omitted.
+    # Defaults to sessionStartBashEnv + projectEnvLocal when omitted.
     targets:
       - sessionStartBashEnv # → CLAUDE_ENV_FILE (session-scoped, bash only)
-      - userSettings # → ~/.claude/settings.local.json .env (persistent, all tools)
+      - projectEnvLocal     # → $CLAUDE_PROJECT_DIR/.env.local (per-repo, gitignored, direnv-consumable)
+      # - userSettings      # → ~/.claude/settings.local.json .env (DEPRECATED for opExec)
 
 
     # Note: recursive resolution of op:// references is always on (op-exec built-in)
@@ -132,23 +133,38 @@ the resolved environment variables to multiple targets.
 
 ### Output Targets
 
-| Target                | Mechanism                              | Scope           | Persistence     | Non-Bash tools |
-| --------------------- | -------------------------------------- | --------------- | --------------- | -------------- |
-| `sessionStartBashEnv` | `CLAUDE_ENV_FILE`                      | Bash tool calls | Session only    | No             |
-| `userSettings`        | `~/.claude/settings.local.json` `.env` | All tools       | Across sessions | Yes            |
+| Target                | Mechanism                                     | Scope                        | Persistence        | Non-Bash tools |
+| --------------------- | --------------------------------------------- | ---------------------------- | ------------------ | -------------- |
+| `sessionStartBashEnv` | `CLAUDE_ENV_FILE`                             | Bash tool calls              | Session only       | No             |
+| `projectEnvLocal`     | `$CLAUDE_PROJECT_DIR/.env.local`              | Per-repo, gitignored         | Truncated each session | Via direnv |
+| `userSettings`        | `~/.claude/settings.local.json` `.env`        | User-global, all tools       | Across sessions    | Yes (DEPRECATED for opExec) |
 
-**Default:** Both `sessionStartBashEnv` and `userSettings` are enabled when
-`targets` is not specified, ensuring env vars are available to all tools and
-also in bash sessions.
+**Default:** `sessionStartBashEnv` and `projectEnvLocal` are enabled when
+`targets` is not specified, ensuring env vars are available in Bash tool calls
+and also picked up by direnv (so non-Claude-Code processes invoked from the
+agent repo see them too).
+
+`projectEnvLocal` writes to `$CLAUDE_PROJECT_DIR/.env.local` in shell-sourceable
+format (`export KEY=$(printf '%q' value)` lines, same as `CLAUDE_ENV_FILE`). The
+file is **truncated at the start of every session** so removed secrets do not
+linger. The agent repo MUST list `.env.local` in `.gitignore` and source it via
+direnv (`dotenv_if_exists .env.local` in `.envrc`).
+
+`userSettings` is **deprecated for opExec usage**. It still works for back-compat
+when explicitly listed, but new configurations should use `projectEnvLocal`. Its
+JSON-merge into `~/.claude/settings.local.json` is user-global rather than
+per-repo, which is rarely the intended scope for resolved 1Password env.
 
 ### When to Use Which Target
 
 - **sessionStartBashEnv only**: Secrets that should not persist on disk beyond
   the session, or when you only need them in bash tool calls.
-- **userSettings only**: Config that non-Bash tools (MCP servers, etc.) need,
-  or values that should persist across sessions.
-- **Both (default)**: Most common — ensures secrets are available everywhere
-  during the session and to all tool types.
+- **projectEnvLocal**: Per-repo env that direnv (and other tooling) can pick up
+  automatically when entering the directory. Default for new configurations.
+- **userSettings**: DEPRECATED for opExec. Use only when you need the resolved
+  vars to persist user-globally across all repos for non-Bash tools.
+- **Both defaults (sessionStartBashEnv + projectEnvLocal)**: Most common — env
+  is available in Claude Code Bash and to any process direnv loads.
 
 ## ENVIRONMENT Aggregator Pattern
 

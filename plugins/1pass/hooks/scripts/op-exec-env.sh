@@ -68,10 +68,10 @@ if [ -z "$op_exec_items" ]; then
   exit 0
 fi
 
-# Read opExec.targets array (default: sessionStartBashEnv, userSettings)
+# Read opExec.targets array (default: sessionStartBashEnv, projectEnvLocal)
 op_exec_targets="$(plugin_get_config_array "opExec.targets")"
 if [ -z "$op_exec_targets" ]; then
-  op_exec_targets=$'sessionStartBashEnv\nuserSettings'
+  op_exec_targets=$'sessionStartBashEnv\nprojectEnvLocal'
 fi
 
 # --- Dependency checks ---
@@ -99,13 +99,15 @@ fi
 # Determine which targets are enabled
 target_bash_env="false"
 target_user_settings="false"
+target_project_env_local="false"
 
 while IFS= read -r target; do
   case "$target" in
     sessionStartBashEnv) target_bash_env="true" ;;
     userSettings)        target_user_settings="true" ;;
+    projectEnvLocal)     target_project_env_local="true" ;;
     *)
-      hook_log "unknown target: $target (expected sessionStartBashEnv or userSettings)"
+      hook_log "unknown target: $target (expected sessionStartBashEnv, userSettings, or projectEnvLocal)"
       ;;
   esac
 done <<< "$op_exec_targets"
@@ -116,6 +118,22 @@ if [ "$target_user_settings" = "true" ]; then
   mkdir -p "$(dirname "$SETTINGS_FILE")"
   if [ ! -f "$SETTINGS_FILE" ]; then
     echo '{}' > "$SETTINGS_FILE"
+  fi
+fi
+
+# Prepare projectEnvLocal writer if needed.
+# Truncate the file so stale entries from previous sessions don't persist.
+# Skip with a warning if CLAUDE_PROJECT_DIR is unset (we cannot guess the
+# right path when not running under Claude Code).
+PROJECT_ENV_LOCAL_FILE=""
+if [ "$target_project_env_local" = "true" ]; then
+  if [ -n "${CLAUDE_PROJECT_DIR:-}" ]; then
+    PROJECT_ENV_LOCAL_FILE="${CLAUDE_PROJECT_DIR}/.env.local"
+    # Truncate (or create) — fresh on every session start.
+    : > "$PROJECT_ENV_LOCAL_FILE"
+  else
+    hook_log "projectEnvLocal target requested but CLAUDE_PROJECT_DIR is unset; skipping"
+    target_project_env_local="false"
   fi
 fi
 
@@ -136,6 +154,10 @@ write_to_targets() {
   if [ "$target_user_settings" = "true" ]; then
     settings_env_names+=("$env_name")
     settings_env_values+=("$env_value")
+  fi
+
+  if [ "$target_project_env_local" = "true" ] && [ -n "$PROJECT_ENV_LOCAL_FILE" ]; then
+    printf 'export %s=%q\n' "$env_name" "$env_value" >> "$PROJECT_ENV_LOCAL_FILE"
   fi
 }
 
@@ -257,6 +279,10 @@ do_inject() {
   if [ "$target_user_settings" = "true" ]; then
     [ -n "$targets_desc" ] && targets_desc="$targets_desc, "
     targets_desc="${targets_desc}userSettings"
+  fi
+  if [ "$target_project_env_local" = "true" ]; then
+    [ -n "$targets_desc" ] && targets_desc="$targets_desc, "
+    targets_desc="${targets_desc}projectEnvLocal -> $PROJECT_ENV_LOCAL_FILE"
   fi
   hook_log "targets: $targets_desc"
 

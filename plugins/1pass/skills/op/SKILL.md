@@ -262,7 +262,8 @@ This plugin supports configuration via `plugins.settings.yaml`:
       - "op://MyVault/ENVIRONMENT"
     targets:
       - sessionStartBashEnv # → CLAUDE_ENV_FILE (session-scoped, bash only)
-      - userSettings # → ~/.claude/settings.local.json (persistent, all tools)
+      - projectEnvLocal     # → $CLAUDE_PROJECT_DIR/.env.local (per-repo, gitignored)
+      # - userSettings      # → ~/.claude/settings.local.json (DEPRECATED for opExec)
     # Note: recursive resolution of op:// references is always on (op-exec built-in)
 ```
 
@@ -275,12 +276,16 @@ Place in:
 
 The `opExec.targets` array controls where resolved env vars are written:
 
-| Target                | Where                                  | Scope           | Persistence     |
-| --------------------- | -------------------------------------- | --------------- | --------------- |
-| `sessionStartBashEnv` | `CLAUDE_ENV_FILE`                      | Bash tools only | Session only    |
-| `userSettings`        | `~/.claude/settings.local.json` `.env` | All tools       | Across sessions |
+| Target                | Where                                  | Scope                  | Persistence            |
+| --------------------- | -------------------------------------- | ---------------------- | ---------------------- |
+| `sessionStartBashEnv` | `CLAUDE_ENV_FILE`                      | Bash tools only        | Session only           |
+| `projectEnvLocal`     | `$CLAUDE_PROJECT_DIR/.env.local`       | Per-repo, gitignored   | Truncated each session |
+| `userSettings`        | `~/.claude/settings.local.json` `.env` | User-global, all tools | Across sessions (DEPRECATED for opExec) |
 
-Both targets are enabled by default, ensuring env vars reach all tool types.
+`sessionStartBashEnv` and `projectEnvLocal` are enabled by default. Use
+`projectEnvLocal` with direnv (`dotenv_if_exists .env.local` in `.envrc`) to
+pick up resolved env in any process invoked from the repo, not just Claude Code
+Bash tools.
 
 ## Environment Variables
 
