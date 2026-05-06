@@ -14,11 +14,11 @@ Per [handler directive 2026-05-06](https://discord.com/channels/1490863845252665
 
 The 1pass plugin's `opExec` flow accepts a `targets` array. Available targets:
 
-| Target | Destination | Format | Consumer | Lifecycle |
-| - | - | - | - | - |
-| `sessionStartBashEnv` | `$CLAUDE_ENV_FILE` | `export K=v` shell lines | Claude Code Bash tool | Session-scoped (file is fresh per session) |
-| `projectEnvLocal` | `$CLAUDE_PROJECT_DIR/.env.local` | `export K=v` shell lines | direnv (`dotenv_if_exists .env.local`) and any tool that sources the file | Truncated on each session start; gitignored at the repo level |
-| `userSettings` (DEPRECATED for opExec) | `~/.claude/settings.local.json` `.env` block | JSON | Claude Code (all tools) | Persistent across sessions, user-global |
+| Target                                 | Destination                                  | Format                   | Consumer                                                                  | Lifecycle                                                     |
+| -------------------------------------- | -------------------------------------------- | ------------------------ | ------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `sessionStartBashEnv`                  | `$CLAUDE_ENV_FILE`                           | `export K=v` shell lines | Claude Code Bash tool                                                     | Session-scoped (file is fresh per session)                    |
+| `projectEnvLocal`                      | `$CLAUDE_PROJECT_DIR/.env.local`             | `export K=v` shell lines | direnv (`dotenv_if_exists .env.local`) and any tool that sources the file | Truncated on each session start; gitignored at the repo level |
+| `userSettings` (DEPRECATED for opExec) | `~/.claude/settings.local.json` `.env` block | JSON                     | Claude Code (all tools)                                                   | Persistent across sessions, user-global                       |
 
 ## Default targets
 

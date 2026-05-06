@@ -124,20 +124,19 @@ the resolved environment variables to multiple targets.
     # Defaults to sessionStartBashEnv + projectEnvLocal when omitted.
     targets:
       - sessionStartBashEnv # → CLAUDE_ENV_FILE (session-scoped, bash only)
-      - projectEnvLocal     # → $CLAUDE_PROJECT_DIR/.env.local (per-repo, gitignored, direnv-consumable)
+      - projectEnvLocal # → $CLAUDE_PROJECT_DIR/.env.local (per-repo, gitignored, direnv-consumable)
       # - userSettings      # → ~/.claude/settings.local.json .env (DEPRECATED for opExec)
-
 
     # Note: recursive resolution of op:// references is always on (op-exec built-in)
 ```
 
 ### Output Targets
 
-| Target                | Mechanism                                     | Scope                        | Persistence        | Non-Bash tools |
-| --------------------- | --------------------------------------------- | ---------------------------- | ------------------ | -------------- |
-| `sessionStartBashEnv` | `CLAUDE_ENV_FILE`                             | Bash tool calls              | Session only       | No             |
-| `projectEnvLocal`     | `$CLAUDE_PROJECT_DIR/.env.local`              | Per-repo, gitignored         | Truncated each session | Via direnv |
-| `userSettings`        | `~/.claude/settings.local.json` `.env`        | User-global, all tools       | Across sessions    | Yes (DEPRECATED for opExec) |
+| Target                | Mechanism                              | Scope                  | Persistence            | Non-Bash tools              |
+| --------------------- | -------------------------------------- | ---------------------- | ---------------------- | --------------------------- |
+| `sessionStartBashEnv` | `CLAUDE_ENV_FILE`                      | Bash tool calls        | Session only           | No                          |
+| `projectEnvLocal`     | `$CLAUDE_PROJECT_DIR/.env.local`       | Per-repo, gitignored   | Truncated each session | Via direnv                  |
+| `userSettings`        | `~/.claude/settings.local.json` `.env` | User-global, all tools | Across sessions        | Yes (DEPRECATED for opExec) |
 
 **Default:** `sessionStartBashEnv` and `projectEnvLocal` are enabled when
 `targets` is not specified, ensuring env vars are available in Bash tool calls
