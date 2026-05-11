@@ -45,6 +45,7 @@ _wait_for_shared_lib() {
 _wait_for_shared_lib "plugin-config-read.sh"
 _wait_for_shared_lib "tool-install.sh"
 _wait_for_shared_lib "hook-logging.sh"
+_wait_for_shared_lib "env-file.sh"
 
 # shellcheck source=/dev/null
 source "$SHARED_LIB_DIR/plugin-config-read.sh"
@@ -52,6 +53,68 @@ source "$SHARED_LIB_DIR/plugin-config-read.sh"
 source "$SHARED_LIB_DIR/tool-install.sh"
 # shellcheck source=/dev/null
 source "$SHARED_LIB_DIR/hook-logging.sh"
+# shellcheck source=/dev/null
+source "$SHARED_LIB_DIR/env-file.sh"
+
+# --- envLocal target helpers ---
+
+# Resolve the envLocal.path config to an absolute path. Echoes path on stdout
+# (empty if neither config nor AGENT_HOME_DIR/CLAUDE_PROJECT_DIR resolves).
+# Expands ${AGENT_HOME_DIR} and ${CLAUDE_PROJECT_DIR} placeholders.
+_resolve_env_local_path() {
+  local configured
+  configured="$(plugin_get_config "envLocal.path" "")"
+  if [ -n "$configured" ]; then
+    # Expand $AGENT_HOME_DIR / $CLAUDE_PROJECT_DIR / ${...} forms via eval-safe substitution
+    local expanded="$configured"
+    expanded="${expanded//\$AGENT_HOME_DIR/${AGENT_HOME_DIR:-}}"
+    expanded="${expanded//\$\{AGENT_HOME_DIR\}/${AGENT_HOME_DIR:-}}"
+    expanded="${expanded//\$CLAUDE_PROJECT_DIR/${CLAUDE_PROJECT_DIR:-}}"
+    expanded="${expanded//\$\{CLAUDE_PROJECT_DIR\}/${CLAUDE_PROJECT_DIR:-}}"
+    echo "$expanded"
+    return 0
+  fi
+  if [ -n "${AGENT_HOME_DIR:-}" ]; then
+    echo "${AGENT_HOME_DIR}/.env.local"
+  elif [ -n "${CLAUDE_PROJECT_DIR:-}" ]; then
+    echo "${CLAUDE_PROJECT_DIR}/.env.local"
+  else
+    echo ""
+  fi
+}
+
+# Resolve envLocal.sourceChain: path to add as `source ...` in CLAUDE_ENV_FILE.
+# When unset, defaults to $AGENT_HOME_DIR/.env if AGENT_HOME_DIR is set.
+# Special value "self" or "none" returns the envLocal path itself / empty.
+# Args: $1=envLocalPath (used when sourceChain == "self")
+_resolve_env_local_source_chain() {
+  local env_local_path="${1:-}"
+  local configured
+  configured="$(plugin_get_config "envLocal.sourceChain" "")"
+  if [ "$configured" = "none" ] || [ "$configured" = "false" ]; then
+    echo ""
+    return 0
+  fi
+  if [ "$configured" = "self" ]; then
+    echo "$env_local_path"
+    return 0
+  fi
+  if [ -n "$configured" ]; then
+    local expanded="$configured"
+    expanded="${expanded//\$AGENT_HOME_DIR/${AGENT_HOME_DIR:-}}"
+    expanded="${expanded//\$\{AGENT_HOME_DIR\}/${AGENT_HOME_DIR:-}}"
+    expanded="${expanded//\$CLAUDE_PROJECT_DIR/${CLAUDE_PROJECT_DIR:-}}"
+    expanded="${expanded//\$\{CLAUDE_PROJECT_DIR\}/${CLAUDE_PROJECT_DIR:-}}"
+    echo "$expanded"
+    return 0
+  fi
+  if [ -n "${AGENT_HOME_DIR:-}" ]; then
+    echo "${AGENT_HOME_DIR}/.env"
+  else
+    echo ""
+  fi
+}
+
 # --- Guards ---
 
 plugin_is_enabled || { hook_log "plugin disabled, skipping"; hook_respond; exit 0; }
@@ -268,19 +331,31 @@ _write_secret() {
   case "$target" in
     envFile)
       if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
-        # Remove any existing export of this var to avoid duplicates
-        if [ -f "$CLAUDE_ENV_FILE" ]; then
-          local tmp_env
-          tmp_env="$(mktemp)"
-          grep -v "^export ${env_var}=" "$CLAUDE_ENV_FILE" > "$tmp_env" 2>/dev/null || true
-          mv "$tmp_env" "$CLAUDE_ENV_FILE"
-        fi
-        printf 'export %s=%q\n' "$env_var" "$value" >> "$CLAUDE_ENV_FILE"
+        env_file_upsert_export "$CLAUDE_ENV_FILE" "$env_var" "$value"
         export "${env_var}=${value}"
         hook_log "Injected ${env_var} via CLAUDE_ENV_FILE"
       else
         hook_log "CLAUDE_ENV_FILE not set, falling back to current environment only"
         export "${env_var}=${value}"
+      fi
+      ;;
+    envLocal)
+      local env_local_path source_chain
+      env_local_path="$(_resolve_env_local_path)"
+      if [ -z "$env_local_path" ]; then
+        hook_fail "secrets injection" \
+          "envLocal target requested for ${env_var} but no path could be resolved" \
+          "Set envLocal.path in plugin settings or define AGENT_HOME_DIR / CLAUDE_PROJECT_DIR"
+        return 1
+      fi
+      env_file_upsert_export "$env_local_path" "$env_var" "$value"
+      export "${env_var}=${value}"
+      hook_log "Injected ${env_var} via ${env_local_path}"
+      # Also chain into CLAUDE_ENV_FILE via a `source` line (idempotent).
+      source_chain="$(_resolve_env_local_source_chain "$env_local_path")"
+      if [ -n "$source_chain" ] && [ -n "${CLAUDE_ENV_FILE:-}" ]; then
+        env_file_upsert_source "$CLAUDE_ENV_FILE" "$source_chain"
+        hook_log "Chained ${source_chain} into CLAUDE_ENV_FILE"
       fi
       ;;
     settingsJson|settingsLocalJson|userSettingsJson)
@@ -302,7 +377,7 @@ _write_secret() {
       ;;
     *)
       hook_fail "secrets injection" "Unknown target '${target}' for ${env_var}" \
-        "Valid targets: envFile, settingsJson, settingsLocalJson, userSettingsJson"
+        "Valid targets: envFile, envLocal, settingsJson, settingsLocalJson, userSettingsJson"
       ;;
   esac
 }
