@@ -200,7 +200,7 @@ curl -s -X POST \
 | ----------------------------- | ------------------------------------------ |
 | `GITHUB_APP_ID`               | The GitHub App's numeric ID                |
 | `GITHUB_APP_PRIVATE_KEY_PATH` | Path to PEM private key file               |
-| `GITHUB_APP_INSTALLATION_ID`      | Installation ID for the target account/org |
+| `GITHUB_APP_INSTALLATION_ID`  | Installation ID for the target account/org |
 
 ### Installation Token Limitations
 
