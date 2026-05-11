@@ -4,11 +4,11 @@
 
 The 1pass plugin currently writes resolved secrets to one of:
 
-| Target                | Destination                              |
-| --------------------- | ---------------------------------------- |
-| `sessionStartBashEnv` | `$CLAUDE_ENV_FILE`                       |
-| `userSettings`        | `~/.claude/settings.local.json` `.env`   |
-| `envFile`, `settings*Json` (individual secrets) | as named above                |
+| Target                                          | Destination                            |
+| ----------------------------------------------- | -------------------------------------- |
+| `sessionStartBashEnv`                           | `$CLAUDE_ENV_FILE`                     |
+| `userSettings`                                  | `~/.claude/settings.local.json` `.env` |
+| `envFile`, `settings*Json` (individual secrets) | as named above                         |
 
 Handler directive (Discord, 2026-05-11): static creds managed by 1pass should
 live in `$AGENT_HOME_DIR/.env.local` (gitignored, persistent, idempotent), with
@@ -44,8 +44,8 @@ Top-level config:
 ```yaml
 1pass:
   envLocal:
-    path: '$AGENT_HOME_DIR/.env.local'   # default; falls back to $CLAUDE_PROJECT_DIR/.env.local
-    sourceChain: '$AGENT_HOME_DIR/.env'  # default; can be 'self', 'none', or a path
+    path: "$AGENT_HOME_DIR/.env.local" # default; falls back to $CLAUDE_PROJECT_DIR/.env.local
+    sourceChain: "$AGENT_HOME_DIR/.env" # default; can be 'self', 'none', or a path
 ```
 
 Behavior:
@@ -60,10 +60,10 @@ Behavior:
 
 ## Defaults
 
-| Setting               | Default                                                              |
-| --------------------- | -------------------------------------------------------------------- |
-| `envLocal.path`       | `$AGENT_HOME_DIR/.env.local`, fallback `$CLAUDE_PROJECT_DIR/.env.local` |
-| `envLocal.sourceChain`| `$AGENT_HOME_DIR/.env` when `AGENT_HOME_DIR` is set, else empty       |
+| Setting                | Default                                                                 |
+| ---------------------- | ----------------------------------------------------------------------- |
+| `envLocal.path`        | `$AGENT_HOME_DIR/.env.local`, fallback `$CLAUDE_PROJECT_DIR/.env.local` |
+| `envLocal.sourceChain` | `$AGENT_HOME_DIR/.env` when `AGENT_HOME_DIR` is set, else empty         |
 
 `opExec.targets` default stays `[sessionStartBashEnv, userSettings]`.
 `envLocal` is opt-in to avoid silently changing behavior for existing users.

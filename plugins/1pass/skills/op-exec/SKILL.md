@@ -124,26 +124,25 @@ the resolved environment variables to multiple targets.
     # Defaults to both targets when omitted.
     targets:
       - sessionStartBashEnv # → CLAUDE_ENV_FILE (session-scoped, bash only)
-      - envLocal            # → $AGENT_HOME_DIR/.env.local (persistent, idempotent)
+      - envLocal # → $AGENT_HOME_DIR/.env.local (persistent, idempotent)
       - userSettings # → ~/.claude/settings.local.json .env (persistent, all tools)
-
 
   # envLocal target configuration (only consulted when "envLocal" is in targets above)
   envLocal:
     # path: '$AGENT_HOME_DIR/.env.local'   # default
     # sourceChain: '$AGENT_HOME_DIR/.env'  # default; pass "self" to chain envLocal directly,
-                                           # or "none" to skip adding any source line.
+    # or "none" to skip adding any source line.
 
     # Note: recursive resolution of op:// references is always on (op-exec built-in)
 ```
 
 ### Output Targets
 
-| Target                | Mechanism                              | Scope           | Persistence     | Non-Bash tools |
-| --------------------- | -------------------------------------- | --------------- | --------------- | -------------- |
-| `sessionStartBashEnv` | `CLAUDE_ENV_FILE`                      | Bash tool calls | Session only    | No             |
+| Target                | Mechanism                                                          | Scope                                     | Persistence                                    | Non-Bash tools                     |
+| --------------------- | ------------------------------------------------------------------ | ----------------------------------------- | ---------------------------------------------- | ---------------------------------- |
+| `sessionStartBashEnv` | `CLAUDE_ENV_FILE`                                                  | Bash tool calls                           | Session only                                   | No                                 |
 | `envLocal`            | `$AGENT_HOME_DIR/.env.local` (shell-sourceable `export K=v` lines) | All tools sourcing the file (e.g. direnv) | Across sessions (idempotent replace-or-append) | Yes — when sourced by the consumer |
-| `userSettings`        | `~/.claude/settings.local.json` `.env` | All tools       | Across sessions | Yes            |
+| `userSettings`        | `~/.claude/settings.local.json` `.env`                             | All tools                                 | Across sessions                                | Yes                                |
 
 **Default:** Both `sessionStartBashEnv` and `userSettings` are enabled when
 `targets` is not specified, ensuring env vars are available to all tools and

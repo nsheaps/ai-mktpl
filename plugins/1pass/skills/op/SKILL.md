@@ -275,11 +275,11 @@ Place in:
 
 The `opExec.targets` array controls where resolved env vars are written:
 
-| Target                | Where                                  | Scope                                | Persistence                                 |
-| --------------------- | -------------------------------------- | ------------------------------------ | ------------------------------------------- |
-| `sessionStartBashEnv` | `CLAUDE_ENV_FILE`                      | Bash tools only                      | Session only                                |
-| `envLocal`            | `$AGENT_HOME_DIR/.env.local`           | All consumers sourcing the file      | Across sessions (idempotent upsert)         |
-| `userSettings`        | `~/.claude/settings.local.json` `.env` | All Claude Code tools                | Across sessions                             |
+| Target                | Where                                  | Scope                           | Persistence                         |
+| --------------------- | -------------------------------------- | ------------------------------- | ----------------------------------- |
+| `sessionStartBashEnv` | `CLAUDE_ENV_FILE`                      | Bash tools only                 | Session only                        |
+| `envLocal`            | `$AGENT_HOME_DIR/.env.local`           | All consumers sourcing the file | Across sessions (idempotent upsert) |
+| `userSettings`        | `~/.claude/settings.local.json` `.env` | All Claude Code tools           | Across sessions                     |
 
 `sessionStartBashEnv` + `userSettings` are enabled by default. `envLocal` is
 opt-in and is intended for agent-home setups where a repo-templated `.env`
