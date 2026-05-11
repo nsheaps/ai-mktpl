@@ -108,7 +108,7 @@ hook_log_step "token" "Refreshing or regenerating installation token"
 _minutes="$(get_minutes_remaining)"
 _should_regen=true
 case "$_minutes" in
-  missing|expired) ;;  # regen
+  missing|expired|unknown) ;;  # regen (unknown = can't parse expires_at; treat as untrustworthy)
   *)
     if (( _minutes > 45 )); then
       _should_regen=false  # token healthy, no action

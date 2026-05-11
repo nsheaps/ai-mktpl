@@ -26,24 +26,32 @@ This skill covers managing GitHub App installation tokens in Claude Code session
 ### Architecture
 
 ```
+Launcher (bin/agent)
+  │
+  ├─ Sources $AGENT_HOME_DIR/.env (and .env.local) before exec'ing claude
+  │   → GITHUB_APP_ID, GITHUB_APP_INSTALLATION_ID,
+  │     GITHUB_APP_PRIVATE_KEY_PATH are in process env at hook time.
+  │
+  ▼
 Session Start
   │
   ├─ SessionStart Hook (github-token-init.sh)
-  │   ├─ Reads GITHUB_APP_ID, PRIVATE_KEY_PATH, INSTALLATION_ID
+  │   ├─ Validates required env vars are present (fail-fast — no fallback)
   │   ├─ Generates JWT from PEM key
   │   ├─ Exchanges JWT for installation token (1 hour validity)
-  │   ├─ Writes token to ~/.agents/${AGENT_NAME}/.config/github-token
-  │   ├─ Creates runtime env file (~/.agents/${AGENT_NAME}/.config/github-app-env)
-  │   ├─ Sources env file via CLAUDE_ENV_FILE
-  │   ├─ Configures git identity (bot user)
-  │   └─ Prints: app name, expiry time, env var names
+  │   ├─ Writes token to ${XDG_CONFIG_HOME}/github-app/token (chmod 600)
+  │   ├─ Writes ${XDG_CONFIG_HOME}/github-app/runtime.env (GH_TOKEN/GITHUB_TOKEN)
+  │   ├─ Writes ${XDG_CONFIG_HOME}/github-app/git-identity.env (bot identity)
+  │   ├─ Appends `source` lines to CLAUDE_ENV_FILE so Bash inherits them
+  │   ├─ Configures global gitconfig with credential helper
+  │   └─ Logs: app slug, expiry time
   │
   └─ PreToolUse Hook (github-token-check.sh)
-      ├─ Debounced: checks at most every 300 seconds (5 minutes)
+      ├─ Throttled: checks at most every 300 seconds (5 minutes)
       ├─ For gh/git commands: synchronous check
-      │   ├─ Valid + >30min: silent allow
-      │   ├─ Valid + <30min: allow + background refresh
-      │   └─ Expired: synchronous refresh, then allow
+      │   ├─ Valid + >45min: silent allow
+      │   ├─ Valid + ≤45min: allow + background refresh
+      │   └─ Expired/missing: synchronous refresh, then allow
       ├─ For other tools: async background check
       ├─ Retries up to 3x with exponential backoff
       └─ 5-minute cooldown after all retries fail
@@ -53,10 +61,10 @@ Session Start
 
 1. **Generation**: JWT created from App private key (10-min validity)
 2. **Exchange**: JWT exchanged for installation token via GitHub API
-3. **Storage**: Token written to `~/.agents/${AGENT_NAME}/.config/github-token` (permissions 600)
-4. **Monitoring**: PreToolUse hook checks expiry before each tool call (debounced)
-5. **Refresh**: When within 30 min of expiry, token is regenerated
-6. **Expiry**: Tokens valid for 1 hour; refreshed with 30-minute buffer
+3. **Storage**: Token written to `${XDG_CONFIG_HOME}/github-app/token` (permissions 600)
+4. **Monitoring**: PreToolUse hook checks expiry before each tool call (throttled)
+5. **Refresh**: When within 45 min of expiry, token is regenerated
+6. **Expiry**: Tokens valid for 1 hour; refreshed with 45-minute buffer
 
 ## Setup
 
@@ -69,71 +77,55 @@ Session Start
 
 ### Configuration
 
-The plugin supports multiple secret sources. Each value can be a literal, `${ENV_VAR}`, or `op://vault/item/field`.
-
-#### Option A: Bulk Secret Reference (`ref`)
-
-Use `ref` to load all secrets from one source:
-
-```yaml
-# In $CLAUDE_PROJECT_DIR/.claude/plugins.settings.yaml
-github-app:
-  # 1Password item (uses op-exec from nsheaps/op-exec)
-  ref: "op://vault/github-app--repo--my-repo"
-  # Or an env file with KEY=VALUE pairs
-  # ref: "env-file://./.env.github-app"
-```
-
-Expected field names: `GITHUB_APP_ID`, `GITHUB_APP_CLIENT_ID`, `GITHUB_APP_CLIENT_SECRET`, `GITHUB_APP_PRIVATE_KEY`, `GITHUB_APP_INSTALLATION_ID`.
-
-#### Option B: Individual Secret References
-
-```yaml
-github-app:
-  secrets:
-    github_app_id: "op://vault/item/GITHUB_APP_ID"
-    github_app_private_key: "op://vault/item/GITHUB_APP_PRIVATE_KEY"
-    github_installation_id: "${GITHUB_APP_INSTALLATION_ID}"
-```
-
-#### Option C: Environment Variables
+As of 0.4.0, the plugin no longer resolves secrets itself. The launcher
+(`bin/agent`) is responsible for sourcing the agent's `.env` / `.env.local`
+chain before exec'ing `claude`, so the following env vars are present at hook
+time:
 
 ```bash
-export GITHUB_APP_ID="12345"
-export GITHUB_APP_PRIVATE_KEY_PATH="~/.agents/${AGENT_NAME}/.config/github-app.pem"
-export GITHUB_APP_INSTALLATION_ID="67890"
+GITHUB_APP_ID="12345"
+GITHUB_APP_INSTALLATION_ID="67890"
+GITHUB_APP_PRIVATE_KEY_PATH="${XDG_CONFIG_HOME}/github-app.pem"  # absolute path to PEM on disk
 ```
+
+The launcher's `.env.local` is typically managed by the 1pass plugin (which
+materializes 1Password items to disk). The github-app plugin is decoupled
+from any specific secret manager and trusts whatever puts the right env
+vars in process env.
+
+If any required var is missing when the SessionStart hook fires, the plugin
+fails loudly with a one-line message naming each missing var.
 
 ### Private Key Handling
 
-The private key can be provided as:
-
-- **File path** (`private_key_path` / `GITHUB_APP_PRIVATE_KEY_PATH`): PEM file on disk
-- **Key content** (`secrets.github_app_private_key` / `GITHUB_APP_PRIVATE_KEY`): PEM content directly (e.g., from 1Password). Written to a secure temp file automatically.
+`GITHUB_APP_PRIVATE_KEY_PATH` must point to a PEM file on disk. Inline PEM
+content (`GITHUB_APP_PRIVATE_KEY`) is not supported — write the key to disk in
+your launcher's env chain.
 
 ### PEM Key Security
 
 ```bash
 # Ensure correct permissions
-chmod 600 ~/.agents/${AGENT_NAME}/.config/github-app.pem
+chmod 600 "${XDG_CONFIG_HOME}/github-app.pem"
 
 # Verify the key
-openssl rsa -in ~/.agents/${AGENT_NAME}/.config/github-app.pem -check -noout
+openssl rsa -in "${XDG_CONFIG_HOME}/github-app.pem" -check -noout
 ```
 
 ## Checking Token Status
 
-Run the token status script directly:
+Source the runtime env file to pick up `GH_TOKEN`/`GITHUB_TOKEN`, then run the
+status script:
 
 ```bash
-~/.agents/${AGENT_NAME}/.config/github-app-env  # source to get vars
+source "${XDG_CONFIG_HOME}/github-app/runtime.env"
 $CLAUDE_PLUGIN_ROOT/bin/token-status.sh
 ```
 
 Or check the metadata file:
 
 ```bash
-cat ~/.agents/${AGENT_NAME}/.config/github-token.meta | jq .
+jq . "${XDG_CONFIG_HOME}/github-app/token.meta"
 ```
 
 ## Forcing a Token Refresh
@@ -154,14 +146,15 @@ git config --global credential.https://github.com.helper \
 
 This reads the token from the shared file, so `git push` always uses the latest token.
 
-## Agent Team Usage
+## Per-Agent Isolation
 
-For agent teams (tmux panes), all agents share the same token file:
+Each agent gets its own token file under its XDG config root:
 
-- Token file: `~/.agents/${AGENT_NAME}/.config/github-token`
-- All agents read from the same file
-- PreToolUse hook in each agent monitors and refreshes as needed
-- File-based locking prevents concurrent refresh races
+- Token file: `${XDG_CONFIG_HOME}/github-app/token` (resolves to
+  `$AGENT_HOME_DIR/.config/github-app/token`)
+- Each agent has its own SessionStart + PreToolUse hooks and refreshes
+  independently — no shared state across agents
+- File-based locking prevents concurrent refresh races within a single agent
 
 ## Troubleshooting
 
@@ -191,10 +184,12 @@ The installation ID is wrong or the App is no longer installed on the target acc
 
 ### "Token expired" or auth errors despite PreToolUse hook
 
-Check that the runtime env file exists and is being sourced:
+Check that the runtime env file exists and is being sourced. The file holds
+`GH_TOKEN`/`GITHUB_TOKEN` exports — list keys only (it does not contain other
+secrets, but treat it as sensitive regardless):
 
 ```bash
-cat ~/.agents/${AGENT_NAME}/.config/github-app-env
+ls -l "${XDG_CONFIG_HOME}/github-app/runtime.env"
 ```
 
 If missing, the SessionStart hook may have failed. Check stderr output from session start.
@@ -210,7 +205,7 @@ The plugin failed to refresh 3 times consecutively and is backing off for 5 minu
 To clear the cooldown manually:
 
 ```bash
-rm ~/.agents/${AGENT_NAME}/.config/github-token.cooldown
+rm "${XDG_CONFIG_HOME}/github-app/token.cooldown"
 ```
 
 ### Permissions Issues

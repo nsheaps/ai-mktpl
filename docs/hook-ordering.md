@@ -2,9 +2,9 @@
 
 ## Problem
 
-Claude Code does not guarantee the execution order of `SessionStart` hooks across plugins. When one plugin depends on environment variables injected by another plugin's hook, there is a race condition: the dependent plugin may run first and find the variables empty.
+Claude Code does not guarantee the execution order of `SessionStart` hooks across plugins. When one plugin depends on environment variables that another plugin would otherwise inject from its own hook, the dependent plugin's hook may run first and find the variables empty.
 
-**Example:** The `github-app` plugin needs `GITHUB_APP_ID`, `GITHUB_APP_INSTALLATION_ID`, and `GITHUB_APP_PRIVATE_KEY_PATH` to generate a token. If the `1pass` plugin is responsible for injecting those values but runs after `github-app`, the `github-app` hook sees empty variables and silently skips token generation.
+**Example:** The `github-app` plugin needs `GITHUB_APP_ID`, `GITHUB_APP_INSTALLATION_ID`, and `GITHUB_APP_PRIVATE_KEY_PATH` to generate a token. If a secret-resolving plugin (such as `1pass`) is responsible for injecting those values via its own SessionStart hook, the `github-app` hook may fire first and see empty variables.
 
 ## Why Polling Process Env Vars Doesn't Work
 
@@ -12,82 +12,58 @@ Each SessionStart hook runs in its own subprocess. Env vars `export`ed inside on
 
 Polling `[[ -n "${VAR:-}" ]]` inside a hook will never observe values written by another hook's subprocess.
 
-## Pattern: `wait_for_env_file` via `CLAUDE_ENV_FILE`
+## Recommended Pattern: Launcher Sources `.env` Before Exec
 
-The correct mechanism is `CLAUDE_ENV_FILE` — a shared file that Claude Code sources before each Bash tool call. Plugins that need to share env vars write `export KEY=value` lines to this file. Other plugins can read (and source) this file to pick up those values.
+The ai-mktpl agent harness uses a launcher script (`bin/agent`) that sources the agent's `.env` / `.env.local` chain **before** exec'ing `claude`. By the time any plugin SessionStart hook fires, the required env vars are already in process env — no inter-hook coordination is necessary.
 
-The `github-app` plugin provides a reusable helper at `lib/wait-for-env.sh` that polls `CLAUDE_ENV_FILE` for required variables with exponential backoff, then sources the file to make them available in the current process.
+```text
+bin/agent
+  ├─ source $AGENT_HOME_DIR/.env          # repo-templated, sources .env.local
+  │    └─ source $AGENT_HOME_DIR/.env.local # 1pass-managed secrets
+  ├─ exec claude                           # all required env vars are now in process env
+  │    │
+  │    ├─ SessionStart hook A (e.g. github-app) — sees GITHUB_APP_ID etc.
+  │    └─ SessionStart hook B — also sees the same env
+```
 
-### Usage
+Plugins that depend on env vars should:
+
+1. **Fail fast** if a required var is missing — log the missing vars by name and exit 0 (informational), or fail loudly if the agent will be useless without them.
+2. **Document the required env vars** in the plugin README so the launcher author knows what to provision.
+3. **Not poll, not wait, not retry.** If the var isn't there at hook time, it isn't going to appear later via another hook.
+
+### Example (from `plugins/github-app/hooks/scripts/github-token-init.sh`)
 
 ```bash
-source "${CLAUDE_PLUGIN_ROOT}/lib/wait-for-env.sh"
-
-# Wait up to 15 seconds for credentials to appear in CLAUDE_ENV_FILE
-if wait_for_env_file GITHUB_APP_ID GITHUB_APP_INSTALLATION_ID --timeout 15; then
-  echo "credentials available"
-else
-  echo "timed out — plugin not configured"
+# Fail-fast: required env vars must be present.
+# The launcher is responsible for populating process env. If any required var
+# is missing, we abort loudly rather than silently leaving the session
+# unauthenticated.
+if ! require_static_env; then
+  hook_log "required JWT-signing env vars missing; aborting"
+  hook_respond
   exit 0
 fi
 ```
 
-### How It Works
+`require_static_env` is a plugin-internal helper that checks for the documented set of required env vars and logs the missing ones by name.
 
-- Checks `CLAUDE_ENV_FILE` for `export VAR=value` lines matching each required variable
-- When all are found, sources the file to make vars available in the current process
-- Polls every 1 second, doubling the interval up to a maximum of 4 seconds
-- Returns `0` when all specified variables are found and sourced
-- Returns `1` if `CLAUDE_ENV_FILE` is not set or the timeout expires
-- Guard-loaded (safe to `source` multiple times via `_WAIT_FOR_ENV_LOADED`)
+## When Hook-to-Hook Coordination Is Unavoidable
 
-### Recommended Timeouts
+If two plugins genuinely need to share state mid-session (rare), use `CLAUDE_ENV_FILE` — a shared file that Claude Code sources before each Bash tool call. Plugin A writes `export KEY=value` to it; subsequent Bash tool calls (and therefore subsequent PreToolUse / PostToolUse hooks invoked via Bash) see the value.
 
-| Hook type    | Timeout | Rationale                                    |
-| ------------ | ------- | -------------------------------------------- |
-| SessionStart | 15s     | Startup allows more wait time                |
-| PreToolUse   | 5s      | Per-tool hooks have a tighter latency budget |
-
-## Where to Apply This Pattern
-
-Apply `wait_for_env_file` in a plugin's `SessionStart` hook **before** the credentials check that exits early. The wait should only trigger if the variables are currently unset — if they are already present (e.g., from a user's shell environment), skip the wait entirely.
-
-```bash
-# Only wait if credentials aren't already in the environment
-if [[ -z "${REQUIRED_VAR:-}" ]]; then
-  source "${CLAUDE_PLUGIN_ROOT}/lib/wait-for-env.sh"
-  if wait_for_env_file REQUIRED_VAR --timeout 15; then
-    log "credentials became available after waiting for another plugin"
-  else
-    log "timeout — plugin not configured, skipping"
-    exit 0
-  fi
-fi
-```
-
-## Example: `github-app` + `1pass`
-
-The `1pass` plugin writes GitHub App secrets as `export KEY=value` lines to `CLAUDE_ENV_FILE`. When both plugins are enabled:
-
-1. Claude Code starts both `SessionStart` hooks concurrently (order unspecified)
-2. If `github-app` runs first, it finds empty env vars and enters the `wait_for_env_file` loop
-3. When `1pass` finishes writing to `CLAUDE_ENV_FILE`, `github-app`'s wait detects the lines, sources the file, and returns successfully
-4. Token generation proceeds normally
-
-If `1pass` is not configured or fails, the wait times out and `github-app` skips gracefully with a log message.
+This is **not** a substitute for the launcher-sources-env pattern at session start — `CLAUDE_ENV_FILE` is only re-sourced between tool calls, not between concurrent SessionStart hooks. Use it for refresh-style updates (e.g. token rotation propagating a new `GH_TOKEN`), not for initial bootstrapping.
 
 ## Plugin Author Guidelines
 
-- **Do not assume hook order.** Any plugin that depends on env vars from another plugin should use `wait_for_env_file`.
-- **Do not poll process env vars.** Each SessionStart hook is a separate subprocess; env vars exported by one subprocess are invisible to others.
-- **Use `CLAUDE_ENV_FILE` as the shared bus.** Write `export KEY=value` lines there; read them with `wait_for_env_file`.
-- **Keep the wait scoped.** Only wait for the specific variables you need, not for a general "ready" signal.
-- **Exit 0 on timeout.** Informational hooks should never block the session. Log a clear message and exit cleanly.
-- **Use shorter timeouts in PreToolUse.** PreToolUse hooks run before every tool call; excessive waiting degrades the user experience.
-- **Document your dependencies.** If your plugin requires another plugin to set specific env vars, document that in your `plugin.json` description or README.
+- **Do not assume hook order.** If your plugin requires env vars from another plugin's SessionStart hook, you have a design problem — push that responsibility up to the launcher's `.env` chain instead.
+- **Do not poll process env vars across hooks.** Each SessionStart hook is a separate subprocess; env vars exported by one subprocess are invisible to others.
+- **Document required env vars in your plugin README.** Make the launcher's contract explicit.
+- **Exit 0 with a clear log on missing config.** Informational hooks should not block the session.
+- **Use `CLAUDE_ENV_FILE` only for between-tool-call propagation.** Not for session-start coordination.
 
 ## Reference
 
-- `plugins/github-app/lib/wait-for-env.sh` — The reusable helper
-- `plugins/github-app/hooks/scripts/github-token-init.sh` — Usage in a SessionStart hook
-- `plugins/github-app/bin/token-check.sh` — Usage in a utility script (shorter timeout)
+- `plugins/github-app/hooks/scripts/github-token-init.sh` — fail-fast SessionStart hook
+- `plugins/github-app/specs/setup-hook-static-config-split.md` — design rationale for launcher-owns-static-config
+- `plugins/github-app/README.md` — example documentation of required env vars

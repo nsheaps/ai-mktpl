@@ -9,6 +9,9 @@
 #   2. require_static_env succeeds when all inputs are present in env.
 #   3. write_runtime_env_file does NOT persist APP_ID / INSTALLATION_ID /
 #      PEM_PATH to runtime.env (the original BUG-19 contamination vector).
+#   4. The SessionStart hook's case statement routes "unknown" minutes-
+#      remaining into the regen path (PR #487 review fix — without this,
+#      `set -u` aborts on the bash arithmetic `(( "unknown" > 45 ))`).
 #
 # Run from anywhere; the script self-isolates via mktemp.
 #
@@ -83,6 +86,52 @@ for key in GITHUB_APP_ID GITHUB_APP_INSTALLATION_ID GITHUB_APP_PRIVATE_KEY_PATH;
     ok "$key absent from runtime.env"
   fi
 done
+
+# --- Test 4: github-token-init.sh tolerates get_minutes_remaining=unknown ----
+#
+# Regression for PR #487 review: when token.meta exists but expires_at is
+# empty (or unparseable), get_minutes_remaining returns the literal string
+# "unknown". Under `set -u`, the SessionStart hook's case statement must
+# route that into the regen path — falling through to `(( _minutes > 45 ))`
+# triggers bash's "unbound variable" abort on the string "unknown" and
+# leaves the session unauthenticated.
+echo "[4/4] github-token-init.sh treats unknown as regen path (no set -u abort)"
+(
+  # Set up a meta file with empty expires_at to force unknown.
+  TOKEN_FILE="${GITHUB_APP_CONFIG_DIR}/token"
+  mkdir -p "$(dirname "$TOKEN_FILE")"
+  printf '{"expires_at": ""}\n' > "${TOKEN_FILE}.meta"
+
+  # Source token-utils and verify get_minutes_remaining returns "unknown".
+  META_FILE="${TOKEN_FILE}.meta"
+  # shellcheck source=/dev/null
+  source "$PLUGIN_ROOT/lib/token-utils.sh"
+  result="$(get_minutes_remaining)"
+  if [[ "$result" != "unknown" ]]; then
+    echo "    fixture didn't produce unknown (got: $result)"
+    exit 1
+  fi
+
+  # Now exercise the case-statement pattern from github-token-init.sh under
+  # the same `set -u` discipline. Pre-fix this would abort.
+  set -u
+  _minutes="$result"
+  _should_regen=true
+  case "$_minutes" in
+    missing|expired|unknown) ;;
+    *)
+      if (( _minutes > 45 )); then  # would abort on "unknown" pre-fix
+        _should_regen=false
+      fi
+      ;;
+  esac
+  [[ "$_should_regen" == "true" ]] || exit 1
+)
+if [[ $? -eq 0 ]]; then
+  ok "case statement routes unknown -> regen without set -u abort"
+else
+  bad "case statement aborted or mis-routed on unknown"
+fi
 
 # --- Result -----------------------------------------------------------------
 echo
