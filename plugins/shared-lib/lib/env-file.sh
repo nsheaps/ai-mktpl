@@ -41,26 +41,35 @@ _env_file_ensure() {
 }
 
 # Internal: strip lines matching an anchored ERE from a file in place,
-# via mktemp+mv (atomic replace). No-op if file doesn't exist.
+# via same-directory mktemp+mv (true rename(2) atomic replace). No-op if
+# file doesn't exist.
+#
+# The temp file is created in the SAME DIRECTORY as the target file
+# (via `mktemp -- "${file}.XXXXXX"`) so that `mv` is guaranteed to be
+# a real rename(2) syscall — atomic on POSIX filesystems. Using a
+# default `mktemp` (which lands in $TMPDIR / /tmp) would risk a
+# cross-filesystem move that falls back to copy+unlink, which is NOT
+# atomic.
 # Args: $1=file_path  $2=ERE pattern (passed to grep -E -v)
 _env_file_strip_regex() {
   local file="$1" pattern="$2"
   [ -f "$file" ] || return 0
   local tmp
-  tmp="$(mktemp)"
+  tmp="$(mktemp -- "${file}.XXXXXX")"
   grep -E -v -- "$pattern" "$file" > "$tmp" 2>/dev/null || true
   mv -- "$tmp" "$file"
 }
 
 # Internal: strip lines matching a fixed string (whole-line) from a file
 # in place. Used for `source <path>` removal, since paths can contain
-# regex metacharacters (dots, plus signs, etc).
+# regex metacharacters (dots, plus signs, etc). Same same-directory
+# mktemp+mv pattern as _env_file_strip_regex for true rename(2) atomicity.
 # Args: $1=file_path  $2=fixed_string
 _env_file_strip_fixed() {
   local file="$1" needle="$2"
   [ -f "$file" ] || return 0
   local tmp
-  tmp="$(mktemp)"
+  tmp="$(mktemp -- "${file}.XXXXXX")"
   grep -F -v -x -- "$needle" "$file" > "$tmp" 2>/dev/null || true
   mv -- "$tmp" "$file"
 }
