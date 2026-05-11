@@ -1,18 +1,6 @@
 {
-  "description": "GitHub App token lifecycle: provision static config + initial token via Setup{init}, refresh on SessionStart and PreToolUse",
+  "description": "GitHub App token lifecycle: refresh on SessionStart and PreToolUse. Static credentials must be provided in process env by the launcher (see plugin README).",
   "hooks": {
-    "Setup": [
-      {
-        "matcher": "init",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/install.sh",
-            "timeout": 60
-          }
-        ]
-      }
-    ],
     "SessionStart": [
       {
         "matcher": "*",

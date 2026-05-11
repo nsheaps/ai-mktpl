@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 # github-token-check.sh — PreToolUse hook for github-app plugin
 #
-# Sources ${GITHUB_APP_CONFIG_DIR}/static.env (the source of truth for
-# JWT-signing inputs as of 0.4.0) and refreshes the token when needed.
-# NEVER reads APP_ID etc. from process env — that is BUG-19's contamination
-# vector.
+# Validates the JWT-signing inputs are present in process env (populated by
+# the launcher's .env chain) and refreshes the token when needed. If the env
+# isn't set up (e.g. plugin not configured for this agent), defers silently.
 set -euo pipefail
 
 # shellcheck source=../../lib/agent-paths.sh
@@ -12,8 +11,9 @@ source "${CLAUDE_PLUGIN_ROOT}/lib/agent-paths.sh"
 # shellcheck source=../../lib/env-file.sh
 source "${CLAUDE_PLUGIN_ROOT}/lib/env-file.sh"
 
-# Plugin not yet provisioned (Setup hasn't run) — defer silently.
-if ! read_static_env_file 2>/dev/null; then
+# Plugin not configured for this agent (launcher didn't source env) — defer
+# silently. SessionStart will log the actual failure once if relevant.
+if ! require_static_env 2>/dev/null; then
   exit 0
 fi
 

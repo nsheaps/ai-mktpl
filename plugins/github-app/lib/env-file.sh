@@ -2,19 +2,20 @@
 # env-file.sh — Shared env-file writers for the github-app plugin
 #
 # This file owns the on-disk layout of the plugin's config under
-# ${GITHUB_APP_CONFIG_DIR} (= ${XDG_CONFIG_HOME}/github-app/). Two separate
-# files exist by design (BUG-19):
+# ${GITHUB_APP_CONFIG_DIR} (= ${XDG_CONFIG_HOME}/github-app/).
 #
-#   static.env        — immutable JWT-signing inputs. Written ONLY by
-#                       hooks/scripts/install.sh during Setup. Never re-written
-#                       from process env afterwards.
-#   runtime.env       — mutable per-session/per-refresh state (token, git
-#                       identity, isolation pointers). Written by SessionStart
-#                       and every successful PreToolUse refresh.
+# Architecture (post-PR #487):
 #
-# Splitting them prevents the BUG-19 contamination loop where SessionStart
-# would re-read GITHUB_APP_ID etc. from process env and persist whatever was
-# in env (possibly another agent's value) back to disk.
+#   The plugin is no longer responsible for persisting static credentials.
+#   The launcher (bin/agent) sources $AGENT_HOME_DIR/.env / .env.local
+#   (managed by the 1pass plugin) before exec'ing claude, so the JWT-signing
+#   inputs (GITHUB_APP_ID, GITHUB_APP_INSTALLATION_ID,
+#   GITHUB_APP_PRIVATE_KEY_PATH) are guaranteed present in process env by
+#   the time any hook fires.
+#
+#   This plugin owns ONLY mutable runtime state:
+#     runtime.env       — token + identity, rewritten on every refresh.
+#     git-identity.env  — stable git identity (written once per session).
 #
 # Required variables when calling write_*:
 #   GITHUB_APP_CONFIG_DIR   — set by lib/agent-paths.sh
@@ -36,8 +37,7 @@ _env_file_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 [[ -n "${_AGENT_PATHS_LOADED:-}" ]] || source "$_env_file_dir/agent-paths.sh"
 
 # Canonical paths under GITHUB_APP_CONFIG_DIR. Callers may override TOKEN_FILE
-# (via GITHUB_TOKEN_FILE / config "tokenFile") but not the static/runtime paths.
-STATIC_ENV_FILE="${GITHUB_APP_CONFIG_DIR}/static.env"
+# (via GITHUB_TOKEN_FILE / config "tokenFile") but not the runtime paths.
 RUNTIME_ENV_FILE="${GITHUB_APP_CONFIG_DIR}/runtime.env"
 GIT_IDENTITY_FILE="${GITHUB_APP_CONFIG_DIR}/git-identity.env"
 
@@ -66,54 +66,24 @@ _atomic_write() {
   mv -f "$tmp" "$target"
 }
 
-# write_static_env_file APP_ID INSTALLATION_ID PEM_PATH [CLIENT_ID] [CLIENT_SECRET] [REF_PROVENANCE] [GH_CONFIG_DIR] [GIT_CONFIG_GLOBAL]
+# require_static_env -- asserts that the JWT-signing inputs are present in
+# process env. Fails loudly with a clear message naming each missing var.
+# The plugin runs independently of any specific secret manager; the launcher
+# is responsible for sourcing the agent's .env/.env.local before exec'ing
+# claude. If any required var is missing, we fail fast so the operator knows
+# the launcher chain is misconfigured.
 #
-# Called only by install.sh during Setup. Writes the immutable JWT-signing
-# inputs to ${STATIC_ENV_FILE} from explicit positional arguments — values
-# are NEVER read from process env, so there is no path for cross-agent
-# env contamination to flow into this file.
-write_static_env_file() {
-  local app_id="${1:?write_static_env_file: APP_ID required}"
-  local installation_id="${2:?write_static_env_file: INSTALLATION_ID required}"
-  local pem_path="${3:?write_static_env_file: PEM_PATH required}"
-  local client_id="${4:-}"
-  local client_secret="${5:-}"
-  local ref_provenance="${6:-}"
-  local gh_config_dir="${7:-}"
-  local git_config_global="${8:-}"
-  local written_at
-  written_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-
-  {
-    cat <<'STATICEOF'
-# github-app plugin static config — written by Setup hook (install.sh).
-# DO NOT EDIT. This file is the source of truth for JWT-signing inputs and
-# is intentionally NOT rewritten on token refresh. To regenerate, rerun
-# `claude --init-only` or delete this file and start a new session.
-STATICEOF
-    printf 'export GITHUB_APP_ID="%s"\n' "$(_safe_val "${app_id}")"
-    printf 'export GITHUB_APP_INSTALLATION_ID="%s"\n' "$(_safe_val "${installation_id}")"
-    printf 'export GITHUB_APP_PRIVATE_KEY_PATH="%s"\n' "$(_safe_val "${pem_path}")"
-    [[ -n "${client_id}" ]]          && printf 'export GITHUB_APP_CLIENT_ID="%s"\n' "$(_safe_val "${client_id}")"
-    [[ -n "${client_secret}" ]]      && printf 'export GITHUB_APP_CLIENT_SECRET="%s"\n' "$(_safe_val "${client_secret}")"
-    [[ -n "${gh_config_dir}" ]]      && printf 'export GH_CONFIG_DIR="%s"\n' "$(_safe_val "${gh_config_dir}")"
-    [[ -n "${git_config_global}" ]]  && printf 'export GIT_CONFIG_GLOBAL="%s"\n' "$(_safe_val "${git_config_global}")"
-    printf 'export GITHUB_APP_STATIC_REF="%s"\n' "$(_safe_val "${ref_provenance}")"
-    printf 'export GITHUB_APP_STATIC_WRITTEN_AT="%s"\n' "$(_safe_val "${written_at}")"
-  } | _atomic_write "${STATIC_ENV_FILE}" 600
-}
-
-# read_static_env_file -- sources STATIC_ENV_FILE and verifies required fields.
-# Returns 0 on success, 1 if file missing, 2 if a required field is empty.
-read_static_env_file() {
-  if [[ ! -f "$STATIC_ENV_FILE" ]]; then
+# Returns 0 if all required vars are non-empty, 1 otherwise.
+require_static_env() {
+  local missing=()
+  [[ -z "${GITHUB_APP_ID:-}" ]] && missing+=("GITHUB_APP_ID")
+  [[ -z "${GITHUB_APP_INSTALLATION_ID:-}" ]] && missing+=("GITHUB_APP_INSTALLATION_ID")
+  [[ -z "${GITHUB_APP_PRIVATE_KEY_PATH:-}" ]] && missing+=("GITHUB_APP_PRIVATE_KEY_PATH")
+  if (( ${#missing[@]} > 0 )); then
+    echo "github-app: ERROR: required env var(s) missing: ${missing[*]}" >&2
+    echo "github-app: ERROR: the launcher (bin/agent) must source \$AGENT_HOME_DIR/.env" >&2
+    echo "github-app: ERROR: before invoking claude. See the github-app plugin README for setup." >&2
     return 1
-  fi
-  # shellcheck disable=SC1090
-  source "$STATIC_ENV_FILE"
-  if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_APP_INSTALLATION_ID:-}" || -z "${GITHUB_APP_PRIVATE_KEY_PATH:-}" ]]; then
-    echo "github-app: ERROR: $STATIC_ENV_FILE is missing required fields" >&2
-    return 2
   fi
   return 0
 }
@@ -122,7 +92,7 @@ read_static_env_file() {
 #
 # Writes per-session/per-refresh state. Intentionally does NOT include
 # GITHUB_APP_ID, GITHUB_APP_INSTALLATION_ID, or GITHUB_APP_PRIVATE_KEY_PATH —
-# those live in static.env exclusively (BUG-19).
+# those come from the launcher-sourced env chain (see require_static_env).
 #
 # Args:
 #   $1  — the raw token string
@@ -197,15 +167,19 @@ GCEOF
 
 # migrate_legacy_layout
 #
-# Removes the pre-0.4.0 flat env file. Pre-0.4.0 wrote to
-# ${HOME}/.agents/${AGENT_NAME}/.config/github-app-env, which under XDG today
-# is ${XDG_CONFIG_HOME}/github-app-env (since launcher sets
-# XDG_CONFIG_HOME=$AGENT_HOME_DIR/.config). Idempotent. Logs to stderr when a
-# file is removed.
+# Removes pre-0.4.0 artifacts. Idempotent. Logs to stderr when a file is
+# removed.
+#   - ${XDG_CONFIG_HOME}/github-app-env   (pre-0.4.0 flat env file)
+#   - ${GITHUB_APP_CONFIG_DIR}/static.env (pre-rework static.env, PR #487)
 migrate_legacy_layout() {
-  local legacy="${XDG_CONFIG_HOME}/github-app-env"
-  if [[ -f "$legacy" ]]; then
-    echo "github-app: removing legacy env file $legacy (pre-0.4.0 layout)" >&2
-    rm -f "$legacy"
+  local legacy_flat="${XDG_CONFIG_HOME}/github-app-env"
+  if [[ -f "$legacy_flat" ]]; then
+    echo "github-app: removing legacy env file $legacy_flat (pre-0.4.0 layout)" >&2
+    rm -f "$legacy_flat"
+  fi
+  local legacy_static="${GITHUB_APP_CONFIG_DIR}/static.env"
+  if [[ -f "$legacy_static" ]]; then
+    echo "github-app: removing legacy static.env $legacy_static (replaced by launcher-sourced env)" >&2
+    rm -f "$legacy_static"
   fi
 }

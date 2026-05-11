@@ -28,91 +28,47 @@ GitHub App installation tokens expire after 1 hour. This plugin generates tokens
 
 ### 3. Configure Credentials
 
-The plugin supports multiple ways to provide secrets, in order of priority:
-
-#### Option A: Bulk Secret Reference (`ref`)
-
-The `ref` setting loads all secrets at once from a single source.
-
-**1Password item** (recommended) — uses `nsheaps/op-exec`:
-
-```yaml
-# In $CLAUDE_PROJECT_DIR/.claude/plugins.settings.yaml
-github-app:
-  ref: "op://vault/github-app--repo--my-repo"
-```
-
-**Env file** — sources `KEY=VALUE` pairs from a file:
-
-```yaml
-github-app:
-  ref: "env-file://./.env.github-app" # relative to project
-  # or
-  ref: "env-file://~/.agents/<agent-name>/.config/github-app.env" # absolute
-```
-
-The source should provide fields named:
+As of 0.4.0, the plugin no longer resolves secrets itself. The agent launcher
+(`bin/agent`) is responsible for sourcing the agent's `.env` / `.env.local`
+chain before exec'ing `claude`, so the following env vars are present at hook
+time:
 
 - `GITHUB_APP_ID`
-- `GITHUB_APP_CLIENT_ID`
-- `GITHUB_APP_CLIENT_SECRET`
-- `GITHUB_APP_PRIVATE_KEY`
-- `GITHUB_APP_INSTALLATION_ID` (optional, can be set per-project)
+- `GITHUB_APP_INSTALLATION_ID`
+- `GITHUB_APP_PRIVATE_KEY_PATH` — absolute path to PEM file on disk
 
-#### Option B: Individual Secret References
+The launcher's `.env.local` is typically managed by the 1pass plugin (which
+materializes 1Password items to disk). The github-app plugin is decoupled
+from 1Password and works with any mechanism that lands the right env vars
+in process env.
 
-Each secret can independently reference an env var, a 1Password field, or a literal:
-
-```yaml
-github-app:
-  secrets:
-    github_app_id: "op://vault/item/GITHUB_APP_ID"
-    github_app_client_id: "${GITHUB_APP_CLIENT_ID}"
-    github_app_client_secret: "op://vault/item/GITHUB_APP_CLIENT_SECRET"
-    github_app_private_key: "op://vault/item/GITHUB_APP_PRIVATE_KEY"
-    github_installation_id: "12345"
-```
-
-Individual `secrets.*` values override `ref` values for the same field.
-
-#### Option C: Environment Variables
-
-Set before the session starts:
-
-```bash
-export GITHUB_APP_ID="12345"
-export GITHUB_APP_PRIVATE_KEY_PATH="~/.agents/<agent-name>/.config/github-app.pem"
-export GITHUB_APP_INSTALLATION_ID="67890"
-```
-
-#### Option D: Legacy Flat Settings
-
-```yaml
-github-app:
-  github_app_id: "12345"
-  private_key_path: "~/.agents/<agent-name>/.config/github-app.pem"
-  github_installation_id: "67890"
-```
+If any required var is missing when the SessionStart hook fires, the plugin
+fails loudly with a one-line message naming each missing var.
 
 ### Private Key Handling
 
-The private key can be provided as:
-
-- **File path** (`private_key_path` or `GITHUB_APP_PRIVATE_KEY_PATH`): Points to a PEM file on disk
-- **Key content** (`secrets.github_app_private_key` or `GITHUB_APP_PRIVATE_KEY`): The PEM content directly (e.g., from 1Password). The plugin writes it to a secure temp file automatically.
-
-When using a PEM file directly, ensure correct permissions:
+`GITHUB_APP_PRIVATE_KEY_PATH` must point to a PEM file on disk with 600 or
+400 permissions:
 
 ```bash
 chmod 600 ~/.agents/<agent-name>/.config/github-app.pem
 ```
 
+Inline PEM content (`GITHUB_APP_PRIVATE_KEY`) is no longer supported by this
+plugin — write the PEM to disk in your launcher chain (the 1pass plugin does
+this automatically when a `GITHUB_APP_PRIVATE_KEY` field is present).
+
 ## How It Works
 
-1. **Session starts**: Hook reads App credentials, generates JWT, exchanges for installation token
-2. **Token stored**: Written to `~/.agents/${AGENT_NAME}/.config/github-token` with 600 permissions (where `AGENT_NAME` defaults to `_UNKNOWN` if unset)
+1. **Session starts**: SessionStart hook validates required env vars
+   (`GITHUB_APP_ID`, `GITHUB_APP_INSTALLATION_ID`, `GITHUB_APP_PRIVATE_KEY_PATH`),
+   generates a JWT, exchanges for an installation token
+2. **Token stored**: Written to `${XDG_CONFIG_HOME}/github-app/token` (i.e.
+   `$AGENT_HOME_DIR/.config/github-app/token`) with 600 permissions. `AGENT_NAME`
+   must be set — the plugin refuses to run without it.
 3. **Git identity configured**: Sets `GIT_AUTHOR_*`/`GIT_COMMITTER_*` env vars to the App's bot identity (e.g., `my-app[bot]` / `12345+my-app[bot]@users.noreply.github.com`). Only configures if `user.name`/`user.email` are not already set in git config.
-4. **Runtime env file**: `GH_TOKEN` and `GITHUB_TOKEN` written to `~/.agents/${AGENT_NAME}/.config/github-app-env`, sourced by `CLAUDE_ENV_FILE`
+4. **Runtime env file**: `GH_TOKEN` and `GITHUB_TOKEN` written to
+   `${XDG_CONFIG_HOME}/github-app/runtime.env`, sourced via `CLAUDE_ENV_FILE`
 5. **PreToolUse monitoring**: Before each tool call, checks token expiry (debounced to every 30s)
 6. **Smart refresh**: Commands using `gh`/`git push` get synchronous checks; others get async background refresh
 7. **Retry with backoff**: Failed refreshes retry up to 3 times, then back off for 5 minutes
@@ -138,33 +94,19 @@ Git identity is only configured if `user.name`/`user.email` are not already set 
 github-app:
   enabled: true
 
-  # Option A: Bulk secret reference (op:// or env-file://)
-  ref: "op://vault/github-app--repo--my-repo"
-  # ref: "env-file://./.env.github-app"
-
-  # Option B: Individual secrets (override ref for specific fields)
-  # Each value: literal, ${ENV_VAR}, or op://vault/item/field
-  secrets:
-    github_app_id: "op://vault/item/GITHUB_APP_ID"
-    github_app_client_id: "op://vault/item/GITHUB_APP_CLIENT_ID"
-    github_app_client_secret: "op://vault/item/GITHUB_APP_CLIENT_SECRET"
-    github_app_private_key: "op://vault/item/GITHUB_APP_PRIVATE_KEY"
-    github_installation_id: "${GITHUB_APP_INSTALLATION_ID}"
-
-  # Other settings
-  tokenFile: "~/.agents/<agent-name>/.config/github-token"
+  # Automatically set GIT_AUTHOR_* / GIT_COMMITTER_* from the App's bot
+  # identity (e.g. "my-app[bot]" + noreply email). Default: true.
   autoGitConfig: true
+
+  # Override the token file path. Defaults to
+  # ${XDG_CONFIG_HOME}/github-app/token.
+  # tokenFile: "~/.agents/<agent-name>/.config/github-app/token"
 ```
 
-### Secret Reference Syntax
-
-| Syntax          | Example                          | Resolution                       |
-| --------------- | -------------------------------- | -------------------------------- |
-| Literal         | `"12345"`                        | Used as-is                       |
-| Env var         | `"${GITHUB_APP_ID}"`             | Expanded from shell environment  |
-| 1Password field | `"op://vault/item/field"`        | Resolved via `op read`           |
-| 1Password item  | `"op://vault/item"` (ref only)   | All fields via `op-exec`         |
-| Env file        | `"env-file://./path"` (ref only) | Source KEY=VALUE pairs from file |
+Static credentials (`GITHUB_APP_ID`, `GITHUB_APP_INSTALLATION_ID`,
+`GITHUB_APP_PRIVATE_KEY_PATH`) come from process env — set by the launcher's
+`.env` chain, NOT by this plugin's settings. See the "Configure Credentials"
+section above.
 
 ## Plugin Structure
 
@@ -203,16 +145,23 @@ rm -rf ~/.config/agent/github-token ~/.config/agent/github-token.meta ~/.config/
 
 ### AGENT_NAME for git credential helper
 
-`bin/git-credential-github-app.sh` is invoked by **git itself** outside the Claude harness. Git inherits the user's shell environment, where `AGENT_NAME` may not be set. To ensure the credential helper finds the correct per-agent token, export `AGENT_NAME` in your shell profile:
+`bin/git-credential-github-app.sh` is invoked by **git itself** outside the
+Claude harness. The helper prefers `GITHUB_TOKEN_FILE` from the environment
+(set by SessionStart via `runtime.env` / `CLAUDE_ENV_FILE`) and skips the
+agent-name guard when that's available.
+
+If you need to invoke the helper from a shell where `GITHUB_TOKEN_FILE` is
+not exported, export `AGENT_NAME` and `XDG_CONFIG_HOME` so path derivation
+works:
 
 ```bash
 # ~/.bashrc or ~/.zshrc
 export AGENT_NAME="jack"  # or "henry", etc.
+export XDG_CONFIG_HOME="$HOME/.agents/$AGENT_NAME/.config"
 ```
 
-Or in a systemd unit: `Environment=AGENT_NAME=jack`
-
-If `AGENT_NAME` is not set, the credential helper falls back to `~/.agents/_UNKNOWN/.config/`, which may collide with other unconfigured agents.
+If `AGENT_NAME` is unset, the helper refuses to run — there is no `_UNKNOWN`
+fallback (PR #487 removed `GITHUB_APP_ALLOW_UNKNOWN_AGENT`).
 
 ## Related
 

@@ -7,23 +7,23 @@
 #   git config --global credential.https://github.com.helper \
 #     '!/path/to/git-credential-github-app.sh'
 #
-# The token file location defaults to ~/.agents/${AGENT_NAME}/.config/github-token
-# but can be overridden via GITHUB_TOKEN_FILE environment variable.
+# The token file location is read from GITHUB_TOKEN_FILE if set (the usual
+# case — SessionStart exports it via CLAUDE_ENV_FILE/runtime.env). Otherwise
+# we derive it from AGENT_NAME/XDG_CONFIG_HOME via lib/agent-paths.sh.
 set -euo pipefail
 
-# shellcheck source=../lib/agent-paths.sh
-_self="${BASH_SOURCE[0]}"
-while [ -L "$_self" ]; do _self="$(readlink -f "$_self")"; done
-# git invokes this helper in subprocesses where AGENT_NAME may already be
-# exported. If GITHUB_TOKEN_FILE is explicitly set (typical when SessionStart
-# has run), we skip the agent-name guard since the token path is already
-# resolved.
-if [[ -n "${GITHUB_TOKEN_FILE:-}" ]]; then
-  GITHUB_APP_ALLOW_UNKNOWN_AGENT=1
+if [[ -z "${GITHUB_TOKEN_FILE:-}" ]]; then
+  # Fall back to per-agent path resolution. agent-paths.sh hard-fails if
+  # AGENT_NAME / XDG_CONFIG_HOME are missing, which is the desired safe default
+  # for callers that haven't gone through the SessionStart hook.
+  _self="${BASH_SOURCE[0]}"
+  while [ -L "$_self" ]; do _self="$(readlink -f "$_self")"; done
+  # shellcheck source=../lib/agent-paths.sh
+  source "$(cd "$(dirname "$_self")/.." && pwd)/lib/agent-paths.sh"
+  GITHUB_TOKEN_FILE="${GITHUB_APP_CONFIG_DIR}/token"
 fi
-source "$(cd "$(dirname "$_self")/.." && pwd)/lib/agent-paths.sh"
 
-TOKEN_FILE="${GITHUB_TOKEN_FILE:-${GITHUB_APP_CONFIG_DIR}/token}"
+TOKEN_FILE="$GITHUB_TOKEN_FILE"
 
 # Only respond to "get" requests
 case "${1:-}" in

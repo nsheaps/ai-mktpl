@@ -97,10 +97,10 @@ PLUGIN_DIR="$(cd "$(dirname "$_self")/.." && pwd)"
 source "$PLUGIN_DIR/lib/token-utils.sh"
 source "$PLUGIN_DIR/lib/env-file.sh"
 
-# Load static config — the source of truth for APP_ID / installation / PEM
-# (BUG-19). NEVER trust process env for these fields.
-if ! read_static_env_file 2>/dev/null; then
-  log_error "static.env missing or invalid — run \`claude --init-only\` to provision"
+# Validate required env vars — the launcher (bin/agent) sources the agent's
+# .env / .env.local before exec'ing claude, so these are guaranteed present
+# at hook time. If they're missing, fail loudly.
+if ! require_static_env; then
   exit 2
 fi
 
@@ -163,10 +163,9 @@ do_refresh_with_retries() {
 
 # --- Main logic ---
 
-# Static config has already been sourced above via read_static_env_file —
-# GITHUB_APP_ID / _PATH / INSTALLATION_ID are guaranteed set at this point.
-# We deliberately do NOT fall back to CLAUDE_ENV_FILE-injected values: that
-# was the BUG-19 contamination vector.
+# GITHUB_APP_ID / _PATH / INSTALLATION_ID are guaranteed set at this point
+# by require_static_env above. The launcher's .env chain is the source of
+# truth — we deliberately do NOT fall back to CLAUDE_ENV_FILE-injected values.
 
 # Check cooldown
 check_cooldown || exit $?

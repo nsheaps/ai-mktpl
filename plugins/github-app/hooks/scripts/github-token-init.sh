@@ -1,16 +1,15 @@
 #!/usr/bin/env bash
 # github-token-init.sh — SessionStart hook for github-app plugin
 #
-# As of 0.4.0 the immutable JWT-signing inputs (GITHUB_APP_ID,
-# GITHUB_APP_INSTALLATION_ID, GITHUB_APP_PRIVATE_KEY_PATH) live in
-# ${GITHUB_APP_CONFIG_DIR}/static.env, written exclusively by the Setup hook
-# (hooks/scripts/install.sh). This hook NEVER reads those values from process
-# env — that path was the BUG-19 contamination vector.
+# The JWT-signing inputs (GITHUB_APP_ID, GITHUB_APP_INSTALLATION_ID,
+# GITHUB_APP_PRIVATE_KEY_PATH) MUST be present in process env when this hook
+# fires. The launcher (bin/agent) is responsible for sourcing the agent's
+# .env / .env.local before exec'ing claude so these are available. If they're
+# missing, we fail fast — the plugin no longer manages static credentials.
 #
 # Steps:
-#   1. Source static.env (if missing, fall back to running install.sh once
-#      so existing 0.3.x sessions self-heal).
-#   2. Refresh-or-regenerate the token.
+#   1. Validate required env vars (fail-fast).
+#   2. Refresh-or-regenerate the installation token.
 #   3. Resolve bot identity from token.meta and write runtime.env +
 #      git-identity.env.
 #   4. Append source lines to CLAUDE_ENV_FILE so subsequent Bash calls inherit
@@ -50,31 +49,43 @@ source "${CLAUDE_PLUGIN_ROOT}/lib/env-file.sh"
 
 plugin_is_enabled || { hook_log "plugin disabled, skipping"; hook_respond; exit 0; }
 
-# --- Load static config (the ONLY source of APP_ID / installation / PEM path) ---
-
-if ! read_static_env_file; then
-  rc=$?
-  if [[ ${rc} -eq 1 ]]; then
-    hook_log "static.env missing — running Setup (install.sh) inline as fallback"
-    if ! bash "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/install.sh" 2>&1; then
-      hook_log "install.sh fallback failed; plugin not configured, skipping"
-      hook_log_cleanup
-      hook_respond; exit 0
-    fi
-    if ! read_static_env_file; then
-      hook_log "static.env still missing after install.sh; skipping"
-      hook_log_cleanup
-      hook_respond; exit 0
-    fi
-  else
-    hook_log "static.env malformed (rc=${rc}); skipping"
-    hook_log_cleanup
-    hook_respond; exit 0
-  fi
+# --- Fail-fast: required env vars must be present ---
+#
+# The launcher is responsible for populating process env. If any required var
+# is missing, we abort loudly rather than silently leaving the session
+# unauthenticated.
+if ! require_static_env; then
+  hook_log "required JWT-signing env vars missing; aborting"
+  hook_log_cleanup
+  hook_respond
+  exit 0
 fi
 
-# Always run legacy migration on session start (idempotent).
+# AGENT_HOME_DIR is set by the launcher (bin/agent). Hard-fail if missing —
+# we use it to derive per-agent isolation paths.
+: "${AGENT_HOME_DIR:?github-token-init: AGENT_HOME_DIR unset (launcher must export it)}"
+
+# Run legacy migration on session start (idempotent — clears pre-0.4.0 flat
+# env file and pre-rework static.env if they exist).
 migrate_legacy_layout
+
+# --- gh + git isolation directories ---
+# Derived from AGENT_HOME_DIR. The launcher already sets XDG_CONFIG_HOME, so
+# these align with the XDG-managed isolation.
+GH_CONFIG_DIR="${AGENT_HOME_DIR}/.config/gh"
+GIT_CONFIG_GLOBAL="${AGENT_HOME_DIR}/.config/git/config"
+mkdir -p "${GH_CONFIG_DIR}"
+chmod 700 "${GH_CONFIG_DIR}"
+mkdir -p "$(dirname "${GIT_CONFIG_GLOBAL}")"
+export GH_CONFIG_DIR GIT_CONFIG_GLOBAL
+
+# Expand ~ in the PEM path if present (env may pass it pre-expansion).
+GITHUB_APP_PRIVATE_KEY_PATH="${GITHUB_APP_PRIVATE_KEY_PATH/#\~/${HOME}}"
+export GITHUB_APP_PRIVATE_KEY_PATH
+
+# Ensure plugin config dir exists.
+mkdir -p "${GITHUB_APP_CONFIG_DIR}"
+chmod 700 "${GITHUB_APP_CONFIG_DIR}"
 
 # --- Token paths ---
 
@@ -116,24 +127,13 @@ if [[ "$_should_regen" == "true" ]]; then
     "$GITHUB_APP_INSTALLATION_ID" \
     "$TOKEN_FILE" 2>&1)" || {
     hook_fail "token-gen" "Token generation failed: $TOKEN_OUTPUT" \
-      "Re-run \`claude --init-only\` and verify ref/secrets resolve to the correct GitHub App"
+      "Verify the launcher sources the agent's .env and that the secrets resolve to the correct GitHub App"
     exit 0
   }
 fi
 
 TOKEN="$(cat "$TOKEN_FILE")"
 EXPIRES_AT="$(jq -r '.expires_at // empty' "$META_FILE" 2>/dev/null || true)"
-
-# --- gh + git isolation directories ---
-# GH_CONFIG_DIR / GIT_CONFIG_GLOBAL are set in static.env (sourced above) by
-# the Setup hook, derived from AGENT_HOME_DIR. We just ensure the dirs exist.
-
-: "${GH_CONFIG_DIR:?github-token-init: GH_CONFIG_DIR not in static.env (rerun claude --init-only)}"
-: "${GIT_CONFIG_GLOBAL:?github-token-init: GIT_CONFIG_GLOBAL not in static.env (rerun claude --init-only)}"
-mkdir -p "${GH_CONFIG_DIR}"
-chmod 700 "${GH_CONFIG_DIR}"
-mkdir -p "$(dirname "${GIT_CONFIG_GLOBAL}")"
-export GH_CONFIG_DIR GIT_CONFIG_GLOBAL
 
 # --- Bot identity from token metadata ---
 

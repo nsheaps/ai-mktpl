@@ -1,16 +1,14 @@
 #!/usr/bin/env bash
-# contamination-resistance.sh — regression test for BUG-19
+# contamination-resistance.sh — regression test for BUG-19 (and PR #487 rework)
 #
-# Reproduces the scenario where another agent's GitHub App vars are present
-# in process env at install/SessionStart time, and proves:
+# Post-rework, the plugin no longer persists static credentials to disk —
+# the launcher's .env chain is the only source of GITHUB_APP_ID etc. These
+# tests verify:
 #
-#   1. install.sh refuses to silently overwrite static.env from contaminated env
-#      (it uses explicit positional args; the contaminated env is irrelevant).
-#   2. read_static_env_file() loads from disk and overwrites any contaminated
-#      GITHUB_APP_ID / GITHUB_APP_INSTALLATION_ID / GITHUB_APP_PRIVATE_KEY_PATH
-#      already in env.
-#   3. The runtime path (token-init.sh) NEVER reads APP_ID/INSTALLATION_ID/
-#      PEM_PATH from process env. It only consumes static.env.
+#   1. require_static_env fails loudly when JWT-signing inputs are missing.
+#   2. require_static_env succeeds when all inputs are present in env.
+#   3. write_runtime_env_file does NOT persist APP_ID / INSTALLATION_ID /
+#      PEM_PATH to runtime.env (the original BUG-19 contamination vector).
 #
 # Run from anywhere; the script self-isolates via mktemp.
 #
@@ -27,15 +25,8 @@ trap 'rm -rf "$TMPDIR"' EXIT
 
 # --- Test fixtures -----------------------------------------------------------
 
-CORRECT_APP_ID="111111"
-CORRECT_INSTALLATION_ID="222222"
-CORRECT_PEM="$TMPDIR/correct.pem"
-echo "fake-pem-correct" > "$CORRECT_PEM"
-
-WRONG_APP_ID="999999"
-WRONG_INSTALLATION_ID="888888"
-WRONG_PEM="$TMPDIR/wrong.pem"
-echo "fake-pem-wrong" > "$WRONG_PEM"
+FAKE_PEM="$TMPDIR/fake.pem"
+echo "fake-pem" > "$FAKE_PEM"
 
 # Fake AGENT_HOME_DIR / XDG_CONFIG_HOME isolation root. The launcher
 # (bin/agent) sets XDG_CONFIG_HOME=$AGENT_HOME_DIR/.config in production;
@@ -58,47 +49,28 @@ pass=0; fail=0
 ok()    { echo "  ✓ $*"; pass=$((pass + 1)); }
 bad()   { echo "  ✗ $*"; fail=$((fail + 1)); }
 
-# --- Test 1: write_static_env_file ignores process env ----------------------
-echo "[1/3] write_static_env_file uses positional args, not process env"
-GITHUB_APP_ID="$WRONG_APP_ID" \
-GITHUB_APP_INSTALLATION_ID="$WRONG_INSTALLATION_ID" \
-GITHUB_APP_PRIVATE_KEY_PATH="$WRONG_PEM" \
-write_static_env_file \
-  "$CORRECT_APP_ID" "$CORRECT_INSTALLATION_ID" "$CORRECT_PEM" "" "" "test"
-
-if grep -q "GITHUB_APP_ID=\"$CORRECT_APP_ID\"" "$STATIC_ENV_FILE"; then
-  ok "static.env contains the CORRECT app id from positional arg"
+# --- Test 1: require_static_env fails when vars are unset --------------------
+echo "[1/3] require_static_env fails loudly when JWT-signing inputs are missing"
+(
+  unset GITHUB_APP_ID GITHUB_APP_INSTALLATION_ID GITHUB_APP_PRIVATE_KEY_PATH
+  require_static_env 2>/dev/null
+)
+rc=$?
+if [[ $rc -ne 0 ]]; then
+  ok "require_static_env returned nonzero ($rc) when vars unset"
 else
-  bad "static.env does NOT contain the correct app id"
-fi
-if grep -q "GITHUB_APP_ID=\"$WRONG_APP_ID\"" "$STATIC_ENV_FILE"; then
-  bad "static.env contains the WRONG app id from contaminated env"
-else
-  ok "static.env does NOT contain the wrong app id from contaminated env"
+  bad "require_static_env returned 0 with missing vars"
 fi
 
-# --- Test 2: read_static_env_file overrides contaminated env ----------------
-# Run inline (not in subshell) so pass/fail counters propagate. We restore the
-# vars by re-sourcing static.env, which is exactly what we're testing anyway.
-echo "[2/3] read_static_env_file overwrites contaminated env values"
-export GITHUB_APP_ID="$WRONG_APP_ID"
-export GITHUB_APP_INSTALLATION_ID="$WRONG_INSTALLATION_ID"
-export GITHUB_APP_PRIVATE_KEY_PATH="$WRONG_PEM"
-read_static_env_file
-if [[ "$GITHUB_APP_ID" == "$CORRECT_APP_ID" ]]; then
-  ok "GITHUB_APP_ID overridden to CORRECT value after read"
+# --- Test 2: require_static_env passes when vars are set ---------------------
+echo "[2/3] require_static_env succeeds when all inputs are present"
+export GITHUB_APP_ID="111111"
+export GITHUB_APP_INSTALLATION_ID="222222"
+export GITHUB_APP_PRIVATE_KEY_PATH="$FAKE_PEM"
+if require_static_env; then
+  ok "require_static_env returned 0 with all vars set"
 else
-  bad "GITHUB_APP_ID still WRONG after read (got $GITHUB_APP_ID)"
-fi
-if [[ "$GITHUB_APP_INSTALLATION_ID" == "$CORRECT_INSTALLATION_ID" ]]; then
-  ok "GITHUB_APP_INSTALLATION_ID overridden"
-else
-  bad "GITHUB_APP_INSTALLATION_ID still WRONG (got $GITHUB_APP_INSTALLATION_ID)"
-fi
-if [[ "$GITHUB_APP_PRIVATE_KEY_PATH" == "$CORRECT_PEM" ]]; then
-  ok "GITHUB_APP_PRIVATE_KEY_PATH overridden"
-else
-  bad "GITHUB_APP_PRIVATE_KEY_PATH still WRONG"
+  bad "require_static_env returned nonzero with all vars set"
 fi
 
 # --- Test 3: write_runtime_env_file does NOT include APP_ID/etc -------------
