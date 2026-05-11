@@ -2,7 +2,7 @@
 gh = "latest"
 jq = "latest"
 node = "lts"
-python = "3.14.3"
+python = "3.14.4"
 bun = "latest"
 
 "npm:@anthropic-ai/claude-code" = "latest"
