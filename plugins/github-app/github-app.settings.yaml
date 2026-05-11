@@ -20,7 +20,7 @@ github-app:
   #      (injected by the agent launcher). Self-contained: does NOT require
   #      the 1pass plugin. Field labels must match the expected env var names:
   #      GITHUB_APP_ID, GITHUB_APP_CLIENT_ID, GITHUB_APP_CLIENT_SECRET,
-  #      GITHUB_APP_PRIVATE_KEY, GITHUB_INSTALLATION_ID.
+  #      GITHUB_APP_PRIVATE_KEY, GITHUB_APP_INSTALLATION_ID.
   #      Example: ref: "op://vault/github-app--repo--my-repo"
   #
   #    env-file://path/to/file
@@ -52,7 +52,7 @@ github-app:
   #   github_app_client_id: "op://vault/item/GITHUB_APP_CLIENT_ID"
   #   github_app_client_secret: "op://vault/item/GITHUB_APP_CLIENT_SECRET"
   #   github_app_private_key: "op://vault/item/GITHUB_APP_PRIVATE_KEY"
-  #   github_installation_id: "${GITHUB_INSTALLATION_ID}"
+  #   github_installation_id: "${GITHUB_APP_INSTALLATION_ID}"
 
   # --- Option 3: Legacy flat settings ---
   # github_app_id: "12345"

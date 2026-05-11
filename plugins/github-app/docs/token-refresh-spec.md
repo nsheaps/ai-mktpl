@@ -104,7 +104,7 @@ The original spec proposed a background MCP server for continuous refresh. The i
    - `op://vault/item/field` — Resolve via `op read`
    - Literal value — Use as-is
 
-3. **Environment variables** — `GITHUB_APP_ID`, `GITHUB_APP_PRIVATE_KEY_PATH`, `GITHUB_INSTALLATION_ID`
+3. **Environment variables** — `GITHUB_APP_ID`, `GITHUB_APP_PRIVATE_KEY_PATH`, `GITHUB_APP_INSTALLATION_ID`
 
 4. **Legacy flat settings** — `github_app_id`, `private_key_path`, `github_installation_id` in plugin config
 
@@ -228,7 +228,7 @@ github-app:
   # token_file: "~/.agents/${AGENT_NAME}/.config/github-token"
 ```
 
-Or via environment variables: `GITHUB_APP_ID`, `GITHUB_APP_PRIVATE_KEY_PATH`, `GITHUB_INSTALLATION_ID`, `GITHUB_TOKEN_FILE`.
+Or via environment variables: `GITHUB_APP_ID`, `GITHUB_APP_PRIVATE_KEY_PATH`, `GITHUB_APP_INSTALLATION_ID`, `GITHUB_TOKEN_FILE`.
 
 ### Open Questions (Resolved)
 

@@ -56,7 +56,7 @@ plugin_is_enabled || { hook_log "plugin disabled, skipping"; hook_respond; exit 
 # bin/agent before claude exec). If they're missing, fail loudly — operators
 # will know the secret is misconfigured.
 : "${GITHUB_APP_ID:?install.sh: GITHUB_APP_ID unset (check 1pass secret + bin/agent .env.local sourcing)}"
-: "${GITHUB_INSTALLATION_ID:?install.sh: GITHUB_INSTALLATION_ID unset}"
+: "${GITHUB_APP_INSTALLATION_ID:?install.sh: GITHUB_APP_INSTALLATION_ID unset}"
 
 # PEM key: accept either inline content (GITHUB_APP_PRIVATE_KEY) or a path.
 if [[ -n "${GITHUB_APP_PRIVATE_KEY_PATH:-}" ]]; then
@@ -83,7 +83,7 @@ GIT_CONFIG_GLOBAL="${AGENT_HOME_DIR}/.config/git/config"
 hook_log_step "write-static" "Writing static.env to ${STATIC_ENV_FILE}"
 write_static_env_file \
   "${GITHUB_APP_ID}" \
-  "${GITHUB_INSTALLATION_ID}" \
+  "${GITHUB_APP_INSTALLATION_ID}" \
   "${_private_key_path}" \
   "${GITHUB_APP_CLIENT_ID:-}" \
   "${GITHUB_APP_CLIENT_SECRET:-}" \
@@ -97,7 +97,7 @@ TOKEN_FILE="${GITHUB_APP_CONFIG_DIR}/token"
 "${CLAUDE_PLUGIN_ROOT}/bin/generate-token.sh" \
   "${GITHUB_APP_ID}" \
   "${_private_key_path}" \
-  "${GITHUB_INSTALLATION_ID}" \
+  "${GITHUB_APP_INSTALLATION_ID}" \
   "${TOKEN_FILE}"
 
 # Note: migrate_legacy_layout runs unconditionally in github-token-init.sh

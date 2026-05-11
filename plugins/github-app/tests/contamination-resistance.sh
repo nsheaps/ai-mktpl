@@ -7,7 +7,7 @@
 #   1. install.sh refuses to silently overwrite static.env from contaminated env
 #      (it uses explicit positional args; the contaminated env is irrelevant).
 #   2. read_static_env_file() loads from disk and overwrites any contaminated
-#      GITHUB_APP_ID / GITHUB_INSTALLATION_ID / GITHUB_APP_PRIVATE_KEY_PATH
+#      GITHUB_APP_ID / GITHUB_APP_INSTALLATION_ID / GITHUB_APP_PRIVATE_KEY_PATH
 #      already in env.
 #   3. The runtime path (token-init.sh) NEVER reads APP_ID/INSTALLATION_ID/
 #      PEM_PATH from process env. It only consumes static.env.
@@ -61,7 +61,7 @@ bad()   { echo "  ✗ $*"; fail=$((fail + 1)); }
 # --- Test 1: write_static_env_file ignores process env ----------------------
 echo "[1/3] write_static_env_file uses positional args, not process env"
 GITHUB_APP_ID="$WRONG_APP_ID" \
-GITHUB_INSTALLATION_ID="$WRONG_INSTALLATION_ID" \
+GITHUB_APP_INSTALLATION_ID="$WRONG_INSTALLATION_ID" \
 GITHUB_APP_PRIVATE_KEY_PATH="$WRONG_PEM" \
 write_static_env_file \
   "$CORRECT_APP_ID" "$CORRECT_INSTALLATION_ID" "$CORRECT_PEM" "" "" "test"
@@ -82,7 +82,7 @@ fi
 # vars by re-sourcing static.env, which is exactly what we're testing anyway.
 echo "[2/3] read_static_env_file overwrites contaminated env values"
 export GITHUB_APP_ID="$WRONG_APP_ID"
-export GITHUB_INSTALLATION_ID="$WRONG_INSTALLATION_ID"
+export GITHUB_APP_INSTALLATION_ID="$WRONG_INSTALLATION_ID"
 export GITHUB_APP_PRIVATE_KEY_PATH="$WRONG_PEM"
 read_static_env_file
 if [[ "$GITHUB_APP_ID" == "$CORRECT_APP_ID" ]]; then
@@ -90,10 +90,10 @@ if [[ "$GITHUB_APP_ID" == "$CORRECT_APP_ID" ]]; then
 else
   bad "GITHUB_APP_ID still WRONG after read (got $GITHUB_APP_ID)"
 fi
-if [[ "$GITHUB_INSTALLATION_ID" == "$CORRECT_INSTALLATION_ID" ]]; then
-  ok "GITHUB_INSTALLATION_ID overridden"
+if [[ "$GITHUB_APP_INSTALLATION_ID" == "$CORRECT_INSTALLATION_ID" ]]; then
+  ok "GITHUB_APP_INSTALLATION_ID overridden"
 else
-  bad "GITHUB_INSTALLATION_ID still WRONG (got $GITHUB_INSTALLATION_ID)"
+  bad "GITHUB_APP_INSTALLATION_ID still WRONG (got $GITHUB_APP_INSTALLATION_ID)"
 fi
 if [[ "$GITHUB_APP_PRIVATE_KEY_PATH" == "$CORRECT_PEM" ]]; then
   ok "GITHUB_APP_PRIVATE_KEY_PATH overridden"
@@ -104,7 +104,7 @@ fi
 # --- Test 3: write_runtime_env_file does NOT include APP_ID/etc -------------
 echo "[3/3] write_runtime_env_file does not persist APP_ID / INSTALLATION_ID / PEM"
 write_runtime_env_file "fake-token-xyz"
-for key in GITHUB_APP_ID GITHUB_INSTALLATION_ID GITHUB_APP_PRIVATE_KEY_PATH; do
+for key in GITHUB_APP_ID GITHUB_APP_INSTALLATION_ID GITHUB_APP_PRIVATE_KEY_PATH; do
   if grep -q "^export ${key}=" "$RUNTIME_ENV_FILE"; then
     bad "$key leaked into runtime.env (BUG-19 vector)"
   else

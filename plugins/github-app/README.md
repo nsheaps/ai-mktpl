@@ -57,7 +57,7 @@ The source should provide fields named:
 - `GITHUB_APP_CLIENT_ID`
 - `GITHUB_APP_CLIENT_SECRET`
 - `GITHUB_APP_PRIVATE_KEY`
-- `GITHUB_INSTALLATION_ID` (optional, can be set per-project)
+- `GITHUB_APP_INSTALLATION_ID` (optional, can be set per-project)
 
 #### Option B: Individual Secret References
 
@@ -82,7 +82,7 @@ Set before the session starts:
 ```bash
 export GITHUB_APP_ID="12345"
 export GITHUB_APP_PRIVATE_KEY_PATH="~/.agents/<agent-name>/.config/github-app.pem"
-export GITHUB_INSTALLATION_ID="67890"
+export GITHUB_APP_INSTALLATION_ID="67890"
 ```
 
 #### Option D: Legacy Flat Settings
@@ -149,7 +149,7 @@ github-app:
     github_app_client_id: "op://vault/item/GITHUB_APP_CLIENT_ID"
     github_app_client_secret: "op://vault/item/GITHUB_APP_CLIENT_SECRET"
     github_app_private_key: "op://vault/item/GITHUB_APP_PRIVATE_KEY"
-    github_installation_id: "${GITHUB_INSTALLATION_ID}"
+    github_installation_id: "${GITHUB_APP_INSTALLATION_ID}"
 
   # Other settings
   tokenFile: "~/.agents/<agent-name>/.config/github-token"

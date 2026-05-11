@@ -84,7 +84,7 @@ github-app:
   # ref: "env-file://./.env.github-app"
 ```
 
-Expected field names: `GITHUB_APP_ID`, `GITHUB_APP_CLIENT_ID`, `GITHUB_APP_CLIENT_SECRET`, `GITHUB_APP_PRIVATE_KEY`, `GITHUB_INSTALLATION_ID`.
+Expected field names: `GITHUB_APP_ID`, `GITHUB_APP_CLIENT_ID`, `GITHUB_APP_CLIENT_SECRET`, `GITHUB_APP_PRIVATE_KEY`, `GITHUB_APP_INSTALLATION_ID`.
 
 #### Option B: Individual Secret References
 
@@ -93,7 +93,7 @@ github-app:
   secrets:
     github_app_id: "op://vault/item/GITHUB_APP_ID"
     github_app_private_key: "op://vault/item/GITHUB_APP_PRIVATE_KEY"
-    github_installation_id: "${GITHUB_INSTALLATION_ID}"
+    github_installation_id: "${GITHUB_APP_INSTALLATION_ID}"
 ```
 
 #### Option C: Environment Variables
@@ -101,7 +101,7 @@ github-app:
 ```bash
 export GITHUB_APP_ID="12345"
 export GITHUB_APP_PRIVATE_KEY_PATH="~/.agents/${AGENT_NAME}/.config/github-app.pem"
-export GITHUB_INSTALLATION_ID="67890"
+export GITHUB_APP_INSTALLATION_ID="67890"
 ```
 
 ### Private Key Handling
@@ -171,7 +171,7 @@ Missing one or more required environment variables. Set all three:
 
 - `GITHUB_APP_ID`
 - `GITHUB_APP_PRIVATE_KEY_PATH`
-- `GITHUB_INSTALLATION_ID`
+- `GITHUB_APP_INSTALLATION_ID`
 
 ### "PEM key not found"
 

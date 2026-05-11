@@ -20,7 +20,7 @@ Additionally, there's no standard way to ensure a Claude Code session starts wit
 ### Requirements
 
 1. **Automatic token refresh**: The plugin must refresh GitHub App installation tokens before they expire, ensuring `GITHUB_TOKEN` (or equivalent) always contains a valid token.
-2. **SessionStart initialization**: When the session starts and GitHub App env vars are present (`GITHUB_APP_ID`, `GITHUB_APP_PRIVATE_KEY_PATH`, `GITHUB_INSTALLATION_ID`), automatically generate an initial token.
+2. **SessionStart initialization**: When the session starts and GitHub App env vars are present (`GITHUB_APP_ID`, `GITHUB_APP_PRIVATE_KEY_PATH`, `GITHUB_APP_INSTALLATION_ID`), automatically generate an initial token.
 3. **Transparent to agents**: Agents should not need to know about token refresh. `gh` CLI and `git push` should just work.
 4. **Configurable**: Support multiple token sources (GitHub App, fine-grained PAT rotation, etc.) via plugin config.
 5. **Fail-safe**: If token refresh fails, warn the user but don't crash the session.
@@ -82,7 +82,7 @@ The plugin has two components working together:
 
 - `GITHUB_APP_ID` — The GitHub App's ID
 - `GITHUB_APP_PRIVATE_KEY_PATH` — Path to PEM file (e.g., `~/.config/agent/github-app.pem`)
-- `GITHUB_INSTALLATION_ID` — The installation ID for the target account/org
+- `GITHUB_APP_INSTALLATION_ID` — The installation ID for the target account/org
 
 **Hook script** (`hooks/github-token-init.sh`):
 
@@ -93,7 +93,7 @@ set -euo pipefail
 # Skip if GitHub App not configured
 [[ -z "${GITHUB_APP_ID:-}" ]] && exit 0
 [[ -z "${GITHUB_APP_PRIVATE_KEY_PATH:-}" ]] && exit 0
-[[ -z "${GITHUB_INSTALLATION_ID:-}" ]] && exit 0
+[[ -z "${GITHUB_APP_INSTALLATION_ID:-}" ]] && exit 0
 
 TOKEN_FILE="${GITHUB_TOKEN_FILE:-$HOME/.config/agent/github-token}"
 mkdir -p "$(dirname "$TOKEN_FILE")"
@@ -112,7 +112,7 @@ JWT="${HEADER}.${PAYLOAD}.${SIGNATURE}"
 RESPONSE=$(curl -s -X POST \
   -H "Authorization: Bearer ${JWT}" \
   -H "Accept: application/vnd.github+json" \
-  "https://api.github.com/app/installations/${GITHUB_INSTALLATION_ID}/access_tokens")
+  "https://api.github.com/app/installations/${GITHUB_APP_INSTALLATION_ID}/access_tokens")
 
 TOKEN=$(echo "$RESPONSE" | jq -r '.token // empty')
 EXPIRES_AT=$(echo "$RESPONSE" | jq -r '.expires_at // empty')
@@ -250,7 +250,7 @@ Or via environment variables (higher priority):
 
 - `GITHUB_APP_ID`
 - `GITHUB_APP_PRIVATE_KEY_PATH`
-- `GITHUB_INSTALLATION_ID`
+- `GITHUB_APP_INSTALLATION_ID`
 - `GITHUB_TOKEN_FILE`
 
 ### Phases

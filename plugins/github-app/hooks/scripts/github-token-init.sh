@@ -2,7 +2,7 @@
 # github-token-init.sh — SessionStart hook for github-app plugin
 #
 # As of 0.4.0 the immutable JWT-signing inputs (GITHUB_APP_ID,
-# GITHUB_INSTALLATION_ID, GITHUB_APP_PRIVATE_KEY_PATH) live in
+# GITHUB_APP_INSTALLATION_ID, GITHUB_APP_PRIVATE_KEY_PATH) live in
 # ${GITHUB_APP_CONFIG_DIR}/static.env, written exclusively by the Setup hook
 # (hooks/scripts/install.sh). This hook NEVER reads those values from process
 # env — that path was the BUG-19 contamination vector.
@@ -113,7 +113,7 @@ if [[ "$_should_regen" == "true" ]]; then
   TOKEN_OUTPUT="$("${CLAUDE_PLUGIN_ROOT}/bin/generate-token.sh" \
     "$GITHUB_APP_ID" \
     "$GITHUB_APP_PRIVATE_KEY_PATH" \
-    "$GITHUB_INSTALLATION_ID" \
+    "$GITHUB_APP_INSTALLATION_ID" \
     "$TOKEN_FILE" 2>&1)" || {
     hook_fail "token-gen" "Token generation failed: $TOKEN_OUTPUT" \
       "Re-run \`claude --init-only\` and verify ref/secrets resolve to the correct GitHub App"

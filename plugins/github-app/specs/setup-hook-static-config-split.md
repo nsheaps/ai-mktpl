@@ -8,7 +8,7 @@ Tracks: BUG-19
 ## Background — what's broken (BUG-19)
 
 The pre-0.4.0 SessionStart hook sourced `${XDG_CONFIG_HOME}/github-app-env` and
-re-derived `GITHUB_APP_ID` / `GITHUB_INSTALLATION_ID` / `GITHUB_APP_PRIVATE_KEY_PATH`
+re-derived `GITHUB_APP_ID` / `GITHUB_APP_INSTALLATION_ID` / `GITHUB_APP_PRIVATE_KEY_PATH`
 from `${VAR:-}` in process env on every refresh, then persisted the result back
 to disk. Any one-time cross-agent env contamination (the wrong agent's `GITHUB_APP_ID`
 in the launcher's environment) made the file the wrong agent's identity
@@ -45,7 +45,7 @@ The launcher (`bin/agent`) sources the agent's `.env.local` (populated by the
 claude. By the time install.sh runs, these are present in process env:
 
 - `GITHUB_APP_ID`
-- `GITHUB_INSTALLATION_ID`
+- `GITHUB_APP_INSTALLATION_ID`
 - `GITHUB_APP_PRIVATE_KEY` (inline content) **or** `GITHUB_APP_PRIVATE_KEY_PATH`
 - `GITHUB_APP_CLIENT_ID` (optional)
 - `GITHUB_APP_CLIENT_SECRET` (optional)
@@ -95,7 +95,7 @@ The pre-0.4.0 flat file at `${XDG_CONFIG_HOME}/github-app-env` is removed by
 
 ```sh
 export GITHUB_APP_ID="..."
-export GITHUB_INSTALLATION_ID="..."
+export GITHUB_APP_INSTALLATION_ID="..."
 export GITHUB_APP_PRIVATE_KEY_PATH="..."     # absolute path
 export GITHUB_APP_CLIENT_ID="..."            # optional
 export GITHUB_APP_CLIENT_SECRET="..."        # optional
@@ -124,7 +124,7 @@ export GIT_AUTHOR_EMAIL="..."
 # + GIT_COMMITTER_*
 ```
 
-Critically: **no `GITHUB_APP_ID`, `GITHUB_INSTALLATION_ID`, or `GITHUB_APP_PRIVATE_KEY_PATH`**.
+Critically: **no `GITHUB_APP_ID`, `GITHUB_APP_INSTALLATION_ID`, or `GITHUB_APP_PRIVATE_KEY_PATH`**.
 
 This file is sourced via `CLAUDE_ENV_FILE` so each Bash tool call sees the fresh
 token.
@@ -139,7 +139,7 @@ intentionally runs without an agent identity).
 
 1. Source shared libs (plugin-config-read, hook-logging, agent-paths, env-file).
 2. Hard-fail if `AGENT_NAME` / `AGENT_HOME_DIR` unset.
-3. Hard-fail if `GITHUB_APP_ID` / `GITHUB_INSTALLATION_ID` unset.
+3. Hard-fail if `GITHUB_APP_ID` / `GITHUB_APP_INSTALLATION_ID` unset.
 4. Resolve PEM: write content to `${GITHUB_APP_CONFIG_DIR}/private-key.pem` if
    given inline; otherwise use the configured path.
 5. Derive `GH_CONFIG_DIR` / `GIT_CONFIG_GLOBAL` from `AGENT_HOME_DIR`.

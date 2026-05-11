@@ -191,7 +191,7 @@ JWT="${HEADER}.${PAYLOAD}.${SIGNATURE}"
 curl -s -X POST \
   -H "Authorization: Bearer ${JWT}" \
   -H "Accept: application/vnd.github+json" \
-  "https://api.github.com/app/installations/${GITHUB_INSTALLATION_ID}/access_tokens"
+  "https://api.github.com/app/installations/${GITHUB_APP_INSTALLATION_ID}/access_tokens"
 ```
 
 ### Required Environment Variables
@@ -200,7 +200,7 @@ curl -s -X POST \
 | ----------------------------- | ------------------------------------------ |
 | `GITHUB_APP_ID`               | The GitHub App's numeric ID                |
 | `GITHUB_APP_PRIVATE_KEY_PATH` | Path to PEM private key file               |
-| `GITHUB_INSTALLATION_ID`      | Installation ID for the target account/org |
+| `GITHUB_APP_INSTALLATION_ID`      | Installation ID for the target account/org |
 
 ### Installation Token Limitations
 

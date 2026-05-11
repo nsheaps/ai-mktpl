@@ -115,7 +115,7 @@ do_generate_token() {
   local script_dir
   script_dir="$(cd "$(dirname "$_self")" && pwd)"
 
-  if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_APP_PRIVATE_KEY_PATH:-}" || -z "${GITHUB_INSTALLATION_ID:-}" ]]; then
+  if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_APP_PRIVATE_KEY_PATH:-}" || -z "${GITHUB_APP_INSTALLATION_ID:-}" ]]; then
     log_error "missing credentials (APP_ID, PRIVATE_KEY_PATH, or INSTALLATION_ID)"
     return 2
   fi
@@ -124,7 +124,7 @@ do_generate_token() {
   output=$("$script_dir/generate-token.sh" \
     "$GITHUB_APP_ID" \
     "$GITHUB_APP_PRIVATE_KEY_PATH" \
-    "$GITHUB_INSTALLATION_ID" \
+    "$GITHUB_APP_INSTALLATION_ID" \
     "$TOKEN_FILE" 2>&1) || {
     log_error "token generation failed: $output"
     return 1

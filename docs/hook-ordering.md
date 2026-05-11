@@ -4,7 +4,7 @@
 
 Claude Code does not guarantee the execution order of `SessionStart` hooks across plugins. When one plugin depends on environment variables injected by another plugin's hook, there is a race condition: the dependent plugin may run first and find the variables empty.
 
-**Example:** The `github-app` plugin needs `GITHUB_APP_ID`, `GITHUB_INSTALLATION_ID`, and `GITHUB_APP_PRIVATE_KEY_PATH` to generate a token. If the `1pass` plugin is responsible for injecting those values but runs after `github-app`, the `github-app` hook sees empty variables and silently skips token generation.
+**Example:** The `github-app` plugin needs `GITHUB_APP_ID`, `GITHUB_APP_INSTALLATION_ID`, and `GITHUB_APP_PRIVATE_KEY_PATH` to generate a token. If the `1pass` plugin is responsible for injecting those values but runs after `github-app`, the `github-app` hook sees empty variables and silently skips token generation.
 
 ## Why Polling Process Env Vars Doesn't Work
 
@@ -24,7 +24,7 @@ The `github-app` plugin provides a reusable helper at `lib/wait-for-env.sh` that
 source "${CLAUDE_PLUGIN_ROOT}/lib/wait-for-env.sh"
 
 # Wait up to 15 seconds for credentials to appear in CLAUDE_ENV_FILE
-if wait_for_env_file GITHUB_APP_ID GITHUB_INSTALLATION_ID --timeout 15; then
+if wait_for_env_file GITHUB_APP_ID GITHUB_APP_INSTALLATION_ID --timeout 15; then
   echo "credentials available"
 else
   echo "timed out — plugin not configured"

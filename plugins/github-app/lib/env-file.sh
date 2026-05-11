@@ -92,7 +92,7 @@ write_static_env_file() {
 # `claude --init-only` or delete this file and start a new session.
 STATICEOF
     printf 'export GITHUB_APP_ID="%s"\n' "$(_safe_val "${app_id}")"
-    printf 'export GITHUB_INSTALLATION_ID="%s"\n' "$(_safe_val "${installation_id}")"
+    printf 'export GITHUB_APP_INSTALLATION_ID="%s"\n' "$(_safe_val "${installation_id}")"
     printf 'export GITHUB_APP_PRIVATE_KEY_PATH="%s"\n' "$(_safe_val "${pem_path}")"
     [[ -n "${client_id}" ]]          && printf 'export GITHUB_APP_CLIENT_ID="%s"\n' "$(_safe_val "${client_id}")"
     [[ -n "${client_secret}" ]]      && printf 'export GITHUB_APP_CLIENT_SECRET="%s"\n' "$(_safe_val "${client_secret}")"
@@ -111,7 +111,7 @@ read_static_env_file() {
   fi
   # shellcheck disable=SC1090
   source "$STATIC_ENV_FILE"
-  if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_INSTALLATION_ID:-}" || -z "${GITHUB_APP_PRIVATE_KEY_PATH:-}" ]]; then
+  if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_APP_INSTALLATION_ID:-}" || -z "${GITHUB_APP_PRIVATE_KEY_PATH:-}" ]]; then
     echo "github-app: ERROR: $STATIC_ENV_FILE is missing required fields" >&2
     return 2
   fi
@@ -121,7 +121,7 @@ read_static_env_file() {
 # write_runtime_env_file TOKEN
 #
 # Writes per-session/per-refresh state. Intentionally does NOT include
-# GITHUB_APP_ID, GITHUB_INSTALLATION_ID, or GITHUB_APP_PRIVATE_KEY_PATH —
+# GITHUB_APP_ID, GITHUB_APP_INSTALLATION_ID, or GITHUB_APP_PRIVATE_KEY_PATH —
 # those live in static.env exclusively (BUG-19).
 #
 # Args:
