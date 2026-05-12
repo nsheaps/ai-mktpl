@@ -124,31 +124,55 @@ the resolved environment variables to multiple targets.
     # Defaults to both targets when omitted.
     targets:
       - sessionStartBashEnv # → CLAUDE_ENV_FILE (session-scoped, bash only)
+      - envLocal # → $AGENT_HOME_DIR/.env.local (persistent, idempotent)
       - userSettings # → ~/.claude/settings.local.json .env (persistent, all tools)
 
+  # envLocal target configuration (only consulted when "envLocal" is in targets above)
+  envLocal:
+    # path: '$AGENT_HOME_DIR/.env.local'   # default
+    # sourceChain: '$AGENT_HOME_DIR/.env'  # default; pass "self" to chain envLocal directly,
+    # or "none" to skip adding any source line.
 
     # Note: recursive resolution of op:// references is always on (op-exec built-in)
 ```
 
 ### Output Targets
 
-| Target                | Mechanism                              | Scope           | Persistence     | Non-Bash tools |
-| --------------------- | -------------------------------------- | --------------- | --------------- | -------------- |
-| `sessionStartBashEnv` | `CLAUDE_ENV_FILE`                      | Bash tool calls | Session only    | No             |
-| `userSettings`        | `~/.claude/settings.local.json` `.env` | All tools       | Across sessions | Yes            |
+| Target                | Mechanism                                                          | Scope                                     | Persistence                                    | Non-Bash tools                     |
+| --------------------- | ------------------------------------------------------------------ | ----------------------------------------- | ---------------------------------------------- | ---------------------------------- |
+| `sessionStartBashEnv` | `CLAUDE_ENV_FILE`                                                  | Bash tool calls                           | Session only                                   | No                                 |
+| `envLocal`            | `$AGENT_HOME_DIR/.env.local` (shell-sourceable `export K=v` lines) | All tools sourcing the file (e.g. direnv) | Across sessions (idempotent replace-or-append) | Yes — when sourced by the consumer |
+| `userSettings`        | `~/.claude/settings.local.json` `.env`                             | All tools                                 | Across sessions                                | Yes                                |
 
 **Default:** Both `sessionStartBashEnv` and `userSettings` are enabled when
 `targets` is not specified, ensuring env vars are available to all tools and
-also in bash sessions.
+also in bash sessions. `envLocal` is opt-in.
+
+### envLocal target details
+
+- Writes shell-sourceable `export KEY=value` lines to `envLocal.path`
+  (default `$AGENT_HOME_DIR/.env.local`, fallback `$CLAUDE_PROJECT_DIR/.env.local`).
+- Uses idempotent **replace-or-append** semantics (via shared-lib's
+  `env_file_upsert_export`). The file is NOT truncated on session start, so
+  vars from other sources (manual edits, other plugins) survive.
+- On first write of the session, also adds `source <envLocal.sourceChain>` to
+  `CLAUDE_ENV_FILE`. Default `sourceChain` is `$AGENT_HOME_DIR/.env` (allowing a
+  repo-templated `.env` to `source .env.local` so direnv and other consumers
+  pick up the vars). Pass `sourceChain: self` to source the envLocal file
+  directly from `CLAUDE_ENV_FILE`, or `sourceChain: none` to skip the source
+  line entirely.
+- The agent repo is responsible for `.gitignore`'ing `.env.local` (and `.env`
+  if applicable) and for setting up the consumer-side `source` of the file.
 
 ### When to Use Which Target
 
 - **sessionStartBashEnv only**: Secrets that should not persist on disk beyond
   the session, or when you only need them in bash tool calls.
+- **envLocal**: When non-Claude-Code processes need the vars (e.g. direnv,
+  scripts run from a shell). Combines well with a repo-templated `.env` that
+  sources `.env.local` for the consumer side.
 - **userSettings only**: Config that non-Bash tools (MCP servers, etc.) need,
   or values that should persist across sessions.
-- **Both (default)**: Most common — ensures secrets are available everywhere
-  during the session and to all tool types.
 
 ## ENVIRONMENT Aggregator Pattern
 
