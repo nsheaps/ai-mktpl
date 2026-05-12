@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
 # env-local-target.test.sh — tests for the 1pass plugin's envLocal target.
 #
+# Exercises the shared `plugins/1pass/lib/env-local.sh` helpers used by BOTH
+# SessionStart hooks (install-op.sh + op-exec-env.sh), so this test covers
+# the envLocal codepath in both entry points.
+#
 # Validates:
 #   - _resolve_env_local_path expands $AGENT_HOME_DIR and falls back as documented
-#   - _resolve_env_local_source_chain supports "self" / "none" / default
+#   - _resolve_env_local_source_chain supports "self" / "none" / "false" / default
 #   - env_file_upsert_export writes idempotently to the envLocal path
 #   - CLAUDE_ENV_FILE gets a `source` line for the resolved sourceChain
 #
@@ -34,20 +38,21 @@ plugin_get_config() {
   fi
 }
 
-# Source the 1pass helper definitions out of install-op.sh without executing
-# the rest of the hook. We extract _resolve_env_local_path and
-# _resolve_env_local_source_chain via sed and eval them.
-_extract() {
-  local script="$1" func="$2"
-  awk -v f="$func" '
-    $0 ~ "^"f"\\(\\) \\{" { capture=1 }
-    capture { print }
-    capture && /^\}$/ { capture=0; exit }
-  ' "$script"
-}
+# Source the shared envLocal helpers directly. Both install-op.sh and
+# op-exec-env.sh source this same file via ${CLAUDE_PLUGIN_ROOT}/lib/env-local.sh,
+# so exercising it here covers both SessionStart hook codepaths.
+# shellcheck source=/dev/null
+source "$PLUGIN_ROOT/lib/env-local.sh"
 
-eval "$(_extract "$PLUGIN_ROOT/hooks/scripts/install-op.sh" "_resolve_env_local_path")"
-eval "$(_extract "$PLUGIN_ROOT/hooks/scripts/install-op.sh" "_resolve_env_local_source_chain")"
+# Sanity-check that the consumers actually source the shared lib (so this test
+# stays meaningful as coverage for both hook entry points).
+for consumer in "$PLUGIN_ROOT/hooks/scripts/install-op.sh" \
+                "$PLUGIN_ROOT/hooks/scripts/op-exec-env.sh"; do
+  if ! grep -q 'env-local.sh' "$consumer"; then
+    echo "FAIL: $consumer no longer sources env-local.sh — test coverage assumption invalid" >&2
+    exit 1
+  fi
+done
 
 pass=0; fail=0
 ok()  { echo "  ✓ $*"; pass=$((pass + 1)); }
@@ -108,6 +113,14 @@ _STUB_CONFIG["envLocal.sourceChain"]="none"
 assert_eq "$(AGENT_HOME_DIR=$TMPDIR_TEST/h _resolve_env_local_source_chain "/tmp/x")" \
           "" \
           "none returns empty"
+_STUB_CONFIG=()
+
+# --- Test 7b: sourceChain "false" alias also returns empty -----------------
+echo "Test 7b: _resolve_env_local_source_chain false (alias for none)"
+_STUB_CONFIG["envLocal.sourceChain"]="false"
+assert_eq "$(AGENT_HOME_DIR=$TMPDIR_TEST/h _resolve_env_local_source_chain "/tmp/x")" \
+          "" \
+          "false alias returns empty"
 _STUB_CONFIG=()
 
 # --- Test 8: end-to-end — upsert + source chain idempotence ----------------

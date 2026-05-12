@@ -131,7 +131,7 @@ the resolved environment variables to multiple targets.
   envLocal:
     # path: '$AGENT_HOME_DIR/.env.local'   # default
     # sourceChain: '$AGENT_HOME_DIR/.env'  # default; pass "self" to chain envLocal directly,
-    # or "none" to skip adding any source line.
+    # or "none" (or "false") to skip adding any source line.
 
     # Note: recursive resolution of op:// references is always on (op-exec built-in)
 ```
@@ -159,8 +159,8 @@ also in bash sessions. `envLocal` is opt-in.
   `CLAUDE_ENV_FILE`. Default `sourceChain` is `$AGENT_HOME_DIR/.env` (allowing a
   repo-templated `.env` to `source .env.local` so direnv and other consumers
   pick up the vars). Pass `sourceChain: self` to source the envLocal file
-  directly from `CLAUDE_ENV_FILE`, or `sourceChain: none` to skip the source
-  line entirely.
+  directly from `CLAUDE_ENV_FILE`, or `sourceChain: none` (alias: `false`) to
+  skip the source line entirely.
 - The agent repo is responsible for `.gitignore`'ing `.env.local` (and `.env`
   if applicable) and for setting up the consumer-side `source` of the file.
 
@@ -173,6 +173,10 @@ also in bash sessions. `envLocal` is opt-in.
   sources `.env.local` for the consumer side.
 - **userSettings only**: Config that non-Bash tools (MCP servers, etc.) need,
   or values that should persist across sessions.
+- **Both `sessionStartBashEnv` + `userSettings` (default)**: Most common —
+  ensures secrets are available everywhere during the session and to all
+  tool types. Add `envLocal` on top if you also want them in a sourceable
+  file on disk.
 
 ## ENVIRONMENT Aggregator Pattern
 

@@ -56,64 +56,18 @@ source "$SHARED_LIB_DIR/hook-logging.sh"
 # shellcheck source=/dev/null
 source "$SHARED_LIB_DIR/env-file.sh"
 
-# --- envLocal target helpers ---
-
-# Resolve the envLocal.path config to an absolute path. Echoes path on stdout
-# (empty if neither config nor AGENT_HOME_DIR/CLAUDE_PROJECT_DIR resolves).
-# Expands ${AGENT_HOME_DIR} and ${CLAUDE_PROJECT_DIR} placeholders.
-_resolve_env_local_path() {
-  local configured
-  configured="$(plugin_get_config "envLocal.path" "")"
-  if [ -n "$configured" ]; then
-    # Expand $AGENT_HOME_DIR / $CLAUDE_PROJECT_DIR / ${...} forms via eval-safe substitution
-    local expanded="$configured"
-    expanded="${expanded//\$AGENT_HOME_DIR/${AGENT_HOME_DIR:-}}"
-    expanded="${expanded//\$\{AGENT_HOME_DIR\}/${AGENT_HOME_DIR:-}}"
-    expanded="${expanded//\$CLAUDE_PROJECT_DIR/${CLAUDE_PROJECT_DIR:-}}"
-    expanded="${expanded//\$\{CLAUDE_PROJECT_DIR\}/${CLAUDE_PROJECT_DIR:-}}"
-    echo "$expanded"
-    return 0
-  fi
-  if [ -n "${AGENT_HOME_DIR:-}" ]; then
-    echo "${AGENT_HOME_DIR}/.env.local"
-  elif [ -n "${CLAUDE_PROJECT_DIR:-}" ]; then
-    echo "${CLAUDE_PROJECT_DIR}/.env.local"
-  else
-    echo ""
-  fi
-}
-
-# Resolve envLocal.sourceChain: path to add as `source ...` in CLAUDE_ENV_FILE.
-# When unset, defaults to $AGENT_HOME_DIR/.env if AGENT_HOME_DIR is set.
-# Special value "self" or "none" returns the envLocal path itself / empty.
-# Args: $1=envLocalPath (used when sourceChain == "self")
-_resolve_env_local_source_chain() {
-  local env_local_path="${1:-}"
-  local configured
-  configured="$(plugin_get_config "envLocal.sourceChain" "")"
-  if [ "$configured" = "none" ] || [ "$configured" = "false" ]; then
-    echo ""
-    return 0
-  fi
-  if [ "$configured" = "self" ]; then
-    echo "$env_local_path"
-    return 0
-  fi
-  if [ -n "$configured" ]; then
-    local expanded="$configured"
-    expanded="${expanded//\$AGENT_HOME_DIR/${AGENT_HOME_DIR:-}}"
-    expanded="${expanded//\$\{AGENT_HOME_DIR\}/${AGENT_HOME_DIR:-}}"
-    expanded="${expanded//\$CLAUDE_PROJECT_DIR/${CLAUDE_PROJECT_DIR:-}}"
-    expanded="${expanded//\$\{CLAUDE_PROJECT_DIR\}/${CLAUDE_PROJECT_DIR:-}}"
-    echo "$expanded"
-    return 0
-  fi
-  if [ -n "${AGENT_HOME_DIR:-}" ]; then
-    echo "${AGENT_HOME_DIR}/.env"
-  else
-    echo ""
-  fi
-}
+# --- envLocal target helpers (shared between install-op.sh and op-exec-env.sh) ---
+#
+# Source plugin-local lib that defines _resolve_env_local_path and
+# _resolve_env_local_source_chain. Kept under plugins/1pass/lib/ so both
+# SessionStart hooks share one source of truth.
+if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
+  PLUGIN_LIB_DIR="${CLAUDE_PLUGIN_ROOT}/lib"
+else
+  PLUGIN_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../lib" && pwd)"
+fi
+# shellcheck source=/dev/null
+source "$PLUGIN_LIB_DIR/env-local.sh"
 
 # --- Guards ---
 
