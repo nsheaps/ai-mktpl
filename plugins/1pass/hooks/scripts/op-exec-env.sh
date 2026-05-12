@@ -51,19 +51,8 @@ source "$SHARED_LIB_DIR/plugin-config-read.sh"
 source "$SHARED_LIB_DIR/hook-logging.sh"
 # shellcheck source=/dev/null
 source "$SHARED_LIB_DIR/env-file.sh"
-
-# --- envLocal target helpers (shared between install-op.sh and op-exec-env.sh) ---
-#
-# Source plugin-local lib that defines _resolve_env_local_path and
-# _resolve_env_local_source_chain. Kept under plugins/1pass/lib/ so both
-# SessionStart hooks share one source of truth.
-if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
-  PLUGIN_LIB_DIR="${CLAUDE_PLUGIN_ROOT}/lib"
-else
-  PLUGIN_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../lib" && pwd)"
-fi
 # shellcheck source=/dev/null
-source "$PLUGIN_LIB_DIR/env-local.sh"
+source "$SHARED_LIB_DIR/env-local-target.sh"
 
 # Script-level tmpdir for secret-bearing tempfiles. EXIT trap ensures cleanup
 # on any exit path (normal, error, signal). All tempfiles in process_item()

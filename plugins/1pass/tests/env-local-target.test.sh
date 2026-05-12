@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # env-local-target.test.sh — tests for the 1pass plugin's envLocal target.
 #
-# Exercises the shared `plugins/1pass/lib/env-local.sh` helpers used by BOTH
+# Exercises the shared `plugins/shared-lib/lib/env-local-target.sh` helpers used by BOTH
 # SessionStart hooks (install-op.sh + op-exec-env.sh), so this test covers
 # the envLocal codepath in both entry points.
 #
@@ -39,17 +39,18 @@ plugin_get_config() {
 }
 
 # Source the shared envLocal helpers directly. Both install-op.sh and
-# op-exec-env.sh source this same file via ${CLAUDE_PLUGIN_ROOT}/lib/env-local.sh,
-# so exercising it here covers both SessionStart hook codepaths.
+# op-exec-env.sh source this same file via
+# ${SHARED_LIB_DIR}/env-local-target.sh, so exercising it here covers both
+# SessionStart hook codepaths.
 # shellcheck source=/dev/null
-source "$PLUGIN_ROOT/lib/env-local.sh"
+source "$SHARED_LIB_ROOT/lib/env-local-target.sh"
 
 # Sanity-check that the consumers actually source the shared lib (so this test
 # stays meaningful as coverage for both hook entry points).
 for consumer in "$PLUGIN_ROOT/hooks/scripts/install-op.sh" \
                 "$PLUGIN_ROOT/hooks/scripts/op-exec-env.sh"; do
-  if ! grep -q 'env-local.sh' "$consumer"; then
-    echo "FAIL: $consumer no longer sources env-local.sh — test coverage assumption invalid" >&2
+  if ! grep -q 'env-local-target.sh' "$consumer"; then
+    echo "FAIL: $consumer no longer sources env-local-target.sh — test coverage assumption invalid" >&2
     exit 1
   fi
 done

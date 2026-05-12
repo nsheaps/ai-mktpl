@@ -114,6 +114,7 @@ refactor (tracked as a follow-up) may derive the marketplace suffix from
 | :----------------------- | :------------------------------------------------------------------------------------ |
 | `add-permission.sh`      | Helpers for adding permissions to settings files                                      |
 | `env-file.sh`            | Idempotent upsert/remove of `export KEY=...` and `source ...` lines in bash env files |
+| `env-local-target.sh`    | Resolve "envLocal" target paths (`$AGENT_HOME_DIR/.env.local`) and source-chain wiring |
 | `hook-logging.sh`        | Full hook lifecycle logging (start/respond/cleanup/fail)                              |
 | `hook-output.sh`         | Lightweight JSON `additionalContext` output for simple hooks                          |
 | `log.sh`                 | Generic stderr logger with configurable prefix                                        |

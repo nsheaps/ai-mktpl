@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
-# env-local.sh — shared helpers for the 1pass plugin's envLocal target.
+# env-local-target.sh — shared helpers for resolving an "envLocal" target
+# path (typically $AGENT_HOME_DIR/.env.local) and an optional source-chain
+# path to wire from CLAUDE_ENV_FILE.
 #
-# Sourced by both SessionStart hooks (install-op.sh and op-exec-env.sh) so
-# the resolution logic for `envLocal.path` and `envLocal.sourceChain` lives
-# in exactly one place.
+# Originally lived as plugins/1pass/lib/env-local.sh; moved here so it can
+# be sourced by multiple plugins without each duplicating the 12-line
+# bootstrap stanza. The 1pass plugin's install-op.sh and op-exec-env.sh
+# hooks both rely on it.
 #
 # Dependencies (must be sourced before this file):
 #   - plugin-config-read.sh from shared-lib (provides plugin_get_config)
@@ -30,6 +33,12 @@
 # Both `"none"` and `"false"` are accepted as the "disable" sentinel for
 # `envLocal.sourceChain`. The two are documented synonyms; `"none"` is the
 # preferred form in user-facing docs.
+
+# Guard against double-sourcing
+if [ "${_ENV_LOCAL_TARGET_SH_LOADED:-}" = "true" ]; then
+  return 0 2>/dev/null || true
+fi
+_ENV_LOCAL_TARGET_SH_LOADED="true"
 
 _resolve_env_local_path() {
   local configured
