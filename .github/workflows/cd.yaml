@@ -145,7 +145,7 @@ jobs:
 
       - name: Post version status comment
         if: steps.check-skip.outputs.skip != 'true'
-        uses: marocchino/sticky-pull-request-comment@v3.0.3
+        uses: marocchino/sticky-pull-request-comment@v3.0.4
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           header: 'plugin-versions'
