@@ -162,6 +162,35 @@ else
   bad "value change produced duplicate or wrong line ($got_val)"
 fi
 
+# --- Test 10: install-op.sh _write_secret envLocal skip-when-unresolvable -
+# When _resolve_env_local_path returns empty (no envLocal.path, no
+# AGENT_HOME_DIR, no CLAUDE_PROJECT_DIR), the install-op.sh _write_secret
+# envLocal branch must skip the secret (return 0 + hook_log) rather than
+# failing the hook. This mirrors op-exec-env.sh:126-128 behavior. Verified
+# by simulating the resolve+skip sequence the way _write_secret does it.
+echo "Test 10: install-op.sh skip-when-envLocal-unresolvable mirrors op-exec-env.sh"
+_STUB_CONFIG=()
+# Unset BOTH env vars so resolver returns empty.
+unresolved_path="$(unset AGENT_HOME_DIR CLAUDE_PROJECT_DIR; _resolve_env_local_path)"
+if [ -z "$unresolved_path" ]; then
+  ok "resolver returns empty when AGENT_HOME_DIR + CLAUDE_PROJECT_DIR unset"
+else
+  bad "resolver unexpectedly returned: $unresolved_path"
+fi
+
+# Verify the install-op.sh source actually uses the skip-not-fail pattern.
+# This is a coverage/grep check — it ensures the code keeps the new behavior.
+if grep -q 'envLocal target not resolvable, skipping' "$PLUGIN_ROOT/hooks/scripts/install-op.sh"; then
+  ok "install-op.sh uses skip log message (matches op-exec-env.sh pattern)"
+else
+  bad "install-op.sh missing skip log — has the skip-not-fail pattern regressed?"
+fi
+if grep -A2 'envLocal target not resolvable, skipping' "$PLUGIN_ROOT/hooks/scripts/install-op.sh" | grep -q 'return 0'; then
+  ok "install-op.sh returns 0 (skip) instead of return 1 (fail)"
+else
+  bad "install-op.sh still uses 'return 1' on envLocal unresolvable — should be 'return 0'"
+fi
+
 echo ""
 echo "Results: $pass passed, $fail failed"
 [ "$fail" -eq 0 ]

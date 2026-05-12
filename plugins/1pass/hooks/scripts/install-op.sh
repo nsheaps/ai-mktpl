@@ -286,10 +286,12 @@ _write_secret() {
       local env_local_path source_chain
       env_local_path="$(_resolve_env_local_path)"
       if [ -z "$env_local_path" ]; then
-        hook_fail "secrets injection" \
-          "envLocal target requested for ${env_var} but no path could be resolved" \
-          "Set envLocal.path in plugin settings or define AGENT_HOME_DIR / CLAUDE_PROJECT_DIR"
-        return 1
+        # Match op-exec-env.sh:126-128 behavior: skip the secret with a log
+        # rather than failing the hook. The user may have additional secrets
+        # targeting envFile/settingsJson that should still inject. Setting
+        # envLocal.path or AGENT_HOME_DIR/CLAUDE_PROJECT_DIR will resolve it.
+        hook_log "envLocal target not resolvable, skipping ${env_var} (set envLocal.path or AGENT_HOME_DIR/CLAUDE_PROJECT_DIR)"
+        return 0
       fi
       env_file_upsert_export "$env_local_path" "$env_var" "$value"
       export "${env_var}=${value}"
