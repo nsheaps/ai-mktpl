@@ -1,5 +1,13 @@
 # Correct Behavior Plugin
 
+> ## DEPRECATED
+>
+> This plugin has been superseded by [agentic-behavior](../agentic-behavior/).
+>
+> Use `agentic-behavior@ai-mktpl` instead.
+
+---
+
 A Claude Code command for correcting AI behavior mistakes and updating rules to prevent recurrence.
 
 ## Installation

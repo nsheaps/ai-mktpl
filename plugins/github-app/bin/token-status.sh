@@ -10,7 +10,12 @@
 # Output: JSON object with token status
 set -euo pipefail
 
-TOKEN_FILE="${GITHUB_TOKEN_FILE:-$HOME/.config/agent/github-token}"
+# shellcheck source=../lib/agent-paths.sh
+_self="${BASH_SOURCE[0]}"
+while [ -L "$_self" ]; do _self="$(readlink -f "$_self")"; done
+source "$(cd "$(dirname "$_self")/.." && pwd)/lib/agent-paths.sh"
+
+TOKEN_FILE="${GITHUB_TOKEN_FILE:-${AGENT_CONFIG_DIR}/github-token}"
 META_FILE="${TOKEN_FILE}.meta"
 
 # Check if token exists

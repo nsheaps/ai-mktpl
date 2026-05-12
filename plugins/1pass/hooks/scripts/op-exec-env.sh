@@ -8,8 +8,51 @@
 set -euo pipefail
 
 PLUGIN_NAME="1pass"
-source "${CLAUDE_PLUGIN_ROOT}/lib/plugin-config-read.sh"
-source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
+
+
+# --- Source shared libs from shared-lib plugin's persistent data dir ---
+#
+# shared-lib (declared in plugin.json `dependencies`) copies its lib/*.sh
+# files into ${CLAUDE_PLUGIN_DATA}/lib on SessionStart. We resolve its data
+# dir by stripping our own data-dir name and appending shared-lib's id.
+# Plugin data dir IDs are deterministic: `{plugin-name}-{marketplace-name}`.
+# See https://code.claude.com/docs/en/plugins-reference#persistent-data-directory
+#
+# When CLAUDE_PLUGIN_DATA is unset (e.g. when this script is invoked
+# outside a Claude Code hook), fall back to the known path.
+if [ -n "${CLAUDE_PLUGIN_DATA:-}" ]; then
+  SHARED_LIB_DIR="${CLAUDE_PLUGIN_DATA%/*}/shared-lib-ai-mktpl/lib"
+else
+  SHARED_LIB_DIR="${HOME}/.claude/plugins/data/shared-lib-ai-mktpl/lib"
+fi
+
+# Wait up to ~10s for a shared-lib file to appear (handles parallel
+# SessionStart hooks where shared-lib's copy may not have completed yet).
+_wait_for_shared_lib() {
+  local lib="$1"
+  local i=0
+  while [ ! -f "$SHARED_LIB_DIR/$lib" ]; do
+    i=$((i + 1))
+    if [ "$i" -ge 20 ]; then
+      echo "[1pass] timed out waiting for $SHARED_LIB_DIR/$lib (shared-lib SessionStart copy)" >&2
+      exit 1
+    fi
+    sleep 0.5
+  done
+}
+
+_wait_for_shared_lib "plugin-config-read.sh"
+_wait_for_shared_lib "hook-logging.sh"
+
+# shellcheck source=/dev/null
+source "$SHARED_LIB_DIR/plugin-config-read.sh"
+# shellcheck source=/dev/null
+source "$SHARED_LIB_DIR/hook-logging.sh"
+# Script-level tmpdir for secret-bearing tempfiles. EXIT trap ensures cleanup
+# on any exit path (normal, error, signal). All tempfiles in process_item()
+# are created here so no per-function trap scoping is needed.
+_OP_EXEC_TMPDIR="$(mktemp -d)"
+trap 'rm -rf "$_OP_EXEC_TMPDIR"' EXIT
 
 # --- Guards ---
 
@@ -147,23 +190,59 @@ process_item() {
     return 0
   fi
 
-  # Parse export statements and write to targets
+  # Evaluate op-exec output in a clean subshell to resolve heredocs/complex syntax.
+  # op-exec can output heredoc-style assignments (e.g. export VAR=$(cat <<'EOF'...))
+  # which break line-by-line parsing. By eval'ing in env -i, only the exported vars
+  # appear in the output — no inherited env to filter.
+  #
+  # We use `env -0` to NUL-delimit records, which correctly handles multi-line
+  # values (e.g. PEM keys). NUL bytes can't appear in env values, so this is
+  # the only safe delimiter. We read via process substitution because bash
+  # strips NULs from $() command substitution output.
+  local eval_stderr eval_output
+  eval_stderr="$(mktemp -p "$_OP_EXEC_TMPDIR")"
+  eval_output="$(mktemp -p "$_OP_EXEC_TMPDIR")"
+  local eval_exit=0
+  env -i HOME="$HOME" PATH="$PATH" bash -c "
+    set -e
+    eval \"\$1\"
+    env -0
+  " _ "$exports" 2>"$eval_stderr" > "$eval_output" || eval_exit=$?
+
+  if [[ $eval_exit -ne 0 ]]; then
+    local err_msg=""
+    [[ -s "$eval_stderr" ]] && err_msg="$(cat "$eval_stderr")"
+    hook_fail "op-exec" "Failed to evaluate op-exec output for: $item_ref${err_msg:+ — $err_msg}" \
+      "The op-exec output may contain syntax that bash cannot evaluate"
+    rm -f "$eval_stderr" "$eval_output"
+    return 0
+  fi
+
+  # Log any stderr even on success (diagnostics, not fatal)
+  if [[ -s "$eval_stderr" ]]; then
+    while IFS= read -r line; do
+      hook_log "[eval stderr] $line"
+    done < "$eval_stderr"
+  fi
+  rm -f "$eval_stderr"
+
+  # Parse NUL-delimited KEY=VALUE records from the isolated subshell.
+  # This correctly handles multi-line values (e.g. PEM keys with embedded newlines).
   local count=0
-  while IFS= read -r line; do
-    # op-exec outputs: export VAR_NAME=value
-    # Strip "export " prefix, then split on first "="
-    local assignment="${line#export }"
-    local env_name="${assignment%%=*}"
-    local env_value="${assignment#*=}"
-
-    # Remove shell quoting from value (op-exec uses printf %q)
-    env_value="$(printf '%b' "$env_value" 2>/dev/null || echo "$env_value")"
-
+  while IFS= read -r -d '' record; do
+    [ -z "$record" ] && continue
+    local env_name="${record%%=*}"
+    local env_value="${record#*=}"
+    # Skip vars injected for the isolated bash to work (not from op-exec)
+    case "$env_name" in
+      HOME|PATH|PWD|OLDPWD|SHLVL|_) continue ;;
+    esac
     if [ -n "$env_name" ]; then
       write_to_targets "$env_name" "$env_value"
       count=$((count + 1))
     fi
-  done <<< "$exports"
+  done < "$eval_output"
+  rm -f "$eval_output"
 
   hook_log "exported $count env vars from $item_ref"
 }

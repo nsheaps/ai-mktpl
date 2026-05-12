@@ -9,5 +9,11 @@
   },
   "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/remote-config",
   "repository": "https://github.com/nsheaps/ai-mktpl",
-  "keywords": ["remote-config", "sync", "dotfiles", "claude-config"]
+  "keywords": ["remote-config", "sync", "dotfiles", "claude-config"],
+  "dependencies": [
+    {
+      "name": "shared-lib",
+      "version": "^1.0"
+    }
+  ]
 }

@@ -2,155 +2,170 @@
 
 ## Overview
 
-Reusable bash libraries live in `shared/lib/` and are symlinked into each plugin's `lib/` directory. Plugins reference them via `${CLAUDE_PLUGIN_ROOT}/lib/<lib>.sh`.
+Reusable bash libraries are bundled in the dedicated `shared-lib` plugin (`plugins/shared-lib/lib/*.sh`). Other plugins declare it as a dependency in their `plugin.json` and source the libs from `shared-lib`'s persistent data directory at runtime.
 
-## Available Libraries
+This replaces the older `shared/lib/` + per-plugin symlink layout, which broke after Claude Code v2.1.117 dropped symlink preservation in plugin caches ([#53948](https://github.com/anthropics/claude-code/issues/53948)).
+
+## How dependent plugins consume the libs
+
+In `.claude-plugin/plugin.json`:
+
+```json
+{
+  "name": "your-plugin",
+  "version": "x.y.z",
+  "dependencies": [{ "name": "shared-lib", "version": "^1.0" }]
+}
+```
+
+In each hook script that needs the libs:
+
+```bash
+PLUGIN_NAME="your-plugin"
+
+if [ -n "${CLAUDE_PLUGIN_DATA:-}" ]; then
+  SHARED_LIB_DIR="${CLAUDE_PLUGIN_DATA%/*}/shared-lib-ai-mktpl/lib"
+else
+  # Fallback for invocations outside a Claude Code hook (eg user runs bin/ script).
+  SHARED_LIB_DIR="${HOME}/.claude/plugins/data/shared-lib-ai-mktpl/lib"
+fi
+
+_wait_for_shared_lib() {
+  local lib="$1"
+  local i=0
+  while [ ! -f "$SHARED_LIB_DIR/$lib" ]; do
+    i=$((i + 1))
+    if [ "$i" -ge 20 ]; then
+      echo "[$PLUGIN_NAME] timed out waiting for $SHARED_LIB_DIR/$lib (shared-lib SessionStart copy)" >&2
+      exit 1
+    fi
+    sleep 0.5
+  done
+}
+
+_wait_for_shared_lib "log.sh"
+# shellcheck source=/dev/null
+source "$SHARED_LIB_DIR/log.sh"
+```
+
+The path expression `${CLAUDE_PLUGIN_DATA%/*}/shared-lib-ai-mktpl/lib` strips the dependent plugin's own data-dir name and rebuilds the path to `shared-lib`'s data dir. Plugin data-dir IDs are deterministic (`{plugin-name}-{marketplace-name}`) per the [plugins reference](https://code.claude.com/docs/en/plugins-reference#persistent-data-directory).
+
+The wait loop handles parallel hook ordering: SessionStart hooks across plugins run in parallel, so `shared-lib`'s copy may not have finished when a dependent's hook fires. After the first run, the libs persist in `${CLAUDE_PLUGIN_DATA}` across sessions, so the wait is normally a no-op.
+
+## Available libraries
+
+The libs themselves are unchanged from the prior layout — only how they get loaded has changed. See `plugins/shared-lib/lib/` for source.
 
 ### log.sh
 
-Lightweight general-purpose stderr logging for any bash script. Works in any context — plugin hooks, session-start scripts, utility scripts, bin scripts.
+Lightweight stderr logging.
 
 ```bash
-LOG_PREFIX="my-script"               # Optional: defaults to PLUGIN_NAME or "script"
-source "${CLAUDE_PLUGIN_ROOT}/lib/log.sh"
+LOG_PREFIX="my-script"
+source "$SHARED_LIB_DIR/log.sh"
 
-log_info "Installing tool v1.2.3"    # my-script: Installing tool v1.2.3
-log_warn "Fallback to default"       # my-script: [warn] Fallback to default
-log_error "File not found"           # my-script: [error] File not found
-log_step "download" "Downloading..." # my-script: [download] Downloading...
+log_info "..."   # my-script: ...
+log_warn "..."   # my-script: [warn] ...
+log_error "..."  # my-script: [error] ...
+log_step "id" "..."  # my-script: [id] ...
 ```
 
-Prefix resolution: `LOG_PREFIX` > `PLUGIN_NAME` > `"script"`.
-
-All output goes to stderr. Never interferes with stdout.
+Prefix resolution: `LOG_PREFIX` > `PLUGIN_NAME` > `"script"`. **CRITICAL:** Set `LOG_PREFIX` (or `PLUGIN_NAME`) BEFORE sourcing — `log.sh` resolves the prefix at source time.
 
 ### hook-output.sh
 
-Shared JSON output helper for hooks that return `{additionalContext, systemMessage}`. Replaces the duplicated `_json_msg()` pattern.
+JSON `additionalContext`/`systemMessage` output for simple hooks.
 
 ```bash
-source "${CLAUDE_PLUGIN_ROOT}/lib/hook-output.sh"
-
-hook_msg "statusline: configured"    # stderr + JSON stdout
-hook_msg_only "quiet message"        # JSON stdout only
+source "$SHARED_LIB_DIR/hook-output.sh"
+hook_msg "statusline: configured"   # stderr + JSON stdout
+hook_msg_only "quiet message"       # JSON stdout only
 ```
-
-Use for simple SessionStart hooks that output a single status message. For hooks with steps and error reporting, use `hook-logging.sh` instead.
 
 ### plugin-config-read.sh
 
-3-tier config resolution for plugin settings. Supports both YAML and JSON formats.
+3-tier config resolution (project > user > plugin) for YAML/JSON settings.
 
 ```bash
-PLUGIN_NAME="my-plugin"  # MUST be set before sourcing
-source "${CLAUDE_PLUGIN_ROOT}/lib/plugin-config-read.sh"
-
-plugin_is_enabled                              # returns 0/1
-plugin_get_config "key" "default"              # single value
-plugin_get_config_array "key"                  # one value per line
+PLUGIN_NAME="my-plugin"   # required
+source "$SHARED_LIB_DIR/plugin-config-read.sh"
+plugin_is_enabled
+plugin_get_config "key" "default"
+plugin_get_config_array "key"
 ```
-
-Resolution order (at each tier, checks `.yaml` then `.yml` then `.json`):
-
-1. `${CLAUDE_PROJECT_DIR}/.claude/plugins.settings.{yaml,yml,json}` → `my-plugin.key`
-2. `~/.claude/plugins.settings.{yaml,yml,json}` → `my-plugin.key`
-3. `${CLAUDE_PLUGIN_ROOT}/my-plugin.settings.{yaml,yml,json}` → `my-plugin.key`
-
-YAML files are read via `yq` (with grep fallback), JSON files via `jq`.
 
 ### tool-install.sh
 
-Project-local binary installation pattern. Requires `plugin-config-read.sh`.
+Project-local binary install helpers.
 
 ```bash
-source "${CLAUDE_PLUGIN_ROOT}/lib/tool-install.sh"
-
-tool_is_web_session                            # checks CLAUDE_CODE_REMOTE
-tool_resolve_install_dir                       # sets INSTALL_DIR global
-tool_ensure_path "$INSTALL_DIR"                # adds to PATH via CLAUDE_ENV_FILE
-tool_is_available "mytool"                     # checks command -v
-tool_resolve_github_version "owner/repo" "1.0" # latest release tag
-tool_run_install do_install                    # bg/fg per config
+source "$SHARED_LIB_DIR/tool-install.sh"
+tool_resolve_install_dir
+tool_ensure_path "$INSTALL_DIR"
+tool_is_available mytool
+tool_resolve_github_version "owner/repo" "1.0"
+tool_run_install do_install
 ```
 
 ### add-permission.sh
 
-Idempotent permission injection into `settings.local.json`. Requires `safe-settings-write.sh`.
+Idempotent permission injection. Requires `safe-settings-write.sh`.
 
 ```bash
-source "${CLAUDE_PLUGIN_ROOT}/lib/safe-settings-write.sh"
-source "${CLAUDE_PLUGIN_ROOT}/lib/add-permission.sh"
-
-add_permission_to_allow "mcp__my-server__*"           # project-level
-add_permission_to_allow "Bash(tool:*)" "user"          # user-level
+source "$SHARED_LIB_DIR/safe-settings-write.sh"
+source "$SHARED_LIB_DIR/add-permission.sh"
+add_permission_to_allow "mcp__my-server__*"
+add_permission_to_allow "Bash(tool:*)" "user"
 ```
 
 ### hook-logging.sh
 
-Full hook lifecycle logging. Depends on `log.sh` (auto-sourced). Messages are printed to stderr (user sees via Ctrl+O) and accumulated for plain text output on stdout (user sees via `systemMessage`, agent sees via `additionalContext`). On failure, a structured error block is also printed to stderr.
+Full hook lifecycle logging with step tracking and structured errors.
 
 ```bash
-PLUGIN_NAME="my-plugin"  # MUST be set before sourcing
-source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
+PLUGIN_NAME="my-plugin"  # required
+source "$SHARED_LIB_DIR/hook-logging.sh"
 
-hook_log "Installing tool v1.2.3"              # stderr + accumulate for stdout
-hook_log_always "Tool v1.2.3 ready"            # alias for hook_log
-hook_log_step "download" "Downloading binary"  # start a named step
-hook_fail "curl" "404 not found" "Check URL"   # structured error to stderr (returns 0)
-hook_run my_main_function                      # wrap function, auto-fail on non-zero exit
-hook_log_cleanup                               # remove log file on success
-hook_respond                                   # MUST be last — outputs plain text to stdout
+hook_log "..."
+hook_log_step "download" "..."
+hook_fail "curl" "404" "Check URL"
+hook_run main_fn
+hook_log_cleanup
+hook_respond  # MUST be last
 ```
-
-**IMPORTANT:** `hook_respond` MUST be called exactly once, as the last thing before exit. It outputs accumulated messages as plain text to stdout. Hooks MUST always exit 0.
-
-On failure, `hook_fail` prints:
-
-```
-==== Plugin Setup Failed ====
-  Plugin:    my-plugin
-  Component: curl
-  Step:      download
-  Error:     404 not found
-  Logs:      /tmp/claude-plugin-logs/my-plugin-20260311-153022-12345.log
-  Fix:       Check URL
-=============================
-```
-
-`hook_session_message` is an alias for `hook_log`. `hook_log_always` is also an alias for `hook_log`.
 
 ### safe-settings-write.sh
 
-Simple jq-based settings writer.
+`jq`-based settings writer.
 
 ```bash
 SETTINGS_FILE="/path/to/settings.local.json"
-source "${CLAUDE_PLUGIN_ROOT}/lib/safe-settings-write.sh"
-
-safe_write_settings '.some.key = "value"'  # jq filter applied to file
+source "$SHARED_LIB_DIR/safe-settings-write.sh"
+safe_write_settings '.some.key = "value"'
 ```
 
-## Adding a New Shared Library
+## Adding a new shared library
 
-1. Create the library in `shared/lib/`
-2. Add double-source guard: `if [ "${_MY_LIB_LOADED:-}" = "true" ]; then return 0; fi`
-3. Symlink into each plugin that needs it: `ln -s ../../../shared/lib/my-lib.sh plugins/*/lib/`
-4. Document it in this file
+1. Add the file to `plugins/shared-lib/lib/<my-lib>.sh`
+2. Include a double-source guard: `if [ "${_MY_LIB_LOADED:-}" = "true" ]; then return 0; fi`
+3. Document it in this file (and `plugins/shared-lib/README.md`)
+4. Bump `plugins/shared-lib/.claude-plugin/plugin.json` `version`
+5. Tag the release: `cd plugins/shared-lib && claude plugin tag --push`
+6. Each dependent plugin that uses the new lib: bump its own version, add the new `_wait_for_shared_lib` call, source the lib
 
 ## Conventions
 
-- Libraries use `_UPPERCASE_LOADED` guards to prevent double-sourcing
+- Each lib uses an `_UPPERCASE_LOADED` guard to prevent double-sourcing
 - Functions are prefixed by domain (`plugin_`, `tool_`, `add_permission_`, `log_`, `hook_`)
-- All libraries are idempotent and safe to source multiple times
-- Symlinked content is resolved and copied on plugin install (not symlinked at runtime)
-- Set `PLUGIN_NAME` before sourcing any library that needs it
+- All libs are idempotent and safe to source multiple times
+- Set `PLUGIN_NAME` (and any `LOG_PREFIX` override) BEFORE sourcing any logging lib
 - **Never use raw `echo` for logging** — use `log.sh`, `hook-output.sh`, or `hook-logging.sh`
-- When `hook-logging.sh` is symlinked, `log.sh` must also be symlinked (it's a dependency)
+- When sourcing `hook-logging.sh`, no need to wait for/source `log.sh` separately — `hook-logging.sh` handles its own dependencies internally
 
-## Choosing the Right Logging Library
+## Choosing the right logging library
 
 - **Any script** → `log.sh` (basic stderr logging)
 - **Simple hook with JSON response** → `hook-output.sh` (replaces `_json_msg`)
 - **Complex hook with lifecycle** → `hook-logging.sh` (steps, errors, log files)
 
-See [docs/shared-logging.md](../../docs/shared-logging.md) for detailed usage guide and anti-patterns.
+See `docs/shared-logging.md` for detailed usage and anti-patterns.

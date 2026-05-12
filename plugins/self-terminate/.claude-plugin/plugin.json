@@ -9,5 +9,11 @@
   },
   "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/self-terminate",
   "repository": "https://github.com/nsheaps/ai-mktpl",
-  "keywords": ["terminate", "exit", "sigint", "process", "self-destruct"]
+  "keywords": ["terminate", "exit", "sigint", "process", "self-destruct"],
+  "dependencies": [
+    {
+      "name": "shared-lib",
+      "version": "^1.0"
+    }
+  ]
 }

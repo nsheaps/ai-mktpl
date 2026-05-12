@@ -7,11 +7,16 @@
 #   git config --global credential.https://github.com.helper \
 #     '!/path/to/git-credential-github-app.sh'
 #
-# The token file location defaults to ~/.config/agent/github-token
+# The token file location defaults to ~/.agents/${AGENT_NAME}/.config/github-token
 # but can be overridden via GITHUB_TOKEN_FILE environment variable.
 set -euo pipefail
 
-TOKEN_FILE="${GITHUB_TOKEN_FILE:-$HOME/.config/agent/github-token}"
+# shellcheck source=../lib/agent-paths.sh
+_self="${BASH_SOURCE[0]}"
+while [ -L "$_self" ]; do _self="$(readlink -f "$_self")"; done
+source "$(cd "$(dirname "$_self")/.." && pwd)/lib/agent-paths.sh"
+
+TOKEN_FILE="${GITHUB_TOKEN_FILE:-${AGENT_CONFIG_DIR}/github-token}"
 
 # Only respond to "get" requests
 case "${1:-}" in

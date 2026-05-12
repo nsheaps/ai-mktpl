@@ -70,9 +70,9 @@ The plugin uses two hooks and a set of CLI scripts:
 │  ┌────────────────────────────────────────────────┐   │
 │  │ Shared Files                                    │   │
 │  │                                                 │   │
-│  │ ~/.config/agent/github-token      (token)       │   │
-│  │ ~/.config/agent/github-token.meta (expiry/meta) │   │
-│  │ ~/.config/agent/github-app-env    (runtime env) │   │
+│  │ ~/.agents/${AGENT_NAME}/.config/github-token      (token)       │   │
+│  │ ~/.agents/${AGENT_NAME}/.config/github-token.meta (expiry/meta) │   │
+│  │ ~/.agents/${AGENT_NAME}/.config/github-app-env    (runtime env) │   │
 │  │                                                 │   │
 │  │ Read by: gh CLI ($GH_TOKEN), git credential     │   │
 │  │ helper, CLAUDE_ENV_FILE (re-sourced each cmd)   │   │
@@ -108,7 +108,7 @@ The original spec proposed a background MCP server for continuous refresh. The i
 
 4. **Legacy flat settings** — `github_app_id`, `private_key_path`, `github_installation_id` in plugin config
 
-**Private key handling**: If `GITHUB_APP_PRIVATE_KEY` contains key content (e.g., from 1Password) but no `GITHUB_APP_PRIVATE_KEY_PATH` is set, the key content is written to a secure temp file (`~/.config/agent/github-app-<app_id>.pem`, chmod 600).
+**Private key handling**: If `GITHUB_APP_PRIVATE_KEY` contains key content (e.g., from 1Password) but no `GITHUB_APP_PRIVATE_KEY_PATH` is set, the key content is written to a secure temp file (`~/.agents/${AGENT_NAME}/.config/github-app-<app_id>.pem`, chmod 600).
 
 **Token generation** (`bin/generate-token.sh`):
 
@@ -117,7 +117,7 @@ The original spec proposed a background MCP server for continuous refresh. The i
 3. Write token to file (chmod 600)
 4. Write metadata to `.meta` file (expiry, app_id, installation_id, permissions)
 
-**Runtime env file**: Written to `~/.config/agent/github-app-env` and registered via `CLAUDE_ENV_FILE` as a `source` command. This file is re-sourced before each Bash command, so token refreshes by the PreToolUse hook are picked up automatically.
+**Runtime env file**: Written to `~/.agents/${AGENT_NAME}/.config/github-app-env` and registered via `CLAUDE_ENV_FILE` as a `source` command. This file is re-sourced before each Bash command, so token refreshes by the PreToolUse hook are picked up automatically.
 
 **Git identity**: If `auto_git_config: true` (default) and git user.name/email aren't already set, the hook fetches the App's slug from the API and configures git identity as `app-slug[bot] <id+app-slug[bot]@users.noreply.github.com>`.
 
@@ -154,7 +154,7 @@ Standalone script invoked by both the PreToolUse hook (sync or background) and p
 
 ### Token Distribution
 
-**Primary mechanism**: Shared file at `~/.config/agent/github-token`
+**Primary mechanism**: Shared file at `~/.agents/${AGENT_NAME}/.config/github-token`
 
 Consumers:
 
@@ -162,7 +162,7 @@ Consumers:
 - **`git push/pull`**: Via git credential helper (`bin/git-credential-github-app.sh`)
 - **Direct reads**: Scripts can `cat $GITHUB_TOKEN_FILE`
 
-The runtime env file (`~/.config/agent/github-app-env`) is sourced via `CLAUDE_ENV_FILE` before each Bash command, ensuring `$GH_TOKEN` and `$GITHUB_TOKEN` always reflect the latest token.
+The runtime env file (`~/.agents/${AGENT_NAME}/.config/github-app-env`) is sourced via `CLAUDE_ENV_FILE` before each Bash command, ensuring `$GH_TOKEN` and `$GITHUB_TOKEN` always reflect the latest token.
 
 **Git credential helper** (`bin/git-credential-github-app.sh`):
 
@@ -218,14 +218,14 @@ github-app:
 
   # Option 3: Legacy flat settings
   # github_app_id: "12345"
-  # private_key_path: "~/.config/agent/github-app.pem"
+  # private_key_path: "~/.agents/${AGENT_NAME}/.config/github-app.pem"
   # github_installation_id: "67890"
 
   # Auto-configure git identity from App bot account (default: true)
   auto_git_config: true
 
-  # Token file location (default: ~/.config/agent/github-token)
-  # token_file: "~/.config/agent/github-token"
+  # Token file location (default: ~/.agents/${AGENT_NAME}/.config/github-token)
+  # token_file: "~/.agents/${AGENT_NAME}/.config/github-token"
 ```
 
 Or via environment variables: `GITHUB_APP_ID`, `GITHUB_APP_PRIVATE_KEY_PATH`, `GITHUB_INSTALLATION_ID`, `GITHUB_TOKEN_FILE`.

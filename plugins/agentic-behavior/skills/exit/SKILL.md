@@ -1,0 +1,141 @@
+---
+name: exit
+description: |
+  Gracefully exit the Claude Code session by sending SIGINT to the Claude process.
+  Works for local CLI sessions and Claude Code Web (remote sessions).
+  Use when you need to exit the session cleanly, or when the user requests exit/termination.
+---
+
+# Exit
+
+This skill enables Claude to gracefully exit its own session by sending a SIGINT signal to its process.
+
+## When to Use This Skill
+
+- When the user explicitly asks Claude to exit or stop
+- When Claude needs to exit for any reason (e.g., cleanup, session end)
+- When running Claude Code Web and you need to exit the session
+- When testing process management or signal handling
+- See also: `/restart` skill for restarting (exit + launcher picks up again)
+
+## Automatic Git State Validation
+
+This plugin includes a PreToolUse hook that validates git state before exit. The hook intercepts Bash tool calls that invoke `exit.sh` or `kill -INT` and checks the working directory.
+
+**Checks performed:**
+
+1. No uncommitted changes (staged or unstaged)
+2. No unpushed commits
+3. No untracked files
+
+If any check fails, the hook blocks the tool call (exit 2) and provides a message explaining what needs to be resolved.
+
+**Note:** The manual method (`kill -INT $PPID`) is also intercepted by the hook. However, if you bypass the Bash tool entirely (e.g., running a signal from outside Claude), the hook cannot intercept it.
+
+## How It Works
+
+Claude runs as a process that spawns shell subprocesses for Bash commands. The parent PID (`$PPID`) of any spawned shell is the Claude process itself.
+
+Sending `SIGINT` (signal 2) to the Claude process triggers a graceful shutdown, similar to pressing `Ctrl+C`.
+
+## Quick Method: Use the Script
+
+The easiest way is to execute the provided script:
+
+```bash
+${CLAUDE_PLUGIN_ROOT}/bin/exit.sh
+```
+
+Or via the installed plugin cache path (varies by installation):
+
+```bash
+~/.claude/plugins/cache/ai-mktpl/agentic-behavior/*/bin/exit.sh
+```
+
+## Manual Method
+
+If the script is unavailable, Claude can exit itself manually:
+
+### Step 1: Identify the Claude Process
+
+```bash
+echo "Shell PID: $$"
+echo "Claude PID (parent): $PPID"
+ps -o pid,ppid,comm -p $$ -p $PPID
+```
+
+### Step 2: Verify It's Claude
+
+```bash
+ps -o comm= -p $PPID
+```
+
+This should output `claude` or similar.
+
+### Step 3: Send SIGINT
+
+```bash
+kill -INT $PPID
+```
+
+## Process Tree Context
+
+A typical Claude Code process tree looks like:
+
+```
+iTerm/Terminal
+└── shell (user's interactive shell)
+    └── claude (PID: XXXXX)  ← Target this
+        └── /bin/zsh (spawned for Bash commands)
+            └── (your command)
+```
+
+## Safety Notes
+
+- **SIGINT** causes graceful termination - Claude can clean up
+- **SIGTERM** also works for graceful shutdown
+- **SIGKILL** (-9) should be avoided - no cleanup opportunity
+- The script verifies the parent is actually Claude before sending the signal
+
+## What Happens After
+
+After exit:
+
+1. The Claude session ends immediately
+2. Any in-progress work is interrupted
+3. The user returns to their shell
+4. A new session can be started with `claude`
+
+## Troubleshooting
+
+**Script says parent is not Claude**: You may be running in a nested shell or different environment. Check `pstree -p $$` to see the full process tree.
+
+**Signal ignored**: Some environments may mask signals. Try `kill -TERM $PPID` as an alternative.
+
+## Stop Hooks (Claude Code Web)
+
+In Claude Code Web environments, stop hooks may validate state before shutdown:
+
+- Checks for uncommitted changes
+- Checks for untracked files
+- Checks for unpushed commits
+- Blocks shutdown (exit 2) if validation fails
+- Allows shutdown (exit 0) if clean
+
+Example stop hook location: `~/.claude/stop-hook-git-check.sh`
+
+## Environment Detection
+
+| Environment Variable     | Purpose                              |
+| ------------------------ | ------------------------------------ |
+| `CLAUDE_CODE_REMOTE`     | Set to "true" in Claude Code Web     |
+| `CLAUDE_PROJECT_DIR`     | Repository root (available in hooks) |
+| `CLAUDE_CODE_SESSION_ID` | Current session UUID                 |
+
+## Alternative Methods (Claude Code Web Only)
+
+For Claude Code Web sessions, you can also exit by:
+
+1. **Idle timeout** - Stop sending messages and wait for auto-shutdown
+2. **Close browser tab** - Session terminates gracefully
+3. **UI controls** - Use session management UI if available

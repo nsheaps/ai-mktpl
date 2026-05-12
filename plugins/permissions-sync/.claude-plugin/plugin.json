@@ -19,5 +19,11 @@
     "allow",
     "deny",
     "ask"
+  ],
+  "dependencies": [
+    {
+      "name": "shared-lib",
+      "version": "^1.0"
+    }
   ]
 }

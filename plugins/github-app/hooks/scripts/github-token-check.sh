@@ -21,9 +21,13 @@ set -euo pipefail
 
 # --- Configuration ---
 
-DEBOUNCE_FILE="${HOME}/.config/agent/github-app-last-check"
-DEBOUNCE_SECONDS=30  # Don't check more often than every 30 seconds
-TOKEN_FILE="${GITHUB_TOKEN_FILE:-$HOME/.config/agent/github-token}"
+# shellcheck source=../../lib/agent-paths.sh
+source "${CLAUDE_PLUGIN_ROOT}/lib/agent-paths.sh"
+
+DEBOUNCE_FILE="${AGENT_CONFIG_DIR}/github-app-last-check"
+DEBOUNCE_SECONDS=300   # Don't check more often than every 5 minutes (token lasts ~1 hour)
+REFRESH_THRESHOLD=45   # Proactively refresh when <=45 min remain (token lasts 1h)
+TOKEN_FILE="${GITHUB_TOKEN_FILE:-${AGENT_CONFIG_DIR}/github-token}"
 META_FILE="${TOKEN_FILE}.meta"
 
 # --- Read hook input ---
@@ -41,24 +45,56 @@ if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_APP_PRIVATE_KEY_PATH:-}" || -z "${
   exit 0
 fi
 
-# No token file means SessionStart didn't generate one — no opinion
+# No token file means SessionStart didn't generate one.
+# This can happen if SessionStart's wait timed out but credentials appeared
+# later (another plugin finished injecting them). If credentials are now
+# available, generate the token synchronously before proceeding.
 if [[ ! -f "$TOKEN_FILE" ]]; then
-  exit 0
+  if [[ -n "${GITHUB_APP_ID:-}" && -n "${GITHUB_APP_PRIVATE_KEY_PATH:-}" && -n "${GITHUB_INSTALLATION_ID:-}" ]]; then
+    echo "github-app: token file missing but credentials available, generating token now..." >&2
+    BIN_DIR_EARLY="${CLAUDE_PLUGIN_ROOT}/bin"
+    if "$BIN_DIR_EARLY/token-check.sh" --sync --quiet; then
+      : # Token generated — continue with the rest of the hook
+    else
+      echo "github-app: WARNING: on-demand token generation failed" >&2
+      exit 0
+    fi
+  else
+    exit 0
+  fi
 fi
 
+# --- Token status check (sourced early so should_check can use it) ---
+
+# Resolve the bin/lib directories via CLAUDE_PLUGIN_ROOT (set by the harness for hook scripts)
+PLUGIN_DIR="${CLAUDE_PLUGIN_ROOT}"
+source "$PLUGIN_DIR/lib/token-utils.sh"
+
+BIN_DIR="${CLAUDE_PLUGIN_ROOT}/bin"
+
 # --- Debounce/throttle ---
+# Throttle (not debounce): skip redundant "refresh early" checks when
+# the token is still valid. NEVER skip a check when the token is
+# already expired — always refresh immediately in that case.
+# (Uses get_minutes_remaining from lib/token-utils.sh, sourced above.)
 
 should_check() {
+  # Always check if token is expired/missing — no throttle bypass
+  local minutes
+  minutes=$(get_minutes_remaining)
+  case "$minutes" in
+    missing|expired) return 0 ;;
+  esac
+  # Token is valid (or unknown) — throttle proactive refresh checks
   if [[ ! -f "$DEBOUNCE_FILE" ]]; then
     return 0  # Never checked
   fi
-  local last_check
+  local last_check now elapsed
   last_check=$(cat "$DEBOUNCE_FILE" 2>/dev/null || echo 0)
-  local now
   now=$(date +%s)
-  local elapsed=$(( now - last_check ))
+  elapsed=$(( now - last_check ))
   if (( elapsed < DEBOUNCE_SECONDS )); then
-    return 1  # Too soon
+    return 1  # Too soon, and token is still valid
   fi
   return 0
 }
@@ -85,14 +121,6 @@ uses_token() {
 
   return 1
 }
-
-# --- Token status check ---
-
-# Resolve the bin/lib directories relative to this script (handles both plugin and symlink cases)
-PLUGIN_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
-source "$PLUGIN_DIR/lib/token-utils.sh"
-
-BIN_DIR="$PLUGIN_DIR/bin"
 
 # --- Allow helper ---
 
@@ -128,7 +156,7 @@ if uses_token; then
       allow_silent
       ;;
     *)
-      if (( MINUTES <= 30 )); then
+      if (( MINUTES <= REFRESH_THRESHOLD )); then
         # Valid but close to expiry — allow + background refresh
         echo "github-app: token valid, but close to expiration, refreshing in the background" >&2
         "$BIN_DIR/token-check.sh" --quiet 2>/dev/null &
@@ -160,7 +188,7 @@ else
       allow_silent
       ;;
     *)
-      if (( MINUTES <= 30 )); then
+      if (( MINUTES <= REFRESH_THRESHOLD )); then
         echo "github-app: token valid, but close to expiration, refreshing in the background" >&2
         "$BIN_DIR/token-check.sh" --quiet 2>/dev/null &
         disown
