@@ -172,6 +172,52 @@ assert_line_count 1 "$f11" "^export FOOBAR=" "FOOBAR still present"
 # Note: `^export FOO=` regex matches `export FOO=` but NOT `export FOOBAR=`
 # because of the literal `=` boundary. This test confirms that.
 
+# --- Test 12: upsert preserves existing file's permissions -----------------
+# `mktemp` creates the tmp file at 0600; `mv` keeps the source inode's mode,
+# so without explicit perm replay, the target would silently be downgraded
+# to 0600. Verify the helper preserves the target's pre-existing mode.
+echo "Test 12: upsert preserves existing file perms (0644 stays 0644)"
+f12="$TMPDIR_TEST/test12.env"
+: > "$f12"
+chmod 644 "$f12"
+env_file_upsert_export "$f12" "PERMSKEY" "permsval"
+# Stat the mode in octal — try GNU first, fall back to BSD.
+mode12="$(stat -c '%a' -- "$f12" 2>/dev/null || stat -f '%Lp' -- "$f12" 2>/dev/null || echo "?")"
+if [ "$mode12" = "644" ]; then
+  ok "perms preserved as 0644 after upsert"
+else
+  bad "perms NOT preserved: expected 644, got $mode12"
+fi
+
+echo "Test 12b: upsert preserves perms across multiple calls (0664)"
+f12b="$TMPDIR_TEST/test12b.env"
+: > "$f12b"
+chmod 664 "$f12b"
+env_file_upsert_export "$f12b" "K1" "v1"
+env_file_upsert_export "$f12b" "K1" "v2"
+env_file_upsert_source "$f12b" "/some/path"
+mode12b="$(stat -c '%a' -- "$f12b" 2>/dev/null || stat -f '%Lp' -- "$f12b" 2>/dev/null || echo "?")"
+if [ "$mode12b" = "664" ]; then
+  ok "perms preserved as 0664 across upserts"
+else
+  bad "perms NOT preserved across upserts: expected 664, got $mode12b"
+fi
+
+# --- Test 13: first-write (file doesn't exist) leaves tmp at 0600 ---------
+# When the target doesn't exist yet, we have no prior perms to replay, so
+# mktemp's 0600 default is what the new file ends up with. This is the
+# safe default for env files that may hold secrets.
+echo "Test 13: first-write to nonexistent file ends at 0600"
+f13="$TMPDIR_TEST/test13-new.env"
+[ ! -e "$f13" ] || rm -f "$f13"
+env_file_upsert_export "$f13" "NEW_KEY" "newval"
+mode13="$(stat -c '%a' -- "$f13" 2>/dev/null || stat -f '%Lp' -- "$f13" 2>/dev/null || echo "?")"
+if [ "$mode13" = "600" ]; then
+  ok "first-write file ends at 0600 (safe default for secrets)"
+else
+  bad "first-write perms unexpected: expected 600, got $mode13"
+fi
+
 # --- Summary ----------------------------------------------------------------
 echo
 echo "Results: $pass passed, $fail failed"
