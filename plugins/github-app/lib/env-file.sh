@@ -21,6 +21,12 @@
 #   GIT_AUTHOR_EMAIL
 #   GIT_COMMITTER_NAME
 #   GIT_COMMITTER_EMAIL
+#
+# Git credential helper:
+#   The plugin configures git via write_git_config_global(), which writes
+#   `credential.helper = !gh auth git-credential` into the per-agent gitconfig.
+#   gh reads GH_TOKEN from the process environment (always fresh via CLAUDE_ENV_FILE).
+#   No script file is copied or installed.
 
 if [ "${_ENV_FILE_LOADED:-}" = "true" ]; then return 0; fi
 _ENV_FILE_LOADED="true"
@@ -138,22 +144,26 @@ GITEOF
   chmod 600 "$GIT_IDENTITY_FILE"
 }
 
-# write_git_config_global [CREDENTIAL_HELPER_PATH]
+# write_git_config_global
 #
 # Rewrites the isolated gitconfig with current identity from env vars
-# (GIT_AUTHOR_NAME, GIT_AUTHOR_EMAIL) plus the credential helper.
-# Git reads GIT_CONFIG_GLOBAL on every operation, so changes take
+# (GIT_AUTHOR_NAME, GIT_AUTHOR_EMAIL) and installs a gh-based credential
+# helper. Git reads GIT_CONFIG_GLOBAL on every operation, so changes take
 # effect immediately on the next git command.
+#
+# The credential helper is written as `!gh auth git-credential` — no absolute
+# path, no custom script file. gh reads $GH_TOKEN from the process environment
+# (always fresh via CLAUDE_ENV_FILE) and returns the correct credentials.
+# This is version-independent: the gitconfig entry never changes when gh upgrades.
 #
 # The target path is computed at call-time (not source-time) so the
 # function always uses the current value of GIT_CONFIG_GLOBAL, avoiding
 # order-dependent bugs when callers source this lib at different points.
 #
-# Args:
-#   $1  — (optional) path to credential helper script. If omitted,
-#         reuses the existing [credential] section or omits it.
+# Guard: if gh is not on PATH, the function prints an error to stderr and returns 1.
+# The caller (hook) runs with set -euo pipefail, so SessionStart will abort and
+# surface the error rather than leaving gitconfig without a [credential] section.
 write_git_config_global() {
-  local cred_helper="${1:-}"
   local bot_name="${GIT_AUTHOR_NAME:-}"
   local bot_email="${GIT_AUTHOR_EMAIL:-}"
   local target="${GIT_CONFIG_GLOBAL:-${AGENT_CONFIG_DIR:-${HOME}/.agents/_UNKNOWN/.config}/git/config}"
@@ -168,11 +178,19 @@ write_git_config_global() {
     email = ${bot_email}
 GCEOF
 
-  if [[ -n "$cred_helper" ]]; then
-    cat >> "$target" <<GCEOF
+  if command -v gh >/dev/null 2>&1; then
+    # gh auth git-credential reads $GH_TOKEN from env — no script file needed,
+    # no versioned path embedded. The double-reset (helper = empty then helper = !gh)
+    # clears any previously-configured credential helper before setting ours,
+    # matching the pattern git itself uses when resetting helpers.
+    cat >> "$target" <<'GCEOF'
 [credential "https://github.com"]
-    helper = !${cred_helper}
+    helper =
+    helper = !gh auth git-credential
 GCEOF
+  else
+    echo "write_git_config_global: gh not found on PATH — cannot configure credential.helper. Install gh (github.com/cli/cli) and ensure it is on PATH before starting a session." >&2
+    return 1
   fi
 
   chmod 600 "$target"

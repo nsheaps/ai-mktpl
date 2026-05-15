@@ -98,10 +98,14 @@ PLUGIN_DIR="$(cd "$(dirname "$_self")/.." && pwd)"
 source "$PLUGIN_DIR/lib/token-utils.sh"
 source "$PLUGIN_DIR/lib/env-file.sh"
 
-# update_runtime_env TOKEN — rewrites runtime env file AND gitconfig on each refresh
+# update_runtime_env TOKEN — rewrites the runtime env file on each refresh
+#
+# The gitconfig credential.helper entry (`!gh auth git-credential`) is written
+# once by SessionStart and persists across token refreshes — gh reads $GH_TOKEN
+# from env at credential-request time, so the gitconfig never needs updating.
+# This function only refreshes the env file so $GH_TOKEN stays current.
 update_runtime_env() {
   write_runtime_env_file "$1"
-  write_git_config_global "${PLUGIN_DIR}/bin/git-credential-github-app.sh"
 }
 
 # Generate a new token (full re-auth from keys)

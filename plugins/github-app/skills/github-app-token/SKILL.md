@@ -144,15 +144,21 @@ $CLAUDE_PLUGIN_ROOT/bin/token-check.sh --sync
 
 ## Git Credential Helper
 
-The plugin includes a git credential helper for seamless `git push` operations:
+The SessionStart hook configures git to use `gh auth git-credential` directly.
+No script file is installed. The gitconfig entry is:
 
-```bash
-# Configure git to use the helper
-git config --global credential.https://github.com.helper \
-  '!/path/to/plugins/github-app/bin/git-credential-github-app.sh'
+```ini
+[credential "https://github.com"]
+    helper =
+    helper = !gh auth git-credential
 ```
 
-This reads the token from the shared file, so `git push` always uses the latest token.
+`gh auth git-credential` reads `$GH_TOKEN` from the process environment. Since
+`CLAUDE_ENV_FILE` is sourced before any Bash tool runs, the token is always
+current. No manual configuration is required. Any old `git config` entries
+pointing at `bin/git-credential-github-app.sh` or
+`$CLAUDE_SETTINGS_DIR/plugins/data/github-app/git-credential-helper.sh`
+should be removed.
 
 ## Agent Team Usage
 

@@ -455,8 +455,15 @@ configure_git_identity_env() {
   mkdir -p "$(dirname "$git_config_file")"
 
   export GIT_CONFIG_GLOBAL="$git_config_file"
-  write_git_config_global "${CLAUDE_PLUGIN_ROOT}/bin/git-credential-github-app.sh"
-  hook_log "GIT_CONFIG_GLOBAL isolated at $git_config_file (with credential helper)"
+  # BUG-12 fix: use `gh auth git-credential` as the credential helper.
+  # Previously we copied a custom script to $CLAUDE_SETTINGS_DIR/plugins/data/
+  # and embedded the versioned helper path in gitconfig. Now we write just
+  # `!gh auth git-credential` — no script file, no versioned path, no token
+  # file path baked into gitconfig. gh reads $GH_TOKEN from the process env
+  # (always up-to-date via CLAUDE_ENV_FILE). GH_CONFIG_DIR is already exported
+  # per-agent by bin/agent, so gh resolves the correct per-agent config.
+  write_git_config_global
+  hook_log "GIT_CONFIG_GLOBAL isolated at $git_config_file (credential helper: gh auth git-credential)"
 
   # Defense-in-depth: also set GIT_AUTHOR_*/GIT_COMMITTER_* env vars.
   # These take precedence over gitconfig, so even if GIT_CONFIG_GLOBAL is

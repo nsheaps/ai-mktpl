@@ -159,16 +159,17 @@ Standalone script invoked by both the PreToolUse hook (sync or background) and p
 Consumers:
 
 - **`gh` CLI**: Via `$GH_TOKEN` environment variable (set by runtime env file)
-- **`git push/pull`**: Via git credential helper (`bin/git-credential-github-app.sh`)
+- **`git push/pull`**: Via `gh auth git-credential` configured in per-agent gitconfig by SessionStart hook
 - **Direct reads**: Scripts can `cat $GITHUB_TOKEN_FILE`
 
 The runtime env file (`~/.agents/${AGENT_NAME}/.config/github-app-env`) is sourced via `CLAUDE_ENV_FILE` before each Bash command, ensuring `$GH_TOKEN` and `$GITHUB_TOKEN` always reflect the latest token.
 
-**Git credential helper** (`bin/git-credential-github-app.sh`):
+**Git credential helper** (`gh auth git-credential`):
 
-- Responds to `get` requests by reading the token file
-- No-ops on `store`/`erase` (lifecycle managed by hooks)
-- Configure via: `git config --global credential.https://github.com.helper '!/path/to/git-credential-github-app.sh'`
+- Configured automatically by the SessionStart hook — no manual `git config` needed, no script file installed
+- Reads `$GH_TOKEN` from process environment — always current because `CLAUDE_ENV_FILE` is sourced before Bash runs
+- Version-independent: no binary path embedded in gitconfig; stable across `gh` upgrades
+- `GH_CONFIG_DIR` is exported per-agent by `bin/agent`, so `gh` resolves the correct per-agent config
 
 ### Plugin Structure
 
@@ -184,8 +185,7 @@ plugins/github-app/
 ├── bin/
 │   ├── generate-token.sh             # JWT generation + token exchange
 │   ├── token-check.sh                # Token validation + refresh with retries/locking
-│   ├── token-status.sh               # JSON status report (used by diagnostics)
-│   └── git-credential-github-app.sh  # Git credential helper
+│   └── token-status.sh               # JSON status report (used by diagnostics)
 ├── lib/
 │   └── token-utils.sh                # Shared: get_minutes_remaining()
 ├── skills/
