@@ -45,6 +45,7 @@ _wait_for_shared_lib() {
 _wait_for_shared_lib "plugin-config-read.sh"
 _wait_for_shared_lib "tool-install.sh"
 _wait_for_shared_lib "hook-logging.sh"
+_wait_for_shared_lib "env-file.sh"
 
 # shellcheck source=/dev/null
 source "$SHARED_LIB_DIR/plugin-config-read.sh"
@@ -52,6 +53,11 @@ source "$SHARED_LIB_DIR/plugin-config-read.sh"
 source "$SHARED_LIB_DIR/tool-install.sh"
 # shellcheck source=/dev/null
 source "$SHARED_LIB_DIR/hook-logging.sh"
+# shellcheck source=/dev/null
+source "$SHARED_LIB_DIR/env-file.sh"
+# shellcheck source=/dev/null
+source "$SHARED_LIB_DIR/env-local-target.sh"
+
 # --- Guards ---
 
 plugin_is_enabled || { hook_log "plugin disabled, skipping"; hook_respond; exit 0; }
@@ -268,19 +274,33 @@ _write_secret() {
   case "$target" in
     envFile)
       if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
-        # Remove any existing export of this var to avoid duplicates
-        if [ -f "$CLAUDE_ENV_FILE" ]; then
-          local tmp_env
-          tmp_env="$(mktemp)"
-          grep -v "^export ${env_var}=" "$CLAUDE_ENV_FILE" > "$tmp_env" 2>/dev/null || true
-          mv "$tmp_env" "$CLAUDE_ENV_FILE"
-        fi
-        printf 'export %s=%q\n' "$env_var" "$value" >> "$CLAUDE_ENV_FILE"
+        env_file_upsert_export "$CLAUDE_ENV_FILE" "$env_var" "$value"
         export "${env_var}=${value}"
         hook_log "Injected ${env_var} via CLAUDE_ENV_FILE"
       else
         hook_log "CLAUDE_ENV_FILE not set, falling back to current environment only"
         export "${env_var}=${value}"
+      fi
+      ;;
+    envLocal)
+      local env_local_path source_chain
+      env_local_path="$(_resolve_env_local_path)"
+      if [ -z "$env_local_path" ]; then
+        # Match op-exec-env.sh:126-128 behavior: skip the secret with a log
+        # rather than failing the hook. The user may have additional secrets
+        # targeting envFile/settingsJson that should still inject. Setting
+        # envLocal.path or AGENT_HOME_DIR/CLAUDE_PROJECT_DIR will resolve it.
+        hook_log "envLocal target not resolvable, skipping ${env_var} (set envLocal.path or AGENT_HOME_DIR/CLAUDE_PROJECT_DIR)"
+        return 0
+      fi
+      env_file_upsert_export "$env_local_path" "$env_var" "$value"
+      export "${env_var}=${value}"
+      hook_log "Injected ${env_var} via ${env_local_path}"
+      # Also chain into CLAUDE_ENV_FILE via a `source` line (idempotent).
+      source_chain="$(_resolve_env_local_source_chain "$env_local_path")"
+      if [ -n "$source_chain" ] && [ -n "${CLAUDE_ENV_FILE:-}" ]; then
+        env_file_upsert_source "$CLAUDE_ENV_FILE" "$source_chain"
+        hook_log "Chained ${source_chain} into CLAUDE_ENV_FILE"
       fi
       ;;
     settingsJson|settingsLocalJson|userSettingsJson)
@@ -302,7 +322,7 @@ _write_secret() {
       ;;
     *)
       hook_fail "secrets injection" "Unknown target '${target}' for ${env_var}" \
-        "Valid targets: envFile, settingsJson, settingsLocalJson, userSettingsJson"
+        "Valid targets: envFile, envLocal, settingsJson, settingsLocalJson, userSettingsJson"
       ;;
   esac
 }

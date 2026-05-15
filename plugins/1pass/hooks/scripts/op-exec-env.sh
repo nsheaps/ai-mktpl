@@ -43,11 +43,17 @@ _wait_for_shared_lib() {
 
 _wait_for_shared_lib "plugin-config-read.sh"
 _wait_for_shared_lib "hook-logging.sh"
+_wait_for_shared_lib "env-file.sh"
 
 # shellcheck source=/dev/null
 source "$SHARED_LIB_DIR/plugin-config-read.sh"
 # shellcheck source=/dev/null
 source "$SHARED_LIB_DIR/hook-logging.sh"
+# shellcheck source=/dev/null
+source "$SHARED_LIB_DIR/env-file.sh"
+# shellcheck source=/dev/null
+source "$SHARED_LIB_DIR/env-local-target.sh"
+
 # Script-level tmpdir for secret-bearing tempfiles. EXIT trap ensures cleanup
 # on any exit path (normal, error, signal). All tempfiles in process_item()
 # are created here so no per-function trap scoping is needed.
@@ -99,16 +105,31 @@ fi
 # Determine which targets are enabled
 target_bash_env="false"
 target_user_settings="false"
+target_env_local="false"
 
 while IFS= read -r target; do
   case "$target" in
     sessionStartBashEnv) target_bash_env="true" ;;
     userSettings)        target_user_settings="true" ;;
+    envLocal)            target_env_local="true" ;;
     *)
-      hook_log "unknown target: $target (expected sessionStartBashEnv or userSettings)"
+      hook_log "unknown target: $target (expected sessionStartBashEnv, userSettings, or envLocal)"
       ;;
   esac
 done <<< "$op_exec_targets"
+
+# Resolve envLocal target path once (used in the per-var writer below).
+ENV_LOCAL_PATH=""
+ENV_LOCAL_SOURCE_CHAIN_WRITTEN="false"
+if [ "$target_env_local" = "true" ]; then
+  ENV_LOCAL_PATH="$(_resolve_env_local_path)"
+  if [ -z "$ENV_LOCAL_PATH" ]; then
+    hook_log "envLocal target requested but no path could be resolved (set envLocal.path or AGENT_HOME_DIR/CLAUDE_PROJECT_DIR); skipping envLocal target"
+    target_env_local="false"
+  else
+    hook_log "envLocal target path: $ENV_LOCAL_PATH"
+  fi
+fi
 
 # Prepare settings.local.json writer if needed
 if [ "$target_user_settings" = "true" ]; then
@@ -130,7 +151,25 @@ write_to_targets() {
   local env_value="$2"
 
   if [ "$target_bash_env" = "true" ] && [ -n "${CLAUDE_ENV_FILE:-}" ]; then
+    # NOTE: kept as append (not upsert) here: CLAUDE_ENV_FILE is session-fresh
+    # and op-exec output for a single session is the source of truth.
     printf 'export %s=%q\n' "$env_name" "$env_value" >> "$CLAUDE_ENV_FILE"
+  fi
+
+  if [ "$target_env_local" = "true" ] && [ -n "$ENV_LOCAL_PATH" ]; then
+    # Idempotent replace-or-append. Multiple sessions / re-runs do not
+    # accumulate duplicate or stale entries.
+    env_file_upsert_export "$ENV_LOCAL_PATH" "$env_name" "$env_value"
+    # On first write, also chain ENV_LOCAL_PATH (or sourceChain) into CLAUDE_ENV_FILE.
+    if [ "$ENV_LOCAL_SOURCE_CHAIN_WRITTEN" != "true" ]; then
+      local chain
+      chain="$(_resolve_env_local_source_chain "$ENV_LOCAL_PATH")"
+      if [ -n "$chain" ] && [ -n "${CLAUDE_ENV_FILE:-}" ]; then
+        env_file_upsert_source "$CLAUDE_ENV_FILE" "$chain"
+        hook_log "Chained $chain into CLAUDE_ENV_FILE"
+      fi
+      ENV_LOCAL_SOURCE_CHAIN_WRITTEN="true"
+    fi
   fi
 
   if [ "$target_user_settings" = "true" ]; then
@@ -254,6 +293,10 @@ do_inject() {
 
   local targets_desc=""
   [ "$target_bash_env" = "true" ] && targets_desc="sessionStartBashEnv"
+  if [ "$target_env_local" = "true" ]; then
+    [ -n "$targets_desc" ] && targets_desc="$targets_desc, "
+    targets_desc="${targets_desc}envLocal"
+  fi
   if [ "$target_user_settings" = "true" ]; then
     [ -n "$targets_desc" ] && targets_desc="$targets_desc, "
     targets_desc="${targets_desc}userSettings"
