@@ -35,5 +35,11 @@
     "footnotes"
   ],
   "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/agentic-behavior",
-  "repository": "https://github.com/nsheaps/ai-mktpl"
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "dependencies": [
+    {
+      "name": "shared-lib",
+      "version": "^1.0"
+    }
+  ]
 }

@@ -1,0 +1,13 @@
+{
+  "name": "shared-lib",
+  "version": "1.0.1",
+  "description": "Shared bash libraries used by other ai-mktpl plugins (logging, hook output, config reading, settings writing, tool install). Other plugins declare this as a dependency and source the libs from this plugin's persistent data directory at runtime.",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/shared-lib",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": ["shared", "library", "bash", "logging", "hooks", "infrastructure"]
+}

@@ -9,9 +9,54 @@
 set -euo pipefail
 
 PLUGIN_NAME="1pass"
-source "${CLAUDE_PLUGIN_ROOT}/lib/plugin-config-read.sh"
-source "${CLAUDE_PLUGIN_ROOT}/lib/tool-install.sh"
-source "${CLAUDE_PLUGIN_ROOT}/lib/hook-logging.sh"
+
+
+# --- Source shared libs from shared-lib plugin's persistent data dir ---
+#
+# shared-lib (declared in plugin.json `dependencies`) copies its lib/*.sh
+# files into ${CLAUDE_PLUGIN_DATA}/lib on SessionStart. We resolve its data
+# dir by stripping our own data-dir name and appending shared-lib's id.
+# Plugin data dir IDs are deterministic: `{plugin-name}-{marketplace-name}`.
+# See https://code.claude.com/docs/en/plugins-reference#persistent-data-directory
+#
+# When CLAUDE_PLUGIN_DATA is unset (e.g. when this script is invoked
+# outside a Claude Code hook), fall back to the known path.
+if [ -n "${CLAUDE_PLUGIN_DATA:-}" ]; then
+  SHARED_LIB_DIR="${CLAUDE_PLUGIN_DATA%/*}/shared-lib-ai-mktpl/lib"
+else
+  SHARED_LIB_DIR="${HOME}/.claude/plugins/data/shared-lib-ai-mktpl/lib"
+fi
+
+# Wait up to ~10s for a shared-lib file to appear (handles parallel
+# SessionStart hooks where shared-lib's copy may not have completed yet).
+_wait_for_shared_lib() {
+  local lib="$1"
+  local i=0
+  while [ ! -f "$SHARED_LIB_DIR/$lib" ]; do
+    i=$((i + 1))
+    if [ "$i" -ge 20 ]; then
+      echo "[1pass] timed out waiting for $SHARED_LIB_DIR/$lib (shared-lib SessionStart copy)" >&2
+      exit 1
+    fi
+    sleep 0.5
+  done
+}
+
+_wait_for_shared_lib "plugin-config-read.sh"
+_wait_for_shared_lib "tool-install.sh"
+_wait_for_shared_lib "hook-logging.sh"
+_wait_for_shared_lib "env-file.sh"
+
+# shellcheck source=/dev/null
+source "$SHARED_LIB_DIR/plugin-config-read.sh"
+# shellcheck source=/dev/null
+source "$SHARED_LIB_DIR/tool-install.sh"
+# shellcheck source=/dev/null
+source "$SHARED_LIB_DIR/hook-logging.sh"
+# shellcheck source=/dev/null
+source "$SHARED_LIB_DIR/env-file.sh"
+# shellcheck source=/dev/null
+source "$SHARED_LIB_DIR/env-local-target.sh"
 
 # --- Guards ---
 
@@ -229,19 +274,33 @@ _write_secret() {
   case "$target" in
     envFile)
       if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
-        # Remove any existing export of this var to avoid duplicates
-        if [ -f "$CLAUDE_ENV_FILE" ]; then
-          local tmp_env
-          tmp_env="$(mktemp)"
-          grep -v "^export ${env_var}=" "$CLAUDE_ENV_FILE" > "$tmp_env" 2>/dev/null || true
-          mv "$tmp_env" "$CLAUDE_ENV_FILE"
-        fi
-        printf 'export %s=%q\n' "$env_var" "$value" >> "$CLAUDE_ENV_FILE"
+        env_file_upsert_export "$CLAUDE_ENV_FILE" "$env_var" "$value"
         export "${env_var}=${value}"
         hook_log "Injected ${env_var} via CLAUDE_ENV_FILE"
       else
         hook_log "CLAUDE_ENV_FILE not set, falling back to current environment only"
         export "${env_var}=${value}"
+      fi
+      ;;
+    envLocal)
+      local env_local_path source_chain
+      env_local_path="$(_resolve_env_local_path)"
+      if [ -z "$env_local_path" ]; then
+        # Match op-exec-env.sh:126-128 behavior: skip the secret with a log
+        # rather than failing the hook. The user may have additional secrets
+        # targeting envFile/settingsJson that should still inject. Setting
+        # envLocal.path or AGENT_HOME_DIR/CLAUDE_PROJECT_DIR will resolve it.
+        hook_log "envLocal target not resolvable, skipping ${env_var} (set envLocal.path or AGENT_HOME_DIR/CLAUDE_PROJECT_DIR)"
+        return 0
+      fi
+      env_file_upsert_export "$env_local_path" "$env_var" "$value"
+      export "${env_var}=${value}"
+      hook_log "Injected ${env_var} via ${env_local_path}"
+      # Also chain into CLAUDE_ENV_FILE via a `source` line (idempotent).
+      source_chain="$(_resolve_env_local_source_chain "$env_local_path")"
+      if [ -n "$source_chain" ] && [ -n "${CLAUDE_ENV_FILE:-}" ]; then
+        env_file_upsert_source "$CLAUDE_ENV_FILE" "$source_chain"
+        hook_log "Chained ${source_chain} into CLAUDE_ENV_FILE"
       fi
       ;;
     settingsJson|settingsLocalJson|userSettingsJson)
@@ -263,7 +322,7 @@ _write_secret() {
       ;;
     *)
       hook_fail "secrets injection" "Unknown target '${target}' for ${env_var}" \
-        "Valid targets: envFile, settingsJson, settingsLocalJson, userSettingsJson"
+        "Valid targets: envFile, envLocal, settingsJson, settingsLocalJson, userSettingsJson"
       ;;
   esac
 }

@@ -11,7 +11,7 @@
     {
       "name": "1pass",
       "description": "Install and manage 1Password CLI (op) and op-exec in Claude Code sessions. Provides session-start auto-install for web sessions and comprehensive workflow skills.",
-      "version": "0.3.4",
+      "version": "0.4.1",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -713,6 +713,18 @@
         "fact-finding",
         "git-history"
       ]
+    },
+    {
+      "name": "shared-lib",
+      "description": "Shared bash libraries used by other ai-mktpl plugins (logging, hook output, config reading, settings writing, tool install). Other plugins declare this as a dependency and source the libs from this plugin's persistent data directory at runtime.",
+      "version": "1.0.1",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/shared-lib",
+      "category": "utility",
+      "tags": ["utility"],
+      "keywords": ["shared", "library", "bash", "logging", "hooks", "infrastructure"]
     },
     {
       "name": "skill-required",

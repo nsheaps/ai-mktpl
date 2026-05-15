@@ -19,5 +19,11 @@
     "hooks",
     "agent-teams",
     "credential-helper"
+  ],
+  "dependencies": [
+    {
+      "name": "shared-lib",
+      "version": "^1.0"
+    }
   ]
 }

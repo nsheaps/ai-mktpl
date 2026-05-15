@@ -19,5 +19,11 @@
     "iterm",
     "iterm2",
     "badge"
+  ],
+  "dependencies": [
+    {
+      "name": "shared-lib",
+      "version": "^1.0"
+    }
   ]
 }

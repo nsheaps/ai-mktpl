@@ -25,5 +25,11 @@
     "google",
     "workspace",
     "cli"
+  ],
+  "dependencies": [
+    {
+      "name": "shared-lib",
+      "version": "^1.0"
+    }
   ]
 }

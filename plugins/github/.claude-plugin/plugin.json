@@ -26,5 +26,11 @@
     "code-review",
     "ci-failures",
     "review-comments"
+  ],
+  "dependencies": [
+    {
+      "name": "shared-lib",
+      "version": "^1.0"
+    }
   ]
 }

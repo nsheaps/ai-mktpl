@@ -104,7 +104,7 @@ The cleanup and conflict concerns make the settings file approach the higher-ris
 
 ## Related
 
-- `shared/lib/safe-settings-write.sh` — atomic jq-based settings writer
-- `shared/lib/tool-install.sh` — `tool_ensure_path()` uses `CLAUDE_ENV_FILE`
+- `plugins/shared-lib/lib/safe-settings-write.sh` — atomic jq-based settings writer
+- `plugins/shared-lib/lib/tool-install.sh` — `tool_ensure_path()` uses `CLAUDE_ENV_FILE`
 - `.claude/rules/environment-setup-and-maintenance.md` — session setup conventions
 - `.claude/rules/shared-libs.md` — shared library documentation

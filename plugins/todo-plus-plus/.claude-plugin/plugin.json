@@ -6,5 +6,11 @@
     "name": "Nathan Heaps",
     "email": "nsheaps@gmail.com"
   },
-  "keywords": ["tasks", "commit", "workflow", "ephemeral", "agent-teams"]
+  "keywords": ["tasks", "commit", "workflow", "ephemeral", "agent-teams"],
+  "dependencies": [
+    {
+      "name": "shared-lib",
+      "version": "^1.0"
+    }
+  ]
 }

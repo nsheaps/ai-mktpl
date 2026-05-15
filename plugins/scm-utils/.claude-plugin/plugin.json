@@ -9,5 +9,11 @@
   },
   "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/scm-utils",
   "repository": "https://github.com/nsheaps/ai-mktpl",
-  "keywords": ["git", "branch", "pr", "pull-request", "sync", "merge", "scm", "source-control"]
+  "keywords": ["git", "branch", "pr", "pull-request", "sync", "merge", "scm", "source-control"],
+  "dependencies": [
+    {
+      "name": "shared-lib",
+      "version": "^1.0"
+    }
+  ]
 }
