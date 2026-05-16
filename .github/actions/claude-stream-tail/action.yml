@@ -30,9 +30,9 @@ inputs:
     required: false
     default: '0.12.13'
   timeout-seconds:
-    description: 'Max seconds to wait for the session to start, and max seconds to follow it. The action exits cleanly (success) on timeout so it does not fail the parallel block.'
+    description: 'Max seconds to wait for the session to start, and max seconds to follow it. The action exits cleanly (success) on timeout so it does not fail the parallel block. Default 600s (10 min) -- bump if reviews routinely run longer.'
     required: false
-    default: '1800'
+    default: '600'
   poll-interval-seconds:
     description: 'How often to poll for a new session JSONL while waiting for it to appear.'
     required: false
@@ -49,6 +49,17 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    # Set the start marker as the VERY FIRST thing so it predates any
+    # competing process writing under ~/.claude/projects. In sidecar mode
+    # alongside claude-code-action via qoomon parallel-steps, both children
+    # start concurrently -- if we marked AFTER our claude-utils install,
+    # the action's SDK could write its first JSONL line before our marker,
+    # and the subsequent `find -newer` would exclude it, hanging the
+    # sidecar for the full timeout.
+    - name: Stamp start marker (must be first)
+      shell: bash
+      run: touch "${RUNNER_TEMP}/claude-stream-tail.start"
+
     - name: Install claude-stream from nsheaps/claude-utils
       shell: bash
       env:
@@ -75,14 +86,17 @@ runs:
         PROJECTS_DIR="${PROJECTS_DIR_OVERRIDE:-$HOME/.claude/projects}"
         mkdir -p "$PROJECTS_DIR"
 
-        # Sidecar mode (default): only pick JSONL files newer than this
-        # start marker, so a pre-existing JSONL on a persistent runner
-        # doesn't get mistaken for the current run's session.
+        # Sidecar mode (default): only pick JSONL files newer than the
+        # start marker (stamped in the FIRST action step, before anything
+        # else, so it predates any competing SDK write).
         # Post-hoc mode (wait-for-new-session=false): drop the marker so
         # the just-completed session (written before this step started)
         # is picked.
         START_MARKER="${RUNNER_TEMP}/claude-stream-tail.start"
-        touch "$START_MARKER"
+        # Defensive: ensure the marker exists. The "Stamp start marker"
+        # step above does this first, but a stale runner re-run might
+        # somehow miss it; touching again is a no-op if present.
+        [ -e "$START_MARKER" ] || touch "$START_MARKER"
 
         if [ "${WAIT_FOR_NEW}" = "true" ]; then
           echo "claude-stream-tail: sidecar mode -- watching $PROJECTS_DIR for a NEW session JSONL (timeout ${TIMEOUT_SECONDS}s)"

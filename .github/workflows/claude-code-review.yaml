@@ -274,4 +274,4 @@ jobs:
                 # this step's start. Safe alongside claude-code-action --
                 # ignores any pre-existing JSONL on persistent runners.
                 wait-for-new-session: 'true'
-                timeout-seconds: '1800'
+                timeout-seconds: '900'
