@@ -82,9 +82,9 @@ Set these three env vars before the session starts:
 1pass:
   secrets:
     - envVar: GITHUB_APP_ID
-      reference: 'op://vault/github-app--repo--my-repo/GITHUB_APP_ID'
+      reference: "op://vault/github-app--repo--my-repo/GITHUB_APP_ID"
     - envVar: GITHUB_INSTALLATION_ID
-      reference: 'op://vault/github-app--repo--my-repo/GITHUB_INSTALLATION_ID'
+      reference: "op://vault/github-app--repo--my-repo/GITHUB_INSTALLATION_ID"
     - envVar: GITHUB_APP_PRIVATE_KEY
       reference: "op://vault/github-app--repo--my-repo/GITHUB_APP_PRIVATE_KEY"
 
@@ -153,13 +153,13 @@ GH_TOKEN=$(cat "$CLAUDE_PLUGIN_DATA/github-token") gh api /user --jq '.login'
 
 ### Common failures
 
-| Symptom | Likely cause |
-| -------- | ------------ |
-| `HTTP 401` during JWT exchange | PEM key mismatch or clock skew > 60s |
-| `HTTP 404` on `/app/installations/…` | Wrong `GITHUB_INSTALLATION_ID` |
-| `Failed to sign JWT` | PEM content malformed or `GITHUB_APP_PRIVATE_KEY` missing |
-| `exit 2` from token-check.sh | Credential env vars missing |
-| `exit 3` from token-check.sh | 5-min cooldown — wait or clear `.cooldown` file |
+| Symptom                              | Likely cause                                              |
+| ------------------------------------ | --------------------------------------------------------- |
+| `HTTP 401` during JWT exchange       | PEM key mismatch or clock skew > 60s                      |
+| `HTTP 404` on `/app/installations/…` | Wrong `GITHUB_INSTALLATION_ID`                            |
+| `Failed to sign JWT`                 | PEM content malformed or `GITHUB_APP_PRIVATE_KEY` missing |
+| `exit 2` from token-check.sh         | Credential env vars missing                               |
+| `exit 3` from token-check.sh         | 5-min cooldown — wait or clear `.cooldown` file           |
 
 ## Git Credential Helper
 
