@@ -2,24 +2,13 @@
 # github-token-init.sh — SessionStart hook for github-app plugin
 #
 # Generates a GitHub App installation token on session start.
-# Expects secrets in environment variables. Use the 1pass plugin or
-# an env-file to populate them before this hook runs.
-#
-# Supported secret sources via the `ref` setting:
-#   - op://vault/item         → resolve fields directly from 1Password (primary)
-#   - env-file://path/to/file → source KEY=VALUE pairs from a file
-# Individual secrets via `secrets.*`:
-#   - Literal values
-#   - ${VAR_NAME}             → expand from environment
-#   - op://vault/item/field   → resolve a single field from 1Password
-#
-# Required env vars (set directly or via ref/secrets config):
-#   GITHUB_APP_ID, GITHUB_APP_PRIVATE_KEY or GITHUB_APP_PRIVATE_KEY_PATH,
+# Reads three env vars (injected by the 1pass plugin or any other mechanism):
+#   GITHUB_APP_ID
 #   GITHUB_INSTALLATION_ID
+#   GITHUB_APP_PRIVATE_KEY   (PEM content — not a file path)
 #
-# Writes token to a shared file and creates a runtime env file that is
-# sourced by CLAUDE_ENV_FILE. The PreToolUse hook updates the runtime
-# env file on refresh, so subsequent Bash commands always get fresh tokens.
+# Materializes the PEM to $CLAUDE_PLUGIN_DATA/github-app.pem on every session
+# start, then generates a token and writes env + git config under $CLAUDE_PLUGIN_DATA/.
 set -euo pipefail
 
 PLUGIN_NAME="github-app"
@@ -63,266 +52,58 @@ _wait_for_shared_lib "hook-logging.sh"
 source "$SHARED_LIB_DIR/plugin-config-read.sh"
 # shellcheck source=/dev/null
 source "$SHARED_LIB_DIR/hook-logging.sh"
-source "${CLAUDE_PLUGIN_ROOT}/lib/agent-paths.sh"
 source "${CLAUDE_PLUGIN_ROOT}/lib/env-file.sh"
-source "${CLAUDE_PLUGIN_ROOT}/lib/resolve-secrets.sh"
+source "${CLAUDE_PLUGIN_ROOT}/lib/wait-for-env.sh"
 
 # --- Guards ---
 
 plugin_is_enabled || { hook_log "plugin disabled, skipping"; hook_respond; exit 0; }
 
-# --- Secret resolution ---
+# --- Check required env vars; wait for them to appear if written by another plugin ---
 
-# Resolve a secret value from one of:
-#   - ${VAR_NAME}  → expand from environment
-#   - op://...     → resolve from 1Password directly
-#   - literal      → use as-is
-resolve_secret() {
-  local raw="$1"
-  local name="${2:-secret}"
-
-  # Empty
-  if [[ -z "$raw" ]]; then
-    echo ""
-    return
-  fi
-
-  # Environment variable reference: ${VAR_NAME}
-  if [[ "$raw" =~ ^\$\{([A-Za-z_][A-Za-z0-9_]*)\}$ ]]; then
-    local var_name="${BASH_REMATCH[1]}"
-    local resolved="${!var_name:-}"
-    if [[ -z "$resolved" ]]; then
-      hook_log "WARNING: env var $var_name is not set (for $name)"
-    fi
-    echo "$resolved"
-    return
-  fi
-
-  # 1Password reference: op://vault/item/field
-  if [[ "$raw" == op://* ]]; then
-    if _op_available; then
-      local resolved
-      resolved=$(op read "$raw" 2>/dev/null) || {
-        hook_log "WARNING: Failed to resolve $name from 1Password ($raw)"
-        echo ""
-        return
-      }
-      echo "$resolved"
-      return
-    else
-      hook_log "WARNING: op:// reference for $name but op CLI not available or OP_SERVICE_ACCOUNT_TOKEN not set"
-      echo ""
-      return
-    fi
-  fi
-
-  # Literal value
-  echo "$raw"
-}
-
-# Resolve an env-file:// path to an absolute path.
-# Relative paths (env-file://./...) are resolved relative to CLAUDE_PROJECT_DIR.
-resolve_env_file_path() {
-  local raw="$1"
-  local path="${raw#env-file://}"
-
-  # Relative path: resolve against project dir
-  if [[ "$path" == ./* || "$path" == ../* ]]; then
-    path="${CLAUDE_PROJECT_DIR:-.}/${path}"
-  fi
-
-  # Expand tilde
-  path="${path/#\~/$HOME}"
-
-  # Canonicalize
-  realpath "$path" 2>/dev/null || echo "$path"
-}
-
-# --- Load secrets from ref ---
-
-hook_log_step "load-secrets" "Loading secrets from configured source"
-
-REF="$(plugin_get_config "ref" "")"
-
-if [[ -n "$REF" ]]; then
-  if [[ "$REF" == op://* ]]; then
-    # 1Password item reference — resolve all fields directly
-    if _op_available; then
-      hook_log "Resolving secrets directly from 1Password: $REF"
-      GITHUB_APP_ID="${GITHUB_APP_ID:-$(op read "${REF}/GITHUB_APP_ID" 2>/dev/null || true)}"
-      GITHUB_APP_CLIENT_ID="${GITHUB_APP_CLIENT_ID:-$(op read "${REF}/GITHUB_APP_CLIENT_ID" 2>/dev/null || true)}"
-      GITHUB_APP_CLIENT_SECRET="${GITHUB_APP_CLIENT_SECRET:-$(op read "${REF}/GITHUB_APP_CLIENT_SECRET" 2>/dev/null || true)}"
-      GITHUB_APP_PRIVATE_KEY="${GITHUB_APP_PRIVATE_KEY:-$(op read "${REF}/GITHUB_APP_PRIVATE_KEY" 2>/dev/null || true)}"
-      GITHUB_INSTALLATION_ID="${GITHUB_INSTALLATION_ID:-$(op read "${REF}/GITHUB_INSTALLATION_ID" 2>/dev/null || true)}"
-      hook_log "Resolved secrets from 1Password item"
-    else
-      hook_log "op:// ref configured but op CLI not available or OP_SERVICE_ACCOUNT_TOKEN not set"
-    fi
-
-  elif [[ "$REF" == env-file://* ]]; then
-    # Env file reference — source KEY=VALUE pairs
-    ENV_FILE_PATH="$(resolve_env_file_path "$REF")"
-
-    if [[ ! -f "$ENV_FILE_PATH" ]]; then
-      hook_fail "env file" "env file not found: $ENV_FILE_PATH" \
-        "Create the env file or update the 'ref' setting in plugin config"
-      hook_respond; exit 0
-    fi
-
-    # Source only lines matching KEY=VALUE (skip comments and blanks)
-    while IFS= read -r line || [[ -n "$line" ]]; do
-      # Skip comments and blank lines
-      [[ "$line" =~ ^[[:space:]]*# ]] && continue
-      [[ "$line" =~ ^[[:space:]]*$ ]] && continue
-      # Strip optional 'export ' prefix
-      line="${line#export }"
-      # Only process lines with =
-      if [[ "$line" == *=* ]]; then
-        key="${line%%=*}"
-        value="${line#*=}"
-        # Strip surrounding quotes from value
-        value="${value#\"}"
-        value="${value%\"}"
-        value="${value#\'}"
-        value="${value%\'}"
-        export "$key"="$value"
-      fi
-    done < "$ENV_FILE_PATH"
-
-    hook_log "Loaded secrets from env file: $ENV_FILE_PATH"
-
-  else
-    hook_fail "ref config" "Unsupported ref format: $REF" \
-      "Use op://vault/item or env-file:///path/to/file format."
-    hook_respond; exit 0
-  fi
-fi
-
-# --- Load individual secret overrides ---
-
-hook_log_step "resolve-secrets" "Resolving individual secret overrides"
-
-# Each secrets.* value can be a literal or ${ENV_VAR}
-SECRETS_APP_ID="$(plugin_get_config "secrets.github_app_id" "")"
-SECRETS_CLIENT_ID="$(plugin_get_config "secrets.github_app_client_id" "")"
-SECRETS_CLIENT_SECRET="$(plugin_get_config "secrets.github_app_client_secret" "")"
-SECRETS_PRIVATE_KEY="$(plugin_get_config "secrets.github_app_private_key" "")"
-SECRETS_INSTALLATION_ID="$(plugin_get_config "secrets.github_installation_id" "")"
-
-# Resolve individual secrets if configured (these take priority over ref env vars)
-if [[ -n "$SECRETS_APP_ID" ]]; then
-  GITHUB_APP_ID="$(resolve_secret "$SECRETS_APP_ID" "github_app_id")"
-fi
-if [[ -n "$SECRETS_CLIENT_ID" ]]; then
-  GITHUB_APP_CLIENT_ID="$(resolve_secret "$SECRETS_CLIENT_ID" "github_app_client_id")"
-fi
-if [[ -n "$SECRETS_CLIENT_SECRET" ]]; then
-  GITHUB_APP_CLIENT_SECRET="$(resolve_secret "$SECRETS_CLIENT_SECRET" "github_app_client_secret")"
-fi
-if [[ -n "$SECRETS_PRIVATE_KEY" ]]; then
-  GITHUB_APP_PRIVATE_KEY="$(resolve_secret "$SECRETS_PRIVATE_KEY" "github_app_private_key")"
-fi
-if [[ -n "$SECRETS_INSTALLATION_ID" ]]; then
-  GITHUB_INSTALLATION_ID="$(resolve_secret "$SECRETS_INSTALLATION_ID" "github_installation_id")"
-fi
-
-# Fall back to legacy flat settings for backwards compatibility
-GITHUB_APP_ID="${GITHUB_APP_ID:-$(plugin_get_config "github_app_id" "")}"
-GITHUB_INSTALLATION_ID="${GITHUB_INSTALLATION_ID:-$(plugin_get_config "github_installation_id" "")}"
-
-# --- Wait for credentials (hook ordering fallback) ---
-#
-# Claude Code doesn't guarantee SessionStart hook execution order.
-# Primary path: credentials resolved via op:// ref or secrets.* config above.
-# Fallback path: poll CLAUDE_ENV_FILE in case another plugin (e.g., 1pass)
-# writes them there. The wait runs before private-key resolution so that
-# GITHUB_APP_PRIVATE_KEY (inline content) can still be written to a temp
-# file if it arrives late.
-
-if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_INSTALLATION_ID:-}" ]]; then
-  hook_log "credentials not yet available, checking CLAUDE_ENV_FILE..."
-  if wait_for_env_file GITHUB_APP_ID GITHUB_INSTALLATION_ID --timeout 15; then
-    # Check for private key (value or path)
-    if wait_for_env_file GITHUB_APP_PRIVATE_KEY_PATH --timeout 2 || wait_for_env_file GITHUB_APP_PRIVATE_KEY --timeout 2; then
-      hook_log "credentials found in CLAUDE_ENV_FILE"
-    else
-      hook_log "timeout waiting for private key — GitHub App not configured, skipping"
-      hook_log_cleanup
-      hook_respond; exit 0
-    fi
-  else
-    hook_log "timeout waiting for credentials — GitHub App not configured, skipping"
+if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_INSTALLATION_ID:-}" || -z "${GITHUB_APP_PRIVATE_KEY:-}" ]]; then
+  hook_log "credentials not yet available, polling CLAUDE_ENV_FILE..."
+  TIMEOUT="$(plugin_get_config "waitForEnvTimeoutSeconds" "15")"
+  if ! wait_for_env_file GITHUB_APP_ID GITHUB_INSTALLATION_ID GITHUB_APP_PRIVATE_KEY --timeout "${TIMEOUT}"; then
+    hook_log "GitHub App not configured (missing GITHUB_APP_ID, GITHUB_INSTALLATION_ID, or GITHUB_APP_PRIVATE_KEY), skipping"
     hook_log_cleanup
     hook_respond; exit 0
   fi
 fi
 
-# --- Handle private key (value vs file path) ---
+# --- Materialize PEM from env var ---
 
-# GITHUB_APP_PRIVATE_KEY contains the key content directly (e.g., from env var)
-# GITHUB_APP_PRIVATE_KEY_PATH points to a PEM file on disk
-# If we have key content but no path, write it to a temp file
-GITHUB_APP_PRIVATE_KEY_PATH="${GITHUB_APP_PRIVATE_KEY_PATH:-$(plugin_get_config "private_key_path" "")}"
+hook_log_step "materialize-pem" "Writing PEM key to $CLAUDE_PLUGIN_DATA/github-app.pem"
 
-if [[ -n "${GITHUB_APP_PRIVATE_KEY:-}" && -z "$GITHUB_APP_PRIVATE_KEY_PATH" ]]; then
-  # Key content provided directly — write to a secure temp file
-  KEY_DIR="${AGENT_CONFIG_DIR}"
-  mkdir -p "$KEY_DIR"
-  GITHUB_APP_PRIVATE_KEY_PATH="${KEY_DIR}/github-app-${GITHUB_APP_ID:-unknown}.pem"
-  echo "$GITHUB_APP_PRIVATE_KEY" > "$GITHUB_APP_PRIVATE_KEY_PATH"
-  chmod 600 "$GITHUB_APP_PRIVATE_KEY_PATH"
-  hook_log "Wrote private key to $GITHUB_APP_PRIVATE_KEY_PATH"
-fi
-
-# --- Validate required credentials ---
-
-if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_APP_PRIVATE_KEY_PATH:-}" || -z "${GITHUB_INSTALLATION_ID:-}" ]]; then
-  hook_log "GitHub App not configured (missing GITHUB_APP_ID, GITHUB_APP_PRIVATE_KEY/GITHUB_APP_PRIVATE_KEY_PATH, or GITHUB_INSTALLATION_ID), skipping"
-  hook_log_cleanup
-  hook_respond; exit 0
-fi
-
-# Expand tilde in key path
-GITHUB_APP_PRIVATE_KEY_PATH="${GITHUB_APP_PRIVATE_KEY_PATH/#\~/$HOME}"
-
-if [[ ! -f "$GITHUB_APP_PRIVATE_KEY_PATH" ]]; then
-  hook_fail "private key" "PEM key not found at $GITHUB_APP_PRIVATE_KEY_PATH" \
-    "Ensure the private key file exists, or set GITHUB_APP_PRIVATE_KEY env var with the key content"
-  exit 0
-fi
-
-# Validate PEM file permissions
-PERMS=$(stat -c '%a' "$GITHUB_APP_PRIVATE_KEY_PATH" 2>/dev/null || stat -f '%Lp' "$GITHUB_APP_PRIVATE_KEY_PATH" 2>/dev/null || echo "unknown")
-if [[ "$PERMS" != "600" && "$PERMS" != "400" && "$PERMS" != "unknown" ]]; then
-  hook_log "WARNING: PEM key has permissions $PERMS, should be 600 or 400"
-fi
+mkdir -p "$CLAUDE_PLUGIN_DATA"
+printf '%s\n' "$GITHUB_APP_PRIVATE_KEY" > "$CLAUDE_PLUGIN_DATA/github-app.pem"
+chmod 600 "$CLAUDE_PLUGIN_DATA/github-app.pem"
 
 # --- Token generation ---
 
 hook_log_step "generate-token" "Generating GitHub App installation token"
 
-TOKEN_FILE="${GITHUB_TOKEN_FILE:-$(plugin_get_config "tokenFile" "${AGENT_CONFIG_DIR}/github-token")}"
-TOKEN_FILE="${TOKEN_FILE/#\~/$HOME}"
+TOKEN_FILE="$CLAUDE_PLUGIN_DATA/github-token"
+META_FILE="${TOKEN_FILE}.meta"
 mkdir -p "$(dirname "$TOKEN_FILE")"
 
-# Export credentials so token-check.sh can use them
-export GITHUB_APP_ID GITHUB_APP_PRIVATE_KEY_PATH GITHUB_INSTALLATION_ID
+# Export installation ID so subprocesses can use it
+export GITHUB_INSTALLATION_ID
 export GITHUB_TOKEN_FILE="$TOKEN_FILE"
 
 # Use the shared JWT generation script
 TOKEN_OUTPUT=$("${CLAUDE_PLUGIN_ROOT}/bin/generate-token.sh" \
   "$GITHUB_APP_ID" \
-  "$GITHUB_APP_PRIVATE_KEY_PATH" \
+  "$CLAUDE_PLUGIN_DATA/github-app.pem" \
   "$GITHUB_INSTALLATION_ID" \
   "$TOKEN_FILE" 2>&1) || {
   hook_fail "token generation" "Token generation failed: $TOKEN_OUTPUT" \
-    "Verify GitHub App credentials (GITHUB_APP_ID, GITHUB_APP_PRIVATE_KEY_PATH, GITHUB_INSTALLATION_ID) are correct and the app is installed on the target org/repo"
+    "Verify GitHub App credentials (GITHUB_APP_ID, GITHUB_APP_PRIVATE_KEY, GITHUB_INSTALLATION_ID) are correct and the app is installed on the target org/repo"
   exit 0
 }
 
 # Read generated token and metadata for output
 TOKEN=$(cat "$TOKEN_FILE")
-META_FILE="${TOKEN_FILE}.meta"
 EXPIRES_AT=""
 APP_SLUG=""
 
@@ -333,12 +114,12 @@ fi
 # --- GH_CONFIG_DIR isolation ---
 # Create an agent-specific, empty gh config directory so that gh never falls
 # back to the handler's personal keyring when the App token expires.
-# Scoped to AGENT_CONFIG_DIR (per-agent) so multiple agents on the same
+# Scoped to CLAUDE_PLUGIN_DATA (per-agent) so multiple agents on the same
 # machine or in the same project don't share gh config.
 
 hook_log_step "gh-config-dir" "Creating isolated GH_CONFIG_DIR"
 
-GH_CONFIG_DIR="${AGENT_CONFIG_DIR}/gh"
+GH_CONFIG_DIR="$CLAUDE_PLUGIN_DATA/gh"
 mkdir -p "$GH_CONFIG_DIR"
 chmod 700 "$GH_CONFIG_DIR"
 export GH_CONFIG_DIR
@@ -351,7 +132,7 @@ hook_log "GH_CONFIG_DIR isolated at $GH_CONFIG_DIR"
 
 hook_log_step "write-env" "Writing runtime environment file"
 
-ENV_RUNTIME_FILE="${AGENT_CONFIG_DIR}/github-app-env"
+ENV_RUNTIME_FILE="$CLAUDE_PLUGIN_DATA/github-app-env"
 write_runtime_env_file "$TOKEN"
 
 # Source the runtime env file from CLAUDE_ENV_FILE so all Bash commands
@@ -449,9 +230,7 @@ configure_git_identity_env() {
   # to it. This prevents git from reading the handler's ~/.gitconfig, which is
   # the root cause of BUG-7 (agents committing as the handler on shared machines).
   # This mirrors the GH_CONFIG_DIR pattern already used for gh CLI isolation.
-  local agent_base="${AGENT_CONFIG_DIR:-${GH_CONFIG_DIR:+$(dirname "$GH_CONFIG_DIR")}}"
-  agent_base="${agent_base:-${HOME}/.agents/github-app/.config}"
-  local git_config_file="${agent_base}/git/config"
+  local git_config_file="$CLAUDE_PLUGIN_DATA/git/config"
   mkdir -p "$(dirname "$git_config_file")"
 
   export GIT_CONFIG_GLOBAL="$git_config_file"
