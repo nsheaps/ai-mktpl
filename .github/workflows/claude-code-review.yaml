@@ -41,94 +41,6 @@ jobs:
       id-token: write
       actions: read
 
-    # Job-level env. INPUT_SETTINGS_JSON lives here (not on the per-step env
-    # block as before) so it is visible to steps that the qoomon parallel
-    # action runs via `gh act`. Per-step env is set INSIDE the parallel
-    # block's `steps:` yaml below where it actually needs it.
-    env:
-      INPUT_SETTINGS_JSON: |
-        {
-          "permissions": {
-            "additionalDirectories": ["/tmp/"],
-            "allow":[
-              "Task",
-              "Glob",
-              "Grep",
-              "LS",
-              "ExitPlanMode",
-              "Read",
-              "Edit",
-              "Write",
-              "Replace",
-              "MultiEdit",
-              "NotebookRead",
-              "NotebookEdit",
-              "TodoWrite",
-              "WebSearch",
-              "WebFetch",
-              "Bash",
-              "BashOutput",
-              "KillBash",
-              "ListMcpResourcesTool",
-              "ReadMcpResourceTool",
-              "SlashCommand",
-              "Skill",
-
-              "mcp__github__github_support_docs_search",
-              "mcp__github__get_pull_request",
-              "mcp__github__get_pull_request_diff",
-              "mcp__github__get_pull_request_files",
-              "mcp__github__get_pull_request_review_comments",
-              "mcp__github__get_pull_request_reviews",
-              "mcp__github__get_pull_request_status",
-              "mcp__github__create_pending_pull_request_review",
-              "mcp__github__add_comment_to_pending_review",
-              "mcp__github__submit_pending_pull_request_review",
-
-              "Bash(git log:*)",
-              "Bash(git diff:*)",
-              "Bash(git status:*)",
-              "Bash(git rev-parse:*)",
-              "Bash(git fetch:*)",
-              "Bash(git show:*)",
-              "Bash(git merge:*)",
-              "Bash(git remote get-url:*)",
-              "Bash(git rm:*)",
-              "Bash(gh issue view:*)",
-              "Bash(gh search:*)",
-              "Bash(gh issue list:*)",
-              "Bash(gh pr comment:*)",
-              "Bash(gh pr diff:*)",
-              "Bash(gh pr view:*)",
-              "Bash(gh pr-review:*)",
-              "Bash(gh pr-review review view:*)",
-              "Bash(gh pr list:*)",
-              "Bash(gh run list:*)",
-              "Bash(gh run view:*)",
-              "Bash(gh extension list:*)"
-            ],
-            "_denyComment": "It will wait for it's own check run to complete, not to mention it should review the code.",
-            "deny": [
-              "mcp__github_ci__get_ci_status",
-              "mcp__github_ci__get_workflow_run_details",
-              "mcp__github_ci__download_job_log",
-              "Bash(gh pr checks:*)",
-              "Bash(git push:*)"
-            ]
-          },
-          "model": "opus",
-          "env": {
-            "GH_TOKEN": "${{ steps.auth.outputs.token }}",
-            "GITHUB_TOKEN": "${{ steps.auth.outputs.token }}",
-            "_GH_PAGER_COMMENT": "disable gh from being able to treat the terminal as interactive",
-            "GH_PAGER": "cat",
-            "GH_PROMPT_DISABLED": "true",
-            "_GH_BROWSER_COMMENT": "what app to open URLs with, since claude is not interactive, we use curl to pipe it to stdout",
-            "GH_BROWSER": "curl",
-            "CLAUDE_CODE_REMOTE": "true"
-          }
-        }
-
     steps:
       - name: Checkout and authenticate as GitHub App
         id: auth
@@ -194,6 +106,95 @@ jobs:
       - name: Run claude review + live chatroom (parallel)
         id: claude-review
         uses: qoomon/actions--parallel-steps@v1
+        # INPUT_SETTINGS_JSON lives here (not at job-level env) because it
+        # references steps.auth.outputs.token, which only resolves once
+        # auth has run. qoomon parallel-steps spawns its act subprocess as
+        # a child of this step's bash invocation; that child inherits this
+        # env block, so the embedded claude-code-action substep can read
+        # INPUT_SETTINGS_JSON via env. propagation.
+        env:
+          INPUT_SETTINGS_JSON: |
+            {
+              "permissions": {
+                "additionalDirectories": ["/tmp/"],
+                "allow":[
+                  "Task",
+                  "Glob",
+                  "Grep",
+                  "LS",
+                  "ExitPlanMode",
+                  "Read",
+                  "Edit",
+                  "Write",
+                  "Replace",
+                  "MultiEdit",
+                  "NotebookRead",
+                  "NotebookEdit",
+                  "TodoWrite",
+                  "WebSearch",
+                  "WebFetch",
+                  "Bash",
+                  "BashOutput",
+                  "KillBash",
+                  "ListMcpResourcesTool",
+                  "ReadMcpResourceTool",
+                  "SlashCommand",
+                  "Skill",
+
+                  "mcp__github__github_support_docs_search",
+                  "mcp__github__get_pull_request",
+                  "mcp__github__get_pull_request_diff",
+                  "mcp__github__get_pull_request_files",
+                  "mcp__github__get_pull_request_review_comments",
+                  "mcp__github__get_pull_request_reviews",
+                  "mcp__github__get_pull_request_status",
+                  "mcp__github__create_pending_pull_request_review",
+                  "mcp__github__add_comment_to_pending_review",
+                  "mcp__github__submit_pending_pull_request_review",
+
+                  "Bash(git log:*)",
+                  "Bash(git diff:*)",
+                  "Bash(git status:*)",
+                  "Bash(git rev-parse:*)",
+                  "Bash(git fetch:*)",
+                  "Bash(git show:*)",
+                  "Bash(git merge:*)",
+                  "Bash(git remote get-url:*)",
+                  "Bash(git rm:*)",
+                  "Bash(gh issue view:*)",
+                  "Bash(gh search:*)",
+                  "Bash(gh issue list:*)",
+                  "Bash(gh pr comment:*)",
+                  "Bash(gh pr diff:*)",
+                  "Bash(gh pr view:*)",
+                  "Bash(gh pr-review:*)",
+                  "Bash(gh pr-review review view:*)",
+                  "Bash(gh pr list:*)",
+                  "Bash(gh run list:*)",
+                  "Bash(gh run view:*)",
+                  "Bash(gh extension list:*)"
+                ],
+                "_denyComment": "It will wait for it's own check run to complete, not to mention it should review the code.",
+                "deny": [
+                  "mcp__github_ci__get_ci_status",
+                  "mcp__github_ci__get_workflow_run_details",
+                  "mcp__github_ci__download_job_log",
+                  "Bash(gh pr checks:*)",
+                  "Bash(git push:*)"
+                ]
+              },
+              "model": "opus",
+              "env": {
+                "GH_TOKEN": "${{ steps.auth.outputs.token }}",
+                "GITHUB_TOKEN": "${{ steps.auth.outputs.token }}",
+                "_GH_PAGER_COMMENT": "disable gh from being able to treat the terminal as interactive",
+                "GH_PAGER": "cat",
+                "GH_PROMPT_DISABLED": "true",
+                "_GH_BROWSER_COMMENT": "what app to open URLs with, since claude is not interactive, we use curl to pipe it to stdout",
+                "GH_BROWSER": "curl",
+                "CLAUDE_CODE_REMOTE": "true"
+              }
+            }
         with:
           steps: |
             - id: review
