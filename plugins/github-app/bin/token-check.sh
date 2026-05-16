@@ -114,8 +114,8 @@ do_generate_token() {
   local script_dir
   script_dir="$(cd "$(dirname "$_self")" && pwd)"
 
-  if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_APP_PRIVATE_KEY:-}" || -z "${GITHUB_APP_INSTALLATION_ID:-}" ]]; then
-    log_error "missing credentials (GITHUB_APP_ID, GITHUB_APP_PRIVATE_KEY, or GITHUB_APP_INSTALLATION_ID)"
+  if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_APP_PRIVATE_KEY:-}" || -z "${GITHUB_INSTALLATION_ID:-}" ]]; then
+    log_error "missing credentials (GITHUB_APP_ID, GITHUB_APP_PRIVATE_KEY, or GITHUB_INSTALLATION_ID)"
     return 2
   fi
 
@@ -128,7 +128,7 @@ do_generate_token() {
   output=$("$script_dir/generate-token.sh" \
     "$GITHUB_APP_ID" \
     "$CLAUDE_PLUGIN_DATA/github-app.pem" \
-    "$GITHUB_APP_INSTALLATION_ID" \
+    "$GITHUB_INSTALLATION_ID" \
     "$TOKEN_FILE" 2>&1) || {
     log_error "token generation failed: $output"
     return 1
@@ -171,9 +171,9 @@ do_refresh_with_retries() {
 # PreToolUse has a shorter time budget than SessionStart, so we use a 5s
 # wait here to handle the case where another plugin is still injecting
 # credentials (hook ordering race).
-if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_APP_PRIVATE_KEY:-}" || -z "${GITHUB_APP_INSTALLATION_ID:-}" ]]; then
+if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_APP_PRIVATE_KEY:-}" || -z "${GITHUB_INSTALLATION_ID:-}" ]]; then
   source "$PLUGIN_DIR/lib/wait-for-env.sh"
-  if ! wait_for_env_file GITHUB_APP_ID GITHUB_APP_PRIVATE_KEY GITHUB_APP_INSTALLATION_ID --timeout 5; then
+  if ! wait_for_env_file GITHUB_APP_ID GITHUB_APP_PRIVATE_KEY GITHUB_INSTALLATION_ID --timeout 5; then
     exit 2
   fi
 fi

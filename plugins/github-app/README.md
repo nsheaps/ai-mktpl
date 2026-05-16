@@ -31,7 +31,7 @@ GitHub App installation tokens expire after 1 hour. This plugin generates tokens
 Set these three env vars before the session starts:
 
 - `GITHUB_APP_ID`
-- `GITHUB_APP_INSTALLATION_ID`
+- `GITHUB_INSTALLATION_ID`
 - `GITHUB_APP_PRIVATE_KEY` (PEM content — not a file path)
 
 **Recommended**: Use the **1pass plugin** to inject from 1Password. Add to your agent's `plugins.settings.yaml`:
@@ -41,8 +41,8 @@ Set these three env vars before the session starts:
   secrets:
     - envVar: GITHUB_APP_ID
       reference: 'op://vault/github-app--repo--my-repo/GITHUB_APP_ID'
-    - envVar: GITHUB_APP_INSTALLATION_ID
-      reference: 'op://vault/github-app--repo--my-repo/GITHUB_APP_INSTALLATION_ID'
+    - envVar: GITHUB_INSTALLATION_ID
+      reference: 'op://vault/github-app--repo--my-repo/GITHUB_INSTALLATION_ID'
     - envVar: GITHUB_APP_PRIVATE_KEY
       reference: 'op://vault/github-app--repo--my-repo/GITHUB_APP_PRIVATE_KEY'
 
@@ -135,8 +135,8 @@ plugins/github-app/
 
 ### Breaking changes in v0.4.0
 
-- **Env-var contract simplified**: Only `GITHUB_APP_ID`, `GITHUB_APP_INSTALLATION_ID`, `GITHUB_APP_PRIVATE_KEY` are read. The `GITHUB_APP_PRIVATE_KEY_PATH` input var is gone — provide PEM content directly.
-- **`GITHUB_INSTALLATION_ID` renamed**: Use `GITHUB_APP_INSTALLATION_ID`.
+- **Env-var contract simplified**: Only `GITHUB_APP_ID`, `GITHUB_INSTALLATION_ID`, `GITHUB_APP_PRIVATE_KEY` are read. The `GITHUB_APP_PRIVATE_KEY_PATH` input var is gone — provide PEM content directly.
+- **`GITHUB_INSTALLATION_ID` renamed**: Use `GITHUB_INSTALLATION_ID`.
 - **`ref:` and `secrets.*` settings removed**: The plugin no longer resolves secrets from 1Password directly. Use the 1pass plugin's `secrets:` list instead.
 - **Paths moved**: All runtime files now live under `$CLAUDE_PLUGIN_DATA/` instead of `~/.agents/<name>/.config/`.
 
@@ -158,8 +158,8 @@ github-app:
   secrets:
     - envVar: GITHUB_APP_ID
       reference: 'op://vault/github-app--repo--my-repo/GITHUB_APP_ID'
-    - envVar: GITHUB_APP_INSTALLATION_ID
-      reference: 'op://vault/github-app--repo--my-repo/GITHUB_APP_INSTALLATION_ID'
+    - envVar: GITHUB_INSTALLATION_ID
+      reference: 'op://vault/github-app--repo--my-repo/GITHUB_INSTALLATION_ID'
     - envVar: GITHUB_APP_PRIVATE_KEY
       reference: 'op://vault/github-app--repo--my-repo/GITHUB_APP_PRIVATE_KEY'
 ```

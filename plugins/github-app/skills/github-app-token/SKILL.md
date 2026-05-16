@@ -29,7 +29,7 @@ This skill covers managing GitHub App installation tokens in Claude Code session
 Session Start
   │
   ├─ SessionStart Hook (github-token-init.sh)
-  │   ├─ Reads GITHUB_APP_ID, GITHUB_APP_INSTALLATION_ID, GITHUB_APP_PRIVATE_KEY
+  │   ├─ Reads GITHUB_APP_ID, GITHUB_INSTALLATION_ID, GITHUB_APP_PRIVATE_KEY
   │   ├─ Materializes PEM to $CLAUDE_PLUGIN_DATA/github-app.pem
   │   ├─ Generates JWT from PEM key
   │   ├─ Exchanges JWT for installation token (1 hour validity)
@@ -73,7 +73,7 @@ Session Start
 Set these three env vars before the session starts:
 
 - `GITHUB_APP_ID`
-- `GITHUB_APP_INSTALLATION_ID`
+- `GITHUB_INSTALLATION_ID`
 - `GITHUB_APP_PRIVATE_KEY` (PEM content, not a file path)
 
 **Recommended**: Use the **1pass plugin** to inject from 1Password by adding the three vars to your agent's `1pass.secrets` list in `plugins.settings.yaml`:
@@ -83,8 +83,8 @@ Set these three env vars before the session starts:
   secrets:
     - envVar: GITHUB_APP_ID
       reference: 'op://vault/github-app--repo--my-repo/GITHUB_APP_ID'
-    - envVar: GITHUB_APP_INSTALLATION_ID
-      reference: 'op://vault/github-app--repo--my-repo/GITHUB_APP_INSTALLATION_ID'
+    - envVar: GITHUB_INSTALLATION_ID
+      reference: 'op://vault/github-app--repo--my-repo/GITHUB_INSTALLATION_ID'
     - envVar: GITHUB_APP_PRIVATE_KEY
       reference: 'op://vault/github-app--repo--my-repo/GITHUB_APP_PRIVATE_KEY'
 
@@ -126,7 +126,7 @@ Exit codes: `0` = valid/refreshed, `1` = failed after retries, `2` = not configu
 **Step 1 — Verify env vars (length-only, never print values)**
 
 ```bash
-for v in GITHUB_APP_ID GITHUB_APP_INSTALLATION_ID GITHUB_APP_PRIVATE_KEY; do
+for v in GITHUB_APP_ID GITHUB_INSTALLATION_ID GITHUB_APP_PRIVATE_KEY; do
   val="${!v:-}"
   [[ -n "$val" ]] && echo "$v is set (${#val} chars)" || echo "$v is NOT set"
 done
@@ -140,7 +140,7 @@ The PEM is already at `$CLAUDE_PLUGIN_DATA/github-app.pem` (materialized by Sess
 $CLAUDE_PLUGIN_ROOT/bin/generate-token.sh \
   "$GITHUB_APP_ID" \
   "$CLAUDE_PLUGIN_DATA/github-app.pem" \
-  "$GITHUB_APP_INSTALLATION_ID" \
+  "$GITHUB_INSTALLATION_ID" \
   "$CLAUDE_PLUGIN_DATA/github-token"
 ```
 
@@ -156,7 +156,7 @@ GH_TOKEN=$(cat "$CLAUDE_PLUGIN_DATA/github-token") gh api /user --jq '.login'
 | Symptom | Likely cause |
 | -------- | ------------ |
 | `HTTP 401` during JWT exchange | PEM key mismatch or clock skew > 60s |
-| `HTTP 404` on `/app/installations/…` | Wrong `GITHUB_APP_INSTALLATION_ID` |
+| `HTTP 404` on `/app/installations/…` | Wrong `GITHUB_INSTALLATION_ID` |
 | `Failed to sign JWT` | PEM content malformed or `GITHUB_APP_PRIVATE_KEY` missing |
 | `exit 2` from token-check.sh | Credential env vars missing |
 | `exit 3` from token-check.sh | 5-min cooldown — wait or clear `.cooldown` file |
@@ -178,7 +178,7 @@ The SessionStart hook configures git to use `gh auth git-credential` directly. T
 Missing env vars. Check lengths (never print values):
 
 ```bash
-for v in GITHUB_APP_ID GITHUB_APP_INSTALLATION_ID GITHUB_APP_PRIVATE_KEY; do
+for v in GITHUB_APP_ID GITHUB_INSTALLATION_ID GITHUB_APP_PRIVATE_KEY; do
   val="${!v:-}"; [[ -n "$val" ]] && echo "$v set (${#val} chars)" || echo "$v NOT SET"
 done
 ```

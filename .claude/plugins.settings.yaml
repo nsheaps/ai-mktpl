@@ -32,12 +32,6 @@ edit-utils:
     - envVar: BRAINTRUST_API_KEY
       reference: 'op://AI-Jack/Braintrust/api-key'
       target: userSettingsJson
-    - envVar: GITHUB_APP_ID
-      reference: 'op://AI-Jack/github-app--repo--ai-mktpl/GITHUB_APP_ID'
-    - envVar: GITHUB_APP_INSTALLATION_ID
-      reference: 'op://AI-Jack/github-app--repo--ai-mktpl/GITHUB_APP_INSTALLATION_ID'
-    - envVar: GITHUB_APP_PRIVATE_KEY
-      reference: 'op://AI-Jack/github-app--repo--ai-mktpl/GITHUB_APP_PRIVATE_KEY'
   # Expose entire 1Password item as environment variables via op-exec.
   # All STRING/CONCEALED fields in the item become env vars
   # (field labels → UPPER_SNAKE_CASE). op:// references in field values

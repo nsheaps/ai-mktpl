@@ -8,7 +8,7 @@
 #   source "${CLAUDE_PLUGIN_ROOT}/lib/wait-for-env.sh"
 #
 #   # Wait for vars to appear in CLAUDE_ENV_FILE, then source it
-#   wait_for_env_file GITHUB_APP_ID GITHUB_APP_INSTALLATION_ID GITHUB_APP_PRIVATE_KEY --timeout 15
+#   wait_for_env_file GITHUB_APP_ID GITHUB_INSTALLATION_ID GITHUB_APP_PRIVATE_KEY --timeout 15
 
 [[ -n "${_WAIT_FOR_ENV_LOADED:-}" ]] && return 0
 _WAIT_FOR_ENV_LOADED=1

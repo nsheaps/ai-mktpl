@@ -38,7 +38,7 @@ HOOK_EVENT="${HOOK_EVENT:-PreToolUse}"
 
 # Only act if the github-app plugin has been configured (credentials in env)
 # No opinion — output nothing, defer to normal permission system
-if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_APP_PRIVATE_KEY:-}" || -z "${GITHUB_APP_INSTALLATION_ID:-}" ]]; then
+if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_APP_PRIVATE_KEY:-}" || -z "${GITHUB_INSTALLATION_ID:-}" ]]; then
   exit 0
 fi
 
@@ -47,7 +47,7 @@ fi
 # later (another plugin finished injecting them). If credentials are now
 # available, generate the token synchronously before proceeding.
 if [[ ! -f "$TOKEN_FILE" ]]; then
-  if [[ -n "${GITHUB_APP_ID:-}" && -n "${GITHUB_APP_PRIVATE_KEY:-}" && -n "${GITHUB_APP_INSTALLATION_ID:-}" ]]; then
+  if [[ -n "${GITHUB_APP_ID:-}" && -n "${GITHUB_APP_PRIVATE_KEY:-}" && -n "${GITHUB_INSTALLATION_ID:-}" ]]; then
     echo "github-app: token file missing but credentials available, generating token now..." >&2
     BIN_DIR_EARLY="${CLAUDE_PLUGIN_ROOT}/bin"
     if "$BIN_DIR_EARLY/token-check.sh" --sync --quiet; then

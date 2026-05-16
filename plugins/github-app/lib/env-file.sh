@@ -12,7 +12,7 @@
 #
 # Optional variables (sourced from environment):
 #   GITHUB_APP_ID
-#   GITHUB_APP_INSTALLATION_ID
+#   GITHUB_INSTALLATION_ID
 #   GH_CONFIG_DIR
 #   GIT_AUTHOR_NAME
 #   GIT_AUTHOR_EMAIL
@@ -80,7 +80,7 @@ ENVEOF
     printf 'export GITHUB_TOKEN_FILE="%s"\n' "$(_safe_val "$TOKEN_FILE")"
     printf 'export GITHUB_APP_ENV_FILE="%s"\n' "$(_safe_val "$ENV_RUNTIME_FILE")"
     printf 'export GITHUB_APP_ID="%s"\n' "$(_safe_val "${GITHUB_APP_ID:-}")"
-    printf 'export GITHUB_APP_INSTALLATION_ID="%s"\n' "$(_safe_val "${GITHUB_APP_INSTALLATION_ID:-}")"
+    printf 'export GITHUB_INSTALLATION_ID="%s"\n' "$(_safe_val "${GITHUB_INSTALLATION_ID:-}")"
     printf 'export GIT_AUTHOR_NAME="%s"\n' "$(_safe_val "${GIT_AUTHOR_NAME:-}")"
     printf 'export GIT_AUTHOR_EMAIL="%s"\n' "$(_safe_val "${GIT_AUTHOR_EMAIL:-}")"
     printf 'export GIT_COMMITTER_NAME="%s"\n' "$(_safe_val "${GIT_COMMITTER_NAME:-}")"

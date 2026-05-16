@@ -4,7 +4,7 @@
 # Generates a GitHub App installation token on session start.
 # Reads three env vars (injected by the 1pass plugin or any other mechanism):
 #   GITHUB_APP_ID
-#   GITHUB_APP_INSTALLATION_ID   (PEM content — not a file path)
+#   GITHUB_INSTALLATION_ID   (PEM content — not a file path)
 #   GITHUB_APP_PRIVATE_KEY
 #
 # Materializes the PEM to $CLAUDE_PLUGIN_DATA/github-app.pem on every session
@@ -61,11 +61,11 @@ plugin_is_enabled || { hook_log "plugin disabled, skipping"; hook_respond; exit 
 
 # --- Check required env vars; wait for them to appear if written by another plugin ---
 
-if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_APP_INSTALLATION_ID:-}" || -z "${GITHUB_APP_PRIVATE_KEY:-}" ]]; then
+if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_INSTALLATION_ID:-}" || -z "${GITHUB_APP_PRIVATE_KEY:-}" ]]; then
   hook_log "credentials not yet available, polling CLAUDE_ENV_FILE..."
   TIMEOUT="$(plugin_get_config "waitForEnvTimeoutSeconds" "15")"
-  if ! wait_for_env_file GITHUB_APP_ID GITHUB_APP_INSTALLATION_ID GITHUB_APP_PRIVATE_KEY --timeout "${TIMEOUT}"; then
-    hook_log "GitHub App not configured (missing GITHUB_APP_ID, GITHUB_APP_INSTALLATION_ID, or GITHUB_APP_PRIVATE_KEY), skipping"
+  if ! wait_for_env_file GITHUB_APP_ID GITHUB_INSTALLATION_ID GITHUB_APP_PRIVATE_KEY --timeout "${TIMEOUT}"; then
+    hook_log "GitHub App not configured (missing GITHUB_APP_ID, GITHUB_INSTALLATION_ID, or GITHUB_APP_PRIVATE_KEY), skipping"
     hook_log_cleanup
     hook_respond; exit 0
   fi
@@ -88,17 +88,17 @@ META_FILE="${TOKEN_FILE}.meta"
 mkdir -p "$(dirname "$TOKEN_FILE")"
 
 # Export installation ID so subprocesses can use it
-export GITHUB_APP_INSTALLATION_ID
+export GITHUB_INSTALLATION_ID
 export GITHUB_TOKEN_FILE="$TOKEN_FILE"
 
 # Use the shared JWT generation script
 TOKEN_OUTPUT=$("${CLAUDE_PLUGIN_ROOT}/bin/generate-token.sh" \
   "$GITHUB_APP_ID" \
   "$CLAUDE_PLUGIN_DATA/github-app.pem" \
-  "$GITHUB_APP_INSTALLATION_ID" \
+  "$GITHUB_INSTALLATION_ID" \
   "$TOKEN_FILE" 2>&1) || {
   hook_fail "token generation" "Token generation failed: $TOKEN_OUTPUT" \
-    "Verify GitHub App credentials (GITHUB_APP_ID, GITHUB_APP_PRIVATE_KEY, GITHUB_APP_INSTALLATION_ID) are correct and the app is installed on the target org/repo"
+    "Verify GitHub App credentials (GITHUB_APP_ID, GITHUB_APP_PRIVATE_KEY, GITHUB_INSTALLATION_ID) are correct and the app is installed on the target org/repo"
   exit 0
 }
 
