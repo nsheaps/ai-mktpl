@@ -131,6 +131,42 @@ env_file_upsert_source() {
   printf 'source %s\n' "$source_path" >> "$file"
 }
 
+# Idempotently set a GUARDED `source <path>` line in an env file:
+#
+#     if [ -r "<path>" ]; then source "<path>"; fi
+#
+# The guard makes a missing source file a silent no-op rather than a shell
+# error. Use this for OPTIONAL/SECONDARY chain files whose absence should NOT
+# break every shell that loads the env file (e.g. $AGENT_HOME_DIR/.env, which
+# may or may not exist depending on the agent's setup).
+#
+# Why `if/then/fi` and not `[ -r ... ] && source ...`:
+# Under `set -e`, the `&& source` form returns non-zero as the last command
+# of a sourced file when the guard fails, which aborts the sourcing shell.
+# The `if/then/fi` form is exit-status-neutral.
+#
+# Use the unguarded env_file_upsert_source for files whose absence IS a real
+# error (e.g. the 1pass-managed .env.local).
+#
+# Removes any prior guarded source line for the same path, then appends the
+# new one. (Does not remove an unguarded `source <path>` line — those are
+# managed via env_file_upsert_source / env_file_remove_source.)
+# Args: $1=file_path  $2=source_path
+env_file_upsert_source_guarded() {
+  local file="$1" source_path="$2"
+  _env_file_ensure "$file"
+  _env_file_strip_fixed "$file" "if [ -r \"${source_path}\" ]; then source \"${source_path}\"; fi"
+  printf 'if [ -r "%s" ]; then source "%s"; fi\n' "$source_path" "$source_path" >> "$file"
+}
+
+# Idempotently remove any guarded source line for <path>.
+# No-op if the file or the line doesn't exist.
+# Args: $1=file_path  $2=source_path
+env_file_remove_source_guarded() {
+  local file="$1" source_path="$2"
+  _env_file_strip_fixed "$file" "if [ -r \"${source_path}\" ]; then source \"${source_path}\"; fi"
+}
+
 # Idempotently remove any `export KEY=...` line from an env file.
 # No-op if the file or the line doesn't exist.
 # Args: $1=file_path  $2=key
