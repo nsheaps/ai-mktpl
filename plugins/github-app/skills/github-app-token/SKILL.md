@@ -160,15 +160,11 @@ credential set.
 **Step 1 — Verify env vars are present (names + lengths only, never values)**
 
 ```bash
-for v in GITHUB_APP_ID GITHUB_APP_INSTALLATION_ID GITHUB_APP_PRIVATE_KEY_PATH GITHUB_APP_PRIVATE_KEY; do
+for v in GITHUB_APP_ID GITHUB_INSTALLATION_ID GITHUB_APP_PRIVATE_KEY_PATH GITHUB_APP_PRIVATE_KEY; do
   val="${!v:-}"
   [[ -n "$val" ]] && echo "$v is set (${#val} chars)" || echo "$v is NOT set"
 done
 ```
-
-`token-check.sh` uses `GITHUB_INSTALLATION_ID`; the SessionStart hook exports
-it from whichever source var is set. Either name works after the env file is
-sourced.
 
 **Step 2 — Materialize PEM to disk if only key content is available**
 
@@ -190,7 +186,7 @@ OUTPUT_TOKEN_FILE="${AGENT_CONFIG_DIR:-${HOME}/.agents/${AGENT_NAME}/.config}/gi
 $CLAUDE_PLUGIN_ROOT/bin/generate-token.sh \
   "$GITHUB_APP_ID" \
   "$GITHUB_APP_PRIVATE_KEY_PATH" \
-  "${GITHUB_APP_INSTALLATION_ID:-$GITHUB_INSTALLATION_ID}" \
+  "$GITHUB_INSTALLATION_ID" \
   "$OUTPUT_TOKEN_FILE"
 ```
 
@@ -212,7 +208,7 @@ cat "${OUTPUT_TOKEN_FILE}.meta" | jq '.expires_at'
 | Symptom                                  | Likely cause                                        |
 | ---------------------------------------- | --------------------------------------------------- |
 | `HTTP 401` during JWT exchange           | PEM key mismatch or system clock skew > 60 s        |
-| `HTTP 404` on `/app/installations/…`     | Wrong `GITHUB_APP_INSTALLATION_ID`                  |
+| `HTTP 404` on `/app/installations/…`     | Wrong `GITHUB_INSTALLATION_ID`                  |
 | `Failed to sign JWT` / `input not found` | PEM file not readable or path wrong                 |
 | `exit 2` from token-check.sh             | One or more credential env vars missing             |
 | `exit 3` from token-check.sh             | In 5-min cooldown — wait or delete `.cooldown` file |
