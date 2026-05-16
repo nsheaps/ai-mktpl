@@ -2,7 +2,7 @@
 
 When multiple parties share a conversation or channel, **don't relay information from one member to another** — regardless of who originated the message or who it was directed at. Every participant can read the conversation for themselves. Restating it is pure noise that wastes context, makes you look performative, and trains a bad reflex.
 
-This is a refinement of (and distinct from) `relay-integrity.md` in the common-sense plugin. That rule says: *when you do relay, do it faithfully without amplification.* This rule says: *don't relay at all when the relay is redundant.*
+This is a refinement of (and distinct from) `relay-integrity.md` in the common-sense plugin. That rule says: _when you do relay, do it faithfully without amplification._ This rule says: _don't relay at all when the relay is redundant._
 
 ## The Test
 
@@ -19,15 +19,15 @@ If everyone is in the channel, everyone can read. Relay is needed only when the 
 
 ## Anti-Patterns
 
-| Scenario                                                                                                    | Bad                                                                                            | Good                                                                                                              |
-| ----------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Handler posts in a shared channel "Alex, do X". You and Alex are both in the channel.                       | You post "🤖 Alex — per Nate: do X"                                                            | Stay silent. Alex saw it. (Or briefly say "Got it" only if you also have follow-up work.)                         |
-| Agent A posts in a shared channel "I'm switching to approach Y". You and Agent B are both in the channel.   | You post "🤖 B — heads up, A is going with Y"                                                  | Stay silent. B saw A's message. If you have a dependency or risk to add, post THAT — not a recap.                 |
-| Handler posts a general "just FYI we're moving the meeting" in a shared channel.                            | You DM each agent restating the FYI                                                            | Stay silent. Everyone in the channel already saw it.                                                              |
-| Handler posts in shared channel "you two coordinate on Y". You and the other agent are both in the channel. | You ping the other agent restating "Nate said we should coordinate on Y"                       | Coordinate directly on Y. The other agent already knows the directive.                                            |
-| Handler asks a question in a thread where multiple agents are subscribed.                                   | Each agent posts "🤖 I see Nate's question, here's what I think we should do…" before acting   | Whoever owns the answer responds. Others stay silent or react.                                                    |
-| Agent A in a shared channel says something noteworthy. You want B to act on it.                             | You post "🤖 B — did you see what A said? You should X"                                        | If B genuinely needs a nudge, ask "B, thoughts?" — don't recap A's content. B can scroll up.                      |
-| Handler sends YOU a DM "tell Alex to do X". Alex was not in the DM.                                         | You stay silent ("Alex will figure it out")                                                    | **Relay IS needed** — Alex didn't see the message. Pass it on faithfully (per `relay-integrity.md`).              |
+| Scenario                                                                                                    | Bad                                                                                          | Good                                                                                              |
+| ----------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Handler posts in a shared channel "Alex, do X". You and Alex are both in the channel.                       | You post "🤖 Alex — per Nate: do X"                                                          | Stay silent. Alex saw it. (Or briefly say "Got it" only if you also have follow-up work.)         |
+| Agent A posts in a shared channel "I'm switching to approach Y". You and Agent B are both in the channel.   | You post "🤖 B — heads up, A is going with Y"                                                | Stay silent. B saw A's message. If you have a dependency or risk to add, post THAT — not a recap. |
+| Handler posts a general "just FYI we're moving the meeting" in a shared channel.                            | You DM each agent restating the FYI                                                          | Stay silent. Everyone in the channel already saw it.                                              |
+| Handler posts in shared channel "you two coordinate on Y". You and the other agent are both in the channel. | You ping the other agent restating "Nate said we should coordinate on Y"                     | Coordinate directly on Y. The other agent already knows the directive.                            |
+| Handler asks a question in a thread where multiple agents are subscribed.                                   | Each agent posts "🤖 I see Nate's question, here's what I think we should do…" before acting | Whoever owns the answer responds. Others stay silent or react.                                    |
+| Agent A in a shared channel says something noteworthy. You want B to act on it.                             | You post "🤖 B — did you see what A said? You should X"                                      | If B genuinely needs a nudge, ask "B, thoughts?" — don't recap A's content. B can scroll up.      |
+| Handler sends YOU a DM "tell Alex to do X". Alex was not in the DM.                                         | You stay silent ("Alex will figure it out")                                                  | **Relay IS needed** — Alex didn't see the message. Pass it on faithfully.                         |
 
 ## Why This Matters
 
@@ -61,7 +61,7 @@ Handler correction (2026-05-16 Discord):
 >
 > — Nate, [corrected framing](https://discord.com/channels/1490863845252665415/1497431286661517353/1505296231700627618)
 
-Original correction context (Jack repeated Nate's verbatim instructions back to Alex in `#behavior` even though Alex was a participant in that channel and read Nate's message directly): Nate's first wording was *"Alex can see my messages."* — Nate then broadened the framing in the message above to apply to ALL pairs of members in a shared conversation, not just handler→agent relays.
+Original correction context (Jack repeated Nate's verbatim instructions back to Alex in `#behavior` even though Alex was a participant in that channel and read Nate's message directly): Nate's first wording was _"Alex can see my messages."_ — Nate then broadened the framing in the message above to apply to ALL pairs of members in a shared conversation, not just handler→agent relays.
 
 ## See Also
 
