@@ -22,10 +22,39 @@ set -euo pipefail
 SRC_DIR="${CLAUDE_PLUGIN_ROOT}/lib"
 DST_DIR="${CLAUDE_PLUGIN_DATA}/lib"
 MANIFEST_FILE="${CLAUDE_PLUGIN_DATA}/lib.manifest"
+# Diagnostic: every invocation appends a line here. Lets operators verify
+# the hook actually fired and which trigger fired it. Pure observability —
+# never gates behavior. Each line: ISO-8601 + hook event + plugin root version
+# + outcome.
+INVOCATION_LOG="${CLAUDE_PLUGIN_DATA}/sync-lib.invocations.log"
 
 log() {
   echo "shared-lib: $*" >&2
 }
+
+# Record this invocation. CLAUDE_HOOK_EVENT_NAME is the documented env var
+# set by Claude Code when firing hooks (Setup / SessionStart / etc.).
+record_invocation() {
+  local outcome="$1"
+  local plugin_version="unknown"
+  if [ -f "${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json" ]; then
+    plugin_version="$(grep -oE '"version"[[:space:]]*:[[:space:]]*"[^"]+"' \
+      "${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json" 2>/dev/null \
+      | head -1 | sed -E 's/.*"version"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/')"
+    [ -z "$plugin_version" ] && plugin_version="unknown"
+  fi
+  mkdir -p "$(dirname "$INVOCATION_LOG")"
+  printf '%s event=%s version=%s outcome=%s root=%s\n' \
+    "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    "${CLAUDE_HOOK_EVENT_NAME:-unknown}" \
+    "$plugin_version" \
+    "$outcome" \
+    "$CLAUDE_PLUGIN_ROOT" \
+    >>"$INVOCATION_LOG" 2>/dev/null || true
+}
+
+# Always record entry, even on early exit / error.
+trap 'record_invocation "${SYNC_OUTCOME:-error}"' EXIT
 
 if [ ! -d "$SRC_DIR" ]; then
   log "[error] source dir missing: $SRC_DIR"
@@ -51,6 +80,7 @@ fi
 
 if [ "$NEW_MANIFEST" = "$OLD_MANIFEST" ] && [ -n "$OLD_MANIFEST" ]; then
   # Manifest matches; nothing to do.
+  SYNC_OUTCOME="noop"
   exit 0
 fi
 
@@ -78,4 +108,5 @@ done
 printf "%s\n" "$NEW_MANIFEST" > "$MANIFEST_FILE"
 
 log "synced ${copied} file(s) to ${DST_DIR}"
+SYNC_OUTCOME="synced-${copied}"
 exit 0
