@@ -2,7 +2,7 @@
 
 When relaying information between parties, FIRST check whether the target already received the message directly. If yes, **don't relay** — the relay is pure noise that wastes context, makes you look performative, and trains a bad reflex.
 
-This is a refinement of (and distinct from) `relay-integrity.md` in the common-sense plugin. That rule says: *when you do relay, do it faithfully without amplification.* This rule says: *don't relay at all when the relay is redundant.*
+This is a refinement of (and distinct from) `relay-integrity.md` in the common-sense plugin. That rule says: _when you do relay, do it faithfully without amplification._ This rule says: _don't relay at all when the relay is redundant._
 
 ## The Test
 
@@ -12,12 +12,12 @@ Most often this happens in shared channels (Discord, Slack, group chats) where t
 
 ## Anti-Patterns
 
-| Scenario                                                                                                    | Bad                                                                                            | Good                                                                                                              |
-| ----------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Handler posts in a shared channel "Alex, do X". You and Alex are both in the channel.                       | You post "🤖 Alex — per Nate: do X"                                                            | Stay silent. Alex saw it. (Or briefly say "Got it" only if you also have follow-up work.)                         |
-| Handler posts in shared channel "you two coordinate on Y". You and the other agent are both in the channel. | You DM/ping the other agent restating "Nate said we should coordinate on Y"                    | Coordinate directly on Y. The other agent already knows the directive.                                            |
-| Handler asks a question in a thread where multiple agents are subscribed.                                   | Each agent posts "🤖 I see Nate's question, here's what I think we should do…" before acting   | Whoever owns the answer responds. Others stay silent or react.                                                    |
-| Handler sends YOU a DM "tell Alex to do X". Alex was not in the DM.                                         | You stay silent ("Alex will figure it out")                                                    | **Relay IS needed** — Alex didn't see the message. Pass it on faithfully (per `relay-integrity.md`).              |
+| Scenario                                                                                                    | Bad                                                                                          | Good                                                                                                 |
+| ----------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Handler posts in a shared channel "Alex, do X". You and Alex are both in the channel.                       | You post "🤖 Alex — per Nate: do X"                                                          | Stay silent. Alex saw it. (Or briefly say "Got it" only if you also have follow-up work.)            |
+| Handler posts in shared channel "you two coordinate on Y". You and the other agent are both in the channel. | You DM/ping the other agent restating "Nate said we should coordinate on Y"                  | Coordinate directly on Y. The other agent already knows the directive.                               |
+| Handler asks a question in a thread where multiple agents are subscribed.                                   | Each agent posts "🤖 I see Nate's question, here's what I think we should do…" before acting | Whoever owns the answer responds. Others stay silent or react.                                       |
+| Handler sends YOU a DM "tell Alex to do X". Alex was not in the DM.                                         | You stay silent ("Alex will figure it out")                                                  | **Relay IS needed** — Alex didn't see the message. Pass it on faithfully (per `relay-integrity.md`). |
 
 ## Why This Matters
 
@@ -44,7 +44,7 @@ When the target already saw the message and a relay would be redundant, choose o
 
 ## Source
 
-Handler correction (2026-05-16 Discord): Jack repeated Nate's verbatim instructions back to Alex in `#behavior` even though Alex was a participant in that channel and read Nate's message directly. Nate's exact words: *"Alex can see my messages."*
+Handler correction (2026-05-16 Discord): Jack repeated Nate's verbatim instructions back to Alex in `#behavior` even though Alex was a participant in that channel and read Nate's message directly. Nate's exact words: _"Alex can see my messages."_
 
 ## See Also
 
