@@ -231,6 +231,11 @@ jobs:
                 bot_name: ${{ steps.auth.outputs.user-name }}
                 allowed_bots: 'github-actions[bot],renovate[bot],claude[bot],automation-nsheaps[bot],jack-nsheaps[bot],henry-nsheaps[bot],alex-nsheaps[bot]'
                 github_token: ${{ steps.auth.outputs.token }}
+                # toJSON() here works because INPUT_SETTINGS_JSON is a STRING
+                # (env vars always are). For an object/array value, toJSON
+                # would emit a pretty-printed multi-line JSON and reintroduce
+                # the indentation problem -- coerce to string first if you
+                # ever need to substitute a non-string here.
                 settings: ${{ toJSON(env.INPUT_SETTINGS_JSON) }}
                 additional_permissions: |
                   actions: read
