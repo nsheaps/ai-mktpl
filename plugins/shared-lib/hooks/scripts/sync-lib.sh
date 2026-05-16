@@ -28,25 +28,42 @@ MANIFEST_FILE="${CLAUDE_PLUGIN_DATA}/lib.manifest"
 # + outcome.
 INVOCATION_LOG="${CLAUDE_PLUGIN_DATA}/sync-lib.invocations.log"
 
+# Capture the hook payload JSON once. Guarded against an interactive TTY so
+# `bash sync-lib.sh` (manual invocation) doesn't block on cat waiting for EOF.
+HOOK_INPUT=""
+if [ ! -t 0 ]; then
+  HOOK_INPUT="$(cat 2>/dev/null || true)"
+fi
+
 log() {
   echo "shared-lib: $*" >&2
 }
 
-# Record this invocation. CLAUDE_HOOK_EVENT_NAME is the documented env var
-# set by Claude Code when firing hooks (Setup / SessionStart / etc.).
+# Record this invocation. The hook event name is delivered in the stdin
+# JSON payload as `hook_event_name`; there is no CLAUDE_HOOK_EVENT_NAME
+# env var. Captured once at top-level (see HOOK_INPUT above) so the
+# trap-driven record_invocation can read it without re-reading stdin.
+# Plugin version is grep'd from plugin.json so we don't take a hard jq
+# dep just for version; jq is only used opportunistically for event name.
 record_invocation() {
   local outcome="$1"
   local plugin_version="unknown"
+  local hook_event="unknown"
   if [ -f "${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json" ]; then
     plugin_version="$(grep -oE '"version"[[:space:]]*:[[:space:]]*"[^"]+"' \
       "${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json" 2>/dev/null \
       | head -1 | sed -E 's/.*"version"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/')"
     [ -z "$plugin_version" ] && plugin_version="unknown"
   fi
+  if [ -n "${HOOK_INPUT:-}" ] && command -v jq >/dev/null 2>&1; then
+    hook_event="$(printf '%s' "$HOOK_INPUT" \
+      | jq -r '.hook_event_name // "unknown"' 2>/dev/null || echo "unknown")"
+    [ -z "$hook_event" ] && hook_event="unknown"
+  fi
   mkdir -p "$(dirname "$INVOCATION_LOG")"
   printf '%s event=%s version=%s outcome=%s root=%s\n' \
     "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-    "${CLAUDE_HOOK_EVENT_NAME:-unknown}" \
+    "$hook_event" \
     "$plugin_version" \
     "$outcome" \
     "$CLAUDE_PLUGIN_ROOT" \

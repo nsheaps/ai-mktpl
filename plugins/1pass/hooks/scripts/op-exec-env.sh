@@ -162,14 +162,10 @@ write_to_targets() {
     # Idempotent replace-or-append. Multiple sessions / re-runs do not
     # accumulate duplicate or stale entries.
     env_file_upsert_export "$ENV_LOCAL_PATH" "$env_name" "$env_value"
-    # On first write, also chain ENV_LOCAL_PATH (or sourceChain) into CLAUDE_ENV_FILE.
+    # On first write, also chain ENV_LOCAL_PATH and its sourceChain into CLAUDE_ENV_FILE.
     if [ "$ENV_LOCAL_SOURCE_CHAIN_WRITTEN" != "true" ]; then
-      local chain
-      chain="$(_resolve_env_local_source_chain "$ENV_LOCAL_PATH")"
-      if [ -n "$chain" ] && [ -n "${CLAUDE_ENV_FILE:-}" ]; then
-        env_file_upsert_source "$CLAUDE_ENV_FILE" "$chain"
-        hook_log "Chained $chain into CLAUDE_ENV_FILE"
-      fi
+      _chain_env_local_into_claude_env_file "$ENV_LOCAL_PATH"
+      hook_log "Chained $ENV_LOCAL_PATH into CLAUDE_ENV_FILE"
       ENV_LOCAL_SOURCE_CHAIN_WRITTEN="true"
     fi
   fi

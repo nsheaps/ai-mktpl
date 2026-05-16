@@ -191,6 +191,121 @@ else
   bad "install-op.sh still uses 'return 1' on envLocal unresolvable — should be 'return 0'"
 fi
 
+# --- Test 11: _chain_env_local_into_claude_env_file helper -------------------
+# Verifies the helper always chains env_local_path itself into CLAUDE_ENV_FILE,
+# while sourceChain:none/false only suppresses the SECONDARY chain file.
+echo "Test 11: _chain_env_local_into_claude_env_file"
+
+_t11_env_local="$TMPDIR_TEST/t11/.env.local"
+_t11_dot_env="$TMPDIR_TEST/t11/.env"
+_t11_claude_env="$TMPDIR_TEST/t11/claude-env-file"
+mkdir -p "$TMPDIR_TEST/t11"
+export AGENT_HOME_DIR="$TMPDIR_TEST/t11"
+export CLAUDE_ENV_FILE="$_t11_claude_env"
+
+# Helper to reset CLAUDE_ENV_FILE to empty.
+_t11_reset() { : > "$_t11_claude_env"; }
+
+# sourceChain: none — env_local_path ALWAYS chained (1), secondary NOT chained
+echo "  Test 11a: sourceChain=none — only env_local_path chained"
+_STUB_CONFIG["envLocal.sourceChain"]="none"
+_t11_reset
+_chain_env_local_into_claude_env_file "$_t11_env_local"
+_chain_env_local_into_claude_env_file "$_t11_env_local"  # idempotent call
+assert_eq "$(grep -c '^source ' "$_t11_claude_env")" "1" \
+  "sourceChain=none: exactly 1 source line (env_local only)"
+assert_eq "$(grep -c "^source $_t11_env_local$" "$_t11_claude_env")" "1" \
+  "sourceChain=none: source line is env_local_path"
+_STUB_CONFIG=()
+
+# sourceChain: false — same as none
+echo "  Test 11b: sourceChain=false — only env_local_path chained"
+_STUB_CONFIG["envLocal.sourceChain"]="false"
+_t11_reset
+_chain_env_local_into_claude_env_file "$_t11_env_local"
+assert_eq "$(grep -c '^source ' "$_t11_claude_env")" "1" \
+  "sourceChain=false: exactly 1 source line (env_local only)"
+_STUB_CONFIG=()
+
+# sourceChain: self — chain == env_local_path, so deduplicated to 1 line
+echo "  Test 11c: sourceChain=self — deduplicated to 1 source line"
+_STUB_CONFIG["envLocal.sourceChain"]="self"
+_t11_reset
+_chain_env_local_into_claude_env_file "$_t11_env_local"
+assert_eq "$(grep -c '^source ' "$_t11_claude_env")" "1" \
+  "sourceChain=self: env_local and chain are same path, deduplicated to 1"
+_STUB_CONFIG=()
+
+# sourceChain: default (AGENT_HOME_DIR/.env) — env_local UNGUARDED + secondary GUARDED
+echo "  Test 11d: sourceChain=default — env_local_path (unguarded) + AGENT_HOME_DIR/.env (guarded)"
+_STUB_CONFIG=()  # no override → default
+_t11_reset
+_chain_env_local_into_claude_env_file "$_t11_env_local"
+# env_local is UNGUARDED (1pass owns it; absence is a real error)
+assert_eq "$(grep -c "^source $_t11_env_local$" "$_t11_claude_env")" "1" \
+  "sourceChain=default: env_local_path written UNGUARDED"
+# secondary chain is GUARDED (optional file; absence must not break the shell)
+assert_eq "$(grep -c "^if \[ -r \"$_t11_dot_env\" \]; then source \"$_t11_dot_env\"; fi$" "$_t11_claude_env")" "1" \
+  "sourceChain=default: AGENT_HOME_DIR/.env written GUARDED"
+# no bare `source <secondary>` line — that would error if .env is missing
+assert_eq "$(grep -c "^source $_t11_dot_env$" "$_t11_claude_env")" "0" \
+  "sourceChain=default: no UNGUARDED source line for secondary chain"
+
+# Idempotent: calling twice with default should still be exactly one of each
+_chain_env_local_into_claude_env_file "$_t11_env_local"
+assert_eq "$(grep -c "^source $_t11_env_local$" "$_t11_claude_env")" "1" \
+  "sourceChain=default: idempotent — still exactly 1 env_local source line"
+assert_eq "$(grep -c "^if \[ -r \"$_t11_dot_env\" \]; then source \"$_t11_dot_env\"; fi$" "$_t11_claude_env")" "1" \
+  "sourceChain=default: idempotent — still exactly 1 guarded secondary line"
+
+# sourceChain: custom path — env_local UNGUARDED + custom GUARDED
+echo "  Test 11e: sourceChain=custom path — env_local_path (unguarded) + custom (guarded)"
+_t11_custom="$TMPDIR_TEST/t11/custom.env"
+_STUB_CONFIG["envLocal.sourceChain"]="$_t11_custom"
+_t11_reset
+_chain_env_local_into_claude_env_file "$_t11_env_local"
+assert_eq "$(grep -c "^source $_t11_env_local$" "$_t11_claude_env")" "1" \
+  "sourceChain=custom: env_local_path written UNGUARDED"
+assert_eq "$(grep -c "^if \[ -r \"$_t11_custom\" \]; then source \"$_t11_custom\"; fi$" "$_t11_claude_env")" "1" \
+  "sourceChain=custom: custom path written GUARDED"
+_STUB_CONFIG=()
+
+# --- Test 11h: guarded secondary line is sourceable when target file is missing
+echo "  Test 11h: guarded secondary line is safe when target file doesn't exist"
+_STUB_CONFIG=()  # default → secondary = AGENT_HOME_DIR/.env (which does NOT exist)
+_t11_reset
+# Ensure the secondary target really doesn't exist on disk
+rm -f "$_t11_dot_env"
+# Pre-touch env_local so its unguarded source doesn't error either
+mkdir -p "$(dirname "$_t11_env_local")"
+: > "$_t11_env_local"
+_chain_env_local_into_claude_env_file "$_t11_env_local"
+# Source the resulting CLAUDE_ENV_FILE in a subshell — should succeed silently
+if ( set -e; source "$_t11_claude_env" ) >/dev/null 2>&1; then
+  ok "sourcing CLAUDE_ENV_FILE succeeds when secondary chain target is missing"
+else
+  bad "sourcing CLAUDE_ENV_FILE failed when secondary chain target is missing"
+fi
+rm -f "$_t11_env_local"
+
+# No-op when CLAUDE_ENV_FILE is empty
+echo "  Test 11f: no-op when CLAUDE_ENV_FILE unset"
+_t11_reset
+unset CLAUDE_ENV_FILE
+_chain_env_local_into_claude_env_file "$_t11_env_local"
+assert_eq "$(wc -c < "$_t11_claude_env")" "0" \
+  "CLAUDE_ENV_FILE unset: file remains empty"
+export CLAUDE_ENV_FILE="$_t11_claude_env"
+
+# No-op when env_local_path is empty
+echo "  Test 11g: no-op when env_local_path is empty"
+_t11_reset
+_chain_env_local_into_claude_env_file ""
+assert_eq "$(wc -c < "$_t11_claude_env")" "0" \
+  "empty env_local_path: CLAUDE_ENV_FILE untouched"
+
+unset AGENT_HOME_DIR CLAUDE_ENV_FILE
+
 echo ""
 echo "Results: $pass passed, $fail failed"
 [ "$fail" -eq 0 ]

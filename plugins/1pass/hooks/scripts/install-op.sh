@@ -296,12 +296,11 @@ _write_secret() {
       env_file_upsert_export "$env_local_path" "$env_var" "$value"
       export "${env_var}=${value}"
       hook_log "Injected ${env_var} via ${env_local_path}"
-      # Also chain into CLAUDE_ENV_FILE via a `source` line (idempotent).
-      source_chain="$(_resolve_env_local_source_chain "$env_local_path")"
-      if [ -n "$source_chain" ] && [ -n "${CLAUDE_ENV_FILE:-}" ]; then
-        env_file_upsert_source "$CLAUDE_ENV_FILE" "$source_chain"
-        hook_log "Chained ${source_chain} into CLAUDE_ENV_FILE"
-      fi
+      # Also chain env_local_path (and its secondary sourceChain) into CLAUDE_ENV_FILE.
+      # The envLocal target is ALWAYS chained; sourceChain:none/false only opts
+      # out of the secondary chain file. Uses shared helper for idempotency.
+      _chain_env_local_into_claude_env_file "$env_local_path"
+      hook_log "Chained ${env_local_path} into CLAUDE_ENV_FILE"
       ;;
     settingsJson|settingsLocalJson|userSettingsJson)
       local settings_file

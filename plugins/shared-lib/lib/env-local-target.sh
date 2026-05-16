@@ -22,13 +22,23 @@
 #         $CLAUDE_PROJECT_DIR/.env.local
 #
 #   _resolve_env_local_source_chain <envLocalPath>
-#       Echoes the path to add as `source <path>` in CLAUDE_ENV_FILE.
+#       Echoes the path to add as `source <path>` in CLAUDE_ENV_FILE as the
+#       SECONDARY chain (alongside the envLocal target itself). NOTE: the
+#       envLocal target is ALWAYS chained — `sourceChain: none|false` only
+#       opts out of this SECONDARY chain file.
 #       Special sentinel values for `envLocal.sourceChain`:
-#         "none" or "false" -> echoes empty (no source line added)
+#         "none" or "false" -> echoes empty (no secondary source line added)
 #         "self"            -> echoes the envLocal path itself
 #       Default (when unset and AGENT_HOME_DIR is set):
 #         $AGENT_HOME_DIR/.env
 #       Otherwise: empty.
+#
+#   _chain_env_local_into_claude_env_file <envLocalPath>
+#       Chains env_local_path (and its secondary sourceChain, if any) into
+#       $CLAUDE_ENV_FILE idempotently. The envLocal target itself is ALWAYS
+#       chained because 1pass writes secrets there — `sourceChain: none|false`
+#       only opts out of the SECONDARY chain file, not the envLocal target.
+#       No-op if env_local_path or CLAUDE_ENV_FILE is empty.
 #
 # Both `"none"` and `"false"` are accepted as the "disable" sentinel for
 # `envLocal.sourceChain`. The two are documented synonyms; `"none"` is the
@@ -86,5 +96,35 @@ _resolve_env_local_source_chain() {
     echo "${AGENT_HOME_DIR}/.env"
   else
     echo ""
+  fi
+}
+
+# _chain_env_local_into_claude_env_file ENV_LOCAL_PATH
+#
+# Chains $env_local_path (and its source chain, if any) into $CLAUDE_ENV_FILE
+# idempotently. The envLocal target itself is ALWAYS chained because 1pass
+# writes secrets there — `sourceChain: none|false` only opts out of the
+# SECONDARY chain file, not the envLocal target.
+#
+# The primary envLocal target is sourced UNGUARDED: 1pass owns that file and
+# its absence is a real error worth surfacing.
+#
+# The SECONDARY chain file (default $AGENT_HOME_DIR/.env) is sourced GUARDED
+# via `if [ -r "<path>" ]; then source "<path>"; fi` so that its absence is a
+# silent no-op rather than a `zsh:source: no such file or directory` error in
+# every shell that loads CLAUDE_ENV_FILE. The secondary chain is an optional
+# convenience file — not every agent setup creates one.
+#
+# Args: $1 = env_local_path (absolute). Reads CLAUDE_ENV_FILE from environment.
+# No-op if env_local_path or CLAUDE_ENV_FILE is empty.
+_chain_env_local_into_claude_env_file() {
+  local env_local_path="$1"
+  local chain
+  [ -z "$env_local_path" ] && return 0
+  [ -z "${CLAUDE_ENV_FILE:-}" ] && return 0
+  env_file_upsert_source "$CLAUDE_ENV_FILE" "$env_local_path"
+  chain="$(_resolve_env_local_source_chain "$env_local_path")"
+  if [ -n "$chain" ] && [ "$chain" != "$env_local_path" ]; then
+    env_file_upsert_source_guarded "$CLAUDE_ENV_FILE" "$chain"
   fi
 }
