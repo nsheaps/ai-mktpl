@@ -86,7 +86,7 @@ Set these three env vars before the session starts:
     - envVar: GITHUB_INSTALLATION_ID
       reference: 'op://vault/github-app--repo--my-repo/GITHUB_INSTALLATION_ID'
     - envVar: GITHUB_APP_PRIVATE_KEY
-      reference: 'op://vault/github-app--repo--my-repo/GITHUB_APP_PRIVATE_KEY'
+      reference: "op://vault/github-app--repo--my-repo/GITHUB_APP_PRIVATE_KEY"
 
 github-app:
   enabled: true

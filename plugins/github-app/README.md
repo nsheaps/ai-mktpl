@@ -44,7 +44,7 @@ Set these three env vars before the session starts:
     - envVar: GITHUB_INSTALLATION_ID
       reference: 'op://vault/github-app--repo--my-repo/GITHUB_INSTALLATION_ID'
     - envVar: GITHUB_APP_PRIVATE_KEY
-      reference: 'op://vault/github-app--repo--my-repo/GITHUB_APP_PRIVATE_KEY'
+      reference: "op://vault/github-app--repo--my-repo/GITHUB_APP_PRIVATE_KEY"
 
 github-app:
   enabled: true
@@ -66,15 +66,15 @@ Any mechanism that exports these vars into the session env works (direct export,
 
 ### Token Refresh Behavior
 
-| Scenario | Behavior |
-| --------- | -------- |
-| Token valid, >45 min remaining | Silent, no action |
-| Token valid, <45 min remaining, non-token command | Background refresh |
-| Token valid, <45 min remaining, gh/git command | Allow + background refresh |
-| Token expired, gh/git command | Synchronous refresh before allowing |
-| Token expired, non-token command | Background refresh |
-| Refresh fails | Retry up to 3x with exponential backoff |
-| All retries fail | 5-minute cooldown, then retry |
+| Scenario                                          | Behavior                                |
+| ------------------------------------------------- | --------------------------------------- |
+| Token valid, >45 min remaining                    | Silent, no action                       |
+| Token valid, <45 min remaining, non-token command | Background refresh                      |
+| Token valid, <45 min remaining, gh/git command    | Allow + background refresh              |
+| Token expired, gh/git command                     | Synchronous refresh before allowing     |
+| Token expired, non-token command                  | Background refresh                      |
+| Refresh fails                                     | Retry up to 3x with exponential backoff |
+| All retries fail                                  | 5-minute cooldown, then retry           |
 
 ## Configuration
 
