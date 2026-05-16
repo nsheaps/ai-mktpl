@@ -208,7 +208,7 @@ cat "${OUTPUT_TOKEN_FILE}.meta" | jq '.expires_at'
 | Symptom                                  | Likely cause                                        |
 | ---------------------------------------- | --------------------------------------------------- |
 | `HTTP 401` during JWT exchange           | PEM key mismatch or system clock skew > 60 s        |
-| `HTTP 404` on `/app/installations/…`     | Wrong `GITHUB_INSTALLATION_ID`                  |
+| `HTTP 404` on `/app/installations/…`     | Wrong `GITHUB_INSTALLATION_ID`                      |
 | `Failed to sign JWT` / `input not found` | PEM file not readable or path wrong                 |
 | `exit 2` from token-check.sh             | One or more credential env vars missing             |
 | `exit 3` from token-check.sh             | In 5-min cooldown — wait or delete `.cooldown` file |
