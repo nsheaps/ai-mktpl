@@ -178,6 +178,33 @@ also in bash sessions. `envLocal` is opt-in.
   tool types. Add `envLocal` on top if you also want them in a sourceable
   file on disk.
 
+### Setup Hook (Install-Time Write)
+
+When `envLocal` is included in `opExec.targets`, the plugin also registers a
+`Setup{init}` hook that fires at **plugin install or update time** (before the
+first `SessionStart`). This ensures `$AGENT_HOME_DIR/.env.local` is populated
+immediately after the plugin is installed — useful for launchers that source
+`.env.local` before the agent's Claude session starts.
+
+**How it works:**
+
+1. At `claude plugin install` (or marketplace bootstrap), the `Setup{init}` hook
+   runs `op-exec-env-setup.sh`.
+2. The script resolves all `opExec.items` via `op-exec` and writes the resulting
+   `export KEY=value` lines atomically to `$AGENT_HOME_DIR/.env.local`.
+3. On every subsequent `SessionStart`, `op-exec-env.sh` re-resolves and writes
+   again (idempotent — uses replace-or-append semantics via `env_file_upsert_export`).
+
+**AGENT_HOME_DIR gating:** If `AGENT_HOME_DIR` is not set in the hook
+environment and no `envLocal.path` is configured, the Setup hook logs a notice
+and exits cleanly. The SessionStart hook will write `.env.local` once
+`AGENT_HOME_DIR` is available in the session env.
+
+**op / op-exec availability:** If either binary is missing at Setup time (e.g.
+autoInstall has not yet run), the Setup hook exits cleanly. The SessionStart
+hook always runs the install step before the env-injection step, so the binaries
+will be available by the time SessionStart fires.
+
 ## ENVIRONMENT Aggregator Pattern
 
 The `ENVIRONMENT` item in 1Password (e.g., `op://AI-Jack/ENVIRONMENT`) serves as the

@@ -1,6 +1,6 @@
 {
   "name": "1pass",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Install and manage 1Password CLI (op) and op-exec in Claude Code sessions. Provides session-start auto-install for web sessions and comprehensive workflow skills.",
   "author": {
     "name": "Nathan Heaps",
