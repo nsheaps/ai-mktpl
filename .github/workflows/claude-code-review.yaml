@@ -90,7 +90,7 @@ jobs:
       # as Claude works. See nsheaps/github-actions/.github/actions/claude-stream-shim.
       - name: Setup Claude stream shim
         id: claude-shim
-        uses: nsheaps/github-actions/.github/actions/claude-stream-shim@ced86812fefafd46f42bc36d8147afc456374d89 # claude-stream-shim@claude/stream-action-output-UtYyT
+        uses: nsheaps/github-actions/.github/actions/claude-stream-shim@100f5b4fe8574ac8e6cb0d2dd553a09728ff46f7 # claude-stream-shim@main
 
       - name: Run Claude Code Review
         id: claude-review
