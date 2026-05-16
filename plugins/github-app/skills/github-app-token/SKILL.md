@@ -176,7 +176,7 @@ Skip this step if `GITHUB_APP_PRIVATE_KEY_PATH` already points to a readable
 file. If only `GITHUB_APP_PRIVATE_KEY` (PEM content) is set:
 
 ```bash
-GITHUB_APP_PRIVATE_KEY_PATH="${AGENT_CONFIG_DIR:-~/.agents/${AGENT_NAME}/.config}/github-app.pem"
+GITHUB_APP_PRIVATE_KEY_PATH="${AGENT_CONFIG_DIR:-${HOME}/.agents/${AGENT_NAME}/.config}/github-app.pem"
 printf '%s\n' "$GITHUB_APP_PRIVATE_KEY" > "$GITHUB_APP_PRIVATE_KEY_PATH"
 chmod 600 "$GITHUB_APP_PRIVATE_KEY_PATH"
 ```
@@ -186,7 +186,7 @@ chmod 600 "$GITHUB_APP_PRIVATE_KEY_PATH"
 Argument order: `app_id  pem_path  installation_id  token_file`
 
 ```bash
-OUTPUT_TOKEN_FILE="${AGENT_CONFIG_DIR:-~/.agents/${AGENT_NAME}/.config}/github-token"
+OUTPUT_TOKEN_FILE="${AGENT_CONFIG_DIR:-${HOME}/.agents/${AGENT_NAME}/.config}/github-token"
 $CLAUDE_PLUGIN_ROOT/bin/generate-token.sh \
   "$GITHUB_APP_ID" \
   "$GITHUB_APP_PRIVATE_KEY_PATH" \
