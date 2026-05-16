@@ -1,6 +1,6 @@
 {
   "name": "shared-lib",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Shared bash libraries used by other ai-mktpl plugins (logging, hook output, config reading, settings writing, tool install). Other plugins declare this as a dependency and source the libs from this plugin's persistent data directory at runtime.",
   "author": {
     "name": "Nathan Heaps",
