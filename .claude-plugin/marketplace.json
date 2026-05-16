@@ -386,7 +386,7 @@
     {
       "name": "github-app",
       "description": "env-var driven GitHub App token lifecycle for Claude Code sessions. Pairs with the 1pass plugin for secret injection.",
-      "version": "0.4.0",
+      "version": "0.5.0",
       "author": {
         "name": "Nathan Heaps"
       },
