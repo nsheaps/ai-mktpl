@@ -10,12 +10,13 @@
 # Output: JSON object with token status
 set -euo pipefail
 
-# shellcheck source=../lib/agent-paths.sh
 _self="${BASH_SOURCE[0]}"
 while [ -L "$_self" ]; do _self="$(readlink -f "$_self")"; done
-source "$(cd "$(dirname "$_self")/.." && pwd)/lib/agent-paths.sh"
 
-TOKEN_FILE="${GITHUB_TOKEN_FILE:-${AGENT_CONFIG_DIR}/github-token}"
+# CLAUDE_PLUGIN_DATA fallback for running outside a hook context
+CLAUDE_PLUGIN_DATA="${CLAUDE_PLUGIN_DATA:-${HOME}/.claude/plugins/data/github-app-ai-mktpl}"
+
+TOKEN_FILE="${GITHUB_TOKEN_FILE:-${CLAUDE_PLUGIN_DATA}/github-token}"
 META_FILE="${TOKEN_FILE}.meta"
 
 # Check if token exists

@@ -1,40 +1,17 @@
 #!/usr/bin/env bash
-# resolve-secrets.sh — Resolve op:// references and wait for env file fallback
+# wait-for-env.sh — Wait for env vars to appear in CLAUDE_ENV_FILE
 #
-# Provides two mechanisms for cross-plugin secret resolution:
-#
-# 1. Direct op:// resolution: If `op` is installed and OP_SERVICE_ACCOUNT_TOKEN
-#    is set, resolve op:// references directly without depending on 1pass plugin.
-#
-# 2. CLAUDE_ENV_FILE fallback: Poll the shared env file for required variables
-#    to appear (written by another plugin's SessionStart hook).
+# Polls the shared env file for required variables to appear
+# (written by another plugin's SessionStart hook, e.g. the 1pass plugin).
 #
 # Usage:
-#   source "${CLAUDE_PLUGIN_ROOT}/lib/resolve-secrets.sh"
-#
-#   # Try to resolve an op:// reference
-#   value=$(resolve_op_ref "op://vault/item/field")
+#   source "${CLAUDE_PLUGIN_ROOT}/lib/wait-for-env.sh"
 #
 #   # Wait for vars to appear in CLAUDE_ENV_FILE, then source it
-#   wait_for_env_file GITHUB_APP_ID GITHUB_INSTALLATION_ID --timeout 15
+#   wait_for_env_file GITHUB_APP_ID GITHUB_APP_INSTALLATION_ID GITHUB_APP_PRIVATE_KEY --timeout 15
 
-[[ -n "${_RESOLVE_SECRETS_LOADED:-}" ]] && return 0
-_RESOLVE_SECRETS_LOADED=1
-
-# Check if op CLI is available and authenticated
-_op_available() {
-  command -v op >/dev/null 2>&1 && [[ -n "${OP_SERVICE_ACCOUNT_TOKEN:-}" ]]
-}
-
-# Resolve an op:// reference to its value
-# Returns 0 and prints the value on success, 1 on failure
-resolve_op_ref() {
-  local ref="$1"
-  if ! _op_available; then
-    return 1
-  fi
-  op read "$ref" 2>/dev/null
-}
+[[ -n "${_WAIT_FOR_ENV_LOADED:-}" ]] && return 0
+_WAIT_FOR_ENV_LOADED=1
 
 # Wait for env vars to appear in CLAUDE_ENV_FILE, then source it
 wait_for_env_file() {

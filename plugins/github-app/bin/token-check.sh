@@ -32,14 +32,15 @@ done
 
 # --- Configuration ---
 
-# shellcheck source=../lib/agent-paths.sh
 _self="${BASH_SOURCE[0]}"
 while [ -L "$_self" ]; do _self="$(readlink -f "$_self")"; done
-source "$(cd "$(dirname "$_self")/.." && pwd)/lib/agent-paths.sh"
 
-TOKEN_FILE="${GITHUB_TOKEN_FILE:-${AGENT_CONFIG_DIR}/github-token}"
+# CLAUDE_PLUGIN_DATA fallback for running outside a hook context
+CLAUDE_PLUGIN_DATA="${CLAUDE_PLUGIN_DATA:-${HOME}/.claude/plugins/data/github-app-ai-mktpl}"
+
+TOKEN_FILE="${GITHUB_TOKEN_FILE:-${CLAUDE_PLUGIN_DATA}/github-token}"
 META_FILE="${TOKEN_FILE}.meta"
-ENV_RUNTIME_FILE="${GITHUB_APP_ENV_FILE:-${AGENT_CONFIG_DIR}/github-app-env}"
+ENV_RUNTIME_FILE="${GITHUB_APP_ENV_FILE:-${CLAUDE_PLUGIN_DATA}/github-app-env}"
 LOCKFILE="${TOKEN_FILE}.lock"
 COOLDOWN_FILE="${TOKEN_FILE}.cooldown"
 REFRESH_THRESHOLD_MINUTES=45  # Proactively refresh when <=45 min remain (token lasts 1h)
@@ -113,16 +114,21 @@ do_generate_token() {
   local script_dir
   script_dir="$(cd "$(dirname "$_self")" && pwd)"
 
-  if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_APP_PRIVATE_KEY_PATH:-}" || -z "${GITHUB_INSTALLATION_ID:-}" ]]; then
-    log_error "missing credentials (APP_ID, PRIVATE_KEY_PATH, or INSTALLATION_ID)"
+  if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_APP_PRIVATE_KEY:-}" || -z "${GITHUB_APP_INSTALLATION_ID:-}" ]]; then
+    log_error "missing credentials (GITHUB_APP_ID, GITHUB_APP_PRIVATE_KEY, or GITHUB_APP_INSTALLATION_ID)"
     return 2
   fi
+
+  # Materialize PEM from env var
+  mkdir -p "$CLAUDE_PLUGIN_DATA"
+  printf '%s\n' "$GITHUB_APP_PRIVATE_KEY" > "$CLAUDE_PLUGIN_DATA/github-app.pem"
+  chmod 600 "$CLAUDE_PLUGIN_DATA/github-app.pem"
 
   local output
   output=$("$script_dir/generate-token.sh" \
     "$GITHUB_APP_ID" \
-    "$GITHUB_APP_PRIVATE_KEY_PATH" \
-    "$GITHUB_INSTALLATION_ID" \
+    "$CLAUDE_PLUGIN_DATA/github-app.pem" \
+    "$GITHUB_APP_INSTALLATION_ID" \
     "$TOKEN_FILE" 2>&1) || {
     log_error "token generation failed: $output"
     return 1
@@ -165,9 +171,9 @@ do_refresh_with_retries() {
 # PreToolUse has a shorter time budget than SessionStart, so we use a 5s
 # wait here to handle the case where another plugin is still injecting
 # credentials (hook ordering race).
-if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_APP_PRIVATE_KEY_PATH:-}" || -z "${GITHUB_INSTALLATION_ID:-}" ]]; then
-  source "$PLUGIN_DIR/lib/resolve-secrets.sh"
-  if ! wait_for_env_file GITHUB_APP_ID GITHUB_APP_PRIVATE_KEY_PATH GITHUB_INSTALLATION_ID --timeout 5; then
+if [[ -z "${GITHUB_APP_ID:-}" || -z "${GITHUB_APP_PRIVATE_KEY:-}" || -z "${GITHUB_APP_INSTALLATION_ID:-}" ]]; then
+  source "$PLUGIN_DIR/lib/wait-for-env.sh"
+  if ! wait_for_env_file GITHUB_APP_ID GITHUB_APP_PRIVATE_KEY GITHUB_APP_INSTALLATION_ID --timeout 5; then
     exit 2
   fi
 fi

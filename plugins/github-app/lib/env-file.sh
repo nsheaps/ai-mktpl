@@ -12,10 +12,7 @@
 #
 # Optional variables (sourced from environment):
 #   GITHUB_APP_ID
-#   GITHUB_APP_PRIVATE_KEY_PATH
-#   GITHUB_INSTALLATION_ID
-#   GITHUB_APP_CLIENT_ID
-#   GITHUB_APP_CLIENT_SECRET
+#   GITHUB_APP_INSTALLATION_ID
 #   GH_CONFIG_DIR
 #   GIT_AUTHOR_NAME
 #   GIT_AUTHOR_EMAIL
@@ -31,10 +28,11 @@
 if [ "${_ENV_FILE_LOADED:-}" = "true" ]; then return 0; fi
 _ENV_FILE_LOADED="true"
 
-# Source agent-paths for AGENT_CONFIG_DIR
-_env_file_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=agent-paths.sh
-[[ "${_AGENT_PATHS_LOADED:-}" == "true" ]] || source "$_env_file_dir/agent-paths.sh"
+# GIT_IDENTITY_FILE — path to the stable git identity file
+# Written once at session start; never overwritten by token refresh.
+# Uses CLAUDE_PLUGIN_DATA (per-agent) so multiple agents on the same machine
+# don't stomp on each other's identity file.
+GIT_IDENTITY_FILE="${CLAUDE_PLUGIN_DATA}/github-git-identity"
 
 # _safe_val VALUE
 #
@@ -82,8 +80,7 @@ ENVEOF
     printf 'export GITHUB_TOKEN_FILE="%s"\n' "$(_safe_val "$TOKEN_FILE")"
     printf 'export GITHUB_APP_ENV_FILE="%s"\n' "$(_safe_val "$ENV_RUNTIME_FILE")"
     printf 'export GITHUB_APP_ID="%s"\n' "$(_safe_val "${GITHUB_APP_ID:-}")"
-    printf 'export GITHUB_APP_PRIVATE_KEY_PATH="%s"\n' "$(_safe_val "${GITHUB_APP_PRIVATE_KEY_PATH:-}")"
-    printf 'export GITHUB_INSTALLATION_ID="%s"\n' "$(_safe_val "${GITHUB_INSTALLATION_ID:-}")"
+    printf 'export GITHUB_APP_INSTALLATION_ID="%s"\n' "$(_safe_val "${GITHUB_APP_INSTALLATION_ID:-}")"
     printf 'export GIT_AUTHOR_NAME="%s"\n' "$(_safe_val "${GIT_AUTHOR_NAME:-}")"
     printf 'export GIT_AUTHOR_EMAIL="%s"\n' "$(_safe_val "${GIT_AUTHOR_EMAIL:-}")"
     printf 'export GIT_COMMITTER_NAME="%s"\n' "$(_safe_val "${GIT_COMMITTER_NAME:-}")"
@@ -95,19 +92,10 @@ ENVEOF
     echo "# be written as empty strings and identity would be lost."
   } >> "$ENV_RUNTIME_FILE"
 
-  [[ -n "${GITHUB_APP_CLIENT_ID:-}" ]] && printf 'export GITHUB_APP_CLIENT_ID="%s"\n' "$(_safe_val "$GITHUB_APP_CLIENT_ID")" >> "$ENV_RUNTIME_FILE"
-  [[ -n "${GITHUB_APP_CLIENT_SECRET:-}" ]] && printf 'export GITHUB_APP_CLIENT_SECRET="%s"\n' "$(_safe_val "$GITHUB_APP_CLIENT_SECRET")" >> "$ENV_RUNTIME_FILE"
   # Preserve GH_CONFIG_DIR isolation across token refreshes
   [[ -n "${GH_CONFIG_DIR:-}" ]] && printf 'export GH_CONFIG_DIR="%s"\n' "$(_safe_val "$GH_CONFIG_DIR")" >> "$ENV_RUNTIME_FILE"
   chmod 600 "$ENV_RUNTIME_FILE"
 }
-
-# GIT_IDENTITY_FILE — path to the stable git identity file
-# Written once at session start; never overwritten by token refresh.
-# Uses AGENT_CONFIG_DIR (per-agent) so multiple agents on the same machine
-# don't stomp on each other's identity file. Falls back to a HOME-scoped
-# path if AGENT_CONFIG_DIR is not yet set (should not happen in normal usage).
-GIT_IDENTITY_FILE="${AGENT_CONFIG_DIR:-${HOME}/.agents/_UNKNOWN/.config}/github-git-identity"
 
 # write_git_identity_file BOT_NAME BOT_EMAIL
 #
@@ -166,7 +154,7 @@ GITEOF
 write_git_config_global() {
   local bot_name="${GIT_AUTHOR_NAME:-}"
   local bot_email="${GIT_AUTHOR_EMAIL:-}"
-  local target="${GIT_CONFIG_GLOBAL:-${AGENT_CONFIG_DIR:-${HOME}/.agents/_UNKNOWN/.config}/git/config}"
+  local target="${GIT_CONFIG_GLOBAL:-${CLAUDE_PLUGIN_DATA}/git/config}"
 
   [[ -n "$bot_name" && -n "$bot_email" ]] || return 0
 
