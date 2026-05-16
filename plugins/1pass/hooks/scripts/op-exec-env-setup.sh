@@ -63,6 +63,8 @@ source "$SHARED_LIB_DIR/hook-logging.sh"
 source "$SHARED_LIB_DIR/env-file.sh"
 # shellcheck source=/dev/null
 source "$SHARED_LIB_DIR/env-local-target.sh"
+# shellcheck source=/dev/null
+source "${CLAUDE_PLUGIN_ROOT}/lib/resolve-op-env.sh"
 
 # Script-level tmpdir for secret-bearing tempfiles. EXIT trap ensures cleanup
 # on any exit path (normal, error, signal).
@@ -108,7 +110,7 @@ fi
 
 ENV_LOCAL_PATH="$(_resolve_env_local_path)"
 if [ -z "$ENV_LOCAL_PATH" ]; then
-  hook_log "[1pass] AGENT_HOME_DIR not set and no envLocal.path configured — skipping Setup write (SessionStart will retry when AGENT_HOME_DIR is available)"
+  hook_log "AGENT_HOME_DIR not set and no envLocal.path configured — skipping Setup write (SessionStart will retry when AGENT_HOME_DIR is available)"
   hook_respond
   exit 0
 fi
@@ -127,98 +129,30 @@ if ! command -v op &>/dev/null; then
   exit 0
 fi
 
-# --- Main: resolve items and write envLocal atomically ---
+# --- Main: resolve items and write envLocal via per-var upsert ---
+
+_setup_total_count=0
+_setup_emit() {
+  local env_name="$1" env_value="$2"
+  env_file_upsert_export "$ENV_LOCAL_PATH" "$env_name" "$env_value"
+  _setup_total_count=$((_setup_total_count + 1))
+}
 
 do_setup() {
   hook_log_step "init" "Writing envLocal: $ENV_LOCAL_PATH"
-
-  # Accumulate all export lines into a single tmpfile, then mv atomically.
-  local tmpfile
-  tmpfile="$(mktemp -p "$_OP_EXEC_TMPDIR")"
-  chmod 600 "$tmpfile"
-
-  local total_count=0
+  mkdir -p "$(dirname "$ENV_LOCAL_PATH")"
 
   while IFS= read -r item_ref; do
     [ -z "$item_ref" ] && continue
-
-    hook_log_step "op-exec" "Resolving item: $item_ref"
-
-    if ! [[ "$item_ref" =~ ^op://[^/]+/[^/]+ ]]; then
-      hook_fail "op-exec" "Invalid reference format: $item_ref (expected op://vault/item)" \
-        "Check opExec.items in plugin settings"
-      continue
-    fi
-
-    local exports
-    if ! exports="$(op-exec "$item_ref" 2>/dev/null)"; then
-      hook_fail "op-exec" "Failed to resolve item: $item_ref" \
-        "Verify the item exists and op has access to the vault"
-      continue
-    fi
-
-    if [ -z "$exports" ]; then
-      hook_log "no fields found in $item_ref"
-      continue
-    fi
-
-    # Evaluate op-exec output in a clean subshell (same pattern as op-exec-env.sh)
-    # to handle heredoc-style assignments and multi-line values safely.
-    local eval_stderr eval_output
-    eval_stderr="$(mktemp -p "$_OP_EXEC_TMPDIR")"
-    eval_output="$(mktemp -p "$_OP_EXEC_TMPDIR")"
-    local eval_exit=0
-    env -i HOME="$HOME" PATH="$PATH" bash -c "
-      set -e
-      eval \"\$1\"
-      env -0
-    " _ "$exports" 2>"$eval_stderr" > "$eval_output" || eval_exit=$?
-
-    if [[ $eval_exit -ne 0 ]]; then
-      local err_msg=""
-      [[ -s "$eval_stderr" ]] && err_msg="$(cat "$eval_stderr")"
-      hook_fail "op-exec" "Failed to evaluate op-exec output for: $item_ref${err_msg:+ — $err_msg}" \
-        "The op-exec output may contain syntax that bash cannot evaluate"
-      rm -f "$eval_stderr" "$eval_output"
-      continue
-    fi
-
-    if [[ -s "$eval_stderr" ]]; then
-      while IFS= read -r line; do
-        hook_log "[eval stderr] $line"
-      done < "$eval_stderr"
-    fi
-    rm -f "$eval_stderr"
-
-    local count=0
-    while IFS= read -r -d '' record; do
-      [ -z "$record" ] && continue
-      local env_name="${record%%=*}"
-      local env_value="${record#*=}"
-      case "$env_name" in
-        HOME|PATH|PWD|OLDPWD|SHLVL|_) continue ;;
-      esac
-      if [ -n "$env_name" ]; then
-        printf 'export %s=%q\n' "$env_name" "$env_value" >> "$tmpfile"
-        count=$((count + 1))
-      fi
-    done < "$eval_output"
-    rm -f "$eval_output"
-
-    hook_log "resolved $count env vars from $item_ref"
-    total_count=$((total_count + count))
+    op_resolve_item_to_callback "$item_ref" _setup_emit
   done <<< "$op_exec_items"
 
-  if [ "$total_count" -eq 0 ]; then
+  if [ "$_setup_total_count" -eq 0 ]; then
     hook_log "no env vars resolved — skipping envLocal write"
-    rm -f "$tmpfile"
     return 0
   fi
 
-  # Atomic rename to final path
-  mkdir -p "$(dirname "$ENV_LOCAL_PATH")"
-  mv "$tmpfile" "$ENV_LOCAL_PATH"
-  hook_log "wrote $total_count env vars → $ENV_LOCAL_PATH"
+  hook_log "wrote $_setup_total_count env vars → $ENV_LOCAL_PATH"
 }
 
 # --- Execute ---

@@ -181,19 +181,22 @@ also in bash sessions. `envLocal` is opt-in.
 ### Setup Hook (Install-Time Write)
 
 When `envLocal` is included in `opExec.targets`, the plugin also registers a
-`Setup{init}` hook that fires at **plugin install or update time** (before the
-first `SessionStart`). This ensures `$AGENT_HOME_DIR/.env.local` is populated
-immediately after the plugin is installed — useful for launchers that source
-`.env.local` before the agent's Claude session starts.
+`Setup{init}` hook that fires at **session bootstrap, before the first
+interactive `SessionStart`** — specifically during the `claude --init-only`
+pre-pass that the agent launcher runs on every startup. This ensures
+`$AGENT_HOME_DIR/.env.local` is populated before the agent's Claude session
+starts, so launchers can source it from the pre-session environment.
 
 **How it works:**
 
-1. At `claude plugin install` (or marketplace bootstrap), the `Setup{init}` hook
-   runs `op-exec-env-setup.sh`.
-2. The script resolves all `opExec.items` via `op-exec` and writes the resulting
-   `export KEY=value` lines atomically to `$AGENT_HOME_DIR/.env.local`.
-3. On every subsequent `SessionStart`, `op-exec-env.sh` re-resolves and writes
-   again (idempotent — uses replace-or-append semantics via `env_file_upsert_export`).
+1. On session bootstrap, the launcher runs `claude --init-only`; this triggers
+   the `Setup{init}` hook, which runs `op-exec-env-setup.sh`.
+2. The script resolves all `opExec.items` via `op-exec` and upserts each
+   resolved `export KEY=value` line into `$AGENT_HOME_DIR/.env.local` via
+   `env_file_upsert_export` (same semantics as the SessionStart sibling — no
+   wholesale replacement; non-1pass entries are preserved).
+3. On every subsequent `SessionStart`, `op-exec-env.sh` re-resolves and upserts
+   again (idempotent — values that haven't changed are no-ops).
 
 **AGENT_HOME_DIR gating:** If `AGENT_HOME_DIR` is not set in the hook
 environment and no `envLocal.path` is configured, the Setup hook logs a notice
