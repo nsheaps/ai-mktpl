@@ -83,6 +83,15 @@ jobs:
         with:
           template-file: .github/prompts/claude-code-review.md
 
+      # Installs claude + claude-stream (from nsheaps/claude-utils) and emits a
+      # shim binary that tees claude's stream-json stdout through claude-stream.
+      # The action's `show_full_output: false` then suppresses the raw JSON dump
+      # while the shim renders a live colored chatroom view to the workflow log
+      # as Claude works. See nsheaps/github-actions/.github/actions/claude-stream-shim.
+      - name: Setup Claude stream shim
+        id: claude-shim
+        uses: nsheaps/github-actions/.github/actions/claude-stream-shim@ced86812fefafd46f42bc36d8147afc456374d89 # claude-stream-shim@claude/stream-action-output-UtYyT
+
       - name: Run Claude Code Review
         id: claude-review
         uses: anthropics/claude-code-action@v1
@@ -179,9 +188,13 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.REVIEW_ANTHROPIC_API_KEY || secrets.ANTHROPIC_API_KEY || '' }}
           claude_code_oauth_token: ${{ (secrets.REVIEW_ANTHROPIC_API_KEY || secrets.ANTHROPIC_API_KEY) && '' || secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          # WARNING: PRINTS FULL JSON OUTPUT WHICH MAY INCLUDE SECRETS.
-          # ONLY USE IN PRIVATE ENVIRONMENTS.
-          show_full_output: true
+          # Raw stream-json is suppressed; the claude-stream-shim above renders
+          # a live colored chatroom view to the workflow log instead. Flip to
+          # `true` only when you also need the raw JSON for debugging (note
+          # the secret-leak warning still applies in that case).
+          show_full_output: false
+          # The shim wraps claude with a tee through claude-stream.
+          path_to_claude_code_executable: ${{ steps.claude-shim.outputs.shim-path }}
           # bug: https://github.com/anthropics/claude-code-action/issues/759
           # won't find the past comments since it's looking for github-actions[bot], not the auth it uses to post the comment.
           bot_id: ${{ steps.auth.outputs.user-id }}
