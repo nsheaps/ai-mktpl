@@ -106,6 +106,15 @@ _resolve_env_local_source_chain() {
 # writes secrets there — `sourceChain: none|false` only opts out of the
 # SECONDARY chain file, not the envLocal target.
 #
+# The primary envLocal target is sourced UNGUARDED: 1pass owns that file and
+# its absence is a real error worth surfacing.
+#
+# The SECONDARY chain file (default $AGENT_HOME_DIR/.env) is sourced GUARDED
+# via `if [ -r "<path>" ]; then source "<path>"; fi` so that its absence is a
+# silent no-op rather than a `zsh:source: no such file or directory` error in
+# every shell that loads CLAUDE_ENV_FILE. The secondary chain is an optional
+# convenience file — not every agent setup creates one.
+#
 # Args: $1 = env_local_path (absolute). Reads CLAUDE_ENV_FILE from environment.
 # No-op if env_local_path or CLAUDE_ENV_FILE is empty.
 _chain_env_local_into_claude_env_file() {
@@ -116,6 +125,6 @@ _chain_env_local_into_claude_env_file() {
   env_file_upsert_source "$CLAUDE_ENV_FILE" "$env_local_path"
   chain="$(_resolve_env_local_source_chain "$env_local_path")"
   if [ -n "$chain" ] && [ "$chain" != "$env_local_path" ]; then
-    env_file_upsert_source "$CLAUDE_ENV_FILE" "$chain"
+    env_file_upsert_source_guarded "$CLAUDE_ENV_FILE" "$chain"
   fi
 }
