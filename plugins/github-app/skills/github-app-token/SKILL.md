@@ -136,11 +136,86 @@ Or check the metadata file:
 cat ~/.agents/${AGENT_NAME}/.config/github-token.meta | jq .
 ```
 
-## Forcing a Token Refresh
+## Manually Refreshing the Token
+
+Use this when the automatic refresh fails, the token is stale, or you need
+a known-good token before running a GitHub operation.
+
+### Option A — Use token-check.sh (preferred)
+
+`token-check.sh --sync` handles locking, retries, and env-file updates for you:
 
 ```bash
 $CLAUDE_PLUGIN_ROOT/bin/token-check.sh --sync
 ```
+
+Exit codes: `0` = token valid/refreshed, `1` = failed after retries,
+`2` = not configured, `3` = in 5-minute cooldown after hard failure.
+
+### Option B — Call generate-token.sh directly
+
+Use this when you want to bypass the retry/cooldown logic or debug a specific
+credential set.
+
+**Step 1 — Verify env vars are present (names + lengths only, never values)**
+
+```bash
+for v in GITHUB_APP_ID GITHUB_APP_INSTALLATION_ID GITHUB_APP_PRIVATE_KEY_PATH GITHUB_APP_PRIVATE_KEY; do
+  val="${!v:-}"
+  [[ -n "$val" ]] && echo "$v is set (${#val} chars)" || echo "$v is NOT set"
+done
+```
+
+`token-check.sh` uses `GITHUB_INSTALLATION_ID`; the SessionStart hook exports
+it from whichever source var is set. Either name works after the env file is
+sourced.
+
+**Step 2 — Materialize PEM to disk if only key content is available**
+
+Skip this step if `GITHUB_APP_PRIVATE_KEY_PATH` already points to a readable
+file. If only `GITHUB_APP_PRIVATE_KEY` (PEM content) is set:
+
+```bash
+GITHUB_APP_PRIVATE_KEY_PATH="${AGENT_CONFIG_DIR:-~/.agents/${AGENT_NAME}/.config}/github-app.pem"
+printf '%s\n' "$GITHUB_APP_PRIVATE_KEY" > "$GITHUB_APP_PRIVATE_KEY_PATH"
+chmod 600 "$GITHUB_APP_PRIVATE_KEY_PATH"
+```
+
+**Step 3 — Run generate-token.sh**
+
+Argument order: `app_id  pem_path  installation_id  token_file`
+
+```bash
+OUTPUT_TOKEN_FILE="${AGENT_CONFIG_DIR:-~/.agents/${AGENT_NAME}/.config}/github-token"
+$CLAUDE_PLUGIN_ROOT/bin/generate-token.sh \
+  "$GITHUB_APP_ID" \
+  "$GITHUB_APP_PRIVATE_KEY_PATH" \
+  "${GITHUB_APP_INSTALLATION_ID:-$GITHUB_INSTALLATION_ID}" \
+  "$OUTPUT_TOKEN_FILE"
+```
+
+The script writes the raw token to `$OUTPUT_TOKEN_FILE` and metadata (expiry,
+permissions, app slug, bot ID) to `${OUTPUT_TOKEN_FILE}.meta`.
+
+**Step 4 — Verify the new token works**
+
+```bash
+GH_TOKEN=$(cat "$OUTPUT_TOKEN_FILE") gh api /user --jq '.login'
+# Expected output: <app-slug>[bot]  e.g. jack-nsheaps[bot]
+
+# Check new expiry
+cat "${OUTPUT_TOKEN_FILE}.meta" | jq '.expires_at'
+```
+
+### Common failures
+
+| Symptom | Likely cause |
+|---------|-------------|
+| `HTTP 401` during JWT exchange | PEM key mismatch or system clock skew > 60 s |
+| `HTTP 404` on `/app/installations/…` | Wrong `GITHUB_APP_INSTALLATION_ID` |
+| `Failed to sign JWT` / `input not found` | PEM file not readable or path wrong |
+| `exit 2` from token-check.sh | One or more credential env vars missing |
+| `exit 3` from token-check.sh | In 5-min cooldown — wait or delete `.cooldown` file |
 
 ## Git Credential Helper
 
