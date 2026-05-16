@@ -4,8 +4,8 @@
 # Generates a GitHub App installation token on session start.
 # Reads three env vars (injected by the 1pass plugin or any other mechanism):
 #   GITHUB_APP_ID
-#   GITHUB_INSTALLATION_ID   (PEM content — not a file path)
-#   GITHUB_APP_PRIVATE_KEY
+#   GITHUB_INSTALLATION_ID
+#   GITHUB_APP_PRIVATE_KEY   (PEM content — not a file path)
 #
 # Materializes the PEM to $CLAUDE_PLUGIN_DATA/github-app.pem on every session
 # start, then generates a token and writes env + git config under $CLAUDE_PLUGIN_DATA/.

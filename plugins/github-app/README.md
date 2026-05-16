@@ -136,7 +136,6 @@ plugins/github-app/
 ### Breaking changes in v0.4.0
 
 - **Env-var contract simplified**: Only `GITHUB_APP_ID`, `GITHUB_INSTALLATION_ID`, `GITHUB_APP_PRIVATE_KEY` are read. The `GITHUB_APP_PRIVATE_KEY_PATH` input var is gone — provide PEM content directly.
-- **`GITHUB_INSTALLATION_ID` renamed**: Use `GITHUB_INSTALLATION_ID`.
 - **`ref:` and `secrets.*` settings removed**: The plugin no longer resolves secrets from 1Password directly. Use the 1pass plugin's `secrets:` list instead.
 - **Paths moved**: All runtime files now live under `$CLAUDE_PLUGIN_DATA/` instead of `~/.agents/<name>/.config/`.
 
