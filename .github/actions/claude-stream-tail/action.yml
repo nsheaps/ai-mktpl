@@ -30,9 +30,9 @@ inputs:
     required: false
     default: '0.12.13'
   timeout-seconds:
-    description: 'Max seconds to wait for the session to start, and max seconds to follow it. The action exits cleanly (success) on timeout so it does not fail the parallel block. Default 600s (10 min) -- bump if reviews routinely run longer.'
+    description: 'Max seconds to wait for the session to start, and max seconds to follow it. The action exits cleanly (success) on timeout so it does not fail the parallel block. Default 300s (5 min) for fast iteration -- bump for longer reviews.'
     required: false
-    default: '600'
+    default: '300'
   poll-interval-seconds:
     description: 'How often to poll for a new session JSONL while waiting for it to appear.'
     required: false
@@ -109,17 +109,38 @@ runs:
         START=$(date +%s)
         SESSION_FILE=""
 
+        # DIAGNOSTIC: dump initial state.
+        echo "::group::claude-stream-tail diagnostics"
+        echo "HOME=$HOME"
+        echo "RUNNER_TEMP=$RUNNER_TEMP"
+        echo "PROJECTS_DIR=$PROJECTS_DIR"
+        echo "WAIT_FOR_NEW=$WAIT_FOR_NEW"
+        echo "TIMEOUT_SECONDS=$TIMEOUT_SECONDS"
+        echo "START_MARKER mtime: $(stat -c '%y' "$START_MARKER" 2>/dev/null || echo missing)"
+        echo "projects dir initial contents:"
+        find "$PROJECTS_DIR" -maxdepth 3 -type f 2>/dev/null | head -20 || echo "  (empty or missing)"
+        echo "command -v claude-stream: $(command -v claude-stream || echo NOT_FOUND)"
+        echo "::endgroup::"
+
         while true; do
           NOW=$(date +%s)
           ELAPSED=$((NOW - START))
           if [ "$ELAPSED" -ge "$TIMEOUT_SECONDS" ]; then
             echo "claude-stream-tail: timed out after ${TIMEOUT_SECONDS}s with no session file" >&2
+            echo "::group::final state at timeout" >&2
+            find "$PROJECTS_DIR" -maxdepth 3 -type f -printf '%T@ %p\n' 2>/dev/null | sort -nr | head -20 >&2 || true
+            echo "::endgroup::" >&2
             exit 0
           fi
           SESSION_FILE="$(find "$PROJECTS_DIR" -type f -name '*.jsonl' "${FIND_FILTER[@]}" -printf '%T@ %p\n' 2>/dev/null \
             | sort -nr | head -1 | awk '{print $2}')"
           if [ -n "$SESSION_FILE" ] && [ -f "$SESSION_FILE" ]; then
             break
+          fi
+          # Every 10s while waiting, log what we DO see (might be in wrong dir).
+          if [ "$((ELAPSED % 10))" -eq 0 ] && [ "$ELAPSED" -gt 0 ]; then
+            echo "claude-stream-tail: still waiting (${ELAPSED}s) -- jsonl files anywhere on host:"
+            find / -name '*.jsonl' -path '*/claude/*' -printf '  %T@ %p\n' 2>/dev/null | sort -nr | head -5 || true
           fi
           sleep "$POLL_INTERVAL_SECONDS"
         done
@@ -134,9 +155,10 @@ runs:
         # Pipeline:
         #   tail -F (line-buffered)  -> awk (exit on terminal "result" line)  -> claude-stream
         # awk closing its stdin makes claude-stream finish cleanly; tail dies via SIGPIPE.
-        # `timeout` caps the whole pipeline so a stuck session can't hold the parallel block.
+        # `timeout` with -k caps the whole pipeline. Dropped --foreground (only
+        # meaningful with a TTY; we run in CI without one).
         set +e
-        timeout --foreground --signal=TERM "${REMAINING}" bash -c '
+        timeout -k 30 --signal=TERM "${REMAINING}" bash -c '
           set -o pipefail
           stdbuf -oL tail -n +1 -F "$1" 2>/dev/null \
             | stdbuf -oL awk "{

@@ -17,10 +17,11 @@ on:
 
 concurrency:
   group: ${{ github.event_name == 'pull_request' && format('claude-review-{0}', github.event.pull_request.number) || format('claude-review-{0}-{1}', github.ref, github.sha) }}
-  # always let a previous review finish (so that time isn't wasted), but queued builds will still
-  # be cancelled if a newer build is pushed
-  # NOTE THIS IS NOT GUARANTEED AT THE JOB LEVEL
-  cancel-in-progress: false
+  # TEMPORARILY true while iterating on the claude-stream-tail sidecar:
+  # a stuck sidecar holds the queue for the full timeout, blocking every
+  # subsequent attempt. Once verified working, flip back to false so a
+  # in-progress review isn't killed by a follow-up push.
+  cancel-in-progress: true
 
 jobs:
   claude-review:
@@ -274,4 +275,5 @@ jobs:
                 # this step's start. Safe alongside claude-code-action --
                 # ignores any pre-existing JSONL on persistent runners.
                 wait-for-new-session: 'true'
-                timeout-seconds: '900'
+                # Aggressive while iterating; bump after sidecar verified working.
+                timeout-seconds: '300'
