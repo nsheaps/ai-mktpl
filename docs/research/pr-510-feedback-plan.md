@@ -13,6 +13,7 @@ Date: 2026-05-16
 **`CLAUDE_HOOK_EVENT_NAME` is not a real env var — `event=` will always log `unknown`.**
 
 Henry's review and inline comment both point out:
+
 - Claude Code does NOT export `CLAUDE_HOOK_EVENT_NAME` (or any env var with the hook event name)
 - The env vars Claude Code actually exports: `CLAUDE_PROJECT_DIR`, `CLAUDE_PLUGIN_ROOT`, `CLAUDE_PLUGIN_DATA`, `CLAUDE_ENV_FILE`, `CLAUDE_EFFORT`, `CLAUDE_CODE_REMOTE`
 - The hook event name is delivered in the **stdin JSON payload** as `hook_event_name`
@@ -83,6 +84,7 @@ record_invocation() {
 ```
 
 **Key design decisions:**
+
 - `jq` used opportunistically (`command -v jq`) — version field still uses grep/sed so no hard jq dep
 - `printf '%s' "$HOOK_INPUT" | jq` avoids subshell stdin conflict vs `echo "$HOOK_INPUT"` (safe for arbitrary JSON)
 - Fallback chain: no jq → `hook_event=unknown`; jq fails → `hook_event=unknown`; `.hook_event_name` null → `"unknown"`
@@ -92,12 +94,14 @@ record_invocation() {
 Replace the comment on the `record_invocation` function header:
 
 **Old:**
+
 ```bash
 # Record this invocation. CLAUDE_HOOK_EVENT_NAME is the documented env var
 # set by Claude Code when firing hooks (Setup / SessionStart / etc.).
 ```
 
 **New:**
+
 ```bash
 # Record this invocation. The hook event name is delivered in the stdin
 # JSON payload as `hook_event_name`; there is no CLAUDE_HOOK_EVENT_NAME
@@ -112,6 +116,7 @@ Replace the comment on the `record_invocation` function header:
 ## Items I Disagree With
 
 None. Henry's blocking finding is correct and verified against:
+
 - [Official hooks docs](https://code.claude.com/docs/en/hooks) — confirms env var list
 - Two sibling hooks in this repo showing the correct `cat | jq` pattern
 - The current code which uses `${CLAUDE_HOOK_EVENT_NAME:-unknown}` (will always be `unknown`)
