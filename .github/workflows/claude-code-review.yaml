@@ -90,7 +90,12 @@ jobs:
       # as Claude works. See nsheaps/github-actions/.github/actions/claude-stream-shim.
       - name: Setup Claude stream shim
         id: claude-shim
-        uses: nsheaps/github-actions/.github/actions/claude-stream-shim@100f5b4fe8574ac8e6cb0d2dd553a09728ff46f7 # claude-stream-shim@main
+        # TODO: re-pin to the post-merge SHA on main once
+        # nsheaps/github-actions PR (description-expression fix on
+        # claude/stream-action-output-UtYyT) is merged. The current main SHA
+        # 100f5b4 has a broken action.yml (literal ${{ }} in description
+        # rejected by the manifest parser).
+        uses: nsheaps/github-actions/.github/actions/claude-stream-shim@1e611c846262625bedff806ca7a4c8f786686a34 # claude-stream-shim@claude/stream-action-output-UtYyT
 
       - name: Run Claude Code Review
         id: claude-review
