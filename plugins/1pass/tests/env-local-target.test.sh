@@ -191,6 +191,98 @@ else
   bad "install-op.sh still uses 'return 1' on envLocal unresolvable — should be 'return 0'"
 fi
 
+# --- Test 11: _chain_env_local_into_claude_env_file helper -------------------
+# Verifies the helper always chains env_local_path itself into CLAUDE_ENV_FILE,
+# while sourceChain:none/false only suppresses the SECONDARY chain file.
+echo "Test 11: _chain_env_local_into_claude_env_file"
+
+_t11_env_local="$TMPDIR_TEST/t11/.env.local"
+_t11_dot_env="$TMPDIR_TEST/t11/.env"
+_t11_claude_env="$TMPDIR_TEST/t11/claude-env-file"
+mkdir -p "$TMPDIR_TEST/t11"
+export AGENT_HOME_DIR="$TMPDIR_TEST/t11"
+export CLAUDE_ENV_FILE="$_t11_claude_env"
+
+# Helper to reset CLAUDE_ENV_FILE to empty.
+_t11_reset() { : > "$_t11_claude_env"; }
+
+# sourceChain: none — env_local_path ALWAYS chained (1), secondary NOT chained
+echo "  Test 11a: sourceChain=none — only env_local_path chained"
+_STUB_CONFIG["envLocal.sourceChain"]="none"
+_t11_reset
+_chain_env_local_into_claude_env_file "$_t11_env_local"
+_chain_env_local_into_claude_env_file "$_t11_env_local"  # idempotent call
+assert_eq "$(grep -c '^source ' "$_t11_claude_env")" "1" \
+  "sourceChain=none: exactly 1 source line (env_local only)"
+assert_eq "$(grep -c "^source $_t11_env_local$" "$_t11_claude_env")" "1" \
+  "sourceChain=none: source line is env_local_path"
+_STUB_CONFIG=()
+
+# sourceChain: false — same as none
+echo "  Test 11b: sourceChain=false — only env_local_path chained"
+_STUB_CONFIG["envLocal.sourceChain"]="false"
+_t11_reset
+_chain_env_local_into_claude_env_file "$_t11_env_local"
+assert_eq "$(grep -c '^source ' "$_t11_claude_env")" "1" \
+  "sourceChain=false: exactly 1 source line (env_local only)"
+_STUB_CONFIG=()
+
+# sourceChain: self — chain == env_local_path, so deduplicated to 1 line
+echo "  Test 11c: sourceChain=self — deduplicated to 1 source line"
+_STUB_CONFIG["envLocal.sourceChain"]="self"
+_t11_reset
+_chain_env_local_into_claude_env_file "$_t11_env_local"
+assert_eq "$(grep -c '^source ' "$_t11_claude_env")" "1" \
+  "sourceChain=self: env_local and chain are same path, deduplicated to 1"
+_STUB_CONFIG=()
+
+# sourceChain: default (AGENT_HOME_DIR/.env) — 2 distinct source lines
+echo "  Test 11d: sourceChain=default — env_local_path + AGENT_HOME_DIR/.env"
+_STUB_CONFIG=()  # no override → default
+_t11_reset
+_chain_env_local_into_claude_env_file "$_t11_env_local"
+assert_eq "$(grep -c '^source ' "$_t11_claude_env")" "2" \
+  "sourceChain=default: 2 source lines (env_local + .env)"
+assert_eq "$(grep -c "^source $_t11_env_local$" "$_t11_claude_env")" "1" \
+  "sourceChain=default: env_local_path is first source"
+assert_eq "$(grep -c "^source $_t11_dot_env$" "$_t11_claude_env")" "1" \
+  "sourceChain=default: AGENT_HOME_DIR/.env is second source"
+
+# Idempotent: calling twice with default should still be 2 lines
+_chain_env_local_into_claude_env_file "$_t11_env_local"
+assert_eq "$(grep -c '^source ' "$_t11_claude_env")" "2" \
+  "sourceChain=default: idempotent — still 2 source lines after second call"
+
+# sourceChain: custom path — 2 distinct source lines
+echo "  Test 11e: sourceChain=custom path — env_local_path + custom"
+_t11_custom="$TMPDIR_TEST/t11/custom.env"
+_STUB_CONFIG["envLocal.sourceChain"]="$_t11_custom"
+_t11_reset
+_chain_env_local_into_claude_env_file "$_t11_env_local"
+assert_eq "$(grep -c '^source ' "$_t11_claude_env")" "2" \
+  "sourceChain=custom: 2 source lines (env_local + custom)"
+assert_eq "$(grep -c "^source $_t11_custom$" "$_t11_claude_env")" "1" \
+  "sourceChain=custom: custom path present as source"
+_STUB_CONFIG=()
+
+# No-op when CLAUDE_ENV_FILE is empty
+echo "  Test 11f: no-op when CLAUDE_ENV_FILE unset"
+_t11_reset
+unset CLAUDE_ENV_FILE
+_chain_env_local_into_claude_env_file "$_t11_env_local"
+assert_eq "$(wc -c < "$_t11_claude_env")" "0" \
+  "CLAUDE_ENV_FILE unset: file remains empty"
+export CLAUDE_ENV_FILE="$_t11_claude_env"
+
+# No-op when env_local_path is empty
+echo "  Test 11g: no-op when env_local_path is empty"
+_t11_reset
+_chain_env_local_into_claude_env_file ""
+assert_eq "$(wc -c < "$_t11_claude_env")" "0" \
+  "empty env_local_path: CLAUDE_ENV_FILE untouched"
+
+unset AGENT_HOME_DIR CLAUDE_ENV_FILE
+
 echo ""
 echo "Results: $pass passed, $fail failed"
 [ "$fail" -eq 0 ]
