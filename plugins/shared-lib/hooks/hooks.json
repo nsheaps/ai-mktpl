@@ -1,6 +1,18 @@
 {
-  "description": "Copy bundled lib/ files from CLAUDE_PLUGIN_ROOT into CLAUDE_PLUGIN_DATA via a SessionStart hook. Running on every session start (not just init) ensures agents pick up new lib files when the plugin is updated, not just when it is freshly installed. The manifest-diff check in sync-lib.sh keeps the hot path fast (no-op when content is unchanged).",
+  "description": "Copy bundled lib/ files from CLAUDE_PLUGIN_ROOT into CLAUDE_PLUGIN_DATA. Registered on BOTH Setup{init} (fires during `claude --init-only` pre-pass for fast first-install) AND SessionStart (fires every session, picks up plugin updates and self-heals manual deletion). The manifest-diff check in sync-lib.sh makes repeat invocations a fast no-op when content is unchanged.",
   "hooks": {
+    "Setup": [
+      {
+        "matcher": "init",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/sync-lib.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "matcher": "*",
