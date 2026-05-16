@@ -67,15 +67,16 @@ runs:
         PROJECTS_DIR="${PROJECTS_DIR_OVERRIDE:-$HOME/.claude/projects}"
         mkdir -p "$PROJECTS_DIR"
 
-        START_MARKER="${RUNNER_TEMP}/claude-stream-tail.start"
-        touch "$START_MARKER"
-
-        echo "claude-stream-tail: watching $PROJECTS_DIR for new session JSONL (timeout ${TIMEOUT_SECONDS}s)"
+        echo "claude-stream-tail: watching $PROJECTS_DIR for the newest session JSONL (timeout ${TIMEOUT_SECONDS}s)"
 
         START=$(date +%s)
         SESSION_FILE=""
 
-        # Wait for a NEW session JSONL to appear (newer than our start marker).
+        # Wait for the newest session JSONL to appear. In live mode (sidecar
+        # alongside claude-code-action) this loops until the SDK creates one;
+        # in post-hoc mode (run after the action) it picks the just-finished
+        # session immediately. CI runners are fresh per job, so no stale-file
+        # filter is needed.
         while true; do
           NOW=$(date +%s)
           ELAPSED=$((NOW - START))
@@ -83,8 +84,7 @@ runs:
             echo "claude-stream-tail: timed out after ${TIMEOUT_SECONDS}s with no session file" >&2
             exit 0
           fi
-          # Newest *.jsonl created after our start marker, anywhere under projects dir.
-          SESSION_FILE="$(find "$PROJECTS_DIR" -type f -name '*.jsonl' -newer "$START_MARKER" -printf '%T@ %p\n' 2>/dev/null \
+          SESSION_FILE="$(find "$PROJECTS_DIR" -type f -name '*.jsonl' -printf '%T@ %p\n' 2>/dev/null \
             | sort -nr | head -1 | awk '{print $2}')"
           if [ -n "$SESSION_FILE" ] && [ -f "$SESSION_FILE" ]; then
             break

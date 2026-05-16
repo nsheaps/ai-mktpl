@@ -83,145 +83,168 @@ jobs:
         with:
           template-file: .github/prompts/claude-code-review.md
 
-      # Runs claude-code-action and a live chatroom-view sidecar in parallel
-      # within the same job. The sidecar (claude-stream-tail) waits for the
-      # SDK to create its session JSONL under ~/.claude/projects/ and tails
-      # it through claude-stream (from nsheaps/claude-utils) so the workflow
-      # log shows a colored chatroom view as Claude works. The parallel
-      # action streams both substeps' output live into a "Concurrent logs"
-      # group (each line prefixed [N]) and also replays each substep's
-      # output in its own group at end.
+      # claude-code-action runs sequentially. show_full_output: true keeps
+      # the original behavior: raw stream-json dumps to the workflow log
+      # live as Claude works. The post-hoc claude-stream-tail step below
+      # then renders the same session as a colored chatroom view -- both
+      # surfaces are visible in the run log.
       #
-      # claude-code-action@v1 calls the Claude Agent SDK in-process and no
-      # longer spawns the claude CLI, so a CLI-wrapper approach (the prior
-      # claude-stream-shim) is a no-op against v1. Tailing the SDK session
-      # file is the SDK-friendly equivalent.
-      #
-      # show_full_output: false suppresses the raw JSON dump in the
-      # claude-code-action substep's output; the live chatroom comes from
-      # the sidecar's stdout/stderr instead.
-      # TODO: re-pin nsheaps/github-actions references to post-merge SHAs
-      # on main once claude/stream-action-output-UtYyT merges. Branch ref
-      # used during development so shim/tail iterations flow through.
-      - name: Run claude review + live chatroom (parallel)
+      # The earlier attempt at qoomon/actions--parallel-steps + a sidecar
+      # tail action did not work: parallel-steps takes its `steps:` input
+      # as a string and re-parses it as YAML, but GitHub interpolates any
+      # multi-line ${{ }} expressions inside that string verbatim, so
+      # multi-line values (the 458-line prompt template, the multi-line
+      # settings JSON) wrecked the embedded YAML structure. Sequential is
+      # the simplest path that exercises the streaming action end-to-end.
+      - name: Run Claude Code Review
         id: claude-review
-        uses: qoomon/actions--parallel-steps@v1
+        uses: anthropics/claude-code-action@v1
+        env:
+          GH_TOKEN: '${{ steps.auth.outputs.token }}'
+          GITHUB_TOKEN: '${{ steps.auth.outputs.token }}'
+          # These are in addition to any parsed settings.json files
+          # Prefer this over claude_args, almost everything can be specified via settings json or env vars
+          # While Bash is allowed, the list here is passed directly to the agent, so explicitly defining them
+          # causes the agent to see those Bash commands as more relevant and will use them more often.
+          # Ref: https://code.claude.com/docs/en/settings
+          INPUT_SETTINGS_JSON: |
+            {
+              "permissions": {
+                "additionalDirectories": ["/tmp/"],
+                "allow":[
+                  "Task",
+                  "Glob",
+                  "Grep",
+                  "LS",
+                  "ExitPlanMode",
+                  "Read",
+                  "Edit",
+                  "Write",
+                  "Replace",
+                  "MultiEdit",
+                  "NotebookRead",
+                  "NotebookEdit",
+                  "TodoWrite",
+                  "WebSearch",
+                  "WebFetch",
+                  "Bash",
+                  "BashOutput",
+                  "KillBash",
+                  "ListMcpResourcesTool",
+                  "ReadMcpResourceTool",
+                  "SlashCommand",
+                  "Skill",
+
+                  "mcp__github__github_support_docs_search",
+                  "mcp__github__get_pull_request",
+                  "mcp__github__get_pull_request_diff",
+                  "mcp__github__get_pull_request_files",
+                  "mcp__github__get_pull_request_review_comments",
+                  "mcp__github__get_pull_request_reviews",
+                  "mcp__github__get_pull_request_status",
+                  "mcp__github__create_pending_pull_request_review",
+                  "mcp__github__add_comment_to_pending_review",
+                  "mcp__github__submit_pending_pull_request_review",
+
+                  "Bash(git log:*)",
+                  "Bash(git diff:*)",
+                  "Bash(git status:*)",
+                  "Bash(git rev-parse:*)",
+                  "Bash(git fetch:*)",
+                  "Bash(git show:*)",
+                  "Bash(git merge:*)",
+                  "Bash(git remote get-url:*)",
+                  "Bash(git rm:*)",
+                  "Bash(gh issue view:*)",
+                  "Bash(gh search:*)",
+                  "Bash(gh issue list:*)",
+                  "Bash(gh pr comment:*)",
+                  "Bash(gh pr diff:*)",
+                  "Bash(gh pr view:*)",
+                  "Bash(gh pr-review:*)",
+                  "Bash(gh pr-review review view:*)",
+                  "Bash(gh pr list:*)",
+                  "Bash(gh run list:*)",
+                  "Bash(gh run view:*)",
+                  "Bash(gh extension list:*)"
+                ],
+                "_denyComment": "It will wait for it's own check run to complete, not to mention it should review the code.",
+                "deny": [
+                  "mcp__github_ci__get_ci_status",
+                  "mcp__github_ci__get_workflow_run_details",
+                  "mcp__github_ci__download_job_log",
+                  "Bash(gh pr checks:*)",
+                  "Bash(git push:*)"
+                ]
+              },
+              "model": "opus",
+              "env": {
+                "GH_TOKEN": "${{ steps.auth.outputs.token }}",
+                "GITHUB_TOKEN": "${{ steps.auth.outputs.token }}",
+                "_GH_PAGER_COMMENT": "disable gh from being able to treat the terminal as interactive",
+                "GH_PAGER": "cat",
+                "GH_PROMPT_DISABLED": "true",
+                "_GH_BROWSER_COMMENT": "what app to open URLs with, since claude is not interactive, we use curl to pipe it to stdout",
+                "GH_BROWSER": "curl",
+                "CLAUDE_CODE_REMOTE": "true"
+              }
+            }
         with:
-          steps: |
-            - id: review
-              uses: anthropics/claude-code-action@v1
-              env:
-                GH_TOKEN: '${{ steps.auth.outputs.token }}'
-                GITHUB_TOKEN: '${{ steps.auth.outputs.token }}'
-              with:
-                anthropic_api_key: ${{ secrets.REVIEW_ANTHROPIC_API_KEY || secrets.ANTHROPIC_API_KEY || '' }}
-                claude_code_oauth_token: ${{ (secrets.REVIEW_ANTHROPIC_API_KEY || secrets.ANTHROPIC_API_KEY) && '' || secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-                show_full_output: false
-                # bug: https://github.com/anthropics/claude-code-action/issues/759
-                # won't find the past comments since it's looking for github-actions[bot], not the auth it uses to post the comment.
-                bot_id: ${{ steps.auth.outputs.user-id }}
-                bot_name: ${{ steps.auth.outputs.user-name }}
-                allowed_bots: 'github-actions[bot],renovate[bot],claude[bot],automation-nsheaps[bot],jack-nsheaps[bot],henry-nsheaps[bot],alex-nsheaps[bot]'
-                github_token: ${{ steps.auth.outputs.token }}
-                # Inlined here as a YAML literal scalar (NOT via env. interpolation)
-                # because qoomon/actions--parallel-steps re-parses the `steps: |`
-                # value as YAML; multi-line ${{ env.X }} substitution into the
-                # outer literal scalar would wreck this embedded YAML's
-                # indentation. ${{ steps.auth.outputs.token }} expressions inside
-                # are still evaluated by GitHub at workflow-parse time.
-                settings: |
-                  {
-                    "permissions": {
-                      "additionalDirectories": ["/tmp/"],
-                      "allow": [
-                        "Task", "Glob", "Grep", "LS", "ExitPlanMode",
-                        "Read", "Edit", "Write", "Replace", "MultiEdit",
-                        "NotebookRead", "NotebookEdit", "TodoWrite",
-                        "WebSearch", "WebFetch",
-                        "Bash", "BashOutput", "KillBash",
-                        "ListMcpResourcesTool", "ReadMcpResourceTool",
-                        "SlashCommand", "Skill",
+          anthropic_api_key: ${{ secrets.REVIEW_ANTHROPIC_API_KEY || secrets.ANTHROPIC_API_KEY || '' }}
+          claude_code_oauth_token: ${{ (secrets.REVIEW_ANTHROPIC_API_KEY || secrets.ANTHROPIC_API_KEY) && '' || secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # WARNING: PRINTS FULL JSON OUTPUT WHICH MAY INCLUDE SECRETS.
+          # ONLY USE IN PRIVATE ENVIRONMENTS. Kept ON so the workflow log
+          # has a live signal during the run; the post-hoc claude-stream-tail
+          # step below also renders a chatroom view of the same session.
+          show_full_output: true
+          # bug: https://github.com/anthropics/claude-code-action/issues/759
+          # won't find the past comments since it's looking for github-actions[bot], not the auth it uses to post the comment.
+          bot_id: ${{ steps.auth.outputs.user-id }}
+          bot_name: ${{ steps.auth.outputs.user-name }}
+          allowed_bots: 'github-actions[bot],renovate[bot],claude[bot],automation-nsheaps[bot],jack-nsheaps[bot],henry-nsheaps[bot],alex-nsheaps[bot]'
+          github_token: ${{ steps.auth.outputs.token }}
+          settings: ${{ env.INPUT_SETTINGS_JSON }}
+          additional_permissions: |
+            actions: read
+          # Prompt is loaded from external template file via interpolate-prompt action
+          prompt: ${{ steps.prompt.outputs.prompt }}
+          # Prefer using settings.json, but some are needed to be set here for the action
+          # to automatically enable the MCP servers. Placing anything with `mcp__github__` prefix will enable the github mcp server.
+          # See https://github.com/anthropics/claude-code-action/issues/723#issuecomment-3716307305
+          # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
+          # or https://docs.claude.com/en/docs/claude-code/cli-reference for available options
+          # Note: We intentionally do NOT include 'github_comment' (used for Claude's persistent "working on it" comment)
+          # or 'github_inline_comment' (used for inline comments outside of reviews) in the allowed tools / claude_args,
+          # to prevent Claude from posting persistent status comments or inline comments outside of proper reviews.
+          claude_args: >-
+            --allowedTools
+            mcp__github__github_support_docs_search,
+            mcp__github__get_pull_request,
+            mcp__github__get_pull_request_diff,
+            mcp__github__get_pull_request_files,
+            mcp__github__get_pull_request_review_comments,
+            mcp__github__get_pull_request_reviews,
+            mcp__github__get_pull_request_status,
+            mcp__github__create_pending_pull_request_review,
+            mcp__github__add_comment_to_pending_review,
+            mcp__github__submit_pending_pull_request_review
 
-                        "mcp__github__github_support_docs_search",
-                        "mcp__github__get_pull_request",
-                        "mcp__github__get_pull_request_diff",
-                        "mcp__github__get_pull_request_files",
-                        "mcp__github__get_pull_request_review_comments",
-                        "mcp__github__get_pull_request_reviews",
-                        "mcp__github__get_pull_request_status",
-                        "mcp__github__create_pending_pull_request_review",
-                        "mcp__github__add_comment_to_pending_review",
-                        "mcp__github__submit_pending_pull_request_review",
-
-                        "Bash(git log:*)",
-                        "Bash(git diff:*)",
-                        "Bash(git status:*)",
-                        "Bash(git rev-parse:*)",
-                        "Bash(git fetch:*)",
-                        "Bash(git show:*)",
-                        "Bash(git merge:*)",
-                        "Bash(git remote get-url:*)",
-                        "Bash(git rm:*)",
-                        "Bash(gh issue view:*)",
-                        "Bash(gh search:*)",
-                        "Bash(gh issue list:*)",
-                        "Bash(gh pr comment:*)",
-                        "Bash(gh pr diff:*)",
-                        "Bash(gh pr view:*)",
-                        "Bash(gh pr-review:*)",
-                        "Bash(gh pr-review review view:*)",
-                        "Bash(gh pr list:*)",
-                        "Bash(gh run list:*)",
-                        "Bash(gh run view:*)",
-                        "Bash(gh extension list:*)"
-                      ],
-                      "_denyComment": "It will wait for it's own check run to complete, not to mention it should review the code.",
-                      "deny": [
-                        "mcp__github_ci__get_ci_status",
-                        "mcp__github_ci__get_workflow_run_details",
-                        "mcp__github_ci__download_job_log",
-                        "Bash(gh pr checks:*)",
-                        "Bash(git push:*)"
-                      ]
-                    },
-                    "model": "opus",
-                    "env": {
-                      "GH_TOKEN": "${{ steps.auth.outputs.token }}",
-                      "GITHUB_TOKEN": "${{ steps.auth.outputs.token }}",
-                      "GH_PAGER": "cat",
-                      "GH_PROMPT_DISABLED": "true",
-                      "GH_BROWSER": "curl",
-                      "CLAUDE_CODE_REMOTE": "true"
-                    }
-                  }
-                additional_permissions: |
-                  actions: read
-                # Prompt is loaded from external template file via interpolate-prompt action
-                prompt: ${{ steps.prompt.outputs.prompt }}
-                # Prefer using settings.json, but some are needed to be set here for the action
-                # to automatically enable the MCP servers. Placing anything with `mcp__github__` prefix will enable the github mcp server.
-                # See https://github.com/anthropics/claude-code-action/issues/723#issuecomment-3716307305
-                # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
-                # or https://docs.claude.com/en/docs/claude-code/cli-reference for available options
-                # Note: We intentionally do NOT include 'github_comment' (used for Claude's persistent "working on it" comment)
-                # or 'github_inline_comment' (used for inline comments outside of reviews) in the allowed tools / claude_args,
-                # to prevent Claude from posting persistent status comments or inline comments outside of proper reviews.
-                claude_args: >-
-                  --allowedTools
-                  mcp__github__github_support_docs_search,
-                  mcp__github__get_pull_request,
-                  mcp__github__get_pull_request_diff,
-                  mcp__github__get_pull_request_files,
-                  mcp__github__get_pull_request_review_comments,
-                  mcp__github__get_pull_request_reviews,
-                  mcp__github__get_pull_request_status,
-                  mcp__github__create_pending_pull_request_review,
-                  mcp__github__add_comment_to_pending_review,
-                  mcp__github__submit_pending_pull_request_review
-
-            - id: chatroom
-              # TEMPORARY: action is hosted locally in this repo while the
-              # workflow stabilizes. Once verified, the canonical copy at
-              # nsheaps/github-actions/.github/actions/claude-stream-tail
-              # should be SHA-pinned here and the local copy removed.
-              uses: ./.github/actions/claude-stream-tail
+      # Render the just-completed Claude session as a colored chatroom view
+      # in the workflow log. Runs whether the review succeeded or failed
+      # (always()) so the session is always visible. The action finds the
+      # newest *.jsonl under ~/.claude/projects/ (the SDK's session store)
+      # and tails it through claude-stream from nsheaps/claude-utils. In
+      # this post-hoc position, the file already contains the terminal
+      # `result` message, so the action streams the whole transcript and
+      # exits cleanly.
+      #
+      # TEMPORARY: the action is hosted locally in this repo
+      # (.github/actions/claude-stream-tail) while the workflow stabilizes.
+      # Once verified, the canonical copy at
+      # nsheaps/github-actions/.github/actions/claude-stream-tail should
+      # be SHA-pinned here and the local copy removed.
+      - name: Render Claude session as chatroom view
+        if: ${{ always() && !cancelled() }}
+        uses: ./.github/actions/claude-stream-tail
+        with:
+          timeout-seconds: '120'
