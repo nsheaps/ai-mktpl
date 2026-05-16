@@ -16,25 +16,26 @@ no longer preserved when plugins are copied to the cache, so every plugin's
 This plugin is the fix:
 
 1. The libraries live here, in `plugins/shared-lib/lib/*.sh`.
-2. A `SessionStart` hook (matcher `"*"`) copies them from the plugin root to
-   `${CLAUDE_PLUGIN_DATA}/lib/` (with a manifest-hash check so we only
-   re-copy when content changes). Running on every session start guarantees
-   that updated files are picked up when the plugin is upgraded, not just
-   when it is freshly installed.
-3. Because the libs are written by a `SessionStart` hook, they are on disk
-   before any dependent plugin's `SessionStart` hook body runs (hook
-   ordering within a session is deterministic by registration order). The
-   wait-loop in dependent plugins is retained as defense-in-depth for edge
-   cases where session start hook ordering may vary.
-4. Other plugins declare a dependency on `shared-lib` in their
-   `plugin.json`, then source the libs out of the shared-lib data
-   directory (with a wait-and-source guard as defense-in-depth).
+2. The sync script is registered on **two** hook events:
+   - `Setup{matcher:"init"}` — fires during the `claude --init-only`
+     pre-pass (the launcher's fresh-install Phase 1). This guarantees
+     the libs are on disk *before* any dependent plugin's
+     `SessionStart` body runs in the interactive session.
+   - `SessionStart{matcher:"*"}` — fires every session. Catches plugin
+     updates (Setup{init} does **not** re-fire when a plugin version
+     bumps) and self-heals if the data dir is manually deleted.
 
-See `docs/research/claude-maintenance-flag-verification.md` in the agent
-repo for the historical launcher-contract analysis (why the original
-`Setup{init}` approach used `--init-only` and what carries over between
-a pre-pass and interactive launch). As of v1.0.2 this plugin uses a
-`SessionStart` hook instead; that document is now background reading only.
+   Both triggers point at the same script. A manifest-hash check makes
+   repeat invocations a fast no-op when content is unchanged.
+3. Other plugins declare a dependency on `shared-lib` in their
+   `plugin.json`, then source the libs out of the shared-lib data
+   directory (with a wait-and-source guard as defense-in-depth — see
+   below).
+
+See [`docs/research/claude-maintenance-flag-verification.md`](https://github.com/nsheaps/.ai-agent-jack/blob/main/docs/research/claude-maintenance-flag-verification.md)
+(in the `nsheaps/.ai-agent-jack` repo) for the launcher-contract
+analysis on `--init-only` semantics and what carries over between the
+pre-pass and the interactive session.
 
 ## How dependent plugins consume it
 
@@ -126,15 +127,28 @@ refactor (tracked as a follow-up) may derive the marketplace suffix from
 
 ## Hook ordering
 
-The `SessionStart` hook fires at the start of every session (fresh launch,
-`--resume`, `--continue`, or post-`/compact` resume). The manifest-diff
-check keeps the hot path fast: if the lib content hasn't changed since the
-last sync, the script exits in milliseconds.
+Two events fire the sync script:
+
+- **`Setup{matcher:"init"}`** runs during the `claude --init-only`
+  pre-pass. The launcher's
+  [`.claude/hooks/session-start/01-install-plugins.sh`](https://github.com/nsheaps/ai-mktpl/blob/main/.claude/hooks/session-start/01-install-plugins.sh)
+  runs Phase 1 (Setup{init} across all plugins) before Phase 2
+  (SessionStart across all plugins). On a fresh-install web session this
+  guarantees `shared-lib`'s data dir is populated before any dependent
+  plugin's `SessionStart` body executes.
+- **`SessionStart{matcher:"*"}`** runs every session (fresh launch,
+  `--resume`, `--continue`, post-`/compact` resume). This is the path
+  that picks up plugin updates and self-heals if the data dir is wiped.
+
+The manifest-diff check keeps the hot path fast: if the lib content
+hasn't changed since the last sync, the script exits in milliseconds.
+Both hooks therefore co-exist cheaply.
 
 The wait-loop in dependent plugins is retained as defense-in-depth: it
-handles edge cases where hook ordering may cause a race (e.g., a dependent
-plugin's `SessionStart` hook is scheduled before shared-lib's), and is a
-no-op on the hot path since the libs persist across sessions.
+handles edge cases where `Setup{init}` may not have run (e.g., the user
+invokes `claude` directly outside the launcher, or interactive-mode
+`SessionStart` ordering races), and is a no-op on the hot path since
+the libs persist across sessions.
 
 ## Releasing
 
