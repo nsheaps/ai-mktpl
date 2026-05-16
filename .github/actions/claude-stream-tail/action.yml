@@ -1,0 +1,132 @@
+name: 'Claude Stream Tail'
+description: |
+  Sidecar action that pretty-prints a live Claude Code session as a chatroom
+  view. Waits for a fresh session JSONL to appear under ~/.claude/projects/,
+  tails it through claude-stream (from nsheaps/claude-utils), and exits when
+  the SDK writes its terminal result message (or on timeout).
+
+  Designed to run in parallel with anthropics/claude-code-action via
+  qoomon/actions--parallel-steps, since claude-code-action@v1 uses the
+  Claude Agent SDK in-process and no longer spawns the claude CLI (making
+  CLI-wrapper approaches impossible).
+
+  TEMPORARY LOCATION: this action also lives in nsheaps/github-actions but
+  is held here so the workflow can iterate without round-trips through
+  the shared repo. Once stable, this copy should be removed and the
+  workflow should reference nsheaps/github-actions/.github/actions/claude-stream-tail.
+
+author: 'nsheaps'
+
+branding:
+  icon: 'message-circle'
+  color: 'green'
+
+inputs:
+  claude-utils-version:
+    description: 'Tag of nsheaps/claude-utils to install (provides claude-stream). Without leading v.'
+    required: false
+    default: '0.12.13'
+  timeout-seconds:
+    description: 'Max seconds to wait for the session to start, and max seconds to follow it. The action exits cleanly (success) on timeout so it does not fail the parallel block.'
+    required: false
+    default: '1800'
+  poll-interval-seconds:
+    description: 'How often to poll for a new session JSONL while waiting for it to appear.'
+    required: false
+    default: '1'
+  projects-dir:
+    description: 'Override for the Claude Agent SDK projects directory. Defaults to $HOME/.claude/projects.'
+    required: false
+    default: ''
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install claude-stream from nsheaps/claude-utils
+      shell: bash
+      env:
+        VERSION: ${{ inputs.claude-utils-version }}
+      run: |
+        set -euo pipefail
+        REPO_DIR="${RUNNER_TEMP}/claude-utils"
+        if [ ! -d "$REPO_DIR" ]; then
+          git clone --depth 1 --branch "v${VERSION}" \
+            https://github.com/nsheaps/claude-utils.git "$REPO_DIR"
+        fi
+        echo "$REPO_DIR/bin" >> "$GITHUB_PATH"
+
+    - name: Tail session JSONL through claude-stream
+      shell: bash
+      env:
+        TIMEOUT_SECONDS: ${{ inputs.timeout-seconds }}
+        POLL_INTERVAL_SECONDS: ${{ inputs.poll-interval-seconds }}
+        PROJECTS_DIR_OVERRIDE: ${{ inputs.projects-dir }}
+      run: |
+        set -euo pipefail
+
+        PROJECTS_DIR="${PROJECTS_DIR_OVERRIDE:-$HOME/.claude/projects}"
+        mkdir -p "$PROJECTS_DIR"
+
+        START_MARKER="${RUNNER_TEMP}/claude-stream-tail.start"
+        touch "$START_MARKER"
+
+        echo "claude-stream-tail: watching $PROJECTS_DIR for new session JSONL (timeout ${TIMEOUT_SECONDS}s)"
+
+        START=$(date +%s)
+        SESSION_FILE=""
+
+        # Wait for a NEW session JSONL to appear (newer than our start marker).
+        while true; do
+          NOW=$(date +%s)
+          ELAPSED=$((NOW - START))
+          if [ "$ELAPSED" -ge "$TIMEOUT_SECONDS" ]; then
+            echo "claude-stream-tail: timed out after ${TIMEOUT_SECONDS}s with no session file" >&2
+            exit 0
+          fi
+          # Newest *.jsonl created after our start marker, anywhere under projects dir.
+          SESSION_FILE="$(find "$PROJECTS_DIR" -type f -name '*.jsonl' -newer "$START_MARKER" -printf '%T@ %p\n' 2>/dev/null \
+            | sort -nr | head -1 | awk '{print $2}')"
+          if [ -n "$SESSION_FILE" ] && [ -f "$SESSION_FILE" ]; then
+            break
+          fi
+          sleep "$POLL_INTERVAL_SECONDS"
+        done
+
+        echo "claude-stream-tail: tailing $SESSION_FILE"
+
+        # Remaining time budget for the follow phase.
+        NOW=$(date +%s)
+        REMAINING=$((TIMEOUT_SECONDS - (NOW - START)))
+        [ "$REMAINING" -lt 30 ] && REMAINING=30
+
+        # Pipeline:
+        #   tail -F (line-buffered)  -> awk (exit on terminal "result" line)  -> claude-stream
+        # awk closing its stdin makes claude-stream finish cleanly; tail dies via SIGPIPE.
+        # `timeout` caps the whole pipeline so a stuck session can't hold the parallel block.
+        set +e
+        timeout --foreground --signal=TERM "${REMAINING}" bash -c '
+          set -o pipefail
+          stdbuf -oL tail -n +1 -F "$1" 2>/dev/null \
+            | stdbuf -oL awk "{
+                print;
+                fflush();
+                if (\$0 ~ /\"type\":[[:space:]]*\"result\"/) { exit }
+              }" \
+            | claude-stream
+        ' _ "$SESSION_FILE"
+        STATUS=$?
+        set -e
+
+        # 124 = GNU timeout fired. We treat that as success (do not fail the parallel block):
+        # the main claude-code-action step is the source of truth for success/failure.
+        if [ "$STATUS" -eq 124 ]; then
+          echo "claude-stream-tail: follow phase hit ${REMAINING}s timeout" >&2
+          exit 0
+        fi
+        # SIGPIPE from tail / claude-stream is normal at end-of-stream; don't fail on it.
+        if [ "$STATUS" -eq 141 ] || [ "$STATUS" -eq 0 ]; then
+          echo "claude-stream-tail: done"
+          exit 0
+        fi
+        echo "claude-stream-tail: pipeline exited with status $STATUS (non-fatal)" >&2
+        exit 0

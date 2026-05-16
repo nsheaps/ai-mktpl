@@ -239,4 +239,8 @@ jobs:
                   mcp__github__submit_pending_pull_request_review
 
             - id: chatroom
-              uses: nsheaps/github-actions/.github/actions/claude-stream-tail@claude/stream-action-output-UtYyT
+              # TEMPORARY: action is hosted locally in this repo while the
+              # workflow stabilizes. Once verified, the canonical copy at
+              # nsheaps/github-actions/.github/actions/claude-stream-tail
+              # should be SHA-pinned here and the local copy removed.
+              uses: ./.github/actions/claude-stream-tail
