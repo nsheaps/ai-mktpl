@@ -242,6 +242,9 @@ jobs:
                 # Prompt loaded from external template via interpolate-prompt
                 # action. toJSON-wrapped for safe single-line interpolation
                 # into qoomon's embedded steps YAML (see KEY TRICK above).
+                # Same string-only caveat as `settings:` -- if the prompt
+                # output were ever an object/array (it isn't; interpolate-prompt
+                # emits a string), toJSON would emit multi-line pretty JSON.
                 prompt: ${{ toJSON(steps.prompt.outputs.prompt) }}
                 # Prefer using settings.json, but some are needed to be set here for the action
                 # to automatically enable the MCP servers. Placing anything with `mcp__github__` prefix will enable the github mcp server.
