@@ -1,23 +1,21 @@
 name: 'Claude Stream Tail'
 description: |
   Renders a Claude Code session as a colored chatroom view in the workflow
-  log. Picks the most recent *.jsonl file under ~/.claude/projects/ (the
-  Claude Agent SDK's session store) and tails it through claude-stream
-  (from nsheaps/claude-utils), exiting when the SDK writes its terminal
-  result message or on timeout.
+  log. Picks a *.jsonl file under ~/.claude/projects/ (the Claude Agent
+  SDK's session store) and tails it through claude-stream (from
+  nsheaps/claude-utils), exiting when the SDK writes its terminal result
+  message or on timeout.
 
-  This copy is post-hoc only -- it intentionally drops the upstream's
-  start-marker freshness filter so it can pick up a session JSONL that
-  was written before this step started (e.g. by a preceding
-  anthropics/claude-code-action step). Safe on fresh CI runners where no
-  stale JSONL can exist; would pick stale data on persistent / self-hosted
-  runners with a previous Claude session in $HOME/.claude/projects/.
+  Two modes via `wait-for-new-session`:
+    - true (default, sidecar): wait for a JSONL that appears AFTER this
+      action starts. Safe alongside anthropics/claude-code-action via
+      qoomon/actions--parallel-steps; ignores any pre-existing JSONL on
+      persistent runners.
+    - false (post-hoc): pick the most recent JSONL regardless of age.
+      Use after the action ran so the just-completed session is rendered.
 
   TEMPORARY LOCATION: this action will move to
-  nsheaps/github-actions/.github/actions/claude-stream-tail once a
-  unified version supports both post-hoc (this) and sidecar (with
-  freshness filter) modes via an input. Until then, this in-repo copy
-  exists so the workflow can be iterated on without cross-repo round-trips.
+  nsheaps/github-actions/.github/actions/claude-stream-tail once stable.
   Tracking: nsheaps/github-actions branch claude/stream-action-output-UtYyT.
 
 author: 'nsheaps'
@@ -43,6 +41,10 @@ inputs:
     description: 'Override for the Claude Agent SDK projects directory. Defaults to $HOME/.claude/projects.'
     required: false
     default: ''
+  wait-for-new-session:
+    description: 'true = sidecar mode (only pick JSONL files created after this action starts); false = post-hoc mode (pick the most recent JSONL regardless of age).'
+    required: false
+    default: 'true'
 
 runs:
   using: 'composite'
@@ -66,22 +68,33 @@ runs:
         TIMEOUT_SECONDS: ${{ inputs.timeout-seconds }}
         POLL_INTERVAL_SECONDS: ${{ inputs.poll-interval-seconds }}
         PROJECTS_DIR_OVERRIDE: ${{ inputs.projects-dir }}
+        WAIT_FOR_NEW: ${{ inputs.wait-for-new-session }}
       run: |
         set -euo pipefail
 
         PROJECTS_DIR="${PROJECTS_DIR_OVERRIDE:-$HOME/.claude/projects}"
         mkdir -p "$PROJECTS_DIR"
 
-        echo "claude-stream-tail: watching $PROJECTS_DIR for the newest session JSONL (timeout ${TIMEOUT_SECONDS}s)"
+        # Sidecar mode (default): only pick JSONL files newer than this
+        # start marker, so a pre-existing JSONL on a persistent runner
+        # doesn't get mistaken for the current run's session.
+        # Post-hoc mode (wait-for-new-session=false): drop the marker so
+        # the just-completed session (written before this step started)
+        # is picked.
+        START_MARKER="${RUNNER_TEMP}/claude-stream-tail.start"
+        touch "$START_MARKER"
+
+        if [ "${WAIT_FOR_NEW}" = "true" ]; then
+          echo "claude-stream-tail: sidecar mode -- watching $PROJECTS_DIR for a NEW session JSONL (timeout ${TIMEOUT_SECONDS}s)"
+          FIND_FILTER=(-newer "$START_MARKER")
+        else
+          echo "claude-stream-tail: post-hoc mode -- watching $PROJECTS_DIR for the most recent session JSONL (timeout ${TIMEOUT_SECONDS}s)"
+          FIND_FILTER=()
+        fi
 
         START=$(date +%s)
         SESSION_FILE=""
 
-        # Wait for the newest session JSONL to appear. In live mode (sidecar
-        # alongside claude-code-action) this loops until the SDK creates one;
-        # in post-hoc mode (run after the action) it picks the just-finished
-        # session immediately. CI runners are fresh per job, so no stale-file
-        # filter is needed.
         while true; do
           NOW=$(date +%s)
           ELAPSED=$((NOW - START))
@@ -89,7 +102,7 @@ runs:
             echo "claude-stream-tail: timed out after ${TIMEOUT_SECONDS}s with no session file" >&2
             exit 0
           fi
-          SESSION_FILE="$(find "$PROJECTS_DIR" -type f -name '*.jsonl' -printf '%T@ %p\n' 2>/dev/null \
+          SESSION_FILE="$(find "$PROJECTS_DIR" -type f -name '*.jsonl' "${FIND_FILTER[@]}" -printf '%T@ %p\n' 2>/dev/null \
             | sort -nr | head -1 | awk '{print $2}')"
           if [ -n "$SESSION_FILE" ] && [ -f "$SESSION_FILE" ]; then
             break
