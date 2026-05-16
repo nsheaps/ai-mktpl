@@ -16,23 +16,25 @@ no longer preserved when plugins are copied to the cache, so every plugin's
 This plugin is the fix:
 
 1. The libraries live here, in `plugins/shared-lib/lib/*.sh`.
-2. A `Setup` hook (matcher `"init"`) copies them from the plugin root to
+2. A `SessionStart` hook (matcher `"*"`) copies them from the plugin root to
    `${CLAUDE_PLUGIN_DATA}/lib/` (with a manifest-hash check so we only
-   re-copy when content changes).
-3. The agent launcher fires a `claude --init-only --dangerously-skip-permissions`
-   pre-pass before the interactive session. The pre-pass fires
-   `Setup{trigger:"init"}` plus `SessionStart{source:"startup"}` and then
-   exits. This is the critical ordering guarantee: the libs are written
-   to disk before any dependent plugin's `SessionStart` hook runs in the
-   interactive session.
+   re-copy when content changes). Running on every session start guarantees
+   that updated files are picked up when the plugin is upgraded, not just
+   when it is freshly installed.
+3. Because the libs are written by a `SessionStart` hook, they are on disk
+   before any dependent plugin's `SessionStart` hook body runs (hook
+   ordering within a session is deterministic by registration order). The
+   wait-loop in dependent plugins is retained as defense-in-depth for edge
+   cases where session start hook ordering may vary.
 4. Other plugins declare a dependency on `shared-lib` in their
    `plugin.json`, then source the libs out of the shared-lib data
    directory (with a wait-and-source guard as defense-in-depth).
 
 See `docs/research/claude-maintenance-flag-verification.md` in the agent
-repo for the full launcher-contract analysis (why `--init-only` and not
-`--maintenance`, what carries over between the pre-pass and interactive
-launch).
+repo for the historical launcher-contract analysis (why the original
+`Setup{init}` approach used `--init-only` and what carries over between
+a pre-pass and interactive launch). As of v1.0.2 this plugin uses a
+`SessionStart` hook instead; that document is now background reading only.
 
 ## How dependent plugins consume it
 
@@ -124,25 +126,15 @@ refactor (tracked as a follow-up) may derive the marketplace suffix from
 
 ## Hook ordering
 
-Setup hooks fire in the `--init-only` pre-pass, which exits before the
-interactive session starts. The interactive session sees the libs already
-on disk in `${CLAUDE_PLUGIN_DATA}/lib/` before any dependent plugin's
-`SessionStart` hook fires.
+The `SessionStart` hook fires at the start of every session (fresh launch,
+`--resume`, `--continue`, or post-`/compact` resume). The manifest-diff
+check keeps the hot path fast: if the lib content hasn't changed since the
+last sync, the script exits in milliseconds.
 
 The wait-loop in dependent plugins is retained as defense-in-depth: it
-handles edge cases where the launcher pre-pass may not have run (e.g.,
-the user invokes `claude` directly outside the launcher), and is a no-op
-on the hot path since the libs persist across sessions.
-
-### What carries over between pre-pass and interactive launch
-
-- **Disk side effects (carry over):** plugin dirs, files written under
-  `${CLAUDE_PLUGIN_DATA}`, marketplace cache.
-- **Conversation/in-memory state (does NOT carry over):** the pre-pass
-  process exits and the interactive session is a fully independent
-  process. Setup hooks that need to inject env vars via `CLAUDE_ENV_FILE`
-  would not affect the interactive session unless the launcher captures
-  and re-injects them.
+handles edge cases where hook ordering may cause a race (e.g., a dependent
+plugin's `SessionStart` hook is scheduled before shared-lib's), and is a
+no-op on the hot path since the libs persist across sessions.
 
 ## Releasing
 

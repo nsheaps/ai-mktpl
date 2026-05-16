@@ -1,9 +1,9 @@
 {
-  "description": "Copy bundled lib/ files from CLAUDE_PLUGIN_ROOT into CLAUDE_PLUGIN_DATA via a Setup{trigger:init} hook. The launcher fires a `claude --init-only` pre-pass before the interactive session starts so the libs are on disk before any dependent plugin's SessionStart hook runs.",
+  "description": "Copy bundled lib/ files from CLAUDE_PLUGIN_ROOT into CLAUDE_PLUGIN_DATA via a SessionStart hook. Running on every session start (not just init) ensures agents pick up new lib files when the plugin is updated, not just when it is freshly installed. The manifest-diff check in sync-lib.sh keeps the hot path fast (no-op when content is unchanged).",
   "hooks": {
-    "Setup": [
+    "SessionStart": [
       {
-        "matcher": "init",
+        "matcher": "*",
         "hooks": [
           {
             "type": "command",
