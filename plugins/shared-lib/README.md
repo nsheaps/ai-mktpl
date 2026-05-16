@@ -19,7 +19,7 @@ This plugin is the fix:
 2. The sync script is registered on **two** hook events:
    - `Setup{matcher:"init"}` — fires during the `claude --init-only`
      pre-pass (the launcher's fresh-install Phase 1). This guarantees
-     the libs are on disk *before* any dependent plugin's
+     the libs are on disk _before_ any dependent plugin's
      `SessionStart` body runs in the interactive session.
    - `SessionStart{matcher:"*"}` — fires every session. Catches plugin
      updates (Setup{init} does **not** re-fire when a plugin version
@@ -27,6 +27,7 @@ This plugin is the fix:
 
    Both triggers point at the same script. A manifest-hash check makes
    repeat invocations a fast no-op when content is unchanged.
+
 3. Other plugins declare a dependency on `shared-lib` in their
    `plugin.json`, then source the libs out of the shared-lib data
    directory (with a wait-and-source guard as defense-in-depth — see
