@@ -238,11 +238,16 @@ jobs:
       # `result` message, so the action streams the whole transcript and
       # exits cleanly.
       #
-      # TEMPORARY: the action is hosted locally in this repo
+      # TEMPORARY: the action is hosted locally
       # (.github/actions/claude-stream-tail) while the workflow stabilizes.
-      # Once verified, the canonical copy at
-      # nsheaps/github-actions/.github/actions/claude-stream-tail should
-      # be SHA-pinned here and the local copy removed.
+      # The canonical copy at nsheaps/github-actions does NOT yet exist on
+      # main; it lives only on branch claude/stream-action-output-UtYyT and
+      # is materially different (uses a START_MARKER + find -newer filter
+      # appropriate for sidecar/parallel-steps use, which the local copy
+      # drops to support post-hoc invocation -- see action.yml comments).
+      # Resolution sequence: (1) land a unified version on
+      # nsheaps/github-actions main supporting both sidecar and post-hoc
+      # modes via an input, (2) SHA-pin it here, (3) delete this local copy.
       - name: Render Claude session as chatroom view
         if: ${{ always() && !cancelled() }}
         uses: ./.github/actions/claude-stream-tail

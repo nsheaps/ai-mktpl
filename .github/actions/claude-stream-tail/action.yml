@@ -1,19 +1,24 @@
 name: 'Claude Stream Tail'
 description: |
-  Sidecar action that pretty-prints a live Claude Code session as a chatroom
-  view. Waits for a fresh session JSONL to appear under ~/.claude/projects/,
-  tails it through claude-stream (from nsheaps/claude-utils), and exits when
-  the SDK writes its terminal result message (or on timeout).
+  Renders a Claude Code session as a colored chatroom view in the workflow
+  log. Picks the most recent *.jsonl file under ~/.claude/projects/ (the
+  Claude Agent SDK's session store) and tails it through claude-stream
+  (from nsheaps/claude-utils), exiting when the SDK writes its terminal
+  result message or on timeout.
 
-  Designed to run in parallel with anthropics/claude-code-action via
-  qoomon/actions--parallel-steps, since claude-code-action@v1 uses the
-  Claude Agent SDK in-process and no longer spawns the claude CLI (making
-  CLI-wrapper approaches impossible).
+  This copy is post-hoc only -- it intentionally drops the upstream's
+  start-marker freshness filter so it can pick up a session JSONL that
+  was written before this step started (e.g. by a preceding
+  anthropics/claude-code-action step). Safe on fresh CI runners where no
+  stale JSONL can exist; would pick stale data on persistent / self-hosted
+  runners with a previous Claude session in $HOME/.claude/projects/.
 
-  TEMPORARY LOCATION: this action also lives in nsheaps/github-actions but
-  is held here so the workflow can iterate without round-trips through
-  the shared repo. Once stable, this copy should be removed and the
-  workflow should reference nsheaps/github-actions/.github/actions/claude-stream-tail.
+  TEMPORARY LOCATION: this action will move to
+  nsheaps/github-actions/.github/actions/claude-stream-tail once a
+  unified version supports both post-hoc (this) and sidecar (with
+  freshness filter) modes via an input. Until then, this in-repo copy
+  exists so the workflow can be iterated on without cross-repo round-trips.
+  Tracking: nsheaps/github-actions branch claude/stream-action-output-UtYyT.
 
 author: 'nsheaps'
 
