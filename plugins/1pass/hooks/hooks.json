@@ -1,5 +1,5 @@
 {
-  "description": "Install 1Password CLI/op-exec and inject secrets on session start and at install time",
+  "description": "Install 1Password CLI/op-exec, inject secrets on session start, and redact secrets from tool outputs",
   "hooks": {
     "Setup": [
       {
@@ -26,6 +26,18 @@
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/op-exec-env.sh",
             "timeout": 60
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_DATA}/redact-secrets.sh",
+            "timeout": 5
           }
         ]
       }
