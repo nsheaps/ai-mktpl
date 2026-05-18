@@ -282,8 +282,22 @@ _register_posttooluse_hook() {
     return 0
   }
 
-  [ -n "$result" ] && printf '%s\n' "$result" > "$settings_file"
-  hook_log "registered PostToolUse redaction hook in ${settings_file}"
+  if [ -z "$result" ]; then
+    hook_log "WARN: jq produced empty result for PostToolUse hook registration"
+    return 0
+  fi
+
+  # Atomic write: tempfile-then-mv prevents partial writes on crash/signal.
+  # shared-lib's safe_write_settings doesn't support extra --arg params yet,
+  # so we implement the tempfile pattern directly here.
+  local tmp_file
+  tmp_file="$(mktemp "${settings_file}.XXXXXXXXXX")"
+  if printf '%s\n' "$result" > "$tmp_file" && mv "$tmp_file" "$settings_file"; then
+    hook_log "registered PostToolUse redaction hook in ${settings_file}"
+  else
+    rm -f "$tmp_file"
+    hook_log "WARN: failed to write PostToolUse hook to ${settings_file}"
+  fi
 }
 
 # --- Main ---

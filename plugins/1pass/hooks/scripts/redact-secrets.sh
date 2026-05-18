@@ -28,10 +28,29 @@
 
 set -euo pipefail
 
+# mapfile and ${!var} (indirect expansion) require bash 4.0+.
+# Stock macOS ships bash 3.2 — exit cleanly rather than erroring.
+if (( BASH_VERSINFO[0] < 4 )); then
+  echo '{}'
+  exit 0
+fi
+
 input="$(cat)"
 
-# Extract tool_result
-tool_result="$(printf '%s' "$input" | jq -r '.tool_result // ""' 2>/dev/null || true)"
+# Extract the text content from tool_result.
+# Per the official PostToolUse schema, tool_result is an object
+# {"type": "text", "text": "..."}, not a raw string. jq -r on an object
+# emits its JSON encoding, which escapes backslashes and double-quotes —
+# secrets containing those chars would be escaped and never matched by
+# grep -F. Extract .text when it's an object; fall back to treating it as
+# a string in case the schema changes or a string-typed result is received.
+tool_result="$(printf '%s' "$input" | jq -r '
+  .tool_result |
+  if type == "string" then .
+  elif type == "object" then (.text // "")
+  else ""
+  end
+' 2>/dev/null || true)"
 
 if [ -z "$tool_result" ]; then
   echo '{}'
