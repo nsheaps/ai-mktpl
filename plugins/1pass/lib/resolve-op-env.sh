@@ -43,13 +43,26 @@ op_resolve_item_to_callback() {
     return 0
   fi
 
-  # Run op-exec to get export statements
-  local exports
-  if ! exports="$(op-exec "$item_ref" 2>/dev/null)"; then
-    hook_fail "op-exec" "Failed to resolve item: $item_ref" \
+  # Run op-exec to get export statements.
+  # If _OP_EXEC_CONCEALED_FILE is set, pass --concealed-file so op-exec appends
+  # CONCEALED var names to that file during resolution. The flag must come before
+  # the op:// reference because op-exec's flag parser stops on op://.
+  local _concealed_args=()
+  if [[ -n "${_OP_EXEC_CONCEALED_FILE:-}" ]]; then
+    _concealed_args=(--concealed-file "$_OP_EXEC_CONCEALED_FILE")
+  fi
+
+  local exports op_exec_stderr
+  op_exec_stderr="$(mktemp -p "$_OP_EXEC_TMPDIR")"
+  if ! exports="$(op-exec "${_concealed_args[@]}" "$item_ref" 2>"$op_exec_stderr")"; then
+    local err_detail=""
+    [[ -s "$op_exec_stderr" ]] && err_detail=" — $(cat "$op_exec_stderr")"
+    rm -f "$op_exec_stderr"
+    hook_fail "op-exec" "Failed to resolve item: $item_ref${err_detail}" \
       "Verify the item exists and op has access to the vault"
     return 0
   fi
+  rm -f "$op_exec_stderr"
 
   if [ -z "$exports" ]; then
     hook_log "no fields found in $item_ref"
