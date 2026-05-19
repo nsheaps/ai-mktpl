@@ -21,6 +21,13 @@
 #
 # See: https://github.com/anthropics/claude-code/issues/20470
 #
+# Note on output keys: claude-code's PostToolUseHookSpecificOutputSchema
+# (source: entrypoints/sdk/coreSchemas.ts) accepts `additionalContext` and
+# `updatedMCPToolOutput` (MCP tools only) inside `hookSpecificOutput`, plus
+# top-level `systemMessage`, `decision`, `reason`. A previously-emitted
+# `updatedToolOutput` key is NOT in the schema and is silently ignored —
+# the working signal here is `systemMessage`.
+#
 # Manifest: written by op-exec-env.sh (SessionStart hook) at:
 #   ${CLAUDE_PLUGIN_DATA}/secrets-manifest.txt  — one var name per line
 # This hook derives the same path from $HOME when CLAUDE_PLUGIN_DATA is unset
@@ -48,23 +55,33 @@ fi
 
 input="$(cat)"
 
-# Extract the text content from tool_result.
-# Per the official PostToolUse schema, tool_result is an object
-# {"type": "text", "text": "..."}, not a raw string. jq -r on an object
-# emits its JSON encoding, which escapes backslashes and double-quotes —
-# secrets containing those chars would be escaped and never matched by
-# grep -F. Extract .text when it's an object; fall back to treating it as
-# a string in case the schema changes or a string-typed result is received.
-tool_result="$(printf '%s' "$input" | jq -r '
-  .tool_result |
+# Extract the textual content of the tool response.
+#
+# Per claude-code source (entrypoints/sdk/coreSchemas.ts
+# PostToolUseHookInputSchema), the field is `tool_response` (z.unknown), NOT
+# `tool_result` as some external docs claim. Per-tool shapes observed at
+# runtime (claude-code v2.1.x):
+#
+#   Bash:   { stdout, stderr, interrupted, isImage, noOutputExpected }
+#   Read/Edit/Write/Grep/Glob: typically { type: "text", text: "..." } or a
+#                              bare string — older docs reflect this shape.
+#   MCP tools: tool-specific objects.
+#
+# We coalesce the candidate textual fields so secret scanning covers all of
+# them. Non-textual responses (e.g. images) fall through to "" and the hook
+# exits without redaction.
+tool_text="$(printf '%s' "$input" | jq -r '
+  .tool_response |
   if type == "string" then .
-  elif type == "object" then (.text // "")
+  elif type == "object" then
+    [ (.stdout // ""), (.stderr // ""), (.text // ""), (.output // "") ]
+    | map(select(. != "")) | join("\n")
   else ""
   end
 ' 2>/dev/null || true)"
 
-if [ -z "$tool_result" ]; then
-  _log "exit: empty tool_result"
+if [ -z "$tool_text" ]; then
+  _log "exit: empty tool_response text"
   echo '{}'
   exit 0
 fi
@@ -125,15 +142,15 @@ if [ "${#redact_names[@]}" -eq 0 ]; then
 fi
 _log "candidates: ${#redact_names[@]} vars loaded for matching"
 
-# Check which values appear in the tool result and replace them
+# Check which values appear in the tool text and replace them
 found_names=()
-redacted_result="$tool_result"
+redacted_result="$tool_text"
 
 for i in "${!redact_names[@]}"; do
   var_name="${redact_names[$i]}"
   value="${redact_values[$i]}"
 
-  if printf '%s' "$tool_result" | grep -qF -- "$value" 2>/dev/null; then
+  if printf '%s' "$tool_text" | grep -qF -- "$value" 2>/dev/null; then
     # Bash parameter expansion for global literal string replacement.
     # The // prefix means "replace all occurrences"; the value is treated as a
     # literal string (not a pattern), so no escaping needed.
