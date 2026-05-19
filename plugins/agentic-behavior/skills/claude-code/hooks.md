@@ -334,11 +334,11 @@ Fires after a tool call succeeds. Matcher: same as PreToolUse. Input adds
 `tool_response` (z.unknown) and `tool_use_id` (string). Per-tool
 `tool_response` shapes (observed at claude-code v2.1.x runtime):
 
-| Tool                       | `tool_response` shape                                                |
-| -------------------------- | -------------------------------------------------------------------- |
-| `Bash`                     | `{ stdout, stderr, interrupted, isImage, noOutputExpected }`         |
-| `Read`/`Edit`/`Write`/`Grep`/`Glob` | `{ type: "text", text: string }` (object) or a bare string  |
-| MCP tools                  | tool-specific                                                        |
+| Tool                                | `tool_response` shape                                        |
+| ----------------------------------- | ------------------------------------------------------------ |
+| `Bash`                              | `{ stdout, stderr, interrupted, isImage, noOutputExpected }` |
+| `Read`/`Edit`/`Write`/`Grep`/`Glob` | `{ type: "text", text: string }` (object) or a bare string   |
+| MCP tools                           | tool-specific                                                |
 
 > **Common pitfall:** Earlier revisions of this doc called the field
 > `tool_result`. The actual schema is `tool_response` — see
@@ -366,7 +366,7 @@ can react (e.g. "your edit broke a test"). It does **not** undo the tool —
 the side effect already happened.
 
 > **Surfacing of `systemMessage`:** When emitted, it is delivered as a
-> `hook_system_message` *attachment* in the transcript JSONL, NOT rendered
+> `hook_system_message` _attachment_ in the transcript JSONL, NOT rendered
 > as a `<system-reminder>` text block. It is visible to the AI's context
 > but not visually distinct in the chat stream — grep
 > `hook_system_message` in the transcript to confirm delivery.
