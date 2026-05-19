@@ -23,8 +23,6 @@
 #
 # Manifest: written by op-exec-env.sh (SessionStart hook) at:
 #   ${CLAUDE_PLUGIN_DATA}/secrets-manifest.txt  — one var name per line
-# This hook derives the same path from $HOME when CLAUDE_PLUGIN_DATA is unset
-# (settings.json hooks don't receive plugin-context env vars).
 
 set -euo pipefail
 
@@ -58,12 +56,10 @@ if [ -z "$tool_result" ]; then
 fi
 
 # Locate the secrets manifest.
-# CLAUDE_PLUGIN_DATA is set when invoked as a plugin hook, but NOT when
-# invoked from settings.json (the working registration path). The deterministic
-# fallback mirrors how CLAUDE_PLUGIN_DATA is constructed by Claude Code:
+# CLAUDE_PLUGIN_DATA is set by the plugin runtime when this hook fires.
+# The fallback mirrors the deterministic path Claude Code uses so the hook
+# remains functional if the var is ever unset:
 #   ${HOME}/.claude/plugins/data/{plugin-name}-{marketplace-name}
-# Since HOME is agent-specific (e.g., /home/nsheaps/.agents/jack), this
-# correctly resolves to each agent's isolated plugin data directory.
 PLUGIN_DATA="${CLAUDE_PLUGIN_DATA:-${HOME}/.claude/plugins/data/1pass-ai-mktpl}"
 MANIFEST="${PLUGIN_DATA}/secrets-manifest.txt"
 
