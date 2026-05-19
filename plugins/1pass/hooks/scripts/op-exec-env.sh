@@ -247,7 +247,10 @@ _copy_redact_script() {
 
 # Register the PostToolUse redaction hook in settings.local.json.
 # Plugin-bundled hooks/hooks.json does NOT fire PostToolUse due to an upstream
-# bug (https://github.com/anthropics/claude-code/issues/6305). This function
+# bug (https://github.com/anthropics/claude-code/issues/6305). Empirically
+# confirmed 2026-05-19: Claude Code v2.1.128 CLI, scm-utils PostToolUse hook
+# from hooks.json did not fire on a matching Bash tool call. Remove this
+# workaround once #6305 is fixed upstream. This function
 # injects the hook directly into settings.local.json so it actually fires.
 # The injection is idempotent — re-running this on every SessionStart is safe.
 _register_posttooluse_hook() {
