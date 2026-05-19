@@ -40,10 +40,10 @@ set -euo pipefail
 
 # Debug log — written regardless of whether redaction fires.
 # Helps diagnose whether PostToolUse hooks are invoked at all.
-# Path: ${HOME}/.claude/tmp/redact-secrets-debug.log
-LOG_DIR="${HOME}/.claude/tmp"
-mkdir -p "$LOG_DIR"
-LOG_FILE="${LOG_DIR}/redact-secrets-debug.log"
+# Path: per-agent plugin data dir (same fallback as PLUGIN_DATA below), so
+# logs from alex/jack/henry don't interleave in a shared $HOME path.
+LOG_FILE="${CLAUDE_PLUGIN_DATA:-${HOME}/.claude/plugins/data/1pass-ai-mktpl}/redact-secrets-debug.log"
+mkdir -p "$(dirname "$LOG_FILE")"
 _log() { printf '%s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" >> "$LOG_FILE"; }
 
 _log "=== invoked (CLAUDE_PLUGIN_DATA=${CLAUDE_PLUGIN_DATA:-unset})"
