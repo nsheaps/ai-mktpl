@@ -71,6 +71,12 @@ source "${CLAUDE_PLUGIN_ROOT}/lib/resolve-op-env.sh"
 _OP_EXEC_TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$_OP_EXEC_TMPDIR"' EXIT
 
+# _OP_EXEC_CONCEALED_FILE is intentionally NOT set here.
+# The Setup hook only writes envLocal at plugin install/update time; it does not
+# own the redaction manifest (.env.secrets). SessionStart owns that file and
+# rewrites it from scratch on every session start. Redaction is session-scoped and
+# will always be correctly initialized before any tool calls fire.
+
 # --- Guards ---
 
 plugin_is_enabled || { hook_log "plugin disabled, skipping op-exec env setup"; hook_respond; exit 0; }
