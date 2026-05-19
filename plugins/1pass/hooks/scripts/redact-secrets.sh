@@ -48,6 +48,10 @@ fi
 
 input="$(cat)"
 
+# Log raw stdin top-level keys + first 200 chars — reveals actual schema on this Claude version.
+_log "stdin keys: $(printf '%s' "$input" | jq -r 'keys | join(", ")' 2>/dev/null || echo 'not-json')"
+_log "stdin preview: $(printf '%s' "$input" | head -c 200 | tr '\n' ' ')"
+
 # Extract the text content from tool_result.
 # Per the official PostToolUse schema, tool_result is an object
 # {"type": "text", "text": "..."}, not a raw string. jq -r on an object
