@@ -62,6 +62,14 @@ source "${CLAUDE_PLUGIN_ROOT}/lib/resolve-op-env.sh"
 _OP_EXEC_TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$_OP_EXEC_TMPDIR"' EXIT
 
+# Path for the secrets manifest used by the PostToolUse redaction hook.
+# The manifest records each resolved env var NAME (not value) so that
+# redact-secrets.sh can look up current values at tool-output scan time.
+_OP_EXEC_MANIFEST=""
+if [ -n "${CLAUDE_PLUGIN_DATA:-}" ]; then
+  _OP_EXEC_MANIFEST="${CLAUDE_PLUGIN_DATA}/secrets-manifest.txt"
+fi
+
 # --- Guards ---
 
 plugin_is_enabled || { hook_log "plugin disabled, skipping op-exec env"; hook_respond; exit 0; }
@@ -152,6 +160,12 @@ write_to_targets() {
   local env_name="$1"
   local env_value="$2"
 
+  # Record var NAME in the secrets manifest (not value) so that the PostToolUse
+  # redaction hook can look up current values from the env at scan time.
+  if [ -n "$_OP_EXEC_MANIFEST" ]; then
+    printf '%s\n' "$env_name" >> "$_OP_EXEC_MANIFEST"
+  fi
+
   if [ "$target_bash_env" = "true" ] && [ -n "${CLAUDE_ENV_FILE:-}" ]; then
     # NOTE: kept as append (not upsert) here: CLAUDE_ENV_FILE is session-fresh
     # and op-exec output for a single session is the source of truth.
@@ -210,6 +224,11 @@ process_item() {
 # --- Main ---
 
 do_inject() {
+  # Clear manifest from any previous session so this session starts fresh.
+  if [ -n "$_OP_EXEC_MANIFEST" ]; then
+    : > "$_OP_EXEC_MANIFEST"
+  fi
+
   hook_log_step "init" "Injecting 1Password items as environment"
 
   local targets_desc=""

@@ -134,27 +134,10 @@ fi
 # Format the list of redacted names
 names_csv="$(IFS=', '; echo "${found_names[*]}")"
 
-message="⚠️  SECRET VALUES DETECTED IN TOOL OUTPUT
-
-The tool output above contained 1Password-managed secrets. The values must
-not be repeated in responses, tool arguments, or logs.
+message="⚠️ 1pass plugin redacted secret values in the tool output above.
 
 Secrets detected: ${names_csv}
 
-Why redacted: These values come from 1Password vaults via the 1pass plugin
-ENVIRONMENT mapping. Exposing them in conversation transcripts or responses
-creates a security risk.
+These values come from 1Password vaults (1pass plugin ENVIRONMENT mapping). Do NOT repeat raw values in responses, tool arguments, or logs. The redacted output has replaced the original above."
 
-Redacted form (prefer this when referencing the output):
----
-${redacted_result}
----
-
-SAFE PATTERNS — reference secrets without printing their values:
-  ✅ Existence check: [[ -n \"\${VAR:-}\" ]] && echo \"set (\${#VAR} chars)\" || echo \"not set\"
-  ✅ Auth effects:    op whoami | gh auth status | curl -s -o /dev/null -w \"%{http_code}\" <api>
-  ✅ Inject via run:  op run --env-file .env.op -- your-command
-  ✅ Plugin config:   1pass opExec.items handles injection at session start
-  ❌ Never:           echo \"\$SECRET\" | env | grep NAME= | cat .env files | pgrep -af | ps aux"
-
-jq -n --arg msg "$message" '{systemMessage: $msg}'
+jq -n --arg msg "$message" --arg out "$redacted_result" '{updatedToolOutput: $out, systemMessage: $msg}'
