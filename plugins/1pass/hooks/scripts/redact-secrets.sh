@@ -82,7 +82,6 @@ fi
 
 # Build list of (name, value) pairs for vars that are:
 #   - non-empty in the current environment
-#   - at least 8 chars (avoid false positives on short common strings)
 #   - single-line (multi-line PEM keys are skipped — they appear in raw
 #     output only in unusual diagnostic contexts, and bash string
 #     substitution handles newlines but grep -F match is line-oriented)
@@ -93,7 +92,7 @@ for var_name in "${var_names[@]}"; do
   [ -z "$var_name" ] && continue
   # Indirect env lookup — works on bash 4+
   value="${!var_name:-}"
-  if [ -z "$value" ] || [ "${#value}" -lt 8 ]; then
+  if [ -z "$value" ]; then
     continue
   fi
   # Skip multi-line values (PEM keys, certificates) — handle separately if needed
