@@ -28,8 +28,11 @@
 # `updatedToolOutput` key is NOT in the schema and is silently ignored —
 # the working signal here is `systemMessage`.
 #
-# Manifest: written by op-exec-env.sh (SessionStart hook) at:
-#   ${CLAUDE_PLUGIN_DATA}/secrets-manifest.txt  — one var name per line
+# Secrets file: written by op-exec via --concealed-file during SessionStart at:
+#   ${CLAUDE_PLUGIN_DATA}/.env.secrets  — one CONCEALED var name per line
+# Only vars whose 1Password field type is CONCEALED (or that resolve through a
+# CONCEALED op:// reference chain) are listed here — non-secret STRING fields
+# like DISCORD_ALLOW_BOTS=true are excluded, preventing false-positive redaction.
 # This hook derives the same path from $HOME when CLAUDE_PLUGIN_DATA is unset
 # (settings.json hooks don't receive plugin-context env vars).
 
@@ -94,7 +97,7 @@ fi
 # Since HOME is agent-specific (e.g., /home/nsheaps/.agents/jack), this
 # correctly resolves to each agent's isolated plugin data directory.
 PLUGIN_DATA="${CLAUDE_PLUGIN_DATA:-${HOME}/.claude/plugins/data/1pass-ai-mktpl}"
-MANIFEST="${PLUGIN_DATA}/secrets-manifest.txt"
+MANIFEST="${PLUGIN_DATA}/.env.secrets"
 
 if [ ! -f "$MANIFEST" ]; then
   _log "exit: manifest not found at ${MANIFEST}"
@@ -107,7 +110,7 @@ _log "manifest found: ${MANIFEST} ($(wc -l < "$MANIFEST") lines)"
 mapfile -t var_names < <(grep -v '^[[:space:]]*$' "$MANIFEST" 2>/dev/null || true)
 
 if [ "${#var_names[@]}" -eq 0 ]; then
-  _log "exit: no var names in manifest"
+  _log "exit: no var names in secrets file"
   echo '{}'
   exit 0
 fi
@@ -136,7 +139,7 @@ for var_name in "${var_names[@]}"; do
 done
 
 if [ "${#redact_names[@]}" -eq 0 ]; then
-  _log "exit: no non-empty single-line env vars from manifest"
+  _log "exit: no non-empty single-line env vars from secrets file"
   echo '{}'
   exit 0
 fi
