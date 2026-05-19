@@ -32,11 +32,12 @@
     ],
     "PostToolUse": [
       {
+        "_note": "Documentation only — PostToolUse does NOT fire from plugin hooks.json due to upstream bug https://github.com/anthropics/claude-code/issues/6305. The working registration happens via settings.local.json injection in op-exec-env.sh::_register_posttooluse_hook().",
         "matcher": "*",
         "hooks": [
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/redact-secrets.sh",
+            "command": "bash ${CLAUDE_PLUGIN_DATA}/redact-secrets.sh",
             "timeout": 5
           }
         ]

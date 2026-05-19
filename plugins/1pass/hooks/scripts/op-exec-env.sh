@@ -226,6 +226,80 @@ process_item() {
 
 # --- PostToolUse redaction hook setup ---
 
+# Copy redact-secrets.sh from the plugin source to CLAUDE_PLUGIN_DATA so it
+# has a stable, version-independent path for the settings.json hook command.
+_copy_redact_script() {
+  [ -z "${CLAUDE_PLUGIN_ROOT:-}" ] && return 0
+  [ -z "${CLAUDE_PLUGIN_DATA:-}" ] && return 0
+
+  local src="${CLAUDE_PLUGIN_ROOT}/hooks/scripts/redact-secrets.sh"
+  local dst="${CLAUDE_PLUGIN_DATA}/redact-secrets.sh"
+
+  if [ ! -f "$src" ]; then
+    hook_log "WARN: redact-secrets.sh not found at ${src}, PostToolUse hook unavailable"
+    return 0
+  fi
+
+  cp "$src" "$dst"
+  chmod +x "$dst"
+  hook_log "synced redact-secrets.sh to plugin data dir"
+}
+
+# Register the PostToolUse redaction hook in settings.local.json.
+# Plugin-bundled hooks/hooks.json does NOT fire PostToolUse due to an upstream
+# bug (https://github.com/anthropics/claude-code/issues/6305). This function
+# injects the hook directly into settings.local.json so it actually fires.
+# The injection is idempotent — re-running this on every SessionStart is safe.
+_register_posttooluse_hook() {
+  [ -z "${CLAUDE_PLUGIN_DATA:-}" ] && return 0
+  command -v jq &>/dev/null || { hook_log "jq not found, skipping PostToolUse hook registration"; return 0; }
+
+  local script="${CLAUDE_PLUGIN_DATA}/redact-secrets.sh"
+  [ -f "$script" ] || return 0  # script copy failed — nothing to register
+
+  local hook_command="bash ${script}"
+  local settings_file="${HOME}/.claude/settings.local.json"
+
+  mkdir -p "$(dirname "$settings_file")"
+  [ -f "$settings_file" ] || echo '{}' > "$settings_file"
+
+  # Idempotent: skip if this exact command is already registered
+  if jq -r '.hooks.PostToolUse // [] | .[] | .hooks // [] | .[] | .command // ""' \
+       "$settings_file" 2>/dev/null \
+     | grep -qxF "$hook_command" 2>/dev/null; then
+    hook_log "PostToolUse redaction hook already registered"
+    return 0
+  fi
+
+  local result
+  result=$(jq \
+    --arg cmd "$hook_command" \
+    '.hooks.PostToolUse = ((.hooks.PostToolUse // []) + [
+       {"matcher": "*", "hooks": [{"type": "command", "command": $cmd, "timeout": 5}]}
+     ])' \
+    "$settings_file" 2>/dev/null) || {
+    hook_log "WARN: failed to register PostToolUse hook in ${settings_file}"
+    return 0
+  }
+
+  if [ -z "$result" ]; then
+    hook_log "WARN: jq produced empty result for PostToolUse hook registration"
+    return 0
+  fi
+
+  # Atomic write: tempfile-then-mv prevents partial writes on crash/signal.
+  # shared-lib's safe_write_settings doesn't support extra --arg params yet,
+  # so we implement the tempfile pattern directly here.
+  local tmp_file
+  tmp_file="$(mktemp "${settings_file}.XXXXXXXXXX")"
+  if printf '%s\n' "$result" > "$tmp_file" && mv "$tmp_file" "$settings_file"; then
+    hook_log "registered PostToolUse redaction hook in ${settings_file}"
+  else
+    rm -f "$tmp_file"
+    hook_log "WARN: failed to write PostToolUse hook to ${settings_file}"
+  fi
+}
+
 # --- Main ---
 
 do_inject() {
@@ -256,6 +330,12 @@ do_inject() {
 
   # Flush collected env vars to settings.local.json in a single write
   flush_settings
+
+  # Copy redact-secrets.sh to plugin data dir and register PostToolUse hook.
+  # These are no-ops when CLAUDE_PLUGIN_DATA / CLAUDE_PLUGIN_ROOT are unset.
+  hook_log_step "redact-setup" "Setting up PostToolUse secret-redaction hook"
+  _copy_redact_script
+  _register_posttooluse_hook
 }
 
 # --- Execute ---
