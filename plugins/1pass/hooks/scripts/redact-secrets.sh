@@ -97,17 +97,19 @@ fi
 # Since HOME is agent-specific (e.g., /home/nsheaps/.agents/jack), this
 # correctly resolves to each agent's isolated plugin data directory.
 PLUGIN_DATA="${CLAUDE_PLUGIN_DATA:-${HOME}/.claude/plugins/data/1pass-ai-mktpl}"
-MANIFEST="${PLUGIN_DATA}/.env.secrets"
+# NOTE: .env.secrets contains plain var NAMES (one per line), NOT KEY=VALUE pairs.
+# The name follows Nate's convention; do not `source` this file.
+SECRETS_FILE="${PLUGIN_DATA}/.env.secrets"
 
-if [ ! -f "$MANIFEST" ]; then
-  _log "exit: manifest not found at ${MANIFEST}"
+if [ ! -f "$SECRETS_FILE" ]; then
+  _log "exit: secrets file not found at ${SECRETS_FILE}"
   echo '{}'
   exit 0
 fi
-_log "manifest found: ${MANIFEST} ($(wc -l < "$MANIFEST") lines)"
+_log "secrets file found: ${SECRETS_FILE} ($(wc -l < "$SECRETS_FILE") lines)"
 
 # Read var names (skip blank lines)
-mapfile -t var_names < <(grep -v '^[[:space:]]*$' "$MANIFEST" 2>/dev/null || true)
+mapfile -t var_names < <(grep -v '^[[:space:]]*$' "$SECRETS_FILE" 2>/dev/null || true)
 
 if [ "${#var_names[@]}" -eq 0 ]; then
   _log "exit: no var names in secrets file"

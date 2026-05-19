@@ -52,12 +52,17 @@ op_resolve_item_to_callback() {
     _concealed_args=(--concealed-file "$_OP_EXEC_CONCEALED_FILE")
   fi
 
-  local exports
-  if ! exports="$(op-exec "${_concealed_args[@]}" "$item_ref" 2>/dev/null)"; then
-    hook_fail "op-exec" "Failed to resolve item: $item_ref" \
+  local exports op_exec_stderr
+  op_exec_stderr="$(mktemp -p "$_OP_EXEC_TMPDIR")"
+  if ! exports="$(op-exec "${_concealed_args[@]}" "$item_ref" 2>"$op_exec_stderr")"; then
+    local err_detail=""
+    [[ -s "$op_exec_stderr" ]] && err_detail=" — $(cat "$op_exec_stderr")"
+    rm -f "$op_exec_stderr"
+    hook_fail "op-exec" "Failed to resolve item: $item_ref${err_detail}" \
       "Verify the item exists and op has access to the vault"
     return 0
   fi
+  rm -f "$op_exec_stderr"
 
   if [ -z "$exports" ]; then
     hook_log "no fields found in $item_ref"

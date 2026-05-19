@@ -222,8 +222,10 @@ process_item() {
 
 do_inject() {
   # Clear secrets file from any previous session so this session starts fresh.
+  # Also clean up the legacy secrets-manifest.txt from pre-0.5.0 sessions.
   if [ -n "$_OP_EXEC_SECRETS_FILE" ]; then
     : > "$_OP_EXEC_SECRETS_FILE"
+    rm -f "$(dirname "$_OP_EXEC_SECRETS_FILE")/secrets-manifest.txt"
   fi
 
   hook_log_step "init" "Injecting 1Password items as environment"
