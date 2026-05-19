@@ -32,7 +32,7 @@
     ],
     "PostToolUse": [
       {
-        "_note": "This entry does not fire in Claude Code CLI due to upstream bug https://github.com/anthropics/claude-code/issues/6305 (empirically confirmed v2.1.128 CLI, 2026-05-19). The working path is the settings.local.json injection in op-exec-env.sh.",
+        "_note": "This entry does not fire in Claude Code CLI due to upstream bug https://github.com/anthropics/claude-code/issues/6305 (empirically confirmed v2.1.128 CLI, 2026-05-19). Remove this note once #6305 is fixed upstream.",
         "matcher": "*",
         "hooks": [
           {

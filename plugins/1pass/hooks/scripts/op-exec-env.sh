@@ -62,17 +62,6 @@ source "${CLAUDE_PLUGIN_ROOT}/lib/resolve-op-env.sh"
 _OP_EXEC_TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$_OP_EXEC_TMPDIR"' EXIT
 
-# Path for the secrets manifest used by the PostToolUse redaction hook.
-# The manifest records each resolved env var NAME (not value) so that
-# redact-secrets.sh can look up current values at tool-output scan time.
-# CLAUDE_PLUGIN_DATA is set when this script runs as a plugin hook; the
-# fallback mirrors the deterministic plugin data path used by Claude Code:
-#   ${HOME}/.claude/plugins/data/{plugin-name}-{marketplace-name}
-_OP_EXEC_MANIFEST=""
-if [ -n "${CLAUDE_PLUGIN_DATA:-}" ]; then
-  _OP_EXEC_MANIFEST="${CLAUDE_PLUGIN_DATA}/secrets-manifest.txt"
-fi
-
 # --- Guards ---
 
 plugin_is_enabled || { hook_log "plugin disabled, skipping op-exec env"; hook_respond; exit 0; }
@@ -163,12 +152,6 @@ write_to_targets() {
   local env_name="$1"
   local env_value="$2"
 
-  # Record var NAME in the secrets manifest (not value) so that the PostToolUse
-  # redaction hook can look up current values from the env at scan time.
-  if [ -n "$_OP_EXEC_MANIFEST" ]; then
-    printf '%s\n' "$env_name" >> "$_OP_EXEC_MANIFEST"
-  fi
-
   if [ "$target_bash_env" = "true" ] && [ -n "${CLAUDE_ENV_FILE:-}" ]; then
     # NOTE: kept as append (not upsert) here: CLAUDE_ENV_FILE is session-fresh
     # and op-exec output for a single session is the source of truth.
@@ -224,94 +207,9 @@ process_item() {
   op_resolve_item_to_callback "$item_ref" write_to_targets
 }
 
-# --- PostToolUse redaction hook setup ---
-
-# Copy redact-secrets.sh from the plugin source to CLAUDE_PLUGIN_DATA so it
-# has a stable, version-independent path for the settings.json hook command.
-_copy_redact_script() {
-  [ -z "${CLAUDE_PLUGIN_ROOT:-}" ] && return 0
-  [ -z "${CLAUDE_PLUGIN_DATA:-}" ] && return 0
-
-  local src="${CLAUDE_PLUGIN_ROOT}/hooks/scripts/redact-secrets.sh"
-  local dst="${CLAUDE_PLUGIN_DATA}/redact-secrets.sh"
-
-  if [ ! -f "$src" ]; then
-    hook_log "WARN: redact-secrets.sh not found at ${src}, PostToolUse hook unavailable"
-    return 0
-  fi
-
-  cp "$src" "$dst"
-  chmod +x "$dst"
-  hook_log "synced redact-secrets.sh to plugin data dir"
-}
-
-# Register the PostToolUse redaction hook in settings.local.json.
-# Plugin-bundled hooks/hooks.json does NOT fire PostToolUse due to an upstream
-# bug (https://github.com/anthropics/claude-code/issues/6305). Empirically
-# confirmed 2026-05-19: Claude Code v2.1.128 CLI, scm-utils PostToolUse hook
-# from hooks.json did not fire on a matching Bash tool call. Remove this
-# workaround once #6305 is fixed upstream. This function
-# injects the hook directly into settings.local.json so it actually fires.
-# The injection is idempotent — re-running this on every SessionStart is safe.
-_register_posttooluse_hook() {
-  [ -z "${CLAUDE_PLUGIN_DATA:-}" ] && return 0
-  command -v jq &>/dev/null || { hook_log "jq not found, skipping PostToolUse hook registration"; return 0; }
-
-  local script="${CLAUDE_PLUGIN_DATA}/redact-secrets.sh"
-  [ -f "$script" ] || return 0  # script copy failed — nothing to register
-
-  local hook_command="bash ${script}"
-  local settings_file="${HOME}/.claude/settings.local.json"
-
-  mkdir -p "$(dirname "$settings_file")"
-  [ -f "$settings_file" ] || echo '{}' > "$settings_file"
-
-  # Idempotent: skip if this exact command is already registered
-  if jq -r '.hooks.PostToolUse // [] | .[] | .hooks // [] | .[] | .command // ""' \
-       "$settings_file" 2>/dev/null \
-     | grep -qxF "$hook_command" 2>/dev/null; then
-    hook_log "PostToolUse redaction hook already registered"
-    return 0
-  fi
-
-  local result
-  result=$(jq \
-    --arg cmd "$hook_command" \
-    '.hooks.PostToolUse = ((.hooks.PostToolUse // []) + [
-       {"matcher": "*", "hooks": [{"type": "command", "command": $cmd, "timeout": 5}]}
-     ])' \
-    "$settings_file" 2>/dev/null) || {
-    hook_log "WARN: failed to register PostToolUse hook in ${settings_file}"
-    return 0
-  }
-
-  if [ -z "$result" ]; then
-    hook_log "WARN: jq produced empty result for PostToolUse hook registration"
-    return 0
-  fi
-
-  # Atomic write: tempfile-then-mv prevents partial writes on crash/signal.
-  # shared-lib's safe_write_settings doesn't support extra --arg params yet,
-  # so we implement the tempfile pattern directly here.
-  local tmp_file
-  tmp_file="$(mktemp "${settings_file}.XXXXXXXXXX")"
-  if printf '%s\n' "$result" > "$tmp_file" && mv "$tmp_file" "$settings_file"; then
-    hook_log "registered PostToolUse redaction hook in ${settings_file}"
-  else
-    rm -f "$tmp_file"
-    hook_log "WARN: failed to write PostToolUse hook to ${settings_file}"
-  fi
-}
-
 # --- Main ---
 
 do_inject() {
-  # Clear manifest from any previous session so this session starts fresh.
-  # write_to_targets() appends one name per var as items are resolved below.
-  if [ -n "$_OP_EXEC_MANIFEST" ]; then
-    : > "$_OP_EXEC_MANIFEST"
-  fi
-
   hook_log_step "init" "Injecting 1Password items as environment"
 
   local targets_desc=""
@@ -333,12 +231,6 @@ do_inject() {
 
   # Flush collected env vars to settings.local.json in a single write
   flush_settings
-
-  # Copy redact-secrets.sh to plugin data dir and register PostToolUse hook.
-  # These are no-ops when CLAUDE_PLUGIN_DATA / CLAUDE_PLUGIN_ROOT are unset.
-  hook_log_step "redact-setup" "Setting up PostToolUse secret-redaction hook"
-  _copy_redact_script
-  _register_posttooluse_hook
 }
 
 # --- Execute ---
