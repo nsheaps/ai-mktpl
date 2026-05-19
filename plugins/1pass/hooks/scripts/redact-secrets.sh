@@ -28,9 +28,20 @@
 
 set -euo pipefail
 
+# Debug log — written regardless of whether redaction fires.
+# Helps diagnose whether PostToolUse hooks are invoked at all.
+# Path: ${HOME}/.claude/tmp/redact-secrets-debug.log
+LOG_DIR="${HOME}/.claude/tmp"
+mkdir -p "$LOG_DIR"
+LOG_FILE="${LOG_DIR}/redact-secrets-debug.log"
+_log() { printf '%s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" >> "$LOG_FILE"; }
+
+_log "=== invoked (CLAUDE_PLUGIN_DATA=${CLAUDE_PLUGIN_DATA:-unset})"
+
 # mapfile and ${!var} (indirect expansion) require bash 4.0+.
 # Stock macOS ships bash 3.2 — exit cleanly rather than erroring.
 if (( BASH_VERSINFO[0] < 4 )); then
+  _log "exit: bash < 4 (${BASH_VERSION})"
   echo '{}'
   exit 0
 fi
@@ -53,6 +64,7 @@ tool_result="$(printf '%s' "$input" | jq -r '
 ' 2>/dev/null || true)"
 
 if [ -z "$tool_result" ]; then
+  _log "exit: empty tool_result"
   echo '{}'
   exit 0
 fi
@@ -68,14 +80,17 @@ PLUGIN_DATA="${CLAUDE_PLUGIN_DATA:-${HOME}/.claude/plugins/data/1pass-ai-mktpl}"
 MANIFEST="${PLUGIN_DATA}/secrets-manifest.txt"
 
 if [ ! -f "$MANIFEST" ]; then
+  _log "exit: manifest not found at ${MANIFEST}"
   echo '{}'
   exit 0
 fi
+_log "manifest found: ${MANIFEST} ($(wc -l < "$MANIFEST") lines)"
 
 # Read var names (skip blank lines)
 mapfile -t var_names < <(grep -v '^[[:space:]]*$' "$MANIFEST" 2>/dev/null || true)
 
 if [ "${#var_names[@]}" -eq 0 ]; then
+  _log "exit: no var names in manifest"
   echo '{}'
   exit 0
 fi
@@ -104,9 +119,11 @@ for var_name in "${var_names[@]}"; do
 done
 
 if [ "${#redact_names[@]}" -eq 0 ]; then
+  _log "exit: no non-empty single-line env vars from manifest"
   echo '{}'
   exit 0
 fi
+_log "candidates: ${#redact_names[@]} vars loaded for matching"
 
 # Check which values appear in the tool result and replace them
 found_names=()
@@ -126,9 +143,11 @@ for i in "${!redact_names[@]}"; do
 done
 
 if [ "${#found_names[@]}" -eq 0 ]; then
+  _log "exit: no secret values matched in tool output"
   echo '{}'
   exit 0
 fi
+_log "REDACTED: ${found_names[*]}"
 
 # Format the list of redacted names
 names_csv="$(IFS=', '; echo "${found_names[*]}")"
