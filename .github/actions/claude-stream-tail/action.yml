@@ -3,8 +3,14 @@ description: |
   Renders a Claude Code session as a colored chatroom view in the workflow
   log. Picks a *.jsonl file under ~/.claude/projects/ (the Claude Agent
   SDK's session store) and tails it through claude-stream (from
-  nsheaps/claude-utils), exiting when the SDK writes its terminal result
-  message or on timeout.
+  nsheaps/claude-utils).
+
+  The follow ends when claude-stream sees the stop sentinel (pass
+  `stop-sentinel`; pair with a Claude Code Stop hook that echoes the same
+  value into the session) or when `timeout-seconds` elapses. Note: the
+  SDK's `{"type":"result"}` message is NOT written to the session JSONL
+  -- it is an SDK stream message -- so it cannot be used as a terminal
+  marker by a JSONL tailer.
 
   Two modes via `wait-for-new-session`:
     - true (default, sidecar): wait for a JSONL that appears AFTER this
@@ -25,10 +31,25 @@ branding:
   color: 'green'
 
 inputs:
-  claude-utils-version:
-    description: 'Tag of nsheaps/claude-utils to install (provides claude-stream). Without leading v.'
+  claude-utils-ref:
+    description: |
+      Git ref of nsheaps/claude-utils to install (provides claude-stream).
+      Any ref works: a tag (e.g. v0.12.14) or a branch. Currently a branch,
+      because the --exit-on-session-stop flag this action depends on is not
+      yet on a release tag.
+      TODO: pin to a release tag once claude-utils ships the flag.
     required: false
-    default: '0.12.13'
+    default: 'claude/stream-action-output-UtYyT'
+  stop-sentinel:
+    description: |
+      Sentinel string passed to `claude-stream --exit-on-session-stop`.
+      claude-stream exits cleanly once it sees this string in the session
+      JSONL. Pair with a Claude Code Stop hook that echoes the same value.
+      Leave empty to disable stop detection (the timeout still bounds the
+      follow). Callers should pass a run-unique value so reviewed content
+      cannot false-trigger an early exit.
+    required: false
+    default: ''
   timeout-seconds:
     description: 'Max seconds to wait for the session to start, and max seconds to follow it. The action exits cleanly (success) on timeout so it does not fail the parallel block. Default 600s (10 min) -- bump if reviews routinely run longer.'
     required: false
@@ -63,12 +84,12 @@ runs:
     - name: Install claude-stream from nsheaps/claude-utils
       shell: bash
       env:
-        VERSION: ${{ inputs.claude-utils-version }}
+        REF: ${{ inputs.claude-utils-ref }}
       run: |
         set -euo pipefail
         REPO_DIR="${RUNNER_TEMP}/claude-utils"
         if [ ! -d "$REPO_DIR" ]; then
-          git clone --depth 1 --branch "v${VERSION}" \
+          git clone --depth 1 --branch "$REF" \
             https://github.com/nsheaps/claude-utils.git "$REPO_DIR"
         fi
         echo "$REPO_DIR/bin" >> "$GITHUB_PATH"
@@ -80,6 +101,7 @@ runs:
         POLL_INTERVAL_SECONDS: ${{ inputs.poll-interval-seconds }}
         PROJECTS_DIR_OVERRIDE: ${{ inputs.projects-dir }}
         WAIT_FOR_NEW: ${{ inputs.wait-for-new-session }}
+        STOP_SENTINEL: ${{ inputs.stop-sentinel }}
       run: |
         set -euo pipefail
 
@@ -154,35 +176,40 @@ runs:
         REMAINING=$((TIMEOUT_SECONDS - (NOW - START)))
         [ "$REMAINING" -lt 30 ] && REMAINING=30
 
-        # Pipeline:
-        #   tail -F (line-buffered)  -> awk (exit on terminal "result" line)  -> claude-stream
-        # awk closing its stdin makes claude-stream finish cleanly; tail dies via SIGPIPE.
-        # `timeout` with -k caps the whole pipeline. Dropped --foreground (only
-        # meaningful with a TTY; we run in CI without one).
+        # claude-stream --file does its own `tail -F`. --exit-on-session-stop
+        # makes it exit cleanly once the stop sentinel appears in the JSONL
+        # (a Stop hook echoes the sentinel; the hook's stdout is recorded
+        # into the session JSONL as a hook_success attachment). Without a
+        # sentinel there is no terminal record to key off and the follow
+        # would run until the timeout below.
+        #
+        # `timeout` with -k still caps the whole thing: if the Stop hook
+        # never fires (misconfig) the follow ends at REMAINING seconds
+        # rather than hanging. The main claude-code-action step is the
+        # source of truth for the job's success/failure.
+        cs_args=(--file "$SESSION_FILE")
+        if [ -n "${STOP_SENTINEL}" ]; then
+          cs_args+=(--exit-on-session-stop --stop-sentinel "${STOP_SENTINEL}")
+          echo "claude-stream-tail: will exit on session-stop sentinel"
+        else
+          echo "claude-stream-tail: no stop sentinel set -- follow bounded only by ${REMAINING}s timeout" >&2
+        fi
+
         set +e
-        timeout -k 30 --signal=TERM "${REMAINING}" bash -c '
-          set -o pipefail
-          stdbuf -oL tail -n +1 -F "$1" 2>/dev/null \
-            | stdbuf -oL awk "{
-                print;
-                fflush();
-                if (\$0 ~ /\"type\":[[:space:]]*\"result\"/) { exit }
-              }" \
-            | claude-stream
-        ' _ "$SESSION_FILE"
+        timeout -k 30 --signal=TERM "${REMAINING}" claude-stream "${cs_args[@]}"
         STATUS=$?
         set -e
 
-        # 124 = GNU timeout fired. We treat that as success (do not fail the parallel block):
-        # the main claude-code-action step is the source of truth for success/failure.
+        # 124 = GNU timeout fired. Treat as success (do not fail the parallel
+        # block) -- claude-code-action governs the job's real outcome.
         if [ "$STATUS" -eq 124 ]; then
           echo "claude-stream-tail: follow phase hit ${REMAINING}s timeout" >&2
           exit 0
         fi
-        # SIGPIPE from tail / claude-stream is normal at end-of-stream; don't fail on it.
+        # SIGPIPE (141) is normal at end-of-stream; 0 is a clean session-stop.
         if [ "$STATUS" -eq 141 ] || [ "$STATUS" -eq 0 ]; then
           echo "claude-stream-tail: done"
           exit 0
         fi
-        echo "claude-stream-tail: pipeline exited with status $STATUS (non-fatal)" >&2
+        echo "claude-stream-tail: claude-stream exited with status $STATUS (non-fatal)" >&2
         exit 0

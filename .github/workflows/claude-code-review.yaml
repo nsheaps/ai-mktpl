@@ -41,6 +41,17 @@ jobs:
       id-token: write
       actions: read
 
+    # Run-unique stop sentinel. The Stop hook (registered in
+    # INPUT_SETTINGS_JSON below) echoes this string when Claude finishes;
+    # the hook's stdout is recorded into the session JSONL, and the
+    # claude-stream-tail sidecar exits on it. Run-scoped via run_id +
+    # run_attempt so the resolved value never appears in any repo file
+    # (only the ${{ }} template does) -- reviewed PR content therefore
+    # cannot false-trigger an early exit. References only github.* (no
+    # steps context), so a job-level env is valid here.
+    env:
+      STOP_SENTINEL: claude-stream-session-stop-${{ github.run_id }}-${{ github.run_attempt }}
+
     steps:
       - name: Checkout and authenticate as GitHub App
         id: auth
@@ -179,6 +190,16 @@ jobs:
                 ]
               },
               "model": "opus",
+              "_HOOKS_COMMENT": "Stop hook echoes the run-unique sentinel when Claude finishes. The hook's stdout is recorded into the session JSONL as a hook_success attachment, which the claude-stream-tail sidecar detects to exit its tail cleanly instead of running to timeout. Without a registered Stop hook, the Stop event produces no JSONL record.",
+              "hooks": {
+                "Stop": [
+                  {
+                    "hooks": [
+                      { "type": "command", "command": "echo '${{ env.STOP_SENTINEL }}'" }
+                    ]
+                  }
+                ]
+              },
               "env": {
                 "GH_TOKEN": "${{ steps.auth.outputs.token }}",
                 "GITHUB_TOKEN": "${{ steps.auth.outputs.token }}",
@@ -274,6 +295,11 @@ jobs:
                 # this step's start. Safe alongside claude-code-action --
                 # ignores any pre-existing JSONL on persistent runners.
                 wait-for-new-session: 'true'
+                # Exit the tail when the Stop hook's sentinel lands in the
+                # session JSONL, instead of running to the timeout. Same
+                # run-unique value the Stop hook (INPUT_SETTINGS_JSON
+                # above) echoes.
+                stop-sentinel: ${{ env.STOP_SENTINEL }}
                 # Verified working at 6m25s in run 25956849344; keep 600s
                 # headroom for long reviews. Action default is also 600s.
                 timeout-seconds: '600'
