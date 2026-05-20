@@ -25,11 +25,18 @@
 # key inside `hookSpecificOutput` replaces the tool result visible to Claude
 # when passed as a JSON object (not a string) — use --argjson, not --arg.
 #
-# Secrets file: written by op-exec via --concealed-file during SessionStart at:
-#   ${CLAUDE_PLUGIN_DATA}/.env.secrets  — one CONCEALED var name per line
-# Only vars whose 1Password field type is CONCEALED (or that resolve through a
-# CONCEALED op:// reference chain) are listed here — non-secret STRING fields
-# like DISCORD_ALLOW_BOTS=true are excluded, preventing false-positive redaction.
+# Secrets file: written by op-exec via --concealed-kv-file during SessionStart at:
+#   ${CLAUDE_PLUGIN_DATA}/.env.secrets — one `NAME=value` pair per line, mode 600.
+# Only fields with type == CONCEALED (or that resolve through a CONCEALED op://
+# reference chain) are listed — non-secret STRING fields like DISCORD_ALLOW_BOTS
+# are excluded, preventing false-positive redaction.
+#
+# As of plugin v0.6.0 the file carries VALUES, not just names: this decouples
+# redaction from env propagation, which mattered for CLAUDE_CODE_OAUTH_TOKEN
+# (claude-code holds it in its own process env but does NOT export it to
+# PostToolUse hook subprocesses, apparent security boundary — so the old
+# env-lookup path was always missing).
+#
 # This hook derives the same path from $HOME when CLAUDE_PLUGIN_DATA is unset
 # (settings.json hooks don't receive plugin-context env vars).
 
@@ -98,8 +105,9 @@ fi
 # Since HOME is agent-specific (e.g., /home/nsheaps/.agents/jack), this
 # correctly resolves to each agent's isolated plugin data directory.
 PLUGIN_DATA="${CLAUDE_PLUGIN_DATA:-${HOME}/.claude/plugins/data/1pass-ai-mktpl}"
-# NOTE: .env.secrets contains plain var NAMES (one per line), NOT KEY=VALUE pairs.
-# The name follows Nate's convention; do not `source` this file.
+# .env.secrets contains `NAME=value` pairs, one per line. Do NOT `source` this
+# file — parse it directly. op-exec writes it via --concealed-kv-file at session
+# start, mode 600.
 SECRETS_FILE="${PLUGIN_DATA}/.env.secrets"
 
 if [ ! -f "$SECRETS_FILE" ]; then
@@ -109,37 +117,26 @@ if [ ! -f "$SECRETS_FILE" ]; then
 fi
 _log "secrets file found: ${SECRETS_FILE} ($(wc -l < "$SECRETS_FILE") lines)"
 
-# Read var names (skip blank lines)
-mapfile -t var_names < <(grep -v '^[[:space:]]*$' "$SECRETS_FILE" 2>/dev/null || true)
-
-if [ "${#var_names[@]}" -eq 0 ]; then
-  _log "exit: no var names in secrets file"
-  echo '{}'
-  exit 0
-fi
-
-# Build list of (name, value) pairs for vars that are:
-#   - non-empty in the current environment
-#   - single-line (multi-line PEM keys are skipped — they appear in raw
-#     output only in unusual diagnostic contexts, and bash string
-#     substitution handles newlines but grep -F match is line-oriented)
+# Parse `NAME=value` lines. Use ${line%%=*} / ${line#*=} so values that contain
+# `=` are preserved intact (only the FIRST `=` separates name from value).
+# Multi-line values cannot appear here — op-exec --concealed-kv-file skips them
+# at write time (same constraint as the line-oriented redaction format).
 declare -a redact_names=()
 declare -a redact_values=()
 
-for var_name in "${var_names[@]}"; do
+while IFS= read -r line || [ -n "$line" ]; do
+  [ -z "$line" ] && continue
+  case "$line" in '#'*) continue ;; esac
+  if [[ "$line" != *=* ]]; then
+    continue
+  fi
+  var_name="${line%%=*}"
+  value="${line#*=}"
   [ -z "$var_name" ] && continue
-  # Indirect env lookup — works on bash 4+
-  value="${!var_name:-}"
-  if [ -z "$value" ]; then
-    continue
-  fi
-  # Skip multi-line values (PEM keys, certificates) — handle separately if needed
-  if [[ "$value" == *$'\n'* ]]; then
-    continue
-  fi
+  [ -z "$value" ] && continue
   redact_names+=("$var_name")
   redact_values+=("$value")
-done
+done < "$SECRETS_FILE"
 
 if [ "${#redact_names[@]}" -eq 0 ]; then
   _log "exit: no non-empty single-line env vars from secrets file"

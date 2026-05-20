@@ -44,12 +44,13 @@ op_resolve_item_to_callback() {
   fi
 
   # Run op-exec to get export statements.
-  # If _OP_EXEC_CONCEALED_FILE is set, pass --concealed-file so op-exec appends
-  # CONCEALED var names to that file during resolution. The flag must come before
-  # the op:// reference because op-exec's flag parser stops on op://.
+  # If _OP_EXEC_CONCEALED_KV_FILE is set, pass --concealed-kv-file so op-exec
+  # writes CONCEALED `NAME=value` pairs (mode 600) to that file. The flag must
+  # come before the op:// reference because op-exec's flag parser stops on op://.
+  # Requires op-exec >= 0.0.14.
   local _concealed_args=()
-  if [[ -n "${_OP_EXEC_CONCEALED_FILE:-}" ]]; then
-    _concealed_args=(--concealed-file "$_OP_EXEC_CONCEALED_FILE")
+  if [[ -n "${_OP_EXEC_CONCEALED_KV_FILE:-}" ]]; then
+    _concealed_args=(--concealed-kv-file "$_OP_EXEC_CONCEALED_KV_FILE")
   fi
 
   local exports op_exec_stderr
