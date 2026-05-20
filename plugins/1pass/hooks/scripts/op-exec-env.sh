@@ -65,7 +65,7 @@ trap 'rm -rf "$_OP_EXEC_TMPDIR"' EXIT
 # Path for the secrets file used by the PostToolUse redaction hook.
 # As of plugin v0.6.0, this file contains `NAME=value` pairs (one per line,
 # mode 600) instead of names-only. op-exec writes via --concealed-kv-file
-# (requires op-exec >= 0.0.14), so only fields with type == CONCEALED (or
+# (requires op-exec >= 0.1.0), so only fields with type == CONCEALED (or
 # that resolve through a CONCEALED op:// reference chain) are included. This
 # decouples redact-secrets.sh from env propagation — the hook no longer needs
 # the secret to be present in its own env (was a gap for CLAUDE_CODE_OAUTH_TOKEN,
