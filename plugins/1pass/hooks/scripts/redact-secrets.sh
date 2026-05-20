@@ -118,8 +118,37 @@ if [ "${#var_names[@]}" -eq 0 ]; then
   exit 0
 fi
 
+# Some secret vars are NOT exported into PostToolUse hook subprocesses by
+# Claude Code itself — most notably CLAUDE_CODE_OAUTH_TOKEN, which claude-code
+# holds in its own process env but does not pass through to hook children
+# (apparent security boundary against agents leaking their own auth token via
+# hooks). For those, indirect env lookup returns empty and we miss the match.
+#
+# Fallback source: $HOME/.env.local — op-exec writes this at session start
+# with `export NAME=value` lines for every var in the ENVIRONMENT mapping,
+# CLAUDE_CODE_OAUTH_TOKEN included. The file is mode 600, per-agent (since
+# $HOME is per-agent for our launcher), and already on disk — so we can pick
+# up filtered values by sourcing it in a subshell (does NOT leak into this
+# script's env) and reading the values we care about.
+declare -A envlocal_values=()
+ENV_LOCAL="${HOME}/.env.local"
+if [ -f "$ENV_LOCAL" ]; then
+  while IFS='=' read -r k v; do
+    [ -z "$k" ] && continue
+    envlocal_values["$k"]="$v"
+  done < <(
+    set +e
+    # shellcheck disable=SC1090
+    . "$ENV_LOCAL" 2>/dev/null
+    for n in "${var_names[@]}"; do
+      [ -z "$n" ] && continue
+      printf '%s=%s\n' "$n" "${!n:-}"
+    done
+  )
+fi
+
 # Build list of (name, value) pairs for vars that are:
-#   - non-empty in the current environment
+#   - non-empty in the current environment (or .env.local fallback)
 #   - single-line (multi-line PEM keys are skipped — they appear in raw
 #     output only in unusual diagnostic contexts, and bash string
 #     substitution handles newlines but grep -F match is line-oriented)
@@ -130,6 +159,10 @@ for var_name in "${var_names[@]}"; do
   [ -z "$var_name" ] && continue
   # Indirect env lookup — works on bash 4+
   value="${!var_name:-}"
+  if [ -z "$value" ]; then
+    # Fallback: Claude Code may have filtered this var from the hook's env.
+    value="${envlocal_values[$var_name]:-}"
+  fi
   if [ -z "$value" ]; then
     continue
   fi
