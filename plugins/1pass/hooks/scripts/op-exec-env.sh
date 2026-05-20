@@ -63,15 +63,19 @@ _OP_EXEC_TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$_OP_EXEC_TMPDIR"' EXIT
 
 # Path for the secrets file used by the PostToolUse redaction hook.
-# Only CONCEALED var names are written here (not all vars). op-exec writes to
-# this file via --concealed-file, so only fields with type == CONCEALED (or
-# that resolve through a CONCEALED op:// reference chain) are included.
+# As of plugin v0.6.0, this file contains `NAME=value` pairs (one per line,
+# mode 600) instead of names-only. op-exec writes via --concealed-kv-file
+# (requires op-exec >= 0.0.14), so only fields with type == CONCEALED (or
+# that resolve through a CONCEALED op:// reference chain) are included. This
+# decouples redact-secrets.sh from env propagation — the hook no longer needs
+# the secret to be present in its own env (was a gap for CLAUDE_CODE_OAUTH_TOKEN,
+# which claude-code does not export to PostToolUse hook subprocesses).
 _OP_EXEC_SECRETS_FILE=""
 if [ -n "${CLAUDE_PLUGIN_DATA:-}" ]; then
   _OP_EXEC_SECRETS_FILE="${CLAUDE_PLUGIN_DATA}/.env.secrets"
 fi
-# Expose to resolve-op-env.sh so it can pass --concealed-file to op-exec.
-_OP_EXEC_CONCEALED_FILE="$_OP_EXEC_SECRETS_FILE"
+# Expose to resolve-op-env.sh so it can pass --concealed-kv-file to op-exec.
+_OP_EXEC_CONCEALED_KV_FILE="$_OP_EXEC_SECRETS_FILE"
 
 # --- Guards ---
 
