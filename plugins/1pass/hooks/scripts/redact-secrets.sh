@@ -9,24 +9,21 @@
 #   - Why the value was redacted
 #   - Safe patterns for referencing secrets without exposing their values
 #
-# IMPORTANT LIMITATION: PostToolUse hooks cannot replace or suppress the
-# built-in tool output for Read/Bash/Grep/etc. — the original output is
-# already in Claude's context window when this hook fires. What this hook
-# DOES is inject a systemMessage that:
-#   (a) Flags the leaked value
-#   (b) Provides the redacted form for Claude to prefer in its responses
-#   (c) Instructs Claude NOT to repeat the raw value
-# This prevents secrets from being echoed back to the user or included in
-# follow-up tool calls / responses, even though they're in the window.
+# When a secret is found, this hook emits:
+#   { hookSpecificOutput: { hookEventName: "PostToolUse",
+#                           updatedToolOutput: <redacted tool_response>,
+#                           additionalContext: <warning message> } }
 #
-# See: https://github.com/anthropics/claude-code/issues/20470
+# updatedToolOutput (object) replaces what Claude sees in the tool result.
+# additionalContext surfaces as a system-reminder instructing Claude not to
+# repeat the raw value in future tool calls or responses.
 #
 # Note on output keys: claude-code's PostToolUseHookSpecificOutputSchema
 # (source: entrypoints/sdk/coreSchemas.ts) accepts `additionalContext` and
 # `updatedMCPToolOutput` (MCP tools only) inside `hookSpecificOutput`, plus
-# top-level `systemMessage`, `decision`, `reason`. A previously-emitted
-# `updatedToolOutput` key is NOT in the schema and is silently ignored —
-# the working signal here is `systemMessage`.
+# top-level `systemMessage`, `decision`, `reason`. The `updatedToolOutput`
+# key inside `hookSpecificOutput` replaces the tool result visible to Claude
+# when passed as a JSON object (not a string) — use --argjson, not --arg.
 #
 # Secrets file: written by op-exec via --concealed-file during SessionStart at:
 #   ${CLAUDE_PLUGIN_DATA}/.env.secrets  — one CONCEALED var name per line
@@ -82,6 +79,10 @@ tool_text="$(printf '%s' "$input" | jq -r '
   else ""
   end
 ' 2>/dev/null || true)"
+
+# Capture the full tool_response as compact JSON for use in updatedToolOutput.
+# Replacement in this string produces a JSON object we can pass via --argjson.
+tool_response_json="$(printf '%s' "$input" | jq -c '.tool_response' 2>/dev/null || true)"
 
 if [ -z "$tool_text" ]; then
   _log "exit: empty tool_response text"
@@ -150,6 +151,7 @@ _log "candidates: ${#redact_names[@]} vars loaded for matching"
 # Check which values appear in the tool text and replace them
 found_names=()
 redacted_result="$tool_text"
+redacted_response_json="$tool_response_json"
 
 for i in "${!redact_names[@]}"; do
   var_name="${redact_names[$i]}"
@@ -160,6 +162,9 @@ for i in "${!redact_names[@]}"; do
     # The // prefix means "replace all occurrences"; the value is treated as a
     # literal string (not a pattern), so no escaping needed.
     redacted_result="${redacted_result//"${value}"/"****REDACTED(${var_name})****"}"
+    # Also replace in the full JSON string so updatedToolOutput carries the
+    # redacted value as a proper JSON object (passed via --argjson below).
+    redacted_response_json="${redacted_response_json//"${value}"/"****REDACTED(${var_name})****"}"
     found_names+=("$var_name")
   fi
 done
@@ -180,4 +185,14 @@ Secrets detected: ${names_csv}
 
 These values come from 1Password vaults (1pass plugin ENVIRONMENT mapping). Do NOT repeat raw values in responses, tool arguments, or logs. The redacted output has replaced the original above."
 
-jq -n --arg msg "$message" --arg out "$redacted_result" '{updatedToolOutput: $out, systemMessage: $msg}'
+# updatedToolOutput must be a JSON object (not string) for Claude Code to
+# accept it. Use --argjson so jq parses $redacted_response_json as JSON.
+# If parsing fails (malformed JSON after substitution), fall back to
+# systemMessage-only so the warning still surfaces.
+if jq -e . >/dev/null 2>&1 <<<"$redacted_response_json"; then
+  jq -cn --arg msg "$message" --argjson out "$redacted_response_json" \
+    '{hookSpecificOutput: {hookEventName: "PostToolUse", updatedToolOutput: $out, additionalContext: $msg}}'
+else
+  _log "warn: redacted_response_json is not valid JSON, falling back to systemMessage"
+  jq -cn --arg msg "$message" '{systemMessage: $msg}'
+fi
