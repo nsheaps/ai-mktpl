@@ -300,6 +300,9 @@ jobs:
                 # run-unique value the Stop hook (INPUT_SETTINGS_JSON
                 # above) echoes.
                 stop-sentinel: ${{ env.STOP_SENTINEL }}
-                # Verified working at 6m25s in run 25956849344; keep 600s
-                # headroom for long reviews. Action default is also 600s.
-                timeout-seconds: '600'
+                # Safety ceiling only -- with the sentinel set, the follow
+                # ends when the review's Stop hook fires. Must exceed the
+                # longest review: run 26141683146's review ran 699s and a
+                # 600s ceiling killed the follow before the Stop hook
+                # could fire. 1200s (20 min) leaves ample margin.
+                timeout-seconds: '1200'

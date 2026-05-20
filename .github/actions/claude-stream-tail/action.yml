@@ -51,9 +51,17 @@ inputs:
     required: false
     default: ''
   timeout-seconds:
-    description: 'Max seconds to wait for the session to start, and max seconds to follow it. The action exits cleanly (success) on timeout so it does not fail the parallel block. Default 600s (10 min) -- bump if reviews routinely run longer.'
+    description: |
+      Safety ceiling: max seconds to wait for the session to start, and
+      max seconds to follow it. The action exits cleanly (success) on
+      timeout so it never fails the parallel block.
+      With `stop-sentinel` set, the follow normally ends the moment the
+      Stop hook fires -- this timeout is only the fallback. It MUST exceed
+      the longest expected Claude session, otherwise the follow is killed
+      before the session ends and the sentinel never gets a chance to
+      fire. Default 1200s (20 min).
     required: false
-    default: '600'
+    default: '1200'
   poll-interval-seconds:
     description: 'How often to poll for a new session JSONL while waiting for it to appear.'
     required: false
