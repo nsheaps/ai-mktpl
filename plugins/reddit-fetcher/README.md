@@ -37,9 +37,9 @@ reddit-fetch.sh user someuser --limit 10
 
 ### Subcommands
 
-| Subcommand         | Description                                                        |
-| ------------------ | ------------------------------------------------------------------ |
-| `subreddit <name>` | List posts from a subreddit (hot, new, top, rising, controversial) |
+| Subcommand         | Description                                                          |
+| ------------------ | -------------------------------------------------------------------- |
+| `subreddit <name>` | List posts from a subreddit (hot, new, top, rising, controversial)   |
 | `post <url>`       | Fetch a single post with its comment tree (depth capped at 4 levels) |
 | `search <query>`   | Search all of Reddit or a specific subreddit                         |
 | `user <username>`  | Fetch a user's recent submitted posts                                |
