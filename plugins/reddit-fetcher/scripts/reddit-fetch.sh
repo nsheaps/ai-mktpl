@@ -15,7 +15,21 @@
 set -euo pipefail
 
 # --- Configuration ---
-readonly USER_AGENT="reddit-fetcher:v0.1.0 (ai-mktpl plugin; https://github.com/nsheaps/ai-mktpl)"
+# Read plugin name/version/repo from plugin.json so the UA stays current
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+_PLUGIN_JSON="${_SCRIPT_DIR}/../.claude-plugin/plugin.json"
+if [[ -f "$_PLUGIN_JSON" ]] && command -v jq >/dev/null 2>&1; then
+  _PLUGIN_NAME="$(jq -r '.name' "$_PLUGIN_JSON")"
+  _PLUGIN_VERSION="$(jq -r '.version' "$_PLUGIN_JSON")"
+  _MARKETPLACE_URL="$(jq -r '.repository' "$_PLUGIN_JSON")"
+else
+  _PLUGIN_NAME="reddit-fetcher"
+  _PLUGIN_VERSION="0.1.0"
+  _MARKETPLACE_URL="https://github.com/nsheaps/ai-mktpl"
+fi
+_AGENT_NAME="${CLAUDE_AGENT_NAME:-${AGENT_NAME:-agent}}"
+_AGENTS_REPO_URL="${AGENTS_REPO_URL:-}"
+readonly USER_AGENT="agent:${_AGENT_NAME} (claude-code; interactive${_AGENTS_REPO_URL:+; +${_AGENTS_REPO_URL}}) ${_PLUGIN_NAME}@${_PLUGIN_VERSION} (claude-code-plugin; +${_MARKETPLACE_URL}/plugins/${_PLUGIN_NAME})"
 readonly BASE_URL="https://www.reddit.com"
 readonly MIN_REQUEST_GAP=6  # seconds between requests (Reddit rate limit for unauth)
 readonly MAX_RETRIES=3
@@ -158,6 +172,7 @@ truncate_text() {
 validate_limit() {
   local limit="$1"
   [[ "$limit" =~ ^[0-9]+$ ]] || die "--limit must be a positive integer, got: $limit"
+  limit=$(( 10#$limit ))  # normalize to base-10, avoids octal trap on leading zeros
   (( limit < 1 )) && die "--limit must be at least 1"
   (( limit > 100 )) && limit=100
   echo "$limit"
