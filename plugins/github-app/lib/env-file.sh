@@ -12,23 +12,27 @@
 #
 # Optional variables (sourced from environment):
 #   GITHUB_APP_ID
-#   GITHUB_APP_PRIVATE_KEY_PATH
 #   GITHUB_INSTALLATION_ID
-#   GITHUB_APP_CLIENT_ID
-#   GITHUB_APP_CLIENT_SECRET
 #   GH_CONFIG_DIR
 #   GIT_AUTHOR_NAME
 #   GIT_AUTHOR_EMAIL
 #   GIT_COMMITTER_NAME
 #   GIT_COMMITTER_EMAIL
+#
+# Git credential helper:
+#   The plugin configures git via write_git_config_global(), which writes
+#   `credential.helper = !gh auth git-credential` into the per-agent gitconfig.
+#   gh reads GH_TOKEN from the process environment (always fresh via CLAUDE_ENV_FILE).
+#   No script file is copied or installed.
 
 if [ "${_ENV_FILE_LOADED:-}" = "true" ]; then return 0; fi
 _ENV_FILE_LOADED="true"
 
-# Source agent-paths for AGENT_CONFIG_DIR
-_env_file_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=agent-paths.sh
-[[ "${_AGENT_PATHS_LOADED:-}" == "true" ]] || source "$_env_file_dir/agent-paths.sh"
+# GIT_IDENTITY_FILE — path to the stable git identity file
+# Written once at session start; never overwritten by token refresh.
+# Uses CLAUDE_PLUGIN_DATA (per-agent) so multiple agents on the same machine
+# don't stomp on each other's identity file.
+GIT_IDENTITY_FILE="${CLAUDE_PLUGIN_DATA}/github-git-identity"
 
 # _safe_val VALUE
 #
@@ -76,7 +80,6 @@ ENVEOF
     printf 'export GITHUB_TOKEN_FILE="%s"\n' "$(_safe_val "$TOKEN_FILE")"
     printf 'export GITHUB_APP_ENV_FILE="%s"\n' "$(_safe_val "$ENV_RUNTIME_FILE")"
     printf 'export GITHUB_APP_ID="%s"\n' "$(_safe_val "${GITHUB_APP_ID:-}")"
-    printf 'export GITHUB_APP_PRIVATE_KEY_PATH="%s"\n' "$(_safe_val "${GITHUB_APP_PRIVATE_KEY_PATH:-}")"
     printf 'export GITHUB_INSTALLATION_ID="%s"\n' "$(_safe_val "${GITHUB_INSTALLATION_ID:-}")"
     printf 'export GIT_AUTHOR_NAME="%s"\n' "$(_safe_val "${GIT_AUTHOR_NAME:-}")"
     printf 'export GIT_AUTHOR_EMAIL="%s"\n' "$(_safe_val "${GIT_AUTHOR_EMAIL:-}")"
@@ -89,19 +92,10 @@ ENVEOF
     echo "# be written as empty strings and identity would be lost."
   } >> "$ENV_RUNTIME_FILE"
 
-  [[ -n "${GITHUB_APP_CLIENT_ID:-}" ]] && printf 'export GITHUB_APP_CLIENT_ID="%s"\n' "$(_safe_val "$GITHUB_APP_CLIENT_ID")" >> "$ENV_RUNTIME_FILE"
-  [[ -n "${GITHUB_APP_CLIENT_SECRET:-}" ]] && printf 'export GITHUB_APP_CLIENT_SECRET="%s"\n' "$(_safe_val "$GITHUB_APP_CLIENT_SECRET")" >> "$ENV_RUNTIME_FILE"
   # Preserve GH_CONFIG_DIR isolation across token refreshes
   [[ -n "${GH_CONFIG_DIR:-}" ]] && printf 'export GH_CONFIG_DIR="%s"\n' "$(_safe_val "$GH_CONFIG_DIR")" >> "$ENV_RUNTIME_FILE"
   chmod 600 "$ENV_RUNTIME_FILE"
 }
-
-# GIT_IDENTITY_FILE — path to the stable git identity file
-# Written once at session start; never overwritten by token refresh.
-# Uses AGENT_CONFIG_DIR (per-agent) so multiple agents on the same machine
-# don't stomp on each other's identity file. Falls back to a HOME-scoped
-# path if AGENT_CONFIG_DIR is not yet set (should not happen in normal usage).
-GIT_IDENTITY_FILE="${AGENT_CONFIG_DIR:-${HOME}/.agents/_UNKNOWN/.config}/github-git-identity"
 
 # write_git_identity_file BOT_NAME BOT_EMAIL
 #
@@ -138,25 +132,29 @@ GITEOF
   chmod 600 "$GIT_IDENTITY_FILE"
 }
 
-# write_git_config_global [CREDENTIAL_HELPER_PATH]
+# write_git_config_global
 #
 # Rewrites the isolated gitconfig with current identity from env vars
-# (GIT_AUTHOR_NAME, GIT_AUTHOR_EMAIL) plus the credential helper.
-# Git reads GIT_CONFIG_GLOBAL on every operation, so changes take
+# (GIT_AUTHOR_NAME, GIT_AUTHOR_EMAIL) and installs a gh-based credential
+# helper. Git reads GIT_CONFIG_GLOBAL on every operation, so changes take
 # effect immediately on the next git command.
+#
+# The credential helper is written as `!gh auth git-credential` — no absolute
+# path, no custom script file. gh reads $GH_TOKEN from the process environment
+# (always fresh via CLAUDE_ENV_FILE) and returns the correct credentials.
+# This is version-independent: the gitconfig entry never changes when gh upgrades.
 #
 # The target path is computed at call-time (not source-time) so the
 # function always uses the current value of GIT_CONFIG_GLOBAL, avoiding
 # order-dependent bugs when callers source this lib at different points.
 #
-# Args:
-#   $1  — (optional) path to credential helper script. If omitted,
-#         reuses the existing [credential] section or omits it.
+# Guard: if gh is not on PATH, the function prints an error to stderr and returns 1.
+# The caller (hook) runs with set -euo pipefail, so SessionStart will abort and
+# surface the error rather than leaving gitconfig without a [credential] section.
 write_git_config_global() {
-  local cred_helper="${1:-}"
   local bot_name="${GIT_AUTHOR_NAME:-}"
   local bot_email="${GIT_AUTHOR_EMAIL:-}"
-  local target="${GIT_CONFIG_GLOBAL:-${AGENT_CONFIG_DIR:-${HOME}/.agents/_UNKNOWN/.config}/git/config}"
+  local target="${GIT_CONFIG_GLOBAL:-${CLAUDE_PLUGIN_DATA}/git/config}"
 
   [[ -n "$bot_name" && -n "$bot_email" ]] || return 0
 
@@ -168,11 +166,19 @@ write_git_config_global() {
     email = ${bot_email}
 GCEOF
 
-  if [[ -n "$cred_helper" ]]; then
-    cat >> "$target" <<GCEOF
+  if command -v gh >/dev/null 2>&1; then
+    # gh auth git-credential reads $GH_TOKEN from env — no script file needed,
+    # no versioned path embedded. The double-reset (helper = empty then helper = !gh)
+    # clears any previously-configured credential helper before setting ours,
+    # matching the pattern git itself uses when resetting helpers.
+    cat >> "$target" <<'GCEOF'
 [credential "https://github.com"]
-    helper = !${cred_helper}
+    helper =
+    helper = !gh auth git-credential
 GCEOF
+  else
+    echo "write_git_config_global: gh not found on PATH — cannot configure credential.helper. Install gh (github.com/cli/cli) and ensure it is on PATH before starting a session." >&2
+    return 1
   fi
 
   chmod 600 "$target"

@@ -16,23 +16,27 @@ no longer preserved when plugins are copied to the cache, so every plugin's
 This plugin is the fix:
 
 1. The libraries live here, in `plugins/shared-lib/lib/*.sh`.
-2. A `Setup` hook (matcher `"init"`) copies them from the plugin root to
-   `${CLAUDE_PLUGIN_DATA}/lib/` (with a manifest-hash check so we only
-   re-copy when content changes).
-3. The agent launcher fires a `claude --init-only --dangerously-skip-permissions`
-   pre-pass before the interactive session. The pre-pass fires
-   `Setup{trigger:"init"}` plus `SessionStart{source:"startup"}` and then
-   exits. This is the critical ordering guarantee: the libs are written
-   to disk before any dependent plugin's `SessionStart` hook runs in the
-   interactive session.
-4. Other plugins declare a dependency on `shared-lib` in their
-   `plugin.json`, then source the libs out of the shared-lib data
-   directory (with a wait-and-source guard as defense-in-depth).
+2. The sync script is registered on **two** hook events:
+   - `Setup{matcher:"init"}` — fires during the `claude --init-only`
+     pre-pass (the launcher's fresh-install Phase 1). This guarantees
+     the libs are on disk _before_ any dependent plugin's
+     `SessionStart` body runs in the interactive session.
+   - `SessionStart{matcher:"*"}` — fires every session. Catches plugin
+     updates (Setup{init} does **not** re-fire when a plugin version
+     bumps) and self-heals if the data dir is manually deleted.
 
-See `docs/research/claude-maintenance-flag-verification.md` in the agent
-repo for the full launcher-contract analysis (why `--init-only` and not
-`--maintenance`, what carries over between the pre-pass and interactive
-launch).
+   Both triggers point at the same script. A manifest-hash check makes
+   repeat invocations a fast no-op when content is unchanged.
+
+3. Other plugins declare a dependency on `shared-lib` in their
+   `plugin.json`, then source the libs out of the shared-lib data
+   directory (with a wait-and-source guard as defense-in-depth — see
+   below).
+
+See [`docs/research/claude-maintenance-flag-verification.md`](https://github.com/nsheaps/.ai-agent-jack/blob/main/docs/research/claude-maintenance-flag-verification.md)
+(in the `nsheaps/.ai-agent-jack` repo) for the launcher-contract
+analysis on `--init-only` semantics and what carries over between the
+pre-pass and the interactive session.
 
 ## How dependent plugins consume it
 
@@ -110,37 +114,42 @@ refactor (tracked as a follow-up) may derive the marketplace suffix from
 
 ## Bundled libraries
 
-| File                     | Purpose                                                      |
-| :----------------------- | :----------------------------------------------------------- |
-| `add-permission.sh`      | Helpers for adding permissions to settings files             |
-| `hook-logging.sh`        | Full hook lifecycle logging (start/respond/cleanup/fail)     |
-| `hook-output.sh`         | Lightweight JSON `additionalContext` output for simple hooks |
-| `log.sh`                 | Generic stderr logger with configurable prefix               |
-| `plugin-config-read.sh`  | 3-tier YAML/JSON plugin config resolver                      |
-| `safe-settings-write.sh` | Atomic JSON edits to `settings.json`                         |
-| `tool-install.sh`        | Helpers for installing tools to project-local install dirs   |
+| File                     | Purpose                                                                                |
+| :----------------------- | :------------------------------------------------------------------------------------- |
+| `add-permission.sh`      | Helpers for adding permissions to settings files                                       |
+| `env-file.sh`            | Idempotent upsert/remove of `export KEY=...` and `source ...` lines in bash env files  |
+| `env-local-target.sh`    | Resolve "envLocal" target paths (`$AGENT_HOME_DIR/.env.local`) and source-chain wiring |
+| `hook-logging.sh`        | Full hook lifecycle logging (start/respond/cleanup/fail)                               |
+| `hook-output.sh`         | Lightweight JSON `additionalContext` output for simple hooks                           |
+| `log.sh`                 | Generic stderr logger with configurable prefix                                         |
+| `plugin-config-read.sh`  | 3-tier YAML/JSON plugin config resolver                                                |
+| `safe-settings-write.sh` | Atomic JSON edits to `settings.json`                                                   |
+| `tool-install.sh`        | Helpers for installing tools to project-local install dirs                             |
 
 ## Hook ordering
 
-Setup hooks fire in the `--init-only` pre-pass, which exits before the
-interactive session starts. The interactive session sees the libs already
-on disk in `${CLAUDE_PLUGIN_DATA}/lib/` before any dependent plugin's
-`SessionStart` hook fires.
+Two events fire the sync script:
+
+- **`Setup{matcher:"init"}`** runs during the `claude --init-only`
+  pre-pass. The launcher's
+  [`.claude/hooks/session-start/01-install-plugins.sh`](https://github.com/nsheaps/ai-mktpl/blob/main/.claude/hooks/session-start/01-install-plugins.sh)
+  runs Phase 1 (Setup{init} across all plugins) before Phase 2
+  (SessionStart across all plugins). On a fresh-install web session this
+  guarantees `shared-lib`'s data dir is populated before any dependent
+  plugin's `SessionStart` body executes.
+- **`SessionStart{matcher:"*"}`** runs every session (fresh launch,
+  `--resume`, `--continue`, post-`/compact` resume). This is the path
+  that picks up plugin updates and self-heals if the data dir is wiped.
+
+The manifest-diff check keeps the hot path fast: if the lib content
+hasn't changed since the last sync, the script exits in milliseconds.
+Both hooks therefore co-exist cheaply.
 
 The wait-loop in dependent plugins is retained as defense-in-depth: it
-handles edge cases where the launcher pre-pass may not have run (e.g.,
-the user invokes `claude` directly outside the launcher), and is a no-op
-on the hot path since the libs persist across sessions.
-
-### What carries over between pre-pass and interactive launch
-
-- **Disk side effects (carry over):** plugin dirs, files written under
-  `${CLAUDE_PLUGIN_DATA}`, marketplace cache.
-- **Conversation/in-memory state (does NOT carry over):** the pre-pass
-  process exits and the interactive session is a fully independent
-  process. Setup hooks that need to inject env vars via `CLAUDE_ENV_FILE`
-  would not affect the interactive session unless the launcher captures
-  and re-injects them.
+handles edge cases where `Setup{init}` may not have run (e.g., the user
+invokes `claude` directly outside the launcher, or interactive-mode
+`SessionStart` ordering races), and is a no-op on the hot path since
+the libs persist across sessions.
 
 ## Releasing
 

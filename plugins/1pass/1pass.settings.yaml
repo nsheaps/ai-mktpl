@@ -32,6 +32,25 @@
   # opExecVersion: "1.0.0"
   opExecVersion: 'latest'
 
+  # --- envLocal target configuration ---
+  # Path settings for the `envLocal` target (used by `secrets:` entries and
+  # `opExec.targets` below). Writes shell-sourceable `export K=v` lines to a
+  # persistent .env.local file (NOT truncated each session — uses idempotent
+  # replace-or-append semantics via shared-lib's env_file_upsert_export).
+  #
+  # path:           Where to write the resolved env vars. Default:
+  #                 $AGENT_HOME_DIR/.env.local when AGENT_HOME_DIR is set,
+  #                 otherwise $CLAUDE_PROJECT_DIR/.env.local.
+  # sourceChain:    Path that 1pass appends as `source <path>` to CLAUDE_ENV_FILE.
+  #                 Use this when .env.local is sourced indirectly via a
+  #                 templated .env file. Default: $AGENT_HOME_DIR/.env when
+  #                 AGENT_HOME_DIR is set, otherwise unset (no source line).
+  #                 Set to the literal value "self" to source the envLocal path
+  #                 directly from CLAUDE_ENV_FILE (skipping the .env chain).
+  envLocal:
+    # path: '$AGENT_HOME_DIR/.env.local'
+    # sourceChain: '$AGENT_HOME_DIR/.env'
+
   # --- Individual secrets injection ---
   # Inject specific 1Password fields as named environment variables.
   # Each entry has:
@@ -39,6 +58,8 @@
   #   reference: (required) 1Password secret reference (op://vault/item/field)
   #   target:    (optional) Where to write the variable. One of:
   #                envFile           — append to CLAUDE_ENV_FILE (session-scoped, default)
+  #                envLocal          — upsert to envLocal.path (see envLocal config above);
+  #                                    also adds a `source` line to CLAUDE_ENV_FILE
   #                settingsJson      — write to .claude/settings.json env block (committed)
   #                settingsLocalJson — write to .claude/settings.local.json env block (gitignored)
   #                userSettingsJson  — write to ~/.claude/settings.json env block (user-global, not committed)
@@ -66,6 +87,9 @@
   #
   # targets: where to write the resolved env vars (list, multiple allowed)
   #   - sessionStartBashEnv  — append to CLAUDE_ENV_FILE (session-scoped, bash tool only)
+  #   - envLocal             — upsert to envLocal.path (gitignored, persistent across sessions
+  #                            via replace-or-append; intended for use with a templated .env
+  #                            file that sources .env.local for direnv/other consumers)
   #   - userSettings         — write to ~/.claude/settings.local.json .env (persistent, all tools)
   #   Defaults to both sessionStartBashEnv and userSettings.
   #

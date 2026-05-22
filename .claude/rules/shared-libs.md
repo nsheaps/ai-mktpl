@@ -144,6 +144,49 @@ source "$SHARED_LIB_DIR/safe-settings-write.sh"
 safe_write_settings '.some.key = "value"'
 ```
 
+### env-file.sh
+
+Idempotent helpers for updating bash-style env files (e.g. `CLAUDE_ENV_FILE`,
+`.env.local`). Each call removes any pre-existing matching line, then appends
+the new one, so the file always has exactly one occurrence (upsert) or zero
+(remove) of the targeted line. Uses same-directory `mktemp -- "${file}.XXXXXX"` +
+`mv` for true `rename(2)` atomic replace.
+
+```bash
+source "$SHARED_LIB_DIR/env-file.sh"
+
+env_file_upsert_export "$CLAUDE_ENV_FILE" "MY_TOKEN" "$value"   # export MY_TOKEN=<quoted>
+env_file_upsert_source "$CLAUDE_ENV_FILE" "$HOME/.env.local"    # source <path>
+env_file_remove_export "$CLAUDE_ENV_FILE" "MY_TOKEN"            # remove any export MY_TOKEN=...
+env_file_remove_source "$CLAUDE_ENV_FILE" "$HOME/.env.local"    # remove any source <path>
+```
+
+See `plugins/shared-lib/tests/env-file.test.sh` for usage examples covering
+edge cases (regex-metachar paths, prefix collisions like `FOO` vs `FOOBAR`,
+empty values, idempotency).
+
+### env-local-target.sh
+
+Resolves the path for an "envLocal" target (typically
+`$AGENT_HOME_DIR/.env.local`) and, optionally, a source-chain path that
+should be wired into `CLAUDE_ENV_FILE` via a `source <path>` line. Used by
+plugins that inject secrets/config into an agent-scoped env file rather
+than the session-scoped `CLAUDE_ENV_FILE`.
+
+Depends on `plugin-config-read.sh` (must be sourced first).
+
+```bash
+source "$SHARED_LIB_DIR/plugin-config-read.sh"
+source "$SHARED_LIB_DIR/env-local-target.sh"
+
+env_local_path="$(_resolve_env_local_path)"
+source_chain="$(_resolve_env_local_source_chain "$env_local_path")"
+```
+
+See `plugins/1pass/tests/env-local-target.test.sh` for the canonical
+consumer test covering path resolution, `sourceChain` sentinels
+(`self` / `none` / `false`), and end-to-end upsert flow.
+
 ## Adding a new shared library
 
 1. Add the file to `plugins/shared-lib/lib/<my-lib>.sh`

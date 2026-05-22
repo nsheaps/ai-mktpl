@@ -29,11 +29,12 @@ This skill covers managing GitHub App installation tokens in Claude Code session
 Session Start
   │
   ├─ SessionStart Hook (github-token-init.sh)
-  │   ├─ Reads GITHUB_APP_ID, PRIVATE_KEY_PATH, INSTALLATION_ID
+  │   ├─ Reads GITHUB_APP_ID, GITHUB_INSTALLATION_ID, GITHUB_APP_PRIVATE_KEY
+  │   ├─ Materializes PEM to $CLAUDE_PLUGIN_DATA/github-app.pem
   │   ├─ Generates JWT from PEM key
   │   ├─ Exchanges JWT for installation token (1 hour validity)
-  │   ├─ Writes token to ~/.agents/${AGENT_NAME}/.config/github-token
-  │   ├─ Creates runtime env file (~/.agents/${AGENT_NAME}/.config/github-app-env)
+  │   ├─ Writes token to $CLAUDE_PLUGIN_DATA/github-token
+  │   ├─ Creates runtime env file ($CLAUDE_PLUGIN_DATA/github-app-env)
   │   ├─ Sources env file via CLAUDE_ENV_FILE
   │   ├─ Configures git identity (bot user)
   │   └─ Prints: app name, expiry time, env var names
@@ -41,8 +42,8 @@ Session Start
   └─ PreToolUse Hook (github-token-check.sh)
       ├─ Debounced: checks at most every 300 seconds (5 minutes)
       ├─ For gh/git commands: synchronous check
-      │   ├─ Valid + >30min: silent allow
-      │   ├─ Valid + <30min: allow + background refresh
+      │   ├─ Valid + >45min: silent allow
+      │   ├─ Valid + <45min: allow + background refresh
       │   └─ Expired: synchronous refresh, then allow
       ├─ For other tools: async background check
       ├─ Retries up to 3x with exponential backoff
@@ -53,175 +54,153 @@ Session Start
 
 1. **Generation**: JWT created from App private key (10-min validity)
 2. **Exchange**: JWT exchanged for installation token via GitHub API
-3. **Storage**: Token written to `~/.agents/${AGENT_NAME}/.config/github-token` (permissions 600)
+3. **Storage**: Token written to `$CLAUDE_PLUGIN_DATA/github-token` (permissions 600)
 4. **Monitoring**: PreToolUse hook checks expiry before each tool call (debounced)
-5. **Refresh**: When within 30 min of expiry, token is regenerated
-6. **Expiry**: Tokens valid for 1 hour; refreshed with 30-minute buffer
+5. **Refresh**: When within 45 min of expiry, token is regenerated
+6. **Expiry**: Tokens valid for 1 hour; refreshed with 45-minute buffer
 
 ## Setup
 
 ### Prerequisites
 
 1. A GitHub App created at `https://github.com/settings/apps`
-2. The App's private key (PEM file) downloaded
+2. The App's private key (PEM content)
 3. The App installed on the target account/organization
 4. The installation ID (found in App settings > Installations)
 
 ### Configuration
 
-The plugin supports multiple secret sources. Each value can be a literal, `${ENV_VAR}`, or `op://vault/item/field`.
+Set these three env vars before the session starts:
 
-#### Option A: Bulk Secret Reference (`ref`)
+- `GITHUB_APP_ID`
+- `GITHUB_INSTALLATION_ID`
+- `GITHUB_APP_PRIVATE_KEY` (PEM content, not a file path)
 
-Use `ref` to load all secrets from one source:
-
-```yaml
-# In $CLAUDE_PROJECT_DIR/.claude/plugins.settings.yaml
-github-app:
-  # 1Password item (uses op-exec from nsheaps/op-exec)
-  ref: "op://vault/github-app--repo--my-repo"
-  # Or an env file with KEY=VALUE pairs
-  # ref: "env-file://./.env.github-app"
-```
-
-Expected field names: `GITHUB_APP_ID`, `GITHUB_APP_CLIENT_ID`, `GITHUB_APP_CLIENT_SECRET`, `GITHUB_APP_PRIVATE_KEY`, `GITHUB_INSTALLATION_ID`.
-
-#### Option B: Individual Secret References
+**Recommended**: Use the **1pass plugin** to inject from 1Password by adding the three vars to your agent's `1pass.secrets` list in `plugins.settings.yaml`:
 
 ```yaml
-github-app:
+1pass:
   secrets:
-    github_app_id: "op://vault/item/GITHUB_APP_ID"
-    github_app_private_key: "op://vault/item/GITHUB_APP_PRIVATE_KEY"
-    github_installation_id: "${GITHUB_INSTALLATION_ID}"
+    - envVar: GITHUB_APP_ID
+      reference: "op://vault/github-app--repo--my-repo/GITHUB_APP_ID"
+    - envVar: GITHUB_INSTALLATION_ID
+      reference: "op://vault/github-app--repo--my-repo/GITHUB_INSTALLATION_ID"
+    - envVar: GITHUB_APP_PRIVATE_KEY
+      reference: "op://vault/github-app--repo--my-repo/GITHUB_APP_PRIVATE_KEY"
+
+github-app:
+  enabled: true
+  autoGitConfig: true
 ```
 
-#### Option C: Environment Variables
+Any other mechanism that exports these vars into the session env works (direct shell export, `.env` file sourced before launch, etc.).
 
-```bash
-export GITHUB_APP_ID="12345"
-export GITHUB_APP_PRIVATE_KEY_PATH="~/.agents/${AGENT_NAME}/.config/github-app.pem"
-export GITHUB_INSTALLATION_ID="67890"
-```
-
-### Private Key Handling
-
-The private key can be provided as:
-
-- **File path** (`private_key_path` / `GITHUB_APP_PRIVATE_KEY_PATH`): PEM file on disk
-- **Key content** (`secrets.github_app_private_key` / `GITHUB_APP_PRIVATE_KEY`): PEM content directly (e.g., from 1Password). Written to a secure temp file automatically.
-
-### PEM Key Security
-
-```bash
-# Ensure correct permissions
-chmod 600 ~/.agents/${AGENT_NAME}/.config/github-app.pem
-
-# Verify the key
-openssl rsa -in ~/.agents/${AGENT_NAME}/.config/github-app.pem -check -noout
-```
+The plugin materializes the PEM to `$CLAUDE_PLUGIN_DATA/github-app.pem` on every session start. No pre-existing PEM file is needed.
 
 ## Checking Token Status
 
 Run the token status script directly:
 
 ```bash
-~/.agents/${AGENT_NAME}/.config/github-app-env  # source to get vars
 $CLAUDE_PLUGIN_ROOT/bin/token-status.sh
 ```
 
-Or check the metadata file:
+Or check the metadata file (length-only — never print the raw token):
 
 ```bash
-cat ~/.agents/${AGENT_NAME}/.config/github-token.meta | jq .
+jq '.expires_at' "$CLAUDE_PLUGIN_DATA/github-token.meta"
 ```
 
-## Forcing a Token Refresh
+## Manually Refreshing the Token
+
+### Option A — Use token-check.sh (preferred)
 
 ```bash
 $CLAUDE_PLUGIN_ROOT/bin/token-check.sh --sync
 ```
 
-## Git Credential Helper
+Exit codes: `0` = valid/refreshed, `1` = failed after retries, `2` = not configured, `3` = cooldown.
 
-The plugin includes a git credential helper for seamless `git push` operations:
+### Option B — Call generate-token.sh directly
+
+**Step 1 — Verify env vars (length-only, never print values)**
 
 ```bash
-# Configure git to use the helper
-git config --global credential.https://github.com.helper \
-  '!/path/to/plugins/github-app/bin/git-credential-github-app.sh'
+for v in GITHUB_APP_ID GITHUB_INSTALLATION_ID GITHUB_APP_PRIVATE_KEY; do
+  val="${!v:-}"
+  [[ -n "$val" ]] && echo "$v is set (${#val} chars)" || echo "$v is NOT set"
+done
 ```
 
-This reads the token from the shared file, so `git push` always uses the latest token.
+**Step 2 — Run generate-token.sh**
 
-## Agent Team Usage
+The PEM is already at `$CLAUDE_PLUGIN_DATA/github-app.pem` (materialized by SessionStart).
 
-For agent teams (tmux panes), all agents share the same token file:
+```bash
+$CLAUDE_PLUGIN_ROOT/bin/generate-token.sh \
+  "$GITHUB_APP_ID" \
+  "$CLAUDE_PLUGIN_DATA/github-app.pem" \
+  "$GITHUB_INSTALLATION_ID" \
+  "$CLAUDE_PLUGIN_DATA/github-token"
+```
 
-- Token file: `~/.agents/${AGENT_NAME}/.config/github-token`
-- All agents read from the same file
-- PreToolUse hook in each agent monitors and refreshes as needed
-- File-based locking prevents concurrent refresh races
+**Step 3 — Verify**
+
+```bash
+GH_TOKEN=$(cat "$CLAUDE_PLUGIN_DATA/github-token") gh api /user --jq '.login'
+# Expected: <app-slug>[bot]
+```
+
+### Common failures
+
+| Symptom                              | Likely cause                                              |
+| ------------------------------------ | --------------------------------------------------------- |
+| `HTTP 401` during JWT exchange       | PEM key mismatch or clock skew > 60s                      |
+| `HTTP 404` on `/app/installations/…` | Wrong `GITHUB_INSTALLATION_ID`                            |
+| `Failed to sign JWT`                 | PEM content malformed or `GITHUB_APP_PRIVATE_KEY` missing |
+| `exit 2` from token-check.sh         | Credential env vars missing                               |
+| `exit 3` from token-check.sh         | 5-min cooldown — wait or clear `.cooldown` file           |
+
+## Git Credential Helper
+
+The SessionStart hook configures git to use `gh auth git-credential` directly. The gitconfig entry written is:
+
+```ini
+[credential "https://github.com"]
+    helper =
+    helper = !gh auth git-credential
+```
 
 ## Troubleshooting
 
 ### "GitHub App not configured"
 
-Missing one or more required environment variables. Set all three:
-
-- `GITHUB_APP_ID`
-- `GITHUB_APP_PRIVATE_KEY_PATH`
-- `GITHUB_INSTALLATION_ID`
-
-### "PEM key not found"
-
-The private key path doesn't exist or isn't readable. Check the path and permissions.
-
-### "Token exchange failed (HTTP 401)"
-
-The JWT is invalid. Common causes:
-
-- PEM key doesn't match the App ID
-- System clock is significantly off (JWT uses time-based claims)
-- App has been deleted or suspended
-
-### "Token exchange failed (HTTP 404)"
-
-The installation ID is wrong or the App is no longer installed on the target account.
-
-### "Token expired" or auth errors despite PreToolUse hook
-
-Check that the runtime env file exists and is being sourced:
+Missing env vars. Check lengths (never print values):
 
 ```bash
-cat ~/.agents/${AGENT_NAME}/.config/github-app-env
+for v in GITHUB_APP_ID GITHUB_INSTALLATION_ID GITHUB_APP_PRIVATE_KEY; do
+  val="${!v:-}"; [[ -n "$val" ]] && echo "$v set (${#val} chars)" || echo "$v NOT SET"
+done
 ```
-
-If missing, the SessionStart hook may have failed. Check stderr output from session start.
 
 ### "in cooldown period"
 
-The plugin failed to refresh 3 times consecutively and is backing off for 5 minutes. Check:
-
-1. Network connectivity
-2. GitHub API status
-3. App credentials validity
-
-To clear the cooldown manually:
+Clear the cooldown:
 
 ```bash
-rm ~/.agents/${AGENT_NAME}/.config/github-token.cooldown
+rm "$CLAUDE_PLUGIN_DATA/github-token.cooldown"
 ```
 
-### Permissions Issues
+### Cleanup of old v0.3.x paths
 
-Installation tokens inherit the App's configured permissions. If you get 403 errors:
+v0.4.0 writes everything under `$CLAUDE_PLUGIN_DATA/`. Orphaned files at `~/.agents/<name>/.config/` can be removed:
 
-1. Check the App's permission configuration in GitHub settings
-2. Verify the App is installed with the needed permissions
-3. Org owners may need to approve permission changes
+```bash
+rm -rf ~/.agents/<name>/.config/github-token* ~/.agents/<name>/.config/github-app-env \
+       ~/.agents/<name>/.config/github-app.pem ~/.agents/<name>/.config/github-git-identity
+```
 
 ## Related
 
 - **[github](../github)** plugin — GitHub CLI and general authentication skills
-- The `github-auth` skill (shared between both plugins) covers all auth methods
+- The `github-auth` skill covers all auth methods

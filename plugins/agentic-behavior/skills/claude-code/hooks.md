@@ -331,7 +331,20 @@ Output:
 ## PostToolUse
 
 Fires after a tool call succeeds. Matcher: same as PreToolUse. Input adds
-`tool_result` (string).
+`tool_response` (z.unknown) and `tool_use_id` (string). Per-tool
+`tool_response` shapes (observed at claude-code v2.1.x runtime):
+
+| Tool                                | `tool_response` shape                                        |
+| ----------------------------------- | ------------------------------------------------------------ |
+| `Bash`                              | `{ stdout, stderr, interrupted, isImage, noOutputExpected }` |
+| `Read`/`Edit`/`Write`/`Grep`/`Glob` | `{ type: "text", text: string }` (object) or a bare string   |
+| MCP tools                           | tool-specific                                                |
+
+> **Common pitfall:** Earlier revisions of this doc called the field
+> `tool_result`. The actual schema is `tool_response` — see
+> `entrypoints/sdk/coreSchemas.ts` `PostToolUseHookInputSchema`. A hook that
+> reads `.tool_result` will always get empty and silently no-op (this caused
+> the 1pass redact-secrets bug fixed in ai-mktpl#532).
 
 Output:
 
@@ -339,9 +352,11 @@ Output:
 {
   "decision": "block",
   "reason": "injected back to Claude as system message",
+  "systemMessage": "delivered as a hook_system_message attachment to the AI",
   "hookSpecificOutput": {
     "hookEventName": "PostToolUse",
-    "additionalContext": "..."
+    "additionalContext": "...",
+    "updatedMCPToolOutput": "MCP tools only — replaces the tool output"
   }
 }
 ```
@@ -350,10 +365,24 @@ Output:
 can react (e.g. "your edit broke a test"). It does **not** undo the tool —
 the side effect already happened.
 
+> **Surfacing of `systemMessage`:** When emitted, it is delivered as a
+> `hook_system_message` _attachment_ in the transcript JSONL, NOT rendered
+> as a `<system-reminder>` text block. It is visible to the AI's context
+> but not visually distinct in the chat stream — grep
+> `hook_system_message` in the transcript to confirm delivery.
+>
+> **`updatedToolOutput` is NOT a recognized field.** Some external docs
+> (and prior 1pass plugin code) include `updatedToolOutput` in the emitted
+> JSON. claude-code's `SyncHookJSONOutputSchema` does not list it; the
+> only "output replacement" field is `hookSpecificOutput.updatedMCPToolOutput`
+> for MCP tools. For Bash/Read/Edit/etc., you cannot replace the tool
+> output — use `systemMessage` to signal redactions or warnings instead.
+
 ## PostToolUseFailure
 
-Same matcher as PreToolUse. Input has `tool_error` instead of `tool_result`.
-Output shape identical to PostToolUse.
+Same matcher as PreToolUse. Input has `error` (string) and optional
+`is_interrupt` (boolean), NOT `tool_error`. Output shape identical to
+PostToolUse.
 
 ## PostToolBatch
 

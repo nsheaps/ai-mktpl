@@ -11,7 +11,7 @@
     {
       "name": "1pass",
       "description": "Install and manage 1Password CLI (op) and op-exec in Claude Code sessions. Provides session-start auto-install for web sessions and comprehensive workflow skills.",
-      "version": "0.3.4",
+      "version": "0.6.1",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -44,7 +44,7 @@
     {
       "name": "agentic-behavior",
       "description": "Skills for configuring Claude Code, behavior correction, memory tracking, autonomy rules, time-context awareness, and session exit/restart. Combines prompt history tracking, git-backed memory sync, the self-checking Ralph loop pattern, and graceful session exit via SIGINT.",
-      "version": "0.4.0",
+      "version": "0.4.1",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -385,8 +385,8 @@
     },
     {
       "name": "github-app",
-      "description": "Automatic GitHub App token lifecycle for Claude Code sessions. Generates installation tokens on session start, monitors expiry via PreToolUse hook, and refreshes transparently before commands that need authentication.",
-      "version": "0.3.5",
+      "description": "env-var driven GitHub App token lifecycle for Claude Code sessions. Pairs with the 1pass plugin for secret injection.",
+      "version": "0.5.0",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -729,7 +729,7 @@
     {
       "name": "shared-lib",
       "description": "Shared bash libraries used by other ai-mktpl plugins (logging, hook output, config reading, settings writing, tool install). Other plugins declare this as a dependency and source the libs from this plugin's persistent data directory at runtime.",
-      "version": "1.0.0",
+      "version": "1.0.5",
       "author": {
         "name": "Nathan Heaps"
       },
