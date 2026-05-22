@@ -40,9 +40,9 @@ reddit-fetch.sh user someuser --limit 10
 | Subcommand         | Description                                                        |
 | ------------------ | ------------------------------------------------------------------ |
 | `subreddit <name>` | List posts from a subreddit (hot, new, top, rising, controversial) |
-| `post <url>`       | Fetch a single post with its comment tree (depth capped at 3)      |
-| `search <query>`   | Search all of Reddit or a specific subreddit                       |
-| `user <username>`  | Fetch a user's recent submitted posts                              |
+| `post <url>`       | Fetch a single post with its comment tree (depth capped at 4 levels) |
+| `search <query>`   | Search all of Reddit or a specific subreddit                         |
+| `user <username>`  | Fetch a user's recent submitted posts                                |
 
 ### Common Options
 
@@ -63,12 +63,12 @@ All output is markdown, optimized for LLM consumption:
 
 - Post bodies are truncated at 2000 characters
 - Comments are truncated at 500 characters
-- Comment nesting is capped at 3 levels deep
+- Comment nesting is capped at 4 levels deep (depth 0–3)
 - NSFW posts are excluded by default
 
 ## Content Quality Warning
 
-Reddit content is user-generated and unverified. Always cross-reference technical claims with official documentation. See `rules/reddit-usage.md` for detailed guidelines.
+Reddit content is user-generated and unverified. Always cross-reference technical claims with official documentation. See the `fetch-reddit` skill for detailed content quality guidelines.
 
 ## Design Decisions
 

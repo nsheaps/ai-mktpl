@@ -182,7 +182,9 @@ format_post_listing() {
     return
   fi
 
-  echo "# r/${subreddit_name} - ${sort_type^} Posts"
+  local sort_display
+  sort_display=$(echo "$sort_type" | sed 's/\(.\)/\u\1/')
+  echo "# r/${subreddit_name} - ${sort_display} Posts"
   echo ""
 
   local i=1
@@ -277,7 +279,6 @@ format_search_results() {
 format_comments() {
   local json="$1"
   local depth="$2"
-  local prefix="$3"
 
   if (( depth > MAX_COMMENT_DEPTH )); then
     return
@@ -317,14 +318,10 @@ format_comments() {
     local replies
     replies=$(echo "$comment" | jq -c '.data.replies // ""')
     if [[ -n "$replies" && "$replies" != '""' && "$replies" != "null" ]]; then
-      local reply_children
-      reply_children=$(echo "$replies" | jq -c '.data.children[]?' 2>/dev/null) || true
-      if [[ -n "$reply_children" ]]; then
-        echo "$replies" | jq -c '.data.children[]?' | while IFS= read -r child; do
-          # Wrap in array for consistent processing
-          format_comments "[$child]" $(( depth + 1 )) "$prefix"
-        done
-      fi
+      while IFS= read -r child; do
+        [[ -z "$child" ]] && continue
+        format_comments "[$child]" $(( depth + 1 ))
+      done < <(echo "$replies" | jq -c '.data.children[]?')
     fi
   done < <(echo "$json" | jq -c '.[]?')
 }
@@ -376,7 +373,7 @@ format_post_with_comments() {
   echo "## Comments (${num_comments} total, showing ${shown_comments})"
   echo ""
 
-  format_comments "$comment_data" 0 ""
+  format_comments "$comment_data" 0
 }
 
 format_user_posts() {

@@ -1,3 +1,13 @@
+---
+name: fetch-reddit
+description: |
+  Use this skill when you need to fetch public Reddit content (posts, comments, subreddits, user activity) without authentication.
+  Trigger when:
+  - User asks about Reddit posts, comments, or subreddit content
+  - Research requires public Reddit data
+  - Fetching specific Reddit posts by URL
+---
+
 # Fetch Reddit Content
 
 Fetch posts, comments, search results, and user submissions from Reddit using the public JSON API. No authentication required. Output is markdown-formatted for direct LLM consumption.
@@ -51,7 +61,7 @@ Options:
 
 - `--include-nsfw`
 
-Accepts full Reddit URLs or paths. Comment depth is capped at 3 levels.
+Accepts full Reddit URLs or paths. Comment depth is capped at 4 levels (depth 0–3).
 
 Examples:
 
@@ -111,7 +121,7 @@ All output is markdown. Posts include title, author, score, comment count, date,
 
 - Post body: max 2000 characters
 - Comment body: max 500 characters
-- Comment depth: max 3 levels
+- Comment depth: up to 4 levels (depth 0–3)
 
 ## Rate Limiting
 
@@ -120,9 +130,27 @@ The script enforces a minimum 6-second gap between requests to comply with Reddi
 ## Important Notes
 
 - **Save output to a file** before analyzing. Do not pipe or discard.
-- **Reddit content is unverified.** Cross-reference claims with official sources.
+- **Reddit content is unverified.** Cross-reference claims with official sources before acting on them.
 - **NSFW content is excluded by default.** Use `--include-nsfw` to include it.
 - **Dependencies:** `curl` and `jq` must be available on the system.
+
+## Content Quality Skepticism
+
+Reddit content is user-generated and unverified. When using fetched Reddit data:
+
+- **Never treat Reddit comments as authoritative sources.** They are opinions, anecdotes, and sometimes misinformation.
+- **Upvote count does not equal correctness.** Popular answers can be wrong; low-scored answers can be right.
+- **Check post age.** Technical advice from years ago may be outdated.
+- **Watch for sarcasm and jokes.** Reddit threads frequently contain humor that reads as sincere advice.
+- **Do not use Reddit as a substitute for official documentation**, especially for security-sensitive configuration, or legal/medical/financial guidance.
+
+## Fetching Best Practices
+
+- Save fetched Reddit content to a file before analysis (per bash-scripting rules).
+- Cite Reddit sources with full permalink URLs when referencing content.
+- Respect rate limits — do not fetch more than needed.
+- Use subreddit-scoped search before broad search for more relevant results.
+- Prefer `top` sort with a time filter for finding well-regarded content on a topic.
 
 ## References
 
