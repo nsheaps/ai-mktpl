@@ -34,7 +34,9 @@ readonly BASE_URL="https://www.reddit.com"
 readonly MIN_REQUEST_GAP=6  # seconds between requests (Reddit rate limit for unauth)
 readonly MAX_RETRIES=3
 readonly MAX_COMMENT_DEPTH=3
-readonly DEFAULT_LIMIT=10
+readonly DEFAULT_LIMIT=15
+readonly DEFAULT_SORT="hot"
+readonly DEFAULT_TIME="month"
 readonly MAX_POST_BODY=2000
 readonly MAX_COMMENT_BODY=500
 
@@ -59,14 +61,16 @@ Subcommands:
   user <username>        Fetch a user's recent posts
 
 Common options:
-  --limit <n>            Number of results (default: 10, max: 100)
-  --sort <type>          Sort: hot, new, top, rising, controversial
-  --time <period>        Time filter for top/controversial: hour, day, week, month, year, all
-  --include-nsfw         Include NSFW posts (excluded by default)
+  --limit <n>            Number of results (default: 15, max: 100)
+  --sort <type>          Sort: hot, new, top, rising, controversial (default: hot)
+  --time <period>        Time filter for top/controversial: hour, day, week, month, year, all (default: month)
+  --exclude-nsfw         Exclude NSFW posts (default: included)
+  --after <cursor>       Pagination cursor — use the 'after' value from a previous response to fetch the next page
   --help                 Show this help
 
 Subreddit-specific:
   reddit-fetch.sh subreddit ClaudeCode --sort top --time week --limit 5
+  reddit-fetch.sh subreddit ClaudeCode --after t3_abc123  # next page
 
 Post-specific:
   reddit-fetch.sh post "https://www.reddit.com/r/ClaudeCode/comments/abc123/title/"
@@ -75,9 +79,11 @@ Post-specific:
 Search-specific:
   --subreddit <name>     Restrict search to a subreddit
   reddit-fetch.sh search "claude code mcp" --subreddit ClaudeCode --limit 5
+  reddit-fetch.sh search "claude code mcp" --after t3_abc123  # next page
 
 User-specific:
   reddit-fetch.sh user someuser --limit 10 --sort new
+  reddit-fetch.sh user someuser --after t3_abc123  # next page
 EOF
   exit 0
 }
@@ -192,10 +198,10 @@ format_post_listing() {
   local json="$1"
   local subreddit_name="$2"
   local sort_type="$3"
-  local include_nsfw="$4"
+  local exclude_nsfw="$4"
 
   local filter='.data.children[]'
-  if [[ "$include_nsfw" != "true" ]]; then
+  if [[ "$exclude_nsfw" == "true" ]]; then
     filter="${filter} | select(.data.over_18 != true)"
   fi
 
@@ -205,6 +211,9 @@ format_post_listing() {
     echo "No posts found."
     return
   fi
+
+  local after_cursor
+  after_cursor=$(echo "$json" | jq -r '.data.after // ""')
 
   echo "# r/${subreddit_name} - ${sort_type} Posts"
   echo ""
@@ -245,15 +254,19 @@ format_post_listing() {
     echo ""
     i=$(( i + 1 ))
   done < <(echo "$json" | jq -c "[${filter}][]")
+
+  if [[ -n "$after_cursor" ]]; then
+    echo "_Next page: \`reddit-fetch.sh subreddit ${subreddit_name} --after ${after_cursor}\`_"
+  fi
 }
 
 format_search_results() {
   local json="$1"
   local query="$2"
-  local include_nsfw="$3"
+  local exclude_nsfw="$3"
 
   local filter='.data.children[]'
-  if [[ "$include_nsfw" != "true" ]]; then
+  if [[ "$exclude_nsfw" == "true" ]]; then
     filter="${filter} | select(.data.over_18 != true)"
   fi
 
@@ -263,6 +276,9 @@ format_search_results() {
     echo "No results found for: ${query}"
     return
   fi
+
+  local after_cursor
+  after_cursor=$(echo "$json" | jq -r '.data.after // ""')
 
   echo "# Reddit Search: \"${query}\""
   echo ""
@@ -296,6 +312,10 @@ format_search_results() {
     echo ""
     i=$(( i + 1 ))
   done < <(echo "$json" | jq -c "[${filter}][]")
+
+  if [[ -n "$after_cursor" ]]; then
+    echo "_Next page: \`reddit-fetch.sh search \"${query}\" --after ${after_cursor}\`_"
+  fi
 }
 
 format_comments() {
@@ -350,7 +370,7 @@ format_comments() {
 
 format_post_with_comments() {
   local json="$1"
-  local include_nsfw="$2"
+  local exclude_nsfw="$2"
 
   # Post is the first listing, comments are the second
   local post_data comment_data
@@ -368,8 +388,8 @@ format_post_with_comments() {
   selftext=$(echo "$post_data" | jq -r '.selftext // ""')
   is_nsfw=$(echo "$post_data" | jq -r '.over_18 // false')
 
-  if [[ "$is_nsfw" == "true" && "$include_nsfw" != "true" ]]; then
-    echo "This post is marked NSFW. Use --include-nsfw to view."
+  if [[ "$is_nsfw" == "true" && "$exclude_nsfw" == "true" ]]; then
+    echo "This post is marked NSFW. Remove --exclude-nsfw to view."
     return
   fi
 
@@ -401,15 +421,18 @@ format_post_with_comments() {
 format_user_posts() {
   local json="$1"
   local username="$2"
-  local include_nsfw="$3"
+  local exclude_nsfw="$3"
 
   local filter='.data.children[] | select(.kind == "t3")'
-  if [[ "$include_nsfw" != "true" ]]; then
+  if [[ "$exclude_nsfw" == "true" ]]; then
     filter="${filter} | select(.data.over_18 != true)"
   fi
 
   local count
   count=$(echo "$json" | jq "[${filter}] | length")
+
+  local after_cursor
+  after_cursor=$(echo "$json" | jq -r '.data.after // ""')
 
   echo "# Posts by u/${username}"
   echo ""
@@ -440,23 +463,29 @@ format_user_posts() {
     echo ""
     i=$(( i + 1 ))
   done < <(echo "$json" | jq -c "[${filter}][]")
+
+  if [[ -n "$after_cursor" ]]; then
+    echo "_Next page: \`reddit-fetch.sh user ${username} --after ${after_cursor}\`_"
+  fi
 }
 
 # --- Subcommands ---
 
 cmd_subreddit() {
   local name=""
-  local sort="hot"
-  local time=""
+  local sort="$DEFAULT_SORT"
+  local time="$DEFAULT_TIME"
   local limit="$DEFAULT_LIMIT"
-  local include_nsfw="false"
+  local exclude_nsfw="false"
+  local after=""
 
   while (( $# > 0 )); do
     case "$1" in
       --sort) sort="$2"; shift 2 ;;
       --time) time="$2"; shift 2 ;;
       --limit) limit="$2"; shift 2 ;;
-      --include-nsfw) include_nsfw="true"; shift ;;
+      --exclude-nsfw) exclude_nsfw="true"; shift ;;
+      --after) after="$2"; shift 2 ;;
       --help) usage ;;
       -*) die "Unknown option: $1" ;;
       *) name="$1"; shift ;;
@@ -468,19 +497,20 @@ cmd_subreddit() {
 
   local url="${BASE_URL}/r/${name}/${sort}.json?limit=${limit}&raw_json=1"
   [[ -n "$time" ]] && url="${url}&t=${time}"
+  [[ -n "$after" ]] && url="${url}&after=${after}"
 
   local json
   json=$(fetch_json "$url")
-  format_post_listing "$json" "$name" "$sort" "$include_nsfw"
+  format_post_listing "$json" "$name" "$sort" "$exclude_nsfw"
 }
 
 cmd_post() {
   local post_url=""
-  local include_nsfw="false"
+  local exclude_nsfw="false"
 
   while (( $# > 0 )); do
     case "$1" in
-      --include-nsfw) include_nsfw="true"; shift ;;
+      --exclude-nsfw) exclude_nsfw="true"; shift ;;
       --help) usage ;;
       -*) die "Unknown option: $1" ;;
       *) post_url="$1"; shift ;;
@@ -508,16 +538,17 @@ cmd_post() {
 
   local json
   json=$(fetch_json "$url")
-  format_post_with_comments "$json" "$include_nsfw"
+  format_post_with_comments "$json" "$exclude_nsfw"
 }
 
 cmd_search() {
   local query=""
   local subreddit=""
-  local sort="relevance"
-  local time=""
+  local sort="$DEFAULT_SORT"
+  local time="$DEFAULT_TIME"
   local limit="$DEFAULT_LIMIT"
-  local include_nsfw="false"
+  local exclude_nsfw="false"
+  local after=""
 
   while (( $# > 0 )); do
     case "$1" in
@@ -525,7 +556,8 @@ cmd_search() {
       --sort) sort="$2"; shift 2 ;;
       --time) time="$2"; shift 2 ;;
       --limit) limit="$2"; shift 2 ;;
-      --include-nsfw) include_nsfw="true"; shift ;;
+      --exclude-nsfw) exclude_nsfw="true"; shift ;;
+      --after) after="$2"; shift 2 ;;
       --help) usage ;;
       -*) die "Unknown option: $1" ;;
       *) query="$1"; shift ;;
@@ -545,23 +577,26 @@ cmd_search() {
     url="${BASE_URL}/search.json?q=${encoded_query}&sort=${sort}&limit=${limit}&raw_json=1"
   fi
   [[ -n "$time" ]] && url="${url}&t=${time}"
+  [[ -n "$after" ]] && url="${url}&after=${after}"
 
   local json
   json=$(fetch_json "$url")
-  format_search_results "$json" "$query" "$include_nsfw"
+  format_search_results "$json" "$query" "$exclude_nsfw"
 }
 
 cmd_user() {
   local username=""
   local sort="new"
   local limit="$DEFAULT_LIMIT"
-  local include_nsfw="false"
+  local exclude_nsfw="false"
+  local after=""
 
   while (( $# > 0 )); do
     case "$1" in
       --sort) sort="$2"; shift 2 ;;
       --limit) limit="$2"; shift 2 ;;
-      --include-nsfw) include_nsfw="true"; shift ;;
+      --exclude-nsfw) exclude_nsfw="true"; shift ;;
+      --after) after="$2"; shift 2 ;;
       --help) usage ;;
       -*) die "Unknown option: $1" ;;
       *) username="$1"; shift ;;
@@ -572,10 +607,11 @@ cmd_user() {
   limit=$(validate_limit "$limit")
 
   local url="${BASE_URL}/user/${username}/submitted.json?sort=${sort}&limit=${limit}&raw_json=1"
+  [[ -n "$after" ]] && url="${url}&after=${after}"
 
   local json
   json=$(fetch_json "$url")
-  format_user_posts "$json" "$username" "$include_nsfw"
+  format_user_posts "$json" "$username" "$exclude_nsfw"
 }
 
 # --- Main ---
