@@ -182,9 +182,7 @@ format_post_listing() {
     return
   fi
 
-  local sort_display
-  sort_display=$(echo "$sort_type" | sed 's/\(.\)/\u\1/')
-  echo "# r/${subreddit_name} - ${sort_display} Posts"
+  echo "# r/${subreddit_name} - ${sort_type} Posts"
   echo ""
 
   local i=1
