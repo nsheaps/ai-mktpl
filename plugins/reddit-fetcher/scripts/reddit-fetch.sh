@@ -154,6 +154,15 @@ truncate_text() {
   fi
 }
 
+# Validate and clamp --limit: must be a positive integer, capped at 100
+validate_limit() {
+  local limit="$1"
+  [[ "$limit" =~ ^[0-9]+$ ]] || die "--limit must be a positive integer, got: $limit"
+  (( limit < 1 )) && die "--limit must be at least 1"
+  (( limit > 100 )) && limit=100
+  echo "$limit"
+}
+
 # Format epoch timestamp to readable date
 format_date() {
   local epoch="$1"
@@ -440,6 +449,7 @@ cmd_subreddit() {
   done
 
   [[ -z "$name" ]] && die "Subreddit name is required. Usage: reddit-fetch.sh subreddit <name>"
+  limit=$(validate_limit "$limit")
 
   local url="${BASE_URL}/r/${name}/${sort}.json?limit=${limit}&raw_json=1"
   [[ -n "$time" ]] && url="${url}&t=${time}"
@@ -508,6 +518,7 @@ cmd_search() {
   done
 
   [[ -z "$query" ]] && die "Search query is required. Usage: reddit-fetch.sh search <query>"
+  limit=$(validate_limit "$limit")
 
   local encoded_query
   encoded_query=$(printf '%s' "$query" | jq -sRr @uri)
@@ -543,6 +554,7 @@ cmd_user() {
   done
 
   [[ -z "$username" ]] && die "Username is required. Usage: reddit-fetch.sh user <username>"
+  limit=$(validate_limit "$limit")
 
   local url="${BASE_URL}/user/${username}/submitted.json?sort=${sort}&limit=${limit}&raw_json=1"
 
