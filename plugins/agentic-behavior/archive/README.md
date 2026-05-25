@@ -31,7 +31,7 @@ Records every file captured in the snapshot with its git hash at capture time.
 ```yaml
 captured_at: 2026-05-24T143022Z
 iteration: 1
-plugin_version_hash: abc1234   # git hash of HEAD at capture time
+plugin_version_hash: abc1234 # git hash of HEAD at capture time
 agents_using_plugin:
   - alex
   - jack

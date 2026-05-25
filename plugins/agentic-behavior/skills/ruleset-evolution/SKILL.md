@@ -185,6 +185,7 @@ Format each section:
 **Definition:** <copied from rubric>
 
 **Evidence:**
+
 - <citation 1: specific file path, journal date, or incident>
 - <citation 2>
 - <citation 3 if available>
@@ -208,11 +209,11 @@ End `evaluation.md` with a summary table:
 ```markdown
 ## Summary
 
-| Category | Score | Status |
-|----------|-------|--------|
-| Silence Discipline | N/5 | ... |
-| Acknowledgment Quality | N/5 | ... |
-| ... | | |
+| Category               | Score | Status |
+| ---------------------- | ----- | ------ |
+| Silence Discipline     | N/5   | ...    |
+| Acknowledgment Quality | N/5   | ...    |
+| ...                    |       |        |
 
 **Lowest-scoring categories (≤ 3):** <list>
 **ESCALATED:** <list, or "none">
@@ -242,8 +243,8 @@ For cross-plugin TODOs, use this format:
 ## Cross-Plugin TODOs — Iteration <ITER>
 
 | Gap Description | Likely Plugin | Priority | First Seen |
-|-----------------|--------------|----------|------------|
-| <gap> | <plugin-name> | p1/p2/p3 | iter-<N> |
+| --------------- | ------------- | -------- | ---------- |
+| <gap>           | <plugin-name> | p1/p2/p3 | iter-<N>   |
 ```
 
 If a gap appeared in a prior iteration's `cross-plugin-todos.md`, carry it forward
@@ -408,15 +409,15 @@ Dream cycle iteration <ITER> complete.
 
 ## Anti-Patterns
 
-| Bad | Good |
-|-----|------|
-| Skipping the snapshot and scoring directly to rewriting | Always snapshot first — evaluation precedes changes |
-| Scoring based on what the rules say should happen | Score based on observed behavior in incidents and journal entries |
-| Editing another plugin's rules to fix a cross-plugin gap | Note it in cross-plugin-todos.md; do not touch other plugins |
-| Treating category changes as retroactive | Rubric changes take effect next iteration; this evaluation used the prior rubric |
-| Writing a dream entry as a status report | Write in observations mode — conversational, "why", not "what happened in bullets" |
-| Making large structural rewrites for categories scoring 4+ | Surgical changes only; address the gap, don't rewrite the whole rule |
-| Treating this as a one-shot rewrite | It's a cycle — each iteration carries forward escalations and cross-plugin TODOs from the prior dream |
+| Bad                                                        | Good                                                                                                  |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Skipping the snapshot and scoring directly to rewriting    | Always snapshot first — evaluation precedes changes                                                   |
+| Scoring based on what the rules say should happen          | Score based on observed behavior in incidents and journal entries                                     |
+| Editing another plugin's rules to fix a cross-plugin gap   | Note it in cross-plugin-todos.md; do not touch other plugins                                          |
+| Treating category changes as retroactive                   | Rubric changes take effect next iteration; this evaluation used the prior rubric                      |
+| Writing a dream entry as a status report                   | Write in observations mode — conversational, "why", not "what happened in bullets"                    |
+| Making large structural rewrites for categories scoring 4+ | Surgical changes only; address the gap, don't rewrite the whole rule                                  |
+| Treating this as a one-shot rewrite                        | It's a cycle — each iteration carries forward escalations and cross-plugin TODOs from the prior dream |
 
 ---
 

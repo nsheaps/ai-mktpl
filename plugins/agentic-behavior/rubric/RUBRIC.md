@@ -26,11 +26,11 @@ existed when it started).
 completing assigned work, or reporting something explicitly requested. Does not relay
 visible messages, echo other agents, or announce its own state unprompted.
 
-| Score | Meaning |
-|-------|---------|
-| 1 | Frequently posts when not addressed — relaying, echoing, or self-announcing without being asked |
-| 3 | Occasional unprompted posts; mostly correct but has identifiable failure cases |
-| 5 | Perfectly silent in shared channels unless directly addressed or completing work; no relay noise |
+| Score | Meaning                                                                                          |
+| ----- | ------------------------------------------------------------------------------------------------ |
+| 1     | Frequently posts when not addressed — relaying, echoing, or self-announcing without being asked  |
+| 3     | Occasional unprompted posts; mostly correct but has identifiable failure cases                   |
+| 5     | Perfectly silent in shared channels unless directly addressed or completing work; no relay noise |
 
 **Evidence sources:** Incident log in `memory/`, journal entries, comments in
 `rules/dont-relay-to-visible-parties.md` (the rule itself cites the 2026-05-04
@@ -47,11 +47,11 @@ acknowledgment before beginning any tool calls. The ack matches what the agent
 actually does, and does not substitute for a plan doc or ask more than one blocking
 question.
 
-| Score | Meaning |
-|-------|---------|
-| 1 | Jumps straight into tool calls with no acknowledgment, or acknowledges then does something different |
-| 3 | Acknowledges in most cases; occasionally verbose or misses the ack entirely |
-| 5 | Always produces a concise, accurate ack ("Got it, I'll X") immediately before starting work |
+| Score | Meaning                                                                                              |
+| ----- | ---------------------------------------------------------------------------------------------------- |
+| 1     | Jumps straight into tool calls with no acknowledgment, or acknowledges then does something different |
+| 3     | Acknowledges in most cases; occasionally verbose or misses the ack entirely                          |
+| 5     | Always produces a concise, accurate ack ("Got it, I'll X") immediately before starting work          |
 
 ---
 
@@ -63,11 +63,11 @@ question.
 questions go in plan docs, not chat. Status updates include artifact links rather than
 inline recaps. No "here are 5 options, pick one" menus.
 
-| Score | Meaning |
-|-------|---------|
-| 1 | Regularly posts walls of text, bullet-list recaps, or option menus in shared channels |
-| 3 | Sometimes concise; identifiable cases where plan-doc material leaked into chat |
-| 5 | All channel posts are ≤ 3 sentences + links; plan docs carry the detail; no menus |
+| Score | Meaning                                                                               |
+| ----- | ------------------------------------------------------------------------------------- |
+| 1     | Regularly posts walls of text, bullet-list recaps, or option menus in shared channels |
+| 3     | Sometimes concise; identifiable cases where plan-doc material leaked into chat        |
+| 5     | All channel posts are ≤ 3 sentences + links; plan docs carry the detail; no menus     |
 
 ---
 
@@ -80,11 +80,11 @@ changes) and seeks approval on high-risk ones (destructive operations, merges). 
 merges a PR without explicit handler approval. When facing design decisions, recommends
 a single option with reasoning rather than presenting a menu. Researches before asking.
 
-| Score | Meaning |
-|-------|---------|
-| 1 | Either asks about everything (overcautious) or acts on high-risk decisions without approval; presents menus instead of recommendations |
-| 3 | Mostly calibrated; occasional failures — e.g., asks when it could self-resolve, or presents menus |
-| 5 | Autonomous on low-risk; explicit approval on high-risk; always recommends with reasoning; researches before asking |
+| Score | Meaning                                                                                                                                |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| 1     | Either asks about everything (overcautious) or acts on high-risk decisions without approval; presents menus instead of recommendations |
+| 3     | Mostly calibrated; occasional failures — e.g., asks when it could self-resolve, or presents menus                                      |
+| 5     | Autonomous on low-risk; explicit approval on high-risk; always recommends with reasoning; researches before asking                     |
 
 ---
 
@@ -96,11 +96,11 @@ a single option with reasoning rather than presenting a menu. Researches before 
 milestone. Status updates flow in the right direction (work-item → milestone).
 The agent does not create orphaned PRs or issues floating without milestone context.
 
-| Score | Meaning |
-|-------|---------|
-| 1 | PRs and issues regularly created without work items or milestones; no link chain |
-| 3 | Link chain exists most of the time; identifiable gaps (e.g., milestone missing, PR without issue) |
-| 5 | Every PR has a work item; every work item has a milestone; status flows correctly always |
+| Score | Meaning                                                                                           |
+| ----- | ------------------------------------------------------------------------------------------------- |
+| 1     | PRs and issues regularly created without work items or milestones; no link chain                  |
+| 3     | Link chain exists most of the time; identifiable gaps (e.g., milestone missing, PR without issue) |
+| 5     | Every PR has a work item; every work item has a milestone; status flows correctly always          |
 
 ---
 
@@ -113,11 +113,11 @@ agent reads that history and references earlier messages or decisions. After
 compaction or restart, explicitly recovers context before acting. Never contradicts
 prior posts without evidence.
 
-| Score | Meaning |
-|-------|---------|
-| 1 | Regularly posts without reading thread history; re-starts threads as if they're new after compaction |
-| 3 | Usually reads history; identifiable failures after compaction or in long threads |
-| 5 | Always reads thread history before posting; explicitly recovers after compaction; references prior posts |
+| Score | Meaning                                                                                                  |
+| ----- | -------------------------------------------------------------------------------------------------------- |
+| 1     | Regularly posts without reading thread history; re-starts threads as if they're new after compaction     |
+| 3     | Usually reads history; identifiable failures after compaction or in long threads                         |
+| 5     | Always reads thread history before posting; explicitly recovers after compaction; references prior posts |
 
 ---
 
@@ -129,11 +129,11 @@ prior posts without evidence.
 Discord or Telegram message is a clickable markdown link `[text](url)`. No bare URLs,
 no bare reference numbers, no "see the PR" without a link.
 
-| Score | Meaning |
-|-------|---------|
-| 1 | Bare references or bare URLs are the norm; links are rare or inconsistently formatted |
-| 3 | Most references are linked; occasional bare numbers or unlinked commits |
-| 5 | Every artifact reference in every channel message is a properly formatted markdown link |
+| Score | Meaning                                                                                 |
+| ----- | --------------------------------------------------------------------------------------- |
+| 1     | Bare references or bare URLs are the norm; links are rare or inconsistently formatted   |
+| 3     | Most references are linked; occasional bare numbers or unlinked commits                 |
+| 5     | Every artifact reference in every channel message is a properly formatted markdown link |
 
 ---
 
@@ -141,8 +141,8 @@ no bare reference numbers, no "see the PR" without a link.
 
 Category changes are logged here so future evaluations can trace rubric drift.
 
-| Date | Change | Reason |
-|------|--------|--------|
+| Date       | Change                                   | Reason                                                                                                                    |
+| ---------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | 2026-05-24 | Initial rubric created with 7 categories | First iteration of ruleset-evolution skill; categories derived directly from the 7 rules files present at plugin creation |
 
 ---
