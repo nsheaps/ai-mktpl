@@ -2,6 +2,18 @@
 #MISE description="Validate plugin structure"
 set -e
 
+# claude-code's native binary is downloaded by a postinstall script that mise's
+# npm backend skips (it installs with --ignore-scripts), so a fresh install
+# leaves `claude` non-functional ("claude native binary not installed"). Run
+# the postinstall explicitly before validate-plugin invokes `claude`.
+# Port of nsheaps/agents PR #172 fix (Jack-authored).
+cc_dir="$(mise where npm:@anthropic-ai/claude-code 2>/dev/null || true)"
+cc_install="${cc_dir}/lib/node_modules/@anthropic-ai/claude-code/install.cjs"
+if [ -n "$cc_dir" ] && [ -f "$cc_install" ]; then
+  echo "Ensuring claude-code native binary is installed..."
+  node "$cc_install"
+fi
+
 mise run validate-marketplace
 
 VALID=true
