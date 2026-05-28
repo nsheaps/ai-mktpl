@@ -3,6 +3,7 @@
 **Purpose**: Install and manage the [Google Workspace CLI](https://github.com/googleworkspace/cli) (`gws`) in Claude Code sessions, with per-service skills for Gmail, Calendar, Drive, Docs, Sheets, Slides, Chat, Tasks, Contacts, and Admin.
 
 ## Skills
+
 - `admin` — Use this skill when the user asks about Google Workspace administration tasks like managing users, groups,...
 - `calendar` — Use this skill when the user asks about managing Google Calendar events, checking schedules, creating meetings, finding...
 - `chat` — Use this skill when the user asks about Google Chat operations like sending messages, managing spaces, or listing...
@@ -16,4 +17,5 @@
 - `tasks` — Use this skill when the user asks about managing Google Tasks like creating, listing, updating, or completing tasks and...
 
 ## Hooks
+
 - `SessionStart` (`bash`) — Install/update Google Workspace CLI (gws) on session start for web sessions

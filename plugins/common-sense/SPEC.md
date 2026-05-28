@@ -3,6 +3,7 @@
 **Purpose**: Common-sense rules for AI assistant behavior, bundled as a Claude Code plugin.
 
 ## Rules
+
 - `answer-before-acting` — When a user asks a question, **answer it first**. Do NOT create tasks, start planning, or take action until you know...
 - `artifact-linking-in-reports` — **CRITICAL:** Every task completion report to the user MUST include links to all produced artifacts.
 - `bash-scripting` — Guidelines for shell commands and script handling.
@@ -34,4 +35,5 @@
 - `writing-rules`
 
 ## Hooks
+
 - `SessionStart` (`bash`) — Sync common-sense rules into project .claude/rules/ via symlink

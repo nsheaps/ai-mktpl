@@ -1,6 +1,6 @@
 {
   "name": "mise",
-  "version": "0.2.19",
+  "version": "0.2.20",
   "description": "Install and manage mise (tool version manager) in Claude Code sessions. Provides session-start auto-install for web sessions and comprehensive workflow skills.",
   "author": {
     "name": "Nathan Heaps",
@@ -17,5 +17,10 @@
     "web-session",
     "auto-install"
   ],
-  "dependencies": [{ "name": "shared-lib", "version": "^1.0" }]
+  "dependencies": [
+    {
+      "name": "shared-lib",
+      "version": "^1.0"
+    }
+  ]
 }

@@ -3,6 +3,7 @@
 **Purpose**: Source control management utilities for improving Claude's interactions with branches and PRs, both locally and in CI environments.
 
 ## Skills
+
 - `auth-user` — Identify the authenticated user for GitHub CLI (gh) and Git
 - `automated-code-review` — Perform a comprehensive automated code review using granular review skills. Orchestrates review-pr-contents,...
 - `code-review` — Code review a pull request. Triggers on "review this PR", "code review", "review PR #123", "request a review", "review...
@@ -24,4 +25,5 @@
 - `validate-review` — Validate that review findings are accurate and actionable. Use when asked to "validate review", "check if review...
 
 ## Hooks
+
 - `PostToolUse` (`bash`) — SCM workflow hooks for branch and PR management
