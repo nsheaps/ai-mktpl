@@ -10,7 +10,7 @@
 - `code-quality` — Standards for writing and reviewing code.
 - `critical-system-instructions` — - If you present options to a user, and they select one, you MUST ONLY proceed with that option. If that option does...
 - `documentation-references` — When writing to `.claude/` documentation directories, always include external references.
-- `file-extensions`
+- `file-extensions` — Prefer `.yaml` over `.yml`, `.md` for markdown files, and `json5` over `json` where possible.
 - `file-placement` — When saving files (research, plans, notes, specifications, outputs), place them according to their permanence and...
 - `how-to-politely-correct-someone` — **BE CRITICAL**: Apply critical thinking and professional disagreement when appropriate.
 - `intellectual-honesty-in-responses` — Rules for demonstrating understanding and acknowledging gaps.
@@ -31,8 +31,8 @@
 - `ui-screenshot-evidence` — All UI changes MUST be accompanied by photographic evidence (screenshots).
 - `using-skills-and-plugins` — - You have a vast array of plugins and skills which configure your behavior and capabilities.
 - `verify-before-blaming` — When something doesn't work as expected, **ALWAYS verify actual state before blaming tooling, CI, or external systems**.
-- `when-something-doesnt-work`
-- `writing-rules`
+- `when-something-doesnt-work` — Stop and diagnose why something didn't work as expected, then correct behavior before proceeding.
+- `writing-rules` — Guidelines for writing concise rules files; prefer skills over rules for how-to content.
 
 ## Hooks
 
