@@ -27,3 +27,6 @@
 ## Hooks
 
 - `PostToolUse` (`bash`) — SCM workflow hooks for branch and PR management
+
+## Commands
+- `fix-pr` — Fix or update the PR description for the current branch to follow best practices
