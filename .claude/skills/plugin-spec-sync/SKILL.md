@@ -4,13 +4,13 @@ Sync plugin `SPEC.md` files with the filesystem across the entire `plugins/` dir
 
 ## What it does
 
-| Direction | Action |
-|-----------|--------|
-| FS → SPEC | Item exists in `skills/`, `rules/`, `commands/`, or `hooks/hooks.json` but missing from `SPEC.md` → adds stub entry, reusing description from source file |
-| SPEC → FS | Item listed in `SPEC.md` but missing from filesystem → creates stub file/dir, using SPEC description |
-| Both exist | **No update** — descriptions not synced even if they differ |
-| Remove | Must be removed from both places manually (never half-removed) |
-| SPEC.md missing | Auto-generated from plugin metadata + filesystem scan with `_description needed_` placeholders |
+| Direction       | Action                                                                                                                                                    |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| FS → SPEC       | Item exists in `skills/`, `rules/`, `commands/`, or `hooks/hooks.json` but missing from `SPEC.md` → adds stub entry, reusing description from source file |
+| SPEC → FS       | Item listed in `SPEC.md` but missing from filesystem → creates stub file/dir, using SPEC description                                                      |
+| Both exist      | **No update** — descriptions not synced even if they differ                                                                                               |
+| Remove          | Must be removed from both places manually (never half-removed)                                                                                            |
+| SPEC.md missing | Auto-generated from plugin metadata + filesystem scan with `_description needed_` placeholders                                                            |
 
 Hooks are synced FS → SPEC only (scaffolding `hooks.json` from SPEC is not supported).
 
