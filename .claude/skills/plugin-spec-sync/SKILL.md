@@ -18,6 +18,8 @@ Hooks are synced FS → SPEC only (scaffolding `hooks.json` from SPEC is not sup
 
 !`bin/sync-plugin-specs.sh 2>&1`
 
+To sync a single plugin: `bin/sync-plugin-specs.sh --plugin <name>`
+
 ## After running
 
 1. Review items printed above — each line shows what changed.

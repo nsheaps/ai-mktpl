@@ -1,234 +1,274 @@
 #!/usr/bin/env bash
 # sync-plugin-specs.sh — Sync SPEC.md files with the plugin filesystem
 #
-# For each plugin directory, ensures SPEC.md is in sync with actual filesystem items:
-#   - If SPEC.md missing: auto-generate from plugin metadata + filesystem scan
-#   - If filesystem item not in spec: append entry to relevant SPEC.md section
-#   - If spec item not in filesystem: create placeholder file/dir
-#   - Both exist: leave alone
+# For each plugin, ensures SPEC.md reflects what's on disk:
+#   - Missing SPEC.md → generate from filesystem with placeholder descriptions
+#   - FS item not in spec → insert entry into spec section
+#   - Spec item not in FS → create minimal skeleton on disk
+#   - Both exist → leave completely alone (no description updates)
 #
-# Usage: sync-plugin-specs.sh [plugins-dir]
-#   plugins-dir defaults to $(dirname "$0")/../plugins
+# Usage:
+#   sync-plugin-specs.sh [--plugin <name>]
+#
+#   --plugin <name>   Run only on the named plugin (directory under plugins/)
+#                     Default: run on all plugins
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PLUGINS_DIR="${1:-${SCRIPT_DIR}/../plugins}"
+PLUGINS_DIR="${SCRIPT_DIR}/../plugins"
 PLUGINS_DIR="$(cd "$PLUGINS_DIR" && pwd)"
 
-CHANGES=()
+PLUGIN_FILTER=""
 
-log_change() {
-    local msg="$1"
-    echo "$msg"
-    CHANGES+=("$msg")
-}
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --plugin)
+            PLUGIN_FILTER="$2"
+            shift 2
+            ;;
+        *)
+            echo "Unknown argument: $1" >&2
+            echo "Usage: $0 [--plugin <name>]" >&2
+            exit 1
+            ;;
+    esac
+done
 
-# Extract the first substantive description line from a markdown file
-# Skips: # headings, blank lines, leading "- " or "> " markers
-# Returns up to 80 chars (with ... if truncated)
+# ---------------------------------------------------------------------------
+# Description extraction
+# ---------------------------------------------------------------------------
+
+# Extract description from a markdown file.
+# Priority:
+#   1. YAML frontmatter `description:` field (handles block scalars via joining)
+#   2. First non-empty, non-heading, non-frontmatter line
+# Returns at most 120 characters (truncated with ...).
 extract_description() {
     local file="$1"
     if [[ ! -f "$file" ]]; then
-        echo "_description needed_"
+        echo "TODO: add description"
         return
     fi
+
+    # Try YAML frontmatter description first using awk.
+    # Handles both single-line (description: text) and block scalars (description: >\n  text).
+    local yaml_desc
+    yaml_desc=$(awk '
+        BEGIN { in_front=0; found=0; is_block=0; buf="" }
+        /^---$/ {
+            if (in_front==0) { in_front=1; next }
+            else { exit }
+        }
+        in_front && /^description:/ {
+            found=1
+            val=$0
+            sub(/^description:[[:space:]]*/, "", val)
+            # Check for block scalar indicator
+            if (val ~ /^[>|]/) {
+                is_block=1
+                next
+            }
+            # Strip surrounding quotes
+            gsub(/^'"'"'|'"'"'$/, "", val)
+            gsub(/^"|"$/, "", val)
+            if (val != "") { buf=val; exit }
+            next
+        }
+        in_front && found && is_block && /^[[:space:]]/ {
+            line=$0
+            sub(/^[[:space:]]+/, "", line)
+            if (line != "") {
+                if (buf != "") buf=buf" "line
+                else buf=line
+            }
+            next
+        }
+        in_front && found && /^[^[:space:]]/ { exit }
+        END { print buf }
+    ' "$file" 2>/dev/null || true)
+    yaml_desc="${yaml_desc## }"
+    yaml_desc="${yaml_desc%% }"
+
+    if [[ -n "$yaml_desc" ]]; then
+        if [[ ${#yaml_desc} -gt 120 ]]; then
+            echo "${yaml_desc:0:120}..."
+        else
+            echo "$yaml_desc"
+        fi
+        return
+    fi
+
+    # Fall back to first non-empty, non-heading, non-frontmatter line
     local desc=""
+    local in_frontmatter=0
+    local first_line=1
     while IFS= read -r line; do
-        # Skip empty lines
+        if [[ "$line" == "---" ]]; then
+            if [[ $first_line -eq 1 ]]; then
+                in_frontmatter=1
+                first_line=0
+                continue
+            elif [[ $in_frontmatter -eq 1 ]]; then
+                in_frontmatter=0
+                continue
+            fi
+        fi
+        first_line=0
+        [[ $in_frontmatter -eq 1 ]] && continue
         [[ -z "$line" ]] && continue
-        # Skip heading lines (# or ##, etc.)
         [[ "$line" =~ ^#+ ]] && continue
-        # Skip YAML frontmatter markers
-        [[ "$line" == "---" ]] && continue
-        # Strip leading "- " or "> "
+        # Skip lines that are just bold purpose markers
+        [[ "$line" =~ ^\*\*[Pp]urpose\*\* ]] && continue
+        # Strip leading list/quote markers
         line="${line#- }"
         line="${line#> }"
-        # Skip if still empty after stripping
         [[ -z "$line" ]] && continue
         desc="$line"
         break
     done < "$file"
 
     if [[ -z "$desc" ]]; then
-        echo "_description needed_"
+        echo "TODO: add description"
         return
     fi
 
-    # Check YAML frontmatter for description field
-    local yaml_desc
-    yaml_desc=$(awk '/^---/{p=!p;next} p && /^description:/{sub(/^description:[[:space:]]*/,""); print; exit}' "$file" 2>/dev/null || true)
-    if [[ -n "$yaml_desc" ]]; then
-        desc="$yaml_desc"
-        # Remove surrounding quotes if present
-        desc="${desc#\"}"
-        desc="${desc%\"}"
-        desc="${desc#\'}"
-        desc="${desc%\'}"
-    fi
-
-    # Truncate at 80 chars
-    if [[ ${#desc} -gt 80 ]]; then
-        desc="${desc:0:80}..."
-    fi
-    echo "$desc"
-}
-
-# Get plugin name from plugin.json, falling back to directory name
-get_plugin_name() {
-    local plugin_dir="$1"
-    local plugin_json="${plugin_dir}/.claude-plugin/plugin.json"
-    if [[ -f "$plugin_json" ]]; then
-        jq -r '.name // empty' "$plugin_json" 2>/dev/null || basename "$plugin_dir"
+    if [[ ${#desc} -gt 120 ]]; then
+        echo "${desc:0:120}..."
     else
-        basename "$plugin_dir"
+        echo "$desc"
     fi
 }
 
-# Get plugin description from plugin.json, falling back to placeholder
-get_plugin_description() {
-    local plugin_dir="$1"
-    local plugin_json="${plugin_dir}/.claude-plugin/plugin.json"
-    if [[ -f "$plugin_json" ]]; then
-        local desc
-        desc=$(jq -r '.description // empty' "$plugin_json" 2>/dev/null || true)
-        if [[ -n "$desc" ]]; then
-            echo "$desc"
-            return
-        fi
-    fi
-    # Try README.md first line
-    if [[ -f "${plugin_dir}/README.md" ]]; then
-        local readme_desc
-        readme_desc=$(grep -m1 '^[^#]' "${plugin_dir}/README.md" 2>/dev/null || true)
-        if [[ -n "$readme_desc" ]]; then
-            echo "$readme_desc"
-            return
-        fi
-    fi
-    echo "_description needed_"
-}
+# ---------------------------------------------------------------------------
+# Filesystem scanners
+# ---------------------------------------------------------------------------
 
-# Scan filesystem for actual skills (dirs in skills/ that have SKILL.md)
+# Skills: subdirectories in skills/ OR .md files directly in skills/
 scan_skills() {
     local plugin_dir="$1"
     local skills_dir="${plugin_dir}/skills"
-    if [[ ! -d "$skills_dir" ]]; then
-        return
-    fi
-    for skill_dir in "$skills_dir"/*/; do
-        [[ -d "$skill_dir" ]] || continue
-        local skill_name
-        skill_name=$(basename "$skill_dir")
-        if [[ -f "${skill_dir}/SKILL.md" ]]; then
-            echo "$skill_name"
-        fi
+    [[ -d "$skills_dir" ]] || return
+
+    # Subdirectories (each is a skill)
+    for entry in "$skills_dir"/*/; do
+        [[ -d "$entry" ]] || continue
+        basename "$entry"
+    done
+
+    # .md files directly in skills/ (e.g. agentic-guidelines.md)
+    for entry in "$skills_dir"/*.md; do
+        [[ -f "$entry" ]] || continue
+        basename "$entry" .md
     done
 }
 
-# Scan filesystem for actual rules (.md files in rules/)
-scan_rules() {
-    local plugin_dir="$1"
-    local rules_dir="${plugin_dir}/rules"
-    if [[ ! -d "$rules_dir" ]]; then
-        return
-    fi
-    for rule_file in "$rules_dir"/*.md; do
-        [[ -f "$rule_file" ]] || continue
-        local rule_name
-        rule_name=$(basename "$rule_file" .md)
-        echo "$rule_name"
-    done
-}
-
-# Scan filesystem for actual commands (.md files in commands/)
-scan_commands() {
-    local plugin_dir="$1"
-    local commands_dir="${plugin_dir}/commands"
-    if [[ ! -d "$commands_dir" ]]; then
-        return
-    fi
-    for cmd_file in "$commands_dir"/*.md; do
-        [[ -f "$cmd_file" ]] || continue
-        local cmd_name
-        cmd_name=$(basename "$cmd_file" .md)
-        echo "$cmd_name"
-    done
-}
-
-# Parse hooks from hooks/hooks.json
-# Returns lines: "type|script_type|description"
+# Hooks: event keys from hooks/hooks.json .hooks object
+# Output format per line: "EventName|type|description"
 scan_hooks() {
     local plugin_dir="$1"
     local hooks_json="${plugin_dir}/hooks/hooks.json"
+    [[ -f "$hooks_json" ]] || return
 
-    if [[ -f "$hooks_json" ]]; then
-        local description
-        description=$(jq -r '.description // "_description needed_"' "$hooks_json" 2>/dev/null || echo "_description needed_")
+    local top_desc
+    top_desc=$(jq -r '.description // "TODO: add description"' "$hooks_json" 2>/dev/null || echo "TODO: add description")
 
-        # Get all hook types from the hooks object keys
-        local hook_types
-        hook_types=$(jq -r '.hooks | keys[]' "$hooks_json" 2>/dev/null || true)
-
-        while IFS= read -r hook_type; do
-            [[ -z "$hook_type" ]] && continue
-            # Determine script type from the hook entries for this type
-            local script_type
-            script_type=$(jq -r --arg t "$hook_type" '.hooks[$t][].hooks[].type // empty' "$hooks_json" 2>/dev/null | sort -u | head -1 || true)
-            [[ -z "$script_type" ]] && script_type="bash"
-            echo "${hook_type}|${script_type}|${description}"
-        done <<< "$hook_types"
-        return
-    fi
-
-    # Fallback: check for hooks/scripts/*.sh
-    local scripts_dir="${plugin_dir}/hooks/scripts"
-    if [[ -d "$scripts_dir" ]]; then
-        for sh_file in "$scripts_dir"/*.sh; do
-            [[ -f "$sh_file" ]] || continue
-            local script_name
-            script_name=$(basename "$sh_file" .sh)
-            echo "unknown|bash|${script_name}"
-        done
-    fi
+    jq -r '.hooks | keys[]' "$hooks_json" 2>/dev/null | while IFS= read -r event; do
+        [[ -z "$event" ]] && continue
+        # Determine the type from first hook entry for this event
+        local htype
+        htype=$(jq -r --arg e "$event" '
+            .hooks[$e][0].hooks[0].type // "bash"
+        ' "$hooks_json" 2>/dev/null || echo "bash")
+        # "command" means it's a bash script
+        [[ "$htype" == "command" ]] && htype="bash"
+        echo "${event}|${htype}|${top_desc}"
+    done
 }
 
-# Parse items from a SPEC.md section
-# Usage: parse_spec_section <spec_file> <section_heading>
-# Outputs one item name per line
+# Rules: .md files in rules/ (name without extension)
+scan_rules() {
+    local plugin_dir="$1"
+    local rules_dir="${plugin_dir}/rules"
+    [[ -d "$rules_dir" ]] || return
+
+    for entry in "$rules_dir"/*.md; do
+        [[ -f "$entry" ]] || continue
+        basename "$entry" .md
+    done
+}
+
+# Agents: dirs OR .md files in agents/ (name without .md extension)
+scan_agents() {
+    local plugin_dir="$1"
+    local agents_dir="${plugin_dir}/agents"
+    [[ -d "$agents_dir" ]] || return
+
+    for entry in "$agents_dir"/*/; do
+        [[ -d "$entry" ]] || continue
+        basename "$entry"
+    done
+    for entry in "$agents_dir"/*.md; do
+        [[ -f "$entry" ]] || continue
+        basename "$entry" .md
+    done
+}
+
+# Commands: dirs OR .md files in commands/ (name without .md extension)
+scan_commands() {
+    local plugin_dir="$1"
+    local commands_dir="${plugin_dir}/commands"
+    [[ -d "$commands_dir" ]] || return
+
+    for entry in "$commands_dir"/*/; do
+        [[ -d "$entry" ]] || continue
+        basename "$entry"
+    done
+    for entry in "$commands_dir"/*.md; do
+        [[ -f "$entry" ]] || continue
+        basename "$entry" .md
+    done
+}
+
+# ---------------------------------------------------------------------------
+# Spec parsing helpers
+# ---------------------------------------------------------------------------
+
+# Parse item names from a named section in SPEC.md.
+# Matches: - `name` — ...  and  - `name` (`type`) — ...
 parse_spec_section() {
     local spec_file="$1"
     local section="$2"
-    if [[ ! -f "$spec_file" ]]; then
-        return
-    fi
+    [[ -f "$spec_file" ]] || return
+
     local in_section=0
     while IFS= read -r line; do
-        if [[ "$line" =~ ^##[[:space:]]+${section}$ ]]; then
+        if [[ "$line" =~ ^##[[:space:]]+${section}[[:space:]]*$ ]]; then
             in_section=1
             continue
         fi
-        # Stop at next ## heading
         if [[ $in_section -eq 1 ]] && [[ "$line" =~ ^## ]]; then
             break
         fi
-        if [[ $in_section -eq 1 ]]; then
-            # Match lines like: - `name` — description
-            if [[ "$line" =~ ^\-[[:space:]]+\`([^\`]+)\` ]]; then
-                echo "${BASH_REMATCH[1]}"
-            fi
+        if [[ $in_section -eq 1 ]] && [[ "$line" =~ ^\-[[:space:]]+\`([^\`]+)\` ]]; then
+            echo "${BASH_REMATCH[1]}"
         fi
     done < "$spec_file"
 }
 
-# Check if a section exists in SPEC.md
+# Return 0 if a section heading exists, 1 otherwise
 spec_has_section() {
     local spec_file="$1"
     local section="$2"
-    grep -q "^## ${section}$" "$spec_file" 2>/dev/null
+    grep -qE "^## ${section}[[:space:]]*$" "$spec_file" 2>/dev/null
 }
 
-# Append a new section to SPEC.md if it doesn't exist
+# ---------------------------------------------------------------------------
+# Spec modification helpers
+# ---------------------------------------------------------------------------
+
+# Append a section at the end of SPEC.md if it doesn't exist
 ensure_spec_section() {
     local spec_file="$1"
     local section="$2"
@@ -237,324 +277,364 @@ ensure_spec_section() {
     fi
 }
 
-# Append an item to a specific section in SPEC.md
+# Insert item_line into section, before the next ## heading (or at EOF).
+# Uses awk for reliable in-place editing via temp file.
 append_to_section() {
     local spec_file="$1"
     local section="$2"
     local item_line="$3"
 
-    # Create a temp file with the new content inserted after the section heading
     local tmp
     tmp=$(mktemp)
-    local in_section=0
-    local inserted=0
-    while IFS= read -r line; do
-        echo "$line" >> "$tmp"
-        if [[ "$line" =~ ^##[[:space:]]+${section}$ ]]; then
-            in_section=1
-            continue
-        fi
-        if [[ $in_section -eq 1 ]] && [[ $inserted -eq 0 ]]; then
-            if [[ "$line" =~ ^## ]] || [[ -z "$line" && $(grep -c "^## " "$spec_file") -eq 1 ]]; then
-                # We've reached the end of the section or next section without inserting
-                # We need a different approach - append at end of section
-                :
-            fi
-        fi
-    done < "$spec_file"
-    rm -f "$tmp"
 
-    # Simpler approach: use awk to insert after last item in section
-    local tmp2
-    tmp2=$(mktemp)
-    awk -v section="$section" -v newline="$item_line" '
-        BEGIN { in_section=0; found_section=0 }
+    awk -v target="## ${section}" -v newitem="$item_line" '
+        BEGIN { in_sect=0; done=0 }
         /^## / {
-            if (in_section && !found_section) {
-                # We were in the section and hit a new section - insert before this line
-                print newline
-                found_section=1
+            if (in_sect && !done) {
+                print newitem
+                done=1
             }
-            in_section = ($0 == "## " section)
+            in_sect = ($0 == target)
         }
         { print }
         END {
-            if (in_section && !found_section) {
-                # Section was at end of file
-                print newline
+            if (in_sect && !done) {
+                print newitem
             }
         }
-    ' "$spec_file" > "$tmp2"
-    mv "$tmp2" "$spec_file"
+    ' "$spec_file" > "$tmp"
+
+    mv "$tmp" "$spec_file"
 }
 
-# Generate a new SPEC.md for a plugin
+# ---------------------------------------------------------------------------
+# Array membership helper
+# ---------------------------------------------------------------------------
+
+array_contains() {
+    local needle="$1"
+    shift
+    local item
+    for item in "$@"; do
+        [[ "$item" == "$needle" ]] && return 0
+    done
+    return 1
+}
+
+# ---------------------------------------------------------------------------
+# SPEC.md generation for missing files
+# ---------------------------------------------------------------------------
+
 generate_spec() {
     local plugin_dir="$1"
     local spec_file="${plugin_dir}/SPEC.md"
     local plugin_name
-    plugin_name=$(get_plugin_name "$plugin_dir")
-    local plugin_desc
-    plugin_desc=$(get_plugin_description "$plugin_dir")
+    plugin_name=$(basename "$plugin_dir")
 
     {
         echo "# Plugin: ${plugin_name}"
         echo ""
-        echo "**Purpose**: ${plugin_desc}"
+        echo "**Purpose**: TODO: add description"
         echo ""
 
-        # Skills section
-        local skills
-        skills=$(scan_skills "$plugin_dir")
-        if [[ -n "$skills" ]]; then
+        # Skills
+        local skills_list=()
+        while IFS= read -r name; do
+            [[ -n "$name" ]] && skills_list+=("$name")
+        done < <(scan_skills "$plugin_dir")
+
+        if [[ ${#skills_list[@]} -gt 0 ]]; then
             echo "## Skills"
             echo ""
-            while IFS= read -r skill_name; do
-                [[ -z "$skill_name" ]] && continue
-                local skill_desc
-                skill_desc=$(extract_description "${plugin_dir}/skills/${skill_name}/SKILL.md")
-                echo "- \`${skill_name}\` — ${skill_desc}"
-            done <<< "$skills"
+            for name in "${skills_list[@]}"; do
+                local skill_file="${plugin_dir}/skills/${name}/SKILL.md"
+                [[ ! -f "$skill_file" ]] && skill_file="${plugin_dir}/skills/${name}.md"
+                local desc
+                desc=$(extract_description "$skill_file")
+                echo "- \`${name}\` — ${desc}"
+            done
             echo ""
         fi
 
-        # Rules section
-        local rules
-        rules=$(scan_rules "$plugin_dir")
-        if [[ -n "$rules" ]]; then
-            echo "## Rules"
-            echo ""
-            while IFS= read -r rule_name; do
-                [[ -z "$rule_name" ]] && continue
-                local rule_desc
-                rule_desc=$(extract_description "${plugin_dir}/rules/${rule_name}.md")
-                echo "- \`${rule_name}\` — ${rule_desc}"
-            done <<< "$rules"
-            echo ""
-        fi
-
-        # Hooks section
+        # Hooks
         local hooks_output
-        hooks_output=$(scan_hooks "$plugin_dir")
+        hooks_output=$(scan_hooks "$plugin_dir" || true)
         if [[ -n "$hooks_output" ]]; then
             echo "## Hooks"
             echo ""
-            while IFS= read -r hook_line; do
-                [[ -z "$hook_line" ]] && continue
-                IFS='|' read -r hook_type script_type hook_desc <<< "$hook_line"
-                echo "- \`${hook_type}\` (\`${script_type}\`) — ${hook_desc}"
+            while IFS='|' read -r event htype desc; do
+                [[ -z "$event" ]] && continue
+                echo "- \`${event}\` (\`${htype}\`) — ${desc}"
             done <<< "$hooks_output"
             echo ""
         fi
 
-        # Commands section
-        local commands
-        commands=$(scan_commands "$plugin_dir")
-        if [[ -n "$commands" ]]; then
+        # Rules
+        local rules_list=()
+        while IFS= read -r name; do
+            [[ -n "$name" ]] && rules_list+=("$name")
+        done < <(scan_rules "$plugin_dir")
+
+        if [[ ${#rules_list[@]} -gt 0 ]]; then
+            echo "## Rules"
+            echo ""
+            for name in "${rules_list[@]}"; do
+                local desc
+                desc=$(extract_description "${plugin_dir}/rules/${name}.md")
+                echo "- \`${name}\` — ${desc}"
+            done
+            echo ""
+        fi
+
+        # Agents
+        local agents_list=()
+        while IFS= read -r name; do
+            [[ -n "$name" ]] && agents_list+=("$name")
+        done < <(scan_agents "$plugin_dir")
+
+        if [[ ${#agents_list[@]} -gt 0 ]]; then
+            echo "## Agents"
+            echo ""
+            for name in "${agents_list[@]}"; do
+                local agent_file="${plugin_dir}/agents/${name}.md"
+                [[ ! -f "$agent_file" ]] && agent_file="${plugin_dir}/agents/${name}/README.md"
+                local desc
+                desc=$(extract_description "$agent_file")
+                echo "- \`${name}\` — ${desc}"
+            done
+            echo ""
+        fi
+
+        # Commands
+        local commands_list=()
+        while IFS= read -r name; do
+            [[ -n "$name" ]] && commands_list+=("$name")
+        done < <(scan_commands "$plugin_dir")
+
+        if [[ ${#commands_list[@]} -gt 0 ]]; then
             echo "## Commands"
             echo ""
-            while IFS= read -r cmd_name; do
-                [[ -z "$cmd_name" ]] && continue
-                local cmd_desc
-                cmd_desc=$(extract_description "${plugin_dir}/commands/${cmd_name}.md")
-                echo "- \`${cmd_name}\` — ${cmd_desc}"
-            done <<< "$commands"
+            for name in "${commands_list[@]}"; do
+                local cmd_file="${plugin_dir}/commands/${name}.md"
+                [[ ! -f "$cmd_file" ]] && cmd_file="${plugin_dir}/commands/${name}/README.md"
+                local desc
+                desc=$(extract_description "$cmd_file")
+                echo "- \`${name}\` — ${desc}"
+            done
             echo ""
         fi
     } > "$spec_file"
 }
 
-# Process a single plugin directory
+# ---------------------------------------------------------------------------
+# Main plugin processor — returns change lines on stdout
+# ---------------------------------------------------------------------------
+
 process_plugin() {
     local plugin_dir="$1"
     local plugin_name
     plugin_name=$(basename "$plugin_dir")
     local spec_file="${plugin_dir}/SPEC.md"
-    local rel_path="plugins/${plugin_name}"
+    local prefix="plugins/${plugin_name}"
 
-    # Generate SPEC.md if missing
+    # Generate SPEC.md from scratch if missing
     if [[ ! -f "$spec_file" ]]; then
         generate_spec "$plugin_dir"
-        log_change "${rel_path}/SPEC.md: generated (new)"
+        echo "${prefix}/SPEC.md: generated (new)"
         return
     fi
 
-    # --- Sync Skills ---
+    # ---- Skills ----
     local fs_skills=()
-    while IFS= read -r s; do
-        [[ -n "$s" ]] && fs_skills+=("$s")
+    while IFS= read -r name; do
+        [[ -n "$name" ]] && fs_skills+=("$name")
     done < <(scan_skills "$plugin_dir")
 
     local spec_skills=()
-    while IFS= read -r s; do
-        [[ -n "$s" ]] && spec_skills+=("$s")
+    while IFS= read -r name; do
+        [[ -n "$name" ]] && spec_skills+=("$name")
     done < <(parse_spec_section "$spec_file" "Skills")
 
-    # Filesystem skill not in spec → append to spec
-    for skill_name in "${fs_skills[@]+"${fs_skills[@]}"}"; do
-        local found=0
-        for s in "${spec_skills[@]+"${spec_skills[@]}"}"; do
-            [[ "$s" == "$skill_name" ]] && found=1 && break
-        done
-        if [[ $found -eq 0 ]]; then
-            local skill_desc
-            skill_desc=$(extract_description "${plugin_dir}/skills/${skill_name}/SKILL.md")
+    for name in "${fs_skills[@]+"${fs_skills[@]}"}"; do
+        if ! array_contains "$name" "${spec_skills[@]+"${spec_skills[@]}"}"; then
+            local skill_file="${plugin_dir}/skills/${name}/SKILL.md"
+            [[ ! -f "$skill_file" ]] && skill_file="${plugin_dir}/skills/${name}.md"
+            local desc
+            desc=$(extract_description "$skill_file")
             ensure_spec_section "$spec_file" "Skills"
-            append_to_section "$spec_file" "Skills" "- \`${skill_name}\` — ${skill_desc}"
-            log_change "${rel_path}/SPEC.md: added skill '${skill_name}'"
+            append_to_section "$spec_file" "Skills" "- \`${name}\` — ${desc}"
+            echo "${prefix}/SPEC.md: added skill '${name}'"
         fi
     done
 
-    # Spec skill not in filesystem → create placeholder
-    for skill_name in "${spec_skills[@]+"${spec_skills[@]}"}"; do
-        local found=0
-        for s in "${fs_skills[@]+"${fs_skills[@]}"}"; do
-            [[ "$s" == "$skill_name" ]] && found=1 && break
-        done
-        if [[ $found -eq 0 ]]; then
-            local skill_dir="${plugin_dir}/skills/${skill_name}"
-            mkdir -p "$skill_dir"
-            local skill_file="${skill_dir}/SKILL.md"
-            if [[ ! -f "$skill_file" ]]; then
-                printf '# %s\n\n_description needed_\n' "$skill_name" > "$skill_file"
-                log_change "${rel_path}/skills/${skill_name}/SKILL.md: created (from spec)"
+    for name in "${spec_skills[@]+"${spec_skills[@]}"}"; do
+        if ! array_contains "$name" "${fs_skills[@]+"${fs_skills[@]}"}"; then
+            local skill_dir="${plugin_dir}/skills/${name}"
+            if [[ ! -d "$skill_dir" ]] && [[ ! -f "${plugin_dir}/skills/${name}.md" ]]; then
+                mkdir -p "$skill_dir"
+                printf -- '---\nname: %s\ndescription: TODO: add description\n---\n\n# %s\n\nTODO: add skill content\n' \
+                    "$name" "$name" > "${skill_dir}/SKILL.md"
+                echo "${prefix}/skills/${name}/SKILL.md: created (from spec)"
             fi
         fi
     done
 
-    # --- Sync Rules ---
+    # ---- Hooks ----
+    local hooks_raw
+    hooks_raw=$(scan_hooks "$plugin_dir" || true)
+
+    local spec_hook_types=()
+    while IFS= read -r name; do
+        [[ -n "$name" ]] && spec_hook_types+=("$name")
+    done < <(parse_spec_section "$spec_file" "Hooks")
+
+    if [[ -n "$hooks_raw" ]]; then
+        while IFS='|' read -r event htype desc; do
+            [[ -z "$event" ]] && continue
+            if ! array_contains "$event" "${spec_hook_types[@]+"${spec_hook_types[@]}"}"; then
+                ensure_spec_section "$spec_file" "Hooks"
+                append_to_section "$spec_file" "Hooks" "- \`${event}\` (\`${htype}\`) — ${desc}"
+                echo "${prefix}/SPEC.md: added hook '${event}'"
+            fi
+        done <<< "$hooks_raw"
+    fi
+    # hooks.json is authoritative — no skeleton creation for missing hooks
+
+    # ---- Rules ----
     local fs_rules=()
-    while IFS= read -r r; do
-        [[ -n "$r" ]] && fs_rules+=("$r")
+    while IFS= read -r name; do
+        [[ -n "$name" ]] && fs_rules+=("$name")
     done < <(scan_rules "$plugin_dir")
 
     local spec_rules=()
-    while IFS= read -r r; do
-        [[ -n "$r" ]] && spec_rules+=("$r")
+    while IFS= read -r name; do
+        [[ -n "$name" ]] && spec_rules+=("$name")
     done < <(parse_spec_section "$spec_file" "Rules")
 
-    # Filesystem rule not in spec → append to spec
-    for rule_name in "${fs_rules[@]+"${fs_rules[@]}"}"; do
-        local found=0
-        for r in "${spec_rules[@]+"${spec_rules[@]}"}"; do
-            [[ "$r" == "$rule_name" ]] && found=1 && break
-        done
-        if [[ $found -eq 0 ]]; then
-            local rule_desc
-            rule_desc=$(extract_description "${plugin_dir}/rules/${rule_name}.md")
+    for name in "${fs_rules[@]+"${fs_rules[@]}"}"; do
+        if ! array_contains "$name" "${spec_rules[@]+"${spec_rules[@]}"}"; then
+            local desc
+            desc=$(extract_description "${plugin_dir}/rules/${name}.md")
             ensure_spec_section "$spec_file" "Rules"
-            append_to_section "$spec_file" "Rules" "- \`${rule_name}\` — ${rule_desc}"
-            log_change "${rel_path}/SPEC.md: added rule '${rule_name}'"
+            append_to_section "$spec_file" "Rules" "- \`${name}\` — ${desc}"
+            echo "${prefix}/SPEC.md: added rule '${name}'"
         fi
     done
 
-    # Spec rule not in filesystem → create placeholder
-    for rule_name in "${spec_rules[@]+"${spec_rules[@]}"}"; do
-        local found=0
-        for r in "${fs_rules[@]+"${fs_rules[@]}"}"; do
-            [[ "$r" == "$rule_name" ]] && found=1 && break
-        done
-        if [[ $found -eq 0 ]]; then
-            local rules_dir="${plugin_dir}/rules"
-            mkdir -p "$rules_dir"
-            local rule_file="${rules_dir}/${rule_name}.md"
+    for name in "${spec_rules[@]+"${spec_rules[@]}"}"; do
+        if ! array_contains "$name" "${fs_rules[@]+"${fs_rules[@]}"}"; then
+            local rule_file="${plugin_dir}/rules/${name}.md"
             if [[ ! -f "$rule_file" ]]; then
-                printf '# %s\n\n_description needed_\n' "$rule_name" > "$rule_file"
-                log_change "${rel_path}/rules/${rule_name}.md: created (from spec)"
+                mkdir -p "${plugin_dir}/rules"
+                printf '# %s\n\nTODO: add description\n' "$name" > "$rule_file"
+                echo "${prefix}/rules/${name}.md: created (from spec)"
             fi
         fi
     done
 
-    # --- Sync Commands ---
+    # ---- Agents ----
+    local fs_agents=()
+    while IFS= read -r name; do
+        [[ -n "$name" ]] && fs_agents+=("$name")
+    done < <(scan_agents "$plugin_dir")
+
+    local spec_agents=()
+    while IFS= read -r name; do
+        [[ -n "$name" ]] && spec_agents+=("$name")
+    done < <(parse_spec_section "$spec_file" "Agents")
+
+    for name in "${fs_agents[@]+"${fs_agents[@]}"}"; do
+        if ! array_contains "$name" "${spec_agents[@]+"${spec_agents[@]}"}"; then
+            local agent_file="${plugin_dir}/agents/${name}.md"
+            [[ ! -f "$agent_file" ]] && agent_file="${plugin_dir}/agents/${name}/README.md"
+            local desc
+            desc=$(extract_description "$agent_file")
+            ensure_spec_section "$spec_file" "Agents"
+            append_to_section "$spec_file" "Agents" "- \`${name}\` — ${desc}"
+            echo "${prefix}/SPEC.md: added agent '${name}'"
+        fi
+    done
+
+    for name in "${spec_agents[@]+"${spec_agents[@]}"}"; do
+        if ! array_contains "$name" "${fs_agents[@]+"${fs_agents[@]}"}"; then
+            local agent_file="${plugin_dir}/agents/${name}.md"
+            if [[ ! -f "$agent_file" ]] && [[ ! -d "${plugin_dir}/agents/${name}" ]]; then
+                mkdir -p "${plugin_dir}/agents"
+                printf -- '---\nname: %s\ndescription: TODO: add description\n---\n\nTODO: add agent content\n' \
+                    "$name" > "$agent_file"
+                echo "${prefix}/agents/${name}.md: created (from spec)"
+            fi
+        fi
+    done
+
+    # ---- Commands ----
     local fs_commands=()
-    while IFS= read -r c; do
-        [[ -n "$c" ]] && fs_commands+=("$c")
+    while IFS= read -r name; do
+        [[ -n "$name" ]] && fs_commands+=("$name")
     done < <(scan_commands "$plugin_dir")
 
     local spec_commands=()
-    while IFS= read -r c; do
-        [[ -n "$c" ]] && spec_commands+=("$c")
+    while IFS= read -r name; do
+        [[ -n "$name" ]] && spec_commands+=("$name")
     done < <(parse_spec_section "$spec_file" "Commands")
 
-    # Filesystem command not in spec → append to spec
-    for cmd_name in "${fs_commands[@]+"${fs_commands[@]}"}"; do
-        local found=0
-        for c in "${spec_commands[@]+"${spec_commands[@]}"}"; do
-            [[ "$c" == "$cmd_name" ]] && found=1 && break
-        done
-        if [[ $found -eq 0 ]]; then
-            local cmd_desc
-            cmd_desc=$(extract_description "${plugin_dir}/commands/${cmd_name}.md")
+    for name in "${fs_commands[@]+"${fs_commands[@]}"}"; do
+        if ! array_contains "$name" "${spec_commands[@]+"${spec_commands[@]}"}"; then
+            local cmd_file="${plugin_dir}/commands/${name}.md"
+            [[ ! -f "$cmd_file" ]] && cmd_file="${plugin_dir}/commands/${name}/README.md"
+            local desc
+            desc=$(extract_description "$cmd_file")
             ensure_spec_section "$spec_file" "Commands"
-            append_to_section "$spec_file" "Commands" "- \`${cmd_name}\` — ${cmd_desc}"
-            log_change "${rel_path}/SPEC.md: added command '${cmd_name}'"
+            append_to_section "$spec_file" "Commands" "- \`${name}\` — ${desc}"
+            echo "${prefix}/SPEC.md: added command '${name}'"
         fi
     done
 
-    # Spec command not in filesystem → create placeholder
-    for cmd_name in "${spec_commands[@]+"${spec_commands[@]}"}"; do
-        local found=0
-        for c in "${fs_commands[@]+"${fs_commands[@]}"}"; do
-            [[ "$c" == "$cmd_name" ]] && found=1 && break
-        done
-        if [[ $found -eq 0 ]]; then
-            local commands_dir="${plugin_dir}/commands"
-            mkdir -p "$commands_dir"
-            local cmd_file="${commands_dir}/${cmd_name}.md"
-            if [[ ! -f "$cmd_file" ]]; then
-                printf '# %s\n\n_description needed_\n' "$cmd_name" > "$cmd_file"
-                log_change "${rel_path}/commands/${cmd_name}.md: created (from spec)"
+    for name in "${spec_commands[@]+"${spec_commands[@]}"}"; do
+        if ! array_contains "$name" "${fs_commands[@]+"${fs_commands[@]}"}"; then
+            local cmd_file="${plugin_dir}/commands/${name}.md"
+            if [[ ! -f "$cmd_file" ]] && [[ ! -d "${plugin_dir}/commands/${name}" ]]; then
+                mkdir -p "${plugin_dir}/commands"
+                printf -- '---\nname: %s\ndescription: TODO: add description\n---\n\nTODO: add command content\n' \
+                    "$name" > "$cmd_file"
+                echo "${prefix}/commands/${name}.md: created (from spec)"
             fi
         fi
     done
-
-    # --- Sync Hooks ---
-    # For hooks, we compare by hook type (the key in the SPEC.md hooks section)
-    local fs_hook_types=()
-    while IFS= read -r h; do
-        [[ -n "$h" ]] && fs_hook_types+=("$(echo "$h" | cut -d'|' -f1)")
-    done < <(scan_hooks "$plugin_dir")
-
-    local spec_hook_types=()
-    while IFS= read -r h; do
-        [[ -n "$h" ]] && spec_hook_types+=("$h")
-    done < <(parse_spec_section "$spec_file" "Hooks")
-
-    # Filesystem hook not in spec → append to spec
-    local hooks_raw
-    hooks_raw=$(scan_hooks "$plugin_dir")
-    while IFS= read -r hook_line; do
-        [[ -z "$hook_line" ]] && continue
-        IFS='|' read -r hook_type script_type hook_desc <<< "$hook_line"
-        local found=0
-        for h in "${spec_hook_types[@]+"${spec_hook_types[@]}"}"; do
-            [[ "$h" == "$hook_type" ]] && found=1 && break
-        done
-        if [[ $found -eq 0 ]]; then
-            ensure_spec_section "$spec_file" "Hooks"
-            append_to_section "$spec_file" "Hooks" "- \`${hook_type}\` (\`${script_type}\`) — ${hook_desc}"
-            log_change "${rel_path}/SPEC.md: added hook '${hook_type}'"
-        fi
-    done <<< "$hooks_raw"
-
-    # Note: we do NOT create hooks in the filesystem from spec entries
-    # (hooks are more complex than skills/rules and need real implementation)
 }
 
-# Main: iterate over plugin directories
-for plugin_dir in "$PLUGINS_DIR"/*/; do
-    [[ -d "$plugin_dir" ]] || continue
-    plugin_basename=$(basename "$plugin_dir")
+# ---------------------------------------------------------------------------
+# Entrypoint
+# ---------------------------------------------------------------------------
 
-    # Skip the specs/ directory if it exists
-    [[ "$plugin_basename" == "specs" ]] && continue
+total_changes=0
 
-    process_plugin "$plugin_dir"
-done
+if [[ -n "$PLUGIN_FILTER" ]]; then
+    plugin_dir="${PLUGINS_DIR}/${PLUGIN_FILTER}"
+    if [[ ! -d "$plugin_dir" ]]; then
+        echo "Error: plugin directory not found: ${plugin_dir}" >&2
+        exit 1
+    fi
+    while IFS= read -r line; do
+        echo "$line"
+        total_changes=$((total_changes + 1))
+    done < <(process_plugin "$plugin_dir")
+else
+    for plugin_dir in "$PLUGINS_DIR"/*/; do
+        [[ -d "$plugin_dir" ]] || continue
+        plugin_basename=$(basename "$plugin_dir")
+        # Skip non-directory entries that happen to match the glob
+        [[ "$plugin_basename" == CLAUDE.md ]] && continue
+        while IFS= read -r line; do
+            echo "$line"
+            total_changes=$((total_changes + 1))
+        done < <(process_plugin "$plugin_dir")
+    done
+fi
 
-if [[ ${#CHANGES[@]} -eq 0 ]]; then
+echo ""
+if [[ $total_changes -eq 0 ]]; then
     echo "No changes needed — all SPEC.md files are in sync."
 else
-    echo ""
-    echo "Total changes: ${#CHANGES[@]}"
+    echo "Total changes: ${total_changes}"
 fi
