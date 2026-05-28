@@ -3,6 +3,7 @@ name: plugin-spec-sync
 description: |
   Use this skill to sync plugin SPEC.md files with what's actually on disk (skills, rules, hooks, agents, commands). Recall when the user asks about SPEC.md drift, "are SPEC files up to date", spec scaffolding, or after adding/renaming a skill/rule/hook/command in a plugin.
 ---
+
 # plugin-spec-sync
 
 Sync plugin `SPEC.md` files with the filesystem across the entire `plugins/` directory.
@@ -15,7 +16,7 @@ Sync plugin `SPEC.md` files with the filesystem across the entire `plugins/` dir
 | SPEC → FS       | Item listed in `SPEC.md` but missing from filesystem → creates stub file/dir, using SPEC description                                                      |
 | Both exist      | **No update** — descriptions not synced even if they differ                                                                                               |
 | Remove          | Must be removed from both places manually (never half-removed)                                                                                            |
-| SPEC.md missing | Auto-generated from plugin metadata + filesystem scan with `TODO: add description` placeholders                                                            |
+| SPEC.md missing | Auto-generated from plugin metadata + filesystem scan with `TODO: add description` placeholders                                                           |
 
 Hooks are synced FS → SPEC only (scaffolding `hooks.json` from SPEC is not supported).
 
