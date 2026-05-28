@@ -26,3 +26,29 @@ github:
 
   # Auto-run `gh auth status` after install to verify authentication
   autoAuthCheck: true
+
+  # --- PR State Tracking ---
+  #
+  # Async hooks that monitor PR state (comments, reviews, CI status,
+  # merge status) across all projects in the session. State is cached
+  # locally and compared on each hook invocation. When changes are
+  # detected (e.g., new review, CI status change), the agent is notified.
+
+  # Enable/disable PR state tracking hooks.
+  prStateTracking: true
+
+  # Minimum seconds between PostToolUse checks (throttle/debounce).
+  # Prevents excessive API calls on every tool use.
+  # SessionStart and Stop always run regardless of this interval.
+  prStateCheckInterval: 60
+
+  # Cache directory for PR state snapshots.
+  # Default: ~/.claude/plugin-cache/github
+  # The plugin appends /<project-slug>/pr-state/ to this path.
+  # For multi-project sessions, each project gets its own subdirectory.
+  # Both ~ and $HOME are supported in paths.
+  #
+  # Suggested structure for project-specific overrides:
+  #   ~/.claude/plugin-cache/github/<project-name>/pr-state/
+  #
+  # prStateCacheDir: "~/.claude/plugin-cache/github"
