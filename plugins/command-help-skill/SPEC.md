@@ -4,4 +4,4 @@
 
 ## Skills
 
-- `command-help` — ---
+- `command-help` — Help users understand and discover slash commands when they accidentally type them as messages instead of executing them.

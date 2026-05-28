@@ -121,6 +121,8 @@ extract_description() {
         [[ "$line" =~ ^#+ ]] && continue
         # Skip lines that are just bold purpose markers
         [[ "$line" =~ ^\*\*[Pp]urpose\*\* ]] && continue
+        # Skip HTML comments
+        [[ "$line" =~ ^\<!-- ]] && continue
         # Strip leading list/quote markers
         line="${line#- }"
         line="${line#> }"
@@ -292,6 +294,7 @@ append_to_section() {
         /^## / {
             if (in_sect && !done) {
                 print newitem
+                print ""
                 done=1
             }
             in_sect = ($0 == target)
@@ -625,6 +628,7 @@ else
         plugin_basename=$(basename "$plugin_dir")
         # Skip non-directory entries that happen to match the glob
         [[ "$plugin_basename" == CLAUDE.md ]] && continue
+        [[ -f "${plugin_dir}.claude-plugin/plugin.json" ]] || continue
         while IFS= read -r line; do
             echo "$line"
             total_changes=$((total_changes + 1))

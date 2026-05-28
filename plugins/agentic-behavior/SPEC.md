@@ -17,7 +17,7 @@
 ## Rules
 
 - `acknowledge-before-working` — When you receive a message from the handler requesting work, you MUST acknowledge it before starting.
-- `autonomy` — <!-- handler feedback #41 -->
+- `autonomy` — Autonomy balance + recommendation rules for how the agent decides when to act vs. ask, and when to surface recommendations.
 - `communication-discipline` — Rules for keeping handler-facing communication concise and plan-doc-first.
 - `dont-relay-to-visible-parties` — When multiple parties share a conversation or channel, **don't relay information from one member to another** —...
 - `message-link-formatting` — \*\*Every reference to a PR, issue, commit, or external resource in a Discord or Telegram message MUST be a clickable...

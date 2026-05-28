@@ -1,6 +1,6 @@
 # Plugin: shared-lib
 
-**Purpose**: Internal infrastructure plugin: bundles bash helper libraries used by other
+**Purpose**: Shared bash libraries used by other ai-mktpl plugins (logging, hook output, config reading, settings writing, tool install). Other plugins declare this as a dependency and source the libs from this plugin's persistent data directory at runtime.
 
 ## Hooks
 

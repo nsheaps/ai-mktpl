@@ -1,6 +1,6 @@
 # Plugin: renovate
 
-**Purpose**: Plugin: renovate
+**Purpose**: Skills for setting up and debugging Renovate auto-merge (config + GitHub auto-merge enablement + diagnosis).
 
 ## Skills
 
