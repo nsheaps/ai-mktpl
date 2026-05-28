@@ -6,6 +6,10 @@ name: Sync main to edge
 on:
   push:
     branches: [main]
+  schedule:
+    # Nightly safety net at 06:00 UTC. Catches any edge branches that
+    # fell behind without a corresponding main push.
+    - cron: '0 6 * * *'
   workflow_dispatch:
     inputs:
       test_mode:
