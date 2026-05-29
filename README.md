@@ -90,7 +90,6 @@ The `.ai/rules/` directory is synced to `~/.claude/rules/` via automation (symli
 | :----------------------------------------------------- | :-------------------------------------------------------- |
 | **[data-serialization](./plugins/data-serialization)** | YAML/JSON/TOON/XML conversion; TOON reduces tokens 30-60% |
 | **[memory-manager](./plugins/memory-manager)**         | Auto-detect and store user preferences in CLAUDE.md       |
-| **[command-help-skill](./plugins/command-help-skill)** | Help discover and execute slash commands sent as messages |
 | **[skills-maintenance](./plugins/skills-maintenance)** | Maintain, update, and improve existing Claude Code skills |
 | **[opengraph-image](./plugins/opengraph-image)**       | Generate OpenGraph images via html2png.dev API            |
 

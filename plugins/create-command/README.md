@@ -105,7 +105,6 @@ The skill covers:
 
 - [correct-behavior](../correct-behavior/) - Correct AI behavior and update rules
 - [skills-maintenance](../skills-maintenance/) - Maintain and update skills
-- [command-help-skill](../command-help-skill/) - Help with command discovery
 
 ## Contributing
 
