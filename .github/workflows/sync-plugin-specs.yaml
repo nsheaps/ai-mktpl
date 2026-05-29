@@ -10,6 +10,7 @@ on:
       - 'plugins/**/commands/*.md'
       - 'plugins/**/agents/*.md'
       - 'plugins/**/SPEC.md'
+      - '.github/workflows/sync-plugin-specs.yaml'
   schedule:
     - cron: '0 6 * * 1'
   workflow_dispatch:
