@@ -1,6 +1,6 @@
 # ----------------------------------------------------------------
 # Auto-merged from nsheaps/.github on every sync.
-#   Source: https://github.com/nsheaps/.github/blob/39cc7a112f67b6dd91334c251bbabe3a56ea1e48/.github/repo-settings.yaml
+#   Source: https://github.com/nsheaps/.github/blob/40094e841f3444a7fe05216f809222763b66baae/.github/repo-settings.yaml
 # Edits to this file are KEPT on the next sync (deep merge).
 # To remove an org default, delete the key here — it will not come back.
 # ----------------------------------------------------------------
@@ -147,6 +147,12 @@ rulesets:
       - actor_id: 5
         actor_type: RepositoryRole # 1=read 2=triage 3=write 4=maintain 5=admin
         bypass_mode: always
+      - actor_id: 101490915
+        actor_type: Integration
+        bypass_mode: always
+      - actor_id: -1
+        actor_type: Integration
+        bypass_mode: always
     rules:
       - type: deletion # block branch deletion
       - type: non_fast_forward # block force-push
@@ -164,6 +170,12 @@ rulesets:
       # Repos can add more actors (other teams, integrations).
       - actor_id: 5
         actor_type: RepositoryRole # 1=read 2=triage 3=write 4=maintain 5=admin
+        bypass_mode: always
+      - actor_id: 101490915
+        actor_type: Integration
+        bypass_mode: always
+      - actor_id: -1
+        actor_type: Integration
         bypass_mode: always
     rules:
       - type: pull_request
@@ -214,6 +226,12 @@ rulesets:
       - actor_id: 5
         actor_type: RepositoryRole # 1=read 2=triage 3=write 4=maintain 5=admin
         bypass_mode: always
+      - actor_id: 101490915
+        actor_type: Integration
+        bypass_mode: always
+      - actor_id: -1
+        actor_type: Integration
+        bypass_mode: always
     rules:
       - type: pull_request
         parameters:
@@ -240,6 +258,12 @@ rulesets:
       - actor_id: 5
         actor_type: RepositoryRole # 1=read 2=triage 3=write 4=maintain 5=admin
         bypass_mode: always
+      - actor_id: 101490915
+        actor_type: Integration
+        bypass_mode: always
+      - actor_id: -1
+        actor_type: Integration
+        bypass_mode: always
     rules:
       - type: pull_request
         parameters:
@@ -259,6 +283,12 @@ rulesets:
       # Repos can add more actors (other teams, integrations).
       - actor_id: 5
         actor_type: RepositoryRole # 1=read 2=triage 3=write 4=maintain 5=admin
+        bypass_mode: always
+      - actor_id: 101490915
+        actor_type: Integration
+        bypass_mode: always
+      - actor_id: -1
+        actor_type: Integration
         bypass_mode: always
     rules:
       - type: required_status_checks
