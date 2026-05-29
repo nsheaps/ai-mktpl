@@ -627,7 +627,7 @@
     {
       "name": "scm-utils",
       "description": "Source control management utilities for improving interactions with branches and PRs, both locally and in CI environments",
-      "version": "0.2.1",
+      "version": "0.2.2",
       "author": {
         "name": "Nathan Heaps"
       },
