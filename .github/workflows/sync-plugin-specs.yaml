@@ -1,0 +1,23 @@
+name: Sync Plugin Specs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'plugins/**/SKILL.md'
+      - 'plugins/**/hooks.json'
+      - 'plugins/**/rules/*.md'
+      - 'plugins/**/commands/*.md'
+      - 'plugins/**/agents/*.md'
+      - 'plugins/**/SPEC.md'
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+jobs:
+  sync-specs:
+    uses: nsheaps/github-actions/.github/workflows/sync-plugin-specs.yaml@main
+    permissions:
+      contents: write
+    with:
+      plugins-dir: plugins
