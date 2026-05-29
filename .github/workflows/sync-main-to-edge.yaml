@@ -1,0 +1,24 @@
+# This file is managed by nsheaps/.github (sync-files).
+# Source: https://github.com/nsheaps/.github/blob/main/ansible/templates/.github/workflows/sync-main-to-edge.yaml
+# Edit-in-place will be overwritten on the next sync.
+name: Sync main to edge
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      test_mode:
+        description: 'Run in test mode (no push)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    name: Sync main -> */edge
+    uses: nsheaps/github-actions/.github/workflows/sync-main-to-edge.yaml@main
+    with:
+      test_mode: ${{ inputs.test_mode == true }}

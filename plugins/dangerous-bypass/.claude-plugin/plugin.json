@@ -1,6 +1,6 @@
 {
   "name": "dangerous-bypass",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Auto-approve ALL permission requests. Use only in trusted, non-production environments where you want Claude Code to operate without interactive permission prompts.",
   "author": {
     "name": "Nathan Heaps",
