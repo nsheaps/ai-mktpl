@@ -1,13 +1,12 @@
 # Plugin: todo-plus-plus
 
-**Purpose**: TODO: add description
+**Purpose**: Enforces commit-on-complete for tasks and provides ephemeral session awareness.
 
 ## Skills
 
-- `todo-plus-plus` — Task workflow enforcement plugin. Use when asking about commit-on-complete behavior, task completion requirements, ephem...
+- `todo-plus-plus` — Task workflow enforcement plugin. Use when asking about commit-on-complete behavior, task completion requirements,...
 
 ## Hooks
 
-- `SessionStart` (`bash`) — Commit enforcement on task completion and ephemeral session awareness on start
 - `TaskCompleted` (`bash`) — Commit enforcement on task completion and ephemeral session awareness on start
-
+- `SessionStart` (`bash`) — Commit enforcement on task completion and ephemeral session awareness on start

@@ -1,8 +1,7 @@
 # Plugin: command-help-skill
 
-**Purpose**: TODO: add description
+**Purpose**: Intelligent skill that helps users understand and discover slash commands when they accidentally type them as messages instead of executing them, enabling shared knowledge between agent and user for how to perform tasks.
 
 ## Skills
 
-- `command-help` — This is supposed to be a skill for CLAUDE to use when a /slashcommand is typed as a message instead of executed. This is...
-
+- `command-help` — Help users understand and discover slash commands when they accidentally type them as messages instead of executing them.

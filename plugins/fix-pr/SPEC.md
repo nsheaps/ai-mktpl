@@ -1,8 +1,7 @@
 # Plugin: fix-pr
 
-**Purpose**: TODO: add description
+**Purpose**: Relentlessly fix a PR until CI passes. Iterates through review, fix, push cycles until the PR is green or a valid reason is found why it can't be.
 
 ## Commands
 
-- `relentlessly-fix` — Keep trying to fix a PR until it passes in CI (or there is a valid reason it cannot) and is self-reviewed thoroughly.
-
+- `relentlessly-fix` — |
