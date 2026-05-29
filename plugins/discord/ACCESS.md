@@ -14,7 +14,8 @@ All state lives in `~/.claude/channels/discord/access.json`. The `/discord:acces
 | -------------- | --------------------------------------------------- |
 | Default policy | `pairing`                                           |
 | Sender ID      | User snowflake (numeric, e.g. `184695080709324800`) |
-| Group key      | Channel snowflake — not guild ID                    |
+| Group key      | Channel snowflake — per-channel opt-in              |
+| Guild key      | Guild (server) snowflake — server-wide opt-in       |
 | Config file    | `~/.claude/channels/discord/access.json`            |
 
 ## DM policies
@@ -57,6 +58,21 @@ With the default `requireMention: true`, the bot responds only when @mentioned o
 /discord:access group add 846209781206941736 --allow 184695080709324800,221773638772129792
 /discord:access group rm 846209781206941736
 ```
+
+## Server-wide (guild) access
+
+Instead of opting in channels one at a time, you can enable an entire Discord server by guild ID. All channels in the guild become active under the guild policy. Per-channel entries in `groups` take precedence — use them to override `requireMention` or `allowFrom` for specific channels within a guild-enabled server.
+
+Find the guild (server) ID by enabling Developer Mode, then right-clicking the server name and choosing **Copy Server ID**.
+
+```
+/discord:access guild add 123456789012345678
+/discord:access guild add 123456789012345678 --no-mention
+/discord:access guild add 123456789012345678 --allow 184695080709324800
+/discord:access guild rm 123456789012345678
+```
+
+Flags work identically to `group add`: `--no-mention` disables the mention requirement, `--allow id1,id2` restricts which members can trigger the bot.
 
 ## Mention detection
 
@@ -101,6 +117,8 @@ Configure outbound behavior with `/discord:access set <key> <value>`.
 | `/discord:access policy allowlist`             | Set `dmPolicy`. Values: `pairing`, `allowlist`, `disabled`.                                        |
 | `/discord:access group add 846209781206941736` | Enable a guild channel. Flags: `--no-mention`, `--allow id1,id2`.                                  |
 | `/discord:access group rm 846209781206941736`  | Disable a guild channel.                                                                           |
+| `/discord:access guild add 123456789012345678` | Enable all channels in a guild. Flags: `--no-mention`, `--allow id1,id2`.                          |
+| `/discord:access guild rm 123456789012345678`  | Disable server-wide access for a guild.                                                            |
 | `/discord:access set ackReaction 🔨`           | Set a config key: `ackReaction`, `replyToMode`, `textChunkLimit`, `chunkMode`, `mentionPatterns`.  |
 
 ## Config file
@@ -121,6 +139,15 @@ Configure outbound behavior with `/discord:access set <key> <value>`.
       // true: respond only to @mentions and replies.
       "requireMention": true,
       // Restrict triggers to these senders. Empty = any member (subject to requireMention).
+      "allowFrom": [],
+    },
+  },
+
+  // Server-wide (guild) access. All channels in the guild are active.
+  // Per-channel entries in "groups" take precedence over guild policy.
+  "guilds": {
+    "123456789012345678": {
+      "requireMention": false,
       "allowFrom": [],
     },
   },

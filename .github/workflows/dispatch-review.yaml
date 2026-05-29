@@ -1,0 +1,27 @@
+# Dispatches PR review requests to nsheaps/.ai-agent-henry.
+# This file is a template — see nsheaps/agents/templates/dispatch-review.yaml.
+# Synced via nsheaps/.github when that is in place; until then, copy-paste.
+#
+# Requirements:
+#   - REVIEW_GITHUB_APP_ID and REVIEW_GITHUB_APP_PRIVATE_KEY secrets
+#     (provisioned via nsheaps/.github/secret-sync.yaml)
+#   - The review App installed on both this repo and the target agent repo.
+
+name: Dispatch PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, labeled]
+
+jobs:
+  dispatch:
+    uses: nsheaps/agents/.github/workflows/review-dispatch.yaml@main
+    # secrets: inherit does not pass required secrets cross-repo (GitHub limitation).
+    # Explicitly passing required secrets as workaround.
+    secrets:
+      REVIEW_GITHUB_APP_ID: ${{ secrets.REVIEW_GITHUB_APP_ID }}
+      REVIEW_GITHUB_APP_PRIVATE_KEY: ${{ secrets.REVIEW_GITHUB_APP_PRIVATE_KEY }}
+    # Optional overrides (uncomment to use):
+    # with:
+    #   target-repo: nsheaps/.ai-agent-henry
+    #   request-label: request-review

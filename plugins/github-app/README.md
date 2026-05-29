@@ -1,16 +1,16 @@
 # github-app
 
-Automatic GitHub App token lifecycle for Claude Code sessions.
+env-var driven GitHub App token lifecycle for Claude Code sessions.
 
 GitHub App installation tokens expire after 1 hour. This plugin generates tokens on session start and monitors their validity via a PreToolUse hook, refreshing transparently before commands that need authentication.
 
 ## Features
 
-- **SessionStart hook**: Generates initial installation token, configures git identity, exports credentials via runtime env file
+- **SessionStart hook**: Reads credentials from env vars, materializes PEM, generates installation token, configures git identity, exports credentials via runtime env file
 - **PreToolUse hook**: Debounced/throttled token validity checks with smart sync/async refresh
 - **Git credential helper**: Seamless `git push` / `gh` auth via shared token file
-- **Agent team support**: Token file shared across all agents in a team session
-- **Authentication skill**: Shared with `github` plugin — covers all auth methods (device code, PATs, fine-grained tokens, GitHub App auth)
+- **Per-agent isolation**: All files written under `$CLAUDE_PLUGIN_DATA/` — each agent automatically gets its own isolated directory
+- **Authentication skill**: Shared with `github` plugin — covers all auth methods
 
 ## Setup
 
@@ -28,143 +28,82 @@ GitHub App installation tokens expire after 1 hour. This plugin generates tokens
 
 ### 3. Configure Credentials
 
-The plugin supports multiple ways to provide secrets, in order of priority:
-
-#### Option A: Bulk Secret Reference (`ref`)
-
-The `ref` setting loads all secrets at once from a single source.
-
-**1Password item** (recommended) — uses `nsheaps/op-exec`:
-
-```yaml
-# In $CLAUDE_PROJECT_DIR/.claude/plugins.settings.yaml
-github-app:
-  ref: "op://vault/github-app--repo--my-repo"
-```
-
-**Env file** — sources `KEY=VALUE` pairs from a file:
-
-```yaml
-github-app:
-  ref: "env-file://./.env.github-app" # relative to project
-  # or
-  ref: "env-file://~/.config/agent/github-app.env" # absolute
-```
-
-The source should provide fields named:
+Set these three env vars before the session starts:
 
 - `GITHUB_APP_ID`
-- `GITHUB_APP_CLIENT_ID`
-- `GITHUB_APP_CLIENT_SECRET`
-- `GITHUB_APP_PRIVATE_KEY`
-- `GITHUB_INSTALLATION_ID` (optional, can be set per-project)
+- `GITHUB_INSTALLATION_ID`
+- `GITHUB_APP_PRIVATE_KEY` (PEM content — not a file path)
 
-#### Option B: Individual Secret References
-
-Each secret can independently reference an env var, a 1Password field, or a literal:
+**Recommended**: Use the **1pass plugin** to inject from 1Password. Add to your agent's `plugins.settings.yaml`:
 
 ```yaml
-github-app:
+1pass:
   secrets:
-    github_app_id: "op://vault/item/GITHUB_APP_ID"
-    github_app_client_id: "${GITHUB_APP_CLIENT_ID}"
-    github_app_client_secret: "op://vault/item/GITHUB_APP_CLIENT_SECRET"
-    github_app_private_key: "op://vault/item/GITHUB_APP_PRIVATE_KEY"
-    github_installation_id: "12345"
-```
+    - envVar: GITHUB_APP_ID
+      reference: "op://vault/github-app--repo--my-repo/GITHUB_APP_ID"
+    - envVar: GITHUB_INSTALLATION_ID
+      reference: "op://vault/github-app--repo--my-repo/GITHUB_INSTALLATION_ID"
+    - envVar: GITHUB_APP_PRIVATE_KEY
+      reference: "op://vault/github-app--repo--my-repo/GITHUB_APP_PRIVATE_KEY"
 
-Individual `secrets.*` values override `ref` values for the same field.
-
-#### Option C: Environment Variables
-
-Set before the session starts:
-
-```bash
-export GITHUB_APP_ID="12345"
-export GITHUB_APP_PRIVATE_KEY_PATH="~/.config/agent/github-app.pem"
-export GITHUB_INSTALLATION_ID="67890"
-```
-
-#### Option D: Legacy Flat Settings
-
-```yaml
 github-app:
-  github_app_id: "12345"
-  private_key_path: "~/.config/agent/github-app.pem"
-  github_installation_id: "67890"
+  enabled: true
+  autoGitConfig: true
 ```
 
-### Private Key Handling
-
-The private key can be provided as:
-
-- **File path** (`private_key_path` or `GITHUB_APP_PRIVATE_KEY_PATH`): Points to a PEM file on disk
-- **Key content** (`secrets.github_app_private_key` or `GITHUB_APP_PRIVATE_KEY`): The PEM content directly (e.g., from 1Password). The plugin writes it to a secure temp file automatically.
-
-When using a PEM file directly, ensure correct permissions:
-
-```bash
-chmod 600 ~/.config/agent/github-app.pem
-```
+Any mechanism that exports these vars into the session env works (direct export, `.env` file sourced before launch, etc.). The 1pass plugin is simply the recommended approach.
 
 ## How It Works
 
-1. **Session starts**: Hook reads App credentials, generates JWT, exchanges for installation token
-2. **Token stored**: Written to `~/.config/agent/github-token` with 600 permissions
-3. **Git identity configured**: Sets `git config user.name` and `user.email` to the App's bot identity (e.g., `my-app[bot]` / `12345+my-app[bot]@users.noreply.github.com`)
-4. **Runtime env file**: `GH_TOKEN` and `GITHUB_TOKEN` written to `~/.config/agent/github-app-env`, sourced by `CLAUDE_ENV_FILE`
-5. **PreToolUse monitoring**: Before each tool call, checks token expiry (debounced to every 30s)
-6. **Smart refresh**: Commands using `gh`/`git push` get synchronous checks; others get async background refresh
-7. **Retry with backoff**: Failed refreshes retry up to 3 times, then back off for 5 minutes
-8. **Git integration**: Credential helper reads from token file for `git push`
-
-Git identity is only configured if `user.name`/`user.email` are not already set. Disable with `autoGitConfig: false` in plugin settings.
+1. **Session starts**: Hook reads three env vars, materializes PEM to `$CLAUDE_PLUGIN_DATA/github-app.pem`
+2. **Token generated**: JWT created from PEM, exchanged for installation token via GitHub API
+3. **Token stored**: Written to `$CLAUDE_PLUGIN_DATA/github-token` (mode 600)
+4. **Git identity configured**: Sets `GIT_AUTHOR_*`/`GIT_COMMITTER_*` to the App's bot identity (e.g., `my-app[bot]`). Controlled by `autoGitConfig: true` (default).
+5. **Runtime env file**: `GH_TOKEN` and `GITHUB_TOKEN` written to `$CLAUDE_PLUGIN_DATA/github-app-env`, sourced by `CLAUDE_ENV_FILE`
+6. **PreToolUse monitoring**: Before each tool call, checks token expiry (debounced to every 5 min)
+7. **Smart refresh**: Commands using `gh`/`git push` get synchronous checks; others get async background refresh
+8. **Retry with backoff**: Failed refreshes retry up to 3 times, then back off for 5 minutes
 
 ### Token Refresh Behavior
 
-| Scenario                                          | Behavior                                  |
-| ------------------------------------------------- | ----------------------------------------- |
-| Token valid, >30 min remaining                    | Silent, no action                         |
-| Token valid, <30 min remaining, non-token command | Background refresh, prints status         |
-| Token valid, <30 min remaining, gh/git command    | Allow + background refresh, prints status |
-| Token expired, gh/git command                     | Synchronous refresh before allowing       |
-| Token expired, non-token command                  | Background refresh                        |
-| Refresh fails                                     | Retry up to 3x with exponential backoff   |
-| All retries fail                                  | 5-minute cooldown, then retry             |
+| Scenario                                          | Behavior                                |
+| ------------------------------------------------- | --------------------------------------- |
+| Token valid, >45 min remaining                    | Silent, no action                       |
+| Token valid, <45 min remaining, non-token command | Background refresh                      |
+| Token valid, <45 min remaining, gh/git command    | Allow + background refresh              |
+| Token expired, gh/git command                     | Synchronous refresh before allowing     |
+| Token expired, non-token command                  | Background refresh                      |
+| Refresh fails                                     | Retry up to 3x with exponential backoff |
+| All retries fail                                  | 5-minute cooldown, then retry           |
 
 ## Configuration
 
 ```yaml
 github-app:
   enabled: true
-
-  # Option A: Bulk secret reference (op:// or env-file://)
-  ref: "op://vault/github-app--repo--my-repo"
-  # ref: "env-file://./.env.github-app"
-
-  # Option B: Individual secrets (override ref for specific fields)
-  # Each value: literal, ${ENV_VAR}, or op://vault/item/field
-  secrets:
-    github_app_id: "op://vault/item/GITHUB_APP_ID"
-    github_app_client_id: "op://vault/item/GITHUB_APP_CLIENT_ID"
-    github_app_client_secret: "op://vault/item/GITHUB_APP_CLIENT_SECRET"
-    github_app_private_key: "op://vault/item/GITHUB_APP_PRIVATE_KEY"
-    github_installation_id: "${GITHUB_INSTALLATION_ID}"
-
-  # Other settings
-  tokenFile: "~/.config/agent/github-token"
   autoGitConfig: true
+  # How long SessionStart waits for env vars to appear (seconds).
+  # Set to 0 to disable.
+  waitForEnvTimeoutSeconds: 15
 ```
 
-### Secret Reference Syntax
+## On-disk Layout
 
-| Syntax          | Example                          | Resolution                       |
-| --------------- | -------------------------------- | -------------------------------- |
-| Literal         | `"12345"`                        | Used as-is                       |
-| Env var         | `"${GITHUB_APP_ID}"`             | Expanded from shell environment  |
-| 1Password field | `"op://vault/item/field"`        | Resolved via `op read`           |
-| 1Password item  | `"op://vault/item"` (ref only)   | All fields via `op-exec`         |
-| Env file        | `"env-file://./path"` (ref only) | Source KEY=VALUE pairs from file |
+All files are written under `$CLAUDE_PLUGIN_DATA/` (per-agent isolated automatically):
+
+```
+$CLAUDE_PLUGIN_DATA/
+├── github-app.pem            # Materialized PEM (mode 600, rewritten each SessionStart)
+├── github-token              # Raw token (mode 600)
+├── github-token.meta         # JSON: expires_at, app_id, installation_id, app_slug, bot_id
+├── github-token.cooldown     # After 3 failed retries (5-min backoff)
+├── github-token.lock         # Mutex for concurrent refresh
+├── github-app-env            # Runtime env file sourced via CLAUDE_ENV_FILE
+├── github-git-identity       # Stable identity file (not overwritten by token refresh)
+├── github-app-last-check     # Debounce timestamp
+├── gh/                       # Isolated GH_CONFIG_DIR
+└── git/config                # Isolated GIT_CONFIG_GLOBAL target
+```
 
 ## Plugin Structure
 
@@ -174,7 +113,7 @@ plugins/github-app/
 ├── hooks/
 │   ├── hooks.json
 │   └── scripts/
-│       ├── github-token-init.sh     # SessionStart: initial token + env setup
+│       ├── github-token-init.sh     # SessionStart: credential check, PEM materialization, token + env setup
 │       └── github-token-check.sh    # PreToolUse: debounced validity check
 ├── skills/
 │   ├── github-auth/SKILL.md         # Shared auth skill (symlink)
@@ -182,24 +121,73 @@ plugins/github-app/
 ├── bin/
 │   ├── generate-token.sh            # JWT generation + token exchange
 │   ├── token-check.sh               # Token validity check + refresh logic
-│   ├── token-status.sh              # Token status JSON output
-│   └── git-credential-github-app.sh # Git credential helper
-├── lib/                             # Shared libraries (symlinks)
+│   └── token-status.sh              # Token status JSON output
+├── lib/
+│   ├── env-file.sh                  # Runtime env file writer
+│   ├── token-utils.sh               # Token expiry helpers
+│   └── wait-for-env.sh              # Poll CLAUDE_ENV_FILE for vars
 ├── docs/
-│   ├── token-refresh-spec.md        # Original design spec
 │   └── reference/                   # Archived implementations
 └── README.md
+```
+
+## Upgrading from 0.3.x
+
+### Breaking changes in v0.4.0
+
+- **Env-var contract simplified**: Only `GITHUB_APP_ID`, `GITHUB_INSTALLATION_ID`, `GITHUB_APP_PRIVATE_KEY` are read. The `GITHUB_APP_PRIVATE_KEY_PATH` input var is gone — provide PEM content directly.
+- **`ref:` and `secrets.*` settings removed**: The plugin no longer resolves secrets from 1Password directly. Use the 1pass plugin's `secrets:` list instead.
+- **Paths moved**: All runtime files now live under `$CLAUDE_PLUGIN_DATA/` instead of `~/.agents/<name>/.config/`.
+
+### Migration
+
+Update your agent's `plugins.settings.yaml`:
+
+```yaml
+# Before (v0.3.x):
+github-app:
+  ref: 'op://vault/github-app--repo--my-repo'
+
+# After (v0.4.0):
+github-app:
+  enabled: true
+  autoGitConfig: true
+
+1pass:
+  secrets:
+    - envVar: GITHUB_APP_ID
+      reference: 'op://vault/github-app--repo--my-repo/GITHUB_APP_ID'
+    - envVar: GITHUB_INSTALLATION_ID
+      reference: 'op://vault/github-app--repo--my-repo/GITHUB_INSTALLATION_ID'
+    - envVar: GITHUB_APP_PRIVATE_KEY
+      reference: 'op://vault/github-app--repo--my-repo/GITHUB_APP_PRIVATE_KEY'
+```
+
+After the first session start on v0.4.0, old files at `~/.agents/<name>/.config/` become orphaned and can be cleaned up:
+
+```bash
+rm -rf ~/.agents/<name>/.config/github-token* ~/.agents/<name>/.config/github-app-env \
+       ~/.agents/<name>/.config/github-app.pem ~/.agents/<name>/.config/github-git-identity
+```
+
+### Git credential helper
+
+The credential helper configuration is unchanged from v0.3.x:
+
+```ini
+[credential "https://github.com"]
+    helper =
+    helper = !gh auth git-credential
 ```
 
 ## Related
 
 - **[github](../github)** plugin — GitHub CLI installation, usage skill, and general auth
-- [Design spec](docs/token-refresh-spec.md) — Original technical design document
 
 ## Security
 
-- PEM private keys must have 600 or 400 permissions (plugin warns if not)
-- Token file and runtime env file are written with 600 permissions
+- PEM is materialized from `$GITHUB_APP_PRIVATE_KEY` on every session start — never cached across sessions
+- Token file and runtime env file are written with mode 600
 - Installation tokens are scoped to the App's configured permissions
 - Tokens expire after 1 hour (non-extensible) and are refreshed automatically
 - File-based locking prevents concurrent refresh races

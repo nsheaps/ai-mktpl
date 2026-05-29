@@ -1,18 +1,27 @@
+# All versions pinned 2026-05-25 per Nate Discord 1508295... to match
+# nsheaps/agents repo (where applicable) or currently-installed versions.
+# Rationale: "latest" causes cascade-breaks (see claude-code 2.1.150 incident
+# where a newer release broke postinstall in CI). Bump deliberately, not
+# silently on tool refresh.
 [tools]
-gh = "latest"
-jq = "latest"
+gh = "2.92.0"        # match agents
+jq = "1.8.1"         # match agents
 node = "lts"
-python = "3.14.3"
-bun = "latest"
+python = "3.14.4"
+bun = "1.3.13"       # match agents (agents repo also has 1.3.14, but this matches agents-fix-validate worktree)
 
-"npm:@anthropic-ai/claude-code" = "latest"
-"npm:prettier" = "latest"
-"npm:eslint" = "latest"
-yarn = "latest"
+"npm:@anthropic-ai/claude-code" = "2.1.128"  # match agents — 2.1.150 broke postinstall in CI
+"npm:prettier" = "3.8.3"   # match agents
+"npm:eslint" = "10.4.0"    # match agents
+# Pinned to match package.json `packageManager` so the lockfile metadata version
+# (currently 8) is not migrated by a newer yarn. Bump in lockstep with
+# package.json's `packageManager` field — Renovate updates package.json but not
+# this pin, so a coordinated change is required.
+yarn = "4.14.1"
 
 # 1Password CLI and op-exec
-"github:nsheaps/op-exec" = "latest"
-1password = "latest"
+"github:nsheaps/op-exec" = "0.1.0"  # match agents
+1password = "2.34.0"                # currently-installed
 
 [settings]
 # Use shorter paths for tools

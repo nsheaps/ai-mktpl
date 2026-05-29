@@ -124,31 +124,89 @@ the resolved environment variables to multiple targets.
     # Defaults to both targets when omitted.
     targets:
       - sessionStartBashEnv # → CLAUDE_ENV_FILE (session-scoped, bash only)
+      - envLocal # → $AGENT_HOME_DIR/.env.local (persistent, idempotent)
       - userSettings # → ~/.claude/settings.local.json .env (persistent, all tools)
 
+  # envLocal target configuration (only consulted when "envLocal" is in targets above)
+  envLocal:
+    # path: '$AGENT_HOME_DIR/.env.local'   # default
+    # sourceChain: '$AGENT_HOME_DIR/.env'  # default; pass "self" to chain envLocal directly,
+    # or "none" (or "false") to skip adding any source line.
 
     # Note: recursive resolution of op:// references is always on (op-exec built-in)
 ```
 
 ### Output Targets
 
-| Target                | Mechanism                              | Scope           | Persistence     | Non-Bash tools |
-| --------------------- | -------------------------------------- | --------------- | --------------- | -------------- |
-| `sessionStartBashEnv` | `CLAUDE_ENV_FILE`                      | Bash tool calls | Session only    | No             |
-| `userSettings`        | `~/.claude/settings.local.json` `.env` | All tools       | Across sessions | Yes            |
+| Target                | Mechanism                                                          | Scope                                     | Persistence                                    | Non-Bash tools                     |
+| --------------------- | ------------------------------------------------------------------ | ----------------------------------------- | ---------------------------------------------- | ---------------------------------- |
+| `sessionStartBashEnv` | `CLAUDE_ENV_FILE`                                                  | Bash tool calls                           | Session only                                   | No                                 |
+| `envLocal`            | `$AGENT_HOME_DIR/.env.local` (shell-sourceable `export K=v` lines) | All tools sourcing the file (e.g. direnv) | Across sessions (idempotent replace-or-append) | Yes — when sourced by the consumer |
+| `userSettings`        | `~/.claude/settings.local.json` `.env`                             | All tools                                 | Across sessions                                | Yes                                |
 
 **Default:** Both `sessionStartBashEnv` and `userSettings` are enabled when
 `targets` is not specified, ensuring env vars are available to all tools and
-also in bash sessions.
+also in bash sessions. `envLocal` is opt-in.
+
+### envLocal target details
+
+- Writes shell-sourceable `export KEY=value` lines to `envLocal.path`
+  (default `$AGENT_HOME_DIR/.env.local`, fallback `$CLAUDE_PROJECT_DIR/.env.local`).
+- Uses idempotent **replace-or-append** semantics (via shared-lib's
+  `env_file_upsert_export`). The file is NOT truncated on session start, so
+  vars from other sources (manual edits, other plugins) survive.
+- On first write of the session, also adds `source <envLocal.sourceChain>` to
+  `CLAUDE_ENV_FILE`. Default `sourceChain` is `$AGENT_HOME_DIR/.env` (allowing a
+  repo-templated `.env` to `source .env.local` so direnv and other consumers
+  pick up the vars). Pass `sourceChain: self` to source the envLocal file
+  directly from `CLAUDE_ENV_FILE`, or `sourceChain: none` (alias: `false`) to
+  skip the source line entirely.
+- The agent repo is responsible for `.gitignore`'ing `.env.local` (and `.env`
+  if applicable) and for setting up the consumer-side `source` of the file.
 
 ### When to Use Which Target
 
 - **sessionStartBashEnv only**: Secrets that should not persist on disk beyond
   the session, or when you only need them in bash tool calls.
+- **envLocal**: When non-Claude-Code processes need the vars (e.g. direnv,
+  scripts run from a shell). Combines well with a repo-templated `.env` that
+  sources `.env.local` for the consumer side.
 - **userSettings only**: Config that non-Bash tools (MCP servers, etc.) need,
   or values that should persist across sessions.
-- **Both (default)**: Most common — ensures secrets are available everywhere
-  during the session and to all tool types.
+- **Both `sessionStartBashEnv` + `userSettings` (default)**: Most common —
+  ensures secrets are available everywhere during the session and to all
+  tool types. Add `envLocal` on top if you also want them in a sourceable
+  file on disk.
+
+### Setup Hook (Install-Time Write)
+
+When `envLocal` is included in `opExec.targets`, the plugin also registers a
+`Setup{init}` hook that fires at **session bootstrap, before the first
+interactive `SessionStart`** — specifically during the `claude --init-only`
+pre-pass that the agent launcher runs on every startup. This ensures
+`$AGENT_HOME_DIR/.env.local` is populated before the agent's Claude session
+starts, so launchers can source it from the pre-session environment.
+
+**How it works:**
+
+1. On session bootstrap, the launcher runs `claude --init-only`; this triggers
+   the `Setup{init}` hook, which runs `op-exec-env-setup.sh`.
+2. The script resolves all `opExec.items` via `op-exec` and upserts each
+   resolved `export KEY=value` line into `$AGENT_HOME_DIR/.env.local` via
+   `env_file_upsert_export` (same semantics as the SessionStart sibling — no
+   wholesale replacement; non-1pass entries are preserved).
+3. On every subsequent `SessionStart`, `op-exec-env.sh` re-resolves and upserts
+   again (idempotent — values that haven't changed are no-ops).
+
+**AGENT_HOME_DIR gating:** If `AGENT_HOME_DIR` is not set in the hook
+environment and no `envLocal.path` is configured, the Setup hook logs a notice
+and exits cleanly. The SessionStart hook will write `.env.local` once
+`AGENT_HOME_DIR` is available in the session env.
+
+**op / op-exec availability:** If either binary is missing at Setup time (e.g.
+autoInstall has not yet run), the Setup hook exits cleanly. The SessionStart
+hook always runs the install step before the env-injection step, so the binaries
+will be available by the time SessionStart fires.
 
 ## ENVIRONMENT Aggregator Pattern
 
