@@ -763,28 +763,6 @@
       "keywords": ["statusline", "status", "ui", "git", "workflow", "productivity"]
     },
     {
-      "name": "statusline-iterm",
-      "description": "Status line for Claude Code with iTerm2 badge integration - shows session info, project context, git status, and updates iTerm2 badge",
-      "version": "0.1.29",
-      "author": {
-        "name": "Nathan Heaps"
-      },
-      "source": "./plugins/statusline-iterm",
-      "category": "utility",
-      "tags": ["utility"],
-      "keywords": [
-        "statusline",
-        "status",
-        "ui",
-        "git",
-        "workflow",
-        "productivity",
-        "iterm",
-        "iterm2",
-        "badge"
-      ]
-    },
-    {
       "name": "task-parallelization",
       "description": "Intelligent skill that helps Claude parallelize Task tool calls when working on repetitive or batch operations, optimizing throughput based on task complexity",
       "version": "0.2.26",
@@ -907,6 +885,28 @@
         "anthropic-compatible",
         "china-ai",
         "llm-provider"
+      ]
+    },
+    {
+      "name": "zzDead_statusline-iterm",
+      "description": "Status line for Claude Code with iTerm2 badge integration - shows session info, project context, git status, and updates iTerm2 badge",
+      "version": "0.1.29",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/zzDead_statusline-iterm",
+      "category": "utility",
+      "tags": ["utility"],
+      "keywords": [
+        "statusline",
+        "status",
+        "ui",
+        "git",
+        "workflow",
+        "productivity",
+        "iterm",
+        "iterm2",
+        "badge"
       ]
     }
   ]
