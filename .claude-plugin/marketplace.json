@@ -11,7 +11,7 @@
     {
       "name": "1pass",
       "description": "Install and manage 1Password CLI (op) and op-exec in Claude Code sessions. Provides session-start auto-install for web sessions and comprehensive workflow skills.",
-      "version": "0.6.1",
+      "version": "0.6.2",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -32,7 +32,7 @@
     {
       "name": "agent-tab-titles",
       "description": "Set tmux/iTerm2 tab titles to agent roles in agent team sessions. Disables Claude Code's LLM-generated titles and uses SessionStart hook to set role-based names.",
-      "version": "0.1.4",
+      "version": "0.1.5",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -44,7 +44,7 @@
     {
       "name": "agentic-behavior",
       "description": "Skills for configuring Claude Code, behavior correction, memory tracking, autonomy rules, time-context awareness, and session exit/restart. Combines prompt history tracking, git-backed memory sync, the self-checking Ralph loop pattern, and graceful session exit via SIGINT.",
-      "version": "0.4.1",
+      "version": "0.4.2",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -82,7 +82,7 @@
     {
       "name": "arcane",
       "description": "Skills for deploying docker-compose stacks via Arcane GitOps — directory conventions, secrets management with 1Password, and GitHub Actions CI/CD.",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -105,7 +105,7 @@
     {
       "name": "cloudflare",
       "description": "Skills for managing Cloudflare developer platform components including Workers, R2, D1, AI Gateway, Pages, Tunnels, and more — with Pulumi IaC setup for each.",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -136,7 +136,7 @@
     {
       "name": "code-simplifier",
       "description": "Simplify and refine code for clarity, consistency, and maintainability. Requires pr-review-toolkit plugin.",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -148,7 +148,7 @@
     {
       "name": "common-sense",
       "description": "Common-sense rules for AI assistant behavior. On session start, symlinks bundled rules into the project's .claude/rules/common-sense directory so they are automatically loaded as context.",
-      "version": "1.3.25",
+      "version": "1.3.27",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -167,7 +167,7 @@
     {
       "name": "context-bloat-prevention",
       "description": "Prevents context window bloat from large tool outputs. PostToolUse hook detects oversized results and instructs Claude to save to file instead of keeping in context. PreToolUse hook redirects Bash commands that are likely to produce large output.",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -179,7 +179,7 @@
     {
       "name": "correct-behavior",
       "description": "[DEPRECATED — use agentic-behavior, which bundles this skill] Correct AI behavior mistakes and update rules to prevent recurrence",
-      "version": "0.2.26",
+      "version": "0.2.27",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -191,7 +191,7 @@
     {
       "name": "create-command",
       "description": "Create and maintain Claude Code slash commands with guided assistance",
-      "version": "0.2.25",
+      "version": "0.2.26",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -203,7 +203,7 @@
     {
       "name": "daily-report",
       "description": "Skill for generating daily organization-wide reports covering commits, PRs, branches, and issue changes across all repositories in a GitHub org. Designed for scheduled CI workflows and on-demand reporting.",
-      "version": "0.1.6",
+      "version": "0.1.7",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -223,7 +223,7 @@
     {
       "name": "dangerous-bypass",
       "description": "Auto-approve ALL permission requests. Use only in trusted, non-production environments where you want Claude Code to operate without interactive permission prompts.",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -242,7 +242,7 @@
     {
       "name": "data-serialization",
       "description": "Data format conversion and querying utilities. Supports YAML, JSON, TOON (Token-Oriented Object Notation), and XML/HTML transformations with special handling for Playwright accessibility snapshots. TOON provides 30-60% token reduction vs JSON for LLM contexts.",
-      "version": "0.2.25",
+      "version": "0.2.26",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -313,7 +313,7 @@
     {
       "name": "fix-pr",
       "description": "Relentlessly fix a PR until CI passes — iterates through review, fix, push cycles until green",
-      "version": "0.1.2",
+      "version": "0.1.3",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -325,7 +325,7 @@
     {
       "name": "git-spice",
       "description": "Skill for managing stacked Git branches with git-spice (gs) CLI tool",
-      "version": "0.2.8",
+      "version": "0.2.9",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -345,7 +345,7 @@
     {
       "name": "github",
       "description": "GitHub CLI installation, authentication, and workflow skill for Claude Code sessions. Consolidates gh-tool and github-auth-skill into a single plugin.",
-      "version": "0.1.16",
+      "version": "0.1.17",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -374,7 +374,7 @@
     {
       "name": "github-app",
       "description": "env-var driven GitHub App token lifecycle for Claude Code sessions. Pairs with the 1pass plugin for secret injection.",
-      "version": "0.5.0",
+      "version": "0.5.1",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -396,7 +396,7 @@
     {
       "name": "google-workspace-cli",
       "description": "Install and manage the Google Workspace CLI (gws) with per-service skills for Gmail, Calendar, Drive, Docs, Sheets, Slides, Chat, Tasks, Contacts, and Admin",
-      "version": "0.1.8",
+      "version": "0.1.9",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -424,7 +424,7 @@
     {
       "name": "linear-mcp-sync",
       "description": "Installs Linear MCP and adds hooks for safe ticket updates with hash validation to prevent stale overwrites",
-      "version": "0.2.25",
+      "version": "0.2.26",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -436,7 +436,7 @@
     {
       "name": "mcp-tooling",
       "description": "Skills for MCP CLI tools, frameworks, proxy daemoning, and gateway patterns. Covers philschmid/mcp-cli, mcp-use, apify/mcpc, mcp-proxy daemoning, and MCP gateway architecture for sharing servers across sessions and networks.",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -459,7 +459,7 @@
     {
       "name": "memory-manager",
       "description": "Intelligent memory management for CLAUDE.md files. Automatically detects and stores user preferences, rules, and instructions with smart scope detection and hierarchical organization.",
-      "version": "0.2.26",
+      "version": "0.2.27",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -471,7 +471,7 @@
     {
       "name": "mise",
       "description": "Install and manage mise (tool version manager) in Claude Code sessions. Provides session-start auto-install for web sessions and comprehensive workflow skills.",
-      "version": "0.2.19",
+      "version": "0.2.20",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -490,7 +490,7 @@
     {
       "name": "og-image",
       "description": "Generate OpenGraph images for Nuxt/Vue pages using HTML templates and html2png.dev API",
-      "version": "0.2.25",
+      "version": "0.2.26",
       "author": {
         "name": "alvinunreal + modifications by nsheaps"
       },
@@ -511,7 +511,7 @@
     {
       "name": "permissions-sync",
       "description": "Merge permission scopes from configurable source settings.json files into settings.local.json on session start. Supports project-level and user-level installation.",
-      "version": "0.1.12",
+      "version": "0.1.13",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -533,7 +533,7 @@
     {
       "name": "plugin-management",
       "description": "Skill for installing, updating, and managing Claude Code plugins — including what requires a restart and what hot-reloads.",
-      "version": "0.1.3",
+      "version": "0.1.4",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -545,7 +545,7 @@
     {
       "name": "proxmox",
       "description": "Skills for managing Proxmox VE hosts and LXC containers — creating containers, running Docker in LXC, and hosting services like cloudflared.",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -567,7 +567,7 @@
     {
       "name": "remote-config",
       "description": "Sync upstream Claude config repo on session start. Pulls latest from a configured git repo to ~/.claude-remote/ and reports update status.",
-      "version": "0.1.8",
+      "version": "0.1.9",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -579,7 +579,7 @@
     {
       "name": "review-changes",
       "description": "[DEPRECATED — use scm-utils, which bundles these skills] Detailed code review feedback on quality, security, performance, and maintainability",
-      "version": "0.2.26",
+      "version": "0.2.27",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -591,7 +591,7 @@
     {
       "name": "safety-evaluation-prompt",
       "description": "Pre-tool-call safety evaluation using prompt-style hooks for inline AI evaluation",
-      "version": "0.2.26",
+      "version": "0.2.27",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -603,7 +603,7 @@
     {
       "name": "safety-evaluation-script",
       "description": "Pre-tool-call safety evaluation using Claude CLI (haiku) with script-style hooks",
-      "version": "0.2.26",
+      "version": "0.2.27",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -615,7 +615,7 @@
     {
       "name": "scm-utils",
       "description": "Source control management utilities for improving interactions with branches and PRs, both locally and in CI environments",
-      "version": "0.2.1",
+      "version": "0.2.3",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -627,7 +627,7 @@
     {
       "name": "sdlc-utils",
       "description": "Software development lifecycle utilities — skills organized by SDLC phase: plan, implement, review, test, deploy, and maintain.",
-      "version": "0.3.1",
+      "version": "0.3.2",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -655,7 +655,7 @@
     {
       "name": "self-terminate",
       "description": "Allows Claude to gracefully terminate itself using SIGINT",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -667,7 +667,7 @@
     {
       "name": "sequential-thinking",
       "description": "Set up the sequential-thinking MCP server and auto-configure permissions for its tools on session start.",
-      "version": "0.1.11",
+      "version": "0.1.12",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -686,7 +686,7 @@
     {
       "name": "session-report",
       "description": "Skill for generating structured session reports — fact-finding across git history, GitHub issues and PRs, tasks, and agent contributions to produce a comprehensive work summary. Works for solo agents and agent teams alike.",
-      "version": "0.1.3",
+      "version": "0.1.4",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -717,7 +717,7 @@
     {
       "name": "skill-required",
       "description": "Enforces that specified skills are loaded before certain tools can be used. Tracks skill reads via PostToolUse and blocks tool use via PreToolUse if the required skill hasn't been recently loaded.",
-      "version": "0.1.4",
+      "version": "0.1.5",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -729,7 +729,7 @@
     {
       "name": "skills-maintenance",
       "description": "Agent skill for maintaining, updating, and improving existing Claude Code skills",
-      "version": "0.2.25",
+      "version": "0.2.26",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -741,7 +741,7 @@
     {
       "name": "statusline",
       "description": "Configurable status line for Claude Code showing session info, project context, and git status",
-      "version": "0.1.25",
+      "version": "0.1.26",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -751,31 +751,9 @@
       "keywords": ["statusline", "status", "ui", "git", "workflow", "productivity"]
     },
     {
-      "name": "statusline-iterm",
-      "description": "Status line for Claude Code with iTerm2 badge integration - shows session info, project context, git status, and updates iTerm2 badge",
-      "version": "0.1.28",
-      "author": {
-        "name": "Nathan Heaps"
-      },
-      "source": "./plugins/statusline-iterm",
-      "category": "utility",
-      "tags": ["utility"],
-      "keywords": [
-        "statusline",
-        "status",
-        "ui",
-        "git",
-        "workflow",
-        "productivity",
-        "iterm",
-        "iterm2",
-        "badge"
-      ]
-    },
-    {
       "name": "task-parallelization",
       "description": "Intelligent skill that helps Claude parallelize Task tool calls when working on repetitive or batch operations, optimizing throughput based on task complexity",
-      "version": "0.2.25",
+      "version": "0.2.26",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -807,7 +785,7 @@
     {
       "name": "tmux-subagent",
       "description": "Launch independent Claude sub-agents in tmux sessions with custom configurations, tool restrictions, and iTerm integration",
-      "version": "0.2.25",
+      "version": "0.2.26",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -819,7 +797,7 @@
     {
       "name": "todo-plus-plus",
       "description": "Enforces commit-on-complete for tasks and reminds about ephemeral session awareness",
-      "version": "0.1.5",
+      "version": "0.1.6",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -831,7 +809,7 @@
     {
       "name": "todo-sync",
       "description": "Automatically syncs todos and plans from ~/.claude/ to the current project's .claude/ directory",
-      "version": "0.2.4",
+      "version": "0.2.5",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -855,7 +833,7 @@
     {
       "name": "word-vomit",
       "description": "Hook-based workflow for capturing unstructured thoughts and triggering the exec-assist agent to categorize them into actionable items (issues, tasks, docs).",
-      "version": "0.1.3",
+      "version": "0.1.4",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -874,7 +852,7 @@
     {
       "name": "zai-glm",
       "description": "Skills for using z.ai (Zhipu AI) GLM models and configuring Claude Code to access them via the Anthropic-compatible endpoint or API gateways.",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -895,6 +873,28 @@
         "anthropic-compatible",
         "china-ai",
         "llm-provider"
+      ]
+    },
+    {
+      "name": "zzDead_statusline-iterm",
+      "description": "Status line for Claude Code with iTerm2 badge integration - shows session info, project context, git status, and updates iTerm2 badge",
+      "version": "0.1.29",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/zzDead_statusline-iterm",
+      "category": "utility",
+      "tags": ["utility"],
+      "keywords": [
+        "statusline",
+        "status",
+        "ui",
+        "git",
+        "workflow",
+        "productivity",
+        "iterm",
+        "iterm2",
+        "badge"
       ]
     }
   ]

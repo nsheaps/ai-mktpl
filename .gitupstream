@@ -1,0 +1,7 @@
+# Configures sync-main-to-edge workflow. Schema:
+# https://github.com/nsheaps/github-actions/blob/main/.github/workflows/sync-main-to-edge.yaml
+version: 1
+sync:
+  - upstream: main
+    targets:
+      - alex/edge
