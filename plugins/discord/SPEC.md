@@ -1,0 +1,10 @@
+# Plugin: discord
+
+**Purpose**: TODO: add description
+
+## Skills
+
+- `access` — Manage Discord channel access — approve pairings, edit allowlists, set DM/group policy. Use when the user asks to pair, ...
+- `configure` — Set up the Discord channel — save the bot token and review access policy. Use when the user pastes a Discord bot token, ...
+- `forum-thread-creation` — Create a new thread in a Discord forum channel by calling the Discord REST API. Use when the Discord `reply` MCP tool fa...
+
