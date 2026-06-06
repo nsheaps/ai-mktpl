@@ -103,6 +103,18 @@
       ]
     },
     {
+      "name": "bash-command-rejection",
+      "description": "Rejects bash commands that use && or | chaining, enforcing single-command execution for proper permission handling",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/bash-command-rejection",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": ["bash", "security", "hooks", "permissions", "chaining"]
+    },
+    {
       "name": "cloudflare",
       "description": "Skills for managing Cloudflare developer platform components including Workers, R2, D1, AI Gateway, Pages, Tunnels, and more — with Pulumi IaC setup for each.",
       "version": "0.1.1",
@@ -737,6 +749,18 @@
       "category": "utility",
       "tags": ["utility", "skill"],
       "keywords": ["skills", "maintenance", "update", "improve", "refactor", "documentation"]
+    },
+    {
+      "name": "spec-validation",
+      "description": "Spec-based development plugin that captures requirements into spec files and validates deliverables against them",
+      "version": "1.0.0",
+      "author": {
+        "name": "Claude Code Community"
+      },
+      "source": "./plugins/spec-validation",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": ["spec", "requirements", "validation", "development", "planning", "testing"]
     },
     {
       "name": "statusline",
