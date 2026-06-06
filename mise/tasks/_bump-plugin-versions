@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+#MISE description="Bump all plugin versions"
+set -euo pipefail
+
+for plugin_dir in plugins/*; do
+  if [ ! -d "$plugin_dir" ]; then
+    continue
+  fi
+  mise run _bump-plugin-version "$plugin_dir"
+done

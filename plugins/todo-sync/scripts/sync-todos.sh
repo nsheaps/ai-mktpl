@@ -4,9 +4,47 @@
 
 set -euo pipefail
 
+PLUGIN_NAME="todo-sync"
+
+
+# --- Source shared libs from shared-lib plugin's persistent data dir ---
+#
+# shared-lib (declared in plugin.json `dependencies`) copies its lib/*.sh
+# files into ${CLAUDE_PLUGIN_DATA}/lib on SessionStart. We resolve its data
+# dir by stripping our own data-dir name and appending shared-lib's id.
+# Plugin data dir IDs are deterministic: `{plugin-name}-{marketplace-name}`.
+# See https://code.claude.com/docs/en/plugins-reference#persistent-data-directory
+#
+# When CLAUDE_PLUGIN_DATA is unset (e.g. when this script is invoked
+# outside a Claude Code hook), fall back to the known path.
+if [ -n "${CLAUDE_PLUGIN_DATA:-}" ]; then
+  SHARED_LIB_DIR="${CLAUDE_PLUGIN_DATA%/*}/shared-lib-ai-mktpl/lib"
+else
+  SHARED_LIB_DIR="${HOME}/.claude/plugins/data/shared-lib-ai-mktpl/lib"
+fi
+
+# Wait up to ~10s for a shared-lib file to appear (handles parallel
+# SessionStart hooks where shared-lib's copy may not have completed yet).
+_wait_for_shared_lib() {
+  local lib="$1"
+  local i=0
+  while [ ! -f "$SHARED_LIB_DIR/$lib" ]; do
+    i=$((i + 1))
+    if [ "$i" -ge 20 ]; then
+      echo "[todo-sync] timed out waiting for $SHARED_LIB_DIR/$lib (shared-lib SessionStart copy)" >&2
+      exit 1
+    fi
+    sleep 0.5
+  done
+}
+
+_wait_for_shared_lib "log.sh"
+
+# shellcheck source=/dev/null
+source "$SHARED_LIB_DIR/log.sh"
 # Check for jq dependency
 if ! command -v jq &>/dev/null; then
-  echo "Warning: jq not found, skipping sync" >&2
+  log_warn "jq not found, skipping sync"
   exit 0
 fi
 
@@ -17,7 +55,7 @@ input=$(cat)
 session_id=$(echo "$input" | jq -r '.session_id // empty')
 
 if [ -z "$session_id" ]; then
-  echo "No session_id in hook input, skipping sync" >&2
+  log_warn "No session_id in hook input, skipping sync"
   exit 0
 fi
 
@@ -90,6 +128,6 @@ if [ -d "$global_plans_dir" ]; then
 fi
 
 # Output success message (shown in transcript)
-echo "Synced todos and plans to $project_dir/.claude/"
+log_info "Synced todos and plans to $project_dir/.claude/"
 
 exit 0

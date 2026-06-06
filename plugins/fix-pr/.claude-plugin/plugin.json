@@ -1,6 +1,6 @@
 {
   "name": "fix-pr",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "description": "Relentlessly fix a PR until CI passes — iterates through review, fix, push cycles until green",
   "author": {
     "name": "Nathan Heaps",

@@ -1,16 +1,45 @@
 ---
 name: code-review
 description: >
-  Use this skill when setting up, configuring, or troubleshooting the automated
-  Claude Code review bot in GitHub CI. Covers the workflow, prompt template,
-  labels, GitHub App auth, and review behavior. Use when the user asks about
-  "review bot", "code review CI", "automated PR review", "claude review workflow",
-  or wants to add automated code review to a repository.
+  Code review a pull request. Triggers on "review this PR", "code review",
+  "review PR #123", "request a review", "review bot", "code review CI",
+  "automated PR review", "claude review workflow", or when the user wants to
+  add automated code review to a repository.
+argument-hint: [PR number | PR URL | branch name]
 ---
+
+> **Note:** This skill covers CI-based automated review via `claude-code-action` and is maintained for backward compatibility with Henry's CI review workflow. For new review workflows, use `scm-utils:automated-code-review`. For manual/interactive code review scoring, see `sdlc-utils:review`.
 
 # Code Review Bot — Claude Code Action
 
 An automated PR review system powered by [claude-code-action](https://github.com/anthropics/claude-code-action) running in GitHub Actions. It reviews PRs for code quality, security, performance, and maintainability, posting structured inline feedback via GitHub's review API.
+
+## Requesting a Review
+
+When the user asks to review a PR:
+
+1. **Resolve the PR**: Determine the PR number from the argument ($ARGUMENTS), current branch, or ask the user.
+
+2. **Check if CI review bot is available**: Look for `.github/workflows/claude-code-review.yaml` in the repository.
+
+3. **If review bot workflow exists**:
+   - Add the `request-review` label to the PR to trigger the CI review bot:
+     ```bash
+     gh pr edit <PR_NUMBER> --add-label "request-review"
+     ```
+   - Inform the user: "Triggered the review bot. It will post a review on the PR shortly."
+
+4. **If review bot workflow does NOT exist**:
+   - Perform a local review using the `pr-review-toolkit:review-pr` skill or the `code-review:code-review` agent
+   - Post the review directly on the PR
+
+**Notes:**
+
+- The CI review bot is preferred over local review because it runs in an isolated environment with proper GitHub App auth
+- The `request-review` label is automatically removed once the review starts
+- For draft PRs, the `request-review` label triggers a one-time review; use `always-review` for persistent review on drafts
+
+---
 
 ## How It Works
 
@@ -55,7 +84,7 @@ The GitHub App needs:
 4. **Copy the prompt** from `references/prompt-template.md` to `.github/prompts/claude-code-review.md`
 5. **Copy the labels** from `references/labels.yaml` and apply them (or merge into existing `.github/labels.yaml`)
 6. **Copy the actions** — the workflow depends on:
-   - `.github/actions/github-app-auth/` — authenticates as a GitHub App
+   - `nsheaps/github-actions/.github/actions/checkout-as-app` — authenticates as a GitHub App and checks out the repo
    - `.github/actions/interpolate-prompt/` — reads a prompt template and interpolates env vars with `envsubst`
 
 ## Review Behavior
@@ -74,7 +103,7 @@ The bot follows a structured review process:
 | Verdict           | When                                                            |
 | ----------------- | --------------------------------------------------------------- |
 | `APPROVE`         | No outstanding issues, ready to merge                           |
-| `COMMENT`         | Suggestions but not blocking (won't break if merged)            |
+| `COMMENT`         | Only P2 follow-ups remain (won't break if merged)               |
 | `REQUEST_CHANGES` | Must fix before merge (security, correctness, breaking changes) |
 
 ### Review Summary Format
@@ -84,7 +113,7 @@ Reviews use a collapsible `<details>/<summary>` format with:
 - Shields.io badges for quality, security, simplicity, and confidence scores
 - Emoji indicators: `✅` checked, `❔` question, `⚠️` warning, `❌` problem
 - Footnotes with workflow run link and external references
-- Follow-up recommendations section (always visible, outside details block)
+- Prioritized follow-ups section with P0/P1/P2 levels (always visible, outside details block)
 
 ## Concurrency
 

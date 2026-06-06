@@ -1,0 +1,165 @@
+name: Daily Report
+
+# Generates a daily activity report for the nsheaps GitHub org
+# Runs at 4:00 AM EST / 5:00 AM EDT (9:00 AM UTC) and covers the previous calendar day (Eastern Time)
+# Can also be triggered manually with custom time and subject scopes
+
+on:
+  schedule:
+    # 4:00 AM EST / 5:00 AM EDT = 9:00 AM UTC
+    # During EST (winter) this runs at 4:00 AM, during EDT (summer) at 5:00 AM
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+    inputs:
+      time_scope:
+        description: >
+          Free-form time scope for the report. Examples: "1 day" (default),
+          "3 days", "1 week", "since 2026-03-01"
+        required: false
+        default: '1 day'
+        type: string
+      subject_scope:
+        description: >
+          Free-form subject scope for the report. Examples: "nsheaps" (default, entire org),
+          "nsheaps/ai-mktpl" (specific repo), "commits from user@example.com across nsheaps",
+          "summarize recent activity for nsheaps/my-project",
+          "PRs by nsheaps across all repos"
+        required: false
+        default: 'nsheaps'
+        type: string
+
+jobs:
+  generate-report:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: write
+      id-token: write
+      actions: read
+    steps:
+      - name: Checkout and authenticate as GitHub App
+        id: auth
+        uses: nsheaps/github-actions/.github/actions/checkout-as-app@603052841cd49b9fdc99bc32979ff9c45c9b669e # checkout-as-app@main
+        with:
+          app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
+          private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
+          persist-credentials: false
+
+      - name: Install mise
+        uses: jdx/mise-action@v4
+        with:
+          install: true
+          cache: true
+
+      - name: Compute report parameters
+        id: params
+        shell: bash
+        run: |
+          # Determine report date (previous calendar day in Eastern Time)
+          REPORT_DATE=$(TZ='America/New_York' date -d 'yesterday' '+%Y-%m-%d')
+          echo "report_date=${REPORT_DATE}" >> "$GITHUB_OUTPUT"
+
+          # Time scope: from workflow_dispatch input or default "1 day"
+          TIME_SCOPE="${{ inputs.time_scope || '1 day' }}"
+          echo "time_scope=${TIME_SCOPE}" >> "$GITHUB_OUTPUT"
+
+          # Subject scope: from workflow_dispatch input or default "nsheaps"
+          SUBJECT_SCOPE="${{ inputs.subject_scope || 'nsheaps' }}"
+          echo "subject_scope=${SUBJECT_SCOPE}" >> "$GITHUB_OUTPUT"
+
+      - name: Build prompt
+        id: prompt
+        uses: ./.github/actions/interpolate-prompt
+        env:
+          REPORT_DATE: ${{ steps.params.outputs.report_date }}
+          TIME_SCOPE: ${{ steps.params.outputs.time_scope }}
+          SUBJECT_SCOPE: ${{ steps.params.outputs.subject_scope }}
+        with:
+          template-file: .github/prompts/daily-report.md
+
+      - name: Run Claude Code
+        id: claude
+        uses: anthropics/claude-code-action@v1
+        env:
+          INPUT_SETTINGS_JSON: |
+            {
+              "permissions": {
+                "allow": [
+                  "Task",
+                  "Glob",
+                  "Grep",
+                  "LS",
+                  "Read",
+                  "TodoWrite",
+                  "WebSearch",
+                  "WebFetch",
+                  "Bash",
+                  "BashOutput",
+                  "Skill",
+                  "mcp__github__create_issue",
+                  "mcp__github__add_issue_comment",
+                  "mcp__github__get_issue",
+                  "mcp__github__list_issues",
+                  "mcp__github__search_issues",
+                  "mcp__github__list_commits",
+                  "mcp__github__get_commit",
+                  "mcp__github__list_pull_requests",
+                  "mcp__github__get_pull_request",
+                  "mcp__github__list_branches",
+                  "mcp__github__search_repositories",
+                  "mcp__github__get_file_contents",
+                  "mcp__github__get_me",
+                  "Bash(gh:*)"
+                ]
+              },
+              "model": "opus",
+              "env": {
+                "GH_PAGER": "cat",
+                "GH_PROMPT_DISABLED": "true",
+                "GH_BROWSER": "curl",
+                "CLAUDE_CODE_REMOTE": "true"
+              }
+            }
+        with:
+          anthropic_api_key: ${{ secrets.CLAUDE_API_KEY || secrets.ANTHROPIC_API_KEY || '' }}
+          claude_code_oauth_token: ${{ (secrets.CLAUDE_API_KEY || secrets.ANTHROPIC_API_KEY) && '' || secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          bot_id: ${{ steps.auth.outputs.user-id }}
+          bot_name: '@claude via ${{ steps.auth.outputs.user-name }}'
+          allowed_bots: 'github-actions[bot],automation-nsheaps[bot]'
+          github_token: ${{ steps.auth.outputs.token }}
+          prompt: ${{ steps.prompt.outputs.prompt }}
+          show_full_output: true
+          additional_permissions: |
+            actions: read
+          settings: ${{ env.INPUT_SETTINGS_JSON }}
+          # Bash + GH_TOKEN is intentionally allowed for gh CLI data gathering
+          # per the daily-report SKILL.md instructions.
+          # MCP tools listed here to enable the GitHub MCP server in the action.
+          # See: https://github.com/anthropics/claude-code-action/issues/723#issuecomment-3716307305
+          claude_args: >-
+            --allowedTools
+            Bash,
+            BashOutput,
+            Task,
+            Glob,
+            Grep,
+            LS,
+            Read,
+            TodoWrite,
+            WebSearch,
+            WebFetch,
+            Skill,
+            mcp__github__create_issue,
+            mcp__github__add_issue_comment,
+            mcp__github__get_issue,
+            mcp__github__list_issues,
+            mcp__github__search_issues,
+            mcp__github__list_commits,
+            mcp__github__get_commit,
+            mcp__github__list_pull_requests,
+            mcp__github__get_pull_request,
+            mcp__github__list_branches,
+            mcp__github__search_repositories,
+            mcp__github__get_file_contents,
+            mcp__github__get_me

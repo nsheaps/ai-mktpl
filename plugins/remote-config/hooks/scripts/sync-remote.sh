@@ -8,6 +8,44 @@
 
 set -euo pipefail
 
+PLUGIN_NAME="remote-config"
+
+
+# --- Source shared libs from shared-lib plugin's persistent data dir ---
+#
+# shared-lib (declared in plugin.json `dependencies`) copies its lib/*.sh
+# files into ${CLAUDE_PLUGIN_DATA}/lib on SessionStart. We resolve its data
+# dir by stripping our own data-dir name and appending shared-lib's id.
+# Plugin data dir IDs are deterministic: `{plugin-name}-{marketplace-name}`.
+# See https://code.claude.com/docs/en/plugins-reference#persistent-data-directory
+#
+# When CLAUDE_PLUGIN_DATA is unset (e.g. when this script is invoked
+# outside a Claude Code hook), fall back to the known path.
+if [ -n "${CLAUDE_PLUGIN_DATA:-}" ]; then
+  SHARED_LIB_DIR="${CLAUDE_PLUGIN_DATA%/*}/shared-lib-ai-mktpl/lib"
+else
+  SHARED_LIB_DIR="${HOME}/.claude/plugins/data/shared-lib-ai-mktpl/lib"
+fi
+
+# Wait up to ~10s for a shared-lib file to appear (handles parallel
+# SessionStart hooks where shared-lib's copy may not have completed yet).
+_wait_for_shared_lib() {
+  local lib="$1"
+  local i=0
+  while [ ! -f "$SHARED_LIB_DIR/$lib" ]; do
+    i=$((i + 1))
+    if [ "$i" -ge 20 ]; then
+      echo "[remote-config] timed out waiting for $SHARED_LIB_DIR/$lib (shared-lib SessionStart copy)" >&2
+      exit 1
+    fi
+    sleep 0.5
+  done
+}
+
+_wait_for_shared_lib "hook-logging.sh"
+
+# shellcheck source=/dev/null
+source "$SHARED_LIB_DIR/hook-logging.sh"
 CONFIG_FILE="${CLAUDE_REMOTE_CONFIG:-$HOME/.claude/settings.remote-config.yaml}"
 REMOTE_DIR="$HOME/.claude-remote"
 
@@ -26,14 +64,18 @@ yaml_get() {
 
 # --- Load Config ---
 
+hook_log_step "load-config" "Loading remote-config settings"
+
 if [ ! -f "$CONFIG_FILE" ]; then
   # No config file — check env var
   if [ -n "${CLAUDE_REMOTE_UPSTREAM:-}" ]; then
     UPSTREAM_REPO="$CLAUDE_REMOTE_UPSTREAM"
     VERBOSE="false"
   else
-    # No config at all — silently exit (plugin not configured)
-    exit 0
+    # No config at all — exit (plugin not configured)
+    hook_log "not configured, skipping"
+    hook_log_cleanup
+    hook_respond; exit 0
   fi
 else
   UPSTREAM_REPO=$(yaml_get "$CONFIG_FILE" "upstream")
@@ -45,34 +87,36 @@ else
 fi
 
 if [ -z "$UPSTREAM_REPO" ]; then
-  echo "[remote-config] Error: No upstream repo configured" >&2
-  echo "[remote-config] Set 'upstream' in $CONFIG_FILE or CLAUDE_REMOTE_UPSTREAM env var" >&2
-  exit 0
+  hook_fail "config" "No upstream repo configured" \
+    "Set 'upstream' in $CONFIG_FILE or set the CLAUDE_REMOTE_UPSTREAM env var"
+  hook_respond; exit 0
 fi
 
 # --- Sync ---
+
+hook_log_step "sync" "Syncing upstream config repo"
 
 PREV_SHA=""
 
 if [ -d "$REMOTE_DIR/.git" ]; then
   # Repo exists — pull latest
   PREV_SHA=$(git -C "$REMOTE_DIR" rev-parse --short HEAD 2>/dev/null || true)
+  hook_log "Pulling latest from upstream (current: $PREV_SHA)"
 
   if ! git -C "$REMOTE_DIR" pull --ff-only --quiet 2>/dev/null; then
-    echo "[remote-config] Error: Cannot update $REMOTE_DIR cleanly" >&2
-    echo "[remote-config] Suggest: cd $REMOTE_DIR && git status" >&2
-    echo "[remote-config] Claude could fix this — reset to origin and re-pull" >&2
-    # Hook stdout is shown to user; they can decide
-    exit 0
+    hook_fail "git pull" "Cannot update $REMOTE_DIR cleanly (merge conflicts or diverged history)" \
+      "Run: cd $REMOTE_DIR && git status — then reset to origin with: git fetch origin && git reset --hard origin/main"
+    hook_respond; exit 0
   fi
 else
   # Fresh clone
+  hook_log "Cloning $UPSTREAM_REPO to $REMOTE_DIR"
   if ! git clone --quiet "$UPSTREAM_REPO" "$REMOTE_DIR" 2>/dev/null; then
-    echo "[remote-config] Error: Failed to clone $UPSTREAM_REPO" >&2
-    echo "[remote-config] Check the upstream URL in $CONFIG_FILE" >&2
-    exit 0
+    hook_fail "git clone" "Failed to clone $UPSTREAM_REPO" \
+      "Check the upstream URL in $CONFIG_FILE and verify network connectivity"
+    hook_respond; exit 0
   fi
-  echo "[remote-config] Cloned $UPSTREAM_REPO → $REMOTE_DIR"
+  hook_log "Cloned $UPSTREAM_REPO → $REMOTE_DIR"
 fi
 
 # --- Status ---
@@ -89,20 +133,21 @@ else
 fi
 
 if [ -n "$PREV_SHA" ] && [ "$PREV_SHA" != "$CURRENT_SHA" ]; then
-  echo "[remote-config] Updated: $PREV_SHA → $STATUS_LINE"
+  hook_log "Updated: $PREV_SHA → $STATUS_LINE"
 
   # Verbose: show commit titles since last update
   if [ "$VERBOSE" = "true" ]; then
-    echo "[remote-config] Changes:"
+    hook_log "Changes:"
     git -C "$REMOTE_DIR" log --oneline "${PREV_SHA}..HEAD" --reverse 2>/dev/null | while IFS= read -r line; do
-      echo "  $line"
+      hook_log "  $line"
     done
   fi
 elif [ -z "$PREV_SHA" ]; then
-  echo "[remote-config] Ready: $STATUS_LINE"
+  hook_log "Ready: $STATUS_LINE"
 else
   # No changes
-  echo "[remote-config] Up to date: $STATUS_LINE"
+  hook_log "up to date: $STATUS_LINE"
 fi
 
-exit 0
+hook_log_cleanup
+hook_respond

@@ -1,0 +1,11 @@
+# github-app plugin configuration
+#
+# Override per-project via ${CLAUDE_PROJECT_DIR}/.claude/plugins.settings.yaml
+# or per-user via ~/.claude/plugins.settings.yaml under the "github-app" key.
+
+github-app:
+  enabled: true
+  autoGitConfig: true
+  # How long SessionStart waits for env vars to appear (seconds).
+  # Set to 0 to disable the wait entirely.
+  waitForEnvTimeoutSeconds: 15

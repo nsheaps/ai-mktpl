@@ -1,0 +1,109 @@
+#!/usr/bin/env bash
+#MISE description="Update marketplace.json from plugin.json files"
+set -e
+
+echo "Updating marketplace.json..."
+
+MARKETPLACE_FILE=".claude-plugin/marketplace.json"
+TEMP_FILE=$(mktemp)
+UPDATED=false
+CHANGED_PLUGINS=""
+
+# Start with empty plugins array
+jq '.plugins = []' "$MARKETPLACE_FILE" > "$TEMP_FILE"
+
+for plugin_dir in plugins/*; do
+  if [ ! -d "$plugin_dir" ]; then
+    continue
+  fi
+
+  PLUGIN_NAME=$(basename "$plugin_dir")
+  PLUGIN_JSON="$plugin_dir/.claude-plugin/plugin.json"
+
+  if [ ! -f "$PLUGIN_JSON" ]; then
+    echo "Skipping $PLUGIN_NAME (no plugin.json)"
+    continue
+  fi
+
+  VERSION=$(jq -r '.version' "$PLUGIN_JSON")
+  DESC=$(jq -r '.description' "$PLUGIN_JSON")
+  AUTHOR=$(jq -r '.author.name' "$PLUGIN_JSON")
+  KEYWORDS=$(jq -c '.keywords // []' "$PLUGIN_JSON")
+
+  # Check if version changed from current marketplace
+  CURRENT_VERSION=$(jq -r ".plugins[] | select(.name == \"$PLUGIN_NAME\") | .version" "$MARKETPLACE_FILE" 2>/dev/null || echo "")
+  if [ "$VERSION" != "$CURRENT_VERSION" ] && [ -n "$CURRENT_VERSION" ]; then
+    echo "Version changed: $PLUGIN_NAME $CURRENT_VERSION -> $VERSION"
+    CHANGED_PLUGINS="${CHANGED_PLUGINS}${PLUGIN_NAME},"
+  fi
+
+  # Determine category
+  CATEGORY="utility"
+  if echo "$PLUGIN_NAME" | grep -q "git\|commit"; then
+    CATEGORY="git"
+  fi
+
+  # Determine tags
+  TAGS='["utility"]'
+  if [ -d "$plugin_dir/commands" ]; then
+    TAGS=$(echo "$TAGS" | jq '. += ["command"]')
+  fi
+  if [ -d "$plugin_dir/skills" ]; then
+    TAGS=$(echo "$TAGS" | jq '. += ["skill"]')
+  fi
+  if [ -d "$plugin_dir/agents" ]; then
+    TAGS=$(echo "$TAGS" | jq '. += ["agent"]')
+  fi
+
+  jq --arg name "$PLUGIN_NAME" \
+     --arg version "$VERSION" \
+     --arg desc "$DESC" \
+     --arg author "$AUTHOR" \
+     --arg source "./plugins/$PLUGIN_NAME" \
+     --arg category "$CATEGORY" \
+     --argjson tags "$TAGS" \
+     --argjson keywords "$KEYWORDS" \
+     '.plugins += [{
+       name: $name,
+       description: $desc,
+       version: $version,
+       author: {name: $author},
+       source: $source,
+       category: $category,
+       tags: $tags,
+       keywords: $keywords
+     }]' "$TEMP_FILE" > "${TEMP_FILE}.new"
+
+  mv "${TEMP_FILE}.new" "$TEMP_FILE"
+  echo "Added $PLUGIN_NAME"
+done
+
+# Sort the new marketplace
+jq '.plugins |= sort_by(.name)' "$TEMP_FILE" > "${TEMP_FILE}.sorted"
+
+# Compare with current marketplace to detect changes
+if ! diff -q "$MARKETPLACE_FILE" "${TEMP_FILE}.sorted" > /dev/null 2>&1; then
+  UPDATED=true
+  mv "${TEMP_FILE}.sorted" "$MARKETPLACE_FILE"
+  echo "Marketplace updated!"
+else
+  echo "No changes to marketplace"
+fi
+
+rm -f "$TEMP_FILE" "${TEMP_FILE}.sorted"
+
+# Remove trailing comma from changed plugins
+CHANGED_PLUGINS=$(echo "$CHANGED_PLUGINS" | sed 's/,$//')
+
+# Output for GitHub Actions if running in CI
+if [ -n "${GITHUB_OUTPUT:-}" ]; then
+  echo "updated=${UPDATED}" >> "$GITHUB_OUTPUT"
+  echo "changed-plugins=${CHANGED_PLUGINS}" >> "$GITHUB_OUTPUT"
+fi
+
+echo "Updated: $UPDATED"
+if [ -n "$CHANGED_PLUGINS" ]; then
+  echo "Changed plugins: $CHANGED_PLUGINS"
+fi
+
+mise run lint-fix

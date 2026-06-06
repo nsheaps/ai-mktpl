@@ -13,10 +13,10 @@ runs:
       id: update
       shell: bash
       run: |
-        set +eou pipefail
+        set +euo pipefail
         HAS_ERRORS=false
 
-        just update-marketplace || HAS_ERRORS=true
+        mise run update-marketplace || HAS_ERRORS=true
 
         # Check if there are any changes
         if git diff --quiet .claude-plugin/marketplace.json; then

@@ -175,21 +175,22 @@ echo "GitHub App token generated (expires: ${EXPIRES_AT})"
 - Less ideal because env vars are set at process start and can't be updated
 - Would require agents to re-read from file anyway
 
-**Git credential helper** (`~/.config/agent/git-credential-github-app.sh`):
+**Git credential helper** (`gh auth git-credential`):
 
-```bash
-#!/usr/bin/env bash
-# Git credential helper that reads from the token file
-TOKEN_FILE="${GITHUB_TOKEN_FILE:-$HOME/.config/agent/github-token}"
-if [[ -f "$TOKEN_FILE" ]]; then
-  echo "protocol=https"
-  echo "host=github.com"
-  echo "username=x-access-token"
-  echo "password=$(cat "$TOKEN_FILE")"
-fi
+The SessionStart hook writes a gitconfig entry automatically — no script file is
+installed. `gh auth git-credential` reads `$GH_TOKEN` from the process environment,
+which is always current because `CLAUDE_ENV_FILE` is sourced before Bash runs.
+
+Example gitconfig entry written by the hook:
+
+```ini
+[credential "https://github.com"]
+    helper =
+    helper = !gh auth git-credential
 ```
 
-Configure via: `git config --global credential.https://github.com.helper '!~/.config/agent/git-credential-github-app.sh'`
+No manual `git config` is required. The entry is version-independent: no binary
+path is embedded, so it survives `gh` upgrades without modification.
 
 ### Plugin Structure
 
@@ -203,8 +204,7 @@ plugins/github-token-refresh/
 │   └── token-refresh-server.sh       # MCP server (bash stdio)
 ├── bin/
 │   ├── generate-jwt.sh               # JWT generation helper
-│   ├── refresh-token.sh              # Token refresh helper
-│   └── git-credential-github-app.sh  # Git credential helper
+│   └── refresh-token.sh              # Token refresh helper
 └── README.md
 ```
 

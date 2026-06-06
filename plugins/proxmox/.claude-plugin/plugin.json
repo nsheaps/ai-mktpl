@@ -1,0 +1,23 @@
+{
+  "name": "proxmox",
+  "version": "0.1.1",
+  "description": "Skills for managing Proxmox VE hosts and LXC containers — creating containers, running Docker in LXC, and hosting services like cloudflared.",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/proxmox",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": [
+    "proxmox",
+    "pve",
+    "lxc",
+    "containers",
+    "virtualization",
+    "homelab",
+    "self-hosted",
+    "docker",
+    "infrastructure"
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "name": "word-vomit",
-  "version": "0.1.0",
+  "version": "0.1.4",
   "description": "Hook-based workflow for capturing unstructured thoughts and triggering the exec-assist agent to categorize them into actionable items (issues, tasks, docs).",
   "author": {
     "name": "Nathan Heaps",
@@ -17,6 +17,5 @@
     "categorization",
     "workflow",
     "hooks"
-  ],
-  "hooks": "./hooks/hooks.json"
+  ]
 }

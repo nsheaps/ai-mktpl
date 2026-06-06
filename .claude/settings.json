@@ -1,5 +1,8 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "env": {
+    "FORCE_AUTOUPDATE_PLUGINS": "true"
+  },
   "attribution": {
     "commit": "\nCo-Authored-By: Claude Code (${CLAUDE_PROJECT_DIR/$HOME/~}) <noreply@anthropic.com>"
   },
@@ -8,7 +11,6 @@
     "allow": [
       "Skill",
       "Agent",
-      "SlashCommand",
       "WebSearch",
       "Glob",
       "Grep",
@@ -27,7 +29,6 @@
       "WebFetch(domain:*.weather.gov)",
       "WebFetch(domain:mise.run)",
       "WebFetch(domain:*.mise.run)",
-      "WebFetch(domain:just.systems)",
       "WebFetch(domain:developer.1password.com)",
       "Bash(git log:*)",
       "Bash(git diff:*)",
@@ -47,14 +48,12 @@
       "Bash(gh run view:*)",
       "Bash(wc:*)",
       "Bash(man:*)",
-      "Bash(just:*)",
       "Bash(mise:*)",
       "Bash(yarn:*)",
       "Bash(npm:*)",
       "Bash(pnpm:*)",
       "Bash(chmod:*)",
-      "Bash(readlink:*)",
-      "mcp__memory__*"
+      "Bash(readlink:*)"
     ],
     "deny": ["Bash(rm -rf /:*)"],
     "ask": [
@@ -67,6 +66,29 @@
     ]
   },
   "hooks": {
+    "PermissionRequest": [
+      {
+        "matcher": "Edit|Write|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -n \"$CLAUDE_CODE_REMOTE\" ] && echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PermissionRequest\",\"decision\":{\"behavior\":\"allow\"}}}' || true",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/run-hook.sh session-start"
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "",
@@ -88,53 +110,28 @@
           }
         ]
       }
-    ],
-    "SessionStart": [
-      {
-        "matcher": "startup",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/run-hook.sh session-start start"
-          }
-        ]
-      },
-      {
-        "matcher": "resume",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/run-hook.sh session-start resume"
-          }
-        ]
-      },
-      {
-        "matcher": "clear",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/run-hook.sh session-start clear"
-          }
-        ]
-      },
-      {
-        "matcher": "compact",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/run-hook.sh session-start compact"
-          }
-        ]
-      }
     ]
   },
   "enabledPlugins": {
+    "trace-claude-code@braintrust-claude-plugin": true,
     "agent-sdk-dev@claude-plugins-official": false,
-    "code-review@claude-plugins-official": true,
-    "pr-review-toolkit@claude-plugins-official": true,
+    "code-review@claude-plugins-official": false,
+    "hookify@claude-plugins-official": true,
     "plugin-dev@claude-plugins-official": true,
-    "data-serialization@nsheaps-claude-plugins": true,
-    "todo-sync@nsheaps-claude-plugins": true
+    "pr-review-toolkit@claude-plugins-official": false,
+    "1pass@ai-mktpl": false,
+    "common-sense@ai-mktpl": false,
+    "agentic-behavior@ai-mktpl": false,
+    "data-serialization@ai-mktpl": false,
+    "deep-research@ai-mktpl": true,
+    "edit-utils@ai-mktpl": true,
+    "git-spice@ai-mktpl": true,
+    "github@ai-mktpl": false,
+    "mise@ai-mktpl": true,
+    "scm-utils@ai-mktpl": true,
+    "sequential-thinking@ai-mktpl": false,
+    "todo-sync@ai-mktpl": false,
+    "web-auto-approve@ai-mktpl": true
   },
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
@@ -143,10 +140,16 @@
         "repo": "anthropics/claude-plugins-official"
       }
     },
-    "nsheaps-claude-plugins": {
+    "ai-mktpl": {
       "source": {
-        "source": "directory",
-        "path": "/Users/nathan.heaps/src/nsheaps/ai-mktpl"
+        "source": "github",
+        "repo": "nsheaps/ai-mktpl"
+      }
+    },
+    "braintrust-claude-plugin": {
+      "source": {
+        "source": "github",
+        "repo": "braintrustdata/braintrust-claude-plugin"
       }
     }
   }

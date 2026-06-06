@@ -2,7 +2,7 @@
 name: how-this-repo-works
 description: |
   Use this skill to understand the nsheaps/ai plugin marketplace build, release, and propagation pipeline.
-  Recall this skill when working on CI/CD workflows, justfile recipes, plugin versioning, marketplace updates,
+  Recall this skill when working on CI/CD workflows, mise tasks, plugin versioning, marketplace updates,
   or when asked how plugins get from source code to a user's Claude Code installation.
   Also recall when debugging version bumps, marketplace.json drift, or plugin cache issues.
 ---
@@ -19,8 +19,7 @@ The repository relies on these tools, all managed by [mise](https://mise.run) (s
 
 | Tool                                | Purpose                                         |
 | ----------------------------------- | ----------------------------------------------- |
-| `just`                              | Task runner (justfile recipes)                  |
-| `mise`                              | Polyglot tool version manager                   |
+| `mise`                              | Polyglot tool version manager + task runner     |
 | `yarn` (v4, via corepack)           | JS dependency management (workspace root)       |
 | `release-it` + `@release-it/bumper` | Automated SemVer version bumps in `plugin.json` |
 | `prettier`                          | Linting and formatting                          |
@@ -28,7 +27,7 @@ The repository relies on these tools, all managed by [mise](https://mise.run) (s
 | `jq`                                | JSON processing in scripts                      |
 | `gh`                                | GitHub CLI for CI interactions                  |
 
-Run `just setup` to bootstrap: it calls `mise install -y` then `yarn install`.
+Run `mise run setup` to bootstrap: it calls `mise install -y` then `yarn install`.
 
 ## Repository Layout
 
@@ -37,7 +36,7 @@ Run `just setup` to bootstrap: it calls `mise install -y` then `yarn install`.
   .claude-plugin/marketplace.json   # Central plugin registry (auto-generated)
   mise.toml                         # Tool versions
   .release-it.base.json             # Shared release-it config (no git ops, patch increment)
-  justfile                          # Build recipes
+  mise/tasks/                       # Build tasks
   package.json                      # Root workspace (yarn 4, release-it devDeps)
   plugins/<name>/                   # One directory per plugin
     .claude-plugin/plugin.json      # Plugin manifest (name, version, description, author)
@@ -54,24 +53,24 @@ Run `just setup` to bootstrap: it calls `mise install -y` then `yarn install`.
     claude-agent-trigger.yaml       # Claude agent trigger
   .github/actions/
     detect-plugin-changes/          # Composite action: diff plugins vs base ref
-    update-marketplace/             # Composite action: run just update-marketplace
+    update-marketplace/             # Composite action: run mise run update-marketplace
     lint-files/                     # Composite action: prettier check/fix
     validate-plugins/               # Composite action: claude plugin validate
 ```
 
-## Build Process (Justfile Recipes)
+## Build Process (Mise Tasks)
 
 ### Local Development
 
-| Recipe                              | What it does                                                                        |
-| ----------------------------------- | ----------------------------------------------------------------------------------- |
-| `just setup`                        | Install mise tools + yarn dependencies                                              |
-| `just lint`                         | Run prettier check; auto-fix if errors found                                        |
-| `just validate`                     | Validate marketplace.json + every plugin.json via `claude plugin validate`          |
-| `just check`                        | Run `lint` then `validate` (the full local CI equivalent)                           |
-| `just update-marketplace`           | Regenerate `.claude-plugin/marketplace.json` from all `plugins/*/plugin.json` files |
-| `just release --dry-run`            | Preview which plugins would get version bumps                                       |
-| `just detect-plugin-changes [base]` | Output JSON listing plugins with code changes vs a base ref                         |
+| Task                                        | What it does                                                                        |
+| ------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `mise run setup`                            | Install mise tools + yarn dependencies                                              |
+| `mise run lint`                             | Run prettier check; auto-fix if errors found                                        |
+| `mise run validate`                         | Validate marketplace.json + every plugin.json via `claude plugin validate`          |
+| `mise run check`                            | Run `lint` then `validate` (the full local CI equivalent)                           |
+| `mise run update-marketplace`               | Regenerate `.claude-plugin/marketplace.json` from all `plugins/*/plugin.json` files |
+| `mise run release -- --dry-run`             | Preview which plugins would get version bumps                                       |
+| `mise run detect-plugin-changes [base-ref]` | Output JSON listing plugins with code changes vs a base ref                         |
 
 ### Version Bumping
 
@@ -102,9 +101,9 @@ Bumping a single plugin: `cd plugins/<name> && yarn exec release-it --ci`
 
 1. **check-version-files** (PRs only) -- Fails if `plugin.json` or `marketplace.json` were manually changed. These files are auto-generated; manual edits in PRs are rejected.
 
-2. **lint** -- Runs `just lint` via the `lint-files` composite action. If files change, it auto-commits the fixes via `git-auto-commit-action` and fails the check (so a re-run picks up the committed fixes).
+2. **lint** -- Runs `mise run lint` via the `lint-files` composite action. If files change, it auto-commits the fixes via `git-auto-commit-action` and fails the check (so a re-run picks up the committed fixes).
 
-3. **validate** -- Runs `just validate` via the `validate-plugins` composite action. Uses `claude plugin validate` against the marketplace and each plugin manifest.
+3. **validate** -- Runs `mise run validate` via the `validate-plugins` composite action. Uses `claude plugin validate` against the marketplace and each plugin manifest.
 
 ## CD Pipeline (cd.yaml)
 
@@ -120,9 +119,9 @@ The **bump-and-update-marketplace** job performs these steps in sequence:
 
 1. **Detect changes** -- `detect-plugin-changes` (base: `HEAD~1`) identifies plugins with code changes, excluding `CHANGELOG.md` and `plugin.json` from the diff.
 2. **Bump versions** -- For each changed plugin, runs `yarn exec release-it --ci` in that plugin's directory. This patches the version in `plugin.json` and runs prettier.
-3. **Lint** -- Runs `just lint` to ensure formatting is clean after bumps.
+3. **Lint** -- Runs `mise run lint` to ensure formatting is clean after bumps.
 4. **Commit version bumps** -- Auto-commits with `chore: bump plugin versions [skip ci]`.
-5. **Update marketplace** -- Runs `just update-marketplace`, which iterates all plugin dirs, reads each `plugin.json`, and rebuilds `.claude-plugin/marketplace.json` (sorted by name, with category/tag inference).
+5. **Update marketplace** -- Runs `mise run update-marketplace`, which iterates all plugin dirs, reads each `plugin.json`, and rebuilds `.claude-plugin/marketplace.json` (sorted by name, with category/tag inference).
 6. **Lint again** -- Ensures marketplace.json is formatted.
 7. **Commit marketplace** -- Auto-commits with `chore: update marketplace metadata [skip ci]`.
 8. **Push** -- Single `git push` sends both commits. The `[skip ci]` tag prevents infinite loops.
@@ -193,7 +192,7 @@ Here is the complete path a plugin change takes from developer to user:
    a. detect-plugin-changes finds changed plugins
    b. release-it bumps plugin.json version (patch)
    c. Commits version bumps [skip ci]
-   d. just update-marketplace rebuilds marketplace.json
+   d. mise run update-marketplace rebuilds marketplace.json
    e. Commits marketplace update [skip ci]
    f. Pushes both commits
 6. User pulls main (or Claude Code fetches from GitHub)
@@ -209,16 +208,16 @@ For Nathan specifically (local directory marketplace), step 6 is `git pull` in `
 
 ```bash
 # 1. Bootstrap
-just setup
+mise run setup
 
 # 2. Make plugin changes
 vim plugins/my-plugin/skills/my-skill/SKILL.md
 
 # 3. Validate locally
-just check          # lint + validate
+mise run check          # lint + validate
 
 # 4. Preview version impact
-just release --dry-run
+mise run release -- --dry-run
 
 # 5. Test the plugin locally (does not require a version bump)
 # Claude Code reads from the directory marketplace source directly
@@ -235,9 +234,16 @@ git push
 - [Agent Skills Standard](https://agentskills.io)
 - [release-it Documentation](https://github.com/release-it/release-it)
 - [mise Documentation](https://mise.run)
-- [just Documentation](https://just.systems/man/en/)
 - CI workflow: `.github/workflows/ci.yaml`
 - CD workflow: `.github/workflows/cd.yaml`
-- Justfile: `justfile` (repo root)
+- Mise tasks: `mise/tasks/` (repo root)
 - Base release config: `.release-it.base.json`
 - Marketplace manifest: `.claude-plugin/marketplace.json`
+
+## Deep-Dive References
+
+These reference documents provide detailed analysis on specific design decisions:
+
+- [Plugin Env Vars Tradeoff](./references/plugin-env-vars-tradeoff.md) — Tradeoffs between writing env vars to `settings.local.json` vs `CLAUDE_ENV_FILE` in SessionStart hooks, including dynamic reloading behavior, scope, persistence, security, and when to use each approach.
+- [Marketplace to User Settings](./references/marketplace-to-user-settings.md) — How plugins propagate from marketplace.json to user installations.
+- [CI/CD Pipeline Details](./references/ci-cd-pipeline-details.md) — Detailed CI/CD pipeline behavior and conventions.

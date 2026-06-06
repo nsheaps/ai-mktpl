@@ -1,0 +1,47 @@
+{
+  "description": "Install 1Password CLI/op-exec, inject secrets on session start, and redact secrets from tool outputs",
+  "hooks": {
+    "Setup": [
+      {
+        "matcher": "init",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/op-exec-env-setup.sh",
+            "timeout": 120
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/install-op.sh",
+            "timeout": 120
+          },
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/op-exec-env.sh",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "_note": "This entry does not fire in Claude Code CLI due to upstream bug https://github.com/anthropics/claude-code/issues/6305 (empirically confirmed v2.1.128 CLI, 2026-05-19). Remove this note once #6305 is fixed upstream.",
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/redact-secrets.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

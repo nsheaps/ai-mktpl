@@ -17,28 +17,24 @@ jobs:
       id-token: write
       actions: read
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-        with:
-          persist-credentials: false
-          fetch-depth: 50
-
-      - name: Install mise
-        uses: jdx/mise-action@v3
-        with:
-          install: true
-
-      - name: Authenticate as GitHub App
+      - name: Checkout and authenticate as GitHub App
         id: auth
-        uses: ./.github/actions/github-app-auth
+        uses: nsheaps/github-actions/.github/actions/checkout-as-app@603052841cd49b9fdc99bc32979ff9c45c9b669e # checkout-as-app@main
         with:
           app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
           private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
+          fetch-depth: '50'
+
+      - name: Install mise
+        uses: jdx/mise-action@v4
+        with:
+          install: true
 
       - name: Build prompt from dispatch payload
         id: prompt
         env:
           PAYLOAD: ${{ toJson(github.event.client_payload) }}
+          WORKFLOW_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           # Extract values from payload
           PROMPT=$(echo "$PAYLOAD" | jq -r '.prompt // ""')
@@ -83,8 +79,17 @@ jobs:
           fi
           CONTEXT+="- Triggered by: $AUTHOR ($ASSOCIATION)\n"
           CONTEXT+="- Trigger: $TRIGGER_TYPE ($TRIGGER_ACTION)\n"
+          CONTEXT+="- Workflow run: $WORKFLOW_URL\n"
           if [ "$TITLE" != "null" ] && [ -n "$TITLE" ]; then
             CONTEXT+="\n## Title\n$TITLE\n"
+          fi
+          CONTEXT+="\n## Attribution\n"
+          CONTEXT+="When posting comments, append GitHub-flavored markdown footnotes at the end for traceability:\n"
+          CONTEXT+="[^1]: Workflow Run: [$REPO actions/runs/${{ github.run_id }}]($WORKFLOW_URL)\n"
+          if [ "$PR_NUM" != "null" ] && [ -n "$PR_NUM" ]; then
+            CONTEXT+="[^2]: PR: [$REPO#$PR_NUM](${{ github.server_url }}/${{ github.repository }}/pull/$PR_NUM)\n"
+          elif [ "$ISSUE_NUM" != "null" ] && [ -n "$ISSUE_NUM" ]; then
+            CONTEXT+="[^2]: Issue: [$REPO#$ISSUE_NUM](${{ github.server_url }}/${{ github.repository }}/issues/$ISSUE_NUM)\n"
           fi
           CONTEXT+="\n## User Request\n$PROMPT"
 

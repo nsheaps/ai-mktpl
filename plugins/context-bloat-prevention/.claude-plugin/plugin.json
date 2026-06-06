@@ -1,6 +1,6 @@
 {
   "name": "context-bloat-prevention",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Prevents context window bloat from large tool outputs. PostToolUse hook detects oversized results and instructs Claude to save to file instead of keeping in context. PreToolUse hook redirects Bash commands that are likely to produce large output.",
   "author": {
     "name": "Nathan Heaps",

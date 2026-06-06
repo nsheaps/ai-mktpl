@@ -1,0 +1,102 @@
+# 1pass plugin configuration
+#
+# Override per-project via ${CLAUDE_PROJECT_DIR}/.claude/plugins.settings.yaml
+# or per-user via ~/.claude/plugins.settings.yaml under the "1pass" key.
+#
+# Set enabled: false to disable auto-install without uninstalling the plugin.
+
+1pass:
+  enabled: true
+
+  # Download and install the op binary if not already on PATH.
+  # Set to false when op is managed externally (e.g. via mise with op in mise.toml).
+  # When false, the plugin still validates that op is available.
+  autoInstall: false
+
+  # Install op to $CLAUDE_PROJECT_DIR/bin/.local on web sessions.
+  # Only used when autoInstall is true.
+  installToProject: true
+
+  # Run installation in the background (non-blocking session start)
+  backgroundInstall: false
+
+  # Specific op CLI version to install (default: latest)
+  # opVersion: "2.30.0"
+  opVersion: 'latest'
+
+  # Also install op-exec (from nsheaps/op-exec)
+  # Set to false to skip op-exec installation.
+  installOpExec: false
+
+  # Specific op-exec version to install (default: latest)
+  # opExecVersion: "1.0.0"
+  opExecVersion: 'latest'
+
+  # --- envLocal target configuration ---
+  # Path settings for the `envLocal` target (used by `secrets:` entries and
+  # `opExec.targets` below). Writes shell-sourceable `export K=v` lines to a
+  # persistent .env.local file (NOT truncated each session — uses idempotent
+  # replace-or-append semantics via shared-lib's env_file_upsert_export).
+  #
+  # path:           Where to write the resolved env vars. Default:
+  #                 $AGENT_HOME_DIR/.env.local when AGENT_HOME_DIR is set,
+  #                 otherwise $CLAUDE_PROJECT_DIR/.env.local.
+  # sourceChain:    Path that 1pass appends as `source <path>` to CLAUDE_ENV_FILE.
+  #                 Use this when .env.local is sourced indirectly via a
+  #                 templated .env file. Default: $AGENT_HOME_DIR/.env when
+  #                 AGENT_HOME_DIR is set, otherwise unset (no source line).
+  #                 Set to the literal value "self" to source the envLocal path
+  #                 directly from CLAUDE_ENV_FILE (skipping the .env chain).
+  envLocal:
+    # path: '$AGENT_HOME_DIR/.env.local'
+    # sourceChain: '$AGENT_HOME_DIR/.env'
+
+  # --- Individual secrets injection ---
+  # Inject specific 1Password fields as named environment variables.
+  # Each entry has:
+  #   envVar:    (required) Environment variable name to set
+  #   reference: (required) 1Password secret reference (op://vault/item/field)
+  #   target:    (optional) Where to write the variable. One of:
+  #                envFile           — append to CLAUDE_ENV_FILE (session-scoped, default)
+  #                envLocal          — upsert to envLocal.path (see envLocal config above);
+  #                                    also adds a `source` line to CLAUDE_ENV_FILE
+  #                settingsJson      — write to .claude/settings.json env block (committed)
+  #                settingsLocalJson — write to .claude/settings.local.json env block (gitignored)
+  #                userSettingsJson  — write to ~/.claude/settings.json env block (user-global, not committed)
+  #
+  # Example:
+  #   secrets:
+  #     - envVar: BRAINTRUST_API_KEY
+  #       reference: "op://Personal/Braintrust/api-key"
+  #       target: envFile
+  secrets: []
+
+  # --- Whole-item environment injection via op-exec ---
+  # Expose entire 1Password items as environment variables at session start.
+  # All STRING and CONCEALED fields in each item are converted to env vars
+  # (field labels → UPPER_SNAKE_CASE, e.g. "API Key" → API_KEY).
+  #
+  # Requires op-exec to be available (install via mise, Homebrew, or set
+  # installOpExec: true above) and op to be authenticated.
+  #
+  # items: list of op:// vault/item references (op://vault/item format)
+  #   Example:
+  #     items:
+  #       - 'op://MyVault/ENVIRONMENT'
+  #       - 'op://MyVault/extra-secrets'
+  #
+  # targets: where to write the resolved env vars (list, multiple allowed)
+  #   - sessionStartBashEnv  — append to CLAUDE_ENV_FILE (session-scoped, bash tool only)
+  #   - envLocal             — upsert to envLocal.path (gitignored, persistent across sessions
+  #                            via replace-or-append; intended for use with a templated .env
+  #                            file that sources .env.local for direnv/other consumers)
+  #   - userSettings         — write to ~/.claude/settings.local.json .env (persistent, all tools)
+  #   Defaults to both sessionStartBashEnv and userSettings.
+  #
+  # Note: op-exec always resolves op:// references in field values recursively
+  # (max depth 5). This is built-in behavior and not configurable.
+  opExec:
+    items: []
+    targets:
+      - sessionStartBashEnv
+      - userSettings

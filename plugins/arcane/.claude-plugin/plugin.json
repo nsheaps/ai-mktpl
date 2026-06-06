@@ -1,0 +1,24 @@
+{
+  "name": "arcane",
+  "version": "0.1.1",
+  "description": "Skills for deploying docker-compose stacks via Arcane GitOps — directory conventions, secrets management with 1Password, and GitHub Actions CI/CD.",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/arcane",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": [
+    "arcane",
+    "gitops",
+    "docker-compose",
+    "deployment",
+    "1password",
+    "secrets",
+    "docker",
+    "containers",
+    "self-hosted",
+    "homelab"
+  ]
+}

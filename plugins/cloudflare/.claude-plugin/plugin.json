@@ -1,0 +1,32 @@
+{
+  "name": "cloudflare",
+  "version": "0.1.1",
+  "description": "Skills for managing Cloudflare developer platform components including Workers, R2, D1, AI Gateway, Pages, Tunnels, and more — with Pulumi IaC setup for each.",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/cloudflare",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": [
+    "cloudflare",
+    "workers",
+    "r2",
+    "d1",
+    "kv",
+    "pages",
+    "tunnels",
+    "ai-gateway",
+    "zero-trust",
+    "durable-objects",
+    "queues",
+    "vectorize",
+    "dns",
+    "pulumi",
+    "infrastructure-as-code",
+    "iac",
+    "serverless",
+    "edge-computing"
+  ]
+}
