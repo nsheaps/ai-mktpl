@@ -67,19 +67,64 @@ if [[ -z "$TOKEN" ]]; then
   exit 3
 fi
 
-# --- Step 3: Write token and metadata ---
+# --- Step 3: Resolve app slug and bot ID ---
+# The /app endpoint requires JWT auth (App-as-app). The /users/<slug>[bot]
+# endpoint is a PUBLIC users endpoint and MUST be called without Authorization
+# (passing the JWT bearer there causes a 401 — see BUG-7).
+# We resolve the slug + bot ID now (while the JWT is still valid for /app)
+# and store them in metadata so downstream consumers don't need to regenerate
+# a JWT.
+
+APP_RESPONSE=$(curl -s -w "\n%{http_code}" \
+  -H "Authorization: Bearer ${JWT}" \
+  -H "Accept: application/vnd.github+json" \
+  "https://api.github.com/app")
+APP_HTTP_CODE=$(echo "$APP_RESPONSE" | tail -1)
+APP_BODY=$(echo "$APP_RESPONSE" | sed '$d')
+
+APP_SLUG=""
+if [[ "$APP_HTTP_CODE" == "200" ]]; then
+  APP_SLUG=$(echo "$APP_BODY" | jq -r '.slug // empty')
+else
+  echo "WARNING: /app lookup failed (HTTP $APP_HTTP_CODE): $APP_BODY" >&2
+fi
+
+BOT_ID=""
+if [[ -n "$APP_SLUG" ]]; then
+  # PUBLIC endpoint — do NOT send Authorization header (causes 401).
+  USER_RESPONSE=$(curl -s -w "\n%{http_code}" \
+    -H "Accept: application/vnd.github+json" \
+    "https://api.github.com/users/${APP_SLUG}%5Bbot%5D")
+  USER_HTTP_CODE=$(echo "$USER_RESPONSE" | tail -1)
+  USER_BODY=$(echo "$USER_RESPONSE" | sed '$d')
+
+  if [[ "$USER_HTTP_CODE" == "200" ]]; then
+    BOT_ID=$(echo "$USER_BODY" | jq -r '.id // empty')
+    if [[ -n "$BOT_ID" ]]; then
+      echo "Resolved bot user ID for ${APP_SLUG}[bot]: ${BOT_ID}" >&2
+    else
+      echo "WARNING: /users/${APP_SLUG}[bot] returned 200 but no .id field" >&2
+    fi
+  else
+    echo "WARNING: /users/${APP_SLUG}[bot] lookup failed (HTTP $USER_HTTP_CODE): $USER_BODY" >&2
+  fi
+fi
+
+# --- Step 4: Write token and metadata ---
 
 mkdir -p "$(dirname "$TOKEN_FILE")"
 echo "$TOKEN" > "$TOKEN_FILE"
 chmod 600 "$TOKEN_FILE"
 
-# Write metadata for status checks
+# Write metadata for status checks + identity resolution
 cat > "${TOKEN_FILE}.meta" <<METAEOF
 {
   "expires_at": "$EXPIRES_AT",
   "app_id": "$GITHUB_APP_ID",
   "installation_id": "$INSTALLATION_ID",
   "permissions": $PERMISSIONS,
+  "app_slug": "${APP_SLUG:-}",
+  "bot_id": "${BOT_ID:-}",
   "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 }
 METAEOF

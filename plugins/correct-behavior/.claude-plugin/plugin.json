@@ -1,7 +1,7 @@
 {
   "name": "correct-behavior",
-  "version": "0.2.25",
-  "description": "Command to correct AI behavior mistakes and update rules to prevent recurrence",
+  "version": "0.2.27",
+  "description": "[DEPRECATED — use agentic-behavior, which bundles this skill] Correct AI behavior mistakes and update rules to prevent recurrence",
   "author": {
     "name": "Nathan Heaps",
     "email": "nsheaps@gmail.com",

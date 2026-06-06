@@ -8,14 +8,8 @@ github:
   autoInstall: false
 
 github-app:
-  # Fetch all GitHub App secrets from a single 1Password item.
-  # Uses bin/op-exec to render item fields as environment variables.
-  ref: 'op://AI-Jack/github-app--repo--ai-mktpl'
-  # Item fields expected:
-  #   GITHUB_APP_ID
-  #   GITHUB_APP_CLIENT_ID
-  #   GITHUB_APP_CLIENT_SECRET
-  #   GITHUB_APP_PRIVATE_KEY
+  enabled: true
+  autoGitConfig: true
 
 mise:
   autoInstallTools: true

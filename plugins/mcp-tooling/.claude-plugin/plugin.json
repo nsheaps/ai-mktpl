@@ -1,6 +1,6 @@
 {
   "name": "mcp-tooling",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Skills for MCP CLI tools, frameworks, proxy daemoning, and gateway patterns. Covers philschmid/mcp-cli, mcp-use, apify/mcpc, mcp-proxy daemoning, and MCP gateway architecture for sharing servers across sessions and networks.",
   "author": {
     "name": "Nathan Heaps",

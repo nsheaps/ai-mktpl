@@ -1,0 +1,29 @@
+{
+  "name": "sdlc-utils",
+  "version": "0.3.2",
+  "description": "Software development lifecycle utilities — skills organized by SDLC phase: plan, implement, review, test, deploy, and maintain.",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/sdlc-utils",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": [
+    "sdlc",
+    "planning",
+    "implementation",
+    "code-review",
+    "testing",
+    "deployment",
+    "maintenance",
+    "software-engineering",
+    "github-issues",
+    "task-tracking",
+    "project-management",
+    "pr",
+    "ci",
+    "fix",
+    "iteration"
+  ]
+}

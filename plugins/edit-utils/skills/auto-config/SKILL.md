@@ -1,4 +1,5 @@
 ---
+name: auto-config
 description: "Auto-detect project formatting tools and configure edit-utils settings"
 ---
 
