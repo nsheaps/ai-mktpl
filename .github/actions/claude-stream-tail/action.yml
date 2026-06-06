@@ -1,0 +1,223 @@
+name: 'Claude Stream Tail'
+description: |
+  Renders a Claude Code session as a colored chatroom view in the workflow
+  log. Picks a *.jsonl file under ~/.claude/projects/ (the Claude Agent
+  SDK's session store) and tails it through claude-stream (from
+  nsheaps/claude-utils).
+
+  The follow ends when claude-stream sees the stop sentinel (pass
+  `stop-sentinel`; pair with a Claude Code Stop hook that echoes the same
+  value into the session) or when `timeout-seconds` elapses. Note: the
+  SDK's `{"type":"result"}` message is NOT written to the session JSONL
+  -- it is an SDK stream message -- so it cannot be used as a terminal
+  marker by a JSONL tailer.
+
+  Two modes via `wait-for-new-session`:
+    - true (default, sidecar): wait for a JSONL that appears AFTER this
+      action starts. Safe alongside anthropics/claude-code-action via
+      qoomon/actions--parallel-steps; ignores any pre-existing JSONL on
+      persistent runners.
+    - false (post-hoc): pick the most recent JSONL regardless of age.
+      Use after the action ran so the just-completed session is rendered.
+
+  TEMPORARY LOCATION: this action will move to
+  nsheaps/github-actions/.github/actions/claude-stream-tail once stable.
+  Tracking: nsheaps/github-actions branch claude/stream-action-output-UtYyT.
+
+author: 'nsheaps'
+
+branding:
+  icon: 'message-circle'
+  color: 'green'
+
+inputs:
+  claude-utils-ref:
+    description: |
+      Git ref of nsheaps/claude-utils to install (provides claude-stream).
+      Any ref works: a tag (e.g. v0.12.14) or a branch. Currently a branch,
+      because the --exit-on-session-stop flag this action depends on is not
+      yet on a release tag.
+      TODO: pin to a release tag once claude-utils ships the flag.
+    required: false
+    default: 'claude/stream-action-output-UtYyT'
+  stop-sentinel:
+    description: |
+      Sentinel string passed to `claude-stream --exit-on-session-stop`.
+      claude-stream exits cleanly once it sees this string in the session
+      JSONL. Pair with a Claude Code Stop hook that echoes the same value.
+      Leave empty to disable stop detection (the timeout still bounds the
+      follow). Callers should pass a run-unique value so reviewed content
+      cannot false-trigger an early exit.
+    required: false
+    default: ''
+  timeout-seconds:
+    description: |
+      Safety ceiling: max seconds to wait for the session to start, and
+      max seconds to follow it. The action exits cleanly (success) on
+      timeout so it never fails the parallel block.
+      With `stop-sentinel` set, the follow normally ends the moment the
+      Stop hook fires -- this timeout is only the fallback. It MUST exceed
+      the longest expected Claude session, otherwise the follow is killed
+      before the session ends and the sentinel never gets a chance to
+      fire. Default 1200s (20 min).
+    required: false
+    default: '1200'
+  poll-interval-seconds:
+    description: 'How often to poll for a new session JSONL while waiting for it to appear.'
+    required: false
+    default: '1'
+  projects-dir:
+    description: 'Override for the Claude Agent SDK projects directory. Defaults to $HOME/.claude/projects.'
+    required: false
+    default: ''
+  wait-for-new-session:
+    description: 'true = sidecar mode (only pick JSONL files created after this action starts); false = post-hoc mode (pick the most recent JSONL regardless of age).'
+    required: false
+    default: 'true'
+
+runs:
+  using: 'composite'
+  steps:
+    # Set the start marker as the VERY FIRST thing so it predates any
+    # competing process writing under ~/.claude/projects. In sidecar mode
+    # alongside claude-code-action via qoomon parallel-steps, both children
+    # start concurrently -- if we marked AFTER our claude-utils install,
+    # the action's SDK could write its first JSONL line before our marker,
+    # and the subsequent `find -newer` would exclude it, hanging the
+    # sidecar for the full timeout.
+    - name: Stamp start marker (must be first)
+      shell: bash
+      run: touch "${RUNNER_TEMP}/claude-stream-tail.start"
+
+    - name: Install claude-stream from nsheaps/claude-utils
+      shell: bash
+      env:
+        REF: ${{ inputs.claude-utils-ref }}
+      run: |
+        set -euo pipefail
+        REPO_DIR="${RUNNER_TEMP}/claude-utils"
+        if [ ! -d "$REPO_DIR" ]; then
+          git clone --depth 1 --branch "$REF" \
+            https://github.com/nsheaps/claude-utils.git "$REPO_DIR"
+        fi
+        echo "$REPO_DIR/bin" >> "$GITHUB_PATH"
+
+    - name: Tail session JSONL through claude-stream
+      shell: bash
+      env:
+        TIMEOUT_SECONDS: ${{ inputs.timeout-seconds }}
+        POLL_INTERVAL_SECONDS: ${{ inputs.poll-interval-seconds }}
+        PROJECTS_DIR_OVERRIDE: ${{ inputs.projects-dir }}
+        WAIT_FOR_NEW: ${{ inputs.wait-for-new-session }}
+        STOP_SENTINEL: ${{ inputs.stop-sentinel }}
+      run: |
+        set -euo pipefail
+
+        PROJECTS_DIR="${PROJECTS_DIR_OVERRIDE:-$HOME/.claude/projects}"
+        mkdir -p "$PROJECTS_DIR"
+
+        # Sidecar mode (default): only pick JSONL files newer than the
+        # start marker (stamped in the FIRST action step, before anything
+        # else, so it predates any competing SDK write).
+        # Post-hoc mode (wait-for-new-session=false): drop the marker so
+        # the just-completed session (written before this step started)
+        # is picked.
+        START_MARKER="${RUNNER_TEMP}/claude-stream-tail.start"
+        # Defensive: ensure the marker exists. The "Stamp start marker"
+        # step above does this first, but a stale runner re-run might
+        # somehow miss it; touching again is a no-op if present.
+        [ -e "$START_MARKER" ] || touch "$START_MARKER"
+
+        if [ "${WAIT_FOR_NEW}" = "true" ]; then
+          echo "claude-stream-tail: sidecar mode -- watching $PROJECTS_DIR for a NEW session JSONL (timeout ${TIMEOUT_SECONDS}s)"
+          FIND_FILTER=(-newer "$START_MARKER")
+        else
+          echo "claude-stream-tail: post-hoc mode -- watching $PROJECTS_DIR for the most recent session JSONL (timeout ${TIMEOUT_SECONDS}s)"
+          FIND_FILTER=()
+        fi
+
+        START=$(date +%s)
+        SESSION_FILE=""
+
+        # DIAGNOSTIC: dump initial state.
+        echo "::group::claude-stream-tail diagnostics"
+        echo "HOME=$HOME"
+        echo "RUNNER_TEMP=$RUNNER_TEMP"
+        echo "PROJECTS_DIR=$PROJECTS_DIR"
+        echo "WAIT_FOR_NEW=$WAIT_FOR_NEW"
+        echo "TIMEOUT_SECONDS=$TIMEOUT_SECONDS"
+        echo "START_MARKER mtime: $(stat -c '%y' "$START_MARKER" 2>/dev/null || echo missing)"
+        echo "projects dir initial contents:"
+        find "$PROJECTS_DIR" -maxdepth 3 -type f 2>/dev/null | head -20 || echo "  (empty or missing)"
+        echo "command -v claude-stream: $(command -v claude-stream || echo NOT_FOUND)"
+        echo "::endgroup::"
+
+        while true; do
+          NOW=$(date +%s)
+          ELAPSED=$((NOW - START))
+          if [ "$ELAPSED" -ge "$TIMEOUT_SECONDS" ]; then
+            echo "claude-stream-tail: timed out after ${TIMEOUT_SECONDS}s with no session file" >&2
+            echo "::group::final state at timeout" >&2
+            find "$PROJECTS_DIR" -maxdepth 3 -type f -printf '%T@ %p\n' 2>/dev/null | sort -nr | head -20 >&2 || true
+            echo "::endgroup::" >&2
+            exit 0
+          fi
+          SESSION_FILE="$(find "$PROJECTS_DIR" -type f -name '*.jsonl' "${FIND_FILTER[@]}" -printf '%T@ %p\n' 2>/dev/null \
+            | sort -nr | head -1 | awk '{print $2}')"
+          if [ -n "$SESSION_FILE" ] && [ -f "$SESSION_FILE" ]; then
+            break
+          fi
+          # Every 10s while waiting, log what we DO see in the plausible
+          # JSONL write paths (might be in a different dir than $PROJECTS_DIR).
+          # Search roots constrained per CLAUDE.md (no full-/ walks).
+          if [ "$((ELAPSED % 10))" -eq 0 ] && [ "$ELAPSED" -gt 0 ]; then
+            echo "claude-stream-tail: still waiting (${ELAPSED}s) -- jsonl files in plausible paths:"
+            find "$HOME" /root /tmp /var/tmp -name '*.jsonl' -path '*/claude/*' -printf '  %T@ %p\n' 2>/dev/null | sort -nr | head -5 || true
+          fi
+          sleep "$POLL_INTERVAL_SECONDS"
+        done
+
+        echo "claude-stream-tail: tailing $SESSION_FILE"
+
+        # Remaining time budget for the follow phase.
+        NOW=$(date +%s)
+        REMAINING=$((TIMEOUT_SECONDS - (NOW - START)))
+        [ "$REMAINING" -lt 30 ] && REMAINING=30
+
+        # claude-stream --file does its own `tail -F`. --exit-on-session-stop
+        # makes it exit cleanly once the stop sentinel appears in the JSONL
+        # (a Stop hook echoes the sentinel; the hook's stdout is recorded
+        # into the session JSONL as a hook_success attachment). Without a
+        # sentinel there is no terminal record to key off and the follow
+        # would run until the timeout below.
+        #
+        # `timeout` with -k still caps the whole thing: if the Stop hook
+        # never fires (misconfig) the follow ends at REMAINING seconds
+        # rather than hanging. The main claude-code-action step is the
+        # source of truth for the job's success/failure.
+        cs_args=(--file "$SESSION_FILE")
+        if [ -n "${STOP_SENTINEL}" ]; then
+          cs_args+=(--exit-on-session-stop --stop-sentinel "${STOP_SENTINEL}")
+          echo "claude-stream-tail: will exit on session-stop sentinel"
+        else
+          echo "claude-stream-tail: no stop sentinel set -- follow bounded only by ${REMAINING}s timeout" >&2
+        fi
+
+        set +e
+        timeout -k 30 --signal=TERM "${REMAINING}" claude-stream "${cs_args[@]}"
+        STATUS=$?
+        set -e
+
+        # 124 = GNU timeout fired. Treat as success (do not fail the parallel
+        # block) -- claude-code-action governs the job's real outcome.
+        if [ "$STATUS" -eq 124 ]; then
+          echo "claude-stream-tail: follow phase hit ${REMAINING}s timeout" >&2
+          exit 0
+        fi
+        # SIGPIPE (141) is normal at end-of-stream; 0 is a clean session-stop.
+        if [ "$STATUS" -eq 141 ] || [ "$STATUS" -eq 0 ]; then
+          echo "claude-stream-tail: done"
+          exit 0
+        fi
+        echo "claude-stream-tail: claude-stream exited with status $STATUS (non-fatal)" >&2
+        exit 0

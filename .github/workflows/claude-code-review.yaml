@@ -41,6 +41,17 @@ jobs:
       id-token: write
       actions: read
 
+    # Run-unique stop sentinel. The Stop hook (registered in
+    # INPUT_SETTINGS_JSON below) echoes this string when Claude finishes;
+    # the hook's stdout is recorded into the session JSONL, and the
+    # claude-stream-tail sidecar exits on it. Run-scoped via run_id +
+    # run_attempt so the resolved value never appears in any repo file
+    # (only the ${{ }} template does) -- reviewed PR content therefore
+    # cannot false-trigger an early exit. References only github.* (no
+    # steps context), so a job-level env is valid here.
+    env:
+      STOP_SENTINEL: claude-stream-session-stop-${{ github.run_id }}-${{ github.run_attempt }}
+
     steps:
       - name: Checkout and authenticate as GitHub App
         id: auth
@@ -83,17 +94,31 @@ jobs:
         with:
           template-file: .github/prompts/claude-code-review.md
 
-      - name: Run Claude Code Review
+      # Runs claude-code-action and a live chatroom-view sidecar in parallel
+      # within a single job. The sidecar (claude-stream-tail) waits for the
+      # SDK to create its session JSONL under ~/.claude/projects/ and tails
+      # it through claude-stream (from nsheaps/claude-utils) so the workflow
+      # log shows a colored chatroom view as Claude works. The parallel
+      # action streams both substeps' output live into a "Concurrent logs"
+      # group (each line prefixed [N]) and also replays each substep's
+      # output in its own group at end.
+      #
+      # show_full_output: false on claude-code-action suppresses the raw
+      # JSON dump; live signal comes from the sidecar's chatroom rendering.
+      #
+      # The two multi-line inputs (settings JSON, prompt) cannot be
+      # interpolated naively into the embedded `steps: |` block because
+      # GitHub substitutes ${{ }} verbatim before qoomon re-parses, and
+      # multi-line substitution wrecks the embedded YAML's indentation.
+      # toJSON() encodes each as a single-line JSON-quoted string, which
+      # YAML's double-quoted scalar style then decodes back to the
+      # original multi-line value inside the embedded action's inputs.
+      - name: Run claude review + live chatroom (parallel)
         id: claude-review
-        uses: anthropics/claude-code-action@v1
+        uses: qoomon/actions--parallel-steps@v1
         env:
-          GH_TOKEN: '${{ steps.auth.outputs.token }}'
-          GITHUB_TOKEN: '${{ steps.auth.outputs.token }}'
-          # These are in addition to any parsed settings.json files
-          # Prefer this over claude_args, almost everything can be specified via settings json or env vars
-          # While Bash is allowed, the list here is passed directly to the agent, so explicitly defining them
-          # causes the agent to see those Bash commands as more relevant and will use them more often.
-          # Ref: https://code.claude.com/docs/en/settings
+          # Stored as job/step env so they can be referenced via env.X and
+          # then toJSON-encoded into the embedded YAML's single-line scalars.
           INPUT_SETTINGS_JSON: |
             {
               "permissions": {
@@ -165,6 +190,16 @@ jobs:
                 ]
               },
               "model": "opus",
+              "_HOOKS_COMMENT": "Stop hook echoes the run-unique sentinel when Claude finishes. The hook's stdout is recorded into the session JSONL as a hook_success attachment, which the claude-stream-tail sidecar detects to exit its tail cleanly instead of running to timeout. Without a registered Stop hook, the Stop event produces no JSONL record.",
+              "hooks": {
+                "Stop": [
+                  {
+                    "hooks": [
+                      { "type": "command", "command": "echo '${{ env.STOP_SENTINEL }}'" }
+                    ]
+                  }
+                ]
+              },
               "env": {
                 "GH_TOKEN": "${{ steps.auth.outputs.token }}",
                 "GITHUB_TOKEN": "${{ steps.auth.outputs.token }}",
@@ -177,39 +212,97 @@ jobs:
               }
             }
         with:
-          anthropic_api_key: ${{ secrets.REVIEW_ANTHROPIC_API_KEY || secrets.ANTHROPIC_API_KEY || '' }}
-          claude_code_oauth_token: ${{ (secrets.REVIEW_ANTHROPIC_API_KEY || secrets.ANTHROPIC_API_KEY) && '' || secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          # WARNING: PRINTS FULL JSON OUTPUT WHICH MAY INCLUDE SECRETS.
-          # ONLY USE IN PRIVATE ENVIRONMENTS.
-          show_full_output: true
-          # bug: https://github.com/anthropics/claude-code-action/issues/759
-          # won't find the past comments since it's looking for github-actions[bot], not the auth it uses to post the comment.
-          bot_id: ${{ steps.auth.outputs.user-id }}
-          bot_name: ${{ steps.auth.outputs.user-name }}
-          allowed_bots: 'github-actions[bot],renovate[bot],claude[bot],automation-nsheaps[bot],jack-nsheaps[bot],henry-nsheaps[bot],alex-nsheaps[bot]'
-          github_token: ${{ steps.auth.outputs.token }}
-          settings: ${{ env.INPUT_SETTINGS_JSON }}
-          additional_permissions: |
-            actions: read
-          # Prompt is loaded from external template file via interpolate-prompt action
-          prompt: ${{ steps.prompt.outputs.prompt }}
-          # Prefer using settings.json, but some are needed to be set here for the action
-          # to automatically enable the MCP servers. Placing anything with `mcp__github__` prefix will enable the github mcp server.
-          # See https://github.com/anthropics/claude-code-action/issues/723#issuecomment-3716307305
-          # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
-          # or https://docs.claude.com/en/docs/claude-code/cli-reference for available options
-          # Note: We intentionally do NOT include 'github_comment' (used for Claude's persistent "working on it" comment)
-          # or 'github_inline_comment' (used for inline comments outside of reviews) in the allowed tools / claude_args,
-          # to prevent Claude from posting persistent status comments or inline comments outside of proper reviews.
-          claude_args: >-
-            --allowedTools
-            mcp__github__github_support_docs_search,
-            mcp__github__get_pull_request,
-            mcp__github__get_pull_request_diff,
-            mcp__github__get_pull_request_files,
-            mcp__github__get_pull_request_review_comments,
-            mcp__github__get_pull_request_reviews,
-            mcp__github__get_pull_request_status,
-            mcp__github__create_pending_pull_request_review,
-            mcp__github__add_comment_to_pending_review,
-            mcp__github__submit_pending_pull_request_review
+          # Embedded steps for qoomon/actions--parallel-steps. The value
+          # below is a YAML literal scalar that the action re-parses as
+          # YAML internally.
+          #
+          # KEY TRICK: multi-line ${{ }} interpolation inside this scalar
+          # would break the embedded YAML's indentation. toJSON() wraps
+          # each multi-line value as a single-line JSON-quoted string with
+          # \n / \" escapes, which is a valid YAML double-quoted scalar.
+          # YAML decodes it back to the original multi-line content when
+          # qoomon re-parses, so the embedded action's `prompt:` /
+          # `settings:` inputs receive the original strings unmodified.
+          #
+          # TEMPORARY: claude-stream-tail is hosted locally
+          # (.github/actions/claude-stream-tail) while the workflow
+          # stabilizes. The canonical copy at nsheaps/github-actions does
+          # NOT yet exist on main; it lives only on branch
+          # claude/stream-action-output-UtYyT. Resolution sequence:
+          # (1) land the action on nsheaps/github-actions main with the
+          # same `wait-for-new-session` toggle, (2) SHA-pin it here, (3)
+          # delete this local copy.
+          steps: |
+            - id: review
+              uses: anthropics/claude-code-action@v1
+              env:
+                GH_TOKEN: '${{ steps.auth.outputs.token }}'
+                GITHUB_TOKEN: '${{ steps.auth.outputs.token }}'
+              with:
+                anthropic_api_key: ${{ secrets.REVIEW_ANTHROPIC_API_KEY || secrets.ANTHROPIC_API_KEY || '' }}
+                claude_code_oauth_token: ${{ (secrets.REVIEW_ANTHROPIC_API_KEY || secrets.ANTHROPIC_API_KEY) && '' || secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+                # Raw JSON dump suppressed; live signal comes from the
+                # chatroom sidecar below instead. Also removes the prior
+                # secret-leak hazard noted in the workflow's earlier
+                # `show_full_output: true` warning.
+                show_full_output: false
+                # bug: https://github.com/anthropics/claude-code-action/issues/759
+                # won't find the past comments since it's looking for github-actions[bot], not the auth it uses to post the comment.
+                bot_id: ${{ steps.auth.outputs.user-id }}
+                bot_name: ${{ steps.auth.outputs.user-name }}
+                allowed_bots: 'github-actions[bot],renovate[bot],claude[bot],automation-nsheaps[bot],jack-nsheaps[bot],henry-nsheaps[bot],alex-nsheaps[bot]'
+                github_token: ${{ steps.auth.outputs.token }}
+                # toJSON() here works because INPUT_SETTINGS_JSON is a STRING
+                # (env vars always are). For an object/array value, toJSON
+                # would emit a pretty-printed multi-line JSON and reintroduce
+                # the indentation problem -- coerce to string first if you
+                # ever need to substitute a non-string here.
+                settings: ${{ toJSON(env.INPUT_SETTINGS_JSON) }}
+                additional_permissions: |
+                  actions: read
+                # Prompt loaded from external template via interpolate-prompt
+                # action. toJSON-wrapped for safe single-line interpolation
+                # into qoomon's embedded steps YAML (see KEY TRICK above).
+                # Same string-only caveat as `settings:` -- if the prompt
+                # output were ever an object/array (it isn't; interpolate-prompt
+                # emits a string), toJSON would emit multi-line pretty JSON.
+                prompt: ${{ toJSON(steps.prompt.outputs.prompt) }}
+                # Prefer using settings.json, but some are needed to be set here for the action
+                # to automatically enable the MCP servers. Placing anything with `mcp__github__` prefix will enable the github mcp server.
+                # See https://github.com/anthropics/claude-code-action/issues/723#issuecomment-3716307305
+                # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
+                # or https://docs.claude.com/en/docs/claude-code/cli-reference for available options
+                # Note: We intentionally do NOT include 'github_comment' (used for Claude's persistent "working on it" comment)
+                # or 'github_inline_comment' (used for inline comments outside of reviews) in the allowed tools / claude_args,
+                # to prevent Claude from posting persistent status comments or inline comments outside of proper reviews.
+                claude_args: >-
+                  --allowedTools
+                  mcp__github__github_support_docs_search,
+                  mcp__github__get_pull_request,
+                  mcp__github__get_pull_request_diff,
+                  mcp__github__get_pull_request_files,
+                  mcp__github__get_pull_request_review_comments,
+                  mcp__github__get_pull_request_reviews,
+                  mcp__github__get_pull_request_status,
+                  mcp__github__create_pending_pull_request_review,
+                  mcp__github__add_comment_to_pending_review,
+                  mcp__github__submit_pending_pull_request_review
+
+            - id: chatroom
+              uses: ./.github/actions/claude-stream-tail
+              with:
+                # Sidecar mode: only pick session JSONL files newer than
+                # this step's start. Safe alongside claude-code-action --
+                # ignores any pre-existing JSONL on persistent runners.
+                wait-for-new-session: 'true'
+                # Exit the tail when the Stop hook's sentinel lands in the
+                # session JSONL, instead of running to the timeout. Same
+                # run-unique value the Stop hook (INPUT_SETTINGS_JSON
+                # above) echoes.
+                stop-sentinel: ${{ env.STOP_SENTINEL }}
+                # Safety ceiling only -- with the sentinel set, the follow
+                # ends when the review's Stop hook fires. Must exceed the
+                # longest review: run 26141683146's review ran 699s and a
+                # 600s ceiling killed the follow before the Stop hook
+                # could fire. 1200s (20 min) leaves ample margin.
+                timeout-seconds: '1200'
