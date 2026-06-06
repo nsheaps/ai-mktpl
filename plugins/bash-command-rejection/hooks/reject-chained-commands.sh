@@ -8,9 +8,9 @@
 #
 # Allowed patterns:
 # - || (error handling/fallback - this is acceptable)
-# - ; (sequential execution - blocked by separate check)
+# Allowed patterns:
+# - || (error handling/fallback - this is acceptable)
 # - Single commands with arguments
-
 set -euo pipefail
 
 # Find the library relative to the plugin root
