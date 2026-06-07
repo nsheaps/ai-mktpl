@@ -13,8 +13,8 @@
 
 - **Triggers**: Push to main or PR with `plugins/**` changes
 - **Jobs**:
-  - `auto-version-bump` (PR): Auto-bumps plugin versions and updates marketplace in PR branch. Respects manual bumps to higher versions. Uses commit message check for loop prevention.
-  - `bump-and-update-marketplace` (main): Safety net — bumps only plugins not already bumped in the PR, then updates marketplace.json
+  - `version-preview` (PR): **Preview only.** Computes the version bumps + marketplace updates that will happen on merge, posts a sticky PR comment, and emits `::notice` annotations on each affected `plugin.json`. Does NOT commit or push to the PR branch (this is what prevents cross-PR `marketplace.json` conflicts).
+  - `bump-and-update-marketplace` (main): The sole place bumps happen — auto-bumps changed plugins (respecting manual bumps to higher versions), regenerates `marketplace.json`, and commits both with `[skip ci]`.
 
 ### claude-code-review.yml
 

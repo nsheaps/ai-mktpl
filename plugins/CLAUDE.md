@@ -69,4 +69,4 @@ All known hook events and their compatibility with plugin `hooks.json`:
 
 ## Version Bumping
 
-Plugin versions are auto-bumped by CI when code changes are detected in a PR. Do not manually bump versions unless the auto-bump fails to detect changes.
+Plugin versions are auto-bumped by CI **on merge to `main`** when code changes are detected. PRs only show a preview (a sticky comment plus a `::notice` annotation on each affected `plugin.json`); they do not commit bumps. Do not manually bump versions unless the auto-bump fails to detect changes.

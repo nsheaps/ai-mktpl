@@ -34,129 +34,95 @@ concurrency:
   group: ${{ github.ref == 'refs/heads/main' && 'ci-cd-main' || format('cd-{0}', github.ref) }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
-env:
-  AUTO_BUMP_COMMIT_MSG: 'chore: auto-bump plugin versions and update marketplace'
-
 jobs:
-  # For PRs: Auto-bump versions and update marketplace in the PR branch.
-  # Pushes changes back to the PR branch (like lint auto-fix).
-  # Does NOT use [skip ci] so CI re-runs to validate the final state.
-  # Loop prevention: skips if latest commit is from a previous auto-bump.
-  # Shares concurrency group with CI lint to prevent concurrent pushes.
-  auto-version-bump:
+  # For PRs: PREVIEW ONLY. Computes the version bumps + marketplace updates that
+  # WILL happen on merge, but does NOT commit or push anything to the PR branch.
+  # Bumping versions and regenerating the shared marketplace.json inside PR
+  # branches caused constant cross-PR merge conflicts; the real bump now happens
+  # exactly once on merge to main (see bump-and-update-marketplace below).
+  # The preview surfaces two ways:
+  #   1. A sticky PR comment with the version table.
+  #   2. ::notice annotations on each affected plugin.json showing the pending bump.
+  # The bump runs in the working tree only to compute next versions; nothing is
+  # committed, so the working tree is discarded when the job ends.
+  version-preview:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
-    concurrency:
-      group: pr-autofix-${{ github.head_ref }}
-      cancel-in-progress: false
     permissions:
-      contents: write
+      contents: read
       pull-requests: write
     steps:
-      - name: Checkout and authenticate as GitHub App
-        id: auth
-        uses: nsheaps/github-actions/.github/actions/checkout-as-app@603052841cd49b9fdc99bc32979ff9c45c9b669e # checkout-as-app@main
+      - name: Checkout PR head
+        uses: actions/checkout@v6
         with:
-          app-id: ${{ secrets.AUTOMATION_GITHUB_APP_ID }}
-          private-key: ${{ secrets.AUTOMATION_GITHUB_APP_PRIVATE_KEY }}
           ref: ${{ github.head_ref }}
-          fetch-depth: '0'
-
-      - name: Check if latest commit is auto-bump (loop prevention)
-        id: check-skip
-        run: |
-          LAST_MSG=$(git log -1 --format='%s')
-          if [[ "$LAST_MSG" == "$AUTO_BUMP_COMMIT_MSG" ]]; then
-            echo "skip=true" >> $GITHUB_OUTPUT
-            echo "Latest commit is from auto-bump, skipping to prevent loop"
-          else
-            echo "skip=false" >> $GITHUB_OUTPUT
-          fi
+          fetch-depth: 0
 
       - name: Fetch base branch and tags
-        if: steps.check-skip.outputs.skip != 'true'
         env:
           BASE_REF: ${{ github.base_ref }}
         run: |
           git fetch origin "$BASE_REF":refs/remotes/origin/"$BASE_REF"
           git fetch origin --tags
 
-      - name: Resolve change-detection base for PR
-        if: steps.check-skip.outputs.skip != 'true'
-        id: resolve-base
-        env:
-          BASE_REF: ${{ github.base_ref }}
-        run: |
-          # For PRs, always diff against the base branch to detect only THIS PR's changes.
-          # Using cd/last-release here is wrong — if main advanced past the tag,
-          # the diff would include changes from other merged PRs, causing incorrect bumps.
-          # See: https://github.com/nsheaps/ai-mktpl/issues/249
-          echo "change-base=origin/$BASE_REF" >> $GITHUB_OUTPUT
-          echo "Using PR base branch 'origin/$BASE_REF' for change detection"
-
       - name: mise install -y
-        if: steps.check-skip.outputs.skip != 'true'
         uses: jdx/mise-action@v4
         with:
           install: true
           cache: true
 
       - name: Install yarn dependencies
-        if: steps.check-skip.outputs.skip != 'true'
         run: yarn install --immutable
 
-      - name: Auto-bump changed plugins
-        if: steps.check-skip.outputs.skip != 'true'
+      - name: Compute version bump preview
         id: bump
         shell: bash
         env:
-          CHANGE_BASE: ${{ steps.resolve-base.outputs.change-base }}
-          VERSION_BASE: ${{ github.base_ref }}
+          BASE_REF: ${{ github.base_ref }}
         run: |
-          OUTPUT=$(mise run auto-bump-plugins "--change-base=$CHANGE_BASE" "--version-base=$VERSION_BASE")
+          # Diff against the PR base branch so only THIS PR's changes are detected.
+          # Using cd/last-release here would be wrong — if main advanced past the
+          # tag, the diff would include other merged PRs' changes.
+          # See: https://github.com/nsheaps/ai-mktpl/issues/249
+          OUTPUT=$(mise run auto-bump-plugins "--change-base=origin/$BASE_REF" "--version-base=$BASE_REF")
 
-          # Always regenerate marketplace (idempotent, picks up new plugins too)
-          mise run update-marketplace
+          echo "bumps=$(echo "$OUTPUT" | jq -c '.bumps')" >> "$GITHUB_OUTPUT"
 
-          # Lint everything
-          mise run lint
-
-          # Check if any files changed
-          if [ -n "$(git status --porcelain)" ]; then
-            echo "has-changes=true" >> $GITHUB_OUTPUT
-          else
-            echo "has-changes=false" >> $GITHUB_OUTPUT
-          fi
-
-          # Save report for PR comment
           {
             echo "report-md<<REPORT_MD_EOF"
             echo "$OUTPUT" | jq -r '.report_md'
             echo "REPORT_MD_EOF"
-          } >> $GITHUB_OUTPUT
+          } >> "$GITHUB_OUTPUT"
 
-      - name: Commit and push all changes at once
-        if: steps.check-skip.outputs.skip != 'true' && steps.bump.outputs.has-changes == 'true'
-        uses: stefanzweifel/git-auto-commit-action@v7
-        with:
-          commit_message: ${{ env.AUTO_BUMP_COMMIT_MSG }}
-          commit_user_name: ${{ steps.auth.outputs.user-name }}
-          commit_user_email: ${{ steps.auth.outputs.user-email }}
+      - name: Annotate plugin.json files with pending version bump
+        if: steps.bump.outputs.bumps != '' && steps.bump.outputs.bumps != '[]'
+        env:
+          BUMPS: ${{ steps.bump.outputs.bumps }}
+        run: |
+          echo "$BUMPS" | jq -c '.[]' | while read -r row; do
+            name=$(echo "$row" | jq -r '.name')
+            path=$(echo "$row" | jq -r '.path')
+            base=$(echo "$row" | jq -r '.base')
+            new=$(echo "$row" | jq -r '.new')
+            line=$(grep -nE '"version"[[:space:]]*:' "$path" | head -1 | cut -d: -f1)
+            echo "::notice file=${path},line=${line:-1},title=Pending version bump::${name}: ${base} → ${new} will be applied automatically when this PR merges to main"
+          done
 
-      - name: Post version status comment
-        if: steps.check-skip.outputs.skip != 'true'
+      - name: Post version preview comment
         uses: marocchino/sticky-pull-request-comment@v3.0.4
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           header: 'plugin-versions'
           message: |
-            ### Plugin Version Status
-            _Versions are auto-bumped in PRs. Manual bumps to higher versions are preserved._
+            ### Plugin Version Preview
+
+            _Preview only — plugin versions and `marketplace.json` are bumped automatically on merge to `main`, **not** in this PR. Manual bumps to higher versions are preserved. See the file annotations for the pending change on each `plugin.json`._
 
             ${{ steps.bump.outputs.report-md }}
 
-  # For main: Bump only plugins that weren't already bumped in the PR,
-  # then update marketplace metadata.
+  # For main: the SOLE place bumps + marketplace updates are committed.
+  # Auto-bumps each changed plugin (patch), preserving any manual bumps to a
+  # higher version, then regenerates and commits marketplace metadata.
   bump-and-update-marketplace:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'

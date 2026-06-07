@@ -81,32 +81,30 @@ Explicitly excluded (to prevent infinite loops):
 
 Group: `cd-${{ github.ref }}` with cancel-in-progress.
 
-### Job: preview-version-bump (PRs only)
+### Job: version-preview (PRs only)
 
-1. Checkout with full history (`fetch-depth: 0`)
-2. Fetch base branch
-3. Run `mise run detect-plugin-changes` via composite action
-4. Post a sticky PR comment (`marocchino/sticky-pull-request-comment`) with header `plugin-versions` showing a markdown table of plugin name, current version, bump type, and new version.
+**Preview only — never commits or pushes to the PR branch.** Permissions: `contents: read`, `pull-requests: write` (no GitHub App needed).
+
+1. Checkout the PR head with full history (`fetch-depth: 0`)
+2. Fetch base branch and tags
+3. Run `mise run auto-bump-plugins --change-base=origin/<base> --version-base=<base>` in the working tree (changes are discarded). Its JSON output includes a `bumps` array of `{name, path, base, new, action}` and a `report_md` table.
+4. Emit a `::notice` annotation on each affected `plugin.json` (`file=<path>,line=<version line>`) describing the pending bump.
+5. Post a sticky PR comment (`marocchino/sticky-pull-request-comment`, header `plugin-versions`) with the `report_md` table.
 
 ### Job: bump-and-update-marketplace (main only)
 
-Authentication: Uses a GitHub App (not GITHUB_TOKEN) so that pushed commits can trigger other workflows.
+Authentication: Uses a GitHub App (not GITHUB_TOKEN) so that pushed commits can trigger other workflows. This is the **only** place version bumps + marketplace updates are committed.
 
 Steps in order:
 
 1. **Checkout** with full history, `persist-credentials: false`
 2. **GitHub App auth** for push access
 3. **Install mise tools** and **yarn dependencies**
-4. **Detect changes** (`base-ref: HEAD~1`) -- The `detect-plugin-changes` action runs `mise run detect-plugin-changes` which:
+4. **Detect + bump changed plugins** -- `mise run auto-bump-plugins` (base: the `cd/last-release` tag) which:
    - Iterates `plugins/*`
-   - Diffs each plugin dir against `HEAD~1`
-   - Excludes `CHANGELOG.md` and `plugin.json` from diff consideration
-   - Outputs JSON with: `has_changes`, `plugins` (space-separated names), `plugins_json`, `report_md`
-5. **Bump versions** (if changes detected) -- Loops over changed plugin names, runs `yarn exec release-it --ci` in each plugin dir. This:
-   - Reads current version from `plugin.json`
-   - Applies patch increment
-   - Writes new version back to `plugin.json`
-   - Runs `prettier --write` on plugin.json (via `after:bump` hook)
+   - Diffs each plugin dir against the base, excluding `CHANGELOG.md` and `plugin.json`
+   - For each changed plugin, runs `yarn exec release-it --ci` (patch increment, writes `plugin.json`, runs prettier via `after:bump`) unless it was already manually bumped above the base
+   - Outputs JSON with `has_bumps`, `bumped`, `skipped`, `report_md`, `bumps`
 6. **Lint** -- `mise run lint` ensures everything is formatted
 7. **Commit version bumps** -- `chore: bump plugin versions [skip ci]`, targeting `plugins/*/.claude-plugin/plugin.json` and `plugins/*/CHANGELOG.md`, with `skip_push: true`
 8. **Update marketplace** -- `mise run update-marketplace` which:

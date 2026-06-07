@@ -42,6 +42,7 @@ echo "Version comparison base: $VERSION_BASE" >&2
 
 BUMPED_PLUGINS=()
 SKIPPED_PLUGINS=()
+BUMP_ENTRIES=()
 REPORT_MD="| Plugin | Base | Current | Action |\n|---|---|---|---|"
 
 for plugin_dir in plugins/*; do
@@ -77,6 +78,10 @@ for plugin_dir in plugins/*; do
       echo "✅ $PLUGIN_NAME: already bumped $BASE_VERSION → $HEAD_VERSION (keeping)" >&2
       SKIPPED_PLUGINS+=("$PLUGIN_NAME")
       REPORT_MD="$REPORT_MD\n| $PLUGIN_NAME | $BASE_VERSION | $HEAD_VERSION | Already bumped |"
+      BUMP_ENTRIES+=("$(jq -nc \
+        --arg name "$PLUGIN_NAME" --arg path "$PLUGIN_JSON" \
+        --arg base "$BASE_VERSION" --arg new "$HEAD_VERSION" --arg action "already-bumped" \
+        '{name:$name,path:$path,base:$base,new:$new,action:$action}')")
       continue
     fi
   fi
@@ -91,6 +96,10 @@ for plugin_dir in plugins/*; do
   NEW_VERSION=$(jq -r '.version' "$PLUGIN_JSON")
   BUMPED_PLUGINS+=("$PLUGIN_NAME")
   REPORT_MD="$REPORT_MD\n| $PLUGIN_NAME | $BASE_VERSION | $NEW_VERSION | Auto-bumped |"
+  BUMP_ENTRIES+=("$(jq -nc \
+    --arg name "$PLUGIN_NAME" --arg path "$PLUGIN_JSON" \
+    --arg base "$BASE_VERSION" --arg new "$NEW_VERSION" --arg action "auto-bumped" \
+    '{name:$name,path:$path,base:$base,new:$new,action:$action}')")
 done
 
 # Output JSON result
@@ -99,14 +108,23 @@ if [ ${#BUMPED_PLUGINS[@]} -gt 0 ]; then
   HAS_BUMPS="true"
 fi
 
+# Combine per-plugin entries (auto-bumped + already-bumped) into a JSON array.
+if [ ${#BUMP_ENTRIES[@]} -gt 0 ]; then
+  BUMPS_JSON=$(printf '%s\n' "${BUMP_ENTRIES[@]}" | jq -sc '.')
+else
+  BUMPS_JSON='[]'
+fi
+
 jq -n \
   --argjson has_bumps "$HAS_BUMPS" \
   --arg bumped "${BUMPED_PLUGINS[*]:-}" \
   --arg skipped "${SKIPPED_PLUGINS[*]:-}" \
   --arg report_md "$(printf '%b' "$REPORT_MD")" \
+  --argjson bumps "$BUMPS_JSON" \
   '{
     has_bumps: $has_bumps,
     bumped: $bumped,
     skipped: $skipped,
-    report_md: $report_md
+    report_md: $report_md,
+    bumps: $bumps
   }'
