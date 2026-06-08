@@ -123,6 +123,10 @@ ts() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 # --- Token refresh (delegates to the plugin's own token-check.sh) ------------
 last_token_err=""
 ensure_token() {
+  # Snapshot expiry before refresh so we can report when token-check actually
+  # rotated the token (it runs --quiet, so it won't announce the refresh itself).
+  local before after
+  before="$(jq -r '.expires_at // empty' "$META_FILE" 2>/dev/null || true)"
   if [ -x "$SCRIPT_DIR/token-check.sh" ]; then
     local err
     err="$("$SCRIPT_DIR/token-check.sh" --sync --quiet 2>&1)" || {
@@ -132,6 +136,13 @@ ensure_token() {
         last_token_err="$err"
       fi
     }
+  fi
+  after="$(jq -r '.expires_at // empty' "$META_FILE" 2>/dev/null || true)"
+  if [ -n "$after" ] && [ "$after" != "$before" ]; then
+    local slug
+    slug="$(jq -r '.app_slug // empty' "$META_FILE" 2>/dev/null || true)"
+    echo "[$(ts)] [token] refreshed${slug:+ as ${slug}[bot]} (expires ${after})"
+    last_token_err=""   # a successful refresh clears any prior error state
   fi
   [ -s "$TOKEN_FILE" ]   # success only if a non-empty token exists
 }

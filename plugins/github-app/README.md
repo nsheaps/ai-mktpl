@@ -128,7 +128,11 @@ Output format (stdout, one line per event):
 [<created_at>] <EventType> by <actor> on <owner/repo> (id <event_id>)
 ```
 
-Status lines (`[start]`, `[baseline]`, `[token]`, `[error]`) are also written to stdout. Errors (rate limit, auth, token-refresh failure) are emitted and de-duplicated so a persistent failure does not spam every poll. The cursor persists across runs, so restarting resumes from the last seen event.
+Status lines are also written to stdout: `[start]`, `[baseline]`, `[token]` (emitted when `token-check.sh` actually rotates the token), and `[error]`. Errors (rate limit, auth, token-refresh failure) are emitted and de-duplicated so a persistent failure does not spam every poll. The cursor persists across runs, so restarting resumes from the last seen event.
+
+### Known limitations
+
+- **Single-page polling.** Each poll fetches one page (`--per-page`, default 50) and advances the cursor to that page's newest id. If more than `per_page` new events land in a single interval, the overflow (oldest) events are skipped. At the default 15s interval this is very unlikely; for high-traffic feeds, lower the interval or raise `--per-page`. Pagination is intentionally omitted to keep the monitor simple.
 
 ## On-disk Layout
 
