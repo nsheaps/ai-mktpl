@@ -135,13 +135,13 @@ the resulting variables to one or more targets.
 
 ### `secrets:` vs `opExec:` — which to use
 
-| Aspect              | `secrets:`                                  | `opExec:`                                                       |
-| ------------------- | ------------------------------------------- | -------------------------------------------------------------- |
-| Granularity         | One field per entry                         | Every field of the whole item                                  |
-| Reference format    | `op://vault/item/field` (includes field)    | `op://vault/item` (no field)                                   |
-| Env var name        | You choose it (`envVar`)                     | Derived from each field label (UPPER_SNAKE_CASE)               |
-| Recursive `op://`   | No — value is taken literally               | **Yes** — `op://` refs in field values are resolved (depth 5)  |
-| Underlying tool     | `op read`                                    | `op-exec`                                                      |
+| Aspect            | `secrets:`                               | `opExec:`                                                     |
+| ----------------- | ---------------------------------------- | ------------------------------------------------------------- |
+| Granularity       | One field per entry                      | Every field of the whole item                                 |
+| Reference format  | `op://vault/item/field` (includes field) | `op://vault/item` (no field)                                  |
+| Env var name      | You choose it (`envVar`)                 | Derived from each field label (UPPER_SNAKE_CASE)              |
+| Recursive `op://` | No — value is taken literally            | **Yes** — `op://` refs in field values are resolved (depth 5) |
+| Underlying tool   | `op read`                                | `op-exec`                                                     |
 
 Use `secrets:` when you need a single value under a name you control. Use
 `opExec:` when you want to manage many env vars as fields on a 1Password item,
@@ -150,21 +150,21 @@ described below.
 
 ### opExec Configuration
 
-| Field             | Required | Description                                                                 |
-| ----------------- | -------- | --------------------------------------------------------------------------- |
-| `opExec.items`    | yes      | List of `op://vault/item` references whose fields become env vars           |
-| `opExec.targets`  | no       | List of targets to write to (default: `sessionStartBashEnv` + `userSettings`) |
+| Field            | Required | Description                                                                   |
+| ---------------- | -------- | ----------------------------------------------------------------------------- |
+| `opExec.items`   | yes      | List of `op://vault/item` references whose fields become env vars             |
+| `opExec.targets` | no       | List of targets to write to (default: `sessionStartBashEnv` + `userSettings`) |
 
 ### opExec Targets
 
 `opExec.targets` is a **list** — multiple targets are allowed and all selected
 targets receive every resolved variable.
 
-| Target                | File written                              | Scope                                          | Persists across sessions?       | Non-bash tools?            |
-| --------------------- | ----------------------------------------- | ---------------------------------------------- | ------------------------------- | -------------------------- |
-| `sessionStartBashEnv` | Appends to `$CLAUDE_ENV_FILE`             | Bash tool calls only                           | No — session-scoped             | No                         |
-| `envLocal`            | Upserts to `envLocal.path` (see below)    | Any consumer that sources the file (e.g. direnv) | Yes — gitignored, idempotent  | Yes — when sourced         |
-| `userSettings`        | `~/.claude/settings.local.json` → `.env`  | All Claude Code tools                          | Yes — gitignored                | Yes                        |
+| Target                | File written                             | Scope                                            | Persists across sessions?    | Non-bash tools?    |
+| --------------------- | ---------------------------------------- | ------------------------------------------------ | ---------------------------- | ------------------ |
+| `sessionStartBashEnv` | Appends to `$CLAUDE_ENV_FILE`            | Bash tool calls only                             | No — session-scoped          | No                 |
+| `envLocal`            | Upserts to `envLocal.path` (see below)   | Any consumer that sources the file (e.g. direnv) | Yes — gitignored, idempotent | Yes — when sourced |
+| `userSettings`        | `~/.claude/settings.local.json` → `.env` | All Claude Code tools                            | Yes — gitignored             | Yes                |
 
 When `opExec.targets` is omitted, the default is **both** `sessionStartBashEnv`
 and `userSettings` — variables are available in bash tool calls and to all other
@@ -246,10 +246,10 @@ The `envLocal:` block configures the file used by the `envLocal` target (and by
 `secrets:` entries that use `target: envLocal`). It is only consulted when
 `envLocal` is selected as a target.
 
-| Field                  | Default                                                                              | Description                                                                                                                                                              |
-| ---------------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `envLocal.path`        | `$AGENT_HOME_DIR/.env.local` if `AGENT_HOME_DIR` is set, else `$CLAUDE_PROJECT_DIR/.env.local` | Path to the shell-sourceable `.env.local` file (`export K=v` lines). Not truncated each session — uses idempotent replace-or-append.                       |
-| `envLocal.sourceChain` | `$AGENT_HOME_DIR/.env` if `AGENT_HOME_DIR` is set, else unset (no secondary source line) | Path to a **secondary** file chained in via `source <path>` (added to `$CLAUDE_ENV_FILE`). Sentinels: `none` (alias `false`) disables only the secondary chain; `self` points the secondary at `envLocal.path` (a no-op, since that file is already chained). |
+| Field                  | Default                                                                                        | Description                                                                                                                                                                                                                                                   |
+| ---------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `envLocal.path`        | `$AGENT_HOME_DIR/.env.local` if `AGENT_HOME_DIR` is set, else `$CLAUDE_PROJECT_DIR/.env.local` | Path to the shell-sourceable `.env.local` file (`export K=v` lines). Not truncated each session — uses idempotent replace-or-append.                                                                                                                          |
+| `envLocal.sourceChain` | `$AGENT_HOME_DIR/.env` if `AGENT_HOME_DIR` is set, else unset (no secondary source line)       | Path to a **secondary** file chained in via `source <path>` (added to `$CLAUDE_ENV_FILE`). Sentinels: `none` (alias `false`) disables only the secondary chain; `self` points the secondary at `envLocal.path` (a no-op, since that file is already chained). |
 
 > **Note:** The `envLocal.path` file is **always** chained into `$CLAUDE_ENV_FILE`
 > on its first write of the session (1pass writes secrets there, so it sources it
