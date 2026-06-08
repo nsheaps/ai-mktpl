@@ -175,10 +175,11 @@ tools, for the current session and onward. `envLocal` is opt-in.
   Only bash tool calls inherit it.
 - **`envLocal`** — Upserts each variable into the `envLocal.path` file using
   replace-or-append semantics (no truncation), so re-runs and other sources do
-  not accumulate duplicates. On its first write of the session the plugin also
-  chains the file into `$CLAUDE_ENV_FILE` (see `envLocal.sourceChain`). Intended
-  for setups where a repo-templated `.env` sources `.env.local` so direnv and
-  other consumers pick the vars up. The file is gitignored by the agent repo.
+  not accumulate duplicates. On its first write of the session the plugin chains
+  `envLocal.path` into `$CLAUDE_ENV_FILE` (always), plus an optional secondary
+  file configured via `envLocal.sourceChain`. Intended for setups where a
+  repo-templated `.env` sources `.env.local` so direnv and other consumers pick
+  the vars up. The file is gitignored by the agent repo.
 - **`userSettings`** — Writes the variables into the `.env` block of
   `~/.claude/settings.local.json`, which is gitignored and read by all Claude
   Code tools (not just bash). Persists across sessions.
@@ -248,7 +249,16 @@ The `envLocal:` block configures the file used by the `envLocal` target (and by
 | Field                  | Default                                                                              | Description                                                                                                                                                              |
 | ---------------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `envLocal.path`        | `$AGENT_HOME_DIR/.env.local` if `AGENT_HOME_DIR` is set, else `$CLAUDE_PROJECT_DIR/.env.local` | Path to the shell-sourceable `.env.local` file (`export K=v` lines). Not truncated each session — uses idempotent replace-or-append.                       |
-| `envLocal.sourceChain` | `$AGENT_HOME_DIR/.env` if `AGENT_HOME_DIR` is set, else unset (no source line)      | Path that the plugin appends as `source <path>` to `$CLAUDE_ENV_FILE`. Use the literal `self` to source `envLocal.path` directly from `$CLAUDE_ENV_FILE`.              |
+| `envLocal.sourceChain` | `$AGENT_HOME_DIR/.env` if `AGENT_HOME_DIR` is set, else unset (no secondary source line) | Path to a **secondary** file chained in via `source <path>` (added to `$CLAUDE_ENV_FILE`). Sentinels: `none` (alias `false`) disables only the secondary chain; `self` points the secondary at `envLocal.path` (a no-op, since that file is already chained). |
+
+> **Note:** The `envLocal.path` file is **always** chained into `$CLAUDE_ENV_FILE`
+> on its first write of the session (1pass writes secrets there, so it sources it
+> unconditionally). `envLocal.sourceChain` only controls an _additional, secondary_
+> file — typically a repo-templated `$AGENT_HOME_DIR/.env` that itself `source`s
+> `.env.local` for direnv and other consumers. The secondary file is sourced
+> guarded (its absence is a silent no-op), whereas the primary `.env.local` is
+> sourced unguarded. Setting `sourceChain: none` therefore disables the secondary
+> chain but does **not** stop `.env.local` itself from being sourced.
 
 The agent repo is responsible for gitignoring `.env.local` (and `.env` if used)
 and for wiring up the consumer-side `source` of the file.
