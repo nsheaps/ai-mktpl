@@ -9,6 +9,5 @@
   },
   "homepage": "https://github.com/nsheaps/.ai/tree/main/plugins/bash-command-rejection",
   "repository": "https://github.com/nsheaps/.ai",
-  "keywords": ["bash", "security", "hooks", "permissions", "chaining"],
-  "hooks": "./hooks/hooks.json"
+  "keywords": ["bash", "security", "hooks", "permissions", "chaining"]
 }
