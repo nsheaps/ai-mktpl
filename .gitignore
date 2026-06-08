@@ -86,3 +86,6 @@ bin/.local/
 *.bak
 *.backup
 .claude/ralph-loop.local.md
+
+# Per-task working notes / plans (session-scoped, not shared)
+.claude/tasks/

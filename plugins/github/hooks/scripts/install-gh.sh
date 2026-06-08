@@ -43,6 +43,7 @@ _wait_for_shared_lib() {
 _wait_for_shared_lib "plugin-config-read.sh"
 _wait_for_shared_lib "tool-install.sh"
 _wait_for_shared_lib "hook-logging.sh"
+_wait_for_shared_lib "env-file.sh"
 
 # shellcheck source=/dev/null
 source "$SHARED_LIB_DIR/plugin-config-read.sh"
@@ -50,6 +51,8 @@ source "$SHARED_LIB_DIR/plugin-config-read.sh"
 source "$SHARED_LIB_DIR/tool-install.sh"
 # shellcheck source=/dev/null
 source "$SHARED_LIB_DIR/hook-logging.sh"
+# shellcheck source=/dev/null
+source "$SHARED_LIB_DIR/env-file.sh"
 # --- Guards ---
 
 plugin_is_enabled || { hook_log "plugin disabled, skipping"; hook_respond; exit 0; }
@@ -157,30 +160,37 @@ do_install() {
 
   # --- Set GH_HOST and GH_REPO so regular gh subcommands work in web sessions ---
   # In web sessions the git remote is a local proxy, so gh can't infer the
-  # GitHub host or repo.  Setting these env vars fixes that globally.
+  # GitHub host or repo from it. Exporting these env vars fixes that.
+  #
+  # Gated to web sessions (CLAUDE_CODE_REMOTE) on purpose: in a local session
+  # gh infers host/repo from the cwd's real remote, and setting GH_REPO there
+  # would override that for the whole session (e.g. after cd'ing elsewhere).
   # See: https://cli.github.com/manual/gh_help_environment
+  if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+    return 0
+  fi
+
   hook_log_step "env-vars" "Configuring GH_HOST and GH_REPO for web session"
 
   if [ -z "${GH_HOST:-}" ]; then
     export GH_HOST="github.com"
     if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
-      echo 'export GH_HOST="github.com"' >> "$CLAUDE_ENV_FILE"
+      env_file_upsert_export "$CLAUDE_ENV_FILE" "GH_HOST" "github.com"
     fi
     hook_log "Set GH_HOST=github.com"
   fi
 
   if [ -z "${GH_REPO:-}" ]; then
-    # Try to infer owner/repo from the git remote URL. Strip a trailing
-    # ".git" first, then extract the trailing "owner/repo" segment. (sed -E
-    # is POSIX ERE and has no non-greedy quantifier, so it can't strip the
-    # suffix in a single pass.)
+    # Infer owner/repo from the git remote URL. Strip a trailing ".git" first,
+    # then extract the trailing "owner/repo" segment. (sed -E is POSIX ERE and
+    # has no non-greedy quantifier, so it can't strip the suffix in one pass.)
     local repo_slug=""
     repo_slug="$(git remote get-url origin 2>/dev/null \
       | sed -E -e 's#\.git$##' -e 's#.*[:/]([^/]+/[^/]+)$#\1#' 2>/dev/null || true)"
     if [ -n "$repo_slug" ]; then
       export GH_REPO="$repo_slug"
       if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
-        echo "export GH_REPO=\"$repo_slug\"" >> "$CLAUDE_ENV_FILE"
+        env_file_upsert_export "$CLAUDE_ENV_FILE" "GH_REPO" "$repo_slug"
       fi
       hook_log "Set GH_REPO=$repo_slug"
     else
