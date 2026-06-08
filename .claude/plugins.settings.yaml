@@ -30,15 +30,24 @@ edit-utils:
   #   userSettingsJson  — write to ~/.claude/settings.json env block (user-global, not committed)
   secrets:
     - envVar: BRAINTRUST_API_KEY
-      reference: 'op://AI-Jack/Braintrust/api-key'
+      reference: 'op://Agent-Jack/Braintrust/api-key'
       target: userSettingsJson
   # Expose entire 1Password item as environment variables via op-exec.
   # All STRING/CONCEALED fields in the item become env vars
   # (field labels → UPPER_SNAKE_CASE). op:// references in field values
   # are resolved recursively.
+  # The ENVIRONMENT aggregator item carries Jack's full env, including the
+  # GitHub App credentials (GITHUB_APP_ID / GITHUB_INSTALLATION_ID /
+  # GITHUB_APP_PRIVATE_KEY) the github-app plugin's SessionStart hook reads
+  # to mint installation tokens and commit as jack-nsheaps[bot].
+  #
+  # Vault: Agent-Jack. The 1Password service account provisioned for these
+  # sessions can read Agent-Jack / Agent-Alex / Agent-Henry — NOT AI-Jack.
+  # The earlier AI-Jack references silently resolved to nothing, so github-app
+  # never received credentials and fell back to the injected PAT.
   opExec:
     items:
-      - 'op://AI-Jack/ENVIRONMENT'
+      - 'op://Agent-Jack/ENVIRONMENT'
     targets:
       - sessionStartBashEnv
       - userSettings
