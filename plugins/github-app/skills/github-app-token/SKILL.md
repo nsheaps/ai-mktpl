@@ -202,5 +202,9 @@ rm -rf ~/.agents/<name>/.config/github-token* ~/.agents/<name>/.config/github-ap
 
 ## Related
 
+- **`github-app-session-env`** skill — manually reproduce the SessionStart env
+  wiring (PEM, runtime env file, `CLAUDE_ENV_FILE`, `GH_CONFIG_DIR` isolation)
+- **`github-app-git-identity`** skill — manually configure the bot git identity
+  and the `gh auth git-credential` helper
 - **[github](../github)** plugin — GitHub CLI and general authentication skills
 - The `github-auth` skill covers all auth methods

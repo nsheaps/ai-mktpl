@@ -10,6 +10,7 @@ GitHub App installation tokens expire after 1 hour. This plugin generates tokens
 - **PreToolUse hook**: Debounced/throttled token validity checks with smart sync/async refresh
 - **Git credential helper**: Seamless `git push` / `gh` auth via shared token file
 - **Per-agent isolation**: All files written under `$CLAUDE_PLUGIN_DATA/` — each agent automatically gets its own isolated directory
+- **Manual-operation skills**: Every hook operation (token lifecycle, session env wiring, bot git identity) has a skill so it can be reproduced by hand when a hook doesn't run
 - **Authentication skill**: Shared with `github` plugin — covers all auth methods
 
 ## Setup
@@ -117,7 +118,9 @@ plugins/github-app/
 │       └── github-token-check.sh    # PreToolUse: debounced validity check
 ├── skills/
 │   ├── github-auth/SKILL.md         # Shared auth skill (symlink)
-│   └── github-app-token/SKILL.md    # Token management skill
+│   ├── github-app-token/SKILL.md    # Token lifecycle: generate, refresh, status
+│   ├── github-app-session-env/SKILL.md   # Manual session env wiring (PEM, env file, CLAUDE_ENV_FILE, GH_CONFIG_DIR)
+│   └── github-app-git-identity/SKILL.md  # Manual bot git identity + gh credential helper
 ├── bin/
 │   ├── generate-token.sh            # JWT generation + token exchange
 │   ├── token-check.sh               # Token validity check + refresh logic
