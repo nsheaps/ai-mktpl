@@ -11,6 +11,7 @@ GitHub App installation tokens expire after 1 hour. This plugin generates tokens
 - **Git credential helper**: Seamless `git push` / `gh` auth via shared token file
 - **Per-agent isolation**: All files written under `$CLAUDE_PLUGIN_DATA/` — each agent automatically gets its own isolated directory
 - **Manual-operation skills**: Every hook operation (token lifecycle, session env wiring, bot git identity) has a skill so it can be reproduced by hand when a hook doesn't run
+- **Events monitor**: `bin/events-monitor.sh` polls the GitHub events REST API as the App, emits one line per new event, and self-refreshes the token (see [Events Monitor](#events-monitor))
 - **Authentication skill**: Shared with `github` plugin — covers all auth methods
 
 ## Setup
@@ -86,7 +87,48 @@ github-app:
   # How long SessionStart waits for env vars to appear (seconds).
   # Set to 0 to disable.
   waitForEnvTimeoutSeconds: 15
+
+  # bin/events-monitor.sh defaults (CLI flag > env var > setting > default)
+  eventsRepo: "" # owner/repo to watch (empty = pass via --repo)
+  eventsPollIntervalSeconds: 15 # seconds between polls
 ```
+
+## Events Monitor
+
+`bin/events-monitor.sh` polls the [GitHub events REST API](https://docs.github.com/rest/activity/events) as the App and prints one line per **new** event. The first poll records a baseline (the latest event id) without dumping the existing backlog, so you only get notified about events that arrive afterward. It calls `token-check.sh` before each poll, so it keeps running past the 1-hour installation-token TTL.
+
+It pairs naturally with Claude Code's `Monitor` tool, but also runs under cron or by hand.
+
+```bash
+# Watch a repo's events every 15s (default interval)
+events-monitor.sh --repo nsheaps/.ai-agent-jack
+
+# Custom interval, single poll (useful for cron / testing)
+events-monitor.sh --repo owner/repo --interval 30
+events-monitor.sh --repo owner/repo --once
+
+# Other event feeds via --api-path (org / user / public / network)
+events-monitor.sh --api-path /orgs/nsheaps/events --interval 60
+events-monitor.sh --api-path /users/some-user/events
+```
+
+**Configuration** (precedence: CLI flag > env var > plugin setting > default):
+
+| Setting        | CLI flag      | Env var                       | Plugin setting              | Default |
+| -------------- | ------------- | ----------------------------- | --------------------------- | ------- |
+| Poll interval  | `--interval`  | `GITHUB_APP_EVENTS_INTERVAL`  | `eventsPollIntervalSeconds` | `15`    |
+| Repo to watch  | `--repo`      | `GITHUB_APP_EVENTS_REPO`      | `eventsRepo`                | —       |
+| API path       | `--api-path`  | `GITHUB_APP_EVENTS_API_PATH`  | —                           | derived |
+| Page size      | `--per-page`  | `GITHUB_APP_EVENTS_PER_PAGE`  | —                           | `50`    |
+| Cursor file    | `--cursor-file` | `GITHUB_APP_EVENTS_CURSOR_FILE` | —                       | under `$CLAUDE_PLUGIN_DATA` |
+
+Output format (stdout, one line per event):
+
+```
+[<created_at>] <EventType> by <actor> on <owner/repo> (id <event_id>)
+```
+
+Status lines (`[start]`, `[baseline]`, `[token]`, `[error]`) are also written to stdout. Errors (rate limit, auth, token-refresh failure) are emitted and de-duplicated so a persistent failure does not spam every poll. The cursor persists across runs, so restarting resumes from the last seen event.
 
 ## On-disk Layout
 
@@ -102,6 +144,7 @@ $CLAUDE_PLUGIN_DATA/
 ├── github-app-env            # Runtime env file sourced via CLAUDE_ENV_FILE
 ├── github-git-identity       # Stable identity file (not overwritten by token refresh)
 ├── github-app-last-check     # Debounce timestamp
+├── events-cursor-*           # events-monitor.sh cursor (highest event id seen, per feed)
 ├── gh/                       # Isolated GH_CONFIG_DIR
 └── git/config                # Isolated GIT_CONFIG_GLOBAL target
 ```
@@ -124,7 +167,8 @@ plugins/github-app/
 ├── bin/
 │   ├── generate-token.sh            # JWT generation + token exchange
 │   ├── token-check.sh               # Token validity check + refresh logic
-│   └── token-status.sh              # Token status JSON output
+│   ├── token-status.sh              # Token status JSON output
+│   └── events-monitor.sh            # Poll the events REST API; emit new events; cursor + self-refresh
 ├── lib/
 │   ├── env-file.sh                  # Runtime env file writer
 │   ├── token-utils.sh               # Token expiry helpers
