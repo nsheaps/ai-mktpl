@@ -154,6 +154,39 @@ do_install() {
     hook_log_step "auth-check" "Checking GitHub CLI authentication"
     "$gh_bin" auth status 2>&1 || hook_log "gh auth not configured"
   fi
+
+  # --- Set GH_HOST and GH_REPO so regular gh subcommands work in web sessions ---
+  # In web sessions the git remote is a local proxy, so gh can't infer the
+  # GitHub host or repo.  Setting these env vars fixes that globally.
+  # See: https://cli.github.com/manual/gh_help_environment
+  hook_log_step "env-vars" "Configuring GH_HOST and GH_REPO for web session"
+
+  if [ -z "${GH_HOST:-}" ]; then
+    export GH_HOST="github.com"
+    if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
+      echo 'export GH_HOST="github.com"' >> "$CLAUDE_ENV_FILE"
+    fi
+    hook_log "Set GH_HOST=github.com"
+  fi
+
+  if [ -z "${GH_REPO:-}" ]; then
+    # Try to infer owner/repo from the git remote URL. Strip a trailing
+    # ".git" first, then extract the trailing "owner/repo" segment. (sed -E
+    # is POSIX ERE and has no non-greedy quantifier, so it can't strip the
+    # suffix in a single pass.)
+    local repo_slug=""
+    repo_slug="$(git remote get-url origin 2>/dev/null \
+      | sed -E -e 's#\.git$##' -e 's#.*[:/]([^/]+/[^/]+)$#\1#' 2>/dev/null || true)"
+    if [ -n "$repo_slug" ]; then
+      export GH_REPO="$repo_slug"
+      if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
+        echo "export GH_REPO=\"$repo_slug\"" >> "$CLAUDE_ENV_FILE"
+      fi
+      hook_log "Set GH_REPO=$repo_slug"
+    else
+      hook_log "Could not infer GH_REPO from git remote"
+    fi
+  fi
 }
 
 # --- Execute ---
