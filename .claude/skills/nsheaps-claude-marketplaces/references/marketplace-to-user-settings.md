@@ -1,6 +1,6 @@
 # Marketplace to User Settings Propagation
 
-Supplementary reference for the `how-this-repo-works` skill. See `../SKILL.md` for the overview.
+Supplementary reference for the `nsheaps-claude-marketplaces` skill. See `../SKILL.md` for the overview.
 
 ## Marketplace Types
 
