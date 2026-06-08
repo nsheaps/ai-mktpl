@@ -104,8 +104,14 @@ jobs:
             path=$(echo "$row" | jq -r '.path')
             base=$(echo "$row" | jq -r '.base')
             new=$(echo "$row" | jq -r '.new')
+            action=$(echo "$row" | jq -r '.action')
             line=$(grep -nE '"version"[[:space:]]*:' "$path" | head -1 | cut -d: -f1)
-            echo "::notice file=${path},line=${line:-1},title=Pending version bump::${name}: ${base} → ${new} will be applied automatically when this PR merges to main"
+            if [ "$action" = "already-bumped" ]; then
+              detail="already bumped to ${new} in this PR (kept on merge to main)"
+            else
+              detail="${base} → ${new} will be applied automatically when this PR merges to main"
+            fi
+            echo "::notice file=${path},line=${line:-1},title=Pending version bump::${name}: ${detail}"
           done
 
       - name: Post version preview comment

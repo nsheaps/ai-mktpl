@@ -3,7 +3,7 @@
 # --change-base: ref for detecting code changes (default: origin/main)
 # --version-base: ref for version comparison (default: origin/main)
 #
-# On PRs, typically: --change-base=cd/last-release --version-base=origin/main
+# On PRs, typically: --change-base=origin/<base> --version-base=<base> (preview only; see cd.yaml version-preview)
 # On main, typically: --change-base=cd/last-release --version-base=cd/last-release
 # Locally: defaults work (compares to origin/main for both)
 set -euo pipefail
