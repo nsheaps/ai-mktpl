@@ -14,6 +14,6 @@ github-app:
   # Used by the events monitor when the matching CLI flag / env var is unset.
   # Precedence: CLI flag > env var > these settings > built-in default.
   # Default repo to watch (owner/repo). Empty = must be passed via --repo.
-  eventsRepo: ""
+  eventsRepo: ''
   # Seconds between polls of the GitHub events REST API.
   eventsPollIntervalSeconds: 15

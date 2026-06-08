@@ -114,13 +114,13 @@ events-monitor.sh --api-path /users/some-user/events
 
 **Configuration** (precedence: CLI flag > env var > plugin setting > default):
 
-| Setting        | CLI flag      | Env var                       | Plugin setting              | Default |
-| -------------- | ------------- | ----------------------------- | --------------------------- | ------- |
-| Poll interval  | `--interval`  | `GITHUB_APP_EVENTS_INTERVAL`  | `eventsPollIntervalSeconds` | `15`    |
-| Repo to watch  | `--repo`      | `GITHUB_APP_EVENTS_REPO`      | `eventsRepo`                | —       |
-| API path       | `--api-path`  | `GITHUB_APP_EVENTS_API_PATH`  | —                           | derived |
-| Page size      | `--per-page`  | `GITHUB_APP_EVENTS_PER_PAGE`  | —                           | `50`    |
-| Cursor file    | `--cursor-file` | `GITHUB_APP_EVENTS_CURSOR_FILE` | —                       | under `$CLAUDE_PLUGIN_DATA` |
+| Setting       | CLI flag        | Env var                         | Plugin setting              | Default                     |
+| ------------- | --------------- | ------------------------------- | --------------------------- | --------------------------- |
+| Poll interval | `--interval`    | `GITHUB_APP_EVENTS_INTERVAL`    | `eventsPollIntervalSeconds` | `15`                        |
+| Repo to watch | `--repo`        | `GITHUB_APP_EVENTS_REPO`        | `eventsRepo`                | —                           |
+| API path      | `--api-path`    | `GITHUB_APP_EVENTS_API_PATH`    | —                           | derived                     |
+| Page size     | `--per-page`    | `GITHUB_APP_EVENTS_PER_PAGE`    | —                           | `50`                        |
+| Cursor file   | `--cursor-file` | `GITHUB_APP_EVENTS_CURSOR_FILE` | —                           | under `$CLAUDE_PLUGIN_DATA` |
 
 Output format (stdout, one line per event):
 
