@@ -105,18 +105,18 @@ Steps in order:
    - Diffs each plugin dir against the base, excluding `CHANGELOG.md` and `plugin.json`
    - For each changed plugin, runs `yarn exec release-it --ci` (patch increment, writes `plugin.json`, runs prettier via `after:bump`) unless it was already manually bumped above the base
    - Outputs JSON with `has_bumps`, `bumped`, `skipped`, `report_md`, `bumps`
-6. **Lint** -- `mise run lint` ensures everything is formatted
-7. **Commit version bumps** -- `chore: bump plugin versions [skip ci]`, targeting `plugins/*/.claude-plugin/plugin.json` and `plugins/*/CHANGELOG.md`, with `skip_push: true`
-8. **Update marketplace** -- `mise run update-marketplace` which:
+5. **Lint** -- `mise run lint` ensures everything is formatted
+6. **Commit version bumps** -- `chore: bump plugin versions [skip ci]`, targeting `plugins/*/.claude-plugin/plugin.json` and `plugins/*/CHANGELOG.md`, with `skip_push: true`
+7. **Update marketplace** -- `mise run update-marketplace` which:
    - Reads each `plugins/*/.claude-plugin/plugin.json`
    - Extracts name, version, description, author, keywords
    - Infers category (git vs utility) from plugin name
    - Infers tags from presence of `commands/` and `skills/` dirs
    - Rebuilds `.claude-plugin/marketplace.json` with plugins sorted by name
    - Runs `mise run lint-fix` at the end
-9. **Lint again** -- Ensures marketplace.json formatting
-10. **Commit marketplace** -- `chore: update marketplace metadata [skip ci]`, targeting `.claude-plugin/marketplace.json`, with `skip_push: true`
-11. **Push** -- Single `git push` sends both commits at once
+8. **Lint again** -- Ensures marketplace.json formatting
+9. **Commit marketplace** -- `chore: update marketplace metadata [skip ci]`, targeting `.claude-plugin/marketplace.json`, with `skip_push: true`
+10. **Push** -- Single `git push` sends both commits at once
 
 ## Loop Prevention
 

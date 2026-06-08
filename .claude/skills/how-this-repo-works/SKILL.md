@@ -123,12 +123,12 @@ The PR branch is never modified — bumping versions and regenerating the shared
 The **bump-and-update-marketplace** job performs these steps in sequence:
 
 1. **Detect + bump changed plugins** -- `mise run auto-bump-plugins` (base: the `cd/last-release` tag) identifies plugins with code changes (excluding `CHANGELOG.md` and `plugin.json` from the diff) and patch-bumps each via `yarn exec release-it --ci`, unless already manually bumped to a higher version.
-3. **Lint** -- Runs `mise run lint` to ensure formatting is clean after bumps.
-4. **Commit version bumps** -- Auto-commits with `chore: bump plugin versions [skip ci]`.
-5. **Update marketplace** -- Runs `mise run update-marketplace`, which iterates all plugin dirs, reads each `plugin.json`, and rebuilds `.claude-plugin/marketplace.json` (sorted by name, with category/tag inference).
-6. **Lint again** -- Ensures marketplace.json is formatted.
-7. **Commit marketplace** -- Auto-commits with `chore: update marketplace metadata [skip ci]`.
-8. **Push** -- Single `git push` sends both commits. The `[skip ci]` tag prevents infinite loops.
+2. **Lint** -- Runs `mise run lint` to ensure formatting is clean after bumps.
+3. **Commit version bumps** -- Auto-commits with `chore: bump plugin versions [skip ci]`.
+4. **Update marketplace** -- Runs `mise run update-marketplace`, which iterates all plugin dirs, reads each `plugin.json`, and rebuilds `.claude-plugin/marketplace.json` (sorted by name, with category/tag inference).
+5. **Lint again** -- Ensures marketplace.json is formatted.
+6. **Commit marketplace** -- Auto-commits with `chore: update marketplace metadata [skip ci]`.
+7. **Push** -- Single `git push` sends both commits. The `[skip ci]` tag prevents infinite loops.
 
 Authentication uses a GitHub App (not GITHUB_TOKEN) to allow the push to trigger downstream workflows if needed.
 
