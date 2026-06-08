@@ -17,6 +17,12 @@ commands for pull requests, issues, repos, actions, and direct API access.
 
 In Claude Code web sessions, the git remote is a local proxy, not github.com. The `gh` CLI infers the host and repo from the remote, so subcommands like `gh pr create` would fail without configuration.
 
+The proxy remote URL looks like this (the trailing `owner/repo` is what the hook extracts for `GH_REPO`):
+
+```
+http://local_proxy@127.0.0.1:<port>/git/nsheaps/ai-mktpl
+```
+
 ### Solution: GH_HOST and GH_REPO Environment Variables
 
 The github plugin's SessionStart hook **automatically sets** `GH_HOST` and `GH_REPO` in web sessions. Once set, all standard `gh` subcommands work normally:

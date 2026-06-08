@@ -184,10 +184,15 @@ do_install() {
     # Infer owner/repo from the git remote URL. Strip a trailing ".git" first,
     # then extract the trailing "owner/repo" segment. (sed -E is POSIX ERE and
     # has no non-greedy quantifier, so it can't strip the suffix in one pass.)
+    # Real web-session remote looks like:
+    #   http://local_proxy@127.0.0.1:<port>/git/nsheaps/ai-mktpl
     local repo_slug=""
     repo_slug="$(git remote get-url origin 2>/dev/null \
       | sed -E -e 's#\.git$##' -e 's#.*[:/]([^/]+/[^/]+)$#\1#' 2>/dev/null || true)"
-    if [ -n "$repo_slug" ]; then
+    # sed echoes its input unchanged when nothing matches, so a URL with no
+    # "owner/repo" path segment would otherwise be exported verbatim — pinning
+    # gh to a bogus repo (worse than unset). Require a clean owner/repo shape.
+    if printf '%s' "$repo_slug" | grep -qE '^[^/]+/[^/]+$'; then
       export GH_REPO="$repo_slug"
       if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
         env_file_upsert_export "$CLAUDE_ENV_FILE" "GH_REPO" "$repo_slug"
