@@ -124,6 +124,8 @@ github-app:
 
 The audit log is always written to `$CLAUDE_PLUGIN_DATA/events-delivery.log` for all non-disabled modes.
 
+> **Sync vs async delivery — important.** The `User (systemMessage)` column applies fully only to the **synchronous `SessionStart`** hooks (exit-0 JSON). The **`UserPromptSubmit` and `Stop`** hooks are `async` + `asyncRewake`, which deliver to **Claude only** (the hook's stdout is shown to Claude as a system reminder on exit 2 — there is no user-facing `systemMessage` channel for an async hook). So on prompt/stop events: `both`/`summary` reach Claude with the details; `user` (user-only) is effectively a no-op (it falls back to the audit log); `file` writes the log. To surface prompt/stop events to the **human** as well, that would require a synchronous `UserPromptSubmit` hook (open follow-up — see PR discussion).
+
 ### Hook lifecycle
 
 | Hook               | Matcher   | Behavior                                                      |
