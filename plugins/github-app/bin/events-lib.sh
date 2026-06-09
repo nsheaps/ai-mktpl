@@ -282,56 +282,74 @@ evlib_format_claude_message() {
 }
 
 # ---- Output routing -------------------------------------------------------
-# evlib_deliver <events_text> <delivery_mode> [<header>]
+# evlib_deliver <events_text> <delivery_mode> <header> <channel> [<hook_event_name>]
 #
-# Writes to audit log (all modes except disabled).
-# Outputs hook JSON to stdout according to the matrix:
-#   disabled -> nothing
-#   file     -> audit log only, no stdout
-#   user     -> systemMessage=full, no additionalContext
-#   both     -> systemMessage=full + additionalContext=full
-#   summary  -> systemMessage="events received from github", additionalContext=full
+# channel:
+#   sync  -- SessionStart-style hook (exit 0). Emits hook JSON: top-level
+#            `systemMessage` (user-facing) and `hookSpecificOutput.additionalContext`
+#            (Claude-facing). Caller exits 0.
+#   async -- UserPromptSubmit/Stop with asyncRewake. The rewake shows the hook's
+#            stdout to Claude as a system reminder on exit 2, so Claude-facing
+#            content is printed as PLAIN TEXT (not JSON). There is no user-facing
+#            channel for async hooks, so user-only mode is a no-op here.
 #
-# For async rewake (UserPromptSubmit / Stop): caller must exit 2 after this
-# when events were delivered.
+# Writes the audit log for all modes except `disabled`.
+# Sets EVLIB_DELIVERED_TO_CLAUDE=true when Claude-facing content was emitted, so
+# an async caller knows to exit 2 (rewake) vs exit 0 (no rewake).
+EVLIB_DELIVERED_TO_CLAUDE="false"
 evlib_deliver() {
   local events_text="$1"
   local mode="$2"
   local header="${3:-}"
+  local channel="${4:-sync}"
+  local hook_event="${5:-SessionStart}"
+  EVLIB_DELIVERED_TO_CLAUDE="false"
 
-  if [ "$mode" = "disabled" ]; then
-    return 0
-  fi
+  [ "$mode" = "disabled" ] && return 0
 
   local claude_msg
   claude_msg="$(evlib_format_claude_message "$events_text" "$header")"
 
   # Audit log (all non-disabled modes).
   {
-    echo "=== $(date -u +%Y-%m-%dT%H:%M:%SZ) [${mode}] ==="
+    echo "=== $(date -u +%Y-%m-%dT%H:%M:%SZ) [${mode}/${channel}] ==="
     printf '%s\n' "$claude_msg"
     echo ""
   } >> "$EVENTS_AUDIT_LOG" 2>/dev/null || true
 
-  # No stdout needed for file mode.
   [ "$mode" = "file" ] && return 0
 
-  # Build hook JSON output.
+  if [ "$channel" = "async" ]; then
+    # asyncRewake: Claude sees the hook's stdout on exit 2. No user channel here.
+    case "$mode" in
+      both|summary)
+        printf '%s\n' "$claude_msg"
+        EVLIB_DELIVERED_TO_CLAUDE="true"
+        ;;
+      user)
+        : # user-only: async hooks have no user-facing channel — nothing delivered.
+        ;;
+    esac
+    return 0
+  fi
+
+  # sync channel: exit-0 JSON. systemMessage is TOP-LEVEL; additionalContext is
+  # under hookSpecificOutput (with hookEventName).
   case "$mode" in
     user)
-      printf '%s' "$claude_msg" | jq -Rs \
-        '{hookSpecificOutput: {systemMessage: .}}'
+      jq -n --arg sm "$claude_msg" '{systemMessage: $sm}'
       ;;
     both)
-      printf '%s' "$claude_msg" | jq -Rs \
-        '{hookSpecificOutput: {systemMessage: ., additionalContext: .}}'
+      jq -n --arg sm "$claude_msg" --arg ac "$claude_msg" --arg ev "$hook_event" \
+        '{systemMessage: $sm, hookSpecificOutput: {hookEventName: $ev, additionalContext: $ac}}'
+      EVLIB_DELIVERED_TO_CLAUDE="true"
       ;;
     summary)
-      printf '%s' "$claude_msg" | jq -Rs \
-        '{hookSpecificOutput: {systemMessage: "events received from github", additionalContext: .}}'
+      jq -n --arg ac "$claude_msg" --arg ev "$hook_event" \
+        '{systemMessage: "events received from github", hookSpecificOutput: {hookEventName: $ev, additionalContext: $ac}}'
+      EVLIB_DELIVERED_TO_CLAUDE="true"
       ;;
     *)
-      # Unknown mode — treat as file (already written to audit log).
       echo "[${PLUGIN_NAME}] unknown eventsDelivery mode: ${mode}" >&2
       ;;
   esac

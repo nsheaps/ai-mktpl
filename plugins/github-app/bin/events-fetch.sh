@@ -74,6 +74,14 @@ case "$EVENT_TYPE" in
     exit 1 ;;
 esac
 
+# Capture hook stdin (JSON) when present. Used by the Stop branch for
+# stop_hook_active loop-prevention. Guard on a non-TTY so direct/CLI
+# invocation (no piped stdin) doesn't block on `cat`.
+HOOK_INPUT=""
+if [ ! -t 0 ]; then
+  HOOK_INPUT="$(cat 2>/dev/null || true)"
+fi
+
 # ---- Check delivery mode --------------------------------------------------
 
 DELIVERY="$(evlib_delivery)"
@@ -94,18 +102,35 @@ fi
 
 ts() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 
-_deliver_and_maybe_exit2() {
-  local events_text="$1"
-  local header="${2:-}"
-  evlib_deliver "$events_text" "$DELIVERY" "$header"
-  # For async rewake hooks (user-prompt-submit, stop): exit 2 to trigger rewake.
-  # For session-start: exit 0 (synchronous hook, additionalContext accepted on 0).
+# async hooks (UserPromptSubmit/Stop) deliver to Claude via asyncRewake (exit 2);
+# session-start hooks are synchronous (exit 0, JSON output).
+_channel_for_event() {
   case "$EVENT_TYPE" in
-    user-prompt-submit|stop)
-      exit 2 ;;
-    *)
-      exit 0 ;;
+    user-prompt-submit|stop) echo "async" ;;
+    *)                       echo "sync" ;;
   esac
+}
+
+_hook_event_name() {
+  case "$EVENT_TYPE" in
+    user-prompt-submit) echo "UserPromptSubmit" ;;
+    stop)               echo "Stop" ;;
+    *)                  echo "SessionStart" ;;
+  esac
+}
+
+# Deliver events, then exit appropriately:
+#   sync  -> exit 0 (evlib_deliver already emitted the hook JSON)
+#   async -> exit 2 ONLY when Claude-facing content was emitted (triggers
+#            asyncRewake); otherwise exit 0 (no rewake — e.g. user/file modes).
+_deliver_and_exit() {
+  local events_text="$1" header="${2:-}"
+  local channel; channel="$(_channel_for_event)"
+  evlib_deliver "$events_text" "$DELIVERY" "$header" "$channel" "$(_hook_event_name)"
+  if [ "$channel" = "async" ] && [ "$EVLIB_DELIVERED_TO_CLAUDE" = "true" ]; then
+    exit 2
+  fi
+  exit 0
 }
 
 # ---- session-start-startup ------------------------------------------------
@@ -132,7 +157,7 @@ _do_session_start_startup() {
   evlib_write_cursor "$newest_id"
 
   local header="Recent GitHub events for ${REPO:-$API_PATH} (last 10):"
-  evlib_deliver "$events_text" "$DELIVERY" "$header"
+  evlib_deliver "$events_text" "$DELIVERY" "$header" "sync" "SessionStart"
   exit 0
 }
 
@@ -156,7 +181,7 @@ _do_since_last_fetch() {
     local count
     count="$(printf '%s\n' "$EVLIB_NEW_EVENTS" | wc -l | tr -d ' ')"
     local header="${count} new GitHub event(s) for ${REPO:-$API_PATH}:"
-    _deliver_and_maybe_exit2 "$EVLIB_NEW_EVENTS" "$header"
+    _deliver_and_exit "$EVLIB_NEW_EVENTS" "$header"
   fi
 
   # No new events: update the fetch timestamp (cursor id unchanged).
@@ -170,6 +195,13 @@ _do_since_last_fetch() {
 # Allow stop at eventsStopTimeoutSeconds (exit 0).
 
 _do_stop() {
+  # Loop-prevention: Claude Code force-overrides a Stop hook after it blocks 8×
+  # without progress and sets stop_hook_active=true. If so, allow the stop.
+  if [ "$(printf '%s' "$HOOK_INPUT" | jq -r '.stop_hook_active // false' 2>/dev/null || echo false)" = "true" ]; then
+    evlib_clear_stop_state
+    exit 0
+  fi
+
   local stop_timeout
   stop_timeout="$(evlib_stop_timeout)"
   local stop_notice
@@ -221,13 +253,12 @@ _do_stop() {
         local count
         count="$(printf '%s\n' "$EVLIB_NEW_EVENTS" | wc -l | tr -d ' ')"
         local header="${count} new GitHub event(s) for ${REPO:-$API_PATH} (received while session was stopping):"
-        evlib_deliver "$EVLIB_NEW_EVENTS" "$DELIVERY" "$header"
-        # Re-wake Claude (Stop hook with asyncRewake: true). Only re-wake for
-        # modes that push content to Claude; file mode doesn't re-wake.
-        case "$DELIVERY" in
-          user|both|summary) exit 2 ;;
-          *) evlib_clear_stop_state; exit 0 ;;
-        esac
+        evlib_deliver "$EVLIB_NEW_EVENTS" "$DELIVERY" "$header" "async" "Stop"
+        # Re-wake Claude only when Claude-facing content was emitted (both/summary).
+        [ "$EVLIB_DELIVERED_TO_CLAUDE" = "true" ] && exit 2
+        # user/file modes: nothing reaches Claude via async — allow the stop.
+        evlib_clear_stop_state
+        exit 0
       fi
     fi
 
@@ -243,14 +274,14 @@ _do_stop() {
       human_since="$(evlib_humanize_seconds "$since_last")"
 
       local notice_text="no github events received in the last ${human_since}"
-      evlib_deliver "$notice_text" "$DELIVERY" ""
-      # Re-wake Claude with the notice, then allow stop.
-      case "$DELIVERY" in
-        user|both|summary) exit 2 ;;
-        *)
-          # file mode: wrote to audit log, allow stop.
-          evlib_clear_stop_state; exit 0 ;;
-      esac
+      evlib_deliver "$notice_text" "$DELIVERY" "" "async" "Stop"
+      # Re-wake Claude with the notice (both/summary). Stop-state is retained
+      # (notice_sent=true) so the next Stop continues polling to the timeout
+      # without re-noticing.
+      [ "$EVLIB_DELIVERED_TO_CLAUDE" = "true" ] && exit 2
+      # user/file modes: nothing deliverable to Claude — allow the stop.
+      evlib_clear_stop_state
+      exit 0
     fi
   done
 }
