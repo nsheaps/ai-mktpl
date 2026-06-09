@@ -148,22 +148,26 @@ ensure_token() {
 }
 
 # --- Event fetch -------------------------------------------------------------
+# Sets the global RESP to the response body and returns 0 when it's a JSON array.
+# On failure emits a de-duplicated [error] line and returns 1. MUST be called
+# directly (not in a $(...) subshell) so the [error] line reaches stdout and the
+# dedup state in last_fetch_err persists across polls.
 last_fetch_err=""
+RESP=""
 fetch_events() {
-  local token resp
+  local token
   token="$(cat "$TOKEN_FILE" 2>/dev/null)"
-  resp="$(curl -s -m 15 \
+  RESP="$(curl -s -m 15 \
     -H "Authorization: Bearer ${token}" \
     -H "Accept: application/vnd.github+json" \
     -H "X-GitHub-Api-Version: 2022-11-28" \
     "https://api.github.com${API_PATH}?per_page=${PER_PAGE}" 2>/dev/null || true)"
-  if printf '%s' "$resp" | jq -e 'type=="array"' >/dev/null 2>&1; then
+  if printf '%s' "$RESP" | jq -e 'type=="array"' >/dev/null 2>&1; then
     last_fetch_err=""
-    printf '%s' "$resp"
     return 0
   fi
   local msg
-  msg="$(printf '%s' "$resp" | jq -r '.message // "empty/non-JSON response"' 2>/dev/null || echo "request failed")"
+  msg="$(printf '%s' "$RESP" | jq -r '.message // "empty/non-JSON response"' 2>/dev/null || echo "request failed")"
   if [ "$msg" != "$last_fetch_err" ]; then
     echo "[$(ts)] [error] events fetch failed: $msg"
     last_fetch_err="$msg"
@@ -172,48 +176,53 @@ fetch_events() {
 }
 
 # --- Cursor init -------------------------------------------------------------
-cursor=0
+# The cursor is the id of the newest event seen on the previous poll. GitHub
+# event ids are NOT monotonic across event types (e.g. PullRequestReviewEvent
+# ids sit in a lower range than PushEvent ids), so we must NOT treat "id > X"
+# as "newer". Instead we rely on the API's reverse-chronological ordering and
+# use the stored id purely as a stop marker: emit everything above it in the
+# returned page, then remember the new top id.
+last_seen=""
 baseline_needed=1
-if [ -f "$CURSOR_FILE" ]; then
-  cursor="$(cat "$CURSOR_FILE" 2>/dev/null || echo 0)"
-  [[ "$cursor" =~ ^[0-9]+$ ]] || cursor=0
-  [ "$cursor" -gt 0 ] && baseline_needed=0
+if [ -s "$CURSOR_FILE" ]; then
+  last_seen="$(cat "$CURSOR_FILE" 2>/dev/null || true)"
+  [ -n "$last_seen" ] && baseline_needed=0
 fi
 
-echo "[$(ts)] [start] watching ${LABEL} (${API_PATH}) every ${INTERVAL}s (cursor=${cursor})"
+echo "[$(ts)] [start] watching ${LABEL} (${API_PATH}) every ${INTERVAL}s (cursor=${last_seen:-<none>})"
 
 poll() {
-  ensure_token || { return 0; }   # error already emitted; try again next tick
-  local resp
-  resp="$(fetch_events)" || return 0
+  ensure_token || return 0   # error already emitted; try again next tick
+  fetch_events || return 0   # sets RESP; error already emitted on failure
 
-  local maxid
-  maxid="$(printf '%s' "$resp" | jq -r '[.[].id|tonumber] | max // 0' 2>/dev/null)"
-  [[ "$maxid" =~ ^[0-9]+$ ]] || maxid=0
+  local newest
+  newest="$(printf '%s' "$RESP" | jq -r '.[0].id // empty' 2>/dev/null)"
+  [ -z "$newest" ] && return 0   # empty feed
 
   if [ "$baseline_needed" -eq 1 ]; then
-    cursor="$maxid"
-    echo "$cursor" > "$CURSOR_FILE"
+    last_seen="$newest"
+    printf '%s' "$last_seen" > "$CURSOR_FILE"
     baseline_needed=0
     local cnt
-    cnt="$(printf '%s' "$resp" | jq -r 'length' 2>/dev/null || echo 0)"
-    echo "[$(ts)] [baseline] ${cnt} recent events present; cursor=${cursor} — reporting new events from here"
+    cnt="$(printf '%s' "$RESP" | jq -r 'length' 2>/dev/null || echo 0)"
+    echo "[$(ts)] [baseline] ${cnt} recent events present; newest id ${last_seen} — reporting new events from here"
     return 0
   fi
 
-  # API returns newest-first; emit ascending so the cursor advances in order.
+  # Take the items above the last-seen id (API order = newest-first), then emit
+  # them oldest-first. If last_seen isn't on the page (more than per_page new
+  # events, or it aged off), index is null and we emit the whole page.
   local new
-  new="$(printf '%s' "$resp" | jq -r --argjson c "$cursor" \
-    '[.[] | select((.id|tonumber) > $c)] | sort_by(.id|tonumber)
-     | .[] | "\(.id)\t\(.created_at)\t\(.type)\t\(.actor.login)\t\(.repo.name)"' 2>/dev/null)"
-  [ -z "$new" ] && return 0
+  new="$(printf '%s' "$RESP" | jq -r --arg ls "$last_seen" '
+    (([.[].id] | index($ls)) // length) as $i
+    | .[0:$i] | reverse | .[]
+    | "[\(.created_at)] \(.type) by \(.actor.login) on \(.repo.name) (id \(.id))"' 2>/dev/null)"
 
-  while IFS=$'\t' read -r id created typ actor repo; do
-    [ -z "$id" ] && continue
-    echo "[${created}] ${typ} by ${actor} on ${repo} (id ${id})"
-    if [ "$id" -gt "$cursor" ] 2>/dev/null; then cursor="$id"; fi
-  done <<< "$new"
-  echo "$cursor" > "$CURSOR_FILE"
+  if [ -n "$new" ]; then
+    printf '%s\n' "$new"
+    last_seen="$newest"
+    printf '%s' "$last_seen" > "$CURSOR_FILE"
+  fi
 }
 
 if [ "$run_once" = true ]; then
