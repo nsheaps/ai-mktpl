@@ -7,13 +7,13 @@ must be re-confirmed before building — the async-push design hinges on them.
 
 ## Hook capabilities (as reported)
 
-| Mechanism | To Claude | To user | Notes |
-| --- | --- | --- | --- |
-| `hookSpecificOutput.additionalContext` (exit 0 + JSON) | yes | — | SessionStart / UserPromptSubmit / Stop |
-| `systemMessage` (exit 0 + JSON) | — | yes | universal, user-facing |
-| plain stdout (exit 0) | yes (UserPromptSubmit only) | — | silenced on most events |
-| exit 2 + stderr | yes (as warning) | yes | blocks on decision events |
-| `suppressOutput: true` | — | — | hides stdout from transcript |
+| Mechanism                                              | To Claude                   | To user | Notes                                  |
+| ------------------------------------------------------ | --------------------------- | ------- | -------------------------------------- |
+| `hookSpecificOutput.additionalContext` (exit 0 + JSON) | yes                         | —       | SessionStart / UserPromptSubmit / Stop |
+| `systemMessage` (exit 0 + JSON)                        | —                           | yes     | universal, user-facing                 |
+| plain stdout (exit 0)                                  | yes (UserPromptSubmit only) | —       | silenced on most events                |
+| exit 2 + stderr                                        | yes (as warning)            | yes     | blocks on decision events              |
+| `suppressOutput: true`                                 | —                           | —       | hides stdout from transcript           |
 
 - **UserPromptSubmit**: inject `additionalContext` for the turn; `systemMessage` to user. Exit 2 blocks the prompt.
 - **Stop**: `decision: "block"` + `reason` -> Claude re-wakes with `reason` as context. **[VERIFY]** report claims no `stop_hook_active` input and no built-in timeout — doubt the first; confirm before relying on it for loop-prevention.
@@ -32,6 +32,7 @@ last fetch"; auth via `token-check.sh`; chronological cursor (newest-event-id st
 ids are not monotonic across types); state file = last-seen id + last-fetch timestamp.
 
 **Hooks** (plugin `hooks/hooks.json`):
+
 - `SessionStart`/`startup` -> show last **10** events; set cursor.
 - `SessionStart`/`resume` -> all since last fetch.
 - `UserPromptSubmit` (`async`+`asyncRewake`) -> fetch since last fetch -> one message.
@@ -40,19 +41,21 @@ ids are not monotonic across types); state file = last-seen id + last-fetch time
 
 **Config — `eventsDelivery` enum** (+ `eventsRepo`, `eventsStopTimeoutSeconds`=600, `eventsStopNoticeSeconds`=480):
 
-| mode | file | user (`systemMessage`) | Claude (`additionalContext`) |
-| --- | --- | --- | --- |
-| `disabled` (a) | — | — | — |
-| `file` (b) | yes | — | — |
-| `user` (c) | — | full | — |
-| `both` (d) | — | full | full |
-| `summary` (e) | — | `"events received from github"` | full |
+| mode           | file | user (`systemMessage`)          | Claude (`additionalContext`) |
+| -------------- | ---- | ------------------------------- | ---------------------------- |
+| `disabled` (a) | —    | —                               | —                            |
+| `file` (b)     | yes  | —                               | —                            |
+| `user` (c)     | —    | full                            | —                            |
+| `both` (d)     | —    | full                            | full                         |
+| `summary` (e)  | —    | `"events received from github"` | full                         |
 
 ## Pre-build verification
+
 - `async` / `asyncRewake` exact field names + semantics.
 - `stop_hook_active` existence (Stop loop-prevention).
 
 ## Related: task-utils write-gate (separate fix, nsheaps/agents)
+
 The `task-utils` plugin (v0.3.0) `require-task-in-progress.sh` PreToolUse hook gates
 `Write|Edit|MultiEdit|NotebookEdit` and **defaults to ON** (`requireInProgress` default `true`).
 Handler wants it **opt-in** (default off). Fix: flip the in-code default in the hook + docs + version bump.
