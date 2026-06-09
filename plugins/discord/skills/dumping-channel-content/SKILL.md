@@ -1,12 +1,14 @@
-<!-- UPSTREAM: discord -->
----
+## <!-- UPSTREAM: discord -->
+
 name: dumping-channel-content
 description: Export a Discord channel or thread to JSONL for audit, analysis, or transcript review. Use when you need offline access to a conversation, want to grep history, or need to verify message completeness.
 user-invocable: false
 allowed-tools:
-  - Bash(python3 *)
-  - Read
-  - Write
+
+- Bash(python3 \*)
+- Read
+- Write
+
 ---
 
 # discord:dumping-channel-content
@@ -65,23 +67,23 @@ python3 plugins/discord/scripts/discord-dump.py \
 
 ## Arguments
 
-| Flag | Short | Description |
-|---|---|---|
-| `--guild` | `-g` | Guild (server) ID. Falls back to `$DISCORD_GUILD_ID`. |
-| `--channel` | `-c` | Channel ID to dump. Falls back to `$DISCORD_CHANNEL_ID`. |
-| `--thread` | `-t` | Specific thread ID within a forum channel. |
-| `--all` | | Dump every text/forum channel in the guild. |
-| `--with-threads` | | Also dump all threads attached to the channel. |
-| `--forum` | | Treat `--channel` as a forum and dump every thread. |
-| `--start` | | ISO date lower bound (`YYYY-MM-DD`, inclusive). |
-| `--end` | | ISO date upper bound (`YYYY-MM-DD`, inclusive). |
-| `--user` | | Filter to messages from this user snowflake (repeatable). |
-| `--exclude-user` | | Exclude messages from this user snowflake (repeatable). |
-| `--output` | `-o` | **Required.** Output `.jsonl` file or directory path. |
-| `--verify` | | After writing, re-fetch message counts and assert no gaps. |
-| `--token-env` | | Env var name holding the bot token (default `DISCORD_BOT_TOKEN`). |
-| `--max-retries` | | Max HTTP retries on rate-limit/5xx (default 8). |
-| `--verbose` | `-v` | Print per-request progress. |
+| Flag             | Short | Description                                                       |
+| ---------------- | ----- | ----------------------------------------------------------------- |
+| `--guild`        | `-g`  | Guild (server) ID. Falls back to `$DISCORD_GUILD_ID`.             |
+| `--channel`      | `-c`  | Channel ID to dump. Falls back to `$DISCORD_CHANNEL_ID`.          |
+| `--thread`       | `-t`  | Specific thread ID within a forum channel.                        |
+| `--all`          |       | Dump every text/forum channel in the guild.                       |
+| `--with-threads` |       | Also dump all threads attached to the channel.                    |
+| `--forum`        |       | Treat `--channel` as a forum and dump every thread.               |
+| `--start`        |       | ISO date lower bound (`YYYY-MM-DD`, inclusive).                   |
+| `--end`          |       | ISO date upper bound (`YYYY-MM-DD`, inclusive).                   |
+| `--user`         |       | Filter to messages from this user snowflake (repeatable).         |
+| `--exclude-user` |       | Exclude messages from this user snowflake (repeatable).           |
+| `--output`       | `-o`  | **Required.** Output `.jsonl` file or directory path.             |
+| `--verify`       |       | After writing, re-fetch message counts and assert no gaps.        |
+| `--token-env`    |       | Env var name holding the bot token (default `DISCORD_BOT_TOKEN`). |
+| `--max-retries`  |       | Max HTTP retries on rate-limit/5xx (default 8).                   |
+| `--verbose`      | `-v`  | Print per-request progress.                                       |
 
 ## Output format
 
