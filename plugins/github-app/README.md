@@ -95,9 +95,24 @@ github-app:
 
 ## Events Monitor
 
-`bin/events-monitor.sh` polls the [GitHub events REST API](https://docs.github.com/rest/activity/events) as the App and prints one line per **new** event. The first poll records a baseline (the latest event id) without dumping the existing backlog, so you only get notified about events that arrive afterward. It calls `token-check.sh` before each poll, so it keeps running past the 1-hour installation-token TTL.
+`bin/events-monitor.sh` polls the [GitHub events REST API](https://docs.github.com/rest/activity/events) as the App and prints one line per **new** event. The first poll records a baseline (the newest event's id) without dumping the existing backlog, so you only get notified about events that arrive afterward. It calls `token-check.sh` before each poll, so it keeps running past the 1-hour installation-token TTL.
 
-It pairs naturally with Claude Code's `Monitor` tool, but also runs under cron or by hand.
+### Auto-start (plugin monitor)
+
+The plugin declares `bin/events-monitor.sh` as a [plugin monitor](https://code.claude.com/docs/en/plugins-reference#monitors) (`experimental.monitors` in `plugin.json`), so Claude Code starts it automatically and delivers each new event to Claude as a notification — no need to launch it by hand. It auto-starts with `--if-configured`, which makes it **a no-op until a repo is configured**: set `eventsRepo` (plugin setting) or `GITHUB_APP_EVENTS_REPO` to begin watching.
+
+```yaml
+# plugins.settings.yaml — turn the auto-monitor on for a repo
+github-app:
+  eventsRepo: "owner/repo"
+  eventsPollIntervalSeconds: 15
+```
+
+**Caveat — project-scope plugins:** Claude Code does **not** load background monitors for plugins enabled at *project* scope (checked into a repo's `.claude/settings.json`); only personal/user-scope plugins auto-start monitors ([reference](https://code.claude.com/docs/en/plugins-reference#monitors)). If `github-app` is installed `--scope project`, run the script manually (below) or via the `Monitor` tool instead. Plugin monitors also require Claude Code **v2.1.105+** and run only in interactive CLI sessions.
+
+### Manual / cron use
+
+It also runs under Claude Code's `Monitor` tool, cron, or by hand.
 
 ```bash
 # Watch a repo's events every 15s (default interval)
@@ -122,13 +137,16 @@ events-monitor.sh --api-path /users/some-user/events
 | Page size     | `--per-page`    | `GITHUB_APP_EVENTS_PER_PAGE`    | —                           | `50`                        |
 | Cursor file   | `--cursor-file` | `GITHUB_APP_EVENTS_CURSOR_FILE` | —                           | under `$CLAUDE_PLUGIN_DATA` |
 
-Output format (stdout, one line per event):
+**Output split** (so that, as a plugin monitor, only things worth reacting to become notifications):
 
-```
-[<created_at>] <EventType> by <actor> on <owner/repo> (id <event_id>)
-```
+- **stdout** (each line is a Monitor notification):
+  - one line per new event: `[<created_at>] <EventType> by <actor> on <owner/repo> (id <event_id>)`
+  - `[error]` lines (rate limit, auth, token-refresh failure), de-duplicated so a persistent failure doesn't spam every poll
+- **stderr** (operational log, _not_ notifications): `[start]`, `[baseline]`, and `[token]` (emitted only when `token-check.sh` actually rotates the token).
 
-Status lines are also written to stdout: `[start]`, `[baseline]`, `[token]` (emitted when `token-check.sh` actually rotates the token), and `[error]`. Errors (rate limit, auth, token-refresh failure) are emitted and de-duplicated so a persistent failure does not spam every poll. The cursor persists across runs, so restarting resumes from the last seen event.
+The cursor persists across runs, so restarting resumes from the last seen event.
+
+> **Note on event ordering:** GitHub event ids are not monotonic across event types (e.g. `PullRequestReviewEvent` ids sit in a lower range than `PushEvent` ids), so the cursor is **not** a numeric high-water mark. It stores the id of the newest event from the previous poll and relies on the API's reverse-chronological ordering — emitting everything above that id in the page (oldest-first), then recording the new top id.
 
 ### Known limitations
 

@@ -10,6 +10,10 @@
 # Usage:
 #   events-monitor.sh --repo <owner/repo> [--interval <seconds>] [--once]
 #                     [--api-path <path>] [--per-page <n>] [--cursor-file <path>]
+#                     [--if-configured]
+#
+# This script is also wired as a plugin-native background monitor (see the
+# plugin's experimental.monitors), which auto-starts it with --if-configured.
 #
 # Config precedence (highest first): CLI flag > env var > plugin setting > default
 #   interval:  --interval | GITHUB_APP_EVENTS_INTERVAL | eventsPollIntervalSeconds | 15
@@ -18,10 +22,14 @@
 #
 # --api-path lets you watch other event feeds, e.g. /orgs/<org>/events,
 #   /users/<user>/events, /networks/<owner>/<repo>/events, or /events.
+# --if-configured exits 0 quietly (instead of erroring) when no repo is set, so
+#   it is safe to auto-start as an always-on plugin monitor.
 #
-# Output (stdout — each line is one Monitor notification):
-#   [<created_at>] <EventType> by <actor> on <owner/repo> (id <event_id>)
-# Status lines: [start], [baseline], [token], [error].
+# Output split (so a plugin monitor only notifies on things you care about):
+#   stdout (each line = one Monitor notification):
+#     - one line per NEW event: [<created_at>] <EventType> by <actor> on <repo> (id <id>)
+#     - [error] lines (auth/rate-limit/token-refresh failures), de-duplicated
+#   stderr (operational log, not notifications): [start], [baseline], [token]
 #
 # Token source: same contract as the rest of the plugin — token-check.sh reads
 #   GITHUB_APP_ID / GITHUB_INSTALLATION_ID / GITHUB_APP_PRIVATE_KEY from the env
@@ -72,6 +80,7 @@ cli_api_path=""
 cli_per_page=""
 cli_cursor_file=""
 run_once=false
+if_configured=false   # when set, no-op (exit 0) instead of erroring if no repo is configured
 
 usage() {
   sed -n '2,30p' "$_self" | sed 's/^# \{0,1\}//'
@@ -85,8 +94,9 @@ while [ $# -gt 0 ]; do
     --api-path)    cli_api_path="${2:-}"; shift 2 ;;
     --per-page)    cli_per_page="${2:-}"; shift 2 ;;
     --cursor-file) cli_cursor_file="${2:-}"; shift 2 ;;
-    --once)        run_once=true; shift ;;
-    -h|--help)     usage 0 ;;
+    --once)          run_once=true; shift ;;
+    --if-configured) if_configured=true; shift ;;
+    -h|--help)       usage 0 ;;
     *) echo "github-app events-monitor: unknown arg: $1" >&2; usage 1 ;;
   esac
 done
@@ -107,6 +117,13 @@ if [ -n "$cli_api_path" ] || [ -n "${GITHUB_APP_EVENTS_API_PATH:-}" ]; then
   LABEL="${REPO:-$API_PATH}"
 else
   if [ -z "$REPO" ]; then
+    # No repo/api-path configured. When auto-started as a plugin monitor
+    # (--if-configured), this is the normal "not set up" state — exit quietly
+    # so the monitor simply doesn't watch anything until eventsRepo is set.
+    if [ "$if_configured" = true ]; then
+      echo "github-app events-monitor: no repo configured (set github-app eventsRepo, GITHUB_APP_EVENTS_REPO, or pass --repo); not watching." >&2
+      exit 0
+    fi
     echo "github-app events-monitor: --repo <owner/repo> is required (or set GITHUB_APP_EVENTS_REPO / eventsRepo, or pass --api-path)" >&2
     usage 1
   fi
@@ -141,7 +158,7 @@ ensure_token() {
   if [ -n "$after" ] && [ "$after" != "$before" ]; then
     local slug
     slug="$(jq -r '.app_slug // empty' "$META_FILE" 2>/dev/null || true)"
-    echo "[$(ts)] [token] refreshed${slug:+ as ${slug}[bot]} (expires ${after})"
+    echo "[$(ts)] [token] refreshed${slug:+ as ${slug}[bot]} (expires ${after})" >&2
     last_token_err=""   # a successful refresh clears any prior error state
   fi
   [ -s "$TOKEN_FILE" ]   # success only if a non-empty token exists
@@ -189,7 +206,7 @@ if [ -s "$CURSOR_FILE" ]; then
   [ -n "$last_seen" ] && baseline_needed=0
 fi
 
-echo "[$(ts)] [start] watching ${LABEL} (${API_PATH}) every ${INTERVAL}s (cursor=${last_seen:-<none>})"
+echo "[$(ts)] [start] watching ${LABEL} (${API_PATH}) every ${INTERVAL}s (cursor=${last_seen:-<none>})" >&2
 
 poll() {
   ensure_token || return 0   # error already emitted; try again next tick
@@ -205,7 +222,7 @@ poll() {
     baseline_needed=0
     local cnt
     cnt="$(printf '%s' "$RESP" | jq -r 'length' 2>/dev/null || echo 0)"
-    echo "[$(ts)] [baseline] ${cnt} recent events present; newest id ${last_seen} — reporting new events from here"
+    echo "[$(ts)] [baseline] ${cnt} recent events present; newest id ${last_seen} — reporting new events from here" >&2
     return 0
   fi
 

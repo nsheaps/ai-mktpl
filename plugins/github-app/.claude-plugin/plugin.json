@@ -25,5 +25,14 @@
       "name": "shared-lib",
       "version": "^1.0"
     }
-  ]
+  ],
+  "experimental": {
+    "monitors": [
+      {
+        "name": "github-events",
+        "command": "bash \"${CLAUDE_PLUGIN_ROOT}/bin/events-monitor.sh\" --if-configured",
+        "description": "New GitHub events on the configured repo (github-app eventsRepo)"
+      }
+    ]
+  }
 }

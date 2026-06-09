@@ -13,3 +13,7 @@
 
 - `SessionStart` (`bash`) — GitHub App token lifecycle: generate on session start, refresh before expiry via PreToolUse hook
 - `PreToolUse` (`bash`) — GitHub App token lifecycle: generate on session start, refresh before expiry via PreToolUse hook
+
+## Monitors
+
+- `github-events` (`experimental.monitors`) — auto-starts `bin/events-monitor.sh --if-configured`; polls the GitHub events REST API as the App and emits new events as notifications. No-op until `eventsRepo` / `GITHUB_APP_EVENTS_REPO` is set. Does not load for project-scope plugin installs.
