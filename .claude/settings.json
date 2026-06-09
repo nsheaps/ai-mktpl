@@ -133,7 +133,8 @@
     "shared-lib@ai-mktpl": true,
     "sequential-thinking@ai-mktpl": false,
     "todo-sync@ai-mktpl": false,
-    "web-auto-approve@ai-mktpl": true
+    "web-auto-approve@ai-mktpl": true,
+    "hook-utils@agents": true
   },
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
@@ -152,6 +153,12 @@
       "source": {
         "source": "github",
         "repo": "braintrustdata/braintrust-claude-plugin"
+      }
+    },
+    "agents": {
+      "source": {
+        "source": "github",
+        "repo": "nsheaps/agents"
       }
     }
   }
