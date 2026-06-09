@@ -206,7 +206,9 @@ jobs:
             mise run lint
 
             # Stage only the files this job is allowed to touch.
-            git add plugins/*/.claude-plugin/plugin.json plugins/*/CHANGELOG.md .claude-plugin/marketplace.json 2>/dev/null || true
+            git add plugins/*/.claude-plugin/plugin.json 2>/dev/null || true
+            git add plugins/*/CHANGELOG.md 2>/dev/null || true
+            git add .claude-plugin/marketplace.json 2>/dev/null || true
 
             if git diff --cached --quiet; then
               echo "No version/marketplace changes to push"
