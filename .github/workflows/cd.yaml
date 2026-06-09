@@ -173,55 +173,60 @@ jobs:
       - name: Install yarn dependencies
         run: yarn install --immutable
 
-      - name: Auto-bump changed plugins (skip already bumped)
-        id: bump
+      # Bump versions, regenerate marketplace, and push — resilient to main
+      # advancing under us. Feature PRs merge to main in rapid succession, so
+      # the SHA checked out at trigger time can be stale by the time we push;
+      # a bare `git push` then fails with "non-fast-forward" and the marketplace
+      # update is silently lost. Both the version bumps and marketplace.json are
+      # fully DERIVED (bumps from the cd/last-release diff, marketplace from the
+      # plugin.json set), so on every attempt we resync to the latest origin/main
+      # and recompute from scratch. Self-healing: if a concurrent run already
+      # bumped a plugin and advanced cd/last-release, the recompute produces no
+      # further changes.
+      - name: Bump versions, update marketplace, and push (sync + retry)
         shell: bash
         env:
           BASE_REF: ${{ steps.resolve-base.outputs.base-ref }}
         run: |
-          # On main, use the same ref for both change detection and version comparison
-          OUTPUT=$(mise run auto-bump-plugins "--change-base=$BASE_REF" "--version-base=$BASE_REF")
-          echo "has-bumps=$(echo "$OUTPUT" | jq -r '.has_bumps')" >> $GITHUB_OUTPUT
+          set -euo pipefail
+          MAX_ATTEMPTS=5
+          attempt=0
+          while [ "$attempt" -lt "$MAX_ATTEMPTS" ]; do
+            attempt=$((attempt + 1))
 
-      - name: Run lint after version bump
-        if: steps.bump.outputs.has-bumps == 'true'
-        run: mise run lint
+            # Resync to the latest main (and tags, in case a concurrent CD run
+            # already moved cd/last-release) and start from a clean tree.
+            git fetch origin main --tags --force
+            git reset --hard origin/main
 
-      - name: Commit version bumps
-        if: steps.bump.outputs.has-bumps == 'true'
-        uses: stefanzweifel/git-auto-commit-action@v7
-        with:
-          commit_message: 'chore: bump plugin versions [skip ci]'
-          commit_user_name: ${{ steps.auth.outputs.user-name }}
-          commit_user_email: ${{ steps.auth.outputs.user-email }}
-          file_pattern: 'plugins/*/.claude-plugin/plugin.json plugins/*/CHANGELOG.md'
-          push_options: '--no-verify'
-          skip_push: true
+            # Recompute bumps against the (stable) release-tag base, then
+            # regenerate marketplace.json from the resulting plugin.json set.
+            mise run auto-bump-plugins "--change-base=$BASE_REF" "--version-base=$BASE_REF" >/dev/null
+            mise run update-marketplace
+            mise run lint
 
-      - name: Update marketplace metadata
-        run: mise run update-marketplace
+            # Stage only the files this job is allowed to touch.
+            git add plugins/*/.claude-plugin/plugin.json plugins/*/CHANGELOG.md .claude-plugin/marketplace.json 2>/dev/null || true
 
-      - name: Run lint after marketplace update
-        run: mise run lint
+            if git diff --cached --quiet; then
+              echo "No version/marketplace changes to push"
+              break
+            fi
 
-      - name: Commit marketplace changes
-        uses: stefanzweifel/git-auto-commit-action@v7
-        with:
-          commit_message: 'chore: update marketplace metadata [skip ci]'
-          commit_user_name: ${{ steps.auth.outputs.user-name }}
-          commit_user_email: ${{ steps.auth.outputs.user-email }}
-          file_pattern: '.claude-plugin/marketplace.json'
-          push_options: '--no-verify'
-          skip_push: true
+            git commit --no-verify -m 'chore: bump plugin versions and update marketplace [skip ci]'
 
-      - name: Push all changes
-        run: |
-          # Push if there are any unpushed commits (version bumps OR marketplace updates)
-          if [ "$(git rev-list origin/main..HEAD 2>/dev/null | wc -l)" -gt 0 ]; then
-            git push
-          else
-            echo "No unpushed commits, skipping push"
-          fi
+            if git push origin HEAD:main; then
+              echo "Pushed plugin/marketplace updates on attempt $attempt"
+              break
+            fi
+
+            if [ "$attempt" -ge "$MAX_ATTEMPTS" ]; then
+              echo "::error::CD push failed after $MAX_ATTEMPTS attempts (main kept advancing)"
+              exit 1
+            fi
+            echo "Push rejected (attempt $attempt) — main advanced; resyncing and retrying"
+            sleep $((attempt * 3))
+          done
 
       - name: Update release tag
         run: |
