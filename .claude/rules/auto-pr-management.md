@@ -25,9 +25,9 @@ Update the PR description **after every push** to reflect the current state of c
 
 ## How to Authenticate
 
-Use the `GH_TOKEN` environment variable with the `gh` CLI. Since the git remote in web sessions is a local proxy, use `gh api` with `--hostname github.com` for all GitHub API calls (not `gh pr create` which requires a GitHub remote).
+Use the `GH_TOKEN` environment variable with the `gh` CLI. The github plugin's SessionStart hook automatically sets `GH_HOST` and `GH_REPO` in web sessions, so standard `gh` subcommands (`gh pr create`, `gh issue list`, etc.) work normally.
 
-The `gh` CLI should already be configured via the mise or GitHub claude-code plugin. If `gh` is not available, investigate the startup hooks for those plugins..
+The `gh` CLI should already be configured via the mise or GitHub claude-code plugin. If `gh` is not available, investigate the startup hooks for those plugins.
 
 ## Creating a PR
 
@@ -42,7 +42,7 @@ After subsequent pushes, update the PR body to reflect all changes.
 
 ## Checking for an Existing PR
 
-Before creating, check if a PR already exists for the current branch. If one exists, update it instead of creating a new one. Use server-side filtering (e.g. `?head=nsheaps:<branch-name>&state=open`) for efficiency.
+Before creating, check if a PR already exists for the current branch. If one exists, update it instead of creating a new one (e.g. `gh pr list --head "<branch-name>" --state open`).
 
 ## PR Title Conventions
 

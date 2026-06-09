@@ -115,20 +115,17 @@ CI on the latest commit of every branch is essential — it gates merges, valida
 
 **CRITICAL:** All CI checks must pass before a PR can be merged. After pushing changes:
 
-1. **Check CI status** using the GitHub API via `GH_TOKEN` (available in environment):
+1. **Check CI status** using `gh` (with `GH_HOST`/`GH_REPO` set automatically in web sessions):
    ```bash
    eval "$(mise activate bash)"
-   # Get check runs for latest commit on a PR
-   gh api repos/nsheaps/ai-mktpl/commits/<SHA>/check-runs \
-     --hostname github.com \
-     --jq '.check_runs[] | {name, status, conclusion}'
+   gh pr checks <PR_NUMBER>
    ```
 2. **Wait for checks to complete** — don't assume a push is done until CI reports back
 3. **Fix failures before moving on** — a failing CI is a blocker, not a "nice to have"
 4. **Review logs for failures** to understand root cause:
    ```bash
    eval "$(mise activate bash)"
-   gh api repos/nsheaps/ai-mktpl/actions/jobs/<JOB_ID>/logs --hostname github.com
+   gh run view <RUN_ID> --log
    ```
 
 ### Common CI Pitfalls
@@ -138,14 +135,17 @@ CI on the latest commit of every branch is essential — it gates merges, valida
 - **Run `mise run validate` locally** before pushing to catch validation errors early
 - **Run `mise run lint` locally** before pushing to catch linting issues
 
-### Accessing GitHub API in Web Sessions
+### Accessing GitHub in Web Sessions
 
-In Claude Code web sessions, `gh` is installed via mise but the remote is a local proxy. Use `--hostname github.com` with `gh api` commands, or use `GH_TOKEN` directly:
+In Claude Code web sessions, `gh` is installed via mise and the github plugin's SessionStart hook sets `GH_HOST` and `GH_REPO` automatically, so standard `gh` subcommands work normally:
 
 ```bash
 eval "$(mise activate bash)"
-gh api repos/nsheaps/ai-mktpl/pulls/<PR_NUMBER> --hostname github.com
+gh pr view <PR_NUMBER>
+gh pr checks <PR_NUMBER>
 ```
+
+Prefer high-level `gh` subcommands (`gh pr`, `gh run`, `gh issue`) over raw `gh api` calls — they're clearer and handle host/repo resolution for you.
 
 ## Secrets Used
 

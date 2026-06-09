@@ -43,6 +43,7 @@ _wait_for_shared_lib() {
 _wait_for_shared_lib "plugin-config-read.sh"
 _wait_for_shared_lib "tool-install.sh"
 _wait_for_shared_lib "hook-logging.sh"
+_wait_for_shared_lib "env-file.sh"
 
 # shellcheck source=/dev/null
 source "$SHARED_LIB_DIR/plugin-config-read.sh"
@@ -50,6 +51,8 @@ source "$SHARED_LIB_DIR/plugin-config-read.sh"
 source "$SHARED_LIB_DIR/tool-install.sh"
 # shellcheck source=/dev/null
 source "$SHARED_LIB_DIR/hook-logging.sh"
+# shellcheck source=/dev/null
+source "$SHARED_LIB_DIR/env-file.sh"
 # --- Guards ---
 
 plugin_is_enabled || { hook_log "plugin disabled, skipping"; hook_respond; exit 0; }
@@ -153,6 +156,51 @@ do_install() {
   if [ "$auto_auth_check" = "true" ]; then
     hook_log_step "auth-check" "Checking GitHub CLI authentication"
     "$gh_bin" auth status 2>&1 || hook_log "gh auth not configured"
+  fi
+
+  # --- Set GH_HOST and GH_REPO so regular gh subcommands work in web sessions ---
+  # In web sessions the git remote is a local proxy, so gh can't infer the
+  # GitHub host or repo from it. Exporting these env vars fixes that.
+  #
+  # Gated to web sessions (CLAUDE_CODE_REMOTE) on purpose: in a local session
+  # gh infers host/repo from the cwd's real remote, and setting GH_REPO there
+  # would override that for the whole session (e.g. after cd'ing elsewhere).
+  # See: https://cli.github.com/manual/gh_help_environment
+  if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+    return 0
+  fi
+
+  hook_log_step "env-vars" "Configuring GH_HOST and GH_REPO for web session"
+
+  if [ -z "${GH_HOST:-}" ]; then
+    export GH_HOST="github.com"
+    if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
+      env_file_upsert_export "$CLAUDE_ENV_FILE" "GH_HOST" "github.com"
+    fi
+    hook_log "Set GH_HOST=github.com"
+  fi
+
+  if [ -z "${GH_REPO:-}" ]; then
+    # Infer owner/repo from the git remote URL. Strip a trailing ".git" first,
+    # then extract the trailing "owner/repo" segment. (sed -E is POSIX ERE and
+    # has no non-greedy quantifier, so it can't strip the suffix in one pass.)
+    # Real web-session remote looks like:
+    #   http://local_proxy@127.0.0.1:<port>/git/nsheaps/ai-mktpl
+    local repo_slug=""
+    repo_slug="$(git remote get-url origin 2>/dev/null \
+      | sed -E -e 's#\.git$##' -e 's#.*[:/]([^/]+/[^/]+)$#\1#' 2>/dev/null || true)"
+    # sed echoes its input unchanged when nothing matches, so a URL with no
+    # "owner/repo" path segment would otherwise be exported verbatim — pinning
+    # gh to a bogus repo (worse than unset). Require a clean owner/repo shape.
+    if printf '%s' "$repo_slug" | grep -qE '^[^/]+/[^/]+$'; then
+      export GH_REPO="$repo_slug"
+      if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
+        env_file_upsert_export "$CLAUDE_ENV_FILE" "GH_REPO" "$repo_slug"
+      fi
+      hook_log "Set GH_REPO=$repo_slug"
+    else
+      hook_log "Could not infer GH_REPO from git remote"
+    fi
   fi
 }
 

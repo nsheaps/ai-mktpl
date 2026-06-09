@@ -13,6 +13,48 @@ description: >
 The GitHub CLI (`gh`) brings GitHub workflows to the terminal. It provides
 commands for pull requests, issues, repos, actions, and direct API access.
 
+## Web Sessions
+
+In Claude Code web sessions, the git remote is a local proxy, not github.com. The `gh` CLI infers the host and repo from the remote, so subcommands like `gh pr create` would fail without configuration.
+
+The proxy remote URL looks like this (the trailing `owner/repo` is what the hook extracts for `GH_REPO`):
+
+```
+http://local_proxy@127.0.0.1:<port>/git/nsheaps/ai-mktpl
+```
+
+### Solution: GH_HOST and GH_REPO Environment Variables
+
+The github plugin's SessionStart hook **automatically sets** `GH_HOST` and `GH_REPO` in web sessions. Once set, all standard `gh` subcommands work normally:
+
+```bash
+# These all work in web sessions when GH_HOST and GH_REPO are set:
+gh pr create --draft --title "Add feature X" --body "Description"
+gh pr list
+gh pr view 123
+gh issue create --title "Bug: X" --body "Details"
+gh issue list --label "bug"
+gh run list
+gh run view 12345 --log
+```
+
+If for some reason the env vars are not set (e.g., hook didn't run), set them manually:
+
+```bash
+export GH_HOST="github.com"
+export GH_REPO="owner/repo"  # inferred from git remote by the hook
+```
+
+Reference: https://cli.github.com/manual/gh_help_environment
+
+### Fallback: gh api
+
+For edge cases or direct API access, `gh api` with `--hostname github.com` always works:
+
+```bash
+gh api repos/OWNER/REPO/pulls --hostname github.com --jq '.[].title'
+```
+
 ## Quick Reference
 
 ### Authentication

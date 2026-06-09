@@ -1,15 +1,15 @@
 ---
-name: how-this-repo-works
+name: nsheaps-claude-marketplaces
 description: |
-  Use this skill to understand the nsheaps/ai plugin marketplace build, release, and propagation pipeline.
+  Use this skill to understand the claude marketplaces in the nsheaps github org: the plugin marketplace build, release, and propagation pipeline.
   Recall this skill when working on CI/CD workflows, mise tasks, plugin versioning, marketplace updates,
   or when asked how plugins get from source code to a user's Claude Code installation.
   Also recall when debugging version bumps, marketplace.json drift, or plugin cache issues.
 ---
 
-# How the nsheaps/ai Plugin Marketplace Works
+# How the nsheaps/ai-mktpl Plugin Marketplace Works
 
-This skill documents the full lifecycle of a Claude Code plugin in the `nsheaps/ai-mktpl` repository (local clone at `~/src/nsheaps/ai/`), from source code to installation on a user's machine.
+This skill documents the full lifecycle of a Claude Code plugin in the `nsheaps/ai-mktpl` repository (local clone at `~/src/nsheaps/ai-mktpl/`), from source code to installation on a user's machine.
 
 Repository: [nsheaps/ai-mktpl on GitHub](https://github.com/nsheaps/ai-mktpl)
 
