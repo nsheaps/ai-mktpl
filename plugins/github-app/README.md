@@ -11,7 +11,8 @@ GitHub App installation tokens expire after 1 hour. This plugin generates tokens
 - **Git credential helper**: Seamless `git push` / `gh` auth via shared token file
 - **Per-agent isolation**: All files written under `$CLAUDE_PLUGIN_DATA/` — each agent automatically gets its own isolated directory
 - **Manual-operation skills**: Every hook operation (token lifecycle, session env wiring, bot git identity) has a skill so it can be reproduced by hand when a hook doesn't run
-- **Events monitor**: `bin/events-monitor.sh` polls the GitHub events REST API as the App, emits one line per new event, and self-refreshes the token (see [Events Monitor](#events-monitor))
+- **Hook-driven event delivery**: GitHub events delivered at session start, on each user prompt, and polled while the session is stopping — configurable via `eventsDelivery` (see [GitHub Events Delivery](#github-events-delivery))
+- **CLI events watcher**: `bin/events-monitor.sh` polls the GitHub events REST API manually as the App, emits one line per new event (see [Manual Events Monitor](#manual-events-monitor))
 - **Authentication skill**: Shared with `github` plugin — covers all auth methods
 
 ## Setup
@@ -88,31 +89,73 @@ github-app:
   # Set to 0 to disable.
   waitForEnvTimeoutSeconds: 15
 
-  # bin/events-monitor.sh defaults (CLI flag > env var > setting > default)
-  eventsRepo: "" # owner/repo to watch (empty = pass via --repo)
-  eventsPollIntervalSeconds: 15 # seconds between polls
+  # --- Hook-driven event delivery ---
+  # eventsDelivery modes: disabled (default) | file | user | both | summary
+  eventsDelivery: "disabled"
+  eventsRepo: "" # owner/repo to watch (required for any delivery)
+  eventsPollIntervalSeconds: 15
+  eventsStopTimeoutSeconds: 600  # max seconds to poll during Stop before allowing exit
+  eventsStopNoticeSeconds: 480   # seconds before emitting "no events received" notice
 ```
 
-## Events Monitor
+## GitHub Events Delivery
 
-`bin/events-monitor.sh` polls the [GitHub events REST API](https://docs.github.com/rest/activity/events) as the App and prints one line per **new** event. The first poll records a baseline (the newest event's id) without dumping the existing backlog, so you only get notified about events that arrive afterward. It calls `token-check.sh` before each poll, so it keeps running past the 1-hour installation-token TTL.
+The plugin delivers GitHub events through Claude Code hooks at key lifecycle points. This replaces the previous `experimental.monitors` auto-start approach, which only worked for user-scope plugins.
 
-### Auto-start (plugin monitor)
+### Enabling delivery
 
-The plugin declares `bin/events-monitor.sh` as a [plugin monitor](https://code.claude.com/docs/en/plugins-reference#monitors) (`experimental.monitors` in `plugin.json`), so Claude Code starts it automatically and delivers each new event to Claude as a notification — no need to launch it by hand. It auto-starts with `--if-configured`, which makes it **a no-op until a repo is configured**: set `eventsRepo` (plugin setting) or `GITHUB_APP_EVENTS_REPO` to begin watching.
+Set `eventsDelivery` and `eventsRepo` in your `plugins.settings.yaml`:
 
 ```yaml
-# plugins.settings.yaml — turn the auto-monitor on for a repo
 github-app:
   eventsRepo: "owner/repo"
-  eventsPollIntervalSeconds: 15
+  eventsDelivery: "summary"  # or: user, both, file
 ```
 
-**Caveat — project-scope plugins:** Claude Code does **not** load background monitors for plugins enabled at _project_ scope (checked into a repo's `.claude/settings.json`); only personal/user-scope plugins auto-start monitors ([reference](https://code.claude.com/docs/en/plugins-reference#monitors)). If `github-app` is installed `--scope project`, run the script manually (below) or via the `Monitor` tool instead. Plugin monitors also require Claude Code **v2.1.105+** and run only in interactive CLI sessions.
+### Delivery modes
 
-### Manual / cron use
+| Mode | Audit log | User (`systemMessage`) | Claude (`additionalContext`) |
+| --- | --- | --- | --- |
+| `disabled` (default) | — | — | — |
+| `file` | yes | — | — |
+| `user` | yes | full event list | — |
+| `both` | yes | full event list | full event list |
+| `summary` | yes | `events received from github` | full event list |
 
-It also runs under Claude Code's `Monitor` tool, cron, or by hand.
+The audit log is always written to `$CLAUDE_PLUGIN_DATA/events-delivery.log` for all non-disabled modes.
+
+### Hook lifecycle
+
+| Hook | Matcher | Behavior |
+| --- | --- | --- |
+| `SessionStart` | `startup` | Shows the **last 10** events; sets cursor baseline |
+| `SessionStart` | `resume` | Shows events since last fetch (cursor-based) |
+| `UserPromptSubmit` | `*` | Shows events since last fetch; async + rewakes Claude if any |
+| `Stop` | `*` | Polls up to `eventsStopTimeoutSeconds`; rewakes on new events |
+
+**Stop hook behavior**: The Stop hook runs asynchronously while Claude is preparing to stop. It polls the events API every `eventsPollIntervalSeconds` seconds:
+- If new events arrive: delivers them and rewakes Claude (exit 2)
+- At `eventsStopNoticeSeconds` with no events: emits `no github events received in the last <X>` and rewakes
+- At `eventsStopTimeoutSeconds`: allows stop (exit 0)
+
+**Claude-facing messages** always begin with: `not every event may be related to your current working task`
+
+> **Note on async/rewake:** The `UserPromptSubmit` and `Stop` hooks use `async: true` + `asyncRewake: true`. These fields are documented in the design notes as `[VERIFY]` — interactive session validation is needed to confirm the rewake mechanism behaves as expected.
+
+### Event ordering note
+
+GitHub event ids are not monotonic across event types (e.g. `PullRequestReviewEvent` ids sit in a lower range than `PushEvent` ids). The cursor stores the id of the newest event seen and relies on the API's reverse-chronological ordering — emitting everything above that id in the page (oldest-first), then recording the new top id.
+
+### State files
+
+| File | Purpose |
+| --- | --- |
+| `events-hook-state.json` | Cursor (last seen id), last-fetch timestamp, Stop hook state |
+| `events-delivery.log` | Append-only audit log of all deliveries |
+
+## Manual Events Monitor
+
+`bin/events-monitor.sh` is a long-running CLI watcher (not a hook). Use it via the `Monitor` tool, cron, or directly when you want a real-time event feed.
 
 ```bash
 # Watch a repo's events every 15s (default interval)
@@ -137,20 +180,18 @@ events-monitor.sh --api-path /users/some-user/events
 | Page size     | `--per-page`    | `GITHUB_APP_EVENTS_PER_PAGE`    | —                           | `50`                        |
 | Cursor file   | `--cursor-file` | `GITHUB_APP_EVENTS_CURSOR_FILE` | —                           | under `$CLAUDE_PLUGIN_DATA` |
 
-**Output split** (so that, as a plugin monitor, only things worth reacting to become notifications):
+**Output split**:
 
 - **stdout** (each line is a Monitor notification):
   - one line per new event: `[<created_at>] <EventType> by <actor> on <owner/repo> (id <event_id>)`
-  - `[error]` lines (rate limit, auth, token-refresh failure), de-duplicated so a persistent failure doesn't spam every poll
-- **stderr** (operational log, _not_ notifications): `[start]`, `[baseline]`, and `[token]` (emitted only when `token-check.sh` actually rotates the token).
+  - `[error]` lines (rate limit, auth, token-refresh failure), de-duplicated
+- **stderr** (operational log): `[start]`, `[baseline]`, and `[token]` (emitted only when `token-check.sh` rotates the token).
 
-The cursor persists across runs, so restarting resumes from the last seen event.
-
-> **Note on event ordering:** GitHub event ids are not monotonic across event types (e.g. `PullRequestReviewEvent` ids sit in a lower range than `PushEvent` ids), so the cursor is **not** a numeric high-water mark. It stores the id of the newest event from the previous poll and relies on the API's reverse-chronological ordering — emitting everything above that id in the page (oldest-first), then recording the new top id.
+The monitor uses its own cursor file (separate from the hook-state cursor) so it can run alongside hook-driven delivery without interference.
 
 ### Known limitations
 
-- **Single-page polling.** Each poll fetches one page (`--per-page`, default 50) and advances the cursor to that page's newest id. If more than `per_page` new events land in a single interval, the overflow (oldest) events are skipped. At the default 15s interval this is very unlikely; for high-traffic feeds, lower the interval or raise `--per-page`. Pagination is intentionally omitted to keep the monitor simple.
+- **Single-page polling.** Each poll fetches one page (`--per-page`, default 50) and advances the cursor to that page's newest id. If more than `per_page` new events land in a single interval, the overflow (oldest) events are skipped. Pagination is intentionally omitted to keep the monitor simple.
 
 ## On-disk Layout
 
@@ -166,7 +207,9 @@ $CLAUDE_PLUGIN_DATA/
 ├── github-app-env            # Runtime env file sourced via CLAUDE_ENV_FILE
 ├── github-git-identity       # Stable identity file (not overwritten by token refresh)
 ├── github-app-last-check     # Debounce timestamp
-├── events-cursor-*           # events-monitor.sh cursor (highest event id seen, per feed)
+├── events-hook-state.json    # Hook delivery state: cursor (last_seen_id), last_fetch_ts, Stop state
+├── events-delivery.log       # Append-only audit log of hook-delivered events
+├── events-cursor-*           # events-monitor.sh cursor (per feed, independent of hook state)
 ├── gh/                       # Isolated GH_CONFIG_DIR
 └── git/config                # Isolated GIT_CONFIG_GLOBAL target
 ```
@@ -190,7 +233,9 @@ plugins/github-app/
 │   ├── generate-token.sh            # JWT generation + token exchange
 │   ├── token-check.sh               # Token validity check + refresh logic
 │   ├── token-status.sh              # Token status JSON output
-│   └── events-monitor.sh            # Poll the events REST API; emit new events; cursor + self-refresh
+│   ├── events-lib.sh                # Shared fetch/cursor/delivery library (sourced by monitor + fetch)
+│   ├── events-fetch.sh              # One-shot hook entrypoint (session-start, user-prompt, stop)
+│   └── events-monitor.sh            # Long-running CLI watcher; sources events-lib.sh
 ├── lib/
 │   ├── env-file.sh                  # Runtime env file writer
 │   ├── token-utils.sh               # Token expiry helpers

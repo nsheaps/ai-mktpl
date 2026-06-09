@@ -1,6 +1,6 @@
 {
   "name": "github-app",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "env-var driven GitHub App token lifecycle for Claude Code sessions. Pairs with the 1pass plugin for secret injection.",
   "author": {
     "name": "Nathan Heaps",
@@ -25,14 +25,5 @@
       "name": "shared-lib",
       "version": "^1.0"
     }
-  ],
-  "experimental": {
-    "monitors": [
-      {
-        "name": "github-events",
-        "command": "bash \"${CLAUDE_PLUGIN_ROOT}/bin/events-monitor.sh\" --if-configured",
-        "description": "New GitHub events on the configured repo (github-app eventsRepo)"
-      }
-    ]
-  }
+  ]
 }

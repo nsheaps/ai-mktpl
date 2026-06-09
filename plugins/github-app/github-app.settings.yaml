@@ -10,10 +10,29 @@ github-app:
   # Set to 0 to disable the wait entirely.
   waitForEnvTimeoutSeconds: 15
 
-  # --- bin/events-monitor.sh defaults ---
-  # Used by the events monitor when the matching CLI flag / env var is unset.
-  # Precedence: CLI flag > env var > these settings > built-in default.
-  # Default repo to watch (owner/repo). Empty = must be passed via --repo.
+  # --- Hook-driven event delivery ---
+  # Controls how GitHub events are delivered to Claude and/or the user.
+  # Requires eventsRepo to be set; no-ops otherwise.
+  #
+  # eventsDelivery modes:
+  #   disabled -- (default) no fetch, no delivery
+  #   file     -- append events to audit log only; nothing shown to Claude/user
+  #   user     -- full event list as systemMessage (user-facing transcript)
+  #   both     -- full event list as systemMessage AND additionalContext (Claude-facing)
+  #   summary  -- systemMessage="events received from github" (user); full details as additionalContext (Claude)
+  eventsDelivery: 'disabled'
+
+  # Repository to watch for events (owner/repo). Required for any delivery.
   eventsRepo: ''
-  # Seconds between polls of the GitHub events REST API.
+
+  # Seconds between event poll attempts (used by events-monitor.sh and the
+  # Stop hook polling loop).
   eventsPollIntervalSeconds: 15
+
+  # Stop hook: maximum seconds to poll for events before allowing the session
+  # to stop. After this duration, the stop proceeds regardless of events.
+  eventsStopTimeoutSeconds: 600
+
+  # Stop hook: seconds after which a "no events received" notice is emitted to
+  # Claude (and/or user) if no events have arrived. Must be < eventsStopTimeoutSeconds.
+  eventsStopNoticeSeconds: 480
