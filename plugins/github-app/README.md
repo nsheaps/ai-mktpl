@@ -94,8 +94,8 @@ github-app:
   eventsDelivery: "disabled"
   eventsRepo: "" # owner/repo to watch (required for any delivery)
   eventsPollIntervalSeconds: 15
-  eventsStopTimeoutSeconds: 600  # max seconds to poll during Stop before allowing exit
-  eventsStopNoticeSeconds: 480   # seconds before emitting "no events received" notice
+  eventsStopTimeoutSeconds: 600 # max seconds to poll during Stop before allowing exit
+  eventsStopNoticeSeconds: 480 # seconds before emitting "no events received" notice
 ```
 
 ## GitHub Events Delivery
@@ -109,31 +109,32 @@ Set `eventsDelivery` and `eventsRepo` in your `plugins.settings.yaml`:
 ```yaml
 github-app:
   eventsRepo: "owner/repo"
-  eventsDelivery: "summary"  # or: user, both, file
+  eventsDelivery: "summary" # or: user, both, file
 ```
 
 ### Delivery modes
 
-| Mode | Audit log | User (`systemMessage`) | Claude (`additionalContext`) |
-| --- | --- | --- | --- |
-| `disabled` (default) | — | — | — |
-| `file` | yes | — | — |
-| `user` | yes | full event list | — |
-| `both` | yes | full event list | full event list |
-| `summary` | yes | `events received from github` | full event list |
+| Mode                 | Audit log | User (`systemMessage`)        | Claude (`additionalContext`) |
+| -------------------- | --------- | ----------------------------- | ---------------------------- |
+| `disabled` (default) | —         | —                             | —                            |
+| `file`               | yes       | —                             | —                            |
+| `user`               | yes       | full event list               | —                            |
+| `both`               | yes       | full event list               | full event list              |
+| `summary`            | yes       | `events received from github` | full event list              |
 
 The audit log is always written to `$CLAUDE_PLUGIN_DATA/events-delivery.log` for all non-disabled modes.
 
 ### Hook lifecycle
 
-| Hook | Matcher | Behavior |
-| --- | --- | --- |
-| `SessionStart` | `startup` | Shows the **last 10** events; sets cursor baseline |
-| `SessionStart` | `resume` | Shows events since last fetch (cursor-based) |
-| `UserPromptSubmit` | `*` | Shows events since last fetch; async + rewakes Claude if any |
-| `Stop` | `*` | Polls up to `eventsStopTimeoutSeconds`; rewakes on new events |
+| Hook               | Matcher   | Behavior                                                      |
+| ------------------ | --------- | ------------------------------------------------------------- |
+| `SessionStart`     | `startup` | Shows the **last 10** events; sets cursor baseline            |
+| `SessionStart`     | `resume`  | Shows events since last fetch (cursor-based)                  |
+| `UserPromptSubmit` | `*`       | Shows events since last fetch; async + rewakes Claude if any  |
+| `Stop`             | `*`       | Polls up to `eventsStopTimeoutSeconds`; rewakes on new events |
 
 **Stop hook behavior**: The Stop hook runs asynchronously while Claude is preparing to stop. It polls the events API every `eventsPollIntervalSeconds` seconds:
+
 - If new events arrive: delivers them and rewakes Claude (exit 2)
 - At `eventsStopNoticeSeconds` with no events: emits `no github events received in the last <X>` and rewakes
 - At `eventsStopTimeoutSeconds`: allows stop (exit 0)
@@ -148,10 +149,10 @@ GitHub event ids are not monotonic across event types (e.g. `PullRequestReviewEv
 
 ### State files
 
-| File | Purpose |
-| --- | --- |
+| File                     | Purpose                                                      |
+| ------------------------ | ------------------------------------------------------------ |
 | `events-hook-state.json` | Cursor (last seen id), last-fetch timestamp, Stop hook state |
-| `events-delivery.log` | Append-only audit log of all deliveries |
+| `events-delivery.log`    | Append-only audit log of all deliveries                      |
 
 ## Manual Events Monitor
 
