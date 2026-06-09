@@ -108,7 +108,7 @@ github-app:
   eventsPollIntervalSeconds: 15
 ```
 
-**Caveat — project-scope plugins:** Claude Code does **not** load background monitors for plugins enabled at *project* scope (checked into a repo's `.claude/settings.json`); only personal/user-scope plugins auto-start monitors ([reference](https://code.claude.com/docs/en/plugins-reference#monitors)). If `github-app` is installed `--scope project`, run the script manually (below) or via the `Monitor` tool instead. Plugin monitors also require Claude Code **v2.1.105+** and run only in interactive CLI sessions.
+**Caveat — project-scope plugins:** Claude Code does **not** load background monitors for plugins enabled at _project_ scope (checked into a repo's `.claude/settings.json`); only personal/user-scope plugins auto-start monitors ([reference](https://code.claude.com/docs/en/plugins-reference#monitors)). If `github-app` is installed `--scope project`, run the script manually (below) or via the `Monitor` tool instead. Plugin monitors also require Claude Code **v2.1.105+** and run only in interactive CLI sessions.
 
 ### Manual / cron use
 
