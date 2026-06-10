@@ -171,6 +171,17 @@ _do_since_last_fetch() {
   local last_seen
   last_seen="$(evlib_get_last_seen_id)"
 
+  # No stored cursor yet (first run, or no prior session-start set one): establish
+  # a baseline silently like session-start-startup — record the newest id and
+  # report nothing, so we only deliver events that arrive AFTER this point rather
+  # than dumping up to per_page backlog events. (Henry review follow-up.)
+  if [ -z "$last_seen" ]; then
+    local newest_id
+    newest_id="$(printf '%s' "$EVLIB_RESP" | jq -r '.[0].id // empty' 2>/dev/null || true)"
+    [ -n "$newest_id" ] && evlib_write_cursor "$newest_id"
+    exit 0
+  fi
+
   evlib_extract_new_events "$last_seen"
 
   [ -n "$EVLIB_NEWEST_ID" ] || exit 0  # Empty feed.
@@ -184,8 +195,9 @@ _do_since_last_fetch() {
     _deliver_and_exit "$EVLIB_NEW_EVENTS" "$header"
   fi
 
-  # No new events: update the fetch timestamp (cursor id unchanged).
-  evlib_write_cursor "${last_seen:-$EVLIB_NEWEST_ID}"
+  # No new events: refresh the fetch timestamp (cursor id unchanged; last_seen is
+  # guaranteed non-empty here — the no-cursor case baselined and exited above).
+  evlib_write_cursor "$last_seen"
   exit 0
 }
 
