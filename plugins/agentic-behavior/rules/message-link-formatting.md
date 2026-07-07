@@ -6,20 +6,20 @@
 
 When mentioning artifacts in channel messages, always use the full markdown link format:
 
-| Artifact      | Format                                 | Example                                                               |
-| ------------- | -------------------------------------- | --------------------------------------------------------------------- |
-| PR            | `[PR repo-name#N](url)`                | [PR repo-name#458](https://github.com/nsheaps/repo-name/pull/458)               |
-| Issue         | `[repo-name#N](url)`  OR `[nsheaps/repo-name#N](url)`                | [nsheaps/repo-name#40](https://github.com/nsheaps/repo-name/issues/40)            |
-| Commit        | `repo-name@[\`abc1234\`](url)`                   | [`dcffa5a`](https://github.com/nsheaps/reponame/commit/dcffa5a)       |
-| External link | `[description](url)`                   | [upstream bug](https://github.com/anthropics/claude-code/issues/6305) |
+| Artifact      | Format                                               | Example                                                                |
+| ------------- | ---------------------------------------------------- | ---------------------------------------------------------------------- |
+| PR            | `[PR repo-name#N](url)`                              | [PR repo-name#458](https://github.com/nsheaps/repo-name/pull/458)      |
+| Issue         | `[repo-name#N](url)` OR `[nsheaps/repo-name#N](url)` | [nsheaps/repo-name#40](https://github.com/nsheaps/repo-name/issues/40) |
+| Commit        | `repo-name@[\`abc1234\`](url)`                       | [`dcffa5a`](https://github.com/nsheaps/reponame/commit/dcffa5a)        |
+| External link | `[description](url)`                                 | [upstream bug](https://github.com/anthropics/claude-code/issues/6305)  |
 
 ## Anti-Patterns
 
-| Bad                                            | Good                                                                                |
-| ---------------------------------------------- | ----------------------------------------------------------------------------------- |
-| `PR #458 fixes the duplicate hooks`            | `[PR repo-name#458](https://github.com/nsheaps/repo-name/pull/458) fixes the duplicate hooks` |
-| `Fixed in commit dcffa5a`                      | `Fixed in [\`dcffa5a\`](https://github.com/nsheaps/ai-mktpl/commit/dcffa5a)`        |
-| `See issue 40`                                 | `See [repo-name#40](https://github.com/nsheaps/repo-name/issues/40)`                    |
+| Bad                                             | Good                                                                                          |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `PR #458 fixes the duplicate hooks`             | `[PR repo-name#458](https://github.com/nsheaps/repo-name/pull/458) fixes the duplicate hooks` |
+| `Fixed in commit dcffa5a`                       | `Fixed in [\`dcffa5a\`](https://github.com/nsheaps/ai-mktpl/commit/dcffa5a)`                  |
+| `See issue 40`                                  | `See [repo-name#40](https://github.com/nsheaps/repo-name/issues/40)`                          |
 | `https://github.com/nsheaps/repo-name/pull/458` | `[PR repo-name#458](https://github.com/nsheaps/repo-name/pull/458)`                           |
 
 ## Why
