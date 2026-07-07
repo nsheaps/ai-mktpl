@@ -44,7 +44,7 @@
     {
       "name": "agentic-behavior",
       "description": "Skills for configuring Claude Code, behavior correction, memory tracking, autonomy rules, time-context awareness, and session exit/restart. Combines prompt history tracking, git-backed memory sync, the self-checking Ralph loop pattern, and graceful session exit via SIGINT.",
-      "version": "0.4.2",
+      "version": "0.4.3",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -357,7 +357,7 @@
     {
       "name": "github",
       "description": "GitHub CLI installation, authentication, and workflow skill for Claude Code sessions. Consolidates gh-tool and github-auth-skill into a single plugin.",
-      "version": "0.1.17",
+      "version": "0.2.0",
       "author": {
         "name": "Nathan Heaps"
       },
