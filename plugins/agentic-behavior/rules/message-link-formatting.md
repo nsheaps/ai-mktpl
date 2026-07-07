@@ -23,7 +23,7 @@ When mentioning artifacts and resources in messages, always use the full markdow
 | `See issue 40`                                  | `See [repo-name#40](https://github.com/nsheaps/repo-name/issues/40)`                                      |
 | `https://github.com/nsheaps/repo-name/pull/458` | `[PR repo-name#458](https://github.com/nsheaps/repo-name/pull/458)`                                       |
 | `ABC-123`                                       | `[ABC-123](https://orgname.atlassian.net/browse/ABC-123)`                                                 |
-| `INC0048316`                                    | `[ABC-123](https://orgname.service-now.com/nav_to.do?uri=task_list.do?sysparm_query=number%3DINC0048316)` |
+| `INC0048316`                                    | `[INC0048316](https://orgname.service-now.com/nav_to.do?uri=task_list.do?sysparm_query=number%3DINC0048316)` |
 
 ## Why
 
