@@ -11,7 +11,7 @@ When mentioning artifacts and resources in messages, always use the full markdow
 | PR            | `[PR repo-name#N](url)`                                                                                                      | [PR repo-name#458](https://github.com/nsheaps/repo-name/pull/458)                                                   |
 | Issue         | `[repo-name#N](url)` OR `[nsheaps/repo-name#N](url)` (org can be skipped if personal org, or if most repos share common org) | [nsheaps/repo-name#40](https://github.com/nsheaps/repo-name/issues/40)                                              |
 | Ticket        | `[ABC-123](url)`                                                                                                             | [ABC-123](https://linear.app/org-name/issue/ABC-123) (or other relevant ticketing platform like Jira or ServiceNow) |
-| Commit        | `[\```repo-name@abc1234\`](url)`                                                                                               | [`repo-name@dcffa5a`](https://github.com/nsheaps/reponame/commit/dcffa5a)                                                     |
+| Commit        | ```[`repo-name@abc1234`](url)```                                                                                               | [`repo-name@dcffa5a`](https://github.com/nsheaps/reponame/commit/dcffa5a)                                                     |
 | External link | `[description](url)`                                                                                                         | [how to be awesome](https://github.com/anthropics/claude-code/wiki/being-awesome)                                   |
 
 ## Anti-Patterns
