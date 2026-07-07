@@ -44,7 +44,7 @@
     {
       "name": "agentic-behavior",
       "description": "Skills for configuring Claude Code, behavior correction, memory tracking, autonomy rules, time-context awareness, and session exit/restart. Combines prompt history tracking, git-backed memory sync, the self-checking Ralph loop pattern, and graceful session exit via SIGINT.",
-      "version": "0.4.4",
+      "version": "0.4.5",
       "author": {
         "name": "Nathan Heaps"
       },
