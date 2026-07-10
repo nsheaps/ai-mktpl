@@ -4,7 +4,7 @@
 # where a newer release broke postinstall in CI). Bump deliberately, not
 # silently on tool refresh.
 [tools]
-gh = "2.93.0"        # match agents
+gh = "2.94.0"        # match agents
 jq = "1.8.1"         # match agents
 node = "lts"
 python = "3.14.6"
