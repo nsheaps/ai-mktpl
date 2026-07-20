@@ -5,7 +5,7 @@
 # silently on tool refresh.
 [tools]
 gh = "2.95.0"        # match agents
-jq = "1.8.1"         # match agents
+jq = "1.8.2"         # match agents
 node = "lts"
 python = "3.14.6"
 bun = "1.3.14"       # match agents (agents repo also has 1.3.14, but this matches agents-fix-validate worktree)
