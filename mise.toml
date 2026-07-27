@@ -10,7 +10,7 @@ node = "lts"
 python = "3.14.6"
 bun = "1.3.14"       # match agents (agents repo also has 1.3.14, but this matches agents-fix-validate worktree)
 
-"npm:@anthropic-ai/claude-code" = "2.1.193"  # match agents — 2.1.150 broke postinstall in CI
+"npm:@anthropic-ai/claude-code" = "2.1.195"  # match agents — 2.1.150 broke postinstall in CI
 "npm:prettier" = "3.8.5"   # match agents
 "npm:eslint" = "10.6.0"    # match agents
 # Pinned to match package.json `packageManager` so the lockfile metadata version
