@@ -1,5 +1,5 @@
 {
-  "description": "GitHub App token lifecycle: generate on session start, refresh before expiry via PreToolUse hook",
+  "description": "GitHub App token lifecycle and hook-driven event delivery",
   "hooks": {
     "SessionStart": [
       {
@@ -8,6 +8,26 @@
           {
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/github-token-init.sh",
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/bin/events-fetch.sh --event session-start-startup",
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/bin/events-fetch.sh --event session-start-resume",
             "timeout": 30
           }
         ]
@@ -21,6 +41,34 @@
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/github-token-check.sh",
             "timeout": 15
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/bin/events-fetch.sh --event user-prompt-submit",
+            "timeout": 30,
+            "async": true,
+            "asyncRewake": true
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/bin/events-fetch.sh --event stop",
+            "timeout": 660,
+            "async": true,
+            "asyncRewake": true
           }
         ]
       }

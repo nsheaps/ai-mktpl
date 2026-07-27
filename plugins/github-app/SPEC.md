@@ -11,5 +11,15 @@
 
 ## Hooks
 
-- `SessionStart` (`bash`) — GitHub App token lifecycle: generate on session start, refresh before expiry via PreToolUse hook
-- `PreToolUse` (`bash`) — GitHub App token lifecycle: generate on session start, refresh before expiry via PreToolUse hook
+- `SessionStart` / matcher `*` (`bash`) — GitHub App token lifecycle: generate on session start, refresh before expiry via PreToolUse hook
+- `SessionStart` / matcher `startup` (`bash`) — Hook-driven event delivery: shows last 10 events and sets cursor baseline
+- `SessionStart` / matcher `resume` (`bash`) — Hook-driven event delivery: shows events since last fetch
+- `UserPromptSubmit` (`bash`, async + asyncRewake) — Hook-driven event delivery: fetches events since last fetch; rewakes Claude if any new events
+- `Stop` (`bash`, async + asyncRewake) — Hook-driven event delivery: polls for events up to eventsStopTimeoutSeconds; rewakes on new events or emits notice at eventsStopNoticeSeconds
+- `PreToolUse` (`bash`) — GitHub App token lifecycle: debounced validity check before every tool call
+
+## Entrypoints
+
+- `bin/events-fetch.sh` — One-shot event fetcher used by the hooks above. Accepts `--event <type>` and routes output per `eventsDelivery` config.
+- `bin/events-lib.sh` — Shared library: fetch/cursor/delivery logic sourced by events-fetch.sh and events-monitor.sh.
+- `bin/events-monitor.sh` — Long-running CLI watcher for use via Monitor tool, cron, or direct invocation. Not a plugin hook.
