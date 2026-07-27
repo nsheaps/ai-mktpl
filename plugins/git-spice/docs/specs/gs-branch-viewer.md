@@ -124,12 +124,12 @@ coding, emoji indicators, and clickable links.
 
 #### Terminal Awareness
 
-| ID     | Requirement                                         | Priority     | Acceptance Criteria                                   |
+| ID | Requirement | Priority | Acceptance Criteria |
 | ------ | --------------------------------------------------- | ------------ | ----------------------------------------------------- | ------------------------ |
-| FR-012 | Detect TTY and suppress colors when piped           | Must-have    | `gsv                                                  | cat` produces plain text |
-| FR-013 | iTerm2 OSC 8 hyperlink support for PR URLs          | Should-have  | PR numbers are clickable hyperlinks in iTerm2         |
-| FR-014 | Respect `NO_COLOR` and `FORCE_COLOR` env vars       | Must-have    | Follows [no-color.org](https://no-color.org) standard |
-| FR-015 | Configurable via git config (`spice.viewer.*` keys) | Nice-to-have | Defaults overridable without flags                    |
+| FR-012 | Detect TTY and suppress colors when piped | Must-have | `gsv                                                  | cat` produces plain text |
+| FR-013 | iTerm2 OSC 8 hyperlink support for PR URLs | Should-have | PR numbers are clickable hyperlinks in iTerm2 |
+| FR-014 | Respect `NO_COLOR` and `FORCE_COLOR` env vars | Must-have | Follows [no-color.org](https://no-color.org) standard |
+| FR-015 | Configurable via git config (`spice.viewer.*` keys) | Nice-to-have | Defaults overridable without flags |
 
 #### Watch Mode
 

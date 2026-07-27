@@ -149,7 +149,7 @@ Update your agent's `plugins.settings.yaml`:
 ```yaml
 # Before (v0.3.x):
 github-app:
-  ref: 'op://vault/github-app--repo--my-repo'
+  ref: "op://vault/github-app--repo--my-repo"
 
 # After (v0.4.0):
 github-app:
@@ -159,11 +159,11 @@ github-app:
 1pass:
   secrets:
     - envVar: GITHUB_APP_ID
-      reference: 'op://vault/github-app--repo--my-repo/GITHUB_APP_ID'
+      reference: "op://vault/github-app--repo--my-repo/GITHUB_APP_ID"
     - envVar: GITHUB_INSTALLATION_ID
-      reference: 'op://vault/github-app--repo--my-repo/GITHUB_INSTALLATION_ID'
+      reference: "op://vault/github-app--repo--my-repo/GITHUB_INSTALLATION_ID"
     - envVar: GITHUB_APP_PRIVATE_KEY
-      reference: 'op://vault/github-app--repo--my-repo/GITHUB_APP_PRIVATE_KEY'
+      reference: "op://vault/github-app--repo--my-repo/GITHUB_APP_PRIVATE_KEY"
 ```
 
 After the first session start on v0.4.0, old files at `~/.agents/<name>/.config/` become orphaned and can be cleaned up:

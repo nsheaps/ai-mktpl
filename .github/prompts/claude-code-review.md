@@ -384,9 +384,12 @@ Another aspect
 - The error message could be more descriptive (not a blocker)
 
 Notes:[^1][^2]
+
 [^1]: Workflow Run: [https://github.com/nsheaps/ai-mktpl/actions/runs.....](https://github.com/nsheaps/ai-mktpl/actions/runs.....)
-[^2]: PR: [nsheaps/ai-mktpl#123](https://github.com/nsheaps/ai-mktpl/pull/123)
-...
+
+[^2]:
+    PR: [nsheaps/ai-mktpl#123](https://github.com/nsheaps/ai-mktpl/pull/123)
+    ...
 
 or if you think there's an issue with the changes...
 
@@ -420,17 +423,20 @@ And a suggestion with how you may want to fix it.
 - Documentation could be updated to explain the admin permission model
 
 Notes:[^1][^2]
+
 [^1]: Workflow Run: [https://github.com/nsheaps/ai-mktpl/actions/runs.....](https://github.com/nsheaps/ai-mktpl/actions/runs.....)
-[^2]: PR: [nsheaps/ai-mktpl#123](https://github.com/nsheaps/ai-mktpl/pull/123)
-...
+
+[^2]:
+    PR: [nsheaps/ai-mktpl#123](https://github.com/nsheaps/ai-mktpl/pull/123)
+    ...
 
 ## Restrictions, guidelines, and critical rules:
 
 When suggesting code changes, use GitHub's suggestion format with ```suggestion blocks so authors can apply changes directly.
-  CRITICAL: ignore stylistic suggestions, as deterministic automation validates that
-  CRITICAL: only suggest code changes when there's a clear benefit (bug fix, performance improvement, security enhancement, correctness, maintainability, simplicity)
-  CRITICAL: If the code can be improved with a suggestion, then your suggestion MUST be posted. Do not describe a fix without providing an example and suggestion. If a suggestion is relevant to another PR thread and it's suggestions, cross link the comments to each other.
-  Do not suggest changes to code that is not part of the PR.
+CRITICAL: ignore stylistic suggestions, as deterministic automation validates that
+CRITICAL: only suggest code changes when there's a clear benefit (bug fix, performance improvement, security enhancement, correctness, maintainability, simplicity)
+CRITICAL: If the code can be improved with a suggestion, then your suggestion MUST be posted. Do not describe a fix without providing an example and suggestion. If a suggestion is relevant to another PR thread and it's suggestions, cross link the comments to each other.
+Do not suggest changes to code that is not part of the PR.
 Do not use the CI output from this PR to base your review. You are to review the code itself, not the output of the CI jobs.
 Use the repository's documentation (including relevant ai agent documentation like **/AGENTS.md, .claude/rules/**/*.md, **/CLAUDE.md, **/README.md, etc) for guidance on style and conventions. Be constructive and helpful in your feedback.
 CRITICAL: Do not post any "test" or "review in progress" comments. Only post your final review, minimizing previous reviews and reusing PR comment threads where possible.
