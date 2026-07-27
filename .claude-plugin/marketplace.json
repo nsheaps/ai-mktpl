@@ -44,7 +44,7 @@
     {
       "name": "agentic-behavior",
       "description": "Skills for configuring Claude Code, behavior correction, memory tracking, autonomy rules, time-context awareness, and session exit/restart. Combines prompt history tracking, git-backed memory sync, the self-checking Ralph loop pattern, and graceful session exit via SIGINT.",
-      "version": "0.4.6",
+      "version": "0.4.7",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -337,7 +337,7 @@
     {
       "name": "git-spice",
       "description": "Skill for managing stacked Git branches with git-spice (gs) CLI tool",
-      "version": "0.2.9",
+      "version": "0.2.10",
       "author": {
         "name": "Nathan Heaps"
       },
@@ -386,7 +386,7 @@
     {
       "name": "github-app",
       "description": "env-var driven GitHub App token lifecycle for Claude Code sessions. Pairs with the 1pass plugin for secret injection.",
-      "version": "0.6.0",
+      "version": "0.6.1",
       "author": {
         "name": "Nathan Heaps"
       },
