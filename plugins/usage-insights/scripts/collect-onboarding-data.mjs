@@ -188,7 +188,8 @@ async function scanSessions(dir, windowDays) {
   if (sessionDescriptors.length > MAX_DESCRIPTORS) {
     sessionDescriptors.sort(
       (a, b) =>
-        ((b.title ? 2 : 0) + (b.prNumbers.length ? 1 : 0)) -
+        (b.title ? 2 : 0) +
+        (b.prNumbers.length ? 1 : 0) -
         ((a.title ? 2 : 0) + (a.prNumbers.length ? 1 : 0)),
     );
     sessionDescriptors.length = MAX_DESCRIPTORS;
@@ -273,8 +274,7 @@ async function main() {
     .sort((a, b) => b[1] - a[1])
     .map(([name, callCount]) => {
       const cfg = mcpConfig[name];
-      const urlOrigin =
-        cfg && typeof cfg.url === "string" ? originOf(cfg.url) : undefined;
+      const urlOrigin = cfg && typeof cfg.url === "string" ? originOf(cfg.url) : undefined;
       return { name, callCount, urlOrigin };
     });
 
@@ -315,7 +315,9 @@ function renderSummary(u) {
   if (u.mcpServers.length) {
     L.push("MCP servers called:");
     for (const s of u.mcpServers.slice(0, 12)) {
-      L.push(`  ${String(s.callCount).padStart(5)}  ${s.name}${s.urlOrigin ? `  (${s.urlOrigin})` : ""}`);
+      L.push(
+        `  ${String(s.callCount).padStart(5)}  ${s.name}${s.urlOrigin ? `  (${s.urlOrigin})` : ""}`,
+      );
     }
     L.push("");
   }

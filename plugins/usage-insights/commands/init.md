@@ -18,11 +18,11 @@ select which prompt variant runs.
 
 **Format:** `[--new] [--classic]`
 
-| Argument    | Meaning                                                                       |
-| ----------- | ----------------------------------------------------------------------------- |
-| (none)      | Classic one-shot: analyze the codebase, write a single `CLAUDE.md`.           |
-| `--new`     | Guided 8-phase flow: CLAUDE.md + optional CLAUDE.local.md, skills, hooks.      |
-| `--classic` | Force the classic one-shot even if `CLAUDE_CODE_NEW_INIT` is set.              |
+| Argument    | Meaning                                                                   |
+| ----------- | ------------------------------------------------------------------------- |
+| (none)      | Classic one-shot: analyze the codebase, write a single `CLAUDE.md`.       |
+| `--new`     | Guided 8-phase flow: CLAUDE.md + optional CLAUDE.local.md, skills, hooks. |
+| `--classic` | Force the classic one-shot even if `CLAUDE_CODE_NEW_INIT` is set.         |
 
 If neither flag is given, the skill selects the variant: **new** when
 `CLAUDE_CODE_NEW_INIT` is truthy in the environment or the user asked to also

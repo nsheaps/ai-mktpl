@@ -24,8 +24,8 @@ this plugin under `assets/prompts/`.
 
 The built-in `/init` picks one of two prompts at runtime:
 
-| Variant     | Asset                          | Behavior                                                                 |
-| ----------- | ------------------------------ | ------------------------------------------------------------------------ |
+| Variant     | Asset                            | Behavior                                                                  |
+| ----------- | -------------------------------- | ------------------------------------------------------------------------- |
 | **Classic** | `assets/prompts/init-classic.md` | One-shot: analyze the codebase, write a single `CLAUDE.md`. No interview. |
 | **New**     | `assets/prompts/init-new.md`     | Guided 8-phase flow: CLAUDE.md + optional CLAUDE.local.md, skills, hooks. |
 
@@ -33,7 +33,7 @@ In the binary, the choice is made by a toggle (internally `Uc_`):
 
 ```js
 // new variant when either is set, else classic
-Boolean(env.CLAUDE_CODE_NEW_INIT) || featureFlag("tengu_slate_harbor_experiment")
+Boolean(env.CLAUDE_CODE_NEW_INIT) || featureFlag("tengu_slate_harbor_experiment");
 ```
 
 - The **classic** prompt is the stable, long-standing behavior and the safe
@@ -114,9 +114,9 @@ to refresh.
 
 ## Troubleshooting
 
-| Symptom                                          | Fix                                                                        |
-| ------------------------------------------------ | -------------------------------------------------------------------------- |
-| Not sure which variant the user wants            | Default to classic; offer `--new` for skills/hooks setup.                   |
-| New variant references `update-config` skill     | That's a built-in Claude Code skill; if absent, construct hooks manually.   |
-| Existing CLAUDE.md would be overwritten          | Both variants propose improvements/diffs first — never blind-overwrite.     |
-| CLAUDE.md comes out bloated                       | Apply the prompt's test: "Would removing this cause Claude to err?" If no, cut. |
+| Symptom                                      | Fix                                                                             |
+| -------------------------------------------- | ------------------------------------------------------------------------------- |
+| Not sure which variant the user wants        | Default to classic; offer `--new` for skills/hooks setup.                       |
+| New variant references `update-config` skill | That's a built-in Claude Code skill; if absent, construct hooks manually.       |
+| Existing CLAUDE.md would be overwritten      | Both variants propose improvements/diffs first — never blind-overwrite.         |
+| CLAUDE.md comes out bloated                  | Apply the prompt's test: "Would removing this cause Claude to err?" If no, cut. |

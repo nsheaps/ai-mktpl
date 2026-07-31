@@ -19,10 +19,10 @@ Invoke the **`team-onboarding`** skill and follow it end to end.
 
 **Format:** `[--days N]`
 
-| Argument         | Meaning                                                             |
-| ---------------- | ------------------------------------------------------------------- |
-| `--days N`       | Window in days to scan (alias `--window N`; default **30**).        |
-| trailing text    | Extra context you may use while co-authoring the guide (optional).  |
+| Argument      | Meaning                                                            |
+| ------------- | ------------------------------------------------------------------ |
+| `--days N`    | Window in days to scan (alias `--window N`; default **30**).       |
+| trailing text | Extra context you may use while co-authoring the guide (optional). |
 
 **Examples:**
 

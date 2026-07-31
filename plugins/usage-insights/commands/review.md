@@ -18,10 +18,10 @@ PR number; any remaining text is passed to the review as extra instructions.
 
 **Format:** `[pr number]`
 
-| Argument            | Meaning                                                        |
-| ------------------- | -------------------------------------------------------------- |
-| `<pr number>`       | The pull request to review (required).                         |
-| trailing text       | Additional instructions for the review (optional).             |
+| Argument      | Meaning                                            |
+| ------------- | -------------------------------------------------- |
+| `<pr number>` | The pull request to review (required).             |
+| trailing text | Additional instructions for the review (optional). |
 
 **Examples:**
 

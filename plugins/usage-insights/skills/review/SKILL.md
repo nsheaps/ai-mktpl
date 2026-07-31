@@ -44,7 +44,7 @@ this plugin at `assets/prompts/review.md`.
 
 Take the PR number from `$ARGUMENTS` (the first bare token, e.g. `123`). Any
 remaining text is the user's additional instructions. If no PR number is given,
-ask for one — this command reviews a *pull request*, not the working tree (for
+ask for one — this command reviews a _pull request_, not the working tree (for
 the local diff, direct the user to `/code-review`).
 
 ### Step 2 — Load the review prompt
@@ -87,9 +87,9 @@ explicitly asks — the built-in `/review` only prints the review.
 
 ## Troubleshooting
 
-| Symptom                                    | Fix                                                                       |
-| ------------------------------------------ | ------------------------------------------------------------------------- |
-| `gh: command not found`                    | Install/activate `gh`; in web sessions `eval "$(mise activate bash)"`.    |
+| Symptom                                    | Fix                                                                        |
+| ------------------------------------------ | -------------------------------------------------------------------------- |
+| `gh: command not found`                    | Install/activate `gh`; in web sessions `eval "$(mise activate bash)"`.     |
 | `gh` can't find the PR                     | Confirm `GH_REPO`/origin points at the right repo; pass a valid PR number. |
-| User wants their uncommitted diff reviewed | That's `/code-review`, not `/review` — this command targets a PR number.  |
-| No PR number supplied                      | Ask for one; there is no sensible default for a PR review.                |
+| User wants their uncommitted diff reviewed | That's `/code-review`, not `/review` — this command targets a PR number.   |
+| No PR number supplied                      | Ask for one; there is no sensible default for a PR review.                 |

@@ -14,7 +14,7 @@ description: >
 # Team Onboarding
 
 Standalone re-implementation of Claude Code's built-in `/team-onboarding`. It
-looks at how *you* have actually used Claude Code in this repo over the last N
+looks at how _you_ have actually used Claude Code in this repo over the last N
 days and turns that into an `ONBOARDING.md` guide for teammates who are new to
 Claude Code. The guide is both a document and an interactive experience: a new
 teammate pastes it into Claude Code and gets a guided setup tour.
@@ -125,10 +125,10 @@ The prompt is the source of truth. In order, it requires you to:
 
 ## Troubleshooting
 
-| Symptom                                  | Fix                                                                              |
-| ---------------------------------------- | -------------------------------------------------------------------------------- |
-| `{"error":"no_project_dir"}`             | This dir has no Claude Code history. Run from a repo you've used with Claude.     |
-| `node: command not found`                | Install/activate `node`; in web sessions `eval "$(mise activate bash)"`.          |
-| Breakdown is all TODO / ~0 sessions      | The window has too little history — widen it with `--days 90`, or accept the TODO. |
-| Guide creator name missing               | `git config user.name` is unset; the prompt omits the name — that's expected.     |
-| Wanted it auto-shared to the team        | Standalone can't use the internal share tool — save `ONBOARDING.md` and share it. |
+| Symptom                             | Fix                                                                                |
+| ----------------------------------- | ---------------------------------------------------------------------------------- |
+| `{"error":"no_project_dir"}`        | This dir has no Claude Code history. Run from a repo you've used with Claude.      |
+| `node: command not found`           | Install/activate `node`; in web sessions `eval "$(mise activate bash)"`.           |
+| Breakdown is all TODO / ~0 sessions | The window has too little history — widen it with `--days 90`, or accept the TODO. |
+| Guide creator name missing          | `git config user.name` is unset; the prompt omits the name — that's expected.      |
+| Wanted it auto-shared to the team   | Standalone can't use the internal share tool — save `ONBOARDING.md` and share it.  |

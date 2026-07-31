@@ -17,11 +17,11 @@ Each command object in the binary has the shape:
 The `type` field is what determines whether a command can be faithfully rebuilt
 as a standalone plugin skill:
 
-| `type`        | What it is                                                        | Reproducible?                                   |
-| ------------- | ----------------------------------------------------------------- | ----------------------------------------------- |
-| `prompt`      | Builds a prompt string sent to the model (`getPromptForCommand`)  | **Yes** — extract the prompt, ship as a skill   |
-| `local`       | Client-side JS. Some compute over local data, many are TUI state  | **Partially** — only the ones that compute      |
-| `local-jsx`   | Client-side React/JSX UI (pickers, toggles, dialogs, QR codes)    | **No** — pure terminal UI / host integration    |
+| `type`      | What it is                                                       | Reproducible?                                 |
+| ----------- | ---------------------------------------------------------------- | --------------------------------------------- |
+| `prompt`    | Builds a prompt string sent to the model (`getPromptForCommand`) | **Yes** — extract the prompt, ship as a skill |
+| `local`     | Client-side JS. Some compute over local data, many are TUI state | **Partially** — only the ones that compute    |
+| `local-jsx` | Client-side React/JSX UI (pickers, toggles, dialogs, QR codes)   | **No** — pure terminal UI / host integration  |
 
 "Reproducible" here means: rebuildable **without** the built-in tooling, using
 only local session transcripts (`~/.claude/projects/**/*.jsonl`), git, the
@@ -36,12 +36,12 @@ mobile, IDE, clipboard, QR) cannot be reproduced honestly and is **not faked**.
 These send a constructed prompt to the model. The prompt text was extracted
 verbatim from the binary; the plugin ships each as a skill + command wrapper.
 
-| Command           | Binary description                                                       | Status in plugin |
-| ----------------- | ------------------------------------------------------------------------ | ---------------- |
-| `/insights`       | Generate a report analyzing your Claude Code sessions                    | **Built**        |
-| `/init`           | Initialize a new CLAUDE.md file with codebase documentation              | Built (Tier 1)   |
-| `/review`         | Review a GitHub pull request; for your working diff use `/code-review`   | Built (Tier 1)   |
-| `/team-onboarding`| Help teammates ramp on Claude Code with a guide from your usage          | Built (Tier 1)   |
+| Command            | Binary description                                                     | Status in plugin |
+| ------------------ | ---------------------------------------------------------------------- | ---------------- |
+| `/insights`        | Generate a report analyzing your Claude Code sessions                  | **Built**        |
+| `/init`            | Initialize a new CLAUDE.md file with codebase documentation            | Built (Tier 1)   |
+| `/review`          | Review a GitHub pull request; for your working diff use `/code-review` | Built (Tier 1)   |
+| `/team-onboarding` | Help teammates ramp on Claude Code with a guide from your usage        | Built (Tier 1)   |
 
 Notes:
 
@@ -51,7 +51,7 @@ Notes:
   ("Initialize a new CLAUDE.md") and the newer skills/hooks-aware variant.
 - `/review` builds a PR-specific prompt when given a PR number, else a
   working-context prompt. It reviews a **GitHub PR**; the working-tree diff
-  review is a *separate* built-in skill, `/code-review` (see Tier 3).
+  review is a _separate_ built-in skill, `/code-review` (see Tier 3).
 - `/team-onboarding` first scans your usage over a window (default window days,
   session count, slash-command count, MCP-server count) and substitutes that
   into a prompt + guide template. The plugin reproduces the usage scan with a
@@ -62,15 +62,15 @@ Notes:
 These do real computation over local data. Reproduced by scanning transcripts /
 git / env deterministically, then (where the builtin does) an analysis pass.
 
-| Command        | Aliases        | Binary description                                                              | How the plugin reproduces it                                    |
-| -------------- | -------------- | ------------------------------------------------------------------------------ | --------------------------------------------------------------- |
-| `/usage`       | `cost`,`stats` | Show session cost, plan usage, and what's contributing to your limits          | **Built** — transcript token scan + synthetic-unit cost model   |
-| `/context`     | —              | Show current context usage                                                     | Transcript scan of the current session's token composition      |
-| `/recap`       | —              | Generate a one-line session recap now                                          | Deterministic session summary + one-line model pass             |
-| `/export`      | —              | Export the current conversation to a file or clipboard                         | Transcript → markdown/json file (clipboard path documented)     |
-| `/status`      | —              | Show version, model, account, API connectivity, and tool statuses             | Reads version/env/git/tool availability locally (account partial)|
-| `/diff`        | —              | View uncommitted changes and per-turn diffs                                    | `git diff` + per-turn file edits parsed from the transcript     |
-| `/skill-doctor`| —              | Show which loaded skills are unused and costing context                        | Scans loaded skills vs. skill invocations in the transcript     |
+| Command         | Aliases        | Binary description                                                    | How the plugin reproduces it                                      |
+| --------------- | -------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `/usage`        | `cost`,`stats` | Show session cost, plan usage, and what's contributing to your limits | **Built** — transcript token scan + synthetic-unit cost model     |
+| `/context`      | —              | Show current context usage                                            | Transcript scan of the current session's token composition        |
+| `/recap`        | —              | Generate a one-line session recap now                                 | Deterministic session summary + one-line model pass               |
+| `/export`       | —              | Export the current conversation to a file or clipboard                | Transcript → markdown/json file (clipboard path documented)       |
+| `/status`       | —              | Show version, model, account, API connectivity, and tool statuses     | Reads version/env/git/tool availability locally (account partial) |
+| `/diff`         | —              | View uncommitted changes and per-turn diffs                           | `git diff` + per-turn file edits parsed from the transcript       |
+| `/skill-doctor` | —              | Show which loaded skills are unused and costing context               | Scans loaded skills vs. skill invocations in the transcript       |
 
 Caveat on `/status`: version, model, git, tool availability, and env are fully
 local. **Account identity and live API connectivity** require the Anthropic
@@ -80,7 +80,7 @@ backend and cannot be reproduced offline — the skill reports those as
 ## Tier 3 — built-in programmatic **skills / workflows** (separate registry)
 
 The docs list these under "Programmatic (Skill)" / "(Workflow)". They are **not**
-in the slash-command object registry above — they are built-in *skills*, which
+in the slash-command object registry above — they are built-in _skills_, which
 is why they don't appear as `type:"prompt"` command objects. They are large and
 self-contained (their own multi-step procedures and, for `/deep-research`, a
 workflow). Prompts are extractable but each is a project of its own; they are
