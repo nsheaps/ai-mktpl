@@ -3,3 +3,10 @@ node_modules
 *.lock
 package-lock.json
 claude-remote-env-snapshot
+
+# Verbatim assets extracted from the Claude Code binary. These are reproduced
+# byte-for-byte so the rebuilt commands behave identically to the built-ins.
+# Reformatting them changes prompt semantics (indentation carries list nesting
+# and blockquote scope) and breaks the ascii-bar alignment, so prettier must
+# not touch them.
+plugins/usage-insights/assets/

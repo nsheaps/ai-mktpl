@@ -1,942 +1,368 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Claude Code Insights</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <style>
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-      body {
-        font-family:
-          "Inter",
-          -apple-system,
-          BlinkMacSystemFont,
-          sans-serif;
-        background: #f8fafc;
-        color: #334155;
-        line-height: 1.65;
-        padding: 48px 24px;
-      }
-      .container {
-        max-width: 800px;
-        margin: 0 auto;
-      }
-      h1 {
-        font-size: 32px;
-        font-weight: 700;
-        color: #0f172a;
-        margin-bottom: 8px;
-      }
-      h2 {
-        font-size: 20px;
-        font-weight: 600;
-        color: #0f172a;
-        margin-top: 48px;
-        margin-bottom: 16px;
-      }
-      .subtitle {
-        color: #64748b;
-        font-size: 15px;
-        margin-bottom: 32px;
-      }
-      .nav-toc {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin: 24px 0 32px 0;
-        padding: 16px;
-        background: white;
-        border-radius: 8px;
-        border: 1px solid #e2e8f0;
-      }
-      .nav-toc a {
-        font-size: 12px;
-        color: #64748b;
-        text-decoration: none;
-        padding: 6px 12px;
-        border-radius: 6px;
-        background: #f1f5f9;
-        transition: all 0.15s;
-      }
-      .nav-toc a:hover {
-        background: #e2e8f0;
-        color: #334155;
-      }
-      .stats-row {
-        display: flex;
-        gap: 24px;
-        margin-bottom: 40px;
-        padding: 20px 0;
-        border-top: 1px solid #e2e8f0;
-        border-bottom: 1px solid #e2e8f0;
-        flex-wrap: wrap;
-      }
-      .stat {
-        text-align: center;
-      }
-      .stat-value {
-        font-size: 24px;
-        font-weight: 700;
-        color: #0f172a;
-      }
-      .stat-label {
-        font-size: 11px;
-        color: #64748b;
-        text-transform: uppercase;
-      }
-      .at-a-glance {
-        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-        border: 1px solid #f59e0b;
-        border-radius: 12px;
-        padding: 20px 24px;
-        margin-bottom: 32px;
-      }
-      .glance-title {
-        font-size: 16px;
-        font-weight: 700;
-        color: #92400e;
-        margin-bottom: 16px;
-      }
-      .glance-sections {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-      }
-      .glance-section {
-        font-size: 14px;
-        color: #78350f;
-        line-height: 1.6;
-      }
-      .glance-section strong {
-        color: #92400e;
-      }
-      .see-more {
-        color: #b45309;
-        text-decoration: none;
-        font-size: 13px;
-        white-space: nowrap;
-      }
-      .see-more:hover {
-        text-decoration: underline;
-      }
-      .project-areas {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        margin-bottom: 32px;
-      }
-      .project-area {
-        background: white;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 16px;
-      }
-      .area-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 8px;
-      }
-      .area-name {
-        font-weight: 600;
-        font-size: 15px;
-        color: #0f172a;
-      }
-      .area-count {
-        font-size: 12px;
-        color: #64748b;
-        background: #f1f5f9;
-        padding: 2px 8px;
-        border-radius: 4px;
-      }
-      .area-desc {
-        font-size: 14px;
-        color: #475569;
-        line-height: 1.5;
-      }
-      .narrative {
-        background: white;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 20px;
-        margin-bottom: 24px;
-      }
-      .narrative p {
-        margin-bottom: 12px;
-        font-size: 14px;
-        color: #475569;
-        line-height: 1.7;
-      }
-      .key-insight {
-        background: #f0fdf4;
-        border: 1px solid #bbf7d0;
-        border-radius: 8px;
-        padding: 12px 16px;
-        margin-top: 12px;
-        font-size: 14px;
-        color: #166534;
-      }
-      .section-intro {
-        font-size: 14px;
-        color: #64748b;
-        margin-bottom: 16px;
-      }
-      .big-wins {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        margin-bottom: 24px;
-      }
-      .big-win {
-        background: #f0fdf4;
-        border: 1px solid #bbf7d0;
-        border-radius: 8px;
-        padding: 16px;
-      }
-      .big-win-title {
-        font-weight: 600;
-        font-size: 15px;
-        color: #166534;
-        margin-bottom: 8px;
-      }
-      .big-win-desc {
-        font-size: 14px;
-        color: #15803d;
-        line-height: 1.5;
-      }
-      .friction-categories {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        margin-bottom: 24px;
-      }
-      .friction-category {
-        background: #fef2f2;
-        border: 1px solid #fca5a5;
-        border-radius: 8px;
-        padding: 16px;
-      }
-      .friction-title {
-        font-weight: 600;
-        font-size: 15px;
-        color: #991b1b;
-        margin-bottom: 6px;
-      }
-      .friction-desc {
-        font-size: 13px;
-        color: #7f1d1d;
-        margin-bottom: 10px;
-      }
-      .friction-examples {
-        margin: 0 0 0 20px;
-        font-size: 13px;
-        color: #334155;
-      }
-      .friction-examples li {
-        margin-bottom: 4px;
-      }
-      .claude-md-section {
-        background: #eff6ff;
-        border: 1px solid #bfdbfe;
-        border-radius: 8px;
-        padding: 16px;
-        margin-bottom: 20px;
-      }
-      .claude-md-section h3 {
-        font-size: 14px;
-        font-weight: 600;
-        color: #1e40af;
-        margin: 0 0 12px 0;
-      }
-      .claude-md-actions {
-        margin-bottom: 12px;
-        padding-bottom: 12px;
-        border-bottom: 1px solid #dbeafe;
-      }
-      .copy-all-btn {
-        background: #2563eb;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        padding: 6px 12px;
-        font-size: 12px;
-        cursor: pointer;
-        font-weight: 500;
-        transition: all 0.2s;
-      }
-      .copy-all-btn:hover {
-        background: #1d4ed8;
-      }
-      .copy-all-btn.copied {
-        background: #16a34a;
-      }
-      .claude-md-item {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: flex-start;
-        gap: 8px;
-        padding: 10px 0;
-        border-bottom: 1px solid #dbeafe;
-      }
-      .claude-md-item:last-child {
-        border-bottom: none;
-      }
-      .cmd-checkbox {
-        margin-top: 2px;
-      }
-      .cmd-code {
-        background: white;
-        padding: 8px 12px;
-        border-radius: 4px;
-        font-size: 12px;
-        color: #1e40af;
-        border: 1px solid #bfdbfe;
-        font-family: monospace;
-        display: block;
-        white-space: pre-wrap;
-        word-break: break-word;
-        flex: 1;
-      }
-      .cmd-why {
-        font-size: 12px;
-        color: #64748b;
-        width: 100%;
-        padding-left: 24px;
-        margin-top: 4px;
-      }
-      .features-section,
-      .patterns-section {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        margin: 16px 0;
-      }
-      .feature-card {
-        background: #f0fdf4;
-        border: 1px solid #86efac;
-        border-radius: 8px;
-        padding: 16px;
-      }
-      .pattern-card {
-        background: #f0f9ff;
-        border: 1px solid #7dd3fc;
-        border-radius: 8px;
-        padding: 16px;
-      }
-      .feature-title,
-      .pattern-title {
-        font-weight: 600;
-        font-size: 15px;
-        color: #0f172a;
-        margin-bottom: 6px;
-      }
-      .feature-oneliner {
-        font-size: 14px;
-        color: #475569;
-        margin-bottom: 8px;
-      }
-      .pattern-summary {
-        font-size: 14px;
-        color: #475569;
-        margin-bottom: 8px;
-      }
-      .feature-why,
-      .pattern-detail {
-        font-size: 13px;
-        color: #334155;
-        line-height: 1.5;
-      }
-      .feature-examples {
-        margin-top: 12px;
-      }
-      .feature-example {
-        padding: 8px 0;
-        border-top: 1px solid #d1fae5;
-      }
-      .feature-example:first-child {
-        border-top: none;
-      }
-      .example-desc {
-        font-size: 13px;
-        color: #334155;
-        margin-bottom: 6px;
-      }
-      .example-code-row {
-        display: flex;
-        align-items: flex-start;
-        gap: 8px;
-      }
-      .example-code {
-        flex: 1;
-        background: #f1f5f9;
-        padding: 8px 12px;
-        border-radius: 4px;
-        font-family: monospace;
-        font-size: 12px;
-        color: #334155;
-        overflow-x: auto;
-        white-space: pre-wrap;
-      }
-      .copyable-prompt-section {
-        margin-top: 12px;
-        padding-top: 12px;
-        border-top: 1px solid #e2e8f0;
-      }
-      .copyable-prompt-row {
-        display: flex;
-        align-items: flex-start;
-        gap: 8px;
-      }
-      .copyable-prompt {
-        flex: 1;
-        background: #f8fafc;
-        padding: 10px 12px;
-        border-radius: 4px;
-        font-family: monospace;
-        font-size: 12px;
-        color: #334155;
-        border: 1px solid #e2e8f0;
-        white-space: pre-wrap;
-        line-height: 1.5;
-      }
-      .feature-code {
-        background: #f8fafc;
-        padding: 12px;
-        border-radius: 6px;
-        margin-top: 12px;
-        border: 1px solid #e2e8f0;
-        display: flex;
-        align-items: flex-start;
-        gap: 8px;
-      }
-      .feature-code code {
-        flex: 1;
-        font-family: monospace;
-        font-size: 12px;
-        color: #334155;
-        white-space: pre-wrap;
-      }
-      .pattern-prompt {
-        background: #f8fafc;
-        padding: 12px;
-        border-radius: 6px;
-        margin-top: 12px;
-        border: 1px solid #e2e8f0;
-      }
-      .pattern-prompt code {
-        font-family: monospace;
-        font-size: 12px;
-        color: #334155;
-        display: block;
-        white-space: pre-wrap;
-        margin-bottom: 8px;
-      }
-      .prompt-label {
-        font-size: 11px;
-        font-weight: 600;
-        text-transform: uppercase;
-        color: #64748b;
-        margin-bottom: 6px;
-      }
-      .copy-btn {
-        background: #e2e8f0;
-        border: none;
-        border-radius: 4px;
-        padding: 4px 8px;
-        font-size: 11px;
-        cursor: pointer;
-        color: #475569;
-        flex-shrink: 0;
-      }
-      .copy-btn:hover {
-        background: #cbd5e1;
-      }
-      .charts-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 24px;
-        margin: 24px 0;
-      }
-      .chart-card {
-        background: white;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 16px;
-      }
-      .chart-title {
-        font-size: 12px;
-        font-weight: 600;
-        color: #64748b;
-        text-transform: uppercase;
-        margin-bottom: 12px;
-      }
-      .bar-row {
-        display: flex;
-        align-items: center;
-        margin-bottom: 6px;
-      }
-      .bar-label {
-        width: 100px;
-        font-size: 11px;
-        color: #475569;
-        flex-shrink: 0;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-      .bar-track {
-        flex: 1;
-        height: 6px;
-        background: #f1f5f9;
-        border-radius: 3px;
-        margin: 0 8px;
-      }
-      .bar-fill {
-        height: 100%;
-        border-radius: 3px;
-      }
-      .bar-value {
-        width: 28px;
-        font-size: 11px;
-        font-weight: 500;
-        color: #64748b;
-        text-align: right;
-      }
-      .empty {
-        color: #94a3b8;
-        font-size: 13px;
-      }
-      .horizon-section {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-      }
-      .horizon-card {
-        background: linear-gradient(135deg, #faf5ff 0%, #f5f3ff 100%);
-        border: 1px solid #c4b5fd;
-        border-radius: 8px;
-        padding: 16px;
-      }
-      .horizon-title {
-        font-weight: 600;
-        font-size: 15px;
-        color: #5b21b6;
-        margin-bottom: 8px;
-      }
-      .horizon-possible {
-        font-size: 14px;
-        color: #334155;
-        margin-bottom: 10px;
-        line-height: 1.5;
-      }
-      .horizon-tip {
-        font-size: 13px;
-        color: #6b21a8;
-        background: rgba(255, 255, 255, 0.6);
-        padding: 8px 12px;
-        border-radius: 4px;
-      }
-      .feedback-header {
-        margin-top: 48px;
-        color: #64748b;
-        font-size: 16px;
-      }
-      .feedback-intro {
-        font-size: 13px;
-        color: #94a3b8;
-        margin-bottom: 16px;
-      }
-      .feedback-section {
-        margin-top: 16px;
-      }
-      .feedback-section h3 {
-        font-size: 14px;
-        font-weight: 600;
-        color: #475569;
-        margin-bottom: 12px;
-      }
-      .feedback-card {
-        background: white;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 16px;
-        margin-bottom: 12px;
-      }
-      .feedback-card.team-card {
-        background: #eff6ff;
-        border-color: #bfdbfe;
-      }
-      .feedback-card.model-card {
-        background: #faf5ff;
-        border-color: #e9d5ff;
-      }
-      .feedback-title {
-        font-weight: 600;
-        font-size: 14px;
-        color: #0f172a;
-        margin-bottom: 6px;
-      }
-      .feedback-detail {
-        font-size: 13px;
-        color: #475569;
-        line-height: 1.5;
-      }
-      .feedback-evidence {
-        font-size: 12px;
-        color: #64748b;
-        margin-top: 8px;
-      }
-      .fun-ending {
-        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-        border: 1px solid #fbbf24;
-        border-radius: 12px;
-        padding: 24px;
-        margin-top: 40px;
-        text-align: center;
-      }
-      .fun-headline {
-        font-size: 18px;
-        font-weight: 600;
-        color: #78350f;
-        margin-bottom: 8px;
-      }
-      .fun-detail {
-        font-size: 14px;
-        color: #92400e;
-      }
-      .collapsible-section {
-        margin-top: 16px;
-      }
-      .collapsible-header {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        cursor: pointer;
-        padding: 12px 0;
-        border-bottom: 1px solid #e2e8f0;
-      }
-      .collapsible-header h3 {
-        margin: 0;
-        font-size: 14px;
-        font-weight: 600;
-        color: #475569;
-      }
-      .collapsible-arrow {
-        font-size: 12px;
-        color: #94a3b8;
-        transition: transform 0.2s;
-      }
-      .collapsible-content {
-        display: none;
-        padding-top: 16px;
-      }
-      .collapsible-content.open {
-        display: block;
-      }
-      .collapsible-header.open .collapsible-arrow {
-        transform: rotate(90deg);
-      }
-      @media (max-width: 640px) {
-        .charts-row {
-          grid-template-columns: 1fr;
-        }
-        .stats-row {
-          justify-content: center;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <h1>Claude Code Insights</h1>
-      <p class="subtitle">{{SUBTITLE}}</p>
+<head>
+  <meta charset="utf-8">
+  <title>Claude Code Insights</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #f8fafc; color: #334155; line-height: 1.65; padding: 48px 24px; }
+    .container { max-width: 800px; margin: 0 auto; }
+    h1 { font-size: 32px; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
+    h2 { font-size: 20px; font-weight: 600; color: #0f172a; margin-top: 48px; margin-bottom: 16px; }
+    .subtitle { color: #64748b; font-size: 15px; margin-bottom: 32px; }
+    .nav-toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 24px 0 32px 0; padding: 16px; background: white; border-radius: 8px; border: 1px solid #e2e8f0; }
+    .nav-toc a { font-size: 12px; color: #64748b; text-decoration: none; padding: 6px 12px; border-radius: 6px; background: #f1f5f9; transition: all 0.15s; }
+    .nav-toc a:hover { background: #e2e8f0; color: #334155; }
+    .stats-row { display: flex; gap: 24px; margin-bottom: 40px; padding: 20px 0; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; flex-wrap: wrap; }
+    .stat { text-align: center; }
+    .stat-value { font-size: 24px; font-weight: 700; color: #0f172a; }
+    .stat-label { font-size: 11px; color: #64748b; text-transform: uppercase; }
+    .at-a-glance { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 1px solid #f59e0b; border-radius: 12px; padding: 20px 24px; margin-bottom: 32px; }
+    .glance-title { font-size: 16px; font-weight: 700; color: #92400e; margin-bottom: 16px; }
+    .glance-sections { display: flex; flex-direction: column; gap: 12px; }
+    .glance-section { font-size: 14px; color: #78350f; line-height: 1.6; }
+    .glance-section strong { color: #92400e; }
+    .see-more { color: #b45309; text-decoration: none; font-size: 13px; white-space: nowrap; }
+    .see-more:hover { text-decoration: underline; }
+    .project-areas { display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
+    .project-area { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; }
+    .area-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .area-name { font-weight: 600; font-size: 15px; color: #0f172a; }
+    .area-count { font-size: 12px; color: #64748b; background: #f1f5f9; padding: 2px 8px; border-radius: 4px; }
+    .area-desc { font-size: 14px; color: #475569; line-height: 1.5; }
+    .narrative { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 24px; }
+    .narrative p { margin-bottom: 12px; font-size: 14px; color: #475569; line-height: 1.7; }
+    .key-insight { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px 16px; margin-top: 12px; font-size: 14px; color: #166534; }
+    .section-intro { font-size: 14px; color: #64748b; margin-bottom: 16px; }
+    .big-wins { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+    .big-win { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 16px; }
+    .big-win-title { font-weight: 600; font-size: 15px; color: #166534; margin-bottom: 8px; }
+    .big-win-desc { font-size: 14px; color: #15803d; line-height: 1.5; }
+    .friction-categories { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
+    .friction-category { background: #fef2f2; border: 1px solid #fca5a5; border-radius: 8px; padding: 16px; }
+    .friction-title { font-weight: 600; font-size: 15px; color: #991b1b; margin-bottom: 6px; }
+    .friction-desc { font-size: 13px; color: #7f1d1d; margin-bottom: 10px; }
+    .friction-examples { margin: 0 0 0 20px; font-size: 13px; color: #334155; }
+    .friction-examples li { margin-bottom: 4px; }
+    .claude-md-section { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 16px; margin-bottom: 20px; }
+    .claude-md-section h3 { font-size: 14px; font-weight: 600; color: #1e40af; margin: 0 0 12px 0; }
+    .claude-md-actions { margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #dbeafe; }
+    .copy-all-btn { background: #2563eb; color: white; border: none; border-radius: 4px; padding: 6px 12px; font-size: 12px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
+    .copy-all-btn:hover { background: #1d4ed8; }
+    .copy-all-btn.copied { background: #16a34a; }
+    .claude-md-item { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 8px; padding: 10px 0; border-bottom: 1px solid #dbeafe; }
+    .claude-md-item:last-child { border-bottom: none; }
+    .cmd-checkbox { margin-top: 2px; }
+    .cmd-code { background: white; padding: 8px 12px; border-radius: 4px; font-size: 12px; color: #1e40af; border: 1px solid #bfdbfe; font-family: monospace; display: block; white-space: pre-wrap; word-break: break-word; flex: 1; }
+    .cmd-why { font-size: 12px; color: #64748b; width: 100%; padding-left: 24px; margin-top: 4px; }
+    .features-section, .patterns-section { display: flex; flex-direction: column; gap: 12px; margin: 16px 0; }
+    .feature-card { background: #f0fdf4; border: 1px solid #86efac; border-radius: 8px; padding: 16px; }
+    .pattern-card { background: #f0f9ff; border: 1px solid #7dd3fc; border-radius: 8px; padding: 16px; }
+    .feature-title, .pattern-title { font-weight: 600; font-size: 15px; color: #0f172a; margin-bottom: 6px; }
+    .feature-oneliner { font-size: 14px; color: #475569; margin-bottom: 8px; }
+    .pattern-summary { font-size: 14px; color: #475569; margin-bottom: 8px; }
+    .feature-why, .pattern-detail { font-size: 13px; color: #334155; line-height: 1.5; }
+    .feature-examples { margin-top: 12px; }
+    .feature-example { padding: 8px 0; border-top: 1px solid #d1fae5; }
+    .feature-example:first-child { border-top: none; }
+    .example-desc { font-size: 13px; color: #334155; margin-bottom: 6px; }
+    .example-code-row { display: flex; align-items: flex-start; gap: 8px; }
+    .example-code { flex: 1; background: #f1f5f9; padding: 8px 12px; border-radius: 4px; font-family: monospace; font-size: 12px; color: #334155; overflow-x: auto; white-space: pre-wrap; }
+    .copyable-prompt-section { margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0; }
+    .copyable-prompt-row { display: flex; align-items: flex-start; gap: 8px; }
+    .copyable-prompt { flex: 1; background: #f8fafc; padding: 10px 12px; border-radius: 4px; font-family: monospace; font-size: 12px; color: #334155; border: 1px solid #e2e8f0; white-space: pre-wrap; line-height: 1.5; }
+    .feature-code { background: #f8fafc; padding: 12px; border-radius: 6px; margin-top: 12px; border: 1px solid #e2e8f0; display: flex; align-items: flex-start; gap: 8px; }
+    .feature-code code { flex: 1; font-family: monospace; font-size: 12px; color: #334155; white-space: pre-wrap; }
+    .pattern-prompt { background: #f8fafc; padding: 12px; border-radius: 6px; margin-top: 12px; border: 1px solid #e2e8f0; }
+    .pattern-prompt code { font-family: monospace; font-size: 12px; color: #334155; display: block; white-space: pre-wrap; margin-bottom: 8px; }
+    .prompt-label { font-size: 11px; font-weight: 600; text-transform: uppercase; color: #64748b; margin-bottom: 6px; }
+    .copy-btn { background: #e2e8f0; border: none; border-radius: 4px; padding: 4px 8px; font-size: 11px; cursor: pointer; color: #475569; flex-shrink: 0; }
+    .copy-btn:hover { background: #cbd5e1; }
+    .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 24px 0; }
+    .chart-card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; }
+    .chart-title { font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; margin-bottom: 12px; }
+    .bar-row { display: flex; align-items: center; margin-bottom: 6px; }
+    .bar-label { width: 100px; font-size: 11px; color: #475569; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bar-track { flex: 1; height: 6px; background: #f1f5f9; border-radius: 3px; margin: 0 8px; }
+    .bar-fill { height: 100%; border-radius: 3px; }
+    .bar-value { width: 28px; font-size: 11px; font-weight: 500; color: #64748b; text-align: right; }
+    .empty { color: #94a3b8; font-size: 13px; }
+    .horizon-section { display: flex; flex-direction: column; gap: 16px; }
+    .horizon-card { background: linear-gradient(135deg, #faf5ff 0%, #f5f3ff 100%); border: 1px solid #c4b5fd; border-radius: 8px; padding: 16px; }
+    .horizon-title { font-weight: 600; font-size: 15px; color: #5b21b6; margin-bottom: 8px; }
+    .horizon-possible { font-size: 14px; color: #334155; margin-bottom: 10px; line-height: 1.5; }
+    .horizon-tip { font-size: 13px; color: #6b21a8; background: rgba(255,255,255,0.6); padding: 8px 12px; border-radius: 4px; }
+    .feedback-header { margin-top: 48px; color: #64748b; font-size: 16px; }
+    .feedback-intro { font-size: 13px; color: #94a3b8; margin-bottom: 16px; }
+    .feedback-section { margin-top: 16px; }
+    .feedback-section h3 { font-size: 14px; font-weight: 600; color: #475569; margin-bottom: 12px; }
+    .feedback-card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+    .feedback-card.team-card { background: #eff6ff; border-color: #bfdbfe; }
+    .feedback-card.model-card { background: #faf5ff; border-color: #e9d5ff; }
+    .feedback-title { font-weight: 600; font-size: 14px; color: #0f172a; margin-bottom: 6px; }
+    .feedback-detail { font-size: 13px; color: #475569; line-height: 1.5; }
+    .feedback-evidence { font-size: 12px; color: #64748b; margin-top: 8px; }
+    .fun-ending { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 1px solid #fbbf24; border-radius: 12px; padding: 24px; margin-top: 40px; text-align: center; }
+    .fun-headline { font-size: 18px; font-weight: 600; color: #78350f; margin-bottom: 8px; }
+    .fun-detail { font-size: 14px; color: #92400e; }
+    .collapsible-section { margin-top: 16px; }
+    .collapsible-header { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 12px 0; border-bottom: 1px solid #e2e8f0; }
+    .collapsible-header h3 { margin: 0; font-size: 14px; font-weight: 600; color: #475569; }
+    .collapsible-arrow { font-size: 12px; color: #94a3b8; transition: transform 0.2s; }
+    .collapsible-content { display: none; padding-top: 16px; }
+    .collapsible-content.open { display: block; }
+    .collapsible-header.open .collapsible-arrow { transform: rotate(90deg); }
+    @media (max-width: 640px) { .charts-row { grid-template-columns: 1fr; } .stats-row { justify-content: center; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Claude Code Insights</h1>
+    <p class="subtitle">{{SUBTITLE}}</p>
 
-      <nav class="nav-toc">
-        <a href="#section-work">What You Work On</a>
-        <a href="#section-usage">How You Use CC</a>
-        <a href="#section-wins">Impressive Things</a>
-        <a href="#section-friction">Where Things Go Wrong</a>
-        <a href="#section-features">Features to Try</a>
-        <a href="#section-patterns">New Usage Patterns</a>
-        <a href="#section-horizon">On the Horizon</a>
-        <a href="#section-feedback">Team Feedback</a>
-      </nav>
+    <nav class="nav-toc">
+      <a href="#section-work">What You Work On</a>
+      <a href="#section-usage">How You Use CC</a>
+      <a href="#section-wins">Impressive Things</a>
+      <a href="#section-friction">Where Things Go Wrong</a>
+      <a href="#section-features">Features to Try</a>
+      <a href="#section-patterns">New Usage Patterns</a>
+      <a href="#section-horizon">On the Horizon</a>
+      <a href="#section-feedback">Team Feedback</a>
+    </nav>
 
-      <div class="stats-row">
-        <div class="stat">
-          <div class="stat-value">{{STAT_MESSAGES}}</div>
-          <div class="stat-label">Messages</div>
-        </div>
-        <div class="stat">
-          <div class="stat-value">+{{STAT_LINES}}</div>
-          <div class="stat-label">Lines</div>
-        </div>
-        <div class="stat">
-          <div class="stat-value">{{STAT_FILES}}</div>
-          <div class="stat-label">Files</div>
-        </div>
-        <div class="stat">
-          <div class="stat-value">{{STAT_DAYS}}</div>
-          <div class="stat-label">Days</div>
-        </div>
-        <div class="stat">
-          <div class="stat-value">{{STAT_MSGS_PER_DAY}}</div>
-          <div class="stat-label">Msgs/Day</div>
-        </div>
+    <div class="stats-row">
+      <div class="stat"><div class="stat-value">{{STAT_MESSAGES}}</div><div class="stat-label">Messages</div></div>
+      <div class="stat"><div class="stat-value">+{{STAT_LINES}}</div><div class="stat-label">Lines</div></div>
+      <div class="stat"><div class="stat-value">{{STAT_FILES}}</div><div class="stat-label">Files</div></div>
+      <div class="stat"><div class="stat-value">{{STAT_DAYS}}</div><div class="stat-label">Days</div></div>
+      <div class="stat"><div class="stat-value">{{STAT_MSGS_PER_DAY}}</div><div class="stat-label">Msgs/Day</div></div>
+    </div>
+
+    <div class="at-a-glance">
+      <div class="glance-title">At a Glance</div>
+      <div class="glance-sections">{{AT_A_GLANCE}}</div>
+    </div>
+
+    <h2 id="section-work">What You Work On</h2>
+    <div class="project-areas">{{PROJECT_AREAS}}</div>
+
+    <h2 id="section-usage">How You Use Claude Code</h2>
+    <div class="narrative">{{INTERACTION_NARRATIVE}}</div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title">What You Wanted</div>
+        {{CHART_WHAT_YOU_WANTED}}
       </div>
-
-      <div class="at-a-glance">
-        <div class="glance-title">At a Glance</div>
-        <div class="glance-sections">{{AT_A_GLANCE}}</div>
+      <div class="chart-card">
+        <div class="chart-title">Top Tools Used</div>
+        {{CHART_TOP_TOOLS}}
       </div>
-
-      <h2 id="section-work">What You Work On</h2>
-      <div class="project-areas">{{PROJECT_AREAS}}</div>
-
-      <h2 id="section-usage">How You Use Claude Code</h2>
-      <div class="narrative">{{INTERACTION_NARRATIVE}}</div>
-
-      <div class="charts-row">
-        <div class="chart-card">
-          <div class="chart-title">What You Wanted</div>
-          {{CHART_WHAT_YOU_WANTED}}
-        </div>
-        <div class="chart-card">
-          <div class="chart-title">Top Tools Used</div>
-          {{CHART_TOP_TOOLS}}
-        </div>
+    </div>
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title">Languages</div>
+        {{CHART_LANGUAGES}}
       </div>
-      <div class="charts-row">
-        <div class="chart-card">
-          <div class="chart-title">Languages</div>
-          {{CHART_LANGUAGES}}
-        </div>
-        <div class="chart-card">
-          <div class="chart-title">Session Types</div>
-          {{CHART_SESSION_TYPES}}
-        </div>
-      </div>
-
-      <!-- Response Time Distribution -->
-      <div class="chart-card" style="margin: 24px 0">
-        <div class="chart-title">User Response Time Distribution</div>
-        {{CHART_RESPONSE_TIME}}
-        <div style="font-size: 12px; color: #64748b; margin-top: 8px">
-          Median: {{RESPONSE_MEDIAN}}s &bull; Average: {{RESPONSE_AVERAGE}}s
-        </div>
-      </div>
-
-      <!-- Multi-clauding Section -->
-      <div class="chart-card" style="margin: 24px 0">
-        <div class="chart-title">Multi-Clauding (Parallel Sessions)</div>
-        {{MULTI_CLAUDING}}
-      </div>
-
-      <!-- Time of Day & Tool Errors -->
-      <div class="charts-row">
-        <div class="chart-card">
-          <div class="chart-title" style="display: flex; align-items: center; gap: 12px">
-            User Messages by Time of Day
-            <select
-              id="timezone-select"
-              style="
-                font-size: 12px;
-                padding: 4px 8px;
-                border-radius: 4px;
-                border: 1px solid #e2e8f0;
-              "
-            >
-              <option value="0">PT (UTC-8)</option>
-              <option value="3">ET (UTC-5)</option>
-              <option value="8">London (UTC)</option>
-              <option value="9">CET (UTC+1)</option>
-              <option value="17">Tokyo (UTC+9)</option>
-              <option value="custom">Custom offset...</option>
-            </select>
-            <input
-              type="number"
-              id="custom-offset"
-              placeholder="UTC offset"
-              style="
-                display: none;
-                width: 80px;
-                font-size: 12px;
-                padding: 4px;
-                border-radius: 4px;
-                border: 1px solid #e2e8f0;
-              "
-            />
-          </div>
-          <div id="timeofday-chart"></div>
-        </div>
-        <div class="chart-card">
-          <div class="chart-title">Tool Errors Encountered</div>
-          {{CHART_TOOL_ERRORS}}
-        </div>
-      </div>
-
-      <h2 id="section-wins">Impressive Things You Did</h2>
-      <p class="section-intro">{{WINS_INTRO}}</p>
-      <div class="big-wins">{{BIG_WINS}}</div>
-
-      <div class="charts-row">
-        <div class="chart-card">
-          <div class="chart-title">What Helped Most (Claude's Capabilities)</div>
-          {{CHART_WHAT_HELPED}}
-        </div>
-        <div class="chart-card">
-          <div class="chart-title">Outcomes</div>
-          {{CHART_OUTCOMES}}
-        </div>
-      </div>
-
-      <h2 id="section-friction">Where Things Go Wrong</h2>
-      <p class="section-intro">{{FRICTION_INTRO}}</p>
-      <div class="friction-categories">{{FRICTION_CATEGORIES}}</div>
-
-      <div class="charts-row">
-        <div class="chart-card">
-          <div class="chart-title">Primary Friction Types</div>
-          {{CHART_FRICTION_TYPES}}
-        </div>
-        <div class="chart-card">
-          <div class="chart-title">Inferred Satisfaction (model-estimated)</div>
-          {{CHART_SATISFACTION}}
-        </div>
-      </div>
-
-      <h2 id="section-features">Features to Try</h2>
-      <div class="claude-md-section">
-        <h3>Suggested CLAUDE.md Additions</h3>
-        <div class="claude-md-actions">
-          <button class="copy-all-btn" data-copy-all="claude-md">Copy all</button>
-        </div>
-        {{CLAUDE_MD_ADDITIONS}}
-      </div>
-      <div class="features-section">{{FEATURES}}</div>
-
-      <h2 id="section-patterns">New Usage Patterns to Try</h2>
-      <div class="patterns-section">{{USAGE_PATTERNS}}</div>
-
-      <h2 id="section-horizon">On the Horizon</h2>
-      <p class="section-intro">{{HORIZON_INTRO}}</p>
-      <div class="horizon-section">{{HORIZON}}</div>
-
-      <h2 id="section-feedback" class="feedback-header">Team Feedback</h2>
-      <p class="feedback-intro">
-        Model-estimated signals from your sessions. These are inferences, not verified facts.
-      </p>
-      <div class="feedback-section">{{FEEDBACK}}</div>
-
-      <div class="fun-ending">
-        <div class="fun-headline">{{FUN_HEADLINE}}</div>
-        <div class="fun-detail">{{FUN_DETAIL}}</div>
+      <div class="chart-card">
+        <div class="chart-title">Session Types</div>
+        {{CHART_SESSION_TYPES}}
       </div>
     </div>
 
-    <script>
-      // Data injected by render-insights.mjs: 24 buckets of UTC-hour message counts.
-      var TIMEOFDAY_UTC = {{TIMEOFDAY_DATA}};
+    <!-- Response Time Distribution -->
+    <div class="chart-card" style="margin: 24px 0;">
+      <div class="chart-title">User Response Time Distribution</div>
+      {{CHART_RESPONSE_TIME}}
+      <div style="font-size: 12px; color: #64748b; margin-top: 8px;">
+        Median: {{RESPONSE_MEDIAN}}s &bull; Average: {{RESPONSE_AVERAGE}}s
+      </div>
+    </div>
 
-      function renderTimeOfDay(offset) {
-        var counts = new Array(24).fill(0);
-        for (var utcHour = 0; utcHour < 24; utcHour++) {
-          var local = ((utcHour + offset) % 24 + 24) % 24;
-          counts[local] += (TIMEOFDAY_UTC[utcHour] || 0);
-        }
-        var max = Math.max(1, Math.max.apply(null, counts));
-        var el = document.getElementById('timeofday-chart');
-        if (!el) return;
-        if (counts.every(function (c) { return c === 0; })) {
-          el.innerHTML = '<p class="empty">No message timing data</p>';
-          return;
-        }
-        var rows = '';
-        for (var h = 0; h < 24; h++) {
-          var pct = Math.round((counts[h] / max) * 100);
-          var label = (h < 10 ? '0' + h : '' + h) + ':00';
-          rows += '<div class="bar-row">'
-            + '<div class="bar-label">' + label + '</div>'
-            + '<div class="bar-track"><div class="bar-fill" style="width:' + pct + '%;background:#6366f1;"></div></div>'
-            + '<div class="bar-value">' + counts[h] + '</div>'
-            + '</div>';
-        }
-        el.innerHTML = rows;
+    <!-- Multi-clauding Section -->
+    <div class="chart-card" style="margin: 24px 0;">
+      <div class="chart-title">Multi-Clauding (Parallel Sessions)</div>
+      {{MULTI_CLAUDING}}
+    </div>
+
+    <!-- Time of Day & Tool Errors -->
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title" style="display: flex; align-items: center; gap: 12px;">
+          User Messages by Time of Day
+          <select id="timezone-select" style="font-size: 12px; padding: 4px 8px; border-radius: 4px; border: 1px solid #e2e8f0;">
+            <option value="0">PT (UTC-8)</option>
+            <option value="3">ET (UTC-5)</option>
+            <option value="8">London (UTC)</option>
+            <option value="9">CET (UTC+1)</option>
+            <option value="17">Tokyo (UTC+9)</option>
+            <option value="custom">Custom offset...</option>
+          </select>
+          <input type="number" id="custom-offset" placeholder="UTC offset" style="display: none; width: 80px; font-size: 12px; padding: 4px; border-radius: 4px; border: 1px solid #e2e8f0;">
+        </div>
+        <div id="timeofday-chart"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Tool Errors Encountered</div>
+        {{CHART_TOOL_ERRORS}}
+      </div>
+    </div>
+
+    <h2 id="section-wins">Impressive Things You Did</h2>
+    <p class="section-intro">{{WINS_INTRO}}</p>
+    <div class="big-wins">{{BIG_WINS}}</div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title">What Helped Most (Claude's Capabilities)</div>
+        {{CHART_WHAT_HELPED}}
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Outcomes</div>
+        {{CHART_OUTCOMES}}
+      </div>
+    </div>
+
+    <h2 id="section-friction">Where Things Go Wrong</h2>
+    <p class="section-intro">{{FRICTION_INTRO}}</p>
+    <div class="friction-categories">{{FRICTION_CATEGORIES}}</div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title">Primary Friction Types</div>
+        {{CHART_FRICTION_TYPES}}
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Inferred Satisfaction (model-estimated)</div>
+        {{CHART_SATISFACTION}}
+      </div>
+    </div>
+
+    <h2 id="section-features">Features to Try</h2>
+    <div class="claude-md-section">
+      <h3>Suggested CLAUDE.md Additions</h3>
+      <div class="claude-md-actions">
+        <button class="copy-all-btn" data-copy-all="claude-md">Copy all</button>
+      </div>
+      {{CLAUDE_MD_ADDITIONS}}
+    </div>
+    <div class="features-section">{{FEATURES}}</div>
+
+    <h2 id="section-patterns">New Usage Patterns to Try</h2>
+    <div class="patterns-section">{{USAGE_PATTERNS}}</div>
+
+    <h2 id="section-horizon">On the Horizon</h2>
+    <p class="section-intro">{{HORIZON_INTRO}}</p>
+    <div class="horizon-section">{{HORIZON}}</div>
+
+    <h2 id="section-feedback" class="feedback-header">Team Feedback</h2>
+    <p class="feedback-intro">Model-estimated signals from your sessions. These are inferences, not verified facts.</p>
+    <div class="feedback-section">{{FEEDBACK}}</div>
+
+    <div class="fun-ending">
+      <div class="fun-headline">{{FUN_HEADLINE}}</div>
+      <div class="fun-detail">{{FUN_DETAIL}}</div>
+    </div>
+  </div>
+
+  <script>
+    // Data injected by render-insights.mjs: 24 buckets of UTC-hour message counts.
+    var TIMEOFDAY_UTC = {{TIMEOFDAY_DATA}};
+
+    function renderTimeOfDay(offset) {
+      var counts = new Array(24).fill(0);
+      for (var utcHour = 0; utcHour < 24; utcHour++) {
+        var local = ((utcHour + offset) % 24 + 24) % 24;
+        counts[local] += (TIMEOFDAY_UTC[utcHour] || 0);
       }
-
-      (function initTimezone() {
-        var select = document.getElementById('timezone-select');
-        var custom = document.getElementById('custom-offset');
-        if (!select) return;
-        function currentOffset() {
-          if (select.value === 'custom') {
-            var v = parseInt(custom.value, 10);
-            return isNaN(v) ? 0 : v;
-          }
-          return parseInt(select.value, 10) || 0;
-        }
-        select.addEventListener('change', function () {
-          custom.style.display = select.value === 'custom' ? 'inline-block' : 'none';
-          renderTimeOfDay(currentOffset());
-        });
-        custom.addEventListener('input', function () { renderTimeOfDay(currentOffset()); });
-        renderTimeOfDay(parseInt(select.value, 10) || 0);
-      })();
-
-      // Copy-to-clipboard for individual snippets and "Copy all" buttons.
-      function copyText(text, btn, revertLabel) {
-        var done = function () {
-          var original = btn.textContent;
-          btn.textContent = revertLabel || 'Copied!';
-          btn.classList.add('copied');
-          setTimeout(function () { btn.textContent = original; btn.classList.remove('copied'); }, 1500);
-        };
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(text).then(done, done);
-        } else {
-          var ta = document.createElement('textarea');
-          ta.value = text; document.body.appendChild(ta); ta.select();
-          try { document.execCommand('copy'); } catch (e) {}
-          document.body.removeChild(ta); done();
-        }
+      var max = Math.max(1, Math.max.apply(null, counts));
+      var el = document.getElementById('timeofday-chart');
+      if (!el) return;
+      if (counts.every(function (c) { return c === 0; })) {
+        el.innerHTML = '<p class="empty">No message timing data</p>';
+        return;
       }
+      var rows = '';
+      for (var h = 0; h < 24; h++) {
+        var pct = Math.round((counts[h] / max) * 100);
+        var label = (h < 10 ? '0' + h : '' + h) + ':00';
+        rows += '<div class="bar-row">'
+          + '<div class="bar-label">' + label + '</div>'
+          + '<div class="bar-track"><div class="bar-fill" style="width:' + pct + '%;background:#6366f1;"></div></div>'
+          + '<div class="bar-value">' + counts[h] + '</div>'
+          + '</div>';
+      }
+      el.innerHTML = rows;
+    }
 
-      document.querySelectorAll('.copy-btn').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          var target = btn.getAttribute('data-copy-target');
-          var node = target ? document.getElementById(target) : btn.previousElementSibling;
-          var text = btn.getAttribute('data-copy') || (node ? node.textContent : '');
-          copyText(text, btn, 'Copied!');
-        });
+    (function initTimezone() {
+      var select = document.getElementById('timezone-select');
+      var custom = document.getElementById('custom-offset');
+      if (!select) return;
+      function currentOffset() {
+        if (select.value === 'custom') {
+          var v = parseInt(custom.value, 10);
+          return isNaN(v) ? 0 : v;
+        }
+        return parseInt(select.value, 10) || 0;
+      }
+      select.addEventListener('change', function () {
+        custom.style.display = select.value === 'custom' ? 'inline-block' : 'none';
+        renderTimeOfDay(currentOffset());
       });
+      custom.addEventListener('input', function () { renderTimeOfDay(currentOffset()); });
+      renderTimeOfDay(parseInt(select.value, 10) || 0);
+    })();
 
-      document.querySelectorAll('.copy-all-btn').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          var group = btn.getAttribute('data-copy-all');
-          var codes = document.querySelectorAll('[data-copy-group="' + group + '"]');
-          var lines = [];
-          codes.forEach(function (c) { lines.push(c.textContent); });
-          copyText(lines.join('\n'), btn, 'Copied!');
-        });
-      });
+    // Copy-to-clipboard for individual snippets and "Copy all" buttons.
+    function copyText(text, btn, revertLabel) {
+      var done = function () {
+        var original = btn.textContent;
+        btn.textContent = revertLabel || 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(function () { btn.textContent = original; btn.classList.remove('copied'); }, 1500);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, done);
+      } else {
+        var ta = document.createElement('textarea');
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); } catch (e) {}
+        document.body.removeChild(ta); done();
+      }
+    }
 
-      // Collapsible sections.
-      document.querySelectorAll('.collapsible-header').forEach(function (header) {
-        header.addEventListener('click', function () {
-          header.classList.toggle('open');
-          var content = header.nextElementSibling;
-          if (content && content.classList.contains('collapsible-content')) {
-            content.classList.toggle('open');
-          }
-        });
+    document.querySelectorAll('.copy-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var target = btn.getAttribute('data-copy-target');
+        var node = target ? document.getElementById(target) : btn.previousElementSibling;
+        var text = btn.getAttribute('data-copy') || (node ? node.textContent : '');
+        copyText(text, btn, 'Copied!');
       });
-    </script>
-  </body>
+    });
+
+    document.querySelectorAll('.copy-all-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var group = btn.getAttribute('data-copy-all');
+        var codes = document.querySelectorAll('[data-copy-group="' + group + '"]');
+        var lines = [];
+        codes.forEach(function (c) { lines.push(c.textContent); });
+        copyText(lines.join('\n'), btn, 'Copied!');
+      });
+    });
+
+    // Collapsible sections.
+    document.querySelectorAll('.collapsible-header').forEach(function (header) {
+      header.addEventListener('click', function () {
+        header.classList.toggle('open');
+        var content = header.nextElementSibling;
+        if (content && content.classList.contains('collapsible-content')) {
+          content.classList.toggle('open');
+        }
+      });
+    });
+  </script>
+</body>
 </html>
