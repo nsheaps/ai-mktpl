@@ -14,8 +14,7 @@ RESPOND WITH ONLY A VALID JSON OBJECT:
   "claude_md_additions": [
     {
       "addition": "The instruction to add to CLAUDE.md",
-      "why": "Why this helps, referencing the user's data",
-      "prompt_scaffold": "A copyable snippet the user can paste into CLAUDE.md"
+      "why": "Why this helps, referencing the user's data"
     }
   ],
   "features_to_try": [

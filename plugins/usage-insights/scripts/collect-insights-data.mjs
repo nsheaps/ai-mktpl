@@ -28,18 +28,22 @@
 //
 // Output: a single JSON object on stdout; a short human summary on stderr.
 
-import { readdir } from "node:fs/promises";
-import { existsSync } from "node:fs";
-import { join, extname, basename } from "node:path";
-import { homedir } from "node:os";
+import { basename } from "node:path";
 import { createInterface } from "node:readline";
 import { createReadStream } from "node:fs";
+import {
+  resolveProjectDir,
+  transcriptFilesIn,
+  allTranscriptFiles,
+  categorizeToolError,
+  bump,
+  mapToSortedList,
+} from "./lib/transcripts.mjs";
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
-const PROJECTS_DIR = join(homedir(), ".claude", "projects");
 const DEFAULT_DAYS = 30;
 const DEFAULT_MAX_SESSIONS = 60;
 const PROMPT_TRUNC = 240; // per-message char cap in session summaries
@@ -161,69 +165,12 @@ function parseArgs(argv) {
 }
 
 // ---------------------------------------------------------------------------
-// Transcript discovery (shared shape with collect-usage.mjs)
-// ---------------------------------------------------------------------------
-
-function encodeCwd(cwd) {
-  return cwd.replace(/[^a-zA-Z0-9]/g, "-");
-}
-
-function resolveProjectDir(cwd) {
-  const direct = join(PROJECTS_DIR, encodeCwd(cwd));
-  return existsSync(direct) ? direct : null;
-}
-
-async function transcriptFilesIn(dir) {
-  let entries;
-  try {
-    entries = await readdir(dir, { withFileTypes: true });
-  } catch {
-    return [];
-  }
-  const files = [];
-  const subdirs = [];
-  for (const e of entries) {
-    if (e.isFile() && extname(e.name) === ".jsonl") files.push(join(dir, e.name));
-    else if (e.isDirectory()) subdirs.push(e.name);
-  }
-  for (const sub of subdirs) {
-    const subagentsDir = join(dir, sub, "subagents");
-    try {
-      const nested = await readdir(subagentsDir, { recursive: true });
-      for (const n of nested) {
-        if (extname(n) === ".jsonl") files.push(join(subagentsDir, n));
-      }
-    } catch {
-      /* no subagents dir */
-    }
-  }
-  return files;
-}
-
-async function allTranscriptFiles() {
-  let projectDirs;
-  try {
-    projectDirs = await readdir(PROJECTS_DIR, { withFileTypes: true });
-  } catch {
-    return [];
-  }
-  const out = [];
-  for (const d of projectDirs) {
-    if (d.isDirectory()) {
-      out.push(...(await transcriptFilesIn(join(PROJECTS_DIR, d.name))));
-    }
-  }
-  return out;
-}
-
-// ---------------------------------------------------------------------------
 // Helpers
+//
+// resolveProjectDir / transcriptFilesIn / allTranscriptFiles / bump /
+// categorizeToolError / mapToSortedList live in ./lib/transcripts.mjs — every
+// collector walks the same tree and counts the same way.
 // ---------------------------------------------------------------------------
-
-function bump(map, key, amt = 1) {
-  if (key === undefined || key === null || key === "") return;
-  map.set(key, (map.get(key) ?? 0) + amt);
-}
 
 function countNewlines(s) {
   if (typeof s !== "string" || s.length === 0) return 0;
@@ -264,29 +211,6 @@ function isSlashOrMeta(text) {
     t.startsWith("Caveat:") ||
     t.startsWith("[Request interrupted")
   );
-}
-
-function categorizeToolError(content) {
-  const text =
-    typeof content === "string"
-      ? content
-      : Array.isArray(content)
-        ? content.map((c) => (typeof c === "string" ? c : (c?.text ?? ""))).join(" ")
-        : "";
-  const t = text.toLowerCase();
-  if (t.includes("user rejected") || t.includes("user doesn't want")) return "User Rejected";
-  if (
-    t.includes("has been modified") ||
-    t.includes("file has changed") ||
-    t.includes("changed since")
-  )
-    return "File Changed";
-  if (t.includes("too large") || t.includes("exceeds")) return "File Too Large";
-  if (t.includes("no such file") || t.includes("not found") || t.includes("does not exist"))
-    return "File Not Found";
-  if (t.includes("string to replace") || t.includes("old_string") || t.includes("edit"))
-    return "Edit Failed";
-  return "Command Failed";
 }
 
 // ---------------------------------------------------------------------------
@@ -495,13 +419,6 @@ function multiClauding(sessions) {
     overlappingSessions: overlapping,
     everParallel: max > 1,
   };
-}
-
-function mapToSortedList(map, limit = Infinity) {
-  return [...map.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, limit)
-    .map(([name, count]) => ({ name, count }));
 }
 
 function distinctDays(sessions) {

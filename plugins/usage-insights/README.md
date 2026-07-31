@@ -192,6 +192,7 @@ step-by-step procedure. You can also trigger the skills conversationally:
 | `scripts/collect-insights-data.mjs`   | Deterministic scan for `/insights` (counts, charts, session summaries).                             |
 | `scripts/render-insights.mjs`         | Fills the HTML template from the collector data + LLM outputs.                                      |
 | `scripts/collect-onboarding-data.mjs` | Deterministic usage scan for `/team-onboarding` (slash commands, MCP servers, session descriptors). |
+| `scripts/lib/transcripts.mjs`         | Shared transcript discovery + counting helpers imported by all three collectors.                    |
 
 `/init` and `/review` are prompt-only reproductions — they have no collector
 script; their skills read the shipped prompts and call `gh` (for `/review`)
@@ -219,6 +220,8 @@ usage-insights/
 │   ├── pr-review/SKILL.md          # /review procedure
 │   └── team-onboarding/SKILL.md    # /team-onboarding procedure
 ├── scripts/
+│   ├── lib/
+│   │   └── transcripts.mjs         # shared transcript discovery + counting
 │   ├── collect-usage.mjs
 │   ├── collect-insights-data.mjs
 │   ├── render-insights.mjs

@@ -27,10 +27,9 @@
 // object on stdout (2-space indented), matching the built-in's shape.
 
 import { readdir, stat, readFile } from "node:fs/promises";
-import { existsSync } from "node:fs";
 import { join, basename } from "node:path";
-import { homedir } from "node:os";
 import { execFileSync } from "node:child_process";
+import { PROJECTS_DIR, resolveProjectDir } from "./lib/transcripts.mjs";
 
 // Behavior constants (verbatim from the binary).
 const DEFAULT_WINDOW_DAYS = 30; // default scan window
@@ -73,25 +72,11 @@ function parseArgs(argv) {
 }
 
 // ---------------------------------------------------------------------------
-// Transcript discovery
-// ---------------------------------------------------------------------------
-
-const PROJECTS_DIR = join(homedir(), ".claude", "projects");
-
-/** Claude encodes a cwd into a project-dir name by replacing non-alnum with '-'. */
-function encodeCwd(cwd) {
-  return cwd.replace(/[^a-zA-Z0-9]/g, "-");
-}
-
-/** Resolve the project transcript dir for a cwd. */
-function resolveProjectDir(cwd) {
-  const direct = join(PROJECTS_DIR, encodeCwd(cwd));
-  if (existsSync(direct)) return direct;
-  return null;
-}
-
-// ---------------------------------------------------------------------------
 // Session scanner (binary: lep)
+//
+// PROJECTS_DIR / resolveProjectDir live in ./lib/transcripts.mjs — every
+// collector resolves the same tree. This one keeps its own scanner because it
+// reads whole files and only walks the top level (no subagents/**).
 // ---------------------------------------------------------------------------
 
 /**

@@ -25,11 +25,19 @@
 // Output: a human-readable summary on stderr and a single JSON object on stdout.
 
 import { readdir, stat } from "node:fs/promises";
-import { existsSync } from "node:fs";
 import { join, extname, basename } from "node:path";
-import { homedir } from "node:os";
 import { createInterface } from "node:readline";
 import { createReadStream } from "node:fs";
+import {
+  PROJECTS_DIR,
+  resolveProjectDir,
+  transcriptFilesIn,
+  allTranscriptFiles,
+  categorizeToolError,
+  bump,
+  mergeCounts,
+  mapToSortedList,
+} from "./lib/transcripts.mjs";
 
 // ---------------------------------------------------------------------------
 // Cost model (verbatim from the binary: sL_ / iL_)
@@ -84,67 +92,10 @@ function parseArgs(argv) {
 
 // ---------------------------------------------------------------------------
 // Transcript discovery
+//
+// PROJECTS_DIR / resolveProjectDir / transcriptFilesIn / allTranscriptFiles all
+// live in ./lib/transcripts.mjs — every collector walks the same tree.
 // ---------------------------------------------------------------------------
-
-const PROJECTS_DIR = join(homedir(), ".claude", "projects");
-
-/** Claude encodes a cwd into a project-dir name by replacing non-alnum with '-'. */
-function encodeCwd(cwd) {
-  return cwd.replace(/[^a-zA-Z0-9]/g, "-");
-}
-
-/** Resolve the project transcript dir for a cwd, tolerating minor encoding drift. */
-function resolveProjectDir(cwd) {
-  const encoded = encodeCwd(cwd);
-  const direct = join(PROJECTS_DIR, encoded);
-  if (existsSync(direct)) return direct;
-  return null;
-}
-
-/** All *.jsonl files in a project dir, including per-session subagents/**. */
-async function transcriptFilesIn(dir) {
-  let entries;
-  try {
-    entries = await readdir(dir, { withFileTypes: true });
-  } catch {
-    return [];
-  }
-  const files = [];
-  const subdirs = [];
-  for (const e of entries) {
-    if (e.isFile() && extname(e.name) === ".jsonl") files.push(join(dir, e.name));
-    else if (e.isDirectory()) subdirs.push(e.name);
-  }
-  for (const sub of subdirs) {
-    const subagentsDir = join(dir, sub, "subagents");
-    try {
-      const nested = await readdir(subagentsDir, { recursive: true });
-      for (const n of nested) {
-        if (extname(n) === ".jsonl") files.push(join(subagentsDir, n));
-      }
-    } catch {
-      /* no subagents dir */
-    }
-  }
-  return files;
-}
-
-/** All transcript files across every project dir. */
-async function allTranscriptFiles() {
-  let projectDirs;
-  try {
-    projectDirs = await readdir(PROJECTS_DIR, { withFileTypes: true });
-  } catch {
-    return [];
-  }
-  const out = [];
-  for (const d of projectDirs) {
-    if (d.isDirectory()) {
-      out.push(...(await transcriptFilesIn(join(PROJECTS_DIR, d.name))));
-    }
-  }
-  return out;
-}
 
 /** Most-recently-modified top-level session file in a project dir. */
 async function mostRecentSessionFile(dir) {
@@ -263,37 +214,9 @@ function normalizeModel(model) {
   return model;
 }
 
-/** Map a tool_result error body to one of the binary's error categories. */
-function categorizeToolError(content) {
-  const text =
-    typeof content === "string"
-      ? content
-      : Array.isArray(content)
-        ? content.map((c) => (typeof c === "string" ? c : (c?.text ?? ""))).join(" ")
-        : "";
-  const t = text.toLowerCase();
-  if (t.includes("user rejected") || t.includes("user doesn't want")) return "User Rejected";
-  if (
-    t.includes("has been modified") ||
-    t.includes("file has changed") ||
-    t.includes("changed since")
-  )
-    return "File Changed";
-  if (t.includes("too large") || t.includes("exceeds")) return "File Too Large";
-  if (t.includes("no such file") || t.includes("not found") || t.includes("does not exist"))
-    return "File Not Found";
-  if (t.includes("string to replace") || t.includes("old_string") || t.includes("edit"))
-    return "Edit Failed";
-  return "Command Failed";
-}
-
 // ---------------------------------------------------------------------------
 // Aggregation
 // ---------------------------------------------------------------------------
-
-function bump(map, key, amt) {
-  if (key) map.set(key, (map.get(key) ?? 0) + amt);
-}
 
 function aggregate(records) {
   const seen = new Set();
@@ -315,6 +238,7 @@ function aggregate(records) {
   let mainCost = 0;
   let subCost = 0;
   let subCount = 0;
+  let attributedRecords = 0;
 
   for (const r of records) {
     if (r.uuid) {
@@ -332,7 +256,18 @@ function aggregate(records) {
 
     bump(byModel, r.model, c);
 
-    // Attribution (binary: fXd)
+    // Attribution (binary: fXd). The four attribution* fields were recovered from
+    // the v2.1.220 binary's strings; older transcripts predate them and carry
+    // none, which is why `attributionAvailable` is reported below.
+    //
+    // The agent/skill split reproduces fXd: a request made *inside* a subagent is
+    // keyed by the skill that agent was running when one is known, falling back to
+    // the agent name — so the "by agent" breakdown reads as "which skill did this
+    // agent spend its budget on". Requests outside a subagent are keyed by skill
+    // alone. Plugin and MCP-server attribution are independent of both.
+    if (r.attributionAgent || r.attributionSkill || r.attributionPlugin || r.attributionMcpServer) {
+      attributedRecords++;
+    }
     if (r.attributionAgent) bump(byAgent, r.attributionSkill ?? r.attributionAgent, c);
     else bump(bySkill, r.attributionSkill, c);
     bump(byPlugin, r.attributionPlugin, c);
@@ -387,6 +322,10 @@ function aggregate(records) {
     bySkill: pctList(bySkill, totalCost),
     byPlugin: pctList(byPlugin, totalCost),
     byMcpServer: pctList(byMcpServer, totalCost),
+    // Distinguishes "no attribution data in these transcripts" (all pre-fXd)
+    // from "attribution data exists but nothing was attributed".
+    attributedRequests: attributedRecords,
+    attributionAvailable: attributedRecords > 0,
     sessions,
     hours,
   };
@@ -403,14 +342,6 @@ function pctList(map, total) {
       pct: Math.round((cost / total) * 100),
     }))
     .filter((r) => r.pct > 0);
-}
-
-function mergeCounts(target, source) {
-  for (const [k, v] of source) target.set(k, (target.get(k) ?? 0) + v);
-}
-
-function mapToSortedList(map) {
-  return [...map.entries()].sort((a, b) => b[1] - a[1]).map(([name, count]) => ({ name, count }));
 }
 
 // ---------------------------------------------------------------------------
@@ -532,6 +463,12 @@ async function main() {
     byModel: agg.byModel,
     byTool: mapToSortedList(toolUses),
     toolErrors: mapToSortedList(toolErrors),
+    // When `available` is false, the empty byAgent/bySkill/byPlugin/byMcpServer
+    // lists mean "these transcripts predate attribution", not "nothing ran".
+    attribution: {
+      available: agg.attributionAvailable,
+      attributedRequests: agg.attributedRequests,
+    },
     byAgent: agg.byAgent,
     bySkill: agg.bySkill,
     byPlugin: agg.byPlugin,

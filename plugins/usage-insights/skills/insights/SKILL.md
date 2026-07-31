@@ -95,8 +95,8 @@ Scope flags (choose what the user asked for):
 
 Read the prompt at `assets/prompts/facets.md`. It classifies each session across
 a fixed enum taxonomy (session type, request types, capabilities that helped,
-friction types, satisfaction, outcome, helpfulness, languages). Feed it the
-`sessions[]` array from `collect.json`.
+friction types, satisfaction, outcome, helpfulness). Feed it the `sessions[]`
+array from `collect.json`.
 
 - For a small number of sessions, do this yourself in-context.
 - For many sessions, dispatch the Task tool (a `general-purpose` agent) with the

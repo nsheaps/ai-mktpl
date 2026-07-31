@@ -12,8 +12,7 @@ RESPOND WITH ONLY A VALID JSON OBJECT of the shape:
       "friction_types": ["zero or more of the FRICTION TYPE enum"],
       "satisfaction": "one of the SATISFACTION enum",
       "outcome": "one of the OUTCOME enum",
-      "helpfulness": "one of the HELPFULNESS enum",
-      "languages": ["programming languages touched, lowercase, e.g. typescript, python, go"]
+      "helpfulness": "one of the HELPFULNESS enum"
     }
   ]
 }
