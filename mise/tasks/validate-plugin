@@ -10,9 +10,14 @@ else
   CLAUDE="mise exec npm:@anthropic-ai/claude-code -- claude"
 fi
 
-OUTPUT="$($CLAUDE plugin validate "$PLUGIN_PATH")"
-STATUS=$?
-if [ $STATUS -ne 0 ]; then
+# Capture stdout+stderr together and take the status from the `||` branch.
+# `STATUS=$?` on the line after a plain `OUTPUT="$(...)"` never runs under
+# `set -e` — the shell aborts on the failing substitution, so the validator's
+# diagnostics were discarded and CI only ever showed a bare exit code.
+STATUS=0
+OUTPUT="$($CLAUDE plugin validate "$PLUGIN_PATH" 2>&1)" || STATUS=$?
+if [ "$STATUS" -ne 0 ]; then
+  echo "❌ $PLUGIN_PATH (exit $STATUS)"
   echo "$OUTPUT"
   exit 1
 else
