@@ -1,0 +1,21 @@
+{
+  "name": "usage-insights",
+  "version": "0.1.0",
+  "description": "Standalone re-implementations of Claude Code's built-in /usage and /insights, reverse-engineered from the CLI binary. /usage programmatically computes session token usage and cost and has an agent analyze where API calls went; /insights scans your session transcripts, extracts facets via an agent, aggregates them, and renders the full shareable HTML report — all without relying on the built-in tooling.",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/usage-insights",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": [
+    "usage",
+    "insights",
+    "session-analysis",
+    "token-usage",
+    "cost",
+    "report",
+    "transcripts"
+  ]
+}
