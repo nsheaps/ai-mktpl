@@ -18,19 +18,19 @@ select the scope.
 
 **Format:** `[--all] [--session <id>] [--file <path>] [--current] [--days <n>]`
 
-| Argument         | Meaning                                       |
-| ---------------- | --------------------------------------------- |
-| (none)           | Current project's transcripts.                |
-| `--all`          | All projects (default window becomes 7 days). |
-| `--session <id>` | A single session id, across all projects.     |
-| `--file <path>`  | A single transcript file.                     |
-| `--current`      | The current / most-recent session only.       |
-| `--days <n>`     | Restrict to the last `n` days.                |
+| Argument         | Meaning                                                                        |
+| ---------------- | ------------------------------------------------------------------------------ |
+| (none)           | The current/most-recent session in this project (same as `--current`).         |
+| `--all`          | All projects (default window becomes 7 days).                                  |
+| `--session <id>` | A single session id, across all projects.                                      |
+| `--file <path>`  | A single transcript file.                                                      |
+| `--current`      | The current/most-recent session only. Narrows — wins over `--all`/`--session`. |
+| `--days <n>`     | Restrict to the last `n` days.                                                 |
 
 **Examples:**
 
-- `/usage` — current project's usage
-- `/usage --current` — just this session
+- `/usage` — this session (the most recent one in the current project)
+- `/usage --current` — the same thing, stated explicitly
 - `/usage --all --days 30` — everything from the last 30 days
 
 ## What to do

@@ -65,8 +65,8 @@ claude --plugin-dir /path/to/usage-insights
 ### `/usage` — where did my API calls go?
 
 ```bash
-/usage                     # current project's usage
-/usage --current           # just this session
+/usage                     # this session (most recent in the current project)
+/usage --current           # the same thing, stated explicitly
 /usage --all --days 30     # everything from the last 30 days
 /usage --session <id>      # one session, across all projects
 ```
@@ -135,7 +135,7 @@ and the improve path prints proposed diffs and confirms before writing.
 ```
 
 Fetches the PR's metadata and diff with `gh` (`gh pr view --json …` + `gh pr
-diff`), then produces a structured review across six focus areas with four
+diff`), then produces a structured review across five focus areas with four
 required sections. It **reads only** — nothing is posted back to GitHub. For a
 review of your uncommitted working tree, that's the separate built-in
 `/code-review`, which this plugin does not reproduce.
@@ -195,7 +195,7 @@ usage-insights/
 │   ├── usage/SKILL.md              # /usage procedure
 │   ├── insights/SKILL.md           # /insights procedure
 │   ├── init/SKILL.md               # /init procedure
-│   ├── review/SKILL.md             # /review procedure
+│   ├── pr-review/SKILL.md          # /review procedure
 │   └── team-onboarding/SKILL.md    # /team-onboarding procedure
 ├── scripts/
 │   ├── collect-usage.mjs
@@ -203,7 +203,7 @@ usage-insights/
 │   ├── render-insights.mjs
 │   └── collect-onboarding-data.mjs
 ├── assets/
-│   ├── insights-template.html      # 34-token HTML template
+│   ├── insights-template.html      # 35-token HTML template
 │   └── prompts/                    # insights facets + 7 sections, init (classic/new),
 │                                   #   review, team-onboarding + guide template
 ├── docs/

@@ -423,7 +423,7 @@ async function main() {
   let sinceMs = null;
   if (typeof opts.days === "number" && !Number.isNaN(opts.days)) {
     sinceMs = Date.now() - opts.days * 86400000;
-  } else if (opts.all) {
+  } else if (opts.all && !opts.current) {
     sinceMs = Date.now() - WINDOW_7D_MS;
   }
 
@@ -431,10 +431,12 @@ async function main() {
   let sessionFilter = opts.session;
   let scope = "current-session";
 
+  // `--current` is also the no-flag default, so it only *narrows*: it must win
+  // over --all/--session, otherwise `--current --all` silently reports --all.
   if (opts.file) {
     files = [opts.file];
     scope = `file:${basename(opts.file)}`;
-  } else if (opts.all) {
+  } else if (opts.all && !opts.current) {
     files = await allTranscriptFiles();
     // Label the window actually in effect: --days overrides the 7-day default.
     const windowDays =
@@ -442,11 +444,12 @@ async function main() {
         ? opts.days
         : WINDOW_7D_MS / 86400000;
     scope = `all-projects-${windowDays}d`;
-  } else if (opts.session) {
+  } else if (opts.session && !opts.current) {
     files = await allTranscriptFiles();
     scope = `session:${opts.session}`;
   } else {
-    // Default: the most-recent session in the cwd's project dir.
+    // `--current`, or no scope flag at all: the most-recent session in the
+    // cwd's project dir.
     const projectDir = opts.projectDir ?? resolveProjectDir(process.cwd());
     if (!projectDir) {
       process.stderr.write(

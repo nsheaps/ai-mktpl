@@ -1,12 +1,14 @@
 ---
-name: review
+name: pr-review
 description: >
   Use this skill when the user runs /review or asks to "review a pull request",
   "review PR #123", "do a code review of this PR", or "give feedback on this
   GitHub pull request". Reproduces Claude Code's built-in /review WITHOUT the
   built-in tooling: it fetches a GitHub pull request's context and diff with the
   gh CLI and produces a thorough, structured code review. For reviewing your own
-  uncommitted working diff instead, use /code-review (a separate built-in).
+  uncommitted working diff instead, use /code-review (a separate built-in). For
+  this repo's own review checklists and scoring rubric, use the sdlc-utils
+  `review` skill instead — this one only reproduces the built-in PR review.
 ---
 
 # Review
@@ -42,22 +44,26 @@ this plugin at `assets/prompts/review.md`.
 
 ### Step 1 — Resolve the target
 
-Take the PR number from `$ARGUMENTS` (the first bare token, e.g. `123`). Any
-remaining text is the user's additional instructions. If no PR number is given,
-ask for one — this command reviews a _pull request_, not the working tree (for
-the local diff, direct the user to `/code-review`).
+Take the PR reference from `$ARGUMENTS` (the first bare token). Either a bare
+number (`123`) or a full PR URL (`https://github.com/owner/repo/pull/123`) is
+accepted — `gh pr view`/`gh pr diff` resolve both, and a URL additionally selects
+the repository, so it works outside the target checkout. Any remaining text is
+the user's additional instructions. If no PR reference is given, ask for one —
+this command reviews a _pull request_, not the working tree (for the local diff,
+direct the user to `/code-review`).
 
 ### Step 2 — Load the review prompt
 
 Read `${CLAUDE_PLUGIN_ROOT}/assets/prompts/review.md` and follow it as your own
 instructions. Substitute:
 
-- `${PR}` → the PR number from Step 1
+- `${PR}` → the PR reference from Step 1 (number or URL)
 - `${ARGS}` → the user's additional instructions (empty string if none)
 
 ### Step 3 — Gather context and diff
 
-Run exactly what the prompt directs, using `gh` (not a local `git diff`):
+Run exactly what the prompt directs, using `gh` (not a local `git diff`). `<pr>`
+is the number or URL from Step 1:
 
 1. `gh pr view <pr> --json title,body,author,baseRefName,headRefName,state,additions,deletions,changedFiles,labels`
 2. `gh pr diff <pr>`
@@ -76,7 +82,7 @@ explicitly asks — the built-in `/review` only prints the review.
 ## Notes on fidelity
 
 - The review criteria and structure are reproduced **verbatim** from the CLI
-  binary (v2.1.220): the six focus areas (correctness, conventions, performance,
+  binary (v2.1.220): the five focus areas (correctness, conventions, performance,
   test coverage, security) and the four required sections (overview, quality,
   suggestions, risks) match the built-in prompt exactly.
 - The built-in command's description distinguishes it from `/code-review`:

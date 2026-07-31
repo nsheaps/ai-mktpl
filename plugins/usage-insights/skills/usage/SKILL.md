@@ -49,8 +49,9 @@ Let `ROOT="${CLAUDE_PLUGIN_ROOT}"`.
 
 ### Step 1 — Compute the breakdown
 
-Default scope is the current project. Pass `--json` to get just the JSON blob
-(the human summary goes to stderr).
+Default scope is the **current session** — the most recent transcript in the
+cwd's project dir, plus that session's subagents. Pass `--json` to get just the
+JSON blob (the human summary goes to stderr).
 
 ```bash
 node "$ROOT/scripts/collect-usage.mjs" --json > usage.json
@@ -58,15 +59,15 @@ node "$ROOT/scripts/collect-usage.mjs" --json > usage.json
 
 Scope flags:
 
-| Flag             | Meaning                                          |
-| ---------------- | ------------------------------------------------ |
-| (none)           | Current project's transcript dir.                |
-| `--all`          | All projects (default window becomes 7 days).    |
-| `--session <id>` | A single session id, across all projects.        |
-| `--file <path>`  | A single transcript file.                        |
-| `--current`      | The current/most-recent session only.            |
-| `--days <n>`     | Only messages from the last `n` days.            |
-| `--json`         | Emit only the JSON (no human summary on stdout). |
+| Flag             | Meaning                                                                        |
+| ---------------- | ------------------------------------------------------------------------------ |
+| (none)           | The current/most-recent session (same as `--current`).                         |
+| `--all`          | All projects (default window becomes 7 days).                                  |
+| `--session <id>` | A single session id, across all projects.                                      |
+| `--file <path>`  | A single transcript file.                                                      |
+| `--current`      | The current/most-recent session only. Narrows — wins over `--all`/`--session`. |
+| `--days <n>`     | Only messages from the last `n` days.                                          |
+| `--json`         | Emit only the JSON (no human summary on stdout).                               |
 
 If no transcripts match, the script emits a small `{ error, scope }` object and
 exits 0 — tell the user nothing matched and suggest a wider scope.
@@ -75,20 +76,20 @@ exits 0 — tell the user nothing matched and suggest a wider scope.
 
 Top-level keys of `usage.json`:
 
-| Key           | What it holds                                                      |
-| ------------- | ------------------------------------------------------------------ |
-| `totals`      | `requestCount`, `sessionCount`, `cost` (synthetic units), `tokens` |
-| `split`       | Cost/tokens split between main thread and subagents.               |
-| `behaviors`   | Notable behavior counts (e.g. retries, long tool chains).          |
-| `byModel`     | Cost + tokens per model.                                           |
-| `byTool`      | Call counts per tool.                                              |
-| `toolErrors`  | Error counts per tool.                                             |
-| `byAgent`     | Cost + tokens per subagent type.                                   |
-| `bySkill`     | Attribution per skill.                                             |
-| `byPlugin`    | Attribution per plugin.                                            |
-| `byMcpServer` | Attribution per MCP server.                                        |
-| `byHourOfDay` | Request/cost histogram across 24 hours (UTC).                      |
-| `topSessions` | The heaviest sessions by cost.                                     |
+| Key           | What it holds                                                         |
+| ------------- | --------------------------------------------------------------------- |
+| `totals`      | `requestCount`, `sessionCount`, `cost` (synthetic units), `tokens`    |
+| `split`       | Cost split between main thread and subagents (costs + percentages).   |
+| `behaviors`   | `cacheMiss` (input > 100k tokens) and `longContext` (> 150k tokens).  |
+| `byModel`     | `{name, cost, pct}` per model family.                                 |
+| `byTool`      | Call counts per tool.                                                 |
+| `toolErrors`  | Counts per error _category_ (e.g. `User Rejected`, `File Not Found`). |
+| `byAgent`     | `{name, cost, pct}` per subagent type.                                |
+| `bySkill`     | Attribution per skill.                                                |
+| `byPlugin`    | Attribution per plugin.                                               |
+| `byMcpServer` | Attribution per MCP server.                                           |
+| `byHourOfDay` | Request-count histogram across 24 hours (**local** time).             |
+| `topSessions` | The heaviest sessions by cost (top 20).                               |
 
 ### Step 3 — Analyze where it went (the agent pass)
 

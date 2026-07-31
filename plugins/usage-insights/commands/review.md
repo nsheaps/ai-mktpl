@@ -11,7 +11,7 @@ Reproduce Claude Code's built-in `/review` **without** the built-in tooling:
 fetch a GitHub pull request's context and diff with the `gh` CLI and produce a
 thorough, structured code review.
 
-Invoke the **`review`** skill and follow it end to end. The first argument is the
+Invoke the **`pr-review`** skill and follow it end to end. The first argument is the
 PR number; any remaining text is passed to the review as extra instructions.
 
 ## Arguments
@@ -32,7 +32,7 @@ For reviewing your own uncommitted working diff, use `/code-review` instead.
 
 ## What to do
 
-1. Recall and follow the **`review`** skill (`skills/review/SKILL.md`).
+1. Recall and follow the **`pr-review`** skill (`skills/pr-review/SKILL.md`).
 2. Take the PR number from the first argument; treat the rest as extra
    instructions. If no PR number is given, ask for one.
 3. Load `${CLAUDE_PLUGIN_ROOT}/assets/prompts/review.md`, gather context with
