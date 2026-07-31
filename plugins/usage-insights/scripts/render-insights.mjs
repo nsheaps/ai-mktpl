@@ -72,13 +72,27 @@ function parseArgs(argv) {
     const a = argv[i];
     const next = () => argv[++i];
     switch (a) {
-      case "--data": args.data = next(); break;
-      case "--llm-dir": args.llmDir = next(); break;
-      case "--sections": args.sections = next(); break;
-      case "--facets": args.overrides.facets = next(); break;
-      case "--template": args.template = next(); break;
-      case "--subtitle": args.subtitle = next(); break;
-      case "--out": args.out = next(); break;
+      case "--data":
+        args.data = next();
+        break;
+      case "--llm-dir":
+        args.llmDir = next();
+        break;
+      case "--sections":
+        args.sections = next();
+        break;
+      case "--facets":
+        args.overrides.facets = next();
+        break;
+      case "--template":
+        args.template = next();
+        break;
+      case "--subtitle":
+        args.subtitle = next();
+        break;
+      case "--out":
+        args.out = next();
+        break;
       default:
         if (a.startsWith("--")) {
           const key = a.slice(2);
@@ -163,7 +177,9 @@ function fmt(n) {
 
 // Humanize an enum token: snake_case -> "snake case".
 function humanize(s) {
-  return String(s == null ? "" : s).replace(/_/g, " ").trim();
+  return String(s == null ? "" : s)
+    .replace(/_/g, " ")
+    .trim();
 }
 
 function emptyState(msg) {
@@ -250,7 +266,9 @@ function renderNarrative(is) {
 }
 
 function renderBigWins(ww) {
-  const wins = (ww && Array.isArray(ww.impressive_workflows) ? ww.impressive_workflows : []).filter(Boolean);
+  const wins = (ww && Array.isArray(ww.impressive_workflows) ? ww.impressive_workflows : []).filter(
+    Boolean,
+  );
   if (!wins.length) return emptyState("Standout workflows will appear once analysis has run.");
   return wins
     .map(
@@ -284,7 +302,9 @@ function renderFrictionCategories(fa) {
 }
 
 function renderClaudeMdAdditions(sug) {
-  const items = (sug && Array.isArray(sug.claude_md_additions) ? sug.claude_md_additions : []).filter(Boolean);
+  const items = (
+    sug && Array.isArray(sug.claude_md_additions) ? sug.claude_md_additions : []
+  ).filter(Boolean);
   if (!items.length) return emptyState("CLAUDE.md suggestions will appear once analysis has run.");
   return items
     .map((it) => {
@@ -302,7 +322,9 @@ function renderClaudeMdAdditions(sug) {
 }
 
 function renderFeatures(sug) {
-  const feats = (sug && Array.isArray(sug.features_to_try) ? sug.features_to_try : []).filter(Boolean);
+  const feats = (sug && Array.isArray(sug.features_to_try) ? sug.features_to_try : []).filter(
+    Boolean,
+  );
   if (!feats.length) return emptyState("Feature suggestions will appear once analysis has run.");
   return feats
     .map((f) => {
@@ -328,7 +350,8 @@ function renderFeatures(sug) {
 
 function renderUsagePatterns(sug) {
   const pats = (sug && Array.isArray(sug.usage_patterns) ? sug.usage_patterns : []).filter(Boolean);
-  if (!pats.length) return emptyState("Usage-pattern suggestions will appear once analysis has run.");
+  if (!pats.length)
+    return emptyState("Usage-pattern suggestions will appear once analysis has run.");
   return pats
     .map((p) => {
       let prompt = "";
@@ -370,7 +393,9 @@ function renderHorizon(hz) {
       return (
         `<div class="horizon-card">` +
         `<div class="horizon-title">${esc(o.title)}</div>` +
-        (o.whats_possible ? `<div class="horizon-possible">${escInline(o.whats_possible)}</div>` : "") +
+        (o.whats_possible
+          ? `<div class="horizon-possible">${escInline(o.whats_possible)}</div>`
+          : "") +
         (o.how_to_try ? `<div class="horizon-tip">${escInline(o.how_to_try)}</div>` : "") +
         prompt +
         `</div>`
@@ -408,9 +433,15 @@ function renderMultiClauding(mc) {
 
 function renderAtAGlance({ projectAreas, interaction, whatWorks, friction }) {
   const rows = [];
-  const areas = projectAreas && Array.isArray(projectAreas.areas) ? projectAreas.areas.filter(Boolean) : [];
+  const areas =
+    projectAreas && Array.isArray(projectAreas.areas) ? projectAreas.areas.filter(Boolean) : [];
   if (areas.length) {
-    const names = areas.slice(0, 3).map((a) => a.name).filter(Boolean).map(esc).join(", ");
+    const names = areas
+      .slice(0, 3)
+      .map((a) => a.name)
+      .filter(Boolean)
+      .map(esc)
+      .join(", ");
     rows.push(
       `<div class="glance-section"><strong>What you work on:</strong> ${names} ` +
         `<a class="see-more" href="#section-work">see more &rarr;</a></div>`,
@@ -422,14 +453,18 @@ function renderAtAGlance({ projectAreas, interaction, whatWorks, friction }) {
         `<a class="see-more" href="#section-usage">see more &rarr;</a></div>`,
     );
   }
-  const wins = whatWorks && Array.isArray(whatWorks.impressive_workflows) ? whatWorks.impressive_workflows.filter(Boolean) : [];
+  const wins =
+    whatWorks && Array.isArray(whatWorks.impressive_workflows)
+      ? whatWorks.impressive_workflows.filter(Boolean)
+      : [];
   if (wins.length) {
     rows.push(
       `<div class="glance-section"><strong>Impressive things:</strong> ${esc(wins[0].title)} ` +
         `<a class="see-more" href="#section-wins">see more &rarr;</a></div>`,
     );
   }
-  const cats = friction && Array.isArray(friction.categories) ? friction.categories.filter(Boolean) : [];
+  const cats =
+    friction && Array.isArray(friction.categories) ? friction.categories.filter(Boolean) : [];
   if (cats.length) {
     rows.push(
       `<div class="glance-section"><strong>Where things go wrong:</strong> ${esc(cats[0].category)} ` +
@@ -463,7 +498,9 @@ function renderFeedback(sessions) {
       );
     }
     if (topSat) {
-      detailParts.push(`Inferred satisfaction most often read as <strong>${esc(topSat.label)}</strong>.`);
+      detailParts.push(
+        `Inferred satisfaction most often read as <strong>${esc(topSat.label)}</strong>.`,
+      );
     }
     cards.push(
       `<div class="feedback-card team-card">` +
@@ -486,7 +523,9 @@ function renderFeedback(sessions) {
     );
   }
 
-  return cards.length ? cards.join("") : emptyState("Model-estimated feedback will appear once analysis has run.");
+  return cards.length
+    ? cards.join("")
+    : emptyState("Model-estimated feedback will appear once analysis has run.");
 }
 
 // ---------------------------------------------------------------------------
@@ -496,7 +535,8 @@ function renderFeedback(sessions) {
 function buildSubtitle(data, override) {
   if (override) return override;
   const det = data.deterministic || {};
-  const count = Number(det.sessionCount) || (Array.isArray(data.sessions) ? data.sessions.length : 0);
+  const count =
+    Number(det.sessionCount) || (Array.isArray(data.sessions) ? data.sessions.length : 0);
   const days = Number(det.days) || 0;
   const scope = data.scope ? String(data.scope) : "all projects";
   const parts = [`Analysis of ${fmt(count)} session${count === 1 ? "" : "s"}`];
@@ -548,7 +588,9 @@ async function main() {
 
   const det = data.deterministic || {};
   const facetSessions =
-    sections.facets && Array.isArray(sections.facets.sessions) ? sections.facets.sessions.filter(Boolean) : [];
+    sections.facets && Array.isArray(sections.facets.sessions)
+      ? sections.facets.sessions.filter(Boolean)
+      : [];
 
   const projectAreas = sections.project_areas || null;
   const interaction = sections.interaction_style || null;
@@ -590,7 +632,11 @@ async function main() {
       COLOR.whatHelped,
       "No capability data yet",
     ),
-    CHART_OUTCOMES: barChart(tallyFacet(facetSessions, "outcome"), COLOR.outcomes, "No outcome data yet"),
+    CHART_OUTCOMES: barChart(
+      tallyFacet(facetSessions, "outcome"),
+      COLOR.outcomes,
+      "No outcome data yet",
+    ),
     CHART_FRICTION_TYPES: barChart(
       tallyFacet(facetSessions, "friction_types", { spread: true }),
       COLOR.frictionTypes,
@@ -619,10 +665,12 @@ async function main() {
       "No tool errors — nice!",
     ),
     CHART_RESPONSE_TIME: barChart(
-      (det.responseTimes && det.responseTimes.buckets ? det.responseTimes.buckets : []).map((b) => ({
-        label: b.label,
-        count: b.count,
-      })),
+      (det.responseTimes && det.responseTimes.buckets ? det.responseTimes.buckets : []).map(
+        (b) => ({
+          label: b.label,
+          count: b.count,
+        }),
+      ),
       COLOR.responseTime,
       "No response-time data yet",
     ),
@@ -664,7 +712,9 @@ async function main() {
   // Surface any tokens we failed to fill (defensive; should be none).
   const leftover = template.match(/\{\{[A-Z_]+\}\}/g);
   if (leftover && leftover.length) {
-    process.stderr.write(`render-insights: warning — unfilled tokens: ${[...new Set(leftover)].join(", ")}\n`);
+    process.stderr.write(
+      `render-insights: warning — unfilled tokens: ${[...new Set(leftover)].join(", ")}\n`,
+    );
   }
 
   if (args.out) {

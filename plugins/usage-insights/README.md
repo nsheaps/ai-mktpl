@@ -6,7 +6,7 @@ built-in tooling. Everything they need — collector scripts, LLM prompts, and t
 HTML template — ships inside this plugin.
 
 - **`/usage`** programmatically computes session token usage and a synthetic
-  cost from your local transcripts, then has an agent analyze *where* the API
+  cost from your local transcripts, then has an agent analyze _where_ the API
   calls and cost actually went (models, tools, subagents, skills, plugins, MCP
   servers, time of day).
 - **`/insights`** scans your session transcripts, classifies each session across
@@ -99,11 +99,11 @@ step-by-step procedure. You can also trigger the skills conversationally:
 
 ## Scripts
 
-| Script                            | Role                                                               |
-| --------------------------------- | ------------------------------------------------------------------ |
-| `scripts/collect-usage.mjs`       | Deterministic token/cost breakdown for `/usage` (JSON on stdout).  |
+| Script                              | Role                                                                    |
+| ----------------------------------- | ----------------------------------------------------------------------- |
+| `scripts/collect-usage.mjs`         | Deterministic token/cost breakdown for `/usage` (JSON on stdout).       |
 | `scripts/collect-insights-data.mjs` | Deterministic scan for `/insights` (counts, charts, session summaries). |
-| `scripts/render-insights.mjs`     | Fills the HTML template from the collector data + LLM outputs.     |
+| `scripts/render-insights.mjs`       | Fills the HTML template from the collector data + LLM outputs.          |
 
 All scripts are plain `.mjs` — run with `node` (or `bun`). They read from
 `~/.claude/projects/` and take scope flags documented in each skill.

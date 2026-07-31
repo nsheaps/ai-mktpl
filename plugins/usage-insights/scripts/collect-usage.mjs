@@ -47,10 +47,7 @@ function modelTier(model) {
 
 /** synthetic cost units (binary: sL_) */
 function costOf(u) {
-  return (
-    (u.cached + u.uncached * 10 + u.cacheCreate * 12.5 + u.output * 50) *
-    u.modelTier
-  );
+  return (u.cached + u.uncached * 10 + u.cacheCreate * 12.5 + u.output * 50) * u.modelTier;
 }
 
 // Behavior thresholds (binary constants)
@@ -269,11 +266,15 @@ function categorizeToolError(content) {
     typeof content === "string"
       ? content
       : Array.isArray(content)
-        ? content.map((c) => (typeof c === "string" ? c : c?.text ?? "")).join(" ")
+        ? content.map((c) => (typeof c === "string" ? c : (c?.text ?? ""))).join(" ")
         : "";
   const t = text.toLowerCase();
   if (t.includes("user rejected") || t.includes("user doesn't want")) return "User Rejected";
-  if (t.includes("has been modified") || t.includes("file has changed") || t.includes("changed since"))
+  if (
+    t.includes("has been modified") ||
+    t.includes("file has changed") ||
+    t.includes("changed since")
+  )
     return "File Changed";
   if (t.includes("too large") || t.includes("exceeds")) return "File Too Large";
   if (t.includes("no such file") || t.includes("not found") || t.includes("does not exist"))
@@ -406,9 +407,7 @@ function mergeCounts(target, source) {
 }
 
 function mapToSortedList(map) {
-  return [...map.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .map(([name, count]) => ({ name, count }));
+  return [...map.entries()].sort((a, b) => b[1] - a[1]).map(([name, count]) => ({ name, count }));
 }
 
 // ---------------------------------------------------------------------------
@@ -466,7 +465,11 @@ async function main() {
   const toolUses = new Map();
   const toolErrors = new Map();
   for (const f of files) {
-    const { usages, toolUses: tu, toolErrors: te } = await parseFile(f, {
+    const {
+      usages,
+      toolUses: tu,
+      toolErrors: te,
+    } = await parseFile(f, {
       sinceMs,
       sessionFilter,
     });

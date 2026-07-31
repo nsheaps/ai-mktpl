@@ -72,15 +72,15 @@ node "$ROOT/scripts/collect-insights-data.mjs" --all --days 30 > "$WORK/collect.
 
 Scope flags (choose what the user asked for):
 
-| Flag                  | Meaning                                              |
-| --------------------- | ---------------------------------------------------- |
-| `--all`               | All projects (default).                              |
-| `--project-dir <dir>` | One project's transcript dir.                        |
-| `--session <id>`      | A single session id.                                 |
-| `--file <path>`       | A single transcript file.                            |
-| `--days <n>`          | Only the last `n` days (default 30).                 |
-| `--all-time`          | No day limit.                                        |
-| `--max-sessions <n>`  | Cap how many session summaries are emitted.          |
+| Flag                  | Meaning                                     |
+| --------------------- | ------------------------------------------- |
+| `--all`               | All projects (default).                     |
+| `--project-dir <dir>` | One project's transcript dir.               |
+| `--session <id>`      | A single session id.                        |
+| `--file <path>`       | A single transcript file.                   |
+| `--days <n>`          | Only the last `n` days (default 30).        |
+| `--all-time`          | No day limit.                               |
+| `--max-sessions <n>`  | Cap how many session summaries are emitted. |
 
 `collect.json` has two parts:
 
@@ -116,15 +116,15 @@ WITH ONLY A VALID JSON OBJECT" — honor that exactly. Write each output to
 `$WORK/llm/<name>.json` using these filenames (they are the names
 `render-insights.mjs` looks up):
 
-| File in `$WORK/llm/`     | Prompt                          | Fills report section                     |
-| ------------------------ | ------------------------------- | ---------------------------------------- |
-| `project_areas.json`     | `prompts/project_areas.md`      | "What you worked on" area cards          |
-| `interaction_style.json` | `prompts/interaction_style.md`  | Interaction-style narrative              |
-| `what_works.json`        | `prompts/what_works.md`         | "Biggest wins" cards                     |
-| `friction_analysis.json` | `prompts/friction_analysis.md`  | Friction categories + examples           |
-| `suggestions.json`       | `prompts/suggestions.md`        | CLAUDE.md additions, features, patterns  |
-| `on_the_horizon.json`    | `prompts/on_the_horizon.md`     | "On the horizon" opportunity prompts     |
-| `fun_ending.json`        | `prompts/fun_ending.md`         | Closing headline + detail                |
+| File in `$WORK/llm/`     | Prompt                         | Fills report section                    |
+| ------------------------ | ------------------------------ | --------------------------------------- |
+| `project_areas.json`     | `prompts/project_areas.md`     | "What you worked on" area cards         |
+| `interaction_style.json` | `prompts/interaction_style.md` | Interaction-style narrative             |
+| `what_works.json`        | `prompts/what_works.md`        | "Biggest wins" cards                    |
+| `friction_analysis.json` | `prompts/friction_analysis.md` | Friction categories + examples          |
+| `suggestions.json`       | `prompts/suggestions.md`       | CLAUDE.md additions, features, patterns |
+| `on_the_horizon.json`    | `prompts/on_the_horizon.md`    | "On the horizon" opportunity prompts    |
+| `fun_ending.json`        | `prompts/fun_ending.md`        | Closing headline + detail               |
 
 You may run these in parallel via multiple Task agents (one prompt each). Keep
 each agent's output strictly to the JSON shape the prompt specifies — the
@@ -178,9 +178,9 @@ buttons and "copy all CLAUDE.md" button work offline.
 
 ## Troubleshooting
 
-| Symptom                                   | Fix                                                              |
-| ----------------------------------------- | --------------------------------------------------------------- |
-| Report is all empty states                | No transcripts matched the scope — widen with `--all-time`.      |
-| A chart is empty but others render        | Its facet field was never produced — re-run Step 2.             |
-| Renderer warns about leftover `{{TOKEN}}` | A template/renderer mismatch — do not ship; report it.          |
-| Time-of-day chart blank                   | No message timing data in scope; expected for tiny scans.       |
+| Symptom                                   | Fix                                                         |
+| ----------------------------------------- | ----------------------------------------------------------- |
+| Report is all empty states                | No transcripts matched the scope — widen with `--all-time`. |
+| A chart is empty but others render        | Its facet field was never produced — re-run Step 2.         |
+| Renderer warns about leftover `{{TOKEN}}` | A template/renderer mismatch — do not ship; report it.      |
+| Time-of-day chart blank                   | No message timing data in scope; expected for tiny scans.   |

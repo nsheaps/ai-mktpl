@@ -59,18 +59,65 @@ const RESPONSE_BUCKETS = [
 
 // File-extension → language label.
 const LANG_BY_EXT = {
-  ts: "typescript", tsx: "typescript", mts: "typescript", cts: "typescript",
-  js: "javascript", jsx: "javascript", mjs: "javascript", cjs: "javascript",
-  py: "python", rb: "ruby", go: "go", rs: "rust", java: "java", kt: "kotlin",
-  c: "c", h: "c", cc: "cpp", cpp: "cpp", cxx: "cpp", hpp: "cpp",
-  cs: "csharp", swift: "swift", m: "objective-c", scala: "scala",
-  php: "php", pl: "perl", lua: "lua", r: "r", jl: "julia", dart: "dart",
-  sh: "shell", bash: "shell", zsh: "shell", fish: "shell",
-  sql: "sql", html: "html", css: "css", scss: "scss", sass: "scss", less: "less",
-  vue: "vue", svelte: "svelte", ex: "elixir", exs: "elixir", erl: "erlang",
-  clj: "clojure", hs: "haskell", ml: "ocaml", nim: "nim", zig: "zig",
-  json: "json", yaml: "yaml", yml: "yaml", toml: "toml", xml: "xml",
-  md: "markdown", tf: "terraform", dockerfile: "docker", gradle: "gradle",
+  ts: "typescript",
+  tsx: "typescript",
+  mts: "typescript",
+  cts: "typescript",
+  js: "javascript",
+  jsx: "javascript",
+  mjs: "javascript",
+  cjs: "javascript",
+  py: "python",
+  rb: "ruby",
+  go: "go",
+  rs: "rust",
+  java: "java",
+  kt: "kotlin",
+  c: "c",
+  h: "c",
+  cc: "cpp",
+  cpp: "cpp",
+  cxx: "cpp",
+  hpp: "cpp",
+  cs: "csharp",
+  swift: "swift",
+  m: "objective-c",
+  scala: "scala",
+  php: "php",
+  pl: "perl",
+  lua: "lua",
+  r: "r",
+  jl: "julia",
+  dart: "dart",
+  sh: "shell",
+  bash: "shell",
+  zsh: "shell",
+  fish: "shell",
+  sql: "sql",
+  html: "html",
+  css: "css",
+  scss: "scss",
+  sass: "scss",
+  less: "less",
+  vue: "vue",
+  svelte: "svelte",
+  ex: "elixir",
+  exs: "elixir",
+  erl: "erlang",
+  clj: "clojure",
+  hs: "haskell",
+  ml: "ocaml",
+  nim: "nim",
+  zig: "zig",
+  json: "json",
+  yaml: "yaml",
+  yml: "yaml",
+  toml: "toml",
+  xml: "xml",
+  md: "markdown",
+  tf: "terraform",
+  dockerfile: "docker",
+  gradle: "gradle",
 };
 
 // ---------------------------------------------------------------------------
@@ -90,14 +137,24 @@ function parseArgs(argv) {
   let scopeGiven = false;
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
-    if (a === "--all") { opts.all = true; scopeGiven = true; }
-    else if (a === "--project-dir") { opts.projectDir = argv[++i]; scopeGiven = true; }
-    else if (a === "--session") { opts.session = argv[++i]; scopeGiven = true; }
-    else if (a === "--file") { opts.file = argv[++i]; scopeGiven = true; }
-    else if (a === "--days") opts.days = Number(argv[++i]);
+    if (a === "--all") {
+      opts.all = true;
+      scopeGiven = true;
+    } else if (a === "--project-dir") {
+      opts.projectDir = argv[++i];
+      scopeGiven = true;
+    } else if (a === "--session") {
+      opts.session = argv[++i];
+      scopeGiven = true;
+    } else if (a === "--file") {
+      opts.file = argv[++i];
+      scopeGiven = true;
+    } else if (a === "--days") opts.days = Number(argv[++i]);
     else if (a === "--all-time") opts.allTime = true;
     else if (a === "--max-sessions") opts.maxSessions = Number(argv[++i]);
-    else if (a === "--json") { /* default */ }
+    else if (a === "--json") {
+      /* default */
+    }
   }
   if (!scopeGiven) opts.all = true;
   return opts;
@@ -214,11 +271,15 @@ function categorizeToolError(content) {
     typeof content === "string"
       ? content
       : Array.isArray(content)
-        ? content.map((c) => (typeof c === "string" ? c : c?.text ?? "")).join(" ")
+        ? content.map((c) => (typeof c === "string" ? c : (c?.text ?? ""))).join(" ")
         : "";
   const t = text.toLowerCase();
   if (t.includes("user rejected") || t.includes("user doesn't want")) return "User Rejected";
-  if (t.includes("has been modified") || t.includes("file has changed") || t.includes("changed since"))
+  if (
+    t.includes("has been modified") ||
+    t.includes("file has changed") ||
+    t.includes("changed since")
+  )
     return "File Changed";
   if (t.includes("too large") || t.includes("exceeds")) return "File Too Large";
   if (t.includes("no such file") || t.includes("not found") || t.includes("does not exist"))
@@ -523,9 +584,17 @@ async function main() {
       error: "no_sessions",
       note: "No transcripts matched the requested scope/window.",
       deterministic: {
-        messages: 0, userMessages: 0, assistantMessages: 0, linesAdded: 0,
-        filesTouched: 0, days: 0, msgsPerDay: 0, sessionCount: 0,
-        topTools: [], toolErrors: [], languages: [],
+        messages: 0,
+        userMessages: 0,
+        assistantMessages: 0,
+        linesAdded: 0,
+        filesTouched: 0,
+        days: 0,
+        msgsPerDay: 0,
+        sessionCount: 0,
+        topTools: [],
+        toolErrors: [],
+        languages: [],
         timeOfDayUTC: global.timeOfDayUTC,
         responseTimes: responseTimeStats([]),
         multiClauding: multiClauding([]),

@@ -58,15 +58,15 @@ node "$ROOT/scripts/collect-usage.mjs --json" > usage.json
 
 Scope flags:
 
-| Flag                | Meaning                                                       |
-| ------------------- | ------------------------------------------------------------- |
-| (none)              | Current project's transcript dir.                             |
-| `--all`             | All projects (default window becomes 7 days).                 |
-| `--session <id>`    | A single session id, across all projects.                     |
-| `--file <path>`     | A single transcript file.                                     |
-| `--current`         | The current/most-recent session only.                         |
-| `--days <n>`        | Only messages from the last `n` days.                         |
-| `--json`            | Emit only the JSON (no human summary on stdout).              |
+| Flag             | Meaning                                          |
+| ---------------- | ------------------------------------------------ |
+| (none)           | Current project's transcript dir.                |
+| `--all`          | All projects (default window becomes 7 days).    |
+| `--session <id>` | A single session id, across all projects.        |
+| `--file <path>`  | A single transcript file.                        |
+| `--current`      | The current/most-recent session only.            |
+| `--days <n>`     | Only messages from the last `n` days.            |
+| `--json`         | Emit only the JSON (no human summary on stdout). |
 
 If no transcripts match, the script emits a small `{ error, scope }` object and
 exits 0 — tell the user nothing matched and suggest a wider scope.
@@ -75,20 +75,20 @@ exits 0 — tell the user nothing matched and suggest a wider scope.
 
 Top-level keys of `usage.json`:
 
-| Key             | What it holds                                                       |
-| --------------- | ------------------------------------------------------------------- |
-| `totals`        | `requestCount`, `sessionCount`, `cost` (synthetic units), `tokens`  |
-| `split`         | Cost/tokens split between main thread and subagents.                |
-| `behaviors`     | Notable behavior counts (e.g. retries, long tool chains).           |
-| `byModel`       | Cost + tokens per model.                                            |
-| `byTool`        | Call counts per tool.                                               |
-| `toolErrors`    | Error counts per tool.                                              |
-| `byAgent`       | Cost + tokens per subagent type.                                    |
-| `bySkill`       | Attribution per skill.                                              |
-| `byPlugin`      | Attribution per plugin.                                             |
-| `byMcpServer`   | Attribution per MCP server.                                         |
-| `byHourOfDay`   | Request/cost histogram across 24 hours (UTC).                       |
-| `topSessions`   | The heaviest sessions by cost.                                      |
+| Key           | What it holds                                                      |
+| ------------- | ------------------------------------------------------------------ |
+| `totals`      | `requestCount`, `sessionCount`, `cost` (synthetic units), `tokens` |
+| `split`       | Cost/tokens split between main thread and subagents.               |
+| `behaviors`   | Notable behavior counts (e.g. retries, long tool chains).          |
+| `byModel`     | Cost + tokens per model.                                           |
+| `byTool`      | Call counts per tool.                                              |
+| `toolErrors`  | Error counts per tool.                                             |
+| `byAgent`     | Cost + tokens per subagent type.                                   |
+| `bySkill`     | Attribution per skill.                                             |
+| `byPlugin`    | Attribution per plugin.                                            |
+| `byMcpServer` | Attribution per MCP server.                                        |
+| `byHourOfDay` | Request/cost histogram across 24 hours (UTC).                      |
+| `topSessions` | The heaviest sessions by cost.                                     |
 
 ### Step 3 — Analyze where it went (the agent pass)
 
@@ -127,8 +127,8 @@ figures are auditable.
 
 ## Troubleshooting
 
-| Symptom                          | Fix                                                            |
-| -------------------------------- | ------------------------------------------------------------- |
-| `{ error, scope }` returned      | No transcripts in scope — try `--all` or `--session <id>`.    |
-| Cost looks implausibly large     | It is synthetic units, not dollars — confirm you said so.     |
-| Numbers differ from built-in     | Ensure the same scope/day-window; dedupe is by id, like built-in. |
+| Symptom                      | Fix                                                               |
+| ---------------------------- | ----------------------------------------------------------------- |
+| `{ error, scope }` returned  | No transcripts in scope — try `--all` or `--session <id>`.        |
+| Cost looks implausibly large | It is synthetic units, not dollars — confirm you said so.         |
+| Numbers differ from built-in | Ensure the same scope/day-window; dedupe is by id, like built-in. |

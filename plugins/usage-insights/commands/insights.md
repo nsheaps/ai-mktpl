@@ -19,15 +19,15 @@ select the scope.
 
 **Format:** `[--all] [--project-dir <dir>] [--session <id>] [--days <n>] [--all-time]`
 
-| Argument              | Meaning                                          |
-| --------------------- | ------------------------------------------------ |
-| `--all`               | All projects (default).                          |
-| `--project-dir <dir>` | One project's transcript dir.                    |
-| `--session <id>`      | A single session id.                             |
-| `--file <path>`       | A single transcript file.                        |
-| `--days <n>`          | Only the last `n` days (default 30).             |
-| `--all-time`          | No day limit.                                    |
-| `--max-sessions <n>`  | Cap how many session summaries are emitted.      |
+| Argument              | Meaning                                     |
+| --------------------- | ------------------------------------------- |
+| `--all`               | All projects (default).                     |
+| `--project-dir <dir>` | One project's transcript dir.               |
+| `--session <id>`      | A single session id.                        |
+| `--file <path>`       | A single transcript file.                   |
+| `--days <n>`          | Only the last `n` days (default 30).        |
+| `--all-time`          | No day limit.                               |
+| `--max-sessions <n>`  | Cap how many session summaries are emitted. |
 
 **Examples:**
 

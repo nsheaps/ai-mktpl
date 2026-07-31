@@ -18,14 +18,14 @@ select the scope.
 
 **Format:** `[--all] [--session <id>] [--file <path>] [--current] [--days <n>]`
 
-| Argument           | Meaning                                                     |
-| ------------------ | ----------------------------------------------------------- |
-| (none)             | Current project's transcripts.                              |
-| `--all`            | All projects (default window becomes 7 days).               |
-| `--session <id>`   | A single session id, across all projects.                   |
-| `--file <path>`    | A single transcript file.                                   |
-| `--current`        | The current / most-recent session only.                     |
-| `--days <n>`       | Restrict to the last `n` days.                              |
+| Argument         | Meaning                                       |
+| ---------------- | --------------------------------------------- |
+| (none)           | Current project's transcripts.                |
+| `--all`          | All projects (default window becomes 7 days). |
+| `--session <id>` | A single session id, across all projects.     |
+| `--file <path>`  | A single transcript file.                     |
+| `--current`      | The current / most-recent session only.       |
+| `--days <n>`     | Restrict to the last `n` days.                |
 
 **Examples:**
 
