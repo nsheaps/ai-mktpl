@@ -70,6 +70,14 @@ object on stdout. Capture stdout — that JSON is the input to the prompt. If th
 JSON is `{"error":"no_project_dir"}`, stop and tell the user this directory has
 no Claude Code history to summarize.
 
+> **The collector does not redact or scrub.** Each session descriptor carries
+> your first user message from that session, truncated to 200 chars but
+> otherwise verbatim — as do session titles and linked PR URLs. If any of your
+> prompts contained secrets, customer names, or internal hostnames, they pass
+> straight through into `usageData` and can end up quoted in `ONBOARDING.md`.
+> Skim the collector output before the guide is shared, and drop anything
+> sensitive when you write the guide in Step 4.
+
 ### Step 3 — Load the prompt and template, substitute placeholders
 
 Read `${CLAUDE_PLUGIN_ROOT}/assets/prompts/team-onboarding.md` and follow it as

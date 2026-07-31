@@ -24,7 +24,7 @@
 //
 // Output: a human-readable summary on stderr and a single JSON object on stdout.
 
-import { readdir, stat, readFile } from "node:fs/promises";
+import { readdir, stat } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join, extname, basename } from "node:path";
 import { homedir } from "node:os";

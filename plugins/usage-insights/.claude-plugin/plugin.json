@@ -1,7 +1,7 @@
 {
   "name": "usage-insights",
   "version": "0.1.0",
-  "description": "Standalone re-implementations of Claude Code's built-in /usage and /insights, reverse-engineered from the CLI binary. /usage programmatically computes session token usage and cost and has an agent analyze where API calls went; /insights scans your session transcripts, extracts facets via an agent, aggregates them, and renders the full shareable HTML report — all without relying on the built-in tooling.",
+  "description": "Standalone re-implementations of Claude Code's faithfully-reproducible built-in slash commands, reverse-engineered from the CLI binary so they run without the built-in tooling: /usage (token/cost breakdown plus an agent analysis of where the API calls went), /insights (transcript scan, facet classification, and a self-contained shareable HTML report), /init (generate a CLAUDE.md), /review (fetch and review a GitHub pull request), and /team-onboarding (co-author an ONBOARDING.md from how you actually use Claude Code).",
   "author": {
     "name": "Nathan Heaps",
     "email": "nsheaps@gmail.com",
@@ -16,6 +16,10 @@
     "token-usage",
     "cost",
     "report",
-    "transcripts"
+    "transcripts",
+    "init",
+    "claude-md",
+    "code-review",
+    "onboarding"
   ]
 }

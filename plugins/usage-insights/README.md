@@ -60,6 +60,27 @@ claude plugin install usage-insights@nsheaps-claude-plugins
 claude --plugin-dir /path/to/usage-insights
 ```
 
+## A note on shadowing the built-ins
+
+The command names here (`/usage`, `/insights`, `/init`, `/review`,
+`/team-onboarding`) are deliberately the **same** as the built-ins they
+reproduce, so this plugin is a drop-in when the built-in isn't available. That
+means when both exist, typing the bare name is ambiguous and you can't tell from
+the output which implementation ran. To force this plugin's version, use the
+plugin-qualified form:
+
+```bash
+/usage-insights:usage
+/usage-insights:insights
+/usage-insights:init
+/usage-insights:review
+/usage-insights:team-onboarding
+```
+
+Skill names avoid the collision entirely — the PR-review skill is named
+`pr-review`, not `review`, so it does not clash with the `review` skill in this
+marketplace's `sdlc-utils` plugin.
+
 ## Usage
 
 ### `/usage` — where did my API calls go?

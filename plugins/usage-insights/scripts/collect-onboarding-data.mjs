@@ -6,8 +6,13 @@
 // Scans session transcript JSONL under ~/.claude/projects/<encoded-cwd>/*.jsonl
 // for the current repo and summarizes HOW the user has worked in Claude Code
 // over a recent window: which slash commands they run, which MCP servers they
-// call, and a redacted set of "session descriptors" (title, linked PRs, first
-// user message) that a model can classify into work-type buckets.
+// call, and a set of "session descriptors" (title, linked PRs, first user
+// message) that a model can classify into work-type buckets.
+//
+// NOTE: descriptors are *not* redacted or scrubbed for secrets. The first user
+// message is only truncated (to FIRST_MSG_SLICE chars) and the descriptor list
+// is capped (at MAX_DESCRIPTORS) — whatever you typed is what gets emitted, so
+// review the output before pasting it anywhere public.
 //
 // The output feeds assets/prompts/team-onboarding.md, which turns it into an
 // ONBOARDING.md guide for teammates new to Claude Code.
