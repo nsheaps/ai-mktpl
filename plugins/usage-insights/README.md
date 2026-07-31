@@ -1,9 +1,9 @@
 # usage-insights
 
-Standalone re-implementations of Claude Code's built-in `/usage` and
-`/insights`, reverse-engineered from the CLI binary so they run **without** the
-built-in tooling. Everything they need — collector scripts, LLM prompts, and the
-HTML template — ships inside this plugin.
+Standalone re-implementations of Claude Code's faithfully-reproducible built-in
+slash commands, reverse-engineered from the CLI binary (**v2.1.220**) so they run
+**without** the built-in tooling. Everything they need — collector scripts, LLM
+prompts, and the HTML template — ships inside this plugin.
 
 - **`/usage`** programmatically computes session token usage and a synthetic
   cost from your local transcripts, then has an agent analyze _where_ the API
@@ -13,6 +13,26 @@ HTML template — ships inside this plugin.
   a fixed facet taxonomy, writes seven narrative sections, and renders the full
   shareable HTML report — stat cards, facet charts, a time-of-day chart, wins,
   friction analysis, CLAUDE.md suggestions, and "on the horizon" prompts.
+- **`/init`** generates a `CLAUDE.md` for the current repo, reproducing the
+  built-in's classic and newer skills/hooks-aware variants (the variant toggles
+  on `CLAUDE_CODE_NEW_INIT`).
+- **`/review`** fetches a GitHub pull request's context and diff with `gh` and
+  produces a thorough, structured code review. (For your uncommitted working
+  diff, that's the separate built-in `/code-review`.)
+- **`/team-onboarding`** scans how you've used Claude Code in this repo, classifies
+  your work into task types, and co-authors an `ONBOARDING.md` guide new teammates
+  can paste into Claude Code for a guided setup tour.
+
+## Which built-ins are reproduced (and which can't be)
+
+Not every built-in can be honestly rebuilt outside the running client. Commands
+that only toggle terminal UI, or that talk to the Anthropic account/billing
+backend or a native host, have no artifact to compute standalone and are **not
+faked**. The full cross-reference — every built-in slash command, its binary
+`type`, and its reproducibility tier — lives in
+[`docs/command-inventory.md`](docs/command-inventory.md). This plugin builds the
+Tier 1 (`type:"prompt"`) commands above plus `/usage` from Tier 2; the remaining
+Tier 2 computational commands are candidates for future passes.
 
 ## Features
 
@@ -90,20 +110,66 @@ scripts/render-insights.mjs --data collect.json --llm-dir <dir>
    report.html   (self-contained, shareable)
 ```
 
-Both commands simply invoke the matching skill; the skills contain the full
+### `/init` — generate a CLAUDE.md
+
+```bash
+/init                      # analyze the repo, write CLAUDE.md
+```
+
+Reproduces the built-in's two prompt variants. The classic prompt
+(`prompts/init-classic.md`) and the newer skills/hooks-aware prompt
+(`prompts/init-new.md`) both ship verbatim; the skill selects between them the
+same way the binary does — on the `CLAUDE_CODE_NEW_INIT` flag — and appends to
+an existing `CLAUDE.md` rather than clobbering it.
+
+### `/review` — review a pull request
+
+```bash
+/review <pr-number>        # e.g. /review 123
+/review <pr-url>
+```
+
+Fetches the PR's metadata and diff with `gh` (`gh pr view --json …` + `gh pr
+diff`), then produces a structured review across six focus areas with four
+required sections. It **reads only** — nothing is posted back to GitHub. For a
+review of your uncommitted working tree, that's the separate built-in
+`/code-review`, which this plugin does not reproduce.
+
+### `/team-onboarding` — build an ONBOARDING.md for teammates
+
+```bash
+/team-onboarding           # scan the last 30 days, co-author the guide
+/team-onboarding --days 90 # widen the scan window
+```
+
+Runs `scripts/collect-onboarding-data.mjs` to scan how you've used Claude Code
+in this repo (slash commands, MCP servers, session topics), classifies the work
+into task types, and co-authors an `ONBOARDING.md`. The guide doubles as an
+interactive tour: a new teammate pastes it into Claude Code and gets a guided
+setup. The one piece that can't run standalone is the built-in's internal
+share tool — the guide is saved to `ONBOARDING.md` for you to distribute.
+
+All five commands simply invoke the matching skill; the skills contain the full
 step-by-step procedure. You can also trigger the skills conversationally:
 
 > "Show me my Claude Code usage for this session."
 >
 > "Generate an insights report from my sessions this month."
+>
+> "Create an onboarding guide for my team from how I use Claude Code."
 
 ## Scripts
 
-| Script                              | Role                                                                    |
-| ----------------------------------- | ----------------------------------------------------------------------- |
-| `scripts/collect-usage.mjs`         | Deterministic token/cost breakdown for `/usage` (JSON on stdout).       |
-| `scripts/collect-insights-data.mjs` | Deterministic scan for `/insights` (counts, charts, session summaries). |
-| `scripts/render-insights.mjs`       | Fills the HTML template from the collector data + LLM outputs.          |
+| Script                                | Role                                                                                                |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `scripts/collect-usage.mjs`           | Deterministic token/cost breakdown for `/usage` (JSON on stdout).                                   |
+| `scripts/collect-insights-data.mjs`   | Deterministic scan for `/insights` (counts, charts, session summaries).                             |
+| `scripts/render-insights.mjs`         | Fills the HTML template from the collector data + LLM outputs.                                      |
+| `scripts/collect-onboarding-data.mjs` | Deterministic usage scan for `/team-onboarding` (slash commands, MCP servers, session descriptors). |
+
+`/init` and `/review` are prompt-only reproductions — they have no collector
+script; their skills read the shipped prompts and call `gh` (for `/review`)
+directly.
 
 All scripts are plain `.mjs` — run with `node` (or `bun`). They read from
 `~/.claude/projects/` and take scope flags documented in each skill.
@@ -116,17 +182,27 @@ usage-insights/
 │   └── plugin.json                 # Plugin manifest
 ├── commands/
 │   ├── usage.md                    # /usage command
-│   └── insights.md                 # /insights command
+│   ├── insights.md                 # /insights command
+│   ├── init.md                     # /init command
+│   ├── review.md                   # /review command
+│   └── team-onboarding.md          # /team-onboarding command
 ├── skills/
 │   ├── usage/SKILL.md              # /usage procedure
-│   └── insights/SKILL.md           # /insights procedure
+│   ├── insights/SKILL.md           # /insights procedure
+│   ├── init/SKILL.md               # /init procedure
+│   ├── review/SKILL.md             # /review procedure
+│   └── team-onboarding/SKILL.md    # /team-onboarding procedure
 ├── scripts/
 │   ├── collect-usage.mjs
 │   ├── collect-insights-data.mjs
-│   └── render-insights.mjs
+│   ├── render-insights.mjs
+│   └── collect-onboarding-data.mjs
 ├── assets/
 │   ├── insights-template.html      # 34-token HTML template
-│   └── prompts/                    # facets.md + 7 section prompts
+│   └── prompts/                    # insights facets + 7 sections, init (classic/new),
+│                                   #   review, team-onboarding + guide template
+├── docs/
+│   └── command-inventory.md        # every built-in slash command + reproducibility tier
 └── README.md
 ```
 
