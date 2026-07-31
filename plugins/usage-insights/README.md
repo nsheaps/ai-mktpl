@@ -119,8 +119,13 @@ scripts/render-insights.mjs --data collect.json --llm-dir <dir>
 Reproduces the built-in's two prompt variants. The classic prompt
 (`prompts/init-classic.md`) and the newer skills/hooks-aware prompt
 (`prompts/init-new.md`) both ship verbatim; the skill selects between them the
-same way the binary does — on the `CLAUDE_CODE_NEW_INIT` flag — and appends to
-an existing `CLAUDE.md` rather than clobbering it.
+same way the binary does — on the `CLAUDE_CODE_NEW_INIT` flag.
+
+Neither variant blindly appends to an existing `CLAUDE.md`. The classic prompt
+suggests improvements to it. The new prompt checks for one in Phase 0 and asks
+what to do — "Review and improve it", "Leave it, set up other things", or
+"Start fresh (replace it)" — so replacement happens only on explicit choice,
+and the improve path prints proposed diffs and confirms before writing.
 
 ### `/review` — review a pull request
 

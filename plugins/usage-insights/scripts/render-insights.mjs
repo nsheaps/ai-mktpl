@@ -533,7 +533,9 @@ function renderFeedback(sessions) {
 // ---------------------------------------------------------------------------
 
 function buildSubtitle(data, override) {
-  if (override) return override;
+  // Escape the override the same way the computed subtitle escapes `scope` —
+  // this value is interpolated straight into the report HTML.
+  if (override) return esc(override);
   const det = data.deterministic || {};
   const count =
     Number(det.sessionCount) || (Array.isArray(data.sessions) ? data.sessions.length : 0);

@@ -53,7 +53,7 @@ Default scope is the current project. Pass `--json` to get just the JSON blob
 (the human summary goes to stderr).
 
 ```bash
-node "$ROOT/scripts/collect-usage.mjs --json" > usage.json
+node "$ROOT/scripts/collect-usage.mjs" --json > usage.json
 ```
 
 Scope flags:

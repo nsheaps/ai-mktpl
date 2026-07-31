@@ -196,6 +196,10 @@ async function parseFile(path, { sinceMs, sessionFilter }) {
     const ts = obj.timestamp ? Date.parse(obj.timestamp) : NaN;
     const sessionId = obj.sessionId ?? "";
     if (sessionFilter && sessionId !== sessionFilter) continue;
+    // Apply the --days/--all window before any aggregation, so the tool and
+    // error breakdowns cover the same time range as the token totals.
+    // Records with an unparseable timestamp are kept rather than dropped.
+    if (!Number.isNaN(ts) && sinceMs && ts < sinceMs) continue;
 
     const msg = obj.message;
     // Count tool_use blocks in assistant messages.
@@ -219,7 +223,6 @@ async function parseFile(path, { sinceMs, sessionFilter }) {
     // Usage records: assistant messages with a usage object.
     const usage = msg && msg.usage;
     if (!usage || obj.type !== "assistant") continue;
-    if (!Number.isNaN(ts) && sinceMs && ts < sinceMs) continue;
 
     const input = usage.input_tokens ?? 0;
     const output = usage.output_tokens ?? 0;
@@ -433,7 +436,12 @@ async function main() {
     scope = `file:${basename(opts.file)}`;
   } else if (opts.all) {
     files = await allTranscriptFiles();
-    scope = "all-projects-7d";
+    // Label the window actually in effect: --days overrides the 7-day default.
+    const windowDays =
+      typeof opts.days === "number" && !Number.isNaN(opts.days)
+        ? opts.days
+        : WINDOW_7D_MS / 86400000;
+    scope = `all-projects-${windowDays}d`;
   } else if (opts.session) {
     files = await allTranscriptFiles();
     scope = `session:${opts.session}`;
