@@ -341,7 +341,7 @@ function pctList(map, total) {
       cost: Math.round(cost),
       pct: Math.round((cost / total) * 100),
     }))
-    .filter((r) => r.pct > 0);
+    .filter((r) => r.cost > 0);
 }
 
 // ---------------------------------------------------------------------------
