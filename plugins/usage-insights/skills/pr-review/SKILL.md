@@ -14,9 +14,9 @@ description: >
 # Review
 
 Standalone re-implementation of Claude Code's built-in `/review`. Given a GitHub
-pull request number, it fetches the PR's metadata and diff with the `gh` CLI and
-writes a thorough, well-structured code review — the same review the built-in
-command produces, driven by the same prompt text.
+pull request reference (a number or a URL), it fetches the PR's metadata and diff
+with the `gh` CLI and writes a thorough, well-structured code review — the same
+review the built-in command produces, driven by the same prompt text.
 
 Nothing here calls the built-in command. The review prompt ships verbatim in
 this plugin at `assets/prompts/review.md`.
@@ -24,7 +24,7 @@ this plugin at `assets/prompts/review.md`.
 ## Architecture
 
 ```
-/review <pr-number> [instructions]
+/review <pr> [instructions]
         │
         ├─ gh pr view  <pr> --json title,body,author,base/head,state,+/-,files,labels
         ├─ gh pr diff  <pr>
@@ -88,15 +88,15 @@ explicitly asks — the built-in `/review` only prints the review.
   suggestions, risks) match the built-in prompt exactly.
 - The built-in command's description distinguishes it from `/code-review`:
   "Review a GitHub pull request; for your working diff use /code-review." This
-  skill preserves that split — it reviews PRs by number, not local changes.
+  skill preserves that split — it reviews PRs by reference, not local changes.
 - `gh` is the intended diff source. Using a local `git diff` would review the
   wrong thing (your checkout, not the PR head against its base).
 
 ## Troubleshooting
 
-| Symptom                                    | Fix                                                                        |
-| ------------------------------------------ | -------------------------------------------------------------------------- |
-| `gh: command not found`                    | Install/activate `gh`; in web sessions `eval "$(mise activate bash)"`.     |
-| `gh` can't find the PR                     | Confirm `GH_REPO`/origin points at the right repo; pass a valid PR number. |
-| User wants their uncommitted diff reviewed | That's `/code-review`, not `/review` — this command targets a PR number.   |
-| No PR number supplied                      | Ask for one; there is no sensible default for a PR review.                 |
+| Symptom                                    | Fix                                                                               |
+| ------------------------------------------ | --------------------------------------------------------------------------------- |
+| `gh: command not found`                    | Install/activate `gh`; in web sessions `eval "$(mise activate bash)"`.            |
+| `gh` can't find the PR                     | Confirm `GH_REPO`/origin points at the right repo; pass a valid PR number or URL. |
+| User wants their uncommitted diff reviewed | That's `/code-review`, not `/review` — this command targets a PR.                 |
+| No PR reference supplied                   | Ask for one; there is no sensible default for a PR review.                        |
