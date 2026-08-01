@@ -76,20 +76,21 @@ exits 0 — tell the user nothing matched and suggest a wider scope.
 
 Top-level keys of `usage.json`:
 
-| Key           | What it holds                                                         |
-| ------------- | --------------------------------------------------------------------- |
-| `totals`      | `requestCount`, `sessionCount`, `cost` (synthetic units), `tokens`    |
-| `split`       | Cost split between main thread and subagents (costs + percentages).   |
-| `behaviors`   | `cacheMiss` (input > 100k tokens) and `longContext` (> 150k tokens).  |
-| `byModel`     | `{name, cost, pct}` per model family.                                 |
-| `byTool`      | Call counts per tool.                                                 |
-| `toolErrors`  | Counts per error _category_ (e.g. `User Rejected`, `File Not Found`). |
-| `byAgent`     | `{name, cost, pct}` per subagent type.                                |
-| `bySkill`     | Attribution per skill.                                                |
-| `byPlugin`    | Attribution per plugin.                                               |
-| `byMcpServer` | Attribution per MCP server.                                           |
-| `byHourOfDay` | Request-count histogram across 24 hours (**local** time).             |
-| `topSessions` | The heaviest sessions by cost (top 20).                               |
+| Key           | What it holds                                                                         |
+| ------------- | ------------------------------------------------------------------------------------- |
+| `totals`      | `requestCount`, `sessionCount`, `cost` (synthetic units), `tokens`                    |
+| `split`       | Cost split between main thread and subagents (costs + percentages).                   |
+| `behaviors`   | `cacheMiss` (input > 100k tokens) and `longContext` (> 150k tokens).                  |
+| `byModel`     | `{name, cost, pct}` per model family.                                                 |
+| `byTool`      | Call counts per tool.                                                                 |
+| `toolErrors`  | Counts per error _category_ (e.g. `User Rejected`, `File Not Found`).                 |
+| `attribution` | `available` (false ⇒ these transcripts predate attribution) and `attributedRequests`. |
+| `byAgent`     | `{name, cost, pct}` per subagent type.                                                |
+| `bySkill`     | Attribution per skill.                                                                |
+| `byPlugin`    | Attribution per plugin.                                                               |
+| `byMcpServer` | Attribution per MCP server.                                                           |
+| `byHourOfDay` | Request-count histogram across 24 hours (**local** time).                             |
+| `topSessions` | The heaviest sessions by cost (top 20).                                               |
 
 ### Step 3 — Analyze where it went (the agent pass)
 
@@ -104,7 +105,9 @@ Cover, at minimum:
    tokens. State plainly that cost is in synthetic units, not USD.
 2. **Where the cost concentrated** — the top 2–3 contributors across `byModel`,
    `byTool`, `byAgent`, `bySkill`, `byPlugin`, `byMcpServer`. Name the single
-   biggest driver.
+   biggest driver. If `attribution.available` is false, say the attribution
+   breakdowns are unavailable for these transcripts rather than reporting them
+   as zero.
 3. **Main thread vs subagents** — use `split` to say how much went to delegated
    work.
 4. **Token shape** — cache_read vs input vs cache_creation vs output; a high

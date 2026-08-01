@@ -1,7 +1,7 @@
 ---
 name: review
 description: Review a GitHub pull request — fetch its context and diff with gh and produce a thorough, structured code review. For your working diff use /code-review.
-argument-hint: "[pr number]"
+argument-hint: "[pr number or url]"
 allowed-tools: Read, Bash(gh:*), Bash(mise:*)
 ---
 
@@ -12,16 +12,16 @@ fetch a GitHub pull request's context and diff with the `gh` CLI and produce a
 thorough, structured code review.
 
 Invoke the **`pr-review`** skill and follow it end to end. The first argument is the
-PR number; any remaining text is passed to the review as extra instructions.
+PR reference; any remaining text is passed to the review as extra instructions.
 
 ## Arguments
 
-**Format:** `[pr number]`
+**Format:** `[pr number or url]`
 
-| Argument      | Meaning                                            |
-| ------------- | -------------------------------------------------- |
-| `<pr number>` | The pull request to review (required).             |
-| trailing text | Additional instructions for the review (optional). |
+| Argument          | Meaning                                            |
+| ----------------- | -------------------------------------------------- |
+| `<pr number/url>` | The pull request to review (required).             |
+| trailing text     | Additional instructions for the review (optional). |
 
 **Examples:**
 
@@ -33,8 +33,9 @@ For reviewing your own uncommitted working diff, use `/code-review` instead.
 ## What to do
 
 1. Recall and follow the **`pr-review`** skill (`skills/pr-review/SKILL.md`).
-2. Take the PR number from the first argument; treat the rest as extra
-   instructions. If no PR number is given, ask for one.
+2. Take the PR reference (a bare number or a full PR URL) from the first
+   argument; treat the rest as extra instructions. If no PR reference is given,
+   ask for one.
 3. Load `${CLAUDE_PLUGIN_ROOT}/assets/prompts/review.md`, gather context with
    `gh pr view` and `gh pr diff`, and write the review.
 4. Deliver the review with clear sections and bullet points. Do not post to

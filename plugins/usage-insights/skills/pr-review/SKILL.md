@@ -37,8 +37,9 @@ this plugin at `assets/prompts/review.md`.
 - The `gh` CLI, authenticated for the target repository (`gh auth status`). In
   this marketplace's sessions `gh` is on `PATH` and `GH_TOKEN`/`GH_HOST`/`GH_REPO`
   are set by the github plugin; elsewhere the user must have `gh` configured.
-- A PR number to review. The PR must live in the repository `gh` resolves to
-  (`GH_REPO`, or the current checkout's origin).
+- A PR reference: a bare PR number, or a full PR URL. A bare number resolves
+  against the repository `gh` resolves to (`GH_REPO`, or the current checkout's
+  origin); a URL carries its own repository, so it works outside that checkout.
 
 ## Procedure
 
