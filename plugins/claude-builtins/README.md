@@ -1,4 +1,4 @@
-# usage-insights
+# claude-builtins
 
 Standalone re-implementations of Claude Code's faithfully-reproducible built-in
 slash commands, reverse-engineered from the CLI binary (**v2.1.220**) so they run
@@ -51,13 +51,13 @@ Tier 2 computational commands are candidates for future passes.
 ### From Marketplace
 
 ```bash
-claude plugin install usage-insights@nsheaps-claude-plugins
+claude plugin install claude-builtins@nsheaps-claude-plugins
 ```
 
 ### Local Development
 
 ```bash
-claude --plugin-dir /path/to/usage-insights
+claude --plugin-dir /path/to/claude-builtins
 ```
 
 ## A note on shadowing the built-ins
@@ -70,11 +70,11 @@ the output which implementation ran. To force this plugin's version, use the
 plugin-qualified form:
 
 ```bash
-/usage-insights:usage
-/usage-insights:insights
-/usage-insights:init
-/usage-insights:review
-/usage-insights:team-onboarding
+/claude-builtins:usage
+/claude-builtins:insights
+/claude-builtins:init
+/claude-builtins:review
+/claude-builtins:team-onboarding
 ```
 
 Skill names avoid the collision entirely — the PR-review skill is named
@@ -204,7 +204,7 @@ All scripts are plain `.mjs` — run with `node` (or `bun`). They read from
 ## File Structure
 
 ```
-usage-insights/
+claude-builtins/
 ├── .claude-plugin/
 │   └── plugin.json                 # Plugin manifest
 ├── commands/

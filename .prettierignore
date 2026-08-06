@@ -9,4 +9,4 @@ claude-remote-env-snapshot
 # Reformatting them changes prompt semantics (indentation carries list nesting
 # and blockquote scope) and breaks the ascii-bar alignment, so prettier must
 # not touch them.
-plugins/usage-insights/assets/
+plugins/claude-builtins/assets/
