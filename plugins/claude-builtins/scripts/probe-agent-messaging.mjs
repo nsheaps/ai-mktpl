@@ -1,0 +1,235 @@
+#!/usr/bin/env node
+// probe-agent-messaging.mjs — read-only inspector for Claude Code's teammate
+// mailbox, the file-backed transport used between agent-team sessions.
+//
+// Extracted from the CLI binary (v2.1.226). The path is built by:
+//
+//   function MWt(e, t) {                        // getInboxPath(agent, team)
+//     let r = t || qm() || "default",           // team ?? currentTeam() ?? "default"
+//         i = join(VOt(), slug(r), "inboxes"),
+//         s = join(i, `${slug(e)}.json`);
+//     return s
+//   }
+//   function VOt(){ return join(homeClaudeDir(), "teams") }
+//
+// => ~/.claude/teams/<team>/inboxes/<agent>.json
+//
+// IMPORTANT — what this is NOT for. Writing into these files does NOT reach an
+// in-process subagent (one spawned via the Agent tool). That was tested: a
+// schema-valid message written to the path above was never delivered and its
+// `read` flag stayed false, while the same message sent with the SendMessage
+// tool arrived and resumed the idle agent. SendMessage to a subagent never
+// touches the filesystem at all. See skills/agent-messaging/SKILL.md.
+//
+// This script only reports state. It does not write, and deliberately offers no
+// send mode: the supported way to message an agent is the SendMessage tool, and
+// the supported way to message a session is the Claude Code Remote MCP tools.
+//
+// Usage:
+//   node probe-agent-messaging.mjs              # inspect every team + inbox
+//   node probe-agent-messaging.mjs --team <name>
+//   node probe-agent-messaging.mjs --json
+//
+// Exit codes: 0 always (absence of a mailbox is a normal state, not an error).
+
+import { homedir } from "node:os";
+import { join } from "node:path";
+import { readdir, readFile, stat } from "node:fs/promises";
+
+// Required keys on a mailbox entry, per the binary's schema. A message missing
+// any of these is refused on write and dropped (and pruned) on read.
+const REQUIRED = ["from", "text", "timestamp"];
+
+function teamsRoot() {
+  return join(process.env.CLAUDE_CONFIG_DIR || join(homedir(), ".claude"), "teams");
+}
+
+function parseArgs(argv) {
+  const opts = { team: null, json: false };
+  for (let i = 0; i < argv.length; i++) {
+    if (argv[i] === "--team") {
+      // Without this guard `argv[++i]` is undefined, which is falsy downstream —
+      // so a flag meant to NARROW the scan would silently widen it to every team.
+      const value = argv[++i];
+      if (!value) {
+        console.error("probe-agent-messaging: --team requires a team name");
+        process.exit(0);
+      }
+      opts.team = value;
+    } else if (argv[i] === "--json") {
+      opts.json = true;
+    } else {
+      console.error(`probe-agent-messaging: unknown argument "${argv[i]}"`);
+      process.exit(0);
+    }
+  }
+  return opts;
+}
+
+async function listDirs(dir) {
+  try {
+    const entries = await readdir(dir, { withFileTypes: true });
+    return entries.filter((e) => e.isDirectory()).map((e) => e.name);
+  } catch {
+    return [];
+  }
+}
+
+// Frame types that ride inside `text` as serialised JSON, never at the top
+// level — writeToMailbox stamps type:"message" on everything it writes, and
+// each frame's own schema has no `text` field, so a top-level frame object
+// fails base-schema validation and is dropped (and pruned) on read.
+const FRAME_TYPES = new Set([
+  "idle_notification",
+  "plan_approval_request",
+  "plan_approval_response",
+  "shutdown_request",
+  "shutdown_approved",
+  "shutdown_rejected",
+  "task_assignment",
+  "task_completed",
+  "teammate_terminated",
+  "mode_set_request",
+]);
+
+/** The frame type carried in `text`, or null for an ordinary prose message. */
+function frameType(msg) {
+  if (typeof msg?.text !== "string") return null;
+  try {
+    const inner = JSON.parse(msg.text);
+    return FRAME_TYPES.has(inner?.type) ? inner.type : null;
+  } catch {
+    return null; // ordinary prose, which is the common case
+  }
+}
+
+/** Classify one entry against the schema the runtime enforces. */
+function inspectMessage(msg) {
+  // The entry schema is {type?, from, text, timestamp, read?, color?, summary?}
+  // with plain string fields — `text` is a bare string with no minimum length,
+  // so an EMPTY text is schema-valid and gets delivered. Checking for "" here
+  // would be stricter than the runtime and would invent drops that never happen.
+  const missing = REQUIRED.filter((k) => typeof msg?.[k] !== "string");
+  return {
+    // The top-level type never names a frame; surface the one inside `text`,
+    // since that is what a reader chasing a message actually wants to see.
+    type: frameType(msg) ?? msg?.type ?? "message", // absent type is read as "message"
+    from: msg?.from ?? null,
+    read: msg?.read === true,
+    msg_id: msg?.msg_id ?? null,
+    valid: missing.length === 0,
+    missing,
+  };
+}
+
+async function inspectInbox(path) {
+  let raw;
+  try {
+    raw = await readFile(path, "utf8");
+  } catch (err) {
+    return { path, error: `unreadable: ${err.code || err.message}` };
+  }
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (err) {
+    // The runtime treats an unparseable inbox as empty rather than crashing.
+    return { path, error: `unparseable JSON (runtime treats as empty): ${err.message}` };
+  }
+  if (!Array.isArray(parsed)) {
+    return { path, error: "not a JSON array — the runtime expects []" };
+  }
+  const messages = parsed.map(inspectMessage);
+  // Existence only — this cannot distinguish a lock actively held by a live
+  // writer from a stale one left behind by a crashed process. Report it as
+  // "a lock file exists", not "someone is writing right now".
+  let lockPresent = false;
+  try {
+    await stat(`${path}.lock`);
+    lockPresent = true;
+  } catch {
+    /* no lock held, which is the normal resting state */
+  }
+  return {
+    path,
+    total: messages.length,
+    // readMailbox() (binary: `_tt`) partitions entries via a schema-parse
+    // helper (binary: `T7d`) and returns only the valid ones; an invalid
+    // entry never reaches readUnreadMessages()'s `!read` filter, so counting
+    // it as unread overstates what's actually pending. `total` intentionally
+    // still counts it: that describes file state (what's on disk right now),
+    // which is what a file inspector should report even for bytes the
+    // runtime will discard on next read (asynchronously, via `TZ_`).
+    unread: messages.filter((m) => m.valid && !m.read).length,
+    invalid: messages.filter((m) => !m.valid).length,
+    lockPresent,
+    messages,
+  };
+}
+
+async function main() {
+  const opts = parseArgs(process.argv.slice(2));
+  const root = teamsRoot();
+  const teams = opts.team ? [opts.team] : await listDirs(root);
+
+  const report = { teamsRoot: root, teams: [] };
+  for (const team of teams) {
+    const inboxDir = join(root, team, "inboxes");
+    let files = [];
+    try {
+      files = (await readdir(inboxDir)).filter((f) => f.endsWith(".json"));
+    } catch {
+      continue; // team dir without an inboxes/ subdir
+    }
+    const inboxes = [];
+    for (const file of files) {
+      const info = await inspectInbox(join(inboxDir, file));
+      inboxes.push({ agent: file.replace(/\.json$/, ""), ...info });
+    }
+    report.teams.push({ team, inboxDir, inboxes });
+  }
+
+  if (opts.json) {
+    process.stdout.write(JSON.stringify(report, null, 2) + "\n");
+    return;
+  }
+
+  console.log(`teams root: ${report.teamsRoot}`);
+  if (report.teams.length === 0) {
+    if (opts.team) {
+      // Don't tell someone who typo'd a team name that they have never used
+      // agent teams — the other teams may be sitting right there.
+      console.log(`\nNo team named "${opts.team}" under ${report.teamsRoot}.`);
+      console.log("Run without --team to list every team that does exist.");
+      return;
+    }
+    console.log("\nNo teams found. That is the normal state when you have never");
+    console.log("started an agent team — in-process subagents do not use this");
+    console.log("transport, so nothing here is required for SendMessage to work.");
+    return;
+  }
+  for (const t of report.teams) {
+    console.log(`\nteam: ${t.team}  (${t.inboxDir})`);
+    if (t.inboxes.length === 0) console.log("  (no inboxes)");
+    for (const ib of t.inboxes) {
+      if (ib.error) {
+        console.log(`  ${ib.agent}: ${ib.error}`);
+        continue;
+      }
+      const lock = ib.lockPresent ? "  [.lock file present — may be stale]" : "";
+      console.log(
+        `  ${ib.agent}: ${ib.total} message(s), ${ib.unread} unread, ` +
+          `${ib.invalid} schema-invalid${lock}`,
+      );
+      for (const m of ib.messages) {
+        const flag = m.valid ? (m.read ? "read" : "UNREAD") : `INVALID(${m.missing.join(",")})`;
+        console.log(`      - [${m.type}] from=${m.from} ${flag}`);
+      }
+    }
+  }
+}
+
+main().catch((err) => {
+  console.error(`probe-agent-messaging: ${err.stack || err}`);
+  process.exit(0); // never fail a diagnostic run
+});

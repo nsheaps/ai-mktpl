@@ -3,3 +3,12 @@ node_modules
 *.lock
 package-lock.json
 claude-remote-env-snapshot
+
+# Assets for the claude-builtins plugin. `prompts/` is reproduced byte-for-byte
+# from the Claude Code binary so the rebuilt commands behave identically to the
+# built-ins — reformatting changes prompt semantics (indentation carries list
+# nesting and blockquote scope) and breaks the ascii-bar alignment.
+# `insights-template.html` is plugin-authored rather than extracted, but is
+# equally off-limits: it is a token-substitution template whose {{TOKEN}}
+# placeholders and inline <style>/<script> blocks prettier would reflow.
+plugins/claude-builtins/assets/

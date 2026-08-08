@@ -7,12 +7,49 @@ set -e
 # leaves `claude` non-functional ("claude native binary not installed"). Run
 # the postinstall explicitly before validate-plugin invokes `claude`.
 # Port of nsheaps/agents PR #172 fix (Jack-authored).
+#
+# A previous version of this guessed install.cjs lived at
+# ${cc_dir}/lib/node_modules/@anthropic-ai/claude-code/install.cjs — the
+# layout of a plain `npm install -g`. That's not how mise's npm backend lays
+# packages out, so the guess never resolved and this step silently no-op'd on
+# every run, leaving `claude` non-functional in CI.
+#
+# Verified by actually installing the pinned version with mise and inspecting
+# the tree: mise nests the real package under its own `.mise` package store,
+# keyed by name@version —
+#   ${cc_dir}/node_modules/.mise/@anthropic-ai+claude-code@<version>/
+#     node_modules/@anthropic-ai/claude-code/install.cjs
+# — but the top-level entry mise creates at
+# ${cc_dir}/node_modules/@anthropic-ai/claude-code is itself a symlink into
+# that store. `[ -f ... ]` and `node` both follow symlinks, so the plain
+# top-level path resolves without needing to know the internal store layout —
+# no `find` required, and it isn't sensitive to a claude-code version bump.
 cc_dir="$(mise where npm:@anthropic-ai/claude-code 2>/dev/null || true)"
-cc_install="${cc_dir}/lib/node_modules/@anthropic-ai/claude-code/install.cjs"
-if [ -n "$cc_dir" ] && [ -f "$cc_install" ]; then
-  echo "Ensuring claude-code native binary is installed..."
-  node "$cc_install"
+cc_install="${cc_dir:+${cc_dir}/node_modules/@anthropic-ai/claude-code/install.cjs}"
+if [ -n "$cc_install" ] && [ -f "$cc_install" ]; then
+  echo "Ensuring claude-code native binary is installed (${cc_install})..."
+  # Don't let a failed postinstall abort the whole task under `set -e` with no
+  # explanation — surface it and let the preflight below produce a clear error.
+  node "$cc_install" || echo "WARNING: claude-code postinstall failed (exit $?)"
+else
+  echo "NOTE: no claude-code install.cjs found under '${cc_dir:-<empty>}'"
 fi
+
+# Preflight: prove `claude` actually runs before validating 50+ plugins against
+# it. Without this, a broken/missing native binary shows up as an opaque
+# per-plugin failure (or an early `set -e` abort) instead of a readable error.
+if command -v claude >/dev/null 2>&1; then
+  CLAUDE="claude"
+else
+  CLAUDE="mise exec npm:@anthropic-ai/claude-code -- claude"
+fi
+echo "Using validator: $CLAUDE"
+if ! CLAUDE_VERSION="$($CLAUDE --version 2>&1)"; then
+  echo "ERROR: '$CLAUDE --version' failed — the validator is not runnable."
+  echo "$CLAUDE_VERSION"
+  exit 1
+fi
+echo "claude version: $CLAUDE_VERSION"
 
 mise run validate-marketplace
 
