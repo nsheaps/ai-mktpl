@@ -2,7 +2,7 @@
 name: init
 description: Analyze this repository and write a concise CLAUDE.md (and optionally CLAUDE.local.md, skills, and hooks), driven by the verbatim prompt extracted from Claude Code's built-in /init
 argument-hint: "[--new] [--classic]"
-allowed-tools: Task, Read, Write, Edit, Bash(echo:*), Bash(git:*), Glob, Grep, AskUserQuestion
+allowed-tools: Task, Read, Write, Edit, Bash(echo:*), Bash(git:*), Bash(which:*), Bash(where:*), Glob, Grep, AskUserQuestion
 ---
 
 # Init

@@ -130,7 +130,7 @@ The prompt is the source of truth. In order, it requires you to:
   or share the finished guide through a Claude-Code-internal share tool (binary
   symbol `hln`). That tool is not available outside the CLI. If you would have
   called it — or if it returns `unavailable` at any point — skip the call and
-  use the manual close from Step 4.5 instead: the guide is saved to
+  use the manual close from Step 4, item 5 instead: the guide is saved to
   `ONBOARDING.md` and the user drops it into their own team docs and channels.
   Everything else (scanning, classification, guide generation, the interactive
   walkthrough baked into the guide) works fully outside the CLI.

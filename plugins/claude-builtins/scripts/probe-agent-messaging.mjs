@@ -140,6 +140,9 @@ async function inspectInbox(path) {
     return { path, error: "not a JSON array — the runtime expects []" };
   }
   const messages = parsed.map(inspectMessage);
+  // Existence only — this cannot distinguish a lock actively held by a live
+  // writer from a stale one left behind by a crashed process. Report it as
+  // "a lock file exists", not "someone is writing right now".
   let lockPresent = false;
   try {
     await stat(`${path}.lock`);
@@ -212,7 +215,7 @@ async function main() {
         console.log(`  ${ib.agent}: ${ib.error}`);
         continue;
       }
-      const lock = ib.lockPresent ? "  [LOCK HELD]" : "";
+      const lock = ib.lockPresent ? "  [.lock file present — may be stale]" : "";
       console.log(
         `  ${ib.agent}: ${ib.total} message(s), ${ib.unread} unread, ` +
           `${ib.invalid} schema-invalid${lock}`,

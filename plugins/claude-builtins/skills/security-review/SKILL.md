@@ -107,7 +107,9 @@ per finding, HIGH/MEDIUM only.
   and is preserved intentionally; do not "fix" it.
 - The frontmatter `allowed-tools` list is the expanded builtin allow-list
   (`Bash`/`PowerShell` variants of `git diff`/`status`/`log`/`show`/`remote show`,
-  plus `Read, Glob, Grep, LS, Task`).
+  plus `Read, Glob, Grep, LS, Task`), plus `git rev-parse` — not part of the
+  built-in's own grant, but required by this skill's own Step 1 guard below,
+  which the verbatim prompt doesn't perform itself.
 - The built-in is distinct from `/code-review` (general quality review of the
   working diff) and from this repo's `sdlc-utils` review skill (project-specific
   checklists). This skill reproduces only the security review of the current

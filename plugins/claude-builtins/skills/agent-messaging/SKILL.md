@@ -67,7 +67,9 @@ function VOt() {
 → `~/.claude/teams/<team>/inboxes/<agent>.json`
 
 Note the `|| "default"` fallback: with no current team the path still resolves,
-to a team literally named `default`.
+to a team literally named `default`. `Ln()` is `$CLAUDE_CONFIG_DIR` when that
+env var is set, falling back to `~/.claude` — `probe-agent-messaging.mjs`
+honors the same override.
 
 `writeToMailbox(recipient, message, team)`:
 
@@ -95,6 +97,11 @@ string:
 let f = vCr(i, { idleReason: "available", summary: CCr(d) }); // build the frame
 await GD(u, { from: i, text: De(f), timestamp: ..., color: z$() }); // De = JSON.stringify
 ```
+
+(`vCr`'s own body wasn't cleanly re-sliceable at this offset, but its output
+must carry `type: "idle_notification"` — the frame's schema below requires
+`type` as a literal, and `frameType()` matching it end-to-end is what the
+probe verifies.)
 
 The receiving side matches this: the in-process runner reads `c.text` and
 parses it (`ACr(c.text)` for a plan-approval response, `TCr(c.text)` for a
@@ -143,10 +150,20 @@ So "idle" is not a barrier: a send resumes the agent from its transcript. No
 separate wake mechanism is needed, and none of the file-poking approaches are
 necessary or sufficient.
 
-For reaching a _session_ rather than a subagent, the supported paths are the
-Claude Code Remote MCP tools (`send_message`, `send_later`, `create_trigger`),
-which deliver into a session as an ordinary user turn and survive restarts.
-`scheduled-trigger` in the source enum is that path.
+`SendMessage` itself already reaches a _session_, not only a subagent — it is
+not limited to in-process children. Any peer listed by `ListAgents` (another
+local Claude Code session, or a Claude Code Remote session) can be addressed
+the same way; the transport for that case is unrelated to the on-disk mailbox
+above.
+
+There is no CCR MCP tool literally named `send_message` — that would be
+conflating the general `SendMessage` tool with Claude Code Remote's separate
+toolset, which covers different needs: `send_later` schedules a message into
+**this** session at a future time, `create_trigger` sets up a recurring or
+one-shot Routine (into this session, a named other session, or a fresh session
+per firing), and `fire_trigger` runs an existing Routine immediately. All three
+deliver as an ordinary user turn and survive restarts. `scheduled-trigger` in
+the source enum is that path.
 
 ## Remote Control and the approval gate
 
