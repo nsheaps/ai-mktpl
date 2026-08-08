@@ -145,12 +145,21 @@ function parseLoose(text) {
 // ---------------------------------------------------------------------------
 
 function esc(s) {
-  return String(s == null ? "" : s)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+  return (
+    String(s == null ? "" : s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;")
+      // Neutralize template-token syntax in LLM output: a literal `{{X}}`
+      // reaching the substitution pass either trips the unfilled-token
+      // warning (which skills/insights/SKILL.md tells the agent to treat as
+      // a bug to fix, not ship) or, for a token named later than this one in
+      // the substitution order, gets replaced with unrelated real content.
+      .replace(/\{\{/g, "&#123;&#123;")
+      .replace(/\}\}/g, "&#125;&#125;")
+  );
 }
 
 // Escape, then promote **bold** markdown to <strong>. For short narrative text.
