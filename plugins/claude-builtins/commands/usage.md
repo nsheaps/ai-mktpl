@@ -2,7 +2,7 @@
 name: usage
 description: Local approximate analysis of your session transcripts (token counts + the binary's relative weight) — NOT the built-in /usage's server-side utilization/cost
 argument-hint: "[--all] [--session <id>] [--file <path>] [--current] [--days <n>]"
-allowed-tools: Task, Read, Bash(node:*), Bash(mkdir:*), Write
+allowed-tools: Task, Read, Bash(node:*), Bash(mkdir:*), Bash(mktemp:*), Write
 ---
 
 # Usage
@@ -43,8 +43,9 @@ select the scope.
 ## What to do
 
 1. Recall and follow the **`usage`** skill (`skills/usage/SKILL.md`).
-2. Run `scripts/collect-usage.mjs` with the scope flags above (`--json`) to
-   get the deterministic breakdown.
+2. Run `${CLAUDE_PLUGIN_ROOT}/scripts/collect-usage.mjs` with the scope flags
+   above (`--json`) to get the deterministic breakdown, writing it into a
+   `mktemp -d` scratch dir rather than the user's repo.
 3. Analyze where the weight concentrated (models, tools, subagents, skills,
    plugins, MCP servers, time of day) per the skill's Step 3.
 4. Present the headline totals — stated as a **relative weight, not USD, and

@@ -473,13 +473,18 @@ function multiClauding(sessions) {
 
 function distinctDays(sessions) {
   const days = new Set();
+  const DAY_MS = 86400000;
   for (const s of sessions) {
     if (!Number.isFinite(s.firstTs)) continue;
-    const d = new Date(s.firstTs);
-    days.add(`${d.getUTCFullYear()}-${d.getUTCMonth()}-${d.getUTCDate()}`);
-    if (Number.isFinite(s.lastTs)) {
-      const d2 = new Date(s.lastTs);
-      days.add(`${d2.getUTCFullYear()}-${d2.getUTCMonth()}-${d2.getUTCDate()}`);
+    // Guard lastTs <= firstTs: a reversed or equal pair is a single-day
+    // session, not a span (the old key-per-endpoint version counted it as two).
+    const last = Number.isFinite(s.lastTs) && s.lastTs > s.firstTs ? s.lastTs : s.firstTs;
+    // Walk UTC day indices so a session spanning more than two calendar days
+    // counts every day it covers, not just its endpoints. Math.floor(ms/DAY_MS)
+    // IS the UTC day index — the epoch is a UTC midnight — so this also crosses
+    // month and year boundaries without any calendar arithmetic.
+    for (let d = Math.floor(s.firstTs / DAY_MS); d <= Math.floor(last / DAY_MS); d++) {
+      days.add(d);
     }
   }
   return days.size;

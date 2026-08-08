@@ -81,8 +81,13 @@ cwd's project dir, plus that session's subagents. The JSON breakdown always goes
 to stdout; a human-readable summary is printed to stderr alongside it. Pass
 `--json` to suppress that stderr summary when you only want the JSON.
 
+Write it to a scratch dir, never the user's repo — this runs from whatever
+project the user invoked `/usage` in, so a bare `> usage.json` would leave an
+untracked file behind in their working tree.
+
 ```bash
-node "$ROOT/scripts/collect-usage.mjs" --json > usage.json
+WORK="$(mktemp -d)"
+node "$ROOT/scripts/collect-usage.mjs" --json > "$WORK/usage.json"
 ```
 
 Scope flags:
@@ -103,7 +108,7 @@ exits 0 — tell the user nothing matched and suggest a wider scope.
 ### Step 2 — What the JSON contains
 
 Every ranked breakdown reports the relative **weight** (see above), never USD.
-Top-level keys of `usage.json`:
+Top-level keys of `$WORK/usage.json`:
 
 | Key           | What it holds                                                                          |
 | ------------- | -------------------------------------------------------------------------------------- |

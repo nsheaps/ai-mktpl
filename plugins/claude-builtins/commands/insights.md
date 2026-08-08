@@ -42,10 +42,11 @@ select the scope.
 ## What to do
 
 1. Recall and follow the **`insights`** skill (`skills/insights/SKILL.md`).
-2. Run `scripts/collect-insights-data.mjs` (Step 1) for the deterministic scan.
+2. Run `${CLAUDE_PLUGIN_ROOT}/scripts/collect-insights-data.mjs` (Step 1) for
+   the deterministic scan.
 3. Run the facet classification (Step 2) and the seven narrative section
    passes (Step 3), writing each JSON into the working `llm/` dir.
-4. Render with `scripts/render-insights.mjs` (Step 4) and deliver the path to
-   the self-contained `report.html` (Step 5).
+4. Render with `${CLAUDE_PLUGIN_ROOT}/scripts/render-insights.mjs` (Step 4) and
+   deliver the path to the self-contained `report.html` (Step 5).
 
 $ARGUMENTS
