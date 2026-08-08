@@ -506,16 +506,10 @@ function renderFeedback(sessions) {
   const total = sessions.length;
 
   const outcomes = tallyFacet(sessions, "outcome", { limit: 5 });
-  const satisfaction = tallyFacet(
-    sessions,
-    ["satisfaction", "user_satisfaction_counts"],
-    { limit: 5 },
-  );
-  const helpfulness = tallyFacet(
-    sessions,
-    ["helpfulness", "claude_helpfulness"],
-    { limit: 5 },
-  );
+  const satisfaction = tallyFacet(sessions, ["satisfaction", "user_satisfaction_counts"], {
+    limit: 5,
+  });
+  const helpfulness = tallyFacet(sessions, ["helpfulness", "claude_helpfulness"], { limit: 5 });
 
   if (outcomes.length || satisfaction.length) {
     const topOutcome = outcomes[0];
