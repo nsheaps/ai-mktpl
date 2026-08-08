@@ -50,8 +50,9 @@ Let `ROOT="${CLAUDE_PLUGIN_ROOT}"`.
 ### Step 1 — Compute the breakdown
 
 Default scope is the **current session** — the most recent transcript in the
-cwd's project dir, plus that session's subagents. Pass `--json` to get just the
-JSON blob (the human summary goes to stderr).
+cwd's project dir, plus that session's subagents. The JSON breakdown always goes
+to stdout; a human-readable summary is printed to stderr alongside it. Pass
+`--json` to suppress that stderr summary when you only want the JSON.
 
 ```bash
 node "$ROOT/scripts/collect-usage.mjs" --json > usage.json
@@ -67,7 +68,7 @@ Scope flags:
 | `--file <path>`  | A single transcript file.                                                      |
 | `--current`      | The current/most-recent session only. Narrows — wins over `--all`/`--session`. |
 | `--days <n>`     | Only messages from the last `n` days.                                          |
-| `--json`         | Emit only the JSON (no human summary on stdout).                               |
+| `--json`         | Suppress the human summary on stderr (JSON goes to stdout either way).         |
 
 If no transcripts match, the script emits a small `{ error, scope }` object and
 exits 0 — tell the user nothing matched and suggest a wider scope.

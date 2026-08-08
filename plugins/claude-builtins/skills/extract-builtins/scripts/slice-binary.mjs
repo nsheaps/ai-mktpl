@@ -6,9 +6,10 @@
 //   node slice-binary.mjs <binary> <out.js> <startOffset> <endOffset>
 //
 // The offsets are REAL byte offsets into the binary. Get them from the leading
-// column of `strings -t d` (see SKILL.md) — NOT from `grep -aob`, whose offsets
-// are into grep's own filtered stream, not the file.
-import { readFileSync, writeFileSync } from "node:fs";
+// column of `strings -t d` (see SKILL.md), or from `grep -aob` run on the binary
+// itself. Never take an offset out of an intermediate stream (e.g.
+// `strings <bin> | grep -b …`) — that indexes the dump, not the file.
+import { openSync, readSync, closeSync, writeFileSync } from "node:fs";
 
 const [, , binPath, outName, sStr, eStr] = process.argv;
 if (!binPath || !outName || !sStr || !eStr) {
@@ -16,15 +17,33 @@ if (!binPath || !outName || !sStr || !eStr) {
   process.exit(2);
 }
 
-const buf = readFileSync(binPath);
 const start = Number(sStr);
 const end = Number(eStr);
 if (!Number.isInteger(start) || !Number.isInteger(end) || start < 0 || end <= start) {
   console.error(`bad offsets [${sStr}, ${eStr}) — expected integers with 0 <= start < end`);
-  console.error("use the leading decimal column from `strings -t d`, not `grep -aob`");
+  console.error(
+    "use the leading decimal column from `strings -t d` (or `grep -aob` on the binary), not an offset from a piped stream",
+  );
   process.exit(2);
 }
-const slice = buf.subarray(start, end);
+
+// Range-read just the requested window — the binary is ~245MB, so never slurp it
+// all. readSync may return fewer bytes than asked (EOF / short read); trim to what
+// we actually got.
+const want = end - start;
+const buf = Buffer.allocUnsafe(want);
+const fd = openSync(binPath, "r");
+let got;
+try {
+  got = readSync(fd, buf, 0, want, start);
+} finally {
+  closeSync(fd);
+}
+if (got === 0) {
+  console.error(`read 0 bytes at offset ${start} — is the offset past end-of-file?`);
+  process.exit(1);
+}
+const slice = buf.subarray(0, got);
 
 let out = "";
 for (const b of slice) {
@@ -37,4 +56,8 @@ for (const b of slice) {
 }
 
 writeFileSync(outName, out);
-console.log(`wrote ${outName} (${out.length} bytes) from ${binPath} [${start}, ${end})`);
+const actualEnd = start + got;
+const trimmedNote = actualEnd < end ? ` (short read: wanted end ${end})` : "";
+console.log(
+  `wrote ${outName} (${out.length} bytes) from ${binPath} [${start}, ${actualEnd})${trimmedNote}`,
+);

@@ -82,13 +82,15 @@ name, description text, or an export mapping:
 
 ```bash
 strings -t d -n 8 "$CLAUDE_BIN" > strings.txt      # -t d = decimal file offset in col 1
-grep -n 'reload-plugins' strings.txt               # find the marker + its REAL offset
+grep 'reload-plugins' strings.txt                  # the marker + its REAL offset in col 1
 ```
 
 **The offset you want is the leading decimal column from `strings -t d`** — that
-is the true byte offset into the binary. Do **not** use `grep -aob` offsets:
-those are offsets into grep's filtered stream, not the file, and will slice the
-wrong bytes.
+is the true byte offset into the binary. `grep -aob "$CLAUDE_BIN"` gives the same
+true offset _if you grep the binary itself_. What you must never do is take an
+offset out of an **intermediate stream** — `strings "$CLAUDE_BIN" | grep -b …`,
+or the `-n` line number from `grep -n … strings.txt` — because those index the
+dump, not the file, and will slice the wrong bytes.
 
 Built-in command definitions follow a recognizable shape, e.g.:
 
@@ -153,7 +155,9 @@ binary-patch fallback plan. Read that as a template for a rigorous extraction.
 
 ## Tooling notes / gotchas
 
-- `strings -t d` leading field = real binary offset. `grep -aob` = wrong offset.
+- `strings -t d` leading field = real binary offset; so is `grep -aob` **on the
+  binary itself**. An offset out of an intermediate stream (`strings … | grep -b`,
+  or a `grep -n` line number from `strings.txt`) is NOT a file offset.
 - `js-beautify@1` succeeds on minified fragments; `prettier`/raw `acorn` fail.
 - Extend the byte window and re-slice if a fragment ends inside a template
   literal or mid-function — a real newline inside a `` `…` `` literal will

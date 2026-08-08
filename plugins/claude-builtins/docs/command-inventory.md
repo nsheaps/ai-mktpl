@@ -62,15 +62,15 @@ Notes:
 These do real computation over local data. Reproduced by scanning transcripts /
 git / env deterministically, then (where the builtin does) an analysis pass.
 
-| Command         | Aliases        | Binary description                                                    | How the plugin reproduces it                                      |
-| --------------- | -------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| `/usage`        | `cost`,`stats` | Show session cost, plan usage, and what's contributing to your limits | **Built** — transcript token scan + synthetic-unit cost model     |
-| `/context`      | —              | Show current context usage                                            | Transcript scan of the current session's token composition        |
-| `/recap`        | —              | Generate a one-line session recap now                                 | Deterministic session summary + one-line model pass               |
-| `/export`       | —              | Export the current conversation to a file or clipboard                | Transcript → markdown/json file (clipboard path documented)       |
-| `/status`       | —              | Show version, model, account, API connectivity, and tool statuses     | Reads version/env/git/tool availability locally (account partial) |
-| `/diff`         | —              | View uncommitted changes and per-turn diffs                           | `git diff` + per-turn file edits parsed from the transcript       |
-| `/skill-doctor` | —              | Show which loaded skills are unused and costing context               | Scans loaded skills vs. skill invocations in the transcript       |
+| Command         | Aliases        | Binary description                                                    | Status in plugin                                                                   |
+| --------------- | -------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `/usage`        | `cost`,`stats` | Show session cost, plan usage, and what's contributing to your limits | **Built** — transcript token scan + synthetic-unit cost model                      |
+| `/context`      | —              | Show current context usage                                            | _Not built_ — planned: transcript scan of the session's token composition          |
+| `/recap`        | —              | Generate a one-line session recap now                                 | _Not built_ — planned: deterministic session summary + one-line model pass         |
+| `/export`       | —              | Export the current conversation to a file or clipboard                | _Not built_ — planned: transcript → markdown/json file (clipboard documented)      |
+| `/status`       | —              | Show version, model, account, API connectivity, and tool statuses     | _Not built_ — planned: version/env/git/tool availability locally (account partial) |
+| `/diff`         | —              | View uncommitted changes and per-turn diffs                           | _Not built_ — planned: `git diff` + per-turn file edits from the transcript        |
+| `/skill-doctor` | —              | Show which loaded skills are unused and costing context               | _Not built_ — planned: loaded skills vs. skill invocations in the transcript       |
 
 Caveat on `/status`: version, model, git, tool availability, and env are fully
 local. **Account identity and live API connectivity** require the Anthropic
