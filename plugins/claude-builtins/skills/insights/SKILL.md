@@ -4,8 +4,8 @@ description: >
   Use this skill when the user runs /insights or asks to "generate an insights
   report", "analyze my Claude Code usage", "show me insights about how I use
   Claude", "make the usage insights HTML report", or "what patterns are in my
-  sessions". Extraction of Claude Code's built-in /insights: it drives
-  the built-in's verbatim facet-classification and narrative prompts against your
+  sessions". Extraction of Claude Code's built-in /insights: it drives the
+  built-in's verbatim facet-classification and narrative prompts against your
   local session transcripts, then renders a shareable HTML report. The prompts
   and facet taxonomy are verbatim; the HTML assembly is this plugin's own
   renderer (the built-in builds its page programmatically inside the CLI, so
@@ -15,12 +15,12 @@ description: >
 
 # Insights
 
-Extraction of Claude Code's built-in `/insights`, driven from a plugin
-skill. It produces an HTML report — stat cards, at-a-glance summary,
-facet bar charts, a time-of-day chart, big wins, friction analysis, CLAUDE.md
-suggestions, features to try, and "on the horizon" prompts — by combining a
-**deterministic transcript scan** with **LLM analysis passes that run the
-built-in's verbatim prompts**, then merging both into a bundled HTML template.
+Extraction of Claude Code's built-in `/insights`, driven from a plugin skill. It
+produces an HTML report — stat cards, at-a-glance summary, facet bar charts, a
+time-of-day chart, big wins, friction analysis, CLAUDE.md suggestions, features
+to try, and "on the horizon" prompts — by combining a **deterministic transcript
+scan** with **LLM analysis passes that run the built-in's verbatim prompts**,
+then merging both into a bundled HTML template.
 
 The classifier and section prompts under `assets/prompts/` are extracted verbatim
 from the CLI binary (v2.1.225). The HTML page, which the built-in assembles

@@ -166,6 +166,21 @@ relay-integrity principle (describe the thing, don't editorialize about it).
   functionally the same as the built-in, it **is** the same — add no comment and
   no "stand-in" caveat.
 
+**Re-wrap the paragraph after editing prose.** Deleting or replacing a word
+inside a wrapped paragraph leaves the line it came from short and the rest of
+the paragraph at its old width — a visibly ragged first line. Prettier will
+**not** catch this: the repo runs it with the default `proseWrap: "preserve"`,
+so a clean `prettier --check` says nothing about paragraph shape. After any
+prose edit, re-flow the whole paragraph to the width of the surrounding text
+(~80 columns here) rather than only patching the words. Check the result by
+eye or with `awk '{print length($0), $0}'` over the paragraph — a first line
+noticeably shorter than the lines under it is the tell.
+
+**Never re-wrap `assets/prompts/`.** Those are byte-for-byte extractions, and
+their line breaks and indentation carry prompt semantics. `.prettierignore`
+already excludes that directory; the re-wrap rule above applies to prose in
+`README.md`, `commands/*.md`, `skills/**/SKILL.md`, and `docs/*.md` only.
+
 ## Worked example: the reload-plugins / reload-skills investigation
 
 A full application of Steps 0–4 — used to answer whether the model can force

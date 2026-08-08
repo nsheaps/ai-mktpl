@@ -3,21 +3,21 @@ name: security-review
 description: >
   Use this skill when the user runs /security-review or asks for a "security
   review of this branch", "check these changes for vulnerabilities", or "review
-  the pending diff for security issues". Extraction of Claude Code's
-  built-in /security-review: a senior-security-engineer review of the pending
-  changes on the current branch (working state vs origin/HEAD), driven by the
-  verbatim built-in prompt. It takes NO arguments and does not fetch GitHub PRs.
-  For a general quality review of your uncommitted working diff, use /code-review
-  (a separate built-in). For this repo's own review checklists and scoring
-  rubric, use the sdlc-utils `review` skill instead.
+  the pending diff for security issues". Extraction of Claude Code's built-in
+  /security-review: a senior-security-engineer review of the pending changes on
+  the current branch (working state vs origin/HEAD), driven by the verbatim
+  built-in prompt. It takes NO arguments and does not fetch GitHub PRs. For a
+  general quality review of your uncommitted working diff, use /code-review (a
+  separate built-in). For this repo's own review checklists and scoring rubric,
+  use the sdlc-utils `review` skill instead.
 ---
 
 # Security Review
 
-Extraction of Claude Code's built-in `/security-review`. It runs the
-built-in's own prompt — verbatim — against the pending changes on the current
-branch (your working state compared to `origin/HEAD`) and produces a
-security-focused markdown report of high-confidence vulnerabilities.
+Extraction of Claude Code's built-in `/security-review`. It runs the built-in's
+own prompt — verbatim — against the pending changes on the current branch (your
+working state compared to `origin/HEAD`) and produces a security-focused
+markdown report of high-confidence vulnerabilities.
 
 The built-in prompt ships verbatim in this plugin at
 `assets/prompts/security-review.md` (extracted from the CLI binary v2.1.225,

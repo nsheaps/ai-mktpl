@@ -6,9 +6,9 @@ allowed-tools: Bash(git diff *), PowerShell(git diff *), Bash(git status *), Pow
 
 # Security Review
 
-Extraction of Claude Code's built-in `/security-review`: a senior
-security engineer review of the pending changes on the current branch, comparing
-your working state against `origin/HEAD`. The prompt body is stored verbatim in
+Extraction of Claude Code's built-in `/security-review`: a senior security
+engineer review of the pending changes on the current branch, comparing your
+working state against `origin/HEAD`. The prompt body is stored verbatim in
 `assets/prompts/security-review.md`.
 
 The builtin takes **no arguments**. It reviews the current branch vs

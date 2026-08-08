@@ -7,11 +7,11 @@ allowed-tools: Read, Write, Edit, Bash(node:*), Bash(ls:*), Bash(git config:*), 
 
 # Team Onboarding
 
-Extraction of Claude Code's built-in `/team-onboarding`, driven from a
-plugin skill: scan your local session transcripts for how you've used Claude Code
-in this repo over a recent window, classify your work into task types using the
-built-in's verbatim prompt, and co-author an `ONBOARDING.md` guide that teammates
-can paste into Claude Code for a guided setup tour.
+Extraction of Claude Code's built-in `/team-onboarding`, driven from a plugin
+skill: scan your local session transcripts for how you've used Claude Code in
+this repo over a recent window, classify your work into task types using the
+built-in's verbatim prompt, and co-author an `ONBOARDING.md` guide that
+teammates can paste into Claude Code for a guided setup tour.
 
 Invoke the **`team-onboarding`** skill and follow it end to end.
 

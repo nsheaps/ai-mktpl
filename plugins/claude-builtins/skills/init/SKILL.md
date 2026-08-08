@@ -4,19 +4,19 @@ description: >
   Use this skill when the user runs /init or asks to "initialize a CLAUDE.md",
   "set up CLAUDE.md for this repo", "bootstrap Claude Code for this project",
   "document this codebase for Claude", or "scaffold skills and hooks for this
-  project". Extraction of Claude Code's built-in /init: it runs the
-  built-in's verbatim prompt to analyze the codebase and write a concise
-  CLAUDE.md, and (in the newer variant) optionally sets up CLAUDE.local.md,
-  skills, and hooks through a guided interview.
+  project". Extraction of Claude Code's built-in /init: it runs the built-in's
+  verbatim prompt to analyze the codebase and write a concise CLAUDE.md, and (in
+  the newer variant) optionally sets up CLAUDE.local.md, skills, and hooks
+  through a guided interview.
 ---
 
 # Init
 
-Extraction of Claude Code's built-in `/init`, driven from a plugin
-skill. It analyzes the current repository and produces a minimal, high-signal
-`CLAUDE.md` (and, in the newer variant, optional `CLAUDE.local.md`, skills, and
-hooks) — the same artifacts the built-in command generates, driven by the same
-verbatim prompt text.
+Extraction of Claude Code's built-in `/init`, driven from a plugin skill. It
+analyzes the current repository and produces a minimal, high-signal `CLAUDE.md`
+(and, in the newer variant, optional `CLAUDE.local.md`, skills, and hooks) — the
+same artifacts the built-in command generates, driven by the same verbatim
+prompt text.
 
 Both prompt variants ship verbatim in this plugin under `assets/prompts/`
 (extracted from the CLI binary v2.1.225).
