@@ -195,12 +195,19 @@
           <select id="timezone-select" style="font-size: 12px; padding: 4px 8px; border-radius: 4px; border: 1px solid #e2e8f0;">
             <!-- Values are UTC offsets in hours: TIMEOFDAY_UTC is indexed by UTC
                  hour, so renderTimeOfDay() adds this directly. Do not make these
-                 relative to any one zone. -->
-            <option value="-8">PT (UTC-8)</option>
-            <option value="-5">ET (UTC-5)</option>
-            <option value="0">London (UTC)</option>
-            <option value="1">CET (UTC+1)</option>
-            <option value="9">Tokyo (UTC+9)</option>
+                 relative to any one zone.
+                 Labels lead with the offset because that is what the value IS;
+                 the cities are examples. Both standard- and daylight-side
+                 offsets are listed so a viewer in a DST zone still matches a
+                 correctly-named preset instead of falling through to custom. -->
+            <option value="-8">UTC-8 (PT winter)</option>
+            <option value="-7">UTC-7 (PT summer, MT winter)</option>
+            <option value="-5">UTC-5 (ET winter)</option>
+            <option value="-4">UTC-4 (ET summer)</option>
+            <option value="0">UTC+0 (London winter)</option>
+            <option value="1">UTC+1 (London summer, CET winter)</option>
+            <option value="2">UTC+2 (CET summer)</option>
+            <option value="9">UTC+9 (Tokyo)</option>
             <option value="custom">Custom offset...</option>
           </select>
           <input type="number" id="custom-offset" placeholder="UTC offset" style="display: none; width: 80px; font-size: 12px; padding: 4px; border-radius: 4px; border: 1px solid #e2e8f0;">
@@ -314,6 +321,9 @@
       }
       // Preselect the viewer's own zone. getTimezoneOffset() returns minutes
       // BEHIND UTC (positive west of Greenwich), so negate it for a UTC offset.
+      // Matching is by offset, so the preset labels must stay offset-first —
+      // a zone name would claim the wrong region whenever two zones share an
+      // offset (London in summer and CET in winter are both UTC+1).
       // Falls back to the custom input for zones with no preset (and for
       // half-hour zones, which round to the nearest hour).
       var viewerOffset = -Math.round(new Date().getTimezoneOffset() / 60);
