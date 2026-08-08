@@ -162,6 +162,16 @@ relay-integrity principle (describe the thing, don't editorialize about it).
 - **A prompt/command pulled out byte-for-byte:** say it is **verbatim** (with the
   binary version). Do **not** add a "faithful"/"faithful extraction"/"faithful
   reproduction" line — the fact is the version stamp, not an adjective.
+  **Removing a self-graded adjective is not the whole fix if it leaves its noun
+  behind.** "Faithful extraction of X" stripped of "Faithful" becomes
+  "Extraction of X" — a dangling opener that still frames the sentence around
+  provenance instead of around what the reader should do, and in a `SKILL.md`
+  `description:` field it burns budget in the model's recall surface on a fact
+  no user utterance will ever match. After any such edit, verify the result
+  reads as a complete sentence on its own, not just that the banned word is
+  gone: `grep -rn 'xtraction of' <plugin>/` should return nothing once a sweep
+  is complete — run it, don't assume it from the diff of the files you
+  remembered touching.
 - **Code we authored to stand in for something the binary does programmatically**
   (e.g. an HTML renderer the CLI assembles in-process, with no extractable
   source): describe it as an **equivalent** reimplementation and, if and only if

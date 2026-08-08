@@ -7,10 +7,11 @@ allowed-tools: Task, Read, Write, Edit, Bash(echo:*), Bash(git:*), Glob, Grep, A
 
 # Init
 
-Extraction of Claude Code's built-in `/init`: run the built-in's own prompt —
-verbatim — to analyze the current repository and produce a minimal, high-signal
-`CLAUDE.md` (and, in the newer variant, optionally `CLAUDE.local.md`, skills,
-and hooks).
+Analyze the current repository and produce a minimal, high-signal `CLAUDE.md`
+(and, in the newer variant, optionally `CLAUDE.local.md`, skills, and hooks).
+
+Both prompt variants are the built-in's own, verbatim — follow the selected one
+exactly rather than writing a `CLAUDE.md` from your own judgement.
 
 Invoke the **`init`** skill and follow it end to end. The user's arguments
 select which prompt variant runs.
