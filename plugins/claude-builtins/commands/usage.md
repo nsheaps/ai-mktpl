@@ -2,7 +2,7 @@
 name: usage
 description: Local approximate analysis of your session transcripts (token counts + the binary's relative weight) — NOT the built-in /usage's server-side utilization/cost
 argument-hint: "[--all] [--session <id>] [--file <path>] [--current] [--days <n>]"
-allowed-tools: Task, Read, Bash(node:*), Bash(mkdir:*), Bash(mktemp:*), Write
+allowed-tools: Task, Read, Bash(node:*), Bash(mktemp:*), Write
 ---
 
 # Usage

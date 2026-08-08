@@ -72,7 +72,11 @@ not report them as zero — report them as not analyzed.
 
 ## Procedure
 
-Let `ROOT="${CLAUDE_PLUGIN_ROOT}"`.
+Let `ROOT="${CLAUDE_PLUGIN_ROOT}"` and pick a scratch directory for the JSON,
+e.g. `WORK="$(mktemp -d)"` (or `.claude/tmp/usage`). **Note the concrete path** —
+each Bash call is a fresh shell, so the shell variable does not survive Step 1;
+Steps 2-4 read the JSON back and need the real directory, and a `mktemp -d` path
+is random rather than guessable.
 
 ### Step 1 — Compute the breakdown
 
@@ -129,7 +133,7 @@ Top-level keys of `$WORK/usage.json`:
 
 ### Step 3 — Analyze where it went (the agent pass)
 
-This is the part that makes the analysis more than a number. Read `usage.json`
+This is the part that makes the analysis more than a number. Read `$WORK/usage.json`
 and produce a concise, evidence-based analysis. For a large or multi-session
 scope, dispatch a Task (`general-purpose`) agent with the JSON and the
 instructions below; for a small scope, do it in-context.
@@ -165,7 +169,7 @@ the numbers show, frame inferences as inferences, and don't inflate.
 Present the headline totals, then the breakdown and the analysis. Lead with the
 caveat that this is a local approximation and that the real utilization/cost
 figures live in the built-in `/usage` (which this does not reproduce). If the
-user wants the raw numbers, share `usage.json`. Attach or reference the JSON so
+user wants the raw numbers, share `$WORK/usage.json`. Attach or reference the JSON so
 the figures are auditable.
 
 ## Notes on fidelity
