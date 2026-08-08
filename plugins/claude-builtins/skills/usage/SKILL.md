@@ -92,6 +92,7 @@ untracked file behind in their working tree.
 ```bash
 WORK="$(mktemp -d)"
 node "$ROOT/scripts/collect-usage.mjs" --json > "$WORK/usage.json"
+echo "$WORK" # record this — Steps 2-4 read the JSON back and the shell is gone
 ```
 
 Scope flags:
