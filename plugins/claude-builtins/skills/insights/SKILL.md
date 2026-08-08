@@ -62,18 +62,21 @@ running any passes.
 
 ## Procedure
 
-Let `ROOT="${CLAUDE_PLUGIN_ROOT}"` and pick a working directory, e.g.
-`WORK="$(mktemp -d)/insights"` (or `.claude/tmp/insights`). Create
-`WORK/llm/` for the LLM outputs. **Note the concrete path** — each Bash call is
-a fresh shell, so the shell variable does not survive Step 1; Steps 2-5 read
-`$WORK` back and a `mktemp -d` path is random rather than guessable.
+Let `ROOT="${CLAUDE_PLUGIN_ROOT}"` and pick a working directory: a fresh
+`mktemp -d`, not a path inside the repo — writing into the repo leaves
+untracked files behind. **Note the concrete path** — each Bash call is a fresh
+shell, so the shell variable does not survive Step 1; Steps 2-5 read `$WORK`
+back and a `mktemp -d` path is random rather than guessable, so it must be
+assigned and echoed in the same block that creates it.
 
 ### Step 1 — Deterministic scan
 
 Run the collector. Default scope is all projects, last 30 days.
 
 ```bash
+WORK="$(mktemp -d)/insights"
 mkdir -p "$WORK/llm"
+echo "$WORK" # record this — Steps 2-5 read these files back and the shell is gone
 node "$ROOT/scripts/collect-insights-data.mjs" --all --days 30 > "$WORK/collect.json"
 ```
 

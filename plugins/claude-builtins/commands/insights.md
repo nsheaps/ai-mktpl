@@ -2,7 +2,7 @@
 name: insights
 description: Generate the Claude Code insights HTML report from local transcripts — deterministic scan plus LLM analysis passes rendered into a self-contained page
 argument-hint: "[--all] [--project-dir <dir>] [--session <id>] [--days <n>] [--all-time]"
-allowed-tools: Task, Read, Bash(node:*), Bash(mkdir:*), Bash(mktemp:*), Write
+allowed-tools: Task, Read, Bash(node:*), Bash(mkdir:*), Bash(mktemp:*), Bash(echo:*), Write
 ---
 
 # Insights

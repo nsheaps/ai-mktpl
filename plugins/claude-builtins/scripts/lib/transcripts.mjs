@@ -15,9 +15,25 @@ import { join, extname } from "node:path";
 import { homedir } from "node:os";
 
 /** Root of Claude Code's per-project transcript storage. */
-export const PROJECTS_DIR = join(homedir(), ".claude", "projects");
+// Mirrors the binary's `S2() = join(Ln(), "projects")`, where
+// `Ln() = $CLAUDE_CONFIG_DIR ?? ~/.claude` (v2.1.226 @267685164/@267687171) —
+// the same accessor probe-agent-messaging.mjs:44 uses for `teams/`. Getting
+// this wrong doesn't error: a missing root hits the "no transcripts" empty
+// state below, so every collector would silently emit a complete,
+// zero-everything report instead of telling the user why.
+export const PROJECTS_DIR = join(
+  process.env.CLAUDE_CONFIG_DIR || join(homedir(), ".claude"),
+  "projects",
+);
 
-/** Claude encodes a cwd into a project-dir name by replacing non-alnum with '-'. */
+/**
+ * Claude encodes a cwd into a project-dir name by replacing non-alnum with '-'.
+ *
+ * KNOWN GAP: this is the binary's inner `bes()`. The dir name actually comes
+ * from `gA()` (v2.1.226 @268529082), which truncates at 200 chars and appends
+ * `-<base36 hash>` past that — so a cwd whose sanitized form exceeds 200 chars
+ * resolves to null here. Port `gA`/`Idt` on the next extraction pass.
+ */
 export function encodeCwd(cwd) {
   return cwd.replace(/[^a-zA-Z0-9]/g, "-");
 }
