@@ -193,11 +193,14 @@
         <div class="chart-title" style="display: flex; align-items: center; gap: 12px;">
           User Messages by Time of Day
           <select id="timezone-select" style="font-size: 12px; padding: 4px 8px; border-radius: 4px; border: 1px solid #e2e8f0;">
-            <option value="0">PT (UTC-8)</option>
-            <option value="3">ET (UTC-5)</option>
-            <option value="8">London (UTC)</option>
-            <option value="9">CET (UTC+1)</option>
-            <option value="17">Tokyo (UTC+9)</option>
+            <!-- Values are UTC offsets in hours: TIMEOFDAY_UTC is indexed by UTC
+                 hour, so renderTimeOfDay() adds this directly. Do not make these
+                 relative to any one zone. -->
+            <option value="-8">PT (UTC-8)</option>
+            <option value="-5">ET (UTC-5)</option>
+            <option value="0">London (UTC)</option>
+            <option value="1">CET (UTC+1)</option>
+            <option value="9">Tokyo (UTC+9)</option>
             <option value="custom">Custom offset...</option>
           </select>
           <input type="number" id="custom-offset" placeholder="UTC offset" style="display: none; width: 80px; font-size: 12px; padding: 4px; border-radius: 4px; border: 1px solid #e2e8f0;">
@@ -306,14 +309,30 @@
           var v = parseInt(custom.value, 10);
           return isNaN(v) ? 0 : v;
         }
-        return parseInt(select.value, 10) || 0;
+        var n = parseInt(select.value, 10);
+        return isNaN(n) ? 0 : n;
+      }
+      // Preselect the viewer's own zone. getTimezoneOffset() returns minutes
+      // BEHIND UTC (positive west of Greenwich), so negate it for a UTC offset.
+      // Falls back to the custom input for zones with no preset (and for
+      // half-hour zones, which round to the nearest hour).
+      var viewerOffset = -Math.round(new Date().getTimezoneOffset() / 60);
+      var match = Array.prototype.filter.call(select.options, function (o) {
+        return o.value !== 'custom' && parseInt(o.value, 10) === viewerOffset;
+      })[0];
+      if (match) {
+        select.value = match.value;
+      } else {
+        select.value = 'custom';
+        custom.value = viewerOffset;
+        custom.style.display = 'inline-block';
       }
       select.addEventListener('change', function () {
         custom.style.display = select.value === 'custom' ? 'inline-block' : 'none';
         renderTimeOfDay(currentOffset());
       });
       custom.addEventListener('input', function () { renderTimeOfDay(currentOffset()); });
-      renderTimeOfDay(parseInt(select.value, 10) || 0);
+      renderTimeOfDay(currentOffset());
     })();
 
     // Copy-to-clipboard for individual snippets and "Copy all" buttons.

@@ -293,16 +293,16 @@ The prompts, facet taxonomy, and enum values are verbatim. The page around them
 is this plugin's renderer — the built-in builds its HTML programmatically inside
 the CLI, so there is no page source to extract. The known differences:
 
-| Difference                                                                        | Status                                         |
-| --------------------------------------------------------------------------------- | ---------------------------------------------- |
-| "At a glance" is composed deterministically here; the built-in uses an LLM prompt | Prompt (`Zqb`) is extractable — port next pass |
-| Team-feedback block is rendered here; the built-in suppresses it                  | Addition, not a reproduction                   |
-| Facet labels humanized generically (`_` → space) vs a per-key Title-Case map      | Map (`Nqb`) is extractable — port next pass    |
-| 8 response-time buckets vs the built-in's 7                                       | Same samples, different bar edges              |
-| 24 hourly UTC bars (re-labeled client-side) vs 4 named Pacific periods            | See the timezone assumption below              |
-| Two chart colors, some top-N cutoffs and number formatting                        | Cosmetic                                       |
-| "Lines" counts added lines only                                                   | Cosmetic                                       |
-| HTML only; the built-in can also emit Markdown                                    | Not implemented                                |
+| Difference                                                                                                 | Status                                         |
+| ---------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| "At a glance" is composed deterministically here; the built-in uses an LLM prompt                          | Prompt (`Zqb`) is extractable — port next pass |
+| Team-feedback block is rendered here; the built-in suppresses it                                           | Addition, not a reproduction                   |
+| Facet labels humanized generically (`_` → space) vs a per-key Title-Case map                               | Map (`Nqb`) is extractable — port next pass    |
+| 8 response-time buckets vs the built-in's 7                                                                | Same samples, different bar edges              |
+| 24 hourly UTC bars (re-labeled client-side, preselected to the viewer's offset) vs 4 named Pacific periods | See the timezone assumption below              |
+| Two chart colors, some top-N cutoffs and number formatting                                                 | Cosmetic                                       |
+| "Lines" counts added lines only                                                                            | Cosmetic                                       |
+| HTML only; the built-in can also emit Markdown                                                             | Not implemented                                |
 
 Three collector inputs are reconstructions rather than extractions — the
 transcript timezone, the response-latency floor/cap, and the multi-Clauding

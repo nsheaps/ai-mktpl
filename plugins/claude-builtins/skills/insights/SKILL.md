@@ -218,8 +218,9 @@ are the known differences, kept here so a later extraction pass can close them:
   built-in, so bar counts are not comparable bucket-for-bucket even though the
   underlying samples are the same.
 - **The time-of-day chart is 24 hourly UTC bars**; the built-in buckets into 4
-  named periods on Pacific time. The chart re-labels client-side for the
-  viewer's timezone, which the built-in does not do.
+  named periods on Pacific time. The chart preselects the viewer's own UTC
+  offset on load (falling back to the custom-offset input for zones with no
+  preset) and re-labels client-side, which the built-in does not do.
 - **Facet labels are humanized generically** (`_` → space) rather than through
   the built-in's per-key Title-Case map (binary symbol `Nqb`). That map is
   extractable and should be ported on the next pass — this is a reproduction

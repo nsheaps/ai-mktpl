@@ -305,8 +305,10 @@ async function parseFile(path, { sinceMs, sessionFilter, sessions, global }) {
             // was extractable — it reads a precomputed `message_hours`, and the
             // code that fills that field was not located, so the base timezone
             // the built-in counts in is unproven. UTC is chosen because it is
-            // the one basis that is stable across machines; render-insights.mjs
-            // then re-labels client-side for the viewer's timezone.
+            // the one basis that is stable across machines; the report's
+            // timezone selector then re-labels client-side, preselected to the
+            // viewer's own UTC offset. Anything consuming `timeOfDayUTC` must
+            // shift by a real UTC offset, not one relative to some other zone.
             // NEXT EXTRACTION CHECK: find where `message_hours` is populated and
             // look for `getUTCHours` vs `getHours` vs an explicit PT offset. If
             // it is local/PT, switch this to match and drop the client re-label.
