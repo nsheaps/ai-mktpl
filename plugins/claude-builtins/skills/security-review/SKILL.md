@@ -116,9 +116,9 @@ per finding, HIGH/MEDIUM only.
 
 ## Troubleshooting
 
-| Symptom                                        | Fix                                                                                                    |
-| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| Guard message about "not a git repository"     | `cd` into the repo (or its subdirectory) and re-run; that is the built-in's own behavior.              |
-| `origin/HEAD` unknown / diffs empty or wrong   | `git fetch origin` then `git remote set-head origin -a` so `origin/HEAD` resolves.                     |
-| User wants their uncommitted diff reviewed     | That is `/code-review` (general quality), not `/security-review` (security vs origin/HEAD).             |
-| User asks to review a specific GitHub PR       | This built-in takes no PR argument; it reviews the current branch. Check out the PR branch, then run.  |
+| Symptom                                      | Fix                                                                                                   |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Guard message about "not a git repository"   | `cd` into the repo (or its subdirectory) and re-run; that is the built-in's own behavior.             |
+| `origin/HEAD` unknown / diffs empty or wrong | `git fetch origin` then `git remote set-head origin -a` so `origin/HEAD` resolves.                    |
+| User wants their uncommitted diff reviewed   | That is `/code-review` (general quality), not `/security-review` (security vs origin/HEAD).           |
+| User asks to review a specific GitHub PR     | This built-in takes no PR argument; it reviews the current branch. Check out the PR branch, then run. |

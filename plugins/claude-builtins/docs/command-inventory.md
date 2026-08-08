@@ -37,12 +37,12 @@ clipboard, QR) cannot be driven honestly outside the CLI and is **not faked**.
 These send a constructed prompt to the model. The prompt text was extracted
 verbatim from the binary; the plugin ships each as a skill + command wrapper.
 
-| Command            | Binary description                                                     | Status in plugin |
-| ------------------ | ---------------------------------------------------------------------- | ---------------- |
-| `/insights`        | Generate a report analyzing your Claude Code sessions                  | **Built**        |
-| `/init`            | Initialize a new CLAUDE.md file with codebase documentation            | Built (Tier 1)   |
-| `/security-review` | Complete a security review of the pending changes on the current branch | Built (Tier 1) |
-| `/team-onboarding` | Help teammates ramp on Claude Code with a guide from your usage        | Built (Tier 1)   |
+| Command            | Binary description                                                      | Status in plugin |
+| ------------------ | ----------------------------------------------------------------------- | ---------------- |
+| `/insights`        | Generate a report analyzing your Claude Code sessions                   | **Built**        |
+| `/init`            | Initialize a new CLAUDE.md file with codebase documentation             | Built (Tier 1)   |
+| `/security-review` | Complete a security review of the pending changes on the current branch | Built (Tier 1)   |
+| `/team-onboarding` | Help teammates ramp on Claude Code with a guide from your usage         | Built (Tier 1)   |
 
 Notes:
 
@@ -66,15 +66,15 @@ These do real computation over local data. Where built, they are reproduced by
 scanning transcripts / git / env deterministically, then (where the builtin does)
 an analysis pass.
 
-| Command         | Aliases        | Binary description                                                    | Status in plugin                                                                   |
-| --------------- | -------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Command         | Aliases        | Binary description                                                    | Status in plugin                                                                                                                                                                                                                                                                    |
+| --------------- | -------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `/usage`        | `cost`,`stats` | Show session cost, plan usage, and what's contributing to your limits | **Partial** — the built-in is an Ink TUI over server-side plan/limit data (not reproducible); the plugin ships a local, approximate token scan + the binary's relative-weight unit, explicitly labeled as an approximation of the "what's contributing to your limits" section only |
-| `/context`      | —              | Show current context usage                                            | _Not built_ — planned: transcript scan of the session's token composition          |
-| `/recap`        | —              | Generate a one-line session recap now                                 | _Not built_ — planned: deterministic session summary + one-line model pass         |
-| `/export`       | —              | Export the current conversation to a file or clipboard                | _Not built_ — planned: transcript → markdown/json file (clipboard documented)      |
-| `/status`       | —              | Show version, model, account, API connectivity, and tool statuses     | _Not built_ — planned: version/env/git/tool availability locally (account partial) |
-| `/diff`         | —              | View uncommitted changes and per-turn diffs                           | _Not built_ — planned: `git diff` + per-turn file edits from the transcript        |
-| `/skill-doctor` | —              | Show which loaded skills are unused and costing context               | _Not built_ — planned: loaded skills vs. skill invocations in the transcript       |
+| `/context`      | —              | Show current context usage                                            | _Not built_ — planned: transcript scan of the session's token composition                                                                                                                                                                                                           |
+| `/recap`        | —              | Generate a one-line session recap now                                 | _Not built_ — planned: deterministic session summary + one-line model pass                                                                                                                                                                                                          |
+| `/export`       | —              | Export the current conversation to a file or clipboard                | _Not built_ — planned: transcript → markdown/json file (clipboard documented)                                                                                                                                                                                                       |
+| `/status`       | —              | Show version, model, account, API connectivity, and tool statuses     | _Not built_ — planned: version/env/git/tool availability locally (account partial)                                                                                                                                                                                                  |
+| `/diff`         | —              | View uncommitted changes and per-turn diffs                           | _Not built_ — planned: `git diff` + per-turn file edits from the transcript                                                                                                                                                                                                         |
+| `/skill-doctor` | —              | Show which loaded skills are unused and costing context               | _Not built_ — planned: loaded skills vs. skill invocations in the transcript                                                                                                                                                                                                        |
 
 Caveat on `/status`: version, model, git, tool availability, and env are fully
 local. **Account identity and live API connectivity** require the Anthropic

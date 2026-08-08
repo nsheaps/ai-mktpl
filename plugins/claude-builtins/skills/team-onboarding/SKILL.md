@@ -138,10 +138,10 @@ The prompt is the source of truth. In order, it requires you to:
 
 ## Troubleshooting
 
-| Symptom                             | Fix                                                                                |
-| ----------------------------------- | ---------------------------------------------------------------------------------- |
-| `{"error":"no_project_dir"}`        | This dir has no Claude Code history. Run from a repo you've used with Claude.      |
-| `node: command not found`           | Install/activate `node`; in web sessions `eval "$(mise activate bash)"`.           |
-| Breakdown is all TODO / ~0 sessions | The window has too little history — widen it with `--days 90`, or accept the TODO. |
-| Guide creator name missing          | `git config user.name` is unset; the prompt omits the name — that's expected.      |
+| Symptom                             | Fix                                                                                          |
+| ----------------------------------- | -------------------------------------------------------------------------------------------- |
+| `{"error":"no_project_dir"}`        | This dir has no Claude Code history. Run from a repo you've used with Claude.                |
+| `node: command not found`           | Install/activate `node`; in web sessions `eval "$(mise activate bash)"`.                     |
+| Breakdown is all TODO / ~0 sessions | The window has too little history — widen it with `--days 90`, or accept the TODO.           |
+| Guide creator name missing          | `git config user.name` is unset; the prompt omits the name — that's expected.                |
 | Wanted it auto-shared to the team   | The internal share tool isn't available outside the CLI — save `ONBOARDING.md` and share it. |

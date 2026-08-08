@@ -24,7 +24,7 @@ server (`GET /api/oauth/usage`) and renders reset times, percentages, and cost.
 None of that server data — the numbers users actually go to `/usage` for — is
 available to a plugin, so none of it is reproduced here.
 
-What this skill *can* stand in for is one section of that TUI: **"What's
+What this skill _can_ stand in for is one section of that TUI: **"What's
 contributing to your limits usage?"** The built-in ranks contributors using an
 internal relative weight computed from local token counts. This skill computes
 that same weight from your local transcripts and analyzes where it concentrated.
@@ -106,20 +106,20 @@ Every ranked breakdown reports the relative **weight** (see above), never USD.
 Top-level keys of `usage.json`:
 
 | Key           | What it holds                                                                          |
-| ------------- | ------------------------------------------------------------------------------------- |
-| `note`        | The standing caveat: local approximation, relative weight not USD, not the built-in.  |
+| ------------- | -------------------------------------------------------------------------------------- |
+| `note`        | The standing caveat: local approximation, relative weight not USD, not the built-in.   |
 | `totals`      | `requestCount`, `sessionCount`, `weight` (relative units), `tokens`.                   |
 | `split`       | Weight split between main thread and subagents (`mainWeight`, `subagentWeight`, pcts). |
 | `behaviors`   | `cacheMiss` (input > 100k) and `longContext` (> 150k) — each `{weight, count}`.        |
 | `byModel`     | `{name, weight, pct}` per model family.                                                |
 | `byTool`      | Call counts per tool.                                                                  |
 | `toolErrors`  | Counts per error _category_ (e.g. `User Rejected`, `File Not Found`).                  |
-| `attribution` | `available` (false ⇒ these transcripts predate attribution) and `attributedRequests`. |
+| `attribution` | `available` (false ⇒ these transcripts predate attribution) and `attributedRequests`.  |
 | `byAgent`     | `{name, weight, pct}` per subagent type.                                               |
 | `bySkill`     | Attribution per skill.                                                                 |
 | `byPlugin`    | Attribution per plugin.                                                                |
 | `byMcpServer` | Attribution per MCP server.                                                            |
-| `byHourOfDay` | Request-count histogram across 24 hours (**local** time).                             |
+| `byHourOfDay` | Request-count histogram across 24 hours (**local** time).                              |
 | `topSessions` | The heaviest sessions by weight (`{..., weight, subagentWeight}`, top 20).             |
 
 ### Step 3 — Analyze where it went (the agent pass)
@@ -176,9 +176,9 @@ the figures are auditable.
 
 ## Troubleshooting
 
-| Symptom                          | Fix                                                                        |
-| -------------------------------- | -------------------------------------------------------------------------- |
-| `{ error, scope }` returned      | No transcripts in scope — try `--all` or `--session <id>`.                 |
-| Weight looks implausibly large   | It is a relative unit, not dollars — confirm you said so.                  |
-| Numbers differ from built-in     | Expected — the built-in reports server-side utilization/cost, not this.    |
-| User wants their plan/limit usage | That lives in the real `/usage` TUI; this skill cannot fetch server data.  |
+| Symptom                           | Fix                                                                       |
+| --------------------------------- | ------------------------------------------------------------------------- |
+| `{ error, scope }` returned       | No transcripts in scope — try `--all` or `--session <id>`.                |
+| Weight looks implausibly large    | It is a relative unit, not dollars — confirm you said so.                 |
+| Numbers differ from built-in      | Expected — the built-in reports server-side utilization/cost, not this.   |
+| User wants their plan/limit usage | That lives in the real `/usage` TUI; this skill cannot fetch server data. |
