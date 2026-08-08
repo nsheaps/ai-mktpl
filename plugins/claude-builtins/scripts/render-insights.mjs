@@ -221,11 +221,12 @@ function barChart(items, color, emptyMsg) {
 // This lets the verbatim classifier's count-maps (goal_categories,
 // friction_counts, user_satisfaction_counts) and its scalars flow straight
 // through without a separate normalization pass.
-function tallyFacet(sessions, fields, { limit = 10 } = {}) {
+function tallyFacet(sessions, fields, { limit = 10, exclude = [] } = {}) {
   const aliases = Array.isArray(fields) ? fields : [fields];
+  const skip = new Set(exclude);
   const counts = new Map();
   const add = (key, n) => {
-    if (key == null || key === "") return;
+    if (key == null || key === "" || skip.has(String(key))) return;
     counts.set(String(key), (counts.get(String(key)) || 0) + n);
   };
   for (const s of sessions) {
@@ -657,7 +658,12 @@ async function main() {
       "No session-type data yet",
     ),
     CHART_WHAT_HELPED: barChart(
-      tallyFacet(facetSessions, ["capabilities_that_helped", "primary_success"]),
+      // "none" is the verbatim schema's sentinel for *no* primary success — an
+      // empty marker, not a capability. Tallying it would rank "nothing helped"
+      // as the top capability and defeat the empty state below.
+      tallyFacet(facetSessions, ["capabilities_that_helped", "primary_success"], {
+        exclude: ["none"],
+      }),
       COLOR.whatHelped,
       "No capability data yet",
     ),
