@@ -150,7 +150,13 @@ async function inspectInbox(path) {
   return {
     path,
     total: messages.length,
-    unread: messages.filter((m) => !m.read).length,
+    // readUnreadMessages() filters !read AFTER partitionEntries() has already
+    // dropped and pruned schema-invalid entries — an invalid entry can never
+    // be delivered, so counting it as unread overstates what's actually
+    // pending. `total` intentionally still counts it: that describes file
+    // state (what's on disk right now), which is what a file inspector
+    // should report even for bytes the runtime will discard on next read.
+    unread: messages.filter((m) => m.valid && !m.read).length,
     invalid: messages.filter((m) => !m.valid).length,
     lockPresent,
     messages,

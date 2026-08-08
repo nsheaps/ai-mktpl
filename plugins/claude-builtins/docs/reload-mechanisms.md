@@ -9,7 +9,7 @@ was never read directly).
 Every claim below was recovered from a single build. Re-verify against a new
 stamp after any binary update.
 
-- claude version: **2.1.223**
+- claude version: **v2.1.223**
 - git sha: `4535f69721056abf01650c73ee8a91c69ba00838`
 - build time: `2026-08-05T18:12:31Z`
 - binary path: `/opt/claude-code/bin/claude` (Bun-compiled ELF)

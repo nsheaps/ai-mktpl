@@ -42,7 +42,11 @@ be trusted and re-verified later.
    asset instantly makes that sentence false everywhere else, and the false
    version is harder to notice than a missing one. A mixed-version tree is the
    expected steady state, not drift to be tidied up:
-   `grep -rn 'v2\.1\.' <plugin>/` is the authoritative inventory.
+   `grep -rn 'v2\.1\.' <plugin>/` is the authoritative inventory — but only if
+   every stamp is actually written in that form. Always write the leading
+   `v` (`- claude version: **v2.1.223**`, not `**2.1.223**`); a stamp missing
+   it is invisible to the inventory grep and silently breaks the "per-asset
+   stamps are all correct" claim for exactly the file that omitted it.
 
 ## Step 0 — Stamp the binary version FIRST
 
