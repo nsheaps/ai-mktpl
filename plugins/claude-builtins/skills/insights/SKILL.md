@@ -65,7 +65,9 @@ running any passes.
 
 Let `ROOT="${CLAUDE_PLUGIN_ROOT}"` and pick a working directory, e.g.
 `WORK="$(mktemp -d)/insights"` (or `.claude/tmp/insights`). Create
-`WORK/llm/` for the LLM outputs.
+`WORK/llm/` for the LLM outputs. **Note the concrete path** — each Bash call is
+a fresh shell, so the shell variable does not survive Step 1; Steps 2-5 read
+`$WORK` back and a `mktemp -d` path is random rather than guessable.
 
 ### Step 1 — Deterministic scan
 
