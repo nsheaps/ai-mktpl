@@ -11,8 +11,9 @@
 // What this script DOES reproduce is the *relative weighting* the binary uses
 // internally for only one part of `/usage` — the "What's contributing to your
 // limits usage?" section — computed over your local transcripts. It parses
-// session transcript JSONL under ~/.claude/projects/<encoded-cwd>/*.jsonl (plus
-// each session's subagents/**/*.jsonl), then reports token totals and where the
+// session transcript JSONL under $CLAUDE_CONFIG_DIR/projects/<encoded-cwd>/*.jsonl
+// (~/.claude/projects/ by default; plus each session's subagents/**/*.jsonl),
+// then reports token totals and where the
 // weighted usage went: by model, by tool, by sub-agent / skill / plugin / MCP
 // server, and main-vs-subagent.
 //
@@ -48,6 +49,7 @@ import {
   resolveProjectDir,
   transcriptFilesIn,
   allTranscriptFiles,
+  projectsDirExists,
   categorizeToolError,
   bump,
   mergeCounts,
@@ -418,6 +420,20 @@ async function main() {
     sessionFilter = basename(recent, ".jsonl");
     files = await transcriptFilesIn(projectDir);
     scope = `current-session:${sessionFilter}`;
+  }
+
+  if (files.length === 0 && (opts.all || opts.session) && !opts.file) {
+    // Unlike the no_project_dir/no_transcripts early-returns above, this path
+    // still emits a well-formed, complete, zero-everything report below (by
+    // design — --all across zero real sessions is a valid answer). Without
+    // this note that's indistinguishable on stdout from "you've used Claude
+    // Code zero times" even when PROJECTS_DIR itself doesn't exist.
+    process.stderr.write(
+      projectsDirExists()
+        ? `usage: no transcripts found for scope ${scope}\n`
+        : `usage: no transcripts found for scope ${scope} — ${PROJECTS_DIR} does not exist ` +
+            `(check $CLAUDE_CONFIG_DIR if you expected it elsewhere)\n`,
+    );
   }
 
   const allUsages = [];

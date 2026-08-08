@@ -180,14 +180,21 @@ session is running**:
   `list_sessions`, `interrupt_session`, `archive_session`,
   `unarchive_session`, `set_session_title`, `set_session_tags`,
   `subscribe_pr_activity`, `unsubscribe_pr_activity`, `register_repo_root`,
-  `list_environments`. This is **not** a binary-extraction claim — grepping
-  the CLI binary for these names correctly finds nothing, because an
-  MCP-server tool's name and schema are supplied by the server at connect
-  time, not compiled into the `claude` executable. The claim instead rests on
+  `list_environments`. This is **not** a binary-extraction claim — it rests on
   directly calling `send_later` and `subscribe_pr_activity` in a live CCR
   session and observing them work (this skill's own extraction session,
-  2026-08-08) — stronger evidence than a string search for a tool whose name
-  was never going to be in that binary to begin with.
+  2026-08-08). Grep is a **one-way** test for this surface: an MCP tool's name
+  and schema are supplied by the server at connect time, so a miss proves
+  nothing about whether the tool exists. It is not, however, a reason to
+  expect a miss — checked against v2.1.226, `register_repo_root` resolves 27
+  times and carries its own native handler strings
+  (`register_repo_root: target is not a directory`, `@179239808`), and
+  `subscribe_pr_activity` / `unsubscribe_pr_activity` resolve 8 / 4 times in a
+  constants table at `@262045600`, while
+  `send_later` / `create_trigger` / `fire_trigger` / `list_triggers` /
+  `list_environments` have zero hits. Read that as: the CLI implements part of
+  this surface natively and the CCR server names the rest — so grep the binary
+  first, and fall back to live tool use only for the names it can't settle.
 
 Both descriptions can be true at once: the CCR MCP server is very likely a
 thin wrapper implemented on top of the same `RemoteTrigger` REST API the raw

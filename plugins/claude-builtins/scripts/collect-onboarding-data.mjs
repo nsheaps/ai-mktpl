@@ -2,8 +2,9 @@
 // collect-onboarding-data.mjs — the data-collection half of Claude Code's
 // built-in `/team-onboarding`, extracted from the CLI binary (v2.1.225).
 //
-// Scans session transcript JSONL under ~/.claude/projects/<encoded-cwd>/*.jsonl
-// for the current repo and summarizes HOW the user has worked in Claude Code
+// Scans session transcript JSONL under $CLAUDE_CONFIG_DIR/projects/<encoded-cwd>/*.jsonl
+// (~/.claude/projects/ by default) for the current repo and summarizes HOW the
+// user has worked in Claude Code
 // over a recent window: which slash commands they run, which MCP servers they
 // call, and a set of "session descriptors" (title, linked PRs, first user
 // message) that a model can classify into work-type buckets.

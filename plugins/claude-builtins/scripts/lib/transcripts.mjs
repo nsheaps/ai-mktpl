@@ -45,6 +45,17 @@ export function resolveProjectDir(cwd) {
 }
 
 /**
+ * Distinguish "no transcripts to scan" from "misconfigured": the first is a
+ * real answer (this machine/config has none), the second — PROJECTS_DIR
+ * itself doesn't exist — usually means CLAUDE_CONFIG_DIR points somewhere
+ * unexpected. Both collectors report zero results the same way otherwise, so
+ * this is what lets the stderr note tell them apart.
+ */
+export function projectsDirExists() {
+  return existsSync(PROJECTS_DIR);
+}
+
+/**
  * All *.jsonl files in a project dir, including per-session subagents/**.
  * Unreadable dirs yield [] rather than throwing — a missing or permission-denied
  * project dir is a normal empty state, not an error.

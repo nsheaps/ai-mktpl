@@ -2,8 +2,9 @@
 // collect-insights-data.mjs — the deterministic (no-LLM) half of Claude Code's
 // built-in `/insights` report, extracted from the CLI binary (v2.1.225).
 //
-// Scans session transcript JSONL under ~/.claude/projects/<encoded-cwd>/*.jsonl
-// (plus each session's subagents/**/*.jsonl) and computes every number the
+// Scans session transcript JSONL under $CLAUDE_CONFIG_DIR/projects/<encoded-cwd>/*.jsonl
+// (~/.claude/projects/ by default; plus each session's subagents/**/*.jsonl) and
+// computes every number the
 // report needs WITHOUT an LLM: message / line / file / day counts, top tools,
 // tool-error categories, languages, user-response-time distribution, the
 // 24-bucket UTC time-of-day histogram, and multi-clauding (overlapping session)
@@ -41,9 +42,11 @@ import { basename } from "node:path";
 import { createInterface } from "node:readline";
 import { createReadStream } from "node:fs";
 import {
+  PROJECTS_DIR,
   resolveProjectDir,
   transcriptFilesIn,
   allTranscriptFiles,
+  projectsDirExists,
   categorizeToolError,
   bump,
   mapToSortedList,
@@ -574,7 +577,15 @@ async function main() {
       sessions: [],
     };
     process.stdout.write(JSON.stringify(empty, null, 2) + "\n");
-    process.stderr.write(`insights: no sessions found for scope ${scope}\n`);
+    // Distinguish "the root exists but is empty" (a real answer) from "the
+    // root doesn't exist" (usually a misconfigured $CLAUDE_CONFIG_DIR) —
+    // both would otherwise produce the same well-formed zero-everything JSON.
+    process.stderr.write(
+      projectsDirExists()
+        ? `insights: no sessions found for scope ${scope}\n`
+        : `insights: no sessions found for scope ${scope} — ${PROJECTS_DIR} does not exist ` +
+            `(check $CLAUDE_CONFIG_DIR if you expected it elsewhere)\n`,
+    );
     return;
   }
 
