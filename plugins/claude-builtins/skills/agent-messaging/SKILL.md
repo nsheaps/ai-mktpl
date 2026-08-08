@@ -85,9 +85,27 @@ Base message schema — `from`, `text`, `timestamp` required; `type`, `read`,
 `type: "message"`, `read: false`. Readers treat a missing `type` as `"message"`,
 and `readUnreadMessages` filters on `!read`.
 
-The same inbox carries other typed frames, discriminated by `type`:
-`idle_notification`, `plan_approval_request`, `plan_approval_response`,
-`shutdown_request`, `shutdown_approved`.
+The same inbox carries other typed frames — but **not** as top-level entries.
+`writeToMailbox` stamps `type: "message"` on everything it writes, and every
+entry is validated against the base schema above, which requires `text`. So a
+frame is `JSON.stringify`'d **into `text`** and discriminated by parsing that
+string:
+
+```js
+let f = vCr(i, { idleReason: "available", summary: CCr(d) }); // build the frame
+await GD(u, { from: i, text: De(f), timestamp: ..., color: z$() }); // De = JSON.stringify
+```
+
+The receiving side matches this: the in-process runner reads `c.text` and
+parses it (`ACr(c.text)` for a plan-approval response, `TCr(c.text)` for a
+mode-set request) rather than switching on the entry's own `type`.
+
+Frame types present in the binary: `idle_notification`,
+`plan_approval_request`, `plan_approval_response`, `shutdown_request`,
+`shutdown_approved`, `shutdown_rejected`, `task_assignment`, `task_completed`,
+`teammate_terminated`, `mode_set_request`. Each has its own schema with **no**
+`text` field, so writing one as a top-level entry fails base-schema validation
+— it is dropped on read and pruned from the file.
 
 ## What does not work
 
@@ -153,11 +171,18 @@ another door.
 
 ## Verification
 
-Re-run the experiment with
-`scripts/probe-agent-messaging.mjs` (read-only; it inspects mailbox state and
-reports what it finds). Re-derive the binary facts with the `extract-builtins`
-skill — the offsets move between releases, so search by the log strings
-(`[TeammateMailbox] getInboxPath`, `writeToMailbox`) rather than by offset.
+Re-run the experiment with the probe (read-only; it inspects mailbox state and
+reports what it finds, and has no send mode):
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/scripts/probe-agent-messaging.mjs"          # all teams
+node "${CLAUDE_PLUGIN_ROOT}/scripts/probe-agent-messaging.mjs" --json   # machine-readable
+node "${CLAUDE_PLUGIN_ROOT}/scripts/probe-agent-messaging.mjs" --team <name>
+```
+
+Re-derive the binary facts with the `extract-builtins` skill — the offsets move
+between releases, so search by the log strings (`[TeammateMailbox]
+getInboxPath`, `writeToMailbox`) rather than by offset.
 
 ## Troubleshooting
 

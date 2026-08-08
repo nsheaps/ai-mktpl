@@ -47,8 +47,21 @@ function teamsRoot() {
 function parseArgs(argv) {
   const opts = { team: null, json: false };
   for (let i = 0; i < argv.length; i++) {
-    if (argv[i] === "--team") opts.team = argv[++i];
-    else if (argv[i] === "--json") opts.json = true;
+    if (argv[i] === "--team") {
+      // Without this guard `argv[++i]` is undefined, which is falsy downstream —
+      // so a flag meant to NARROW the scan would silently widen it to every team.
+      const value = argv[++i];
+      if (!value) {
+        console.error("probe-agent-messaging: --team requires a team name");
+        process.exit(0);
+      }
+      opts.team = value;
+    } else if (argv[i] === "--json") {
+      opts.json = true;
+    } else {
+      console.error(`probe-agent-messaging: unknown argument "${argv[i]}"`);
+      process.exit(0);
+    }
   }
   return opts;
 }
@@ -62,11 +75,45 @@ async function listDirs(dir) {
   }
 }
 
+// Frame types that ride inside `text` as serialised JSON, never at the top
+// level — writeToMailbox stamps type:"message" on everything it writes, and
+// each frame's own schema has no `text` field, so a top-level frame object
+// fails base-schema validation and is dropped (and pruned) on read.
+const FRAME_TYPES = new Set([
+  "idle_notification",
+  "plan_approval_request",
+  "plan_approval_response",
+  "shutdown_request",
+  "shutdown_approved",
+  "shutdown_rejected",
+  "task_assignment",
+  "task_completed",
+  "teammate_terminated",
+  "mode_set_request",
+]);
+
+/** The frame type carried in `text`, or null for an ordinary prose message. */
+function frameType(msg) {
+  if (typeof msg?.text !== "string") return null;
+  try {
+    const inner = JSON.parse(msg.text);
+    return FRAME_TYPES.has(inner?.type) ? inner.type : null;
+  } catch {
+    return null; // ordinary prose, which is the common case
+  }
+}
+
 /** Classify one entry against the schema the runtime enforces. */
 function inspectMessage(msg) {
-  const missing = REQUIRED.filter((k) => typeof msg?.[k] !== "string" || msg[k] === "");
+  // The entry schema is {type?, from, text, timestamp, read?, color?, summary?}
+  // with plain string fields — `text` is a bare string with no minimum length,
+  // so an EMPTY text is schema-valid and gets delivered. Checking for "" here
+  // would be stricter than the runtime and would invent drops that never happen.
+  const missing = REQUIRED.filter((k) => typeof msg?.[k] !== "string");
   return {
-    type: msg?.type ?? "message", // absent type is read as "message"
+    // The top-level type never names a frame; surface the one inside `text`,
+    // since that is what a reader chasing a message actually wants to see.
+    type: frameType(msg) ?? msg?.type ?? "message", // absent type is read as "message"
     from: msg?.from ?? null,
     read: msg?.read === true,
     msg_id: msg?.msg_id ?? null,
@@ -139,6 +186,13 @@ async function main() {
 
   console.log(`teams root: ${report.teamsRoot}`);
   if (report.teams.length === 0) {
+    if (opts.team) {
+      // Don't tell someone who typo'd a team name that they have never used
+      // agent teams — the other teams may be sitting right there.
+      console.log(`\nNo team named "${opts.team}" under ${report.teamsRoot}.`);
+      console.log("Run without --team to list every team that does exist.");
+      return;
+    }
     console.log("\nNo teams found. That is the normal state when you have never");
     console.log("started an agent team — in-process subagents do not use this");
     console.log("transport, so nothing here is required for SendMessage to work.");

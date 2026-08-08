@@ -5,6 +5,12 @@ Claude Code's built-in slash-command prompts, taken verbatim from the CLI binary
 need — collector scripts, the verbatim LLM prompts, and the HTML template — ships
 inside this plugin.
 
+It also records **mechanics** extracted from the binary that aren't commands at
+all — how agent-to-agent messaging is actually wired
+(`skills/agent-messaging/`), and how the plugin/skill reload triggers work
+(`docs/reload-mechanisms.md`). Each is stamped with the binary version it came
+from, which is not always the same version as the prompts above.
+
 - **`/security-review`** runs the built-in's verbatim prompt: a senior security
   engineer's review of the pending changes on the current branch (diffed against
   `origin/HEAD`), pulling the diff through inline `git` bang-commands. No
@@ -209,6 +215,7 @@ step-by-step procedure. You can also trigger the skills conversationally:
 | `scripts/collect-insights-data.mjs`   | Deterministic scan for `/insights` (counts, charts, session summaries).                             |
 | `scripts/render-insights.mjs`         | Fills the HTML template from the collector data + LLM outputs.                                      |
 | `scripts/collect-onboarding-data.mjs` | Deterministic usage scan for `/team-onboarding` (slash commands, MCP servers, session descriptors). |
+| `scripts/probe-agent-messaging.mjs`   | Read-only inspector for the teammate mailbox (`--team`, `--json`). Never writes; no send mode.      |
 | `scripts/lib/transcripts.mjs`         | Shared transcript discovery + counting helpers imported by all three collectors.                    |
 
 `/init` and `/security-review` are prompt-only extractions — they have no
@@ -237,6 +244,7 @@ claude-builtins/
 │   ├── init/SKILL.md               # /init procedure
 │   ├── security-review/SKILL.md    # /security-review procedure
 │   ├── team-onboarding/SKILL.md    # /team-onboarding procedure
+│   ├── agent-messaging/SKILL.md    # how messages reach an agent, incl. what does NOT work
 │   └── extract-builtins/           # how the built-ins were recovered from the binary
 │       ├── SKILL.md
 │       └── scripts/                # binary-version.sh, slice-binary.mjs
@@ -246,7 +254,8 @@ claude-builtins/
 │   ├── collect-usage.mjs
 │   ├── collect-insights-data.mjs
 │   ├── render-insights.mjs
-│   └── collect-onboarding-data.mjs
+│   ├── collect-onboarding-data.mjs
+│   └── probe-agent-messaging.mjs   # read-only teammate-mailbox inspector
 ├── assets/
 │   ├── insights-template.html      # 35-token HTML template
 │   └── prompts/                    # insights facets + 7 sections, init (classic/new),
