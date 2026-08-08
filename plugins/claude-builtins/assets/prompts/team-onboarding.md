@@ -23,8 +23,9 @@ Generate the guide immediately, then ask for revisions. Don't wait for answers f
 1. **Output the acknowledgment line above.** No thinking, no classification, no tool calls before this. One line, then move on.
 
 2. **Derive the work-type breakdown.** Read the `sessionDescriptors` array — each entry describes one session via its title, any linked code reviews (`prNumbers`), and first user message. Classify each session into one of these task types:
+
    - **build_feature** — new functionality, scripts, tools, config/CI/env setup
-   - **debug_fix** — investigating or fixing bugs
+   - **debug_fix** — investigating and fixing bugs
    - **improve_quality** — refactoring, tests, cleanup, code review
    - **analyze_data** — queries, metrics, number crunching
    - **plan_design** — architecture, approach, strategy, understanding unfamiliar code, design review
@@ -48,6 +49,7 @@ Generate the guide immediately, then ask for revisions. Don't wait for answers f
 5. **Render the guide in a code block, then close out the first turn.** You're co-authoring this guide with the guide creator — frame the follow-up as collaboration, not corrections.
 
    After the code block, add a `---` horizontal rule and a `**Review**` heading so the guide is visually separated from your questions. Under the heading, number these three questions:
+
    1. "I went with '[X]' for the team name — let me know if that sounds right." (or if you couldn't tell: "What's the team name? I'll add it in.")
    2. Is there a starter task for someone new to Claude Code? (ticket or doc link — optional)
    3. Any team tips you'd tell a new teammate that aren't already in CLAUDE.md?

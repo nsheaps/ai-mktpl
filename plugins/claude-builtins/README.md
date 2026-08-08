@@ -1,43 +1,48 @@
 # claude-builtins
 
-Standalone re-implementations of Claude Code's faithfully-reproducible built-in
-slash commands, reverse-engineered from the CLI binary (**v2.1.220**) so they run
-**without** the built-in tooling. Everything they need — collector scripts, LLM
+Faithful extractions of Claude Code's built-in slash-command prompts, taken
+verbatim from the CLI binary (**v2.1.225**) and driven from portable plugin
+skills. Everything the skills need — collector scripts, the verbatim LLM
 prompts, and the HTML template — ships inside this plugin.
 
-- **`/usage`** programmatically computes session token usage and a synthetic
-  cost from your local transcripts, then has an agent analyze _where_ the API
-  calls and cost actually went (models, tools, subagents, skills, plugins, MCP
-  servers, time of day).
+- **`/security-review`** runs the built-in's verbatim prompt: a senior security
+  engineer's review of the pending changes on the current branch (diffed against
+  `origin/HEAD`), pulling the diff through inline `git` bang-commands. No
+  arguments; reads only.
+- **`/usage`** runs a **local, approximate** analysis of your transcripts — token
+  counts plus the binary's own relative-weight unit — then has an agent analyze
+  _where_ the weight went (models, tools, subagents, skills, plugins, MCP
+  servers, time of day). This does **not** reproduce the built-in `/usage`, which
+  is an Ink TUI backed by server-side plan/limit data a plugin can't recompute.
 - **`/insights`** scans your session transcripts, classifies each session across
-  a fixed facet taxonomy, writes seven narrative sections, and renders the full
-  shareable HTML report — stat cards, facet charts, a time-of-day chart, wins,
-  friction analysis, CLAUDE.md suggestions, and "on the horizon" prompts.
-- **`/init`** generates a `CLAUDE.md` for the current repo, reproducing the
-  built-in's classic and newer skills/hooks-aware variants (the variant toggles
-  on `CLAUDE_CODE_NEW_INIT`).
-- **`/review`** fetches a GitHub pull request's context and diff with `gh` and
-  produces a thorough, structured code review. (For your uncommitted working
-  diff, that's the separate built-in `/code-review`.)
+  the built-in's verbatim facet taxonomy, writes seven narrative sections, and
+  renders a shareable HTML report — stat cards, facet charts, a time-of-day
+  chart, wins, friction analysis, CLAUDE.md suggestions, and "on the horizon"
+  prompts. (The built-in assembles its HTML programmatically; the plugin ships an
+  equivalent renderer as a faithful stand-in.)
+- **`/init`** generates a `CLAUDE.md` for the current repo from the built-in's
+  verbatim classic and newer skills/hooks-aware prompts (the variant toggles on
+  `CLAUDE_CODE_NEW_INIT`).
 - **`/team-onboarding`** scans how you've used Claude Code in this repo, classifies
   your work into task types, and co-authors an `ONBOARDING.md` guide new teammates
   can paste into Claude Code for a guided setup tour.
 
-## Which built-ins are reproduced (and which can't be)
+## Which built-ins are extracted (and which can't be)
 
-Not every built-in can be honestly rebuilt outside the running client. Commands
+Not every built-in can be driven honestly outside the running client. Commands
 that only toggle terminal UI, or that talk to the Anthropic account/billing
-backend or a native host, have no artifact to compute standalone and are **not
+backend or a native host, have no prompt or computation to recover and are **not
 faked**. The full cross-reference — every built-in slash command, its binary
-`type`, and its reproducibility tier — lives in
-[`docs/command-inventory.md`](docs/command-inventory.md). This plugin builds the
-Tier 1 (`type:"prompt"`) commands above plus `/usage` from Tier 2; the remaining
-Tier 2 computational commands are candidates for future passes.
+`type`, and its extraction tier — lives in
+[`docs/command-inventory.md`](docs/command-inventory.md). This plugin ships the
+Tier 1 (`type:"prompt"`) commands above plus a local approximation of `/usage`
+from Tier 2; the remaining Tier 2 computational commands are candidates for
+future passes.
 
 ## Features
 
-- **No built-in dependency** — parses `~/.claude/projects/**/*.jsonl` directly;
-  nothing calls the built-in commands.
+- **Runs outside the built-in** — the collectors parse
+  `~/.claude/projects/**/*.jsonl` directly; nothing calls the built-in commands.
 - **Deterministic + agentic split** — exact counts come from plain scans; the
   narrative and facet classification come from LLM passes you (the agent) run.
 - **Graceful degradation** — missing transcripts or skipped LLM passes render as
@@ -62,28 +67,29 @@ claude --plugin-dir /path/to/claude-builtins
 
 ## A note on shadowing the built-ins
 
-The command names here (`/usage`, `/insights`, `/init`, `/review`,
-`/team-onboarding`) are deliberately the **same** as the built-ins they
-reproduce, so this plugin is a drop-in when the built-in isn't available. That
-means when both exist, typing the bare name is ambiguous and you can't tell from
-the output which implementation ran. To force this plugin's version, use the
-plugin-qualified form:
+The command names here (`/security-review`, `/usage`, `/insights`, `/init`,
+`/team-onboarding`) are deliberately the **same** as the built-ins they extract,
+so this plugin is a drop-in when the built-in isn't available. That means when
+both exist, typing the bare name is ambiguous and you can't tell from the output
+which one ran. To force this plugin's version, use the plugin-qualified form:
 
 ```bash
+/claude-builtins:security-review
 /claude-builtins:usage
 /claude-builtins:insights
 /claude-builtins:init
-/claude-builtins:review
 /claude-builtins:team-onboarding
 ```
 
-Skill names avoid the collision entirely — the PR-review skill is named
-`pr-review`, not `review`, so it does not clash with the `review` skill in this
-marketplace's `sdlc-utils` plugin.
-
 ## Usage
 
-### `/usage` — where did my API calls go?
+### `/usage` — a local, approximate look at where the weight went
+
+> **This does not reproduce the built-in `/usage`.** The built-in is an Ink TUI
+> backed by server-side plan/limit and cost data that a plugin cannot recompute.
+> What follows is a local, approximate analysis of your transcripts — an
+> approximation of the built-in's "what's contributing to your limits usage?"
+> section only, never a headline cost and never USD.
 
 ```bash
 /usage                     # this session (most recent in the current project)
@@ -93,16 +99,19 @@ marketplace's `sdlc-utils` plugin.
 ```
 
 The command runs `scripts/collect-usage.mjs` for the deterministic breakdown,
-then analyzes it. Costs are reported as **synthetic units, not USD** — the
-built-in report does the same. The synthetic model, recovered from the binary:
+then analyzes it. Weights are reported in the binary's **relative-weight unit —
+not USD, and not the utilization/cost the built-in `/usage` shows**. The weight
+formula, recovered verbatim from the binary:
 
 ```
-units = (cache_read + input*10 + cache_creation*12.5 + output*50) * modelTier
+weight = (cache_read + input*10 + cache_creation*12.5 + output*50) * modelTier
 modelTier:  fable = 10,  opus = 5,  haiku = 1,  default = 3
 ```
 
 Requests are deduped by `requestId` / message `uuid` so retries and streamed
-duplicates are not double-counted.
+duplicates are not double-counted. Only the `cacheMiss` (input > 100k) and
+`longContext` (> 150k total) contributing factors are computed locally; the
+built-in's other factors are not.
 
 ### `/insights` — generate the HTML report
 
@@ -148,18 +157,19 @@ what to do — "Review and improve it", "Leave it, set up other things", or
 "Start fresh (replace it)" — so replacement happens only on explicit choice,
 and the improve path prints proposed diffs and confirms before writing.
 
-### `/review` — review a pull request
+### `/security-review` — security-review the current branch
 
 ```bash
-/review <pr-number>        # e.g. /review 123
-/review <pr-url>
+/security-review           # review the pending changes on the current branch
 ```
 
-Fetches the PR's metadata and diff with `gh` (`gh pr view --json …` + `gh pr
-diff`), then produces a structured review across five focus areas with four
-required sections. It **reads only** — nothing is posted back to GitHub. For a
-review of your uncommitted working tree, that's the separate built-in
-`/code-review`, which this plugin does not reproduce.
+Runs the built-in's verbatim prompt: a senior security engineer's focused review
+of the branch's changes against `origin/HEAD`, with the diff pulled in through
+four inline `git` bang-commands (`git status`, `git diff --name-only
+origin/HEAD...`, and the rest). It takes **no arguments** and **reads only** —
+nothing is posted anywhere. For a general review of your uncommitted working
+tree, that's the separate built-in `/code-review`, which this plugin does not
+extract.
 
 ### `/team-onboarding` — build an ONBOARDING.md for teammates
 
@@ -172,8 +182,9 @@ Runs `scripts/collect-onboarding-data.mjs` to scan how you've used Claude Code
 in this repo (slash commands, MCP servers, session topics), classifies the work
 into task types, and co-authors an `ONBOARDING.md`. The guide doubles as an
 interactive tour: a new teammate pastes it into Claude Code and gets a guided
-setup. The one piece that can't run standalone is the built-in's internal
-share tool — the guide is saved to `ONBOARDING.md` for you to distribute.
+setup. The one piece that can't run outside the CLI is the built-in's
+server-gated internal share tool — the guide is saved to `ONBOARDING.md` for you
+to distribute.
 
 All five commands simply invoke the matching skill; the skills contain the full
 step-by-step procedure. You can also trigger the skills conversationally:
@@ -188,15 +199,16 @@ step-by-step procedure. You can also trigger the skills conversationally:
 
 | Script                                | Role                                                                                                |
 | ------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `scripts/collect-usage.mjs`           | Deterministic token/cost breakdown for `/usage` (JSON on stdout).                                   |
+| `scripts/collect-usage.mjs`           | Local token / relative-weight breakdown for `/usage` (JSON on stdout).                              |
 | `scripts/collect-insights-data.mjs`   | Deterministic scan for `/insights` (counts, charts, session summaries).                             |
 | `scripts/render-insights.mjs`         | Fills the HTML template from the collector data + LLM outputs.                                      |
 | `scripts/collect-onboarding-data.mjs` | Deterministic usage scan for `/team-onboarding` (slash commands, MCP servers, session descriptors). |
 | `scripts/lib/transcripts.mjs`         | Shared transcript discovery + counting helpers imported by all three collectors.                    |
 
-`/init` and `/review` are prompt-only reproductions — they have no collector
-script; their skills read the shipped prompts and call `gh` (for `/review`)
-directly.
+`/init` and `/security-review` are prompt-only extractions — they have no
+collector script; their skills read the shipped verbatim prompts and run those
+directly (`/security-review` gathers its diff through the prompt's inline `git`
+bang-commands).
 
 All scripts are plain `.mjs` — run with `node` (or `bun`). They read from
 `~/.claude/projects/` and take scope flags documented in each skill.
@@ -211,13 +223,13 @@ claude-builtins/
 │   ├── usage.md                    # /usage command
 │   ├── insights.md                 # /insights command
 │   ├── init.md                     # /init command
-│   ├── review.md                   # /review command
+│   ├── security-review.md          # /security-review command
 │   └── team-onboarding.md          # /team-onboarding command
 ├── skills/
 │   ├── usage/SKILL.md              # /usage procedure
 │   ├── insights/SKILL.md           # /insights procedure
 │   ├── init/SKILL.md               # /init procedure
-│   ├── pr-review/SKILL.md          # /review procedure
+│   ├── security-review/SKILL.md    # /security-review procedure
 │   ├── team-onboarding/SKILL.md    # /team-onboarding procedure
 │   └── extract-builtins/           # how the built-ins were recovered from the binary
 │       ├── SKILL.md
@@ -232,9 +244,9 @@ claude-builtins/
 ├── assets/
 │   ├── insights-template.html      # 35-token HTML template
 │   └── prompts/                    # insights facets + 7 sections, init (classic/new),
-│                                   #   review, team-onboarding + guide template
+│                                   #   security-review, team-onboarding + guide template
 ├── docs/
-│   ├── command-inventory.md        # every built-in slash command + reproducibility tier
+│   ├── command-inventory.md        # every built-in slash command + extraction tier
 │   └── reload-mechanisms.md        # worked extraction: the /reload-plugins & /reload-skills triggers
 └── README.md
 ```

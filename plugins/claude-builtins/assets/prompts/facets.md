@@ -1,41 +1,48 @@
-Analyze the Claude Code session summaries below and classify each session across a fixed set of facets. These per-session facets are aggregated into the charts in the final report.
+Analyze this Claude Code session and extract structured facets.
 
-RESPOND WITH ONLY A VALID JSON OBJECT of the shape:
+CRITICAL GUIDELINES:
 
+1. **goal_categories**: Count ONLY what the USER explicitly asked for.
+   - DO NOT count Claude's autonomous codebase exploration
+   - DO NOT count work Claude decided to do on its own
+   - ONLY count when user says "can you...", "please...", "I need...", "let's..."
+
+2. **user_satisfaction_counts**: Base ONLY on explicit user signals.
+   - "Yay!", "great!", "perfect!" → happy
+   - "thanks", "looks good", "that works" → satisfied
+   - "ok, now let's..." (continuing without complaint) → likely_satisfied
+   - "that's not right", "try again" → dissatisfied
+   - "this is broken", "I give up" → frustrated
+
+3. **friction_counts**: Be specific about what went wrong.
+   - misunderstood_request: Claude interpreted incorrectly
+   - wrong_approach: Right goal, wrong solution method
+   - buggy_code: Code didn't work correctly
+   - user_rejected_action: User said no/stop to a tool call
+   - excessive_changes: Over-engineered or changed too much
+
+4. If very short or just warmup, use warmup_minimal for goal_category
+
+SESSION:
+
+<!--
+INTERPOLATION (from the binary): at runtime the built-in appends one session's
+transcript text immediately after the "SESSION:" line above, then appends the
+schema block below. The prompt is run once per session by a small/fast model
+(maxOutputTokensOverride: 4096). The two literals — this header (`Bqb`) and the
+schema (appended by `Jqb`) — are concatenated around the session text.
+-->
+
+RESPOND WITH ONLY A VALID JSON OBJECT matching this schema:
 {
-  "sessions": [
-    {
-      "session_id": "the session id you were given",
-      "session_type": "one of the SESSION TYPE enum",
-      "request_types": ["one or more of the REQUEST TYPE enum"],
-      "capabilities_that_helped": ["zero or more of the CAPABILITY enum"],
-      "friction_types": ["zero or more of the FRICTION TYPE enum"],
-      "satisfaction": "one of the SATISFACTION enum",
-      "outcome": "one of the OUTCOME enum",
-      "helpfulness": "one of the HELPFULNESS enum"
-    }
-  ]
+  "underlying_goal": "What the user fundamentally wanted to achieve",
+  "goal_categories": {"category_name": count, ...},
+  "outcome": "fully_achieved|mostly_achieved|partially_achieved|not_achieved|unclear_from_transcript",
+  "user_satisfaction_counts": {"level": count, ...},
+  "claude_helpfulness": "unhelpful|slightly_helpful|moderately_helpful|very_helpful|essential",
+  "session_type": "single_task|multi_task|iterative_refinement|exploration|quick_question",
+  "friction_counts": {"friction_type": count, ...},
+  "friction_detail": "One sentence describing friction or empty",
+  "primary_success": "none|fast_accurate_search|correct_code_edits|good_explanations|proactive_help|multi_file_changes|good_debugging",
+  "brief_summary": "One sentence: what user wanted and whether they got it"
 }
-
-Use ONLY the enum values below — do not invent new categories.
-
-## SESSION TYPE
-single_task, multi_task, iterative_refinement, exploration, quick_question
-
-## REQUEST TYPE
-debug_investigate, implement_feature, fix_bug, write_script_tool, refactor_code, configure_system, create_pr_commit, analyze_data, understand_codebase, write_tests, write_docs, deploy_infra, warmup_minimal
-
-## CAPABILITY (what helped most)
-fast_accurate_search, correct_code_edits, good_explanations, proactive_help, multi_file_changes, handled_complexity, good_debugging
-
-## FRICTION TYPE
-misunderstood_request, wrong_approach, buggy_code, user_rejected_action, claude_got_blocked, user_stopped_early, wrong_file_or_location, excessive_changes, slow_or_verbose, tool_failed, user_unclear, external_issue
-
-## SATISFACTION
-frustrated, dissatisfied, likely_satisfied, satisfied, unsure, neutral, delighted
-
-## OUTCOME
-fully_achieved, mostly_achieved, partially_achieved, not_achieved, unclear_from_transcript
-
-## HELPFULNESS
-unhelpful, slightly_helpful, moderately_helpful, very_helpful, essential

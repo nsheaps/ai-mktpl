@@ -1,15 +1,22 @@
 ---
 name: usage
-description: Compute this session's token usage and synthetic cost from local transcripts, then analyze where the API calls and cost actually went
+description: Local approximate analysis of your session transcripts (token counts + the binary's relative weight) — NOT the built-in /usage's server-side utilization/cost
 argument-hint: "[--all] [--session <id>] [--file <path>] [--current] [--days <n>]"
 allowed-tools: Task, Read, Bash(node:*), Bash(mkdir:*), Write
 ---
 
 # Usage
 
-Reproduce Claude Code's built-in `/usage` **without** the built-in tooling:
-programmatically compute token counts and a synthetic cost from your local
-session transcripts, then analyze where the API calls and cost went.
+Local, approximate usage analysis. **This does not reproduce the built-in
+`/usage`.** The real `/usage` is an interactive TUI backed by server-side plan
+and limit data (utilization %, reset times, cost) that a plugin cannot fetch or
+recompute.
+
+What this provides is a stand-in for the built-in's **"What's contributing to
+your limits usage?"** section: it computes token counts and the binary's
+internal **relative weight** from your local session transcripts, then analyzes
+where the API calls and weight went (models, tools, subagents, skills, plugins,
+MCP servers, time of day).
 
 Invoke the **`usage`** skill and follow it end to end. The user's arguments
 select the scope.
@@ -38,9 +45,10 @@ select the scope.
 1. Recall and follow the **`usage`** skill (`skills/usage/SKILL.md`).
 2. Run `scripts/collect-usage.mjs` with the scope flags above (`--json`) to
    get the deterministic breakdown.
-3. Analyze where the cost concentrated (models, tools, subagents, skills,
+3. Analyze where the weight concentrated (models, tools, subagents, skills,
    plugins, MCP servers, time of day) per the skill's Step 3.
-4. Present the headline totals — stated as **synthetic units, not USD** — the
-   breakdown, and the analysis.
+4. Present the headline totals — stated as a **relative weight, not USD, and
+   not the utilization/cost the built-in `/usage` shows** — the breakdown, and
+   the analysis.
 
 $ARGUMENTS

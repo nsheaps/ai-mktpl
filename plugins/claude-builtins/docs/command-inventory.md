@@ -4,7 +4,7 @@ This is the cross-reference the plugin is built from: the **docs-side** list of
 built-in slash commands (discovered via the `claude-code-guide` agent against
 the official Claude Code docs) merged with the **binary-side** command registry
 (recovered by extracting strings from the compiled Claude Code binary
-**v2.1.220** and grepping for the command-object declarations).
+**v2.1.225** and grepping for the command-object declarations).
 
 Each command object in the binary has the shape:
 
@@ -14,20 +14,21 @@ Each command object in the binary has the shape:
   isEnabled:()=>..., getPromptForCommand(e){...} }
 ```
 
-The `type` field is what determines whether a command can be faithfully rebuilt
-as a standalone plugin skill:
+The `type` field is what determines whether a command's behavior can be driven
+faithfully from a plugin skill outside the CLI:
 
-| `type`      | What it is                                                       | Reproducible?                                 |
+| `type`      | What it is                                                       | Extractable?                                  |
 | ----------- | ---------------------------------------------------------------- | --------------------------------------------- |
 | `prompt`    | Builds a prompt string sent to the model (`getPromptForCommand`) | **Yes** — extract the prompt, ship as a skill |
 | `local`     | Client-side JS. Some compute over local data, many are TUI state | **Partially** — only the ones that compute    |
 | `local-jsx` | Client-side React/JSX UI (pickers, toggles, dialogs, QR codes)   | **No** — pure terminal UI / host integration  |
 
-"Reproducible" here means: rebuildable **without** the built-in tooling, using
-only local session transcripts (`~/.claude/projects/**/*.jsonl`), git, the
-environment, and model passes. Anything that toggles in-process TUI state,
-talks to Anthropic account/billing backends, or drives a native host (desktop,
-mobile, IDE, clipboard, QR) cannot be reproduced honestly and is **not faked**.
+"Extractable" here means: the built-in's prompt or computation can be recovered
+verbatim from the binary and driven from a plugin skill using only local session
+transcripts (`~/.claude/projects/**/*.jsonl`), git, the environment, and model
+passes. Anything that toggles in-process TUI state, talks to Anthropic
+account/billing backends, or drives a native host (desktop, mobile, IDE,
+clipboard, QR) cannot be driven honestly outside the CLI and is **not faked**.
 
 ---
 
@@ -40,7 +41,7 @@ verbatim from the binary; the plugin ships each as a skill + command wrapper.
 | ------------------ | ---------------------------------------------------------------------- | ---------------- |
 | `/insights`        | Generate a report analyzing your Claude Code sessions                  | **Built**        |
 | `/init`            | Initialize a new CLAUDE.md file with codebase documentation            | Built (Tier 1)   |
-| `/review`          | Review a GitHub pull request; for your working diff use `/code-review` | Built (Tier 1)   |
+| `/security-review` | Complete a security review of the pending changes on the current branch | Built (Tier 1) |
 | `/team-onboarding` | Help teammates ramp on Claude Code with a guide from your usage        | Built (Tier 1)   |
 
 Notes:
@@ -49,9 +50,11 @@ Notes:
   on `CLAUDE_CODE_NEW_INIT`), which is why it did not appear in a naive
   `name:"…",description:"…"` grep. It has two prompt variants — classic
   ("Initialize a new CLAUDE.md") and the newer skills/hooks-aware variant.
-- `/review` builds a PR-specific prompt when given a PR number, else a
-  working-context prompt. It reviews a **GitHub PR**; the working-tree diff
-  review is a _separate_ built-in skill, `/code-review` (see Tier 3).
+- `/security-review` is a no-argument `type:"prompt"` builtin. Its prompt drives
+  a senior-security-engineer review of the current branch's pending changes
+  against `origin/HEAD`, pulling the diff through four inline `git` bang-commands.
+  (There is no built-in `/review` command; the working-tree-vs-PR review lives in
+  the separate `/code-review` built-in skill — see Tier 3.)
 - `/team-onboarding` first scans your usage over a window (default window days,
   session count, slash-command count, MCP-server count) and substitutes that
   into a prompt + guide template. The plugin reproduces the usage scan with a
@@ -65,7 +68,7 @@ an analysis pass.
 
 | Command         | Aliases        | Binary description                                                    | Status in plugin                                                                   |
 | --------------- | -------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `/usage`        | `cost`,`stats` | Show session cost, plan usage, and what's contributing to your limits | **Built** — transcript token scan + synthetic-unit cost model                      |
+| `/usage`        | `cost`,`stats` | Show session cost, plan usage, and what's contributing to your limits | **Partial** — the built-in is an Ink TUI over server-side plan/limit data (not reproducible); the plugin ships a local, approximate token scan + the binary's relative-weight unit, explicitly labeled as an approximation of the "what's contributing to your limits" section only |
 | `/context`      | —              | Show current context usage                                            | _Not built_ — planned: transcript scan of the session's token composition          |
 | `/recap`        | —              | Generate a one-line session recap now                                 | _Not built_ — planned: deterministic session summary + one-line model pass         |
 | `/export`       | —              | Export the current conversation to a file or clipboard                | _Not built_ — planned: transcript → markdown/json file (clipboard documented)      |
@@ -87,9 +90,13 @@ self-contained (their own multi-step procedures and, for `/deep-research`, a
 workflow). Prompts are extractable but each is a project of its own; they are
 **out of scope** for this plugin's first pass and listed here for completeness.
 
-`/code-review` · `/security-review` · `/simplify` · `/verify` · `/deep-research`
+`/code-review` · `/simplify` · `/verify` · `/deep-research`
 (workflow) · `/loop` · `/batch` · `/doctor` · `/dataviz` · `/design-sync` ·
 `/claude-api` · `/fewer-permission-prompts`
+
+(`/security-review` is also a built-in skill in this group, but it is a
+no-argument `type:"prompt"` builtin whose prompt this plugin extracts verbatim —
+so it is covered above in Tier 1 rather than left here as out-of-scope.)
 
 ## Tier 4 — client-side TUI state (NOT reproducible; not faked)
 
@@ -127,7 +134,7 @@ service, or a device flow. Cannot be honestly reproduced from local data.
 
 ## Method notes
 
-- Binary: Bun-compiled ELF, v2.1.220. `strings` dump (~37 MB) split into 520
+- Binary: Bun-compiled ELF, v2.1.225. `strings` dump (~37 MB) split into 520
   chunks; command objects located by grepping for
   `type:"(local|local-jsx|prompt)",name:"…"`. 102 command objects found.
 - `/cost` and `/stats` are aliases of `/usage`; `/name` of `/rename`; `/bg` of

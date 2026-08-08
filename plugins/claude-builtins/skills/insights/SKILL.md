@@ -4,23 +4,28 @@ description: >
   Use this skill when the user runs /insights or asks to "generate an insights
   report", "analyze my Claude Code usage", "show me insights about how I use
   Claude", "make the usage insights HTML report", or "what patterns are in my
-  sessions". Reproduces Claude Code's built-in /insights end-to-end WITHOUT the
-  built-in tooling: it scans your local session transcripts, classifies each
-  session across a fixed facet taxonomy, writes seven narrative sections, and
-  renders a single shareable HTML report with charts and copyable prompts.
+  sessions". Faithful extraction of Claude Code's built-in /insights: it drives
+  the built-in's verbatim facet-classification and narrative prompts against your
+  local session transcripts, then renders a shareable HTML report. The prompts
+  are verbatim; the HTML assembly is an equivalent plugin renderer (the built-in
+  builds its page programmatically inside the CLI), so the end-to-end report is a
+  faithful stand-in, not a byte-identical reproduction.
 ---
 
 # Insights
 
-Standalone re-implementation of Claude Code's built-in `/insights`. It produces
-the same HTML report — stat cards, at-a-glance summary, facet bar charts, a
-time-of-day chart, big wins, friction analysis, CLAUDE.md suggestions, features
-to try, and "on the horizon" prompts — by combining a **deterministic transcript
-scan** with **LLM analysis passes**, then merging both into a bundled HTML
-template.
+Faithful extraction of Claude Code's built-in `/insights`, driven from a plugin
+skill. It produces an equivalent HTML report — stat cards, at-a-glance summary,
+facet bar charts, a time-of-day chart, big wins, friction analysis, CLAUDE.md
+suggestions, features to try, and "on the horizon" prompts — by combining a
+**deterministic transcript scan** with **LLM analysis passes that run the
+built-in's verbatim prompts**, then merging both into a bundled HTML template.
 
-Nothing here calls the built-in command. Every asset needed to run it ships in
-this plugin under `assets/` and `scripts/`.
+The classifier and section prompts under `assets/prompts/` are extracted verbatim
+from the CLI binary (v2.1.225). The HTML page, which the built-in assembles
+programmatically inside the CLI, is produced here by an equivalent bundled
+renderer. Every asset needed to run it ships in this plugin under `assets/` and
+`scripts/`.
 
 ## Architecture
 
@@ -93,20 +98,38 @@ Scope flags (choose what the user asked for):
 
 ### Step 2 — Facet classification (one LLM pass)
 
-Read the prompt at `assets/prompts/facets.md`. It classifies each session across
-a fixed enum taxonomy (session type, request types, capabilities that helped,
-friction types, satisfaction, outcome, helpfulness). Feed it the `sessions[]`
-array from `collect.json`.
+Read the prompt at `assets/prompts/facets.md` — it is the built-in's **verbatim**
+classifier. The built-in runs it **once per session** (a small/fast model), so
+feed it **one** session's summary from the `sessions[]` array at a time and
+collect the results. Its verbatim schema emits, per session: `underlying_goal`,
+`goal_categories` (a `{category: count}` map), `outcome`, `user_satisfaction_counts`
+(a `{level: count}` map), `claude_helpfulness`, `session_type`, `friction_counts`
+(a `{friction_type: count}` map), `friction_detail`, `primary_success`, and
+`brief_summary`. Use ONLY the enum values named in the prompt; do not invent
+categories.
 
 - For a small number of sessions, do this yourself in-context.
-- For many sessions, dispatch the Task tool (a `general-purpose` agent) with the
-  prompt body + the sessions array; instruct it to **respond with only the JSON
-  object**.
+- For many sessions, dispatch the Task tool (a `general-purpose` agent) per
+  session (or per batch) with the prompt body + the session summary; instruct it
+  to **respond with only the JSON object**.
 
-Write the result — the object `{ "sessions": [ … ] }` — to
-`$WORK/llm/facets.json`. These facets drive six of the report's bar charts, so
-this pass matters most for chart fidelity. Use ONLY the enum values in the
-prompt; do not invent categories.
+Assemble the per-session objects into `{ "sessions": [ … ] }` and write it to
+`$WORK/llm/facets.json`.
+
+**Renderer-shape caveat (known gap):** the bundled `render-insights.mjs` tallies
+its six facet bar charts from an **older** per-session field shape —
+`request_types`, `session_type`, `capabilities_that_helped`, `outcome`,
+`friction_types`, `satisfaction` (mostly enum arrays). That does **not** match
+the verbatim classifier's current keys (`goal_categories`,
+`user_satisfaction_counts`, `friction_counts`, `session_type`, `outcome`,
+`claude_helpfulness`, `primary_success`). Feeding the verbatim output straight
+into the renderer therefore leaves those facet charts **empty** (the renderer
+degrades gracefully). If you need the facet charts populated, map the verbatim
+fields onto the renderer's expected keys when you write `facets.json` (e.g.
+`session_type` → `session_type`, the keys of `friction_counts` → a
+`friction_types` array, the keys of `user_satisfaction_counts` →
+a `satisfaction` value). The verbatim prompt is preserved as-is; this mapping is
+a renderer-input adaptation, not a change to the built-in prompt.
 
 ### Step 3 — Seven narrative sections (LLM passes)
 

@@ -1,7 +1,6 @@
 #!/usr/bin/env node
-// collect-onboarding-data.mjs — standalone re-implementation of Claude Code's
-// built-in `/team-onboarding` data collection, reverse-engineered from the CLI
-// binary (v2.1.220).
+// collect-onboarding-data.mjs — the data-collection half of Claude Code's
+// built-in `/team-onboarding`, extracted from the CLI binary (v2.1.225).
 //
 // Scans session transcript JSONL under ~/.claude/projects/<encoded-cwd>/*.jsonl
 // for the current repo and summarizes HOW the user has worked in Claude Code

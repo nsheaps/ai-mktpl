@@ -1,7 +1,6 @@
 #!/usr/bin/env node
-// collect-insights-data.mjs — standalone re-implementation of the deterministic
-// half of Claude Code's built-in `/insights` report, reverse-engineered from the
-// CLI binary.
+// collect-insights-data.mjs — the deterministic (no-LLM) half of Claude Code's
+// built-in `/insights` report, extracted from the CLI binary (v2.1.225).
 //
 // Scans session transcript JSONL under ~/.claude/projects/<encoded-cwd>/*.jsonl
 // (plus each session's subagents/**/*.jsonl) and computes every number the

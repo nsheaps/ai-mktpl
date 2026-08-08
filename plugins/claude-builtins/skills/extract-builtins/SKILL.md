@@ -4,7 +4,7 @@ description: >
   Use this skill when reproducing, updating, or auditing one of Claude Code's
   built-in slash commands from the compiled CLI binary — e.g. "pull the /usage
   command out of the binary", "re-extract the init prompt for the new version",
-  "how were these built-ins reverse-engineered", or "the binary updated, refresh
+  "how were these built-ins extracted", or "the binary updated, refresh
   the extracted commands". Documents the exact, safe pipeline used to recover the
   built-ins in this plugin from the Bun-compiled binary WITHOUT reading the
   obfuscated source directly, and REQUIRES stamping every extraction with the
@@ -136,13 +136,14 @@ each alias points at, rather than trusting a visual scan. Slice out and beautify
 each referenced function the same way (Steps 1–3) until the behavior is fully
 recovered.
 
-## Step 5 — Reproduce faithfully, and only what's honest
+## Step 5 — Extract faithfully, and only what's honest
 
-Rebuild the command as a skill + optional collector script in this plugin. If a
-built-in only toggles terminal UI or talks to a native host / account backend,
-there is nothing to compute standalone — **do not fake it**; record it as
-non-reproducible in [`docs/command-inventory.md`](../../docs/command-inventory.md)
-with the tier and the reason.
+Rebuild the command as a skill + optional collector script in this plugin,
+driven by the verbatim prompt. If a built-in only toggles terminal UI or talks
+to a native host / account backend, there is nothing to compute outside the
+CLI — **do not fake it**; record it as non-reproducible in
+[`docs/command-inventory.md`](../../docs/command-inventory.md) with the tier and
+the reason.
 
 ## Worked example: the reload-plugins / reload-skills investigation
 

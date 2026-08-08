@@ -1,16 +1,31 @@
 #!/usr/bin/env node
-// collect-usage.mjs — standalone re-implementation of Claude Code's built-in
-// `/usage` data collection, reverse-engineered from the CLI binary.
+// collect-usage.mjs — LOCAL, APPROXIMATE analyzer of your own Claude Code
+// transcripts. This is NOT a reproduction of the built-in `/usage`.
 //
-// Parses session transcript JSONL under ~/.claude/projects/<encoded-cwd>/*.jsonl
-// (plus each session's subagents/**/*.jsonl) and computes token totals, a
-// synthetic cost figure, and a breakdown of WHERE the API calls went: by model,
-// by tool, by sub-agent / skill / plugin / MCP server, and main-vs-subagent.
+// The real `/usage` is an Ink TUI (server-backed): its headline numbers — plan
+// and rate-limit utilization %, reset times, and session USD cost — come from
+// Claude's servers (`GET /api/oauth/usage`) and Claude's internal per-model
+// price accounting. None of that can be recomputed by a plugin, so none of it
+// is reproduced here.
 //
-// The cost model is the binary's own (synthetic "units", NOT USD):
-//   cost = (cache_read + input*10 + cache_creation*12.5 + output*50) * modelTier
+// What this script DOES reproduce is the *relative weighting* the binary uses
+// internally for only one part of `/usage` — the "What's contributing to your
+// limits usage?" section — computed over your local transcripts. It parses
+// session transcript JSONL under ~/.claude/projects/<encoded-cwd>/*.jsonl (plus
+// each session's subagents/**/*.jsonl), then reports token totals and where the
+// weighted usage went: by model, by tool, by sub-agent / skill / plugin / MCP
+// server, and main-vs-subagent.
+//
+// The weight is the binary's own internal relative unit (fns nNb × rNb), and is
+// NEVER dollars and never the number `/usage` shows as a headline:
+//   weight = (cache_read + input*10 + cache_creation*12.5 + output*50) * modelTier
 //   modelTier: fable=10, opus=5, haiku=1, default=3
-// Requests are de-duplicated by requestId/uuid, exactly like the built-in.
+// Requests are de-duplicated by requestId/uuid, matching the binary's local scan.
+//
+// Coverage note: the binary's local section reports five behaviors —
+// cache_miss, long_context, subagent_heavy, high_parallel, and cron. This script
+// currently computes only cache_miss (>100k input) and long_context (>150k
+// total); subagent_heavy, high_parallel, and cron are NOT computed here.
 //
 // Usage:
 //   node collect-usage.mjs [options]
@@ -40,10 +55,12 @@ import {
 } from "./lib/transcripts.mjs";
 
 // ---------------------------------------------------------------------------
-// Cost model (verbatim from the binary: sL_ / iL_)
+// Relative-weight model (verbatim from the binary: nNb / rNb). This is the
+// binary's INTERNAL weighting for the local "contributing factors" section —
+// a relative unit, never USD, never the `/usage` headline number.
 // ---------------------------------------------------------------------------
 
-/** modelTier: fable=10, opus=5, haiku=1, default=3 (binary: iL_) */
+/** modelTier: fable=10, opus=5, haiku=1, default=3 (binary: rNb) */
 function modelTier(model) {
   if (!model) return 3;
   const t = model.toLowerCase();
@@ -53,15 +70,15 @@ function modelTier(model) {
   return 3;
 }
 
-/** synthetic cost units (binary: sL_) */
-function costOf(u) {
+/** relative weight units (binary: nNb) */
+function weightOf(u) {
   return (u.cached + u.uncached * 10 + u.cacheCreate * 12.5 + u.output * 50) * u.modelTier;
 }
 
 // Behavior thresholds (binary constants)
-const WINDOW_7D_MS = 604800000; // hXd
-const CACHE_MISS_TOKENS = 1e5; // RR_
-const LONG_CTX_TOKENS = 150000; // LR_
+const WINDOW_7D_MS = 604800000; // XDp
+const CACHE_MISS_TOKENS = 1e5; // x1b
+const LONG_CTX_TOKENS = 150000; // I1b
 
 // ---------------------------------------------------------------------------
 // Arg parsing
@@ -220,11 +237,11 @@ function normalizeModel(model) {
 
 function aggregate(records) {
   const seen = new Set();
-  let totalCost = 0;
+  let totalWeight = 0;
   let requestCount = 0;
-  let cacheMissCost = 0;
+  let cacheMissWeight = 0;
   let cacheMissCount = 0;
-  let longCtxCost = 0;
+  let longCtxWeight = 0;
   let longCtxCount = 0;
 
   const tokens = { input: 0, output: 0, cacheCreate: 0, cacheRead: 0 };
@@ -235,8 +252,8 @@ function aggregate(records) {
   const byMcpServer = new Map();
   const sessions = new Map();
   const hours = new Map(); // hour-of-day (0-23) -> request count
-  let mainCost = 0;
-  let subCost = 0;
+  let mainWeight = 0;
+  let subWeight = 0;
   let subCount = 0;
   let attributedRecords = 0;
 
@@ -245,8 +262,8 @@ function aggregate(records) {
       if (seen.has(r.uuid)) continue;
       seen.add(r.uuid);
     }
-    const c = costOf(r);
-    totalCost += c;
+    const w = weightOf(r);
+    totalWeight += w;
     requestCount++;
 
     tokens.input += r.uncached;
@@ -254,51 +271,51 @@ function aggregate(records) {
     tokens.cacheCreate += r.cacheCreate;
     tokens.cacheRead += r.cached;
 
-    bump(byModel, r.model, c);
+    bump(byModel, r.model, w);
 
-    // Attribution (binary: fXd). The four attribution* fields were recovered from
-    // the v2.1.220 binary's strings; older transcripts predate them and carry
-    // none, which is why `attributionAvailable` is reported below.
+    // Attribution (binary: fXd). The four attribution* fields were recovered
+    // from the binary's strings; older transcripts predate them and carry none,
+    // which is why `attributionAvailable` is reported below.
     //
-    // The agent/skill split reproduces fXd: a request made *inside* a subagent is
-    // keyed by the skill that agent was running when one is known, falling back to
-    // the agent name — so the "by agent" breakdown reads as "which skill did this
-    // agent spend its budget on". Requests outside a subagent are keyed by skill
-    // alone. Plugin and MCP-server attribution are independent of both.
+    // The agent/skill split reproduces fXd: a request made *inside* a subagent
+    // is keyed by the skill that agent was running when one is known, falling
+    // back to the agent name — so the "by agent" breakdown reads as "which skill
+    // did this agent spend its budget on". Requests outside a subagent are keyed
+    // by skill alone. Plugin and MCP-server attribution are independent of both.
     if (r.attributionAgent || r.attributionSkill || r.attributionPlugin || r.attributionMcpServer) {
       attributedRecords++;
     }
-    if (r.attributionAgent) bump(byAgent, r.attributionSkill ?? r.attributionAgent, c);
-    else bump(bySkill, r.attributionSkill, c);
-    bump(byPlugin, r.attributionPlugin, c);
-    bump(byMcpServer, r.attributionMcpServer, c);
+    if (r.attributionAgent) bump(byAgent, r.attributionSkill ?? r.attributionAgent, w);
+    else bump(bySkill, r.attributionSkill, w);
+    bump(byPlugin, r.attributionPlugin, w);
+    bump(byMcpServer, r.attributionMcpServer, w);
 
     const totalToks = r.cached + r.cacheCreate + r.uncached;
     if (r.uncached > CACHE_MISS_TOKENS) {
-      cacheMissCost += c;
+      cacheMissWeight += w;
       cacheMissCount++;
     }
     if (totalToks > LONG_CTX_TOKENS) {
-      longCtxCost += c;
+      longCtxWeight += w;
       longCtxCount++;
     }
 
     if (r.isSubagent) {
-      subCost += c;
+      subWeight += w;
       subCount++;
     } else {
-      mainCost += c;
+      mainWeight += w;
     }
 
     let s = sessions.get(r.sessionId);
     if (!s) {
-      s = { cost: 0, requests: 0, subCost: 0, subCount: 0 };
+      s = { weight: 0, requests: 0, subWeight: 0, subCount: 0 };
       sessions.set(r.sessionId, s);
     }
-    s.cost += c;
+    s.weight += w;
     s.requests++;
     if (r.isSubagent) {
-      s.subCost += c;
+      s.subWeight += w;
       s.subCount++;
     }
 
@@ -309,19 +326,19 @@ function aggregate(records) {
   }
 
   return {
-    totalCost,
+    totalWeight,
     requestCount,
     sessionCount: sessions.size,
     tokens,
-    cacheMiss: { cost: cacheMissCost, count: cacheMissCount },
-    longContext: { cost: longCtxCost, count: longCtxCount },
-    mainCost,
-    subagent: { cost: subCost, count: subCount },
-    byModel: pctList(byModel, totalCost),
-    byAgent: pctList(byAgent, totalCost),
-    bySkill: pctList(bySkill, totalCost),
-    byPlugin: pctList(byPlugin, totalCost),
-    byMcpServer: pctList(byMcpServer, totalCost),
+    cacheMiss: { weight: cacheMissWeight, count: cacheMissCount },
+    longContext: { weight: longCtxWeight, count: longCtxCount },
+    mainWeight,
+    subagent: { weight: subWeight, count: subCount },
+    byModel: pctList(byModel, totalWeight),
+    byAgent: pctList(byAgent, totalWeight),
+    bySkill: pctList(bySkill, totalWeight),
+    byPlugin: pctList(byPlugin, totalWeight),
+    byMcpServer: pctList(byMcpServer, totalWeight),
     // Distinguishes "no attribution data in these transcripts" (all pre-fXd)
     // from "attribution data exists but nothing was attributed".
     attributedRequests: attributedRecords,
@@ -331,17 +348,17 @@ function aggregate(records) {
   };
 }
 
-/** Sort a name->cost map descending, attach integer percentages. */
+/** Sort a name->weight map descending, attach integer percentages. */
 function pctList(map, total) {
   if (map.size === 0 || total === 0) return [];
   return [...map.entries()]
     .sort((a, b) => b[1] - a[1])
-    .map(([name, cost]) => ({
+    .map(([name, weight]) => ({
       name,
-      cost: Math.round(cost),
-      pct: Math.round((cost / total) * 100),
+      weight: Math.round(weight),
+      pct: Math.round((weight / total) * 100),
     }))
-    .filter((r) => r.cost > 0);
+    .filter((r) => r.weight > 0);
 }
 
 // ---------------------------------------------------------------------------
@@ -427,38 +444,46 @@ async function main() {
     .map(([hour, count]) => ({ hour, count }));
 
   const sessionList = [...agg.sessions.entries()]
-    .sort((a, b) => b[1].cost - a[1].cost)
+    .sort((a, b) => b[1].weight - a[1].weight)
     .slice(0, 20)
     .map(([id, s]) => ({
       sessionId: id,
-      cost: Math.round(s.cost),
+      weight: Math.round(s.weight),
       requests: s.requests,
-      subagentCost: Math.round(s.subCost),
+      subagentWeight: Math.round(s.subWeight),
       subagentRequests: s.subCount,
     }));
 
   const result = {
     scope,
     generatedAt: new Date().toISOString(),
-    note: "Cost is in the binary's synthetic units, NOT USD. Model tiers: fable=10, opus=5, haiku=1, default=3. Weighting: cache_read×1, input×10, cache_creation×12.5, output×50.",
+    note:
+      "LOCAL APPROXIMATION — not the built-in /usage. `weight` is the binary's " +
+      "INTERNAL relative unit (matches nNb×rNb) used only for the local " +
+      '"What\'s contributing to your limits usage?" section. It is NOT USD and ' +
+      "NOT the utilization/cost numbers /usage shows (those come from Claude's " +
+      "servers and cannot be reproduced here). Model tiers: fable=10, opus=5, " +
+      "haiku=1, default=3. Weighting: cache_read×1, input×10, cache_creation×12.5, " +
+      "output×50. Behaviors computed here: cache_miss, long_context only " +
+      "(subagent_heavy, high_parallel, cron are NOT computed).",
     totals: {
       requestCount: agg.requestCount,
       sessionCount: agg.sessionCount,
-      cost: Math.round(agg.totalCost),
+      weight: Math.round(agg.totalWeight),
       tokens: agg.tokens,
       totalTokens:
         agg.tokens.input + agg.tokens.output + agg.tokens.cacheCreate + agg.tokens.cacheRead,
     },
     split: {
-      mainCost: Math.round(agg.mainCost),
-      subagentCost: Math.round(agg.subagent.cost),
+      mainWeight: Math.round(agg.mainWeight),
+      subagentWeight: Math.round(agg.subagent.weight),
       subagentRequests: agg.subagent.count,
-      mainPct: agg.totalCost ? Math.round((agg.mainCost / agg.totalCost) * 100) : 0,
-      subagentPct: agg.totalCost ? Math.round((agg.subagent.cost / agg.totalCost) * 100) : 0,
+      mainPct: agg.totalWeight ? Math.round((agg.mainWeight / agg.totalWeight) * 100) : 0,
+      subagentPct: agg.totalWeight ? Math.round((agg.subagent.weight / agg.totalWeight) * 100) : 0,
     },
     behaviors: {
-      cacheMiss: { cost: Math.round(agg.cacheMiss.cost), count: agg.cacheMiss.count },
-      longContext: { cost: Math.round(agg.longContext.cost), count: agg.longContext.count },
+      cacheMiss: { weight: Math.round(agg.cacheMiss.weight), count: agg.cacheMiss.count },
+      longContext: { weight: Math.round(agg.longContext.weight), count: agg.longContext.count },
     },
     byModel: agg.byModel,
     byTool: mapToSortedList(toolUses),
@@ -491,11 +516,12 @@ function bar(pct, width = 24) {
 function renderSummary(r) {
   const L = [];
   L.push("");
-  L.push("═══ Claude Code Usage ═══");
+  L.push("═══ Claude Code local usage (approximate) ═══");
   L.push(`scope: ${r.scope}`);
+  L.push("(relative weight, not USD — see note; the real /usage numbers come from Claude)");
   L.push("");
   L.push(
-    `Requests: ${r.totals.requestCount}   Sessions: ${r.totals.sessionCount}   Cost (units): ${r.totals.cost.toLocaleString()}`,
+    `Requests: ${r.totals.requestCount}   Sessions: ${r.totals.sessionCount}   Weight (relative): ${r.totals.weight.toLocaleString()}`,
   );
   const t = r.totals.tokens;
   L.push(
@@ -506,7 +532,7 @@ function renderSummary(r) {
   );
   L.push("");
   if (r.byModel.length) {
-    L.push("By model (share of cost):");
+    L.push("By model (share of weight):");
     for (const m of r.byModel) L.push(`  ${bar(m.pct)} ${String(m.pct).padStart(3)}%  ${m.name}`);
     L.push("");
   }
@@ -516,17 +542,17 @@ function renderSummary(r) {
     L.push("");
   }
   if (r.byAgent.length) {
-    L.push("By sub-agent (share of cost):");
+    L.push("By sub-agent (share of weight):");
     for (const a of r.byAgent) L.push(`  ${String(a.pct).padStart(3)}%  ${a.name}`);
     L.push("");
   }
   if (r.bySkill.length) {
-    L.push("By skill (share of cost):");
+    L.push("By skill (share of weight):");
     for (const s of r.bySkill) L.push(`  ${String(s.pct).padStart(3)}%  ${s.name}`);
     L.push("");
   }
   if (r.byMcpServer.length) {
-    L.push("By MCP server (share of cost):");
+    L.push("By MCP server (share of weight):");
     for (const s of r.byMcpServer) L.push(`  ${String(s.pct).padStart(3)}%  ${s.name}`);
     L.push("");
   }

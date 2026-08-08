@@ -7,11 +7,11 @@ allowed-tools: Read, Write, Edit, Bash(node:*), Bash(ls:*), Bash(git config:*), 
 
 # Team Onboarding
 
-Reproduce Claude Code's built-in `/team-onboarding` **without** the built-in
-tooling: scan your local session transcripts for how you've used Claude Code in
-this repo over a recent window, classify your work into task types, and
-co-author an `ONBOARDING.md` guide that teammates can paste into Claude Code for
-a guided setup tour.
+Faithful extraction of Claude Code's built-in `/team-onboarding`, driven from a
+plugin skill: scan your local session transcripts for how you've used Claude Code
+in this repo over a recent window, classify your work into task types using the
+built-in's verbatim prompt, and co-author an `ONBOARDING.md` guide that teammates
+can paste into Claude Code for a guided setup tour.
 
 Invoke the **`team-onboarding`** skill and follow it end to end.
 
@@ -44,6 +44,7 @@ Invoke the **`team-onboarding`** skill and follow it end to end.
    emit the acknowledgment line first, classify sessions, write `ONBOARDING.md`,
    render it, then ask the three Review questions and finalize.
 5. Saving to `ONBOARDING.md` is the deliverable. The built-in's internal share
-   tool is unavailable standalone — use the manual close from the skill.
+   tool (server-gated `ShareOnboardingGuide`) is not available outside the CLI —
+   use the manual close from the skill.
 
 $ARGUMENTS

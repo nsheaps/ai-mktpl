@@ -4,23 +4,28 @@ description: >
   Use this skill when the user runs /team-onboarding or asks to "create an
   onboarding guide for my team", "generate a Claude Code onboarding doc",
   "onboard new teammates to how I use Claude", or "make an ONBOARDING.md from my
-  usage". Reproduces Claude Code's built-in /team-onboarding WITHOUT the built-in
-  tooling: it scans your local session transcripts for how you've used Claude
-  Code over a recent window (slash commands, MCP servers, session topics) and
-  co-authors an ONBOARDING.md guide teammates can paste into Claude for a guided
-  walkthrough.
+  usage". Faithful extraction of Claude Code's built-in /team-onboarding: it
+  drives the built-in's verbatim prompt against your local session transcripts
+  for how you've used Claude Code over a recent window (slash commands, MCP
+  servers, session topics) and co-authors an ONBOARDING.md guide teammates can
+  paste into Claude for a guided walkthrough. The built-in's server-gated share
+  step is not reproducible; saving ONBOARDING.md is the deliverable.
 ---
 
 # Team Onboarding
 
-Standalone re-implementation of Claude Code's built-in `/team-onboarding`. It
-looks at how _you_ have actually used Claude Code in this repo over the last N
-days and turns that into an `ONBOARDING.md` guide for teammates who are new to
-Claude Code. The guide is both a document and an interactive experience: a new
-teammate pastes it into Claude Code and gets a guided setup tour.
+Faithful extraction of Claude Code's built-in `/team-onboarding`, driven from a
+plugin skill. It looks at how _you_ have actually used Claude Code in this repo
+over the last N days and turns that into an `ONBOARDING.md` guide for teammates
+who are new to Claude Code. The guide is both a document and an interactive
+experience: a new teammate pastes it into Claude Code and gets a guided setup
+tour.
 
-Nothing here calls the built-in command. The two prompts and the data collector
-ship verbatim in this plugin.
+The prompt and guide template ship verbatim in this plugin (extracted from the
+CLI binary v2.1.225), alongside the data collector. The built-in's final "share
+to team" step calls a server-gated internal tool (`ShareOnboardingGuide`) that is
+not available outside the CLI, so this skill closes by saving the file rather
+than sharing it.
 
 ## Architecture
 
@@ -113,7 +118,7 @@ The prompt is the source of truth. In order, it requires you to:
 ## Notes on fidelity
 
 - The collector reproduces the built-in's scan logic verbatim from the CLI
-  binary (v2.1.220): the 30-day default window, the 50 MiB per-file skip, the
+  binary (v2.1.225): the 30-day default window, the 50 MiB per-file skip, the
   200-char first-message truncation, the 60-descriptor cap sorted by
   informativeness, and the same markers/regexes for slash commands, MCP calls,
   custom titles, and PR links. The output `usageData` shape
@@ -129,7 +134,7 @@ The prompt is the source of truth. In order, it requires you to:
   use the manual close from Step 4.5 instead: the guide is saved to
   `ONBOARDING.md` and the user drops it into their own team docs and channels.
   Everything else (scanning, classification, guide generation, the interactive
-  walkthrough baked into the guide) works fully standalone.
+  walkthrough baked into the guide) works fully outside the CLI.
 
 ## Troubleshooting
 
@@ -139,4 +144,4 @@ The prompt is the source of truth. In order, it requires you to:
 | `node: command not found`           | Install/activate `node`; in web sessions `eval "$(mise activate bash)"`.           |
 | Breakdown is all TODO / ~0 sessions | The window has too little history — widen it with `--days 90`, or accept the TODO. |
 | Guide creator name missing          | `git config user.name` is unset; the prompt omits the name — that's expected.      |
-| Wanted it auto-shared to the team   | Standalone can't use the internal share tool — save `ONBOARDING.md` and share it.  |
+| Wanted it auto-shared to the team   | The internal share tool isn't available outside the CLI — save `ONBOARDING.md` and share it. |

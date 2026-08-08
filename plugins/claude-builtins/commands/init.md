@@ -1,15 +1,16 @@
 ---
 name: init
-description: Analyze this repository and write a concise CLAUDE.md (and optionally CLAUDE.local.md, skills, and hooks) — a standalone reproduction of Claude Code's built-in /init
+description: Analyze this repository and write a concise CLAUDE.md (and optionally CLAUDE.local.md, skills, and hooks), driven by the verbatim prompt extracted from Claude Code's built-in /init
 argument-hint: "[--new] [--classic]"
 allowed-tools: Task, Read, Write, Edit, Bash(echo:*), Bash(git:*), Glob, Grep, AskUserQuestion
 ---
 
 # Init
 
-Reproduce Claude Code's built-in `/init` **without** the built-in tooling:
-analyze the current repository and produce a minimal, high-signal `CLAUDE.md`
-(and, in the newer variant, optionally `CLAUDE.local.md`, skills, and hooks).
+Faithful extraction of Claude Code's built-in `/init`: run the built-in's own
+prompt — verbatim — to analyze the current repository and produce a minimal,
+high-signal `CLAUDE.md` (and, in the newer variant, optionally `CLAUDE.local.md`,
+skills, and hooks).
 
 Invoke the **`init`** skill and follow it end to end. The user's arguments
 select which prompt variant runs.
