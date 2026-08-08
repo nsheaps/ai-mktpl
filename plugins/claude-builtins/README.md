@@ -81,6 +81,11 @@ which one ran. To force this plugin's version, use the plugin-qualified form:
 /claude-builtins:team-onboarding
 ```
 
+The same goes for skills: this plugin's `security-review` skill shares its name
+with Claude Code's built-in `security-review` skill, so it too is an intentional
+drop-in. When both are present, invoke this one explicitly as
+`claude-builtins:security-review` to be unambiguous.
+
 ## Usage
 
 ### `/usage` — a local, approximate look at where the weight went
@@ -261,8 +266,19 @@ claude-builtins/
 
 - Stat cards, top tools, languages, tool-error, response-time, and time-of-day
   charts come **only** from the deterministic scan and are exact.
-- The six facet charts are aggregated from `facets.json`, so their accuracy
-  depends on the facet-classification pass.
+- The six facet charts (what you wanted, session types, what helped, outcomes,
+  friction types, satisfaction) are aggregated from `facets.json`, so their
+  accuracy depends on the facet-classification pass. The verbatim classifier
+  emits count maps (`goal_categories`, `friction_counts`,
+  `user_satisfaction_counts`) and scalars (`claude_helpfulness`,
+  `primary_success`) rather than the enum arrays/scalars an older renderer
+  tallied. No reshaping is needed: each chart in `render-insights.mjs` is fed an
+  **alias list** of accepted field names, and its `tallyFacet` helper understands
+  all three shapes — a count map (`{category: n}`, whose values are summed as
+  weights), an enum array, or a plain scalar. So the verbatim count-map fields
+  feed the charts with their counts preserved, and the older enum-array/scalar
+  names still tally too. "What Helped Most" reads `primary_success` (the
+  classifier's Claude-capability enum).
 - All user- and LLM-supplied strings are HTML-escaped before insertion; the only
   raw injection is the time-of-day integer array, emitted as a bare 24-element
   literal.

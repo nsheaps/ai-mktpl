@@ -211,17 +211,39 @@ function barChart(items, color, emptyMsg) {
 }
 
 // Aggregate a per-session facet field into ranked [{label,count}].
-// `spread` true when the field is an array (request_types, capabilities, etc.).
-function tallyFacet(sessions, field, { spread = false, limit = 10 } = {}) {
+//
+// `fields` is a field name or an ordered list of alias names — the first alias
+// present on a session wins, so the verbatim schema and any older shapes both
+// tally through the same call. Each value is handled by its runtime shape:
+//   • count map ({category: n})  → each key weighted by its count
+//   • array     ([a, b])         → each element counted once
+//   • scalar    ("x")            → counted once
+// This lets the verbatim classifier's count-maps (goal_categories,
+// friction_counts, user_satisfaction_counts) and its scalars flow straight
+// through without a separate normalization pass.
+function tallyFacet(sessions, fields, { limit = 10 } = {}) {
+  const aliases = Array.isArray(fields) ? fields : [fields];
   const counts = new Map();
+  const add = (key, n) => {
+    if (key == null || key === "") return;
+    counts.set(String(key), (counts.get(String(key)) || 0) + n);
+  };
   for (const s of sessions) {
     if (!s) continue;
-    const raw = s[field];
-    const values = spread ? (Array.isArray(raw) ? raw : []) : raw ? [raw] : [];
-    for (const v of values) {
-      if (v == null || v === "") continue;
-      const key = String(v);
-      counts.set(key, (counts.get(key) || 0) + 1);
+    let raw;
+    for (const alias of aliases) {
+      if (s[alias] != null) {
+        raw = s[alias];
+        break;
+      }
+    }
+    if (raw == null) continue;
+    if (Array.isArray(raw)) {
+      for (const v of raw) add(v, 1);
+    } else if (typeof raw === "object") {
+      for (const [k, n] of Object.entries(raw)) add(k, Number(n) || 0);
+    } else {
+      add(raw, 1);
     }
   }
   return [...counts.entries()]
@@ -484,8 +506,16 @@ function renderFeedback(sessions) {
   const total = sessions.length;
 
   const outcomes = tallyFacet(sessions, "outcome", { limit: 5 });
-  const satisfaction = tallyFacet(sessions, "satisfaction", { limit: 5 });
-  const helpfulness = tallyFacet(sessions, "helpfulness", { limit: 5 });
+  const satisfaction = tallyFacet(
+    sessions,
+    ["satisfaction", "user_satisfaction_counts"],
+    { limit: 5 },
+  );
+  const helpfulness = tallyFacet(
+    sessions,
+    ["helpfulness", "claude_helpfulness"],
+    { limit: 5 },
+  );
 
   if (outcomes.length || satisfaction.length) {
     const topOutcome = outcomes[0];
@@ -589,6 +619,7 @@ async function main() {
   }
 
   const det = data.deterministic || {};
+
   const facetSessions =
     sections.facets && Array.isArray(sections.facets.sessions)
       ? sections.facets.sessions.filter(Boolean)
@@ -618,9 +649,11 @@ async function main() {
     PROJECT_AREAS: renderProjectAreas(projectAreas),
     INTERACTION_NARRATIVE: renderNarrative(interaction),
 
-    // Facet-driven charts.
+    // Facet-driven charts. Each pulls through an alias list so the verbatim
+    // classifier's count-maps and any older enum-array/scalar shapes tally
+    // identically (see tallyFacet).
     CHART_WHAT_YOU_WANTED: barChart(
-      tallyFacet(facetSessions, "request_types", { spread: true }),
+      tallyFacet(facetSessions, ["request_types", "goal_categories"]),
       COLOR.whatYouWanted,
       "No request data yet",
     ),
@@ -630,7 +663,7 @@ async function main() {
       "No session-type data yet",
     ),
     CHART_WHAT_HELPED: barChart(
-      tallyFacet(facetSessions, "capabilities_that_helped", { spread: true }),
+      tallyFacet(facetSessions, ["capabilities_that_helped", "primary_success"]),
       COLOR.whatHelped,
       "No capability data yet",
     ),
@@ -640,12 +673,12 @@ async function main() {
       "No outcome data yet",
     ),
     CHART_FRICTION_TYPES: barChart(
-      tallyFacet(facetSessions, "friction_types", { spread: true }),
+      tallyFacet(facetSessions, ["friction_types", "friction_counts"]),
       COLOR.frictionTypes,
       "No friction recorded",
     ),
     CHART_SATISFACTION: barChart(
-      tallyFacet(facetSessions, "satisfaction"),
+      tallyFacet(facetSessions, ["satisfaction", "user_satisfaction_counts"]),
       COLOR.satisfaction,
       "No satisfaction data yet",
     ),

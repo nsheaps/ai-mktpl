@@ -116,20 +116,19 @@ categories.
 Assemble the per-session objects into `{ "sessions": [ … ] }` and write it to
 `$WORK/llm/facets.json`.
 
-**Renderer-shape caveat (known gap):** the bundled `render-insights.mjs` tallies
-its six facet bar charts from an **older** per-session field shape —
-`request_types`, `session_type`, `capabilities_that_helped`, `outcome`,
-`friction_types`, `satisfaction` (mostly enum arrays). That does **not** match
-the verbatim classifier's current keys (`goal_categories`,
-`user_satisfaction_counts`, `friction_counts`, `session_type`, `outcome`,
-`claude_helpfulness`, `primary_success`). Feeding the verbatim output straight
-into the renderer therefore leaves those facet charts **empty** (the renderer
-degrades gracefully). If you need the facet charts populated, map the verbatim
-fields onto the renderer's expected keys when you write `facets.json` (e.g.
-`session_type` → `session_type`, the keys of `friction_counts` → a
-`friction_types` array, the keys of `user_satisfaction_counts` →
-a `satisfaction` value). The verbatim prompt is preserved as-is; this mapping is
-a renderer-input adaptation, not a change to the built-in prompt.
+Write the verbatim classifier's output straight through — no reshaping. The
+verbatim schema emits count maps (`goal_categories`, `friction_counts`,
+`user_satisfaction_counts`) and scalars (`claude_helpfulness`,
+`primary_success`). `render-insights.mjs` tallies these directly: each facet
+chart is fed an **alias list** of accepted field names, and its `tallyFacet`
+helper understands all three shapes — a count map (`{category: n}`, whose values
+are summed as weights), an enum array, or a plain scalar. So the verbatim
+count-map fields feed the charts with their counts preserved, and the older
+enum-array/scalar field names (`request_types`, `friction_types`,
+`satisfaction`, `helpfulness`, `capabilities_that_helped`) still tally too — no
+reshaping in this pass, and no chart depends on the classifier changing its
+output. All six facet charts populate from the verbatim schema, including "What
+Helped Most", which reads `primary_success`.
 
 ### Step 3 — Seven narrative sections (LLM passes)
 
