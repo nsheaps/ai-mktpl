@@ -17,11 +17,18 @@
 // weighted usage went: by model, by tool, by sub-agent / skill / plugin / MCP
 // server, and main-vs-subagent.
 //
-// The weight is the binary's own internal relative unit (fns nNb × rNb), and is
-// NEVER dollars and never the number `/usage` shows as a headline:
+// The weight is the binary's own internal relative unit — a per-request weight
+// function (binary: nNb) applied to a per-model-tier multiplier (binary: rNb) —
+// and is NEVER dollars and never the number `/usage` shows as a headline:
 //   weight = (cache_read + input*10 + cache_creation*12.5 + output*50) * modelTier
-//   modelTier: fable=10, opus=5, haiku=1, default=3
+//   modelTier: fable=10, opus=5, haiku=1, sonnet (default)=3
 // Requests are de-duplicated by requestId/uuid, matching the binary's local scan.
+//
+// A separate binary field, additionalModelCostsCache (fn Ims, default table
+// _mt), looks like a real USD price table but isn't: it holds these same
+// relative-weight rates. Genuine dollar cost only exists server-side, in the
+// GET /api/oauth/usage response (its schema includes a `currency` field this
+// weight table doesn't) — there is no local, token-count-only path to it.
 //
 // Coverage note: the binary's local section reports five behaviors —
 // cache_miss, long_context, subagent_heavy, high_parallel, and cron. This script
@@ -57,12 +64,13 @@ import {
 } from "./lib/transcripts.mjs";
 
 // ---------------------------------------------------------------------------
-// Relative-weight model (verbatim from the binary: nNb / rNb). This is the
-// binary's INTERNAL weighting for the local "contributing factors" section —
-// a relative unit, never USD, never the `/usage` headline number.
+// Relative-weight model, verbatim from the binary's per-request weight
+// function (nNb) and per-model-tier multiplier (rNb). This is the binary's
+// INTERNAL weighting for the local "contributing factors" section — a
+// relative unit, never USD, never the `/usage` headline number.
 // ---------------------------------------------------------------------------
 
-/** modelTier: fable=10, opus=5, haiku=1, default=3 (binary: rNb) */
+/** Per-model-tier multiplier: fable=10, opus=5, haiku=1, sonnet (default)=3. Binary: rNb. */
 function modelTier(model) {
   if (!model) return 3;
   const t = model.toLowerCase();
@@ -479,7 +487,7 @@ async function main() {
       '"What\'s contributing to your limits usage?" section. It is NOT USD and ' +
       "NOT the utilization/cost numbers /usage shows (those come from Claude's " +
       "servers and cannot be reproduced here). Model tiers: fable=10, opus=5, " +
-      "haiku=1, default=3. Weighting: cache_read×1, input×10, cache_creation×12.5, " +
+      "haiku=1, sonnet (default)=3. Weighting: cache_read×1, input×10, cache_creation×12.5, " +
       "output×50. Behaviors computed here: cache_miss, long_context only " +
       "(subagent_heavy, high_parallel, cron are NOT computed).",
     totals: {

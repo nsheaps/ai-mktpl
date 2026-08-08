@@ -10,12 +10,14 @@ all — how agent-to-agent messaging is actually wired
 (`skills/agent-messaging/`), and how the plugin/skill reload triggers work
 (`docs/reload-mechanisms.md`).
 
-**Provenance is per asset, not per plugin.** Each asset carries the binary
-version it was extracted from, in the file itself. A mixed-version tree is the
-expected steady state — re-extracting one asset shouldn't force a rewrite of
-every other stamp. Today the command prompts are **v2.1.225**, the
-agent-messaging mechanics are **v2.1.226**, and the reload-mechanisms
-investigation is **v2.1.223**;
+**Provenance is per asset, not per plugin — and a single file can carry more
+than one stamp.** Each fact carries the binary version it was checked
+against, at its source. A mixed-version tree is the expected steady state —
+re-extracting one asset shouldn't force a rewrite of every other stamp, and
+`skills/usage/SKILL.md` itself mixes **v2.1.225** (the weight formula) with
+**v2.1.226** (the live-data investigation added later) in the same file.
+Today the command prompts are **v2.1.225**, the agent-messaging mechanics are
+**v2.1.226**, and the reload-mechanisms investigation is **v2.1.223**;
 `grep -rnE 'v[0-9]+\.[0-9]+\.[0-9]+' plugins/claude-builtins/` is the
 authoritative answer at any point in time.
 
@@ -109,7 +111,12 @@ drop-in. When both are present, invoke this one explicitly as
 > backed by server-side plan/limit and cost data that a plugin cannot recompute.
 > What follows is a local, approximate analysis of your transcripts — an
 > approximation of the built-in's "what's contributing to your limits usage?"
-> section only, never a headline cost and never USD.
+> section only, never a headline cost and never USD. This was checked against
+> the binary, not assumed: the CLI does cache its last live fetch locally
+> (`cachedUsageUtilization` in `~/.claude.json`, 5-minute TTL), but this skill
+> doesn't read it — that file also holds real OAuth account state, and parsing
+> it from a plugin script is a different trust boundary than parsing your own
+> transcripts. See `skills/usage/SKILL.md` for the full investigation.
 
 ```bash
 /usage                     # this session (most recent in the current project)
@@ -125,7 +132,7 @@ formula, recovered verbatim from the binary:
 
 ```
 weight = (cache_read + input*10 + cache_creation*12.5 + output*50) * modelTier
-modelTier:  fable = 10,  opus = 5,  haiku = 1,  default = 3
+modelTier:  fable = 10,  opus = 5,  haiku = 1,  sonnet (default) = 3
 ```
 
 Requests are deduped by `requestId` / message `uuid` so retries and streamed
