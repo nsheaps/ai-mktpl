@@ -17,8 +17,13 @@ if (!binPath || !outName || !sStr || !eStr) {
 }
 
 const buf = readFileSync(binPath);
-const start = parseInt(sStr, 10);
-const end = parseInt(eStr, 10);
+const start = Number(sStr);
+const end = Number(eStr);
+if (!Number.isInteger(start) || !Number.isInteger(end) || start < 0 || end <= start) {
+  console.error(`bad offsets [${sStr}, ${eStr}) — expected integers with 0 <= start < end`);
+  console.error("use the leading decimal column from `strings -t d`, not `grep -aob`");
+  process.exit(2);
+}
 const slice = buf.subarray(start, end);
 
 let out = "";

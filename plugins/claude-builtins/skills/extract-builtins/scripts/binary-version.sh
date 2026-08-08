@@ -3,7 +3,7 @@
 # EVERY extraction MUST record this — a command/skill reproduced from the binary
 # is only meaningful next to the exact build it came out of.
 #
-# Prints (and, if given a file, appends) a provenance stamp:
+# Prints a provenance stamp to stdout:
 #   version, git sha, build time, binary path, sha256 of the binary.
 #
 # Usage:

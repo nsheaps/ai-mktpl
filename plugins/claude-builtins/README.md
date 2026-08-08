@@ -218,7 +218,10 @@ claude-builtins/
 │   ├── insights/SKILL.md           # /insights procedure
 │   ├── init/SKILL.md               # /init procedure
 │   ├── pr-review/SKILL.md          # /review procedure
-│   └── team-onboarding/SKILL.md    # /team-onboarding procedure
+│   ├── team-onboarding/SKILL.md    # /team-onboarding procedure
+│   └── extract-builtins/           # how the built-ins were recovered from the binary
+│       ├── SKILL.md
+│       └── scripts/                # binary-version.sh, slice-binary.mjs
 ├── scripts/
 │   ├── lib/
 │   │   └── transcripts.mjs         # shared transcript discovery + counting
@@ -231,7 +234,8 @@ claude-builtins/
 │   └── prompts/                    # insights facets + 7 sections, init (classic/new),
 │                                   #   review, team-onboarding + guide template
 ├── docs/
-│   └── command-inventory.md        # every built-in slash command + reproducibility tier
+│   ├── command-inventory.md        # every built-in slash command + reproducibility tier
+│   └── reload-mechanisms.md        # worked extraction: the /reload-plugins & /reload-skills triggers
 └── README.md
 ```
 

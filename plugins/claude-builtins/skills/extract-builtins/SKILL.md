@@ -42,13 +42,19 @@ be trusted and re-verified later.
 Before extracting anything, capture the identity of the binary you are working
 from. This is the first step of every extraction, not an afterthought.
 
+Let `ROOT="${CLAUDE_PLUGIN_ROOT}/skills/extract-builtins"` — a skill runs in the
+session's cwd, and these scripts live under the skill dir, not the plugin-root
+`scripts/` (which holds the collectors).
+
 ```bash
+ROOT="${CLAUDE_PLUGIN_ROOT}/skills/extract-builtins"
+
 CLAUDE_BIN=$(readlink -f "$(command -v claude)")
-file "$CLAUDE_BIN"          # confirm: ELF 64-bit (Bun binary) vs Node.js script (JS bundle)
-scripts/binary-version.sh   # prints version / git sha / build time / sha256 / path
+file "$CLAUDE_BIN"                    # confirm: ELF 64-bit (Bun binary) vs Node.js script (JS bundle)
+"$ROOT/scripts/binary-version.sh"     # prints version / git sha / build time / sha256 / path
 ```
 
-`scripts/binary-version.sh` emits a provenance block like:
+`$ROOT/scripts/binary-version.sh` emits a provenance block like:
 
 ```
 - claude version: 2.1.223
@@ -100,8 +106,8 @@ capture the whole declaration (command object + its handler); extend the window
 if the fragment ends mid-string or mid-function.
 
 ```bash
-# node scripts/slice-binary.mjs <binary> <out.js> <startOffset> <endOffset>
-node scripts/slice-binary.mjs "$CLAUDE_BIN" chunks/reload.js 271783000 271788500
+# node "$ROOT/scripts/slice-binary.mjs" <binary> <out.js> <startOffset> <endOffset>
+node "$ROOT/scripts/slice-binary.mjs" "$CLAUDE_BIN" chunks/reload.js 271783000 271788500
 ```
 
 The slicer keeps printable ASCII + tab/newline and turns every other byte into a
