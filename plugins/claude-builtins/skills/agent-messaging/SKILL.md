@@ -156,14 +156,48 @@ local Claude Code session, or a Claude Code Remote session) can be addressed
 the same way; the transport for that case is unrelated to the on-disk mailbox
 above.
 
-There is no CCR MCP tool literally named `send_message` — that would be
-conflating the general `SendMessage` tool with Claude Code Remote's separate
-toolset, which covers different needs: `send_later` schedules a message into
-**this** session at a future time, `create_trigger` sets up a recurring or
-one-shot Routine (into this session, a named other session, or a fresh session
-per firing), and `fire_trigger` runs an existing Routine immediately. All three
-deliver as an ordinary user turn and survive restarts. `scheduled-trigger` in
-the source enum is that path.
+There is no tool literally named `send_message` — that would be conflating the
+general `SendMessage` tool with the scheduling/remote-session toolset, which
+covers different needs and has **two distinct surfaces depending on how the
+session is running**:
+
+- **The CLI binary's own native tool, when no Claude Code Remote MCP server is
+  attached**, is a single tool named `RemoteTrigger` ("Manage scheduled remote
+  Claude Code agents (routines) via the claude.ai CCR API") whose operations
+  are one `action` parameter — `list`, `get`, `create`, `update`, `run`, and
+  `create_webhook_trigger` (attaches an event source, e.g. a GitHub webhook, to
+  an existing routine) — plus a separate, session-local trio for scheduling
+  _into this session_: `CronCreate` (fires a prompt in the current session, or
+  writes `.claude/scheduled_tasks.json`), `CronDelete`, `CronList`. Verified
+  against the binary (v2.1.226): `send_later`/`create_trigger`/`fire_trigger`
+  (and camelCase variants) have **zero** hits as literal strings — the action
+  names live inside `RemoteTrigger`'s parameter schema, not as separate tool
+  names.
+- **A Claude Code Remote (CCR)-enabled session — such as the one used to write
+  this skill — exposes a richer, separately-named tool surface instead**:
+  `send_later`, `create_trigger`, `fire_trigger`, `list_triggers`,
+  `update_trigger`, `delete_trigger`, `create_session`, `get_session`,
+  `list_sessions`, `interrupt_session`, `archive_session`,
+  `unarchive_session`, `set_session_title`, `set_session_tags`,
+  `subscribe_pr_activity`, `unsubscribe_pr_activity`, `register_repo_root`,
+  `list_environments`. This is **not** a binary-extraction claim — grepping
+  the CLI binary for these names correctly finds nothing, because an
+  MCP-server tool's name and schema are supplied by the server at connect
+  time, not compiled into the `claude` executable. The claim instead rests on
+  directly calling `send_later` and `subscribe_pr_activity` in a live CCR
+  session and observing them work (this skill's own extraction session,
+  2026-08-08) — stronger evidence than a string search for a tool whose name
+  was never going to be in that binary to begin with.
+
+Both descriptions can be true at once: the CCR MCP server is very likely a
+thin wrapper implemented on top of the same `RemoteTrigger` REST API the raw
+binary calls directly, just split into one MCP tool per action for a nicer
+call shape. `send_later` maps to local `CronCreate`-style scheduling into the
+current session; `create_trigger`/`fire_trigger`/`list_triggers`/etc. map onto
+`RemoteTrigger`'s `create`/`run`/`list` actions. That mapping is inferred, not
+verified — re-check it against the CCR MCP server's own source if it becomes
+load-bearing. `scheduled-trigger` in the message-source enum is this path,
+under either surface.
 
 ## Remote Control and the approval gate
 

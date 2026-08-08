@@ -15,8 +15,9 @@ version it was extracted from, in the file itself. A mixed-version tree is the
 expected steady state — re-extracting one asset shouldn't force a rewrite of
 every other stamp. Today the command prompts are **v2.1.225**, the
 agent-messaging mechanics are **v2.1.226**, and the reload-mechanisms
-investigation is **v2.1.223**; `grep -rn 'v2\.1\.' plugins/claude-builtins/`
-is the authoritative answer at any point in time.
+investigation is **v2.1.223**;
+`grep -rnE 'v[0-9]+\.[0-9]+\.[0-9]+' plugins/claude-builtins/` is the
+authoritative answer at any point in time.
 
 - **`/security-review`** runs the built-in's verbatim prompt: a senior security
   engineer's review of the pending changes on the current branch (diffed against

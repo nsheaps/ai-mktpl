@@ -606,7 +606,10 @@ function buildSubtitle(data, override) {
   parts.push(`· ${esc(scope)}`);
   let sub = parts.join(" ");
   if (data.generatedAt) {
-    const d = String(data.generatedAt).slice(0, 10);
+    // esc() AFTER slice: the 10-char window stays over the source text, so a
+    // normal ISO timestamp still renders as e.g. 2026-08-08, but a hand-edited
+    // or third-party --data file can't leave an unescaped fragment in the DOM.
+    const d = esc(String(data.generatedAt).slice(0, 10));
     sub += ` · generated ${d}`;
   }
   return sub;

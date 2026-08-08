@@ -1,7 +1,7 @@
 ---
 name: security-review
 description: Complete a security review of the pending changes on the current branch
-allowed-tools: Bash(git rev-parse *), PowerShell(git rev-parse *), Bash(git diff *), PowerShell(git diff *), Bash(git status *), PowerShell(git status *), Bash(git log *), PowerShell(git log *), Bash(git show *), PowerShell(git show *), Bash(git remote show *), PowerShell(git remote show *), Read, Glob, Grep, LS, Task
+allowed-tools: Bash(git rev-parse *), PowerShell(git rev-parse *), Bash(git diff *), PowerShell(git diff *), Bash(git status *), PowerShell(git status *), Bash(git log *), PowerShell(git log *), Bash(git show *), PowerShell(git show *), Bash(git remote show *), PowerShell(git remote show *), Bash(git remote set-head *), PowerShell(git remote set-head *), Bash(git fetch *), PowerShell(git fetch *), Read, Glob, Grep, LS, Task
 ---
 
 # Security Review
