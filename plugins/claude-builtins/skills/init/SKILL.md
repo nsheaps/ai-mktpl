@@ -4,7 +4,7 @@ description: >
   Use this skill when the user runs /init or asks to "initialize a CLAUDE.md",
   "set up CLAUDE.md for this repo", "bootstrap Claude Code for this project",
   "document this codebase for Claude", or "scaffold skills and hooks for this
-  project". Faithful extraction of Claude Code's built-in /init: it runs the
+  project". Extraction of Claude Code's built-in /init: it runs the
   built-in's verbatim prompt to analyze the codebase and write a concise
   CLAUDE.md, and (in the newer variant) optionally sets up CLAUDE.local.md,
   skills, and hooks through a guided interview.
@@ -12,7 +12,7 @@ description: >
 
 # Init
 
-Faithful extraction of Claude Code's built-in `/init`, driven from a plugin
+Extraction of Claude Code's built-in `/init`, driven from a plugin
 skill. It analyzes the current repository and produces a minimal, high-signal
 `CLAUDE.md` (and, in the newer variant, optional `CLAUDE.local.md`, skills, and
 hooks) — the same artifacts the built-in command generates, driven by the same
@@ -108,7 +108,7 @@ to refresh.
 - The new variant's Phase 7 references the built-in `update-config` skill for
   hook construction and Phase 8 references official plugins (`skill-creator`,
   `frontend-design`, `playwright`) — those are Claude Code features, not part of
-  this plugin. The prompt still names them because a faithful reproduction should;
+  this plugin. The prompt still names them because it is reproduced verbatim;
   they degrade gracefully if unavailable.
 - The classic prompt writes exactly one file (`CLAUDE.md`) and never asks
   questions — that is the intended one-shot behavior, not a limitation.

@@ -1,9 +1,9 @@
 # claude-builtins
 
-Faithful extractions of Claude Code's built-in slash-command prompts, taken
-verbatim from the CLI binary (**v2.1.225**) and driven from portable plugin
-skills. Everything the skills need — collector scripts, the verbatim LLM
-prompts, and the HTML template — ships inside this plugin.
+Claude Code's built-in slash-command prompts, taken verbatim from the CLI binary
+(**v2.1.225**) and driven from portable plugin skills. Everything the skills
+need — collector scripts, the verbatim LLM prompts, and the HTML template — ships
+inside this plugin.
 
 - **`/security-review`** runs the built-in's verbatim prompt: a senior security
   engineer's review of the pending changes on the current branch (diffed against
@@ -18,8 +18,9 @@ prompts, and the HTML template — ships inside this plugin.
   the built-in's verbatim facet taxonomy, writes seven narrative sections, and
   renders a shareable HTML report — stat cards, facet charts, a time-of-day
   chart, wins, friction analysis, CLAUDE.md suggestions, and "on the horizon"
-  prompts. (The built-in assembles its HTML programmatically; the plugin ships an
-  equivalent renderer as a faithful stand-in.)
+  prompts. (The built-in assembles its HTML programmatically inside the CLI, so
+  there is no page source to extract; the plugin ships its own renderer, which
+  differs from the built-in's page in documented ways — see "Fidelity notes".)
 - **`/init`** generates a `CLAUDE.md` for the current repo from the built-in's
   verbatim classic and newer skills/hooks-aware prompts (the variant toggles on
   `CLAUDE_CODE_NEW_INIT`).
@@ -285,3 +286,26 @@ claude-builtins/
 - All user- and LLM-supplied strings are HTML-escaped before insertion; the only
   raw injection is the time-of-day integer array, emitted as a bare 24-element
   literal.
+
+### Where the `/insights` page differs from the built-in
+
+The prompts, facet taxonomy, and enum values are verbatim. The page around them
+is this plugin's renderer — the built-in builds its HTML programmatically inside
+the CLI, so there is no page source to extract. The known differences:
+
+| Difference                                                                        | Status                                         |
+| --------------------------------------------------------------------------------- | ---------------------------------------------- |
+| "At a glance" is composed deterministically here; the built-in uses an LLM prompt | Prompt (`Zqb`) is extractable — port next pass |
+| Team-feedback block is rendered here; the built-in suppresses it                  | Addition, not a reproduction                   |
+| Facet labels humanized generically (`_` → space) vs a per-key Title-Case map      | Map (`Nqb`) is extractable — port next pass    |
+| 8 response-time buckets vs the built-in's 7                                       | Same samples, different bar edges              |
+| 24 hourly UTC bars (re-labeled client-side) vs 4 named Pacific periods            | See the timezone assumption below              |
+| Two chart colors, some top-N cutoffs and number formatting                        | Cosmetic                                       |
+| "Lines" counts added lines only                                                   | Cosmetic                                       |
+| HTML only; the built-in can also emit Markdown                                    | Not implemented                                |
+
+Three collector inputs are reconstructions rather than extractions — the
+transcript timezone, the response-latency floor/cap, and the multi-Clauding
+overlap computation. Each is commented at its source in
+`scripts/collect-insights-data.mjs` with the assumption made and what to
+re-check on the next extraction pass.

@@ -176,6 +176,13 @@ function fmt(n) {
 }
 
 // Humanize an enum token: snake_case -> "snake case".
+//
+// KNOWN GAP: the built-in does not do this generically — it looks each enum key
+// up in a per-key Title-Case label map (binary symbol `Nqb`), so its chart
+// labels read "Bug Fixing", not "bug fixing". That map IS extractable; port it
+// on the next extraction pass and make this the fallback for unmapped keys.
+// This is a reproduction gap, not an assumption: nothing here is guessed, the
+// map simply hasn't been pulled across yet.
 function humanize(s) {
   return String(s == null ? "" : s)
     .replace(/_/g, " ")
@@ -458,6 +465,16 @@ function renderMultiClauding(mc) {
 
 // ---------------------------------------------------------------------------
 // Synthesized sections (At a Glance, Team Feedback)
+//
+// Both of these diverge from the built-in and are documented as such in
+// skills/insights/SKILL.md:
+//   * At a Glance — the built-in synthesizes this with its own LLM prompt
+//     (binary symbol `Zqb`). That prompt is extractable; until it ships here,
+//     this composes the section deterministically from the facets and stats
+//     already collected, so it never needs an extra LLM pass.
+//   * Team Feedback — the built-in has the markup but suppresses the section in
+//     its rendered report. Emitting it is an addition of ours, not a
+//     reproduction; drop it if the goal is to match the built-in page.
 // ---------------------------------------------------------------------------
 
 function renderAtAGlance({ projectAreas, interaction, whatWorks, friction }) {

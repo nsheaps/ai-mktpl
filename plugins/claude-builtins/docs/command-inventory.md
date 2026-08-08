@@ -15,7 +15,7 @@ Each command object in the binary has the shape:
 ```
 
 The `type` field is what determines whether a command's behavior can be driven
-faithfully from a plugin skill outside the CLI:
+from a plugin skill outside the CLI:
 
 | `type`      | What it is                                                       | Extractable?                                  |
 | ----------- | ---------------------------------------------------------------- | --------------------------------------------- |
@@ -32,7 +32,7 @@ clipboard, QR) cannot be driven honestly outside the CLI and is **not faked**.
 
 ---
 
-## Tier 1 — `type:"prompt"` builtins (faithfully reproducible as skills)
+## Tier 1 — `type:"prompt"` builtins (reproducible as skills)
 
 These send a constructed prompt to the model. The prompt text was extracted
 verbatim from the binary; the plugin ships each as a skill + command wrapper.

@@ -4,18 +4,19 @@ description: >
   Use this skill when the user runs /insights or asks to "generate an insights
   report", "analyze my Claude Code usage", "show me insights about how I use
   Claude", "make the usage insights HTML report", or "what patterns are in my
-  sessions". Faithful extraction of Claude Code's built-in /insights: it drives
+  sessions". Extraction of Claude Code's built-in /insights: it drives
   the built-in's verbatim facet-classification and narrative prompts against your
   local session transcripts, then renders a shareable HTML report. The prompts
-  are verbatim; the HTML assembly is an equivalent plugin renderer (the built-in
-  builds its page programmatically inside the CLI), so the end-to-end report is a
-  faithful stand-in, not a byte-identical reproduction.
+  and facet taxonomy are verbatim; the HTML assembly is this plugin's own
+  renderer (the built-in builds its page programmatically inside the CLI, so
+  there is no page source to extract), and the rendered page differs from the
+  built-in's in the ways listed under "Notes on fidelity".
 ---
 
 # Insights
 
-Faithful extraction of Claude Code's built-in `/insights`, driven from a plugin
-skill. It produces an equivalent HTML report — stat cards, at-a-glance summary,
+Extraction of Claude Code's built-in `/insights`, driven from a plugin
+skill. It produces an HTML report — stat cards, at-a-glance summary,
 facet bar charts, a time-of-day chart, big wins, friction analysis, CLAUDE.md
 suggestions, features to try, and "on the horizon" prompts — by combining a
 **deterministic transcript scan** with **LLM analysis passes that run the
@@ -195,11 +196,44 @@ buttons and "copy all CLAUDE.md" button work offline.
   renderer — so the quality of Step 2 directly determines their accuracy.
 - Stat cards, top tools, languages, tool-error, response-time, and time-of-day
   charts come **only** from the deterministic scan and are exact.
-- "At a glance" and the team-feedback block are synthesized by the renderer from
-  the facets; they need no dedicated prompt.
 - All user- and LLM-supplied strings are HTML-escaped before insertion; the only
   raw injection is the time-of-day integer array, which the renderer emits as a
   bare 24-element literal.
+
+### Where the rendered page differs from the built-in
+
+The prompts, the facet taxonomy, and the enum values are verbatim. The page
+around them is this plugin's renderer — the built-in builds its HTML
+programmatically inside the CLI, so there is no page source to extract. These
+are the known differences, kept here so a later extraction pass can close them:
+
+- **"At a glance" is deterministic here.** The built-in synthesizes it with a
+  dedicated LLM prompt (binary symbol `Zqb`); this renderer composes it from the
+  already-collected facets and stats instead. That prompt _is_ extractable — a
+  later pass can ship it and switch this section to an LLM pass.
+- **The team-feedback block is extra.** The built-in has the markup but
+  suppresses it in the rendered report; this renderer emits it. Treat it as an
+  addition, not a reproduction.
+- **Response-time buckets differ** — 8 here (`<5s … >15m`) versus 7 in the
+  built-in, so bar counts are not comparable bucket-for-bucket even though the
+  underlying samples are the same.
+- **The time-of-day chart is 24 hourly UTC bars**; the built-in buckets into 4
+  named periods on Pacific time. The chart re-labels client-side for the
+  viewer's timezone, which the built-in does not do.
+- **Facet labels are humanized generically** (`_` → space) rather than through
+  the built-in's per-key Title-Case map (binary symbol `Nqb`). That map is
+  extractable and should be ported on the next pass — this is a reproduction
+  gap, not an assumption.
+- Two chart colors, a few top-N cutoffs, and some number rounding/formatting
+  choices differ; the "Lines" stat counts added lines only.
+- **HTML only.** The built-in can also emit a Markdown version of the report;
+  this plugin renders the HTML page only.
+
+Three inputs the renderer consumes rest on assumptions that could not be proven
+from the extracted code — the transcript timezone, the response-time floor/cap,
+and the multi-Clauding overlap computation. Each is commented at its source in
+`scripts/collect-insights-data.mjs`, with what to re-check on the next
+extraction pass.
 
 ## Troubleshooting
 

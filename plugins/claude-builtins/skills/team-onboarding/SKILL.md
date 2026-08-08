@@ -4,7 +4,7 @@ description: >
   Use this skill when the user runs /team-onboarding or asks to "create an
   onboarding guide for my team", "generate a Claude Code onboarding doc",
   "onboard new teammates to how I use Claude", or "make an ONBOARDING.md from my
-  usage". Faithful extraction of Claude Code's built-in /team-onboarding: it
+  usage". Extraction of Claude Code's built-in /team-onboarding: it
   drives the built-in's verbatim prompt against your local session transcripts
   for how you've used Claude Code over a recent window (slash commands, MCP
   servers, session topics) and co-authors an ONBOARDING.md guide teammates can
@@ -14,7 +14,7 @@ description: >
 
 # Team Onboarding
 
-Faithful extraction of Claude Code's built-in `/team-onboarding`, driven from a
+Extraction of Claude Code's built-in `/team-onboarding`, driven from a
 plugin skill. It looks at how _you_ have actually used Claude Code in this repo
 over the last N days and turns that into an `ONBOARDING.md` guide for teammates
 who are new to Claude Code. The guide is both a document and an interactive

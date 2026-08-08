@@ -7,13 +7,14 @@ allowed-tools: Task, Read, Bash(node:*), Bash(mkdir:*), Bash(mktemp:*), Write
 
 # Insights
 
-Faithful extraction of Claude Code's built-in `/insights`, driven from a plugin
+Extraction of Claude Code's built-in `/insights`, driven from a plugin
 skill: scan your local session transcripts, classify each session across the
 built-in's verbatim facet taxonomy, write seven narrative sections using the
 built-in's verbatim section prompts, and render a single shareable HTML report
 with charts and copyable prompts. (The built-in assembles its HTML programmatically
-inside the CLI; this plugin ships an equivalent renderer, so the end-to-end
-report is a faithful stand-in rather than a byte-identical reproduction.)
+inside the CLI, so there is no extractable page source; this plugin ships its own
+renderer. The prompts and facet taxonomy are verbatim; the rendered page differs
+from the built-in's in documented ways — see "Notes on fidelity" in the skill.)
 
 Invoke the **`insights`** skill and follow it end to end. The user's arguments
 select the scope.

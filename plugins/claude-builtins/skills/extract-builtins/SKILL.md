@@ -136,7 +136,7 @@ each alias points at, rather than trusting a visual scan. Slice out and beautify
 each referenced function the same way (Steps 1–3) until the behavior is fully
 recovered.
 
-## Step 5 — Extract faithfully, and only what's honest
+## Step 5 — Reproduce only what's honest
 
 Rebuild the command as a skill + optional collector script in this plugin,
 driven by the verbatim prompt. If a built-in only toggles terminal UI or talks
@@ -144,6 +144,27 @@ to a native host / account backend, there is nothing to compute outside the
 CLI — **do not fake it**; record it as non-reproducible in
 [`docs/command-inventory.md`](../../docs/command-inventory.md) with the tier and
 the reason.
+
+### Describe the reproduction, don't grade it
+
+State what a reproduction **is**, never how good it is. "Extracted verbatim from
+the binary (v2.1.225)" is a checkable fact; "faithful extraction" is a
+self-awarded grade that means nothing to a reader and violates the
+relay-integrity principle (describe the thing, don't editorialize about it).
+
+- **A prompt/command pulled out byte-for-byte:** say it is **verbatim** (with the
+  binary version). Do **not** add a "faithful"/"faithful extraction"/"faithful
+  reproduction" line — the fact is the version stamp, not an adjective.
+- **Code we authored to stand in for something the binary does programmatically**
+  (e.g. an HTML renderer the CLI assembles in-process, with no extractable
+  source): describe it as an **equivalent** reimplementation and, if and only if
+  a behavior could not be extracted or proven from the underlying logic, record
+  the assumption where the doc type calls for it — a code comment in the script,
+  a note in the skill — stating (a) **why** it couldn't be extracted, (b) **what
+  to check on the next extraction pass** to see whether it has become
+  extractable, and (c) the **assumption** made in the meantime. If the logic is
+  functionally the same as the built-in, it **is** the same — add no comment and
+  no "stand-in" caveat.
 
 ## Worked example: the reload-plugins / reload-skills investigation
 

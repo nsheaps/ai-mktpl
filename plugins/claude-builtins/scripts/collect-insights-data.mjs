@@ -14,6 +14,16 @@
 // the seven section prompts); render-insights.mjs then merges this JSON with the
 // LLM output into ../assets/insights-template.html.
 //
+// ASSUMPTIONS. The built-in's renderer consumes an already-computed stats object,
+// so a few inputs on this side could not be proven from the extracted code and
+// are reconstructions rather than extractions. Each one is commented inline at
+// its source below with what to re-check on the next extraction pass:
+//   * the base timezone of the time-of-day histogram  (see `getUTCHours` below)
+//   * the response-latency floor and cap              (see `responseTimes` below)
+//   * the multi-clauding overlap computation          (see `multiClauding()`)
+// Do not treat these three as verbatim; everything else here was read out of the
+// binary.
+//
 // Usage:
 //   node collect-insights-data.mjs [options]
 //     --all                scan ALL projects (default)
@@ -49,6 +59,11 @@ const PROMPT_TRUNC = 240; // per-message char cap in session summaries
 const MAX_PROMPTS_PER_SESSION = 18;
 
 // Response-time buckets (seconds). Upper-exclusive; last is a catch-all.
+// These 8 buckets are ours; the built-in's chart uses 7. The samples feeding
+// them are the same, so the distribution is comparable but the bars are not
+// bucket-for-bucket. The built-in's edges live with its chart code, which is
+// assembled programmatically — recover them alongside the renderer if the two
+// charts ever need to line up.
 const RESPONSE_BUCKETS = [
   { label: "<5s", max: 5 },
   { label: "5-15s", max: 15 },
@@ -285,9 +300,29 @@ async function parseFile(path, { sinceMs, sessionFilter, sessions, global }) {
           s.userMessages++;
           global.userMessages++;
           if (!Number.isNaN(ts)) {
+            // ASSUMPTION (timezone): we bucket by UTC hour. The built-in's page
+            // renders 4 named periods on Pacific time, but only its *renderer*
+            // was extractable — it reads a precomputed `message_hours`, and the
+            // code that fills that field was not located, so the base timezone
+            // the built-in counts in is unproven. UTC is chosen because it is
+            // the one basis that is stable across machines; render-insights.mjs
+            // then re-labels client-side for the viewer's timezone.
+            // NEXT EXTRACTION CHECK: find where `message_hours` is populated and
+            // look for `getUTCHours` vs `getHours` vs an explicit PT offset. If
+            // it is local/PT, switch this to match and drop the client re-label.
             const hour = new Date(ts).getUTCHours();
             global.timeOfDayUTC[hour]++;
             // Response latency: gap since the assistant last finished a turn.
+            // ASSUMPTION (floor/cap): negative gaps are dropped and anything
+            // >= 6h is treated as "user walked away", not a response. Neither
+            // bound was recoverable — the built-in renderer receives finished
+            // `user_response_times` / `median_response_time` values, so whatever
+            // filtering produced them is upstream of the extracted code. These
+            // bounds are our own and will shift the median if the built-in uses
+            // different ones.
+            // NEXT EXTRACTION CHECK: locate where `user_response_times` and
+            // `median_response_time` are computed and read off the real floor
+            // and cap (and whether it filters at all).
             if (s.pendingAssistantEndTs != null) {
               const secs = (ts - s.pendingAssistantEndTs) / 1000;
               if (secs >= 0 && secs < 6 * 3600) global.responseTimes.push(secs);
@@ -381,6 +416,20 @@ function responseTimeStats(times) {
  * Multi-clauding: how often sessions overlapped in time (parallel Claudes).
  * Sweep-line over [start,end] intervals to find the max concurrency and the
  * number of sessions that overlapped at least one other.
+ *
+ * ASSUMPTION (whole function): this is a reconstruction, not an extraction. The
+ * built-in's renderer consumes a precomputed `multi_clauding` object handed to
+ * it by `Qzp(e)`; that producer was never sliced out of the binary, so what
+ * counts as an overlap there is unknown. Choices made here that the built-in
+ * may not share: a session's span is [firstTs, lastTs] from its own messages;
+ * zero-length spans (lastTs <= firstTs) are dropped entirely; overlap is
+ * strict (touching endpoints do not count); and there is no minimum-overlap
+ * threshold, so a one-second brush between two sessions counts the same as an
+ * hour of genuine parallel work.
+ *
+ * NEXT EXTRACTION CHECK: extract and beautify `Qzp` and compare its output
+ * fields (sessionsWithTiming, maxConcurrent, overlappingSessions, everParallel)
+ * and its overlap definition against this. If it matches, delete this note.
  */
 function multiClauding(sessions) {
   const intervals = [];

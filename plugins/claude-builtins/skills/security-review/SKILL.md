@@ -3,7 +3,7 @@ name: security-review
 description: >
   Use this skill when the user runs /security-review or asks for a "security
   review of this branch", "check these changes for vulnerabilities", or "review
-  the pending diff for security issues". Faithful extraction of Claude Code's
+  the pending diff for security issues". Extraction of Claude Code's
   built-in /security-review: a senior-security-engineer review of the pending
   changes on the current branch (working state vs origin/HEAD), driven by the
   verbatim built-in prompt. It takes NO arguments and does not fetch GitHub PRs.
@@ -14,7 +14,7 @@ description: >
 
 # Security Review
 
-Faithful extraction of Claude Code's built-in `/security-review`. It runs the
+Extraction of Claude Code's built-in `/security-review`. It runs the
 built-in's own prompt — verbatim — against the pending changes on the current
 branch (your working state compared to `origin/HEAD`) and produces a
 security-focused markdown report of high-confidence vulnerabilities.
