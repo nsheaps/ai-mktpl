@@ -32,7 +32,8 @@ than sharing it.
 /team-onboarding [--days N]
         │
         ├─ collect-onboarding-data.mjs   (scripts/)
-        │     scans ~/.claude/projects/<encoded-cwd>/*.jsonl in the window,
+        │     scans $CLAUDE_CONFIG_DIR/projects/<encoded-cwd>/*.jsonl in the
+        │     window (~/.claude/projects/ by default),
         │     emits usageData JSON: slashCommands, mcpServers, sessionDescriptors
         │
         ├─ team-onboarding prompt         (assets/prompts/team-onboarding.md)
@@ -46,9 +47,10 @@ than sharing it.
 
 - `node` on `PATH` (the collector is plain ESM, no dependencies).
 - Local Claude Code transcripts for this repo under
-  `~/.claude/projects/<encoded-cwd>/`. If you've never used Claude Code from
-  this directory, the collector reports `no_project_dir` and there's nothing to
-  summarize — say so rather than inventing usage.
+  `$CLAUDE_CONFIG_DIR/projects/<encoded-cwd>/` (`~/.claude/projects/` by
+  default). If you've never used Claude Code from this directory, the
+  collector reports `no_project_dir` and there's nothing to summarize — say so
+  rather than inventing usage.
 - Optional: `git` (used to attribute the guide to your `git config user.name`
   and to resolve the repo slug) and a project `.mcp.json` (used to annotate MCP
   servers with their URL origin). Both degrade gracefully when absent.

@@ -68,15 +68,17 @@ not report them as zero — report them as not analyzed.
 ## Prerequisites
 
 - `node` on PATH (Bun works too).
-- Local transcripts under `~/.claude/projects/`.
+- Local transcripts under `$CLAUDE_CONFIG_DIR/projects/` (`~/.claude/projects/`
+  by default).
 
 ## Procedure
 
-Let `ROOT="${CLAUDE_PLUGIN_ROOT}"` and pick a scratch directory for the JSON,
-e.g. `WORK="$(mktemp -d)"` (or `.claude/tmp/usage`). **Note the concrete path** —
-each Bash call is a fresh shell, so the shell variable does not survive Step 1;
-Steps 2-4 read the JSON back and need the real directory, and a `mktemp -d` path
-is random rather than guessable.
+Let `ROOT="${CLAUDE_PLUGIN_ROOT}"` and pick a scratch directory for the JSON: a
+fresh `mktemp -d`, not a path inside the repo — writing into the repo leaves
+untracked files behind, which is exactly what Step 1 below warns against.
+**Note the concrete path** — each Bash call is a fresh shell, so the shell
+variable does not survive Step 1; Steps 2-4 read the JSON back and need the
+real directory, and a `mktemp -d` path is random rather than guessable.
 
 ### Step 1 — Compute the breakdown
 

@@ -57,8 +57,9 @@ running any passes.
 ## Prerequisites
 
 - `node` on PATH (Bun also works — the scripts are plain `.mjs`).
-- Local session transcripts under `~/.claude/projects/`. If none exist, the
-  report renders with empty states rather than failing.
+- Local session transcripts under `$CLAUDE_CONFIG_DIR/projects/`
+  (`~/.claude/projects/` by default). If none exist, the report renders with
+  empty states rather than failing.
 
 ## Procedure
 

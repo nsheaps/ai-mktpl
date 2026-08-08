@@ -277,8 +277,9 @@ claude-builtins/
 ## Prerequisites
 
 - `node` on PATH (Bun works too — the scripts are plain `.mjs`).
-- Local session transcripts under `~/.claude/projects/`. With none present, the
-  scripts return empty states rather than failing.
+- Local session transcripts under `$CLAUDE_CONFIG_DIR/projects/`
+  (`~/.claude/projects/` by default). With none present, the scripts return
+  empty states rather than failing.
 
 ## Fidelity notes
 
