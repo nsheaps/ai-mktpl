@@ -36,6 +36,13 @@ be trusted and re-verified later.
    plugin without a provenance stamp (see below). A recovered command with no
    version is worthless — the binary changes constantly and the fragment is only
    correct relative to one build.
+5. **Stamp per asset; never make a blanket version claim.** The stamp belongs
+   in the file the fragment lives in. Do **not** write "this plugin was
+   extracted from vX.Y.Z" in a README or manifest — re-extracting a single
+   asset instantly makes that sentence false everywhere else, and the false
+   version is harder to notice than a missing one. A mixed-version tree is the
+   expected steady state, not drift to be tidied up:
+   `grep -rn 'v2\.1\.' <plugin>/` is the authoritative inventory.
 
 ## Step 0 — Stamp the binary version FIRST
 

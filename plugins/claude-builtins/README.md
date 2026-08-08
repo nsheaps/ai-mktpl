@@ -1,15 +1,21 @@
 # claude-builtins
 
 Claude Code's built-in slash-command prompts, taken verbatim from the CLI binary
-(**v2.1.225**) and driven from portable plugin skills. Everything the skills
-need — collector scripts, the verbatim LLM prompts, and the HTML template — ships
-inside this plugin.
+and driven from portable plugin skills. Everything the skills need — collector
+scripts, the verbatim LLM prompts, and the HTML template — ships inside this
+plugin.
 
 It also records **mechanics** extracted from the binary that aren't commands at
 all — how agent-to-agent messaging is actually wired
 (`skills/agent-messaging/`), and how the plugin/skill reload triggers work
-(`docs/reload-mechanisms.md`). Each is stamped with the binary version it came
-from, which is not always the same version as the prompts above.
+(`docs/reload-mechanisms.md`).
+
+**Provenance is per asset, not per plugin.** Each asset carries the binary
+version it was extracted from, in the file itself. A mixed-version tree is the
+expected steady state — re-extracting one asset shouldn't force a rewrite of
+every other stamp. Today the command prompts are **v2.1.225** and the
+agent-messaging mechanics are **v2.1.226**; `grep -rn 'v2\.1\.' plugins/claude-builtins/`
+is the authoritative answer at any point in time.
 
 - **`/security-review`** runs the built-in's verbatim prompt: a senior security
   engineer's review of the pending changes on the current branch (diffed against
