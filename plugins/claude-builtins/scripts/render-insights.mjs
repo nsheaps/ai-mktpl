@@ -183,6 +183,7 @@ function fmt(n) {
 // on the next extraction pass and make this the fallback for unmapped keys.
 // This is a reproduction gap, not an assumption: nothing here is guessed, the
 // map simply hasn't been pulled across yet.
+// Tracked in https://github.com/nsheaps/ai-mktpl/issues/733
 function humanize(s) {
   return String(s == null ? "" : s)
     .replace(/_/g, " ")
@@ -475,6 +476,8 @@ function renderMultiClauding(mc) {
 //   * Team Feedback — the built-in has the markup but suppresses the section in
 //     its rendered report. Emitting it is an addition of ours, not a
 //     reproduction; drop it if the goal is to match the built-in page.
+// Porting Zqb (and the Nqb label map above) is tracked in
+// https://github.com/nsheaps/ai-mktpl/issues/733
 // ---------------------------------------------------------------------------
 
 function renderAtAGlance({ projectAreas, interaction, whatWorks, friction }) {

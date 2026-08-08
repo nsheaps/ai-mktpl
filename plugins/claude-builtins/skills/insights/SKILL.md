@@ -210,7 +210,8 @@ are the known differences, kept here so a later extraction pass can close them:
 - **"At a glance" is deterministic here.** The built-in synthesizes it with a
   dedicated LLM prompt (binary symbol `Zqb`); this renderer composes it from the
   already-collected facets and stats instead. That prompt _is_ extractable — a
-  later pass can ship it and switch this section to an LLM pass.
+  later pass can ship it and switch this section to an LLM pass
+  ([#733](https://github.com/nsheaps/ai-mktpl/issues/733)).
 - **The team-feedback block is extra.** The built-in has the markup but
   suppresses it in the rendered report; this renderer emits it. Treat it as an
   addition, not a reproduction.
@@ -224,7 +225,7 @@ are the known differences, kept here so a later extraction pass can close them:
 - **Facet labels are humanized generically** (`_` → space) rather than through
   the built-in's per-key Title-Case map (binary symbol `Nqb`). That map is
   extractable and should be ported on the next pass — this is a reproduction
-  gap, not an assumption.
+  gap, not an assumption ([#733](https://github.com/nsheaps/ai-mktpl/issues/733)).
 - Two chart colors, a few top-N cutoffs, and some number rounding/formatting
   choices differ; the "Lines" stat counts added lines only.
 - **HTML only.** The built-in can also emit a Markdown version of the report;
