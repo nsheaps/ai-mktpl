@@ -59,8 +59,9 @@ Notes:
 
 ## Tier 2 — `type:"local"` computational builtins (reproducible as skills)
 
-These do real computation over local data. Reproduced by scanning transcripts /
-git / env deterministically, then (where the builtin does) an analysis pass.
+These do real computation over local data. Where built, they are reproduced by
+scanning transcripts / git / env deterministically, then (where the builtin does)
+an analysis pass.
 
 | Command         | Aliases        | Binary description                                                    | Status in plugin                                                                   |
 | --------------- | -------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
@@ -74,7 +75,7 @@ git / env deterministically, then (where the builtin does) an analysis pass.
 
 Caveat on `/status`: version, model, git, tool availability, and env are fully
 local. **Account identity and live API connectivity** require the Anthropic
-backend and cannot be reproduced offline — the skill reports those as
+backend and cannot be reproduced offline — the skill would report those as
 "unavailable (requires built-in auth)" rather than inventing them.
 
 ## Tier 3 — built-in programmatic **skills / workflows** (separate registry)

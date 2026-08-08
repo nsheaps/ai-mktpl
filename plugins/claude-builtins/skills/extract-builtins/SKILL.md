@@ -86,9 +86,9 @@ grep 'reload-plugins' strings.txt                  # the marker + its REAL offse
 ```
 
 **The offset you want is the leading decimal column from `strings -t d`** — that
-is the true byte offset into the binary. `grep -aob "$CLAUDE_BIN"` gives the same
-true offset _if you grep the binary itself_. What you must never do is take an
-offset out of an **intermediate stream** — `strings "$CLAUDE_BIN" | grep -b …`,
+is the true byte offset into the binary. `grep -aob '<marker>' "$CLAUDE_BIN"`
+gives the same true offset _if you grep the binary itself_. What you must never
+do is take an offset out of an **intermediate stream** — `strings "$CLAUDE_BIN" | grep -b …`,
 or the `-n` line number from `grep -n … strings.txt` — because those index the
 dump, not the file, and will slice the wrong bytes.
 

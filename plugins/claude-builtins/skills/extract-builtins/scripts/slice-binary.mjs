@@ -31,6 +31,13 @@ if (!Number.isInteger(start) || !Number.isInteger(end) || start < 0 || end <= st
 // all. readSync may return fewer bytes than asked (EOF / short read); trim to what
 // we actually got.
 const want = end - start;
+// The binary is ~245MB; a window larger than that is a mistyped offset, not a
+// real request. Catch it here so it fails with a message rather than a raw
+// `Array buffer allocation failed` out of Buffer.allocUnsafe.
+if (want > 512 * 1024 * 1024) {
+  console.error(`window of ${want} bytes is implausibly large — check the end offset`);
+  process.exit(2);
+}
 const buf = Buffer.allocUnsafe(want);
 const fd = openSync(binPath, "r");
 let got;
