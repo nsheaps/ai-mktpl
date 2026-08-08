@@ -153,12 +153,13 @@ async function inspectInbox(path) {
   return {
     path,
     total: messages.length,
-    // readUnreadMessages() filters !read AFTER partitionEntries() has already
-    // dropped and pruned schema-invalid entries — an invalid entry can never
-    // be delivered, so counting it as unread overstates what's actually
-    // pending. `total` intentionally still counts it: that describes file
-    // state (what's on disk right now), which is what a file inspector
-    // should report even for bytes the runtime will discard on next read.
+    // readMailbox() (binary: `_tt`) partitions entries via a schema-parse
+    // helper (binary: `T7d`) and returns only the valid ones; an invalid
+    // entry never reaches readUnreadMessages()'s `!read` filter, so counting
+    // it as unread overstates what's actually pending. `total` intentionally
+    // still counts it: that describes file state (what's on disk right now),
+    // which is what a file inspector should report even for bytes the
+    // runtime will discard on next read (asynchronously, via `TZ_`).
     unread: messages.filter((m) => m.valid && !m.read).length,
     invalid: messages.filter((m) => !m.valid).length,
     lockPresent,
