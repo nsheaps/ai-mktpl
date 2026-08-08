@@ -128,7 +128,10 @@ enum-array/scalar field names (`request_types`, `friction_types`,
 `satisfaction`, `helpfulness`, `capabilities_that_helped`) still tally too — no
 reshaping in this pass, and no chart depends on the classifier changing its
 output. All six facet charts populate from the verbatim schema, including "What
-Helped Most", which reads `primary_success`.
+Helped Most", which reads `primary_success` — excluding its `none` member, which
+marks the _absence_ of a primary success rather than a capability. If every
+session classifies as `none`, that chart correctly shows its empty state; that is
+expected output, not a malformed classification to retry.
 
 ### Step 3 — Seven narrative sections (LLM passes)
 

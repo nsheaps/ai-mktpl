@@ -221,6 +221,12 @@ function barChart(items, color, emptyMsg) {
 // This lets the verbatim classifier's count-maps (goal_categories,
 // friction_counts, user_satisfaction_counts) and its scalars flow straight
 // through without a separate normalization pass.
+//
+// `exclude` drops specific keys from the tally across every value shape — used
+// for schema sentinels that are not real categories (e.g. primary_success's
+// "none", which marks the *absence* of a success, not a capability). Excluded
+// keys are skipped in `add()`, so an all-sentinel facet set falls through to the
+// chart's empty state instead of ranking the sentinel.
 function tallyFacet(sessions, fields, { limit = 10, exclude = [] } = {}) {
   const aliases = Array.isArray(fields) ? fields : [fields];
   const skip = new Set(exclude);

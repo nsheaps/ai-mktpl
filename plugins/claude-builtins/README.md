@@ -278,7 +278,10 @@ claude-builtins/
   weights), an enum array, or a plain scalar. So the verbatim count-map fields
   feed the charts with their counts preserved, and the older enum-array/scalar
   names still tally too. "What Helped Most" reads `primary_success` (the
-  classifier's Claude-capability enum).
+  classifier's Claude-capability enum), minus its `none` member — that value
+  marks the _absence_ of a primary success, so it is excluded rather than
+  ranked as a capability. A facet set that is entirely `none` therefore falls
+  through to the chart's empty state.
 - All user- and LLM-supplied strings are HTML-escaped before insertion; the only
   raw injection is the time-of-day integer array, emitted as a bare 24-element
   literal.
