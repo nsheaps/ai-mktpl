@@ -2,9 +2,10 @@
 // Shared transcript-discovery and counting helpers.
 //
 // Claude Code writes one JSONL transcript per session under
-// ~/.claude/projects/<encoded-cwd>/, plus nested subagent transcripts under
-// <session-id>/subagents/**. Every collector in this plugin walks the same
-// tree, so the walk lives here rather than being copy-pasted three times.
+// $CLAUDE_CONFIG_DIR/projects/<encoded-cwd>/ (default ~/.claude/projects/),
+// plus nested subagent transcripts under <session-id>/subagents/**. Every
+// collector in this plugin walks the same tree, so the walk lives here
+// rather than being copy-pasted three times.
 //
 // Plain ESM, no dependencies — run with `node` or `bun`.
 // ---------------------------------------------------------------------------
