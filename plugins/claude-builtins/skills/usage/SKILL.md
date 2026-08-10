@@ -24,6 +24,25 @@ server (`GET /api/oauth/usage`) and renders reset times, percentages, and cost.
 None of that server data — the numbers users actually go to `/usage` for — is
 available to a plugin, so none of it is reproduced here.
 
+**This was investigated, not assumed** (checked against binary **v2.1.226**).
+The binary does cache its last fetch of
+that endpoint locally, under `cachedUsageUtilization` in `~/.claude.json`
+(`fetchedAtMs`, `accountUuid`, and the raw response — percent/reset-time per
+rate-limit bucket, keyed roughly `five_hour`/`seven_day`/`seven_day_opus`/
+`seven_day_sonnet`), refreshed on a 5-minute TTL (binary constant `fe_`). A
+sibling field, `cachedExtraUsageDisabledReason`, records whether overage is
+currently disabled and why. This skill deliberately does **not** read either
+one: `~/.claude.json` sits alongside real OAuth account state
+(`oauthAccount`, per-model cost overrides) in the same file, its schema is
+undocumented and unversioned, and a plugin script silently parsing it is a
+different trust boundary than parsing your own session transcripts — which is
+why this repo's own permission classifier pushes back on touching that file
+at all. Calling `GET /api/oauth/usage` directly has the same shape of problem
+one layer up: it needs the CLI's own OAuth access token, which isn't reliably
+readable as a portable, refreshable credential from outside the CLI process.
+If you want the real numbers, run the built-in `/usage` — that's what it's
+for.
+
 What this skill _can_ stand in for is one section of that TUI: **"What's
 contributing to your limits usage?"** The built-in ranks contributors using an
 internal relative weight computed from local token counts. This skill computes
@@ -41,12 +60,28 @@ Two halves:
 
 The built-in's local "contributing factors" section does **not** rank by USD. It
 ranks by an internal relative weight derived from token counts. That weight
-formula is extracted verbatim from the binary (`nNb` × `rNb`):
+formula is extracted verbatim from the binary — a per-request weight function
+(binary symbol `nNb`) applied to a per-model-tier multiplier (binary symbol
+`rNb`):
 
 ```
 weight = (cache_read + input*10 + cache_creation*12.5 + output*50) * modelTier
-modelTier:  fable = 10,  opus = 5,  haiku = 1,  default = 3
+modelTier:  fable = 10,  opus = 5,  haiku = 1,  sonnet (default) = 3
 ```
+
+Every model that isn't fable/opus/haiku — sonnet included — falls under
+`default`; the binary has no separate sonnet-specific tier.
+
+**This is also not the same thing as real dollar cost**, and the binary
+confirms why: a similarly-named binary field, `additionalModelCostsCache`
+(server-provided per-model overrides, function `Ims`/binary default table
+`_mt`), turns out to hold the _same_ relative-weight rates shown above
+(`{inputTokens:10, outputTokens:50, promptCacheWriteTokens:12.5,
+promptCacheReadTokens:1, ...}`) — not USD. The real per-account dollar figure
+lives only in the `GET /api/oauth/usage` response (which carries a `currency`
+field this weight table doesn't), so there is no local, token-count-only path
+to a genuine cost number. This skill's weight breakdown is the closest local
+stand-in for "where did the cost go" that can be computed offline.
 
 This is a **relative unit only** — it is meaningful for comparing contributors
 against each other, not as an absolute cost. It is **not dollars**, and it is
@@ -177,12 +212,18 @@ the figures are auditable.
 
 ## Notes on fidelity
 
-- The **weight formula** (`nNb` × `rNb`) is verbatim from the binary
-  (v2.1.225) and is the genuine relative unit the local "contributing factors"
-  section ranks by. Everything else the built-in `/usage` shows — plan/limit
-  utilization %, reset windows, real cost — is server-fetched and **cannot** be
-  reproduced by a plugin. Do not present this skill's output as the built-in's
-  output.
+- The **weight formula** (per-request weight function `nNb` × per-model-tier
+  multiplier `rNb`) is verbatim from the binary (v2.1.225) and is the genuine
+  relative unit the local "contributing factors" section ranks by. It is
+  distinct from `additionalModelCostsCache`/`_mt` (function `Ims`; checked
+  against v2.1.226), which looked like a real cost table on first read but
+  turns out to hold the same relative-weight rates, not USD — see "The
+  relative-weight unit" above.
+  Everything the built-in `/usage` shows that genuinely is dollar-denominated
+  — plan/limit utilization %, reset windows, real cost — is server-fetched
+  (`GET /api/oauth/usage`, response schema includes a `currency` field) and
+  **cannot** be reproduced by a plugin. Do not present this skill's output as
+  the built-in's output.
 - Only `cacheMiss` and `longContext` behaviors are computed;
   `subagent_heavy`, `high_parallel`, and `cron` are not.
 
