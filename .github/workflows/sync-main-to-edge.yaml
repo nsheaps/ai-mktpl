@@ -19,6 +19,6 @@ permissions:
 jobs:
   sync:
     name: Sync main -> */edge
-    uses: nsheaps/github-actions/.github/workflows/sync-main-to-edge.yaml@main
+    uses: nsheaps/github-actions/.github/workflows/sync-main-to-edge.yaml@c1794f6f4fbb3cbc5e5a71e820581a74239f706a # main
     with:
       test_mode: ${{ inputs.test_mode == true }}
