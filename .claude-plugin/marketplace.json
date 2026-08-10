@@ -117,7 +117,7 @@
     {
       "name": "claude-builtins",
       "description": "Claude Code's built-in slash-command prompts, taken verbatim from the CLI binary and driven from portable plugin skills: /security-review (a senior-security-engineer review of the current branch vs origin/HEAD), /init (generate a CLAUDE.md), /insights (transcript scan, verbatim facet classification, and a self-contained HTML report), /team-onboarding (co-author an ONBOARDING.md from how you actually use Claude Code), and /usage (a local, approximate analysis of your transcripts — token counts plus the binary's relative weight; the built-in's server-side utilization/cost is not reproducible).",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "author": {
         "name": "Nathan Heaps"
       },
