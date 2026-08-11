@@ -11,6 +11,18 @@
 # has an opinion about allow/deny, so it NEVER writes a permissionDecision.
 # It always exits 0 with empty stdout, deferring to the normal permission
 # system. Status is logged to stderr only.
+#
+# Input parsing prefers claude-utils' `agent-hook export-input` (when
+# `agent-hook` is on PATH) over hand-rolled jq, falling back to jq
+# otherwise — see lib/direnv-export.sh for why this is an enhancement, not a
+# hard dependency. NOTE: this hook deliberately does NOT call `agent-hook
+# allow`/`deny` for its "nothing changed" case — per this repo's own
+# hook-output-patterns.md, a PreToolUse hook with no opinion must emit
+# NOTHING, not an explicit allow (an explicit allow bypasses the normal
+# permission system for every single Bash call, which this hook must never
+# do). agent-hook's decision subcommands are used only where this hook
+# actually needs to speak, which today is never — it only ever re-exports
+# state and stays silent.
 set -euo pipefail
 
 PLUGIN_NAME="direnv"
@@ -52,9 +64,29 @@ source "${CLAUDE_PLUGIN_ROOT}/lib/direnv-export.sh"
 plugin_is_enabled || { hook_respond; exit 0; }
 
 # --- Read hook input ---
+#
+# Prefer agent-hook's parser (exports HOOK_TOOL_NAME, HOOK_TOOL_INPUT_COMMAND,
+# etc. — see that repo's export-input.ts for the injection-safety guarantees
+# it gives the eval below). Fall back to jq when agent-hook isn't on PATH.
 
 INPUT="$(cat)"
-TOOL_NAME="$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)"
+
+AGENT_HOOK_BIN="$(direnv_agent_hook_bin)"
+AGENT_HOOK_EXPORTS=""
+if [ -n "$AGENT_HOOK_BIN" ]; then
+  AGENT_HOOK_EXPORTS="$("$AGENT_HOOK_BIN" export-input "$INPUT" 2>/dev/null || true)"
+fi
+
+if [ -n "$AGENT_HOOK_EXPORTS" ]; then
+  eval "$AGENT_HOOK_EXPORTS"
+  TOOL_NAME="${HOOK_TOOL_NAME:-}"
+  CMD="${HOOK_TOOL_INPUT_COMMAND:-}"
+else
+  # agent-hook not on PATH, or (unexpectedly) failed to parse the payload —
+  # fall back to jq so this hook keeps working either way.
+  TOOL_NAME="$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)"
+  CMD="$(echo "$INPUT" | jq -r '.tool_input.command // ""' 2>/dev/null)"
+fi
 
 # Belt-and-suspenders: hooks.json already matches only Bash, but guard here
 # too in case the matcher is ever widened to "*".
@@ -70,11 +102,8 @@ fi
 # prefix (a common pattern for this agent's own Bash calls), honor it;
 # otherwise fall back to CLAUDE_PROJECT_DIR, matching what SessionStart used.
 resolve_target_dir() {
-  local cmd
-  cmd="$(echo "$INPUT" | jq -r '.tool_input.command // ""' 2>/dev/null)"
-
   local cd_target
-  cd_target="$(echo "$cmd" | sed -nE 's/^[[:space:]]*cd[[:space:]]+("[^"]+"|'"'"'[^'"'"']+'"'"'|[^[:space:]&;]+).*/\1/p' | head -1)"
+  cd_target="$(echo "$CMD" | sed -nE 's/^[[:space:]]*cd[[:space:]]+("[^"]+"|'"'"'[^'"'"']+'"'"'|[^[:space:]&;]+).*/\1/p' | head -1)"
   # Strip surrounding quotes if present
   cd_target="${cd_target%\"}"; cd_target="${cd_target#\"}"
   cd_target="${cd_target%\'}"; cd_target="${cd_target#\'}"
@@ -95,12 +124,20 @@ TARGET_DIR="$(resolve_target_dir)"
 
 # --- Debounce/throttle ---
 #
-# TODO(agent-hook-throttle): this local debounce is a placeholder. A
-# companion task is extracting this exact "DEBOUNCE_FILE + elapsed seconds"
-# pattern (first introduced in github-app's github-token-check.sh) into a
-# shared, reusable helper in claude-utils. should_check()/record_check() are
-# kept as small, isolated functions specifically so that swap is a
-# one-function change here, not a rewrite of this script.
+# TODO(agent-hook-throttle): this local debounce is a placeholder. Confirmed
+# in-flight: nsheaps/claude-utils PR #436
+# (https://github.com/nsheaps/claude-utils/pull/436, branch
+# feature/agent-hook-throttle) generalizes this exact "DEBOUNCE_FILE +
+# elapsed seconds" pattern (first introduced in github-app's
+# github-token-check.sh) into `bin/lib/agent-hook-throttle.sh`
+# (throttle_should_run/throttle_record, sourceable) plus a CLI wrapper. Once
+# #436 merges and ships in a claude-utils release, replace should_check()/
+# record_check() below with a source of that library and calls to
+# `throttle_should_run "direnv-envrc-check" "$DEBOUNCE_SECONDS"
+# "$CLAUDE_PLUGIN_DATA"` / `throttle_record "direnv-envrc-check"
+# "$CLAUDE_PLUGIN_DATA"` — same signature shape, so this is a one-function
+# swap, not a rewrite. should_check()/record_check() are kept as small,
+# isolated functions specifically so that swap stays localized.
 DEBOUNCE_FILE="${CLAUDE_PLUGIN_DATA}/direnv-last-check"
 DEBOUNCE_SECONDS="$(plugin_get_config "checkIntervalSeconds" "2")"
 
@@ -146,13 +183,13 @@ elif [ -x "${CLAUDE_PROJECT_DIR:-.}/bin/.local/direnv" ]; then
 fi
 
 if [ -z "$DIRENV_BIN" ]; then
-  hook_log "direnv binary not found (PATH or bin/.local) — skipping re-export"
+  direnv_log "warn" "direnv binary not found (PATH or bin/.local) — skipping re-export"
   hook_log_cleanup
   hook_respond
   exit 0
 fi
 
-hook_log "envrc fingerprint changed, re-exporting via direnv"
+direnv_log "info" "envrc fingerprint changed, re-exporting via direnv"
 direnv_export_and_write "$DIRENV_BIN" "$TARGET_DIR" "$RUNTIME_FILE"
 echo "$CURRENT_FP" > "$FINGERPRINT_FILE"
 

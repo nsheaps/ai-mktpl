@@ -22,11 +22,116 @@
 # Note: Plugins symlink this file into their own lib/ directory is NOT used
 # here — this file lives directly in plugins/direnv/lib/ since it is not
 # shared across plugins.
+#
+# --- claude-utils agent-plugin / agent-hook integration (enhancement-if-present) ---
+#
+# nsheaps/claude-utils ships two native binaries meant for exactly this kind
+# of plugin (see that repo's README, "For plugin and hook authors"):
+#   agent-plugin — leveled logging + per-plugin settings + `ensure-dependency`
+#   agent-hook   — parses a hook's JSON stdin into shell vars, emits decisions
+# Installed via `brew install nsheaps/devsetup/claude-utils`.
+#
+# No other ai-mktpl plugin depends on these yet (mise/github-app/1pass predate
+# them and use this repo's own shared-lib bash convention), and their settings
+# story is genuinely different: agent-plugin reads a per-plugin autoInstall
+# flag from `.claude/settings.direnv.yaml`, NOT ai-mktpl's own
+# `plugins.settings.yaml` (read via shared-lib's plugin-config-read.sh) that
+# this plugin's `direnv.settings.yaml` documents and every other ai-mktpl
+# plugin's settings live in. Requiring users to configure autoInstall twice,
+# in two different files, to get auto-install working would be a regression.
+#
+# So this plugin treats agent-plugin/agent-hook as an ENHANCEMENT, not a hard
+# dependency: used opportunistically when on PATH, with ai-mktpl's own
+# shared-lib-based logic remaining the source of truth and the fallback in
+# every case. See install-direnv.sh and direnv-check.sh for where each is
+# used.
 
 if [ "${_DIRENV_EXPORT_LOADED:-}" = "true" ]; then
   return 0 2>/dev/null || true
 fi
 _DIRENV_EXPORT_LOADED="true"
+
+# direnv_agent_plugin_bin
+#
+# Prints the path to `agent-plugin` if it's on PATH, empty otherwise.
+direnv_agent_plugin_bin() {
+  command -v agent-plugin 2>/dev/null || true
+}
+
+# direnv_agent_hook_bin
+#
+# Prints the path to `agent-hook` if it's on PATH, empty otherwise.
+direnv_agent_hook_bin() {
+  command -v agent-hook 2>/dev/null || true
+}
+
+# direnv_log LEVEL MESSAGE
+#
+# Logs MESSAGE at LEVEL (trace|debug|info|warn|error). When `agent-plugin` is
+# on PATH, routes through it (`agent-plugin --plugin direnv log-<level>`),
+# which gives level-threshold filtering via $AGENT_PLUGIN_LOG_LEVEL. Always
+# ALSO calls hook_log — hook_log's accumulation into the message file is what
+# SessionStart's hook_respond() surfaces to the user/agent as
+# additionalContext/systemMessage, and PreToolUse's failure diagnostics
+# (hook_fail, log file) depend on it too. hook_log has no level concept, so
+# every message reaches it regardless of LEVEL; agent-plugin is the one that
+# actually filters by threshold.
+direnv_log() {
+  local level="$1" message="$2"
+  local ap_bin
+  ap_bin="$(direnv_agent_plugin_bin)"
+  if [ -n "$ap_bin" ]; then
+    AGENT_PLUGIN_NAME="direnv" "$ap_bin" "log-${level}" "$message" || true
+  fi
+  hook_log "$message"
+}
+
+# direnv_try_ensure_dependency_via_agent_plugin
+#
+# Best-effort attempt to install direnv via `agent-plugin ensure-dependency`
+# (which shells out to `mise use -g direnv@latest` — verified for real: the
+# mise registry maps the bare name `direnv` to `aqua:direnv/direnv`, and
+# `mise use direnv@latest` resolves and installs v2.37.1 successfully, see
+# this PR's description for the transcript).
+#
+# Prints the resolved direnv binary path via stdout and returns 0 on success.
+# Returns 1 (prints nothing) when: agent-plugin isn't on PATH, its OWN
+# `autoInstall` setting (in .claude/settings.direnv.yaml — a DIFFERENT file
+# from this plugin's own direnv.settings.yaml/plugins.settings.yaml) isn't
+# true, the mise install fails, or the binary still isn't resolvable
+# afterward. Callers are expected to fall back to their own install logic in
+# every failure case — see resolve_direnv_bin() in install-direnv.sh.
+direnv_try_ensure_dependency_via_agent_plugin() {
+  local ap_bin
+  ap_bin="$(direnv_agent_plugin_bin)"
+  [ -n "$ap_bin" ] || return 1
+
+  if ! AGENT_PLUGIN_NAME="direnv" "$ap_bin" ensure-dependency direnv "direnv@latest"; then
+    # Declined (claude-utils' own autoInstall setting is unset/false), no
+    # mise, or the mise install itself failed. agent-plugin already logged
+    # the reason to stderr — nothing more to add here.
+    return 1
+  fi
+
+  # ensure-dependency exited 0, meaning direnv is either already present or
+  # was just installed via `mise use -g`. Either way, resolve a concrete
+  # binary path: `mise use -g` updates mise's shim dir, which may not be on
+  # THIS process's PATH yet (ensure-dependency's own doc comment notes this).
+  if command -v direnv >/dev/null 2>&1; then
+    command -v direnv
+    return 0
+  fi
+  if command -v mise >/dev/null 2>&1; then
+    local via_mise
+    via_mise="$(mise which direnv 2>/dev/null || true)"
+    if [ -n "$via_mise" ] && [ -x "$via_mise" ]; then
+      echo "$via_mise"
+      return 0
+    fi
+  fi
+
+  return 1
+}
 
 # direnv_detect_platform
 #

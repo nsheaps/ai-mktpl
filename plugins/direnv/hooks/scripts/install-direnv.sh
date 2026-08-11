@@ -22,6 +22,14 @@
 # and again only when the PreToolUse hook (direnv-check.sh) detects the
 # .envrc fingerprint has changed. See lib/direnv-export.sh for the shared
 # implementation and further rationale.
+#
+# Install mechanism: prefers claude-utils' `agent-plugin ensure-dependency`
+# (mise-based) when `agent-plugin` is on PATH, falling back to a direct
+# GitHub-release download otherwise. Logging: prefers `agent-plugin log-*`
+# when present, always also uses this repo's shared-lib hook-logging.sh
+# lifecycle (hook_log_step/hook_fail/hook_respond). See lib/direnv-export.sh
+# for why both are treated as present-if-available rather than hard
+# dependencies.
 set -euo pipefail
 
 PLUGIN_NAME="direnv"
@@ -75,7 +83,7 @@ source "${CLAUDE_PLUGIN_ROOT}/lib/direnv-export.sh"
 
 # --- Guards ---
 
-plugin_is_enabled || { hook_log "plugin disabled, skipping"; hook_respond; exit 0; }
+plugin_is_enabled || { direnv_log "info" "plugin disabled, skipping"; hook_respond; exit 0; }
 
 # --- Read config ---
 
@@ -93,26 +101,50 @@ resolve_direnv_bin() {
 
   if [ "$auto_install" != "true" ]; then
     if tool_is_available direnv; then
-      hook_log "autoInstall=false, using direnv from PATH at $(command -v direnv)"
+      direnv_log "info" "autoInstall=false, using direnv from PATH at $(command -v direnv)"
       command -v direnv
       return 0
     fi
-    hook_log "autoInstall=false and direnv not on PATH, skipping"
+    direnv_log "info" "autoInstall=false and direnv not on PATH, skipping"
     return 1
   fi
 
   if [ -x "$direnv_bin" ]; then
-    hook_log "direnv already installed at $direnv_bin"
+    direnv_log "info" "direnv already installed at $direnv_bin"
     echo "$direnv_bin"
     return 0
   fi
 
   if tool_is_available direnv; then
     direnv_bin="$(command -v direnv)"
-    hook_log "direnv found on PATH at $direnv_bin"
+    direnv_log "info" "direnv found on PATH at $direnv_bin"
     echo "$direnv_bin"
     return 0
   fi
+
+  # --- Preferred path: claude-utils' agent-plugin, if present ---
+  #
+  # Enhancement, not a hard dependency (see lib/direnv-export.sh header for
+  # why): tries `agent-plugin ensure-dependency direnv "direnv@latest"`
+  # (installs via `mise use -g`) when `agent-plugin` is on PATH. Falls
+  # through to the direct GitHub-release download below on ANY failure —
+  # agent-plugin not installed, its own autoInstall setting declining, no
+  # mise, or the mise install itself failing — so this plugin keeps working
+  # exactly as before for the 100% of users who haven't installed
+  # claude-utils or configured .claude/settings.direnv.yaml.
+  if [ -n "$(direnv_agent_plugin_bin)" ]; then
+    local via_agent_plugin
+    if via_agent_plugin="$(direnv_try_ensure_dependency_via_agent_plugin)" && [ -n "$via_agent_plugin" ]; then
+      direnv_log "info" "direnv resolved via agent-plugin/mise at ${via_agent_plugin}"
+      echo "$via_agent_plugin"
+      return 0
+    fi
+    direnv_log "info" "agent-plugin present but did not provide direnv (declined, no mise, or install failed) — falling back to direct download"
+  fi
+
+  # --- Fallback: direct GitHub release download (unchanged from before the
+  # agent-plugin integration; this is the only path when claude-utils isn't
+  # installed, which is every session today) ---
 
   direnv_detect_platform || return 1
 
@@ -130,7 +162,7 @@ resolve_direnv_bin() {
   hook_log_step "download-direnv" "Downloading direnv v${target_version} from ${url}"
   if curl -fsSL "$url" -o "$direnv_bin" 2>/dev/null; then
     chmod +x "$direnv_bin"
-    hook_log "direnv v${target_version} installed to ${direnv_bin}"
+    direnv_log "info" "direnv v${target_version} installed to ${direnv_bin}"
     echo "$direnv_bin"
     return 0
   fi
@@ -147,7 +179,7 @@ resolve_direnv_bin() {
 # step below silently produces nothing for a fresh/unapproved .envrc.
 auto_allow_envrc() {
   local direnv_bin="$1"
-  [ "$auto_allow" = "true" ] || { hook_log "autoAllow=false, skipping direnv allow"; return 0; }
+  [ "$auto_allow" = "true" ] || { direnv_log "info" "autoAllow=false, skipping direnv allow"; return 0; }
 
   local project_dir
   project_dir="$(cd "${CLAUDE_PROJECT_DIR:-.}" 2>/dev/null && pwd)" || project_dir="${CLAUDE_PROJECT_DIR:-.}"
@@ -162,7 +194,7 @@ auto_allow_envrc() {
   if command -v git &>/dev/null; then
     while IFS= read -r worktree_dir; do
       if [ "$worktree_dir" != "$project_dir" ] && [ -f "${worktree_dir}/.envrc" ]; then
-        hook_log "Allowing worktree ${worktree_dir}/.envrc"
+        direnv_log "info" "Allowing worktree ${worktree_dir}/.envrc"
         "$direnv_bin" allow "${worktree_dir}/.envrc" || true
         allowed_any=true
       fi
@@ -170,7 +202,7 @@ auto_allow_envrc() {
   fi
 
   if [ "$allowed_any" = "false" ]; then
-    hook_log "No .envrc found to allow (looked in ${project_dir})"
+    direnv_log "info" "No .envrc found to allow (looked in ${project_dir})"
   fi
 }
 
@@ -194,12 +226,12 @@ do_setup() {
 
   if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
     env_file_upsert_source "$CLAUDE_ENV_FILE" "$runtime_file"
-    hook_log "Wired ${runtime_file} into CLAUDE_ENV_FILE (static snapshot, not a live shell hook)"
+    direnv_log "info" "Wired ${runtime_file} into CLAUDE_ENV_FILE (static snapshot, not a live shell hook)"
   fi
 
   local direnv_ver
   direnv_ver="$("$direnv_bin" --version 2>/dev/null || echo "unknown")"
-  hook_log "direnv v${direnv_ver} available at ${direnv_bin}"
+  direnv_log "info" "direnv v${direnv_ver} available at ${direnv_bin}"
 }
 
 # --- Execute ---
