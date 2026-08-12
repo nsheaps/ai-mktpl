@@ -64,16 +64,16 @@ EOF
 
 If the PR is still in draft, apply the `request-review` label to force a review — non-draft PRs get reviewed automatically on every push. The review receiver removes the label the moment a review starts, so a label sitting on the PR always means "not yet reviewed." To request another round after addressing feedback (a pushed fix, or just a reply justifying why you didn't change something), re-apply the label. See `pr-management.md`'s "Requesting a Fresh AI Review" section for the full loop and the CI-green/mergeable/approved gate that must hold before engaging the user.
 
-## When to Move from Draft
+## When a PR Is Ready to Leave Draft
 
-Move PR from draft to ready when:
+**Only the user/handler moves a PR out of draft** — see `pr-management.md` rule 5. Never run `gh pr ready` on an agent-authored PR. The criteria below are what makes a PR *ready for that decision*, so drive toward them and then hand off:
 
 - All planned work is complete
 - Tests pass
 - You've self-reviewed the changes
-- Ready for actual review
+- The AI review agent has approved (see "Requesting a Fresh AI Review" above)
 
-**Note:** Per `pr-management.md`, AI-created PRs stay in draft — only the user/handler moves a PR out of draft. `gh pr ready` below is documented for completeness but should not be run unilaterally on agent-authored PRs.
+For reference, the command the user runs is:
 
 ```bash
 gh pr ready <number>
