@@ -66,7 +66,7 @@ If the PR is still in draft, apply the `request-review` label to force a review 
 
 ## When a PR Is Ready to Leave Draft
 
-**Only the user/handler moves a PR out of draft** — see `pr-management.md` rule 5. Never run `gh pr ready` on an agent-authored PR. The criteria below are what makes a PR *ready for that decision*, so drive toward them and then hand off:
+**Only the user/handler moves a PR out of draft** — see `pr-management.md` rule 5. Never run `gh pr ready` on an agent-authored PR. The criteria below are what makes a PR _ready for that decision_, so drive toward them and then hand off:
 
 - All planned work is complete
 - Tests pass
