@@ -38,7 +38,7 @@
 
      **After every push, re-arm the monitor. Re-firing depends on PR draft state:**
      - **Non-draft PR**: push (`synchronize` event) re-fires the workflow naturally. No label dance needed.
-     - **Draft PR** (the default per `auto-pr-management.md`): push does **NOT** re-fire the workflow — `synchronize` is gated out by the workflow's `if:` condition (`pull_request.draft != true`). You MUST remove + re-add the `request-review` label IMMEDIATELY after every push to a draft to force a re-fire. Do not wait the 6-minute SKIPPED-detection window — for drafts, push-without-re-label is a known certainty, not an uncertain probe.
+     - **Draft PR** (the default per `auto-pr-management.md`): push does **NOT** re-fire the workflow — `synchronize` is gated out by the workflow's `if:` condition (`pull_request.draft != true`). Re-apply the `request-review` label (remove + re-add) to force a re-fire, but only when you actually want a fresh review round — i.e. after addressing the previous review's feedback, not after every unrelated commit. See `pr-management.md` §"Requesting a Fresh AI Review".
 
   6. Once that state is achieved, use your best judgement to determine if the PR should be merged, and follow up actions to take (eg wait for homebrew tap to publish, bump versions in mise.toml, install new versions of tools and plugins, restart agents/services). If the PR is reviewed, but the review requirement isn't satisfied, you MUST tag Nate (your handler) in discord.
   7. After the PR merges, coordinate with the PM agent (Henry) to update linked tickets and close any bugs the change resolves:

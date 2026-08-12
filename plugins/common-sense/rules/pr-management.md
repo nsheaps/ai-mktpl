@@ -17,3 +17,15 @@ You are expected to open and maintain PRs. Follow these rules:
 3. **Keep PRs up to date**: Update the PR title, body, and labels as the branch evolves.
 4. **Close duplicates**: If one PR duplicates functionality from another or resolves an issue, use GitHub magic phrases (e.g., `Closes #123`, `Fixes #456`) in the PR body to link and close appropriately.
 5. **Never mark ready for review**: Do NOT remove the draft status from a PR. Only the user may do that.
+
+## Requesting a Fresh AI Review (`request-review` label)
+
+The `request-review` label is what forces a review on a still-draft PR (non-draft PRs get reviewed automatically on every push). Where the review workflow clears the label at review-start (ai-mktpl does — see the `Remove request-review label` step in `.github/workflows/claude-code-review.yaml`), a label sitting on the PR means "a review hasn't started yet" rather than a stale leftover; where it doesn't, the label may simply be left over from an earlier round. Either way, **re-applying the label** is the correct way to ask for another look:
+
+1. Address the AI review's feedback — either push a fix, or reply in the review thread explaining why you're not changing something (a justification is a valid response, not just a code change).
+2. Re-apply the `request-review` label (remove + re-add, or just add if it's already gone) to request a fresh review round.
+3. Repeat until the review agent approves.
+
+**Do not remove-then-re-add the label after every ordinary push just to force a re-trigger.** That workaround was needed when the label used to sit "on" indefinitely after firing once on a draft PR. Where the receiver clears it at review-start, it no longer is; where it doesn't, remove and re-add rather than assuming a present label is still doing something. Re-apply the label specifically when you want a new review round — after addressing feedback, not after every unrelated commit.
+
+**Gate before engaging the user:** only once (a) CI is green, (b) the PR is mergeable with no conflicts, AND (c) the review agent has approved, should you — while keeping the PR in draft — reach out to the user/handler for their own review.

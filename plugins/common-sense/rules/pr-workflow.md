@@ -60,14 +60,20 @@ EOF
 - Git history becomes unclear when PRs touch unrelated code
 - Rollbacks are harder when changes are mixed
 
-## When to Move from Draft
+## Requesting a Fresh AI Review
 
-Move PR from draft to ready when:
+If the PR is still in draft, apply the `request-review` label to force a review — non-draft PRs get reviewed automatically on every push. Where the review workflow clears the label at review-start (ai-mktpl does), a label sitting on the PR means "not yet reviewed" rather than a leftover from an earlier round; where it doesn't, remove and re-add rather than assuming a present label is still doing something. To request another round after addressing feedback (a pushed fix, or just a reply justifying why you didn't change something), re-apply the label. See `pr-management.md`'s "Requesting a Fresh AI Review" section for the full loop and the CI-green/mergeable/approved gate that must hold before engaging the user.
+
+## When a PR Is Ready to Leave Draft
+
+**Only the user/handler moves a PR out of draft** — see `pr-management.md` rule 5. Never run `gh pr ready` on an agent-authored PR. The criteria below are what makes a PR _ready for that decision_, so drive toward them and then hand off:
 
 - All planned work is complete
 - Tests pass
 - You've self-reviewed the changes
-- Ready for actual review
+- The AI review agent has approved (see "Requesting a Fresh AI Review" above)
+
+For reference, the command the user runs is:
 
 ```bash
 gh pr ready <number>
