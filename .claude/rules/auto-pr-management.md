@@ -54,8 +54,11 @@ Before creating, check if a PR already exists for the current branch. If one exi
 
 1. **Create as draft** — all new PRs start as drafts
 2. **Add `request-review` label** — triggers AI code review automatically
-3. **Address review feedback** — fix any issues found by the AI review
-4. **Mark ready** when work is complete and CI passes
+3. **Address review feedback** — fix any issues found by the AI review (push a fix, or reply in the thread justifying why you're not changing something)
+4. **Re-apply `request-review`** to request another review round — the receiver clears the label itself the moment a review starts, so a label sitting on the PR always means "not yet reviewed." Iterate steps 3-4 until the review agent approves.
+5. **Gate before human engagement**: only once CI is green, the PR is mergeable (no conflicts), AND the review agent has approved, reach out to the user/handler for their own review — while keeping the PR in draft.
+
+Do not remove-then-re-add the label after every ordinary push just to force a re-trigger — that was only needed before the receiver auto-cleared the label at review start. Re-apply it specifically when requesting a new review round.
 
 ## See Also
 
