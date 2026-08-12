@@ -62,7 +62,7 @@ EOF
 
 ## Requesting a Fresh AI Review
 
-If the PR is still in draft, apply the `request-review` label to force a review — non-draft PRs get reviewed automatically on every push. The review receiver removes the label the moment a review starts, so a label sitting on the PR always means "not yet reviewed." To request another round after addressing feedback (a pushed fix, or just a reply justifying why you didn't change something), re-apply the label. See `pr-management.md`'s "Requesting a Fresh AI Review" section for the full loop and the CI-green/mergeable/approved gate that must hold before engaging the user.
+If the PR is still in draft, apply the `request-review` label to force a review — non-draft PRs get reviewed automatically on every push. Where the review workflow clears the label at review-start (ai-mktpl does), a label sitting on the PR means "not yet reviewed" rather than a leftover from an earlier round; where it doesn't, remove and re-add rather than assuming a present label is still doing something. To request another round after addressing feedback (a pushed fix, or just a reply justifying why you didn't change something), re-apply the label. See `pr-management.md`'s "Requesting a Fresh AI Review" section for the full loop and the CI-green/mergeable/approved gate that must hold before engaging the user.
 
 ## When a PR Is Ready to Leave Draft
 

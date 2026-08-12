@@ -20,7 +20,7 @@ You are expected to open and maintain PRs. Follow these rules:
 
 ## Requesting a Fresh AI Review (`request-review` label)
 
-The `request-review` label is what forces a review on a still-draft PR (non-draft PRs get reviewed automatically on every push). The review receiver removes the label itself the instant a review actually starts — so a label sitting on the PR always means "a review hasn't started yet," never a stale leftover from an earlier round. That makes **re-applying the label** the correct way to ask for another look:
+The `request-review` label is what forces a review on a still-draft PR (non-draft PRs get reviewed automatically on every push). Where the review workflow clears the label at review-start (ai-mktpl does — see the `Remove request-review label` step in `.github/workflows/claude-code-review.yaml`), a label sitting on the PR means "a review hasn't started yet" rather than a stale leftover; where it doesn't, the label may simply be left over from an earlier round. Either way, **re-applying the label** is the correct way to ask for another look:
 
 1. Address the AI review's feedback — either push a fix, or reply in the review thread explaining why you're not changing something (a justification is a valid response, not just a code change).
 2. Re-apply the `request-review` label (remove + re-add, or just add if it's already gone) to request a fresh review round.
