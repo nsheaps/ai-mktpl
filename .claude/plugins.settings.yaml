@@ -10,6 +10,7 @@ github:
 github-app:
   enabled: true
   autoGitConfig: true
+  ref: 'op://Agent-Jack/github--app--jack'
 
 mise:
   autoInstallTools: true
