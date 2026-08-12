@@ -4,4 +4,4 @@ All ongoing issues MUST be tracked in a github issue and cross linked here and o
 The current issues are:
 
 - Repeated permissions issues since claude-code cli update where changes in .claude require permissions prompts https://github.com/nsheaps/ai-mktpl/issues/261
-- Plugins set up in project settings.json are not installed and made available on initial session launch, but are later available.
+- Plugins set up in project settings.json are not installed and made available on initial session launch, but are later available. Root cause identified 2026-08-12: on a fresh cloud session, plugin `Setup{init}`/`SessionStart` lifecycle hooks never fire because those events already passed before the plugins existed on disk. `ai-mktpl` (`.claude/hooks/session-start/01-install-plugins.sh`) and `.ai-agent-jack` (`bin/hooks/session-start-install-plugins.sh`) have a workaround that manually installs enabled plugins and re-fires their lifecycle hooks; `agents`, `claude-utils`, `nsheaps`, and `.github` do not yet. Tracked in https://github.com/nsheaps/ai-mktpl/issues/745
