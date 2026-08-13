@@ -17,7 +17,7 @@ on:
 
 jobs:
   sync-specs:
-    uses: nsheaps/github-actions/.github/workflows/sync-plugin-specs.yaml@1e129396b6f0b39257efac9a255010fe64a68ef8 # main
+    uses: nsheaps/github-actions/.github/workflows/sync-plugin-specs.yaml@c1794f6f4fbb3cbc5e5a71e820581a74239f706a # main
     permissions:
       contents: write
     with:
