@@ -36,6 +36,13 @@ It runs each ecosystem's opinionated linter where that binary resolves, emitting
 without running anything. Fields are `|`-separated; a literal pipe inside FILE or MESSAGE arrives
 escaped as `\|`, so the field count is always five.
 
+**Output-format coverage.** The probe parses each tool's own stdout, so a filter that does not
+match its tool is a silent zero-findings bug rather than a crash. **No tool in this family has been
+run against captured output** — every row's filter is assumed, and none is pinned by a fixture in
+[`tests/run-probe-tests.sh`](../../tests/run-probe-tests.sh), which asserts only that this probe's
+`--list` runs. Treat an unexpected zero from any row as suspect, and confirm by running the linter
+directly before reporting the language clean.
+
 | Rule                  | Consequence                                                                              |
 | :-------------------- | :--------------------------------------------------------------------------------------- |
 | Probe, then battery   | If `.review/battery.sarif` exists, adjudicate its partitioned results, do not re-run     |

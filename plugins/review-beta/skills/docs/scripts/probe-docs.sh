@@ -46,41 +46,41 @@ LIST=0
 ROOT="."
 
 usage() {
-	echo "usage: probe-docs.sh [--base REF] [--list] [PATH]" >&2
-	exit 2
+  echo "usage: probe-docs.sh [--base REF] [--list] [PATH]" >&2
+  exit 2
 }
 
 while [ $# -gt 0 ]; do
-	case "$1" in
-	--base)
-		[ $# -ge 2 ] || usage
-		BASE=$2
-		shift
-		;;
-	--list) LIST=1 ;;
-	-h | --help)
-		sed -n '2,45p' "$0" | sed 's/^#\{1,\} \{0,1\}//'
-		exit 0
-		;;
-	-*) usage ;;
-	*) ROOT=$1 ;;
-	esac
-	shift
+  case "$1" in
+  --base)
+    [ $# -ge 2 ] || usage
+    BASE=$2
+    shift
+    ;;
+  --list) LIST=1 ;;
+  -h | --help)
+    sed -n '2,45p' "$0" | sed 's/^#\{1,\} \{0,1\}//'
+    exit 0
+    ;;
+  -*) usage ;;
+  *) ROOT=$1 ;;
+  esac
+  shift
 done
 
 [ -d "$ROOT" ] || {
-	echo "probe-docs.sh: no such directory: $ROOT" >&2
-	exit 2
+  echo "probe-docs.sh: no such directory: $ROOT" >&2
+  exit 2
 }
 cd "$ROOT" || exit 2
 
 if [ -z "$BASE" ]; then
-	for c in origin/main origin/master main master; do
-		if git rev-parse --verify "$c" >/dev/null 2>&1; then
-			BASE=$c
-			break
-		fi
-	done
+  for c in origin/main origin/master main master; do
+    if git rev-parse --verify "$c" >/dev/null 2>&1; then
+      BASE=$c
+      break
+    fi
+  done
 fi
 export BASE
 
@@ -90,7 +90,7 @@ export BASE
 # testing, load tests, deployed-endpoint probes) are declared deferred below and
 # have to arrive from the CI battery instead.
 TOOLS=$(
-	cat <<'TOOLTABLE'
+  cat <<'TOOLTABLE'
 docs-link-graph-integrity,docs-url-stability-and-redirects	lychee	major	lychee --no-progress --offline . 2>&1 | grep -E '^\[ERROR\]' || true
 docs-presentation,docs-entry-point-completeness,docs-accessibility	markdownlint-cli2	nit	markdownlint-cli2 '**/*.md' 2>&1 | grep -E '^[^ ]+\.md:[0-9]+' || true
 docs-terminology-consistency,docs-claim-substantiation,docs-presentation	vale	major	vale --output line . 2>/dev/null | grep -E ':[0-9]+:[0-9]+' || true
@@ -104,8 +104,8 @@ TOOLTABLE
 )
 
 if [ "$LIST" -eq 1 ]; then
-	printf '%s\n' "$TOOLS"
-	exit 0
+  printf '%s\n' "$TOOLS"
+  exit 0
 fi
 
 TMP=$(mktemp -d) || exit 2
@@ -119,9 +119,9 @@ export TMP
 # A CI run that already produced the merged battery is authoritative: rerunning a
 # scanner here duplicates results the aggregator has partitioned by dimension.
 if [ -f .review/battery.sarif ]; then
-	echo "# battery=present path=.review/battery.sarif" >>"$TMP/meta"
+  echo "# battery=present path=.review/battery.sarif" >>"$TMP/meta"
 else
-	echo "# battery=absent" >>"$TMP/meta"
+  echo "# battery=absent" >>"$TMP/meta"
 fi
 
 ran=0
@@ -130,36 +130,36 @@ missing=0
 printf '%s\n' "$TOOLS" | grep -v '^[[:space:]]*$' | grep -v '^#' >"$TMP/tools"
 
 while IFS="$(printf '\t')" read -r dim bin sev cmd; do
-	[ -n "${dim:-}" ] || continue
-	if ! command -v "$bin" >/dev/null 2>&1; then
-		printf '# tool=%s status=missing dimensions=%s\n' "$bin" "$dim" >>"$TMP/meta"
-		missing=$((missing + 1))
-		continue
-	fi
-	printf '# tool=%s status=ran dimensions=%s\n' "$bin" "$dim" >>"$TMP/meta"
-	ran=$((ran + 1))
-	sh -c "$cmd" >"$TMP/out" 2>&1 || true
-	while IFS= read -r line; do
-		[ -n "$line" ] || continue
-		file=$(printf '%s' "$line" | sed -n 's/^\([^ :][^ :]*\):[0-9][0-9]*[: 	].*/\1/p')
-		lno=$(printf '%s' "$line" | sed -n 's/^[^ :][^ :]*:\([0-9][0-9]*\)[: 	].*/\1/p')
-		[ -n "$file" ] || file="-"
-		[ -n "$lno" ] || lno=0
-		# A diagnostic may itself contain '|' (regex alternations, table output,
-		# shell snippets). Escaping it as '\\|' in the two free-text fields keeps
-		# the field count fixed at five for any consumer, naive splitter included.
-		file=$(printf '%s' "$file" | sed 's/|/\\|/g')
-		msg=$(printf '%s' "$line" | sed 's/|/\\|/g')
-		printf '%s|%s|%s|%s|%s\n' "$sev" "$file" "$lno" "$dim" "$msg" >>"$TMP/findings"
-	done <"$TMP/out"
+  [ -n "${dim:-}" ] || continue
+  if ! command -v "$bin" >/dev/null 2>&1; then
+    printf '# tool=%s status=missing dimensions=%s\n' "$bin" "$dim" >>"$TMP/meta"
+    missing=$((missing + 1))
+    continue
+  fi
+  printf '# tool=%s status=ran dimensions=%s\n' "$bin" "$dim" >>"$TMP/meta"
+  ran=$((ran + 1))
+  sh -c "$cmd" >"$TMP/out" 2>&1 || true
+  while IFS= read -r line; do
+    [ -n "$line" ] || continue
+    file=$(printf '%s' "$line" | sed -n 's/^\([^ :][^ :]*\):[0-9][0-9]*[: 	].*/\1/p')
+    lno=$(printf '%s' "$line" | sed -n 's/^[^ :][^ :]*:\([0-9][0-9]*\)[: 	].*/\1/p')
+    [ -n "$file" ] || file="-"
+    [ -n "$lno" ] || lno=0
+    # A diagnostic may itself contain '|' (regex alternations, table output,
+    # shell snippets). Escaping it as '\\|' in the two free-text fields keeps
+    # the field count fixed at five for any consumer, naive splitter included.
+    file=$(printf '%s' "$file" | sed 's/|/\\|/g')
+    msg=$(printf '%s' "$line" | sed 's/|/\\|/g')
+    printf '%s|%s|%s|%s|%s\n' "$sev" "$file" "$lno" "$dim" "$msg" >>"$TMP/findings"
+  done <"$TMP/out"
 done <"$TMP/tools"
 
 printf "# deferred=%s reason=%s\n" \
-	"docs-getting-started-executable" "quickstart execution needs a clean container" \
-	"docs-translation-sync" "source-digest comparison needs the localized corpus" >>"$TMP/meta"
+  "docs-getting-started-executable" "quickstart execution needs a clean container" \
+  "docs-translation-sync" "source-digest comparison needs the localized corpus" >>"$TMP/meta"
 
 cat "$TMP/meta"
 cat "$TMP/findings"
 printf '# summary tools_ran=%s tools_missing=%s findings=%s\n' \
-	"$ran" "$missing" "$(wc -l <"$TMP/findings" | tr -d ' ')"
+  "$ran" "$missing" "$(wc -l <"$TMP/findings" | tr -d ' ')"
 exit 0

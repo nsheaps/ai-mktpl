@@ -66,8 +66,16 @@ dimensions and produce no findings:
 | Machine-detectable WCAG failures        | `axe-core` / `pa11y`, `eslint-plugin-jsx-a11y`             |
 | Formatter / linter / editorconfig       | the repo's own `lint` or `format --check` task             |
 
-**If a gate fails, abort the run** with "fix the failing gate first" rather than spawning aspects.
-A review layered on top of a red gate spends tokens re-describing what CI already said.
+**These gates are aspirational in this beta**: unlike every aspect in §3 they have no probe script
+and no per-gate command, so apply one only where the repo's own CI already runs that tool, and
+take the tool's verdict as the gate's. Three rules keep a gate from becoming the silent zero this
+plugin argues against everywhere else:
+
+- A gate whose tool is absent is `unavailable`, never `passed`, and never counts toward a pass.
+- A failing gate does **not** abort the run — lead the report with it and review anyway. Losing
+  the whole review to an unformatted tree tells the reader strictly less than the findings plus a
+  red gate header, which is all CI had already told them.
+- Never eyeball a gate. No tool, no verdict.
 
 ---
 
@@ -80,12 +88,12 @@ implements the aspect contract:
 
 ```
 for d in "${CLAUDE_SKILL_DIR}"/../*/; do
-	[ "$(basename "$d")" = "start" ] && continue
-	f="$d/SKILL.md"
-	[ -f "$f" ] || continue                                  # no skill, not an aspect
-	grep -q '^context: fork' "$f" || continue                # must run isolated
-	grep -qE '^## [0-9]+\. Return contract' "$f" || continue # must return the shared shape
-	echo "$(basename "$d")"
+  [ "$(basename "$d")" = "start" ] && continue
+  f="$d/SKILL.md"
+  [ -f "$f" ] || continue                                  # no skill, not an aspect
+  grep -q '^context: fork' "$f" || continue                # must run isolated
+  grep -qE '^## [0-9]+\. Return contract' "$f" || continue # must return the shared shape
+  echo "$(basename "$d")"
 done
 ```
 
@@ -159,7 +167,7 @@ Return one report:
 
 VERDICT: PASS | FAIL
 KIND: <the §1 row that was matched>
-GATES: <n> passed, <n> failed <— names of any that failed>
+GATES: <n> passed, <n> failed, <n> unavailable <— names of any that failed or were unavailable>
 ASPECTS: <n> run, <n> passed, <n> failed<, n unavailable>
 COUNTS: P0=<n> P1=<n> P2=<n> P3=<n> (after de-duplication and verification)
 

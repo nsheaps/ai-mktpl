@@ -46,41 +46,41 @@ LIST=0
 ROOT="."
 
 usage() {
-	echo "usage: probe-org-fit.sh [--base REF] [--list] [PATH]" >&2
-	exit 2
+  echo "usage: probe-org-fit.sh [--base REF] [--list] [PATH]" >&2
+  exit 2
 }
 
 while [ $# -gt 0 ]; do
-	case "$1" in
-	--base)
-		[ $# -ge 2 ] || usage
-		BASE=$2
-		shift
-		;;
-	--list) LIST=1 ;;
-	-h | --help)
-		sed -n '2,45p' "$0" | sed 's/^#\{1,\} \{0,1\}//'
-		exit 0
-		;;
-	-*) usage ;;
-	*) ROOT=$1 ;;
-	esac
-	shift
+  case "$1" in
+  --base)
+    [ $# -ge 2 ] || usage
+    BASE=$2
+    shift
+    ;;
+  --list) LIST=1 ;;
+  -h | --help)
+    sed -n '2,45p' "$0" | sed 's/^#\{1,\} \{0,1\}//'
+    exit 0
+    ;;
+  -*) usage ;;
+  *) ROOT=$1 ;;
+  esac
+  shift
 done
 
 [ -d "$ROOT" ] || {
-	echo "probe-org-fit.sh: no such directory: $ROOT" >&2
-	exit 2
+  echo "probe-org-fit.sh: no such directory: $ROOT" >&2
+  exit 2
 }
 cd "$ROOT" || exit 2
 
 if [ -z "$BASE" ]; then
-	for c in origin/main origin/master main master; do
-		if git rev-parse --verify "$c" >/dev/null 2>&1; then
-			BASE=$c
-			break
-		fi
-	done
+  for c in origin/main origin/master main master; do
+    if git rev-parse --verify "$c" >/dev/null 2>&1; then
+      BASE=$c
+      break
+    fi
+  done
 fi
 export BASE
 
@@ -99,7 +99,7 @@ export BASE
 # 'prettier --check' and 'go mod tidy -diff' are the read-only spellings of
 # their respective tools (--check / -diff report and exit non-zero, never write).
 TOOLS=$(
-	cat <<'TOOLTABLE'
+  cat <<'TOOLTABLE'
 org-fit-repo-stated-rules,org-fit-interface-convention-conformance	mise	major	t=$(mise tasks ls 2>/dev/null | awk '{print $1}' | grep -xE 'lint:check|lint-check|check|format:check|format-check' | head -1); [ -n "$t" ] || exit 0; b=$(git status --porcelain 2>/dev/null; git diff 2>/dev/null | cksum); o=$(mise run "$t" 2>&1); a=$(git status --porcelain 2>/dev/null; git diff 2>/dev/null | cksum); if [ "$b" != "$a" ]; then echo "-:0: mise run $t mutated the working tree; its findings were discarded - treat this dimension as unavailable"; exit 0; fi; printf '%s\n' "$o" | grep -E ':[0-9]+:[0-9]+' || true
 org-fit-repo-stated-rules	editorconfig-checker	minor	editorconfig-checker 2>&1 | grep -E ':[0-9]+' || true
 org-fit-repo-stated-rules	prettier	minor	prettier --check . 2>&1 | grep -E '^\[warn\] ' || true
@@ -114,8 +114,8 @@ TOOLTABLE
 )
 
 if [ "$LIST" -eq 1 ]; then
-	printf '%s\n' "$TOOLS"
-	exit 0
+  printf '%s\n' "$TOOLS"
+  exit 0
 fi
 
 TMP=$(mktemp -d) || exit 2
@@ -129,9 +129,9 @@ export TMP
 # A CI run that already produced the merged battery is authoritative: rerunning a
 # scanner here duplicates results the aggregator has partitioned by dimension.
 if [ -f .review/battery.sarif ]; then
-	echo "# battery=present path=.review/battery.sarif" >>"$TMP/meta"
+  echo "# battery=present path=.review/battery.sarif" >>"$TMP/meta"
 else
-	echo "# battery=absent" >>"$TMP/meta"
+  echo "# battery=absent" >>"$TMP/meta"
 fi
 
 ran=0
@@ -144,49 +144,49 @@ printf '%s\n' "$TOOLS" | grep -v '^[[:space:]]*$' | grep -v '^#' >"$TMP/tools"
 # formatter output), so running it would mutate the tree; with no read-only
 # invocation the honest report is unavailable, not a clean scan.
 if command -v mise >/dev/null 2>&1 &&
-	! mise tasks ls 2>/dev/null | awk '{print $1}' |
-		grep -qxE 'lint:check|lint-check|check|format:check|format-check'; then
-	grep -v "^org-fit-repo-stated-rules,org-fit-interface-convention-conformance$(printf '\t')mise$(printf '\t')" \
-		"$TMP/tools" >"$TMP/tools.f" || true
-	mv "$TMP/tools.f" "$TMP/tools"
-	printf '# tool=%s status=missing dimensions=%s reason=%s\n' \
-		"mise" "org-fit-repo-stated-rules,org-fit-interface-convention-conformance" \
-		"no check-only task; a fixing lint task is not a read-only probe" >>"$TMP/meta"
-	missing=$((missing + 1))
+  ! mise tasks ls 2>/dev/null | awk '{print $1}' |
+    grep -qxE 'lint:check|lint-check|check|format:check|format-check'; then
+  grep -v "^org-fit-repo-stated-rules,org-fit-interface-convention-conformance$(printf '\t')mise$(printf '\t')" \
+    "$TMP/tools" >"$TMP/tools.f" || true
+  mv "$TMP/tools.f" "$TMP/tools"
+  printf '# tool=%s status=missing dimensions=%s reason=%s\n' \
+    "mise" "org-fit-repo-stated-rules,org-fit-interface-convention-conformance" \
+    "no check-only task; a fixing lint task is not a read-only probe" >>"$TMP/meta"
+  missing=$((missing + 1))
 fi
 
 while IFS="$(printf '\t')" read -r dim bin sev cmd; do
-	[ -n "${dim:-}" ] || continue
-	if ! command -v "$bin" >/dev/null 2>&1; then
-		printf '# tool=%s status=missing dimensions=%s\n' "$bin" "$dim" >>"$TMP/meta"
-		missing=$((missing + 1))
-		continue
-	fi
-	printf '# tool=%s status=ran dimensions=%s\n' "$bin" "$dim" >>"$TMP/meta"
-	ran=$((ran + 1))
-	sh -c "$cmd" >"$TMP/out" 2>&1 || true
-	while IFS= read -r line; do
-		[ -n "$line" ] || continue
-		file=$(printf '%s' "$line" | sed -n 's/^\([^ :][^ :]*\):[0-9][0-9]*[: 	].*/\1/p')
-		lno=$(printf '%s' "$line" | sed -n 's/^[^ :][^ :]*:\([0-9][0-9]*\)[: 	].*/\1/p')
-		[ -n "$file" ] || file="-"
-		[ -n "$lno" ] || lno=0
-		# A diagnostic may itself contain '|' (regex alternations, table output,
-		# shell snippets). Escaping it as '\\|' in the two free-text fields keeps
-		# the field count fixed at five for any consumer, naive splitter included.
-		file=$(printf '%s' "$file" | sed 's/|/\\|/g')
-		msg=$(printf '%s' "$line" | sed 's/|/\\|/g')
-		printf '%s|%s|%s|%s|%s\n' "$sev" "$file" "$lno" "$dim" "$msg" >>"$TMP/findings"
-	done <"$TMP/out"
+  [ -n "${dim:-}" ] || continue
+  if ! command -v "$bin" >/dev/null 2>&1; then
+    printf '# tool=%s status=missing dimensions=%s\n' "$bin" "$dim" >>"$TMP/meta"
+    missing=$((missing + 1))
+    continue
+  fi
+  printf '# tool=%s status=ran dimensions=%s\n' "$bin" "$dim" >>"$TMP/meta"
+  ran=$((ran + 1))
+  sh -c "$cmd" >"$TMP/out" 2>&1 || true
+  while IFS= read -r line; do
+    [ -n "$line" ] || continue
+    file=$(printf '%s' "$line" | sed -n 's/^\([^ :][^ :]*\):[0-9][0-9]*[: 	].*/\1/p')
+    lno=$(printf '%s' "$line" | sed -n 's/^[^ :][^ :]*:\([0-9][0-9]*\)[: 	].*/\1/p')
+    [ -n "$file" ] || file="-"
+    [ -n "$lno" ] || lno=0
+    # A diagnostic may itself contain '|' (regex alternations, table output,
+    # shell snippets). Escaping it as '\\|' in the two free-text fields keeps
+    # the field count fixed at five for any consumer, naive splitter included.
+    file=$(printf '%s' "$file" | sed 's/|/\\|/g')
+    msg=$(printf '%s' "$line" | sed 's/|/\\|/g')
+    printf '%s|%s|%s|%s|%s\n' "$sev" "$file" "$lno" "$dim" "$msg" >>"$TMP/findings"
+  done <"$TMP/out"
 done <"$TMP/tools"
 
 printf "# deferred=%s reason=%s\n" \
-	"org-fit-a11y-semantics-and-keyboard" "screen-reader and keyboard traversal need a rendered surface" \
-	"org-fit-a11y-adaptive-presentation" "zoom/reflow matrix needs a browser" \
-	"org-fit-performance-budget-regression" "budget assertions need a production-shaped build" >>"$TMP/meta"
+  "org-fit-a11y-semantics-and-keyboard" "screen-reader and keyboard traversal need a rendered surface" \
+  "org-fit-a11y-adaptive-presentation" "zoom/reflow matrix needs a browser" \
+  "org-fit-performance-budget-regression" "budget assertions need a production-shaped build" >>"$TMP/meta"
 
 cat "$TMP/meta"
 cat "$TMP/findings"
 printf '# summary tools_ran=%s tools_missing=%s findings=%s\n' \
-	"$ran" "$missing" "$(wc -l <"$TMP/findings" | tr -d ' ')"
+  "$ran" "$missing" "$(wc -l <"$TMP/findings" | tr -d ' ')"
 exit 0

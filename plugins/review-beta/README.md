@@ -70,8 +70,10 @@ unrecognized aspect directory, so a half-built skill is visible rather than sile
 sh plugins/review-beta/tests/run-probe-tests.sh
 ```
 
-30 assertions covering each probe's tool-detection and output-parsing paths against real captured
-tool output (provenance in [`tests/fixtures/SOURCES.md`](tests/fixtures/SOURCES.md)), the
-pipe-escaping contract, the `org-fit` read-only task guard, and the aspect-discovery gate. Run it
-after changing any probe command or filter — a filter that no longer matches its tool reports zero
-findings silently, which is worse than the tool being absent.
+30 assertions. The `docs`, `security`, `design` and `org-fit` probes have their output-parsing
+filters pinned against real captured tool output (provenance in
+[`tests/fixtures/SOURCES.md`](tests/fixtures/SOURCES.md)); `correctness`, `process` and
+`best-practices` are currently covered only by a syntax check and a `--list` smoke test, so their
+filters are unpinned. Also covered: the pipe-escaping contract, the `org-fit` read-only task guard,
+and the aspect-discovery gate. Run it after changing any probe command or filter — a filter that no
+longer matches its tool reports zero findings silently, which is worse than the tool being absent.

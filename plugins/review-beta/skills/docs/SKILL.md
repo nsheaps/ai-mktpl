@@ -11,7 +11,7 @@ allowed-tools: Read, Grep, Glob, Bash(${CLAUDE_SKILL_DIR}/scripts/probe-docs.sh:
 Review the documentation touched by $ARGUMENTS and return the findings report defined in §5. With
 no `$ARGUMENTS`, review the working-tree diff against the default branch.
 
-This is one aspect subskill of a multi-aspect review. The parent orchestrator (`review-beta`)
+This is one aspect subskill of a multi-aspect review. The parent orchestrator (`review-beta:start`)
 collects this report alongside the other five aspects and synthesizes them, so the report is the
 whole product: **the parent sees only the return value, never any of this reasoning.**
 
@@ -141,6 +141,6 @@ UNAVAILABLE:
 
 | Skill                               | Relationship                                                     |
 | :---------------------------------- | :--------------------------------------------------------------- |
-| `review-beta`                       | The orchestrator that invokes this aspect and merges its report  |
+| `review-beta:start`                 | The orchestrator that invokes this aspect and merges its report  |
 | `review-beta:agentic-configuration` | Reviews SKILL.md authoring specifically; this aspect skips those |
 | `review-beta:design`                | Owns fact duplication and the deprecation window                 |

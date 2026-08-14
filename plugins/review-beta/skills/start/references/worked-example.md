@@ -9,7 +9,7 @@
 5. [The synthesized report](#5-the-synthesized-report)
 6. [What this example is meant to show](#6-what-this-example-is-meant-to-show)
 
-Reference for `review-beta` §5. One run, end to end, on a small realistic diff.
+Reference for `review-beta:start` §5. One run, end to end, on a small realistic diff.
 
 ---
 
