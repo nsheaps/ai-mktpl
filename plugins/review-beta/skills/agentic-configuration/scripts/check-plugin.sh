@@ -99,7 +99,7 @@ check_plugin_json() {
   # would be reported as mis-named.
   pdir=$(basename "$(CDPATH= cd -- "$(dirname "$(dirname "$f")")" && pwd)")
   if [ -n "$name" ] && [ "$name" != "$pdir" ]; then
-    finding P1 "$f" "$(key_line "$f" name)" PL005 "plugin.json name '$name' does not match its directory '$pdir'"
+    finding P1 "$f" "$(key_line "$f" name)" PL005 "plugin.json name '$name' does not match its directory '$pdir'; the data dir is {plugin-name}-{marketplace} (.claude/rules/shared-libs.md)"
   fi
 
   # PL006: a plugin with no README is undiscoverable in the marketplace listing.
@@ -185,7 +185,7 @@ check_md_frontmatter() {
     n=$(printf '%s\n' "$fm" | sed -n 's/^name:[ \t]*//p' | head -n 1 | tr -d '"'"'"' \t\r')
     b=$(basename "$f" .md)
     if [ -n "$n" ] && [ "$n" != "$b" ]; then
-      finding P1 "$f" 2 AG003 "agent name '$n' does not match its filename '$b.md'"
+      finding P1 "$f" 2 AG003 "agent name '$n' does not match its filename '$b.md' (marketplace convention, not a written rule — Claude Code registers agents by the frontmatter name, so a mismatch misleads readers rather than breaking loading)"
     fi
   fi
 }
