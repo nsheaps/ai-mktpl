@@ -1,0 +1,7 @@
+[ERROR] file:///tmp/claude-0/-home-user/5db46c57-65a9-53e9-85fa-f71183401ad8/scratchpad/sample/docs/no-such-file.md | Cannot find file
+Issues found in 1 input. Find details below.
+
+[./docs/broken.md]:
+[ERROR] file:///tmp/claude-0/-home-user/5db46c57-65a9-53e9-85fa-f71183401ad8/scratchpad/sample/docs/no-such-file.md | Cannot find file
+
+🔍 2 Total (in 0s) ✅ 0 OK 🚫 1 Error 👻 1 Excluded

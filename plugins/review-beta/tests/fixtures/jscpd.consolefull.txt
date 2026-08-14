@@ -1,0 +1,37 @@
+[1mClone found (javascript)[22m
+ - dup1.js [1:29 - 10:19]
+   dup2.js [1:27 - 10:19]
+[90m   1 │ [39mfunction computeInvoiceTotal(items, taxRate, discount) {
+[90m   2 │ [39m  let subtotal = 0;
+[90m   3 │ [39m  for (const item of items) {
+[90m   4 │ [39m    subtotal += item.price * item.quantity;
+[90m   5 │ [39m  }
+[90m   6 │ [39m  const discounted = subtotal - subtotal * discount;
+[90m   7 │ [39m  const tax = discounted * taxRate;
+[90m   8 │ [39m  return Math.round((discounted + tax) * 100) / 100;
+[90m   9 │ [39m}
+[90m  10 │ [39mmodule.exports = { computeInvoiceTotal };
+[90m   1 │ [39mfunction computeOrderTotal(items, taxRate, discount) {
+[90m   2 │ [39m  let subtotal = 0;
+[90m   3 │ [39m  for (const item of items) {
+[90m   4 │ [39m    subtotal += item.price * item.quantity;
+[90m   5 │ [39m  }
+[90m   6 │ [39m  const discounted = subtotal - subtotal * discount;
+[90m   7 │ [39m  const tax = discounted * taxRate;
+[90m   8 │ [39m  return Math.round((discounted + tax) * 100) / 100;
+[90m   9 │ [39m}
+[90m  10 │ [39mmodule.exports = { computeOrderTotal };
+
+[90m┌────────────┬────────────────┬─────────────┬──────────────┬──────────────┬──────────────────┬───────────────────┐[39m
+[90m│[39m[31m Format     [39m[90m│[39m[31m Files analyzed [39m[90m│[39m[31m Total lines [39m[90m│[39m[31m Total tokens [39m[90m│[39m[31m Clones found [39m[90m│[39m[31m Duplicated lines [39m[90m│[39m[31m Duplicated tokens [39m[90m│[39m
+[90m├────────────┼────────────────┼─────────────┼──────────────┼──────────────┼──────────────────┼───────────────────┤[39m
+[90m│[39m javascript [90m│[39m 2              [90m│[39m 20          [90m│[39m 150          [90m│[39m 1            [90m│[39m 9 (45.00%)       [90m│[39m 70 (46.67%)       [90m│[39m
+[90m├────────────┼────────────────┼─────────────┼──────────────┼──────────────┼──────────────────┼───────────────────┤[39m
+[90m│[39m [1mTotal:[22m     [90m│[39m 2              [90m│[39m 20          [90m│[39m 150          [90m│[39m 1            [90m│[39m 9 (45.00%)       [90m│[39m 70 (46.67%)       [90m│[39m
+[90m└────────────┴────────────────┴─────────────┴──────────────┴──────────────┴──────────────────┴───────────────────┘[39m
+[90mFound 1 clones.[39m
+[90mtime: 3.157ms[39m
+
+[90m💡 Auto-refactor with AI: [1m[39mnpx skills add https://github.com/kucherenko/jscpd --skill dry-refactoring[90m[22m
+[90m🎩 New: Gangsta Agents — discipline your AI coding → gangsta.page[39m
+[90m💖 Support jscpd project → https://opencollective.com/jscpd[39m

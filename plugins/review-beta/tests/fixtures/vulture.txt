@@ -1,0 +1,5 @@
+src/dead.py:4: unused function 'unused_helper' (60% confidence)
+src/dead.py:8: unused class 'UnusedThing' (60% confidence)
+src/dead.py:9: unused variable 'unused_attribute' (60% confidence)
+src/dead.py:11: unused method 'unused_method' (60% confidence)
+src/vuln.py:4: unused function 'run' (60% confidence)

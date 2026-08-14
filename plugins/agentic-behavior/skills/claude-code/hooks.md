@@ -53,29 +53,31 @@ Plugin-layer shape (wrapped):
 }
 ```
 
-> ⚠️ **Known limitations of plugin-bundled `hooks/hooks.json`**
+> ✅ **Former limitation of plugin-bundled `hooks/hooks.json` — fixed upstream**
 >
-> Several tool-dispatch events **do not fire** when configured inside a
-> plugin's `hooks/hooks.json` — they only fire when defined in
-> `<repo>/.claude/settings.json` (or another settings layer):
+> These tool-dispatch events used to fire only when defined in
+> `<repo>/.claude/settings.json` (or another settings layer), never from a
+> plugin's own `hooks/hooks.json`:
 >
 > - `PreToolUse`
 > - `PostToolUse`
 > - `PostToolUseFailure`
 > - `PermissionRequest`
 >
-> Root cause: tool-dispatch events use a separate registry from where plugin
-> hooks are stored. **Workaround**: if your plugin needs to hook one of these
-> events, ship a setup script that writes the hook into
-> `<repo>/.claude/settings.json` instead of bundling it as plugin hooks.
+> **This no longer applies.** It was true on v2.1.128 CLI (confirmed
+> 2026-05-19), the root cause being that tool-dispatch events used a separate
+> registry from where plugin hooks were stored. Re-tested on v2.1.231
+> (2026-08-14): a plugin `hooks.json` declaring all four fired `PreToolUse`,
+> `PostToolUse` and `PostToolUseFailure`; `PermissionRequest` was not exercised.
+> Bundle `PreToolUse`, `PostToolUse` and `PostToolUseFailure` as plugin hooks;
+> the `settings.json` workaround is no longer needed for those. Treat
+> `PermissionRequest` as untested until a run reaches a permission prompt.
 >
 > Source: [`plugins/CLAUDE.md`](../../../CLAUDE.md) (the canonical project
-> table of plugin-bundled hook bugs), upstream issue
+> table, which carries the test that established this), upstream issues
 > [anthropics/claude-code#6305](https://github.com/anthropics/claude-code/issues/6305)
-> (Pre/PostToolUse not firing) and
-> [#40506](https://github.com/anthropics/claude-code/issues/40506)
-> (PreToolUse not firing in `claude -p`). Both upstream issues remain open as
-> of 2026-04-29; one of these is also tracked locally as BUG-1.
+> and [#40506](https://github.com/anthropics/claude-code/issues/40506), and
+> local BUG-1 — all three describing the behaviour before the fix.
 
 ## Hook types (the `type` field)
 

@@ -1,0 +1,1 @@
+docs/pipes.md:12 MD013/line-length Line length [Expected: 80; Actual: 120 | see .markdownlint.yaml | rule docs]

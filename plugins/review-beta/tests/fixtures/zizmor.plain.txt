@@ -1,0 +1,61 @@
+ INFO zizmor::registry: skipping impostor-commit: can't run without a GitHub API token
+ INFO zizmor::registry: skipping ref-confusion: can't run without a GitHub API token
+ INFO zizmor::registry: skipping known-vulnerable-actions: can't run without a GitHub API token
+ INFO zizmor::registry: skipping forbidden-uses: audit not configured
+ INFO zizmor::registry: skipping stale-action-refs: can't run without a GitHub API token
+ INFO audit: zizmor: 🌈 completed .github/workflows/bad.yml
+warning[artipacked]: credential persistence through GitHub Actions artifacts
+ --> .github/workflows/bad.yml:7:9
+  |
+7 |       - uses: actions/checkout@v4
+  |         ------------------------- does not set persist-credentials: false
+  |
+  = note: audit confidence → Low
+  = note: this finding has an auto-fix
+
+warning[excessive-permissions]: overly broad permissions
+  --> .github/workflows/bad.yml:4:3
+   |
+ 4 | /   build:
+ 5 | |     runs-on: ubuntu-latest
+...  |
+13 | |         with:
+14 | |           bogus_input: 1
+   | |                         -
+   | |_________________________|
+   |                           this job
+   |                           default permissions used due to no permissions: block
+   |
+   = note: audit confidence → Medium
+
+error[dangerous-triggers]: use of fundamentally insecure workflow trigger
+ --> .github/workflows/bad.yml:2:1
+  |
+2 | on: [pull_request_target]
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^ pull_request_target is almost always used insecurely
+  |
+  = note: audit confidence → Medium
+
+error[template-injection]: code injection via template expansion
+ --> .github/workflows/bad.yml:8:24
+  |
+8 |       - run: echo "${{ github.event.pull_request.title }}"
+  |         ^^^            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+  |         |
+  |         this run block
+  |
+  = note: audit confidence → High
+  = note: this finding has an auto-fix
+
+error[template-injection]: code injection via template expansion
+  --> .github/workflows/bad.yml:10:20
+   |
+ 9 |       - run: |
+   |         ^^^ this run block
+10 |           echo ${{ github.event.issue.body }}
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+
+10 findings (5 suppressed, 3 fixable): 0 unknown, 0 informational, 0 low, 2 medium, 3 high

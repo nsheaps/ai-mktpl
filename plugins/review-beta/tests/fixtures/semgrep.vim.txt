@@ -1,0 +1,1 @@
+src/vuln.py:5:5:E:tmp.subprocess-shell-true:subprocess call with shell=True and untrusted input
