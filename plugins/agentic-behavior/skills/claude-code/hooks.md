@@ -48,9 +48,7 @@ Plugin-layer shape (wrapped):
 {
   "description": "optional human-readable summary",
   "hooks": {
-    "PreToolUse": [
-      /* same shape as above */
-    ]
+    "PreToolUse": [/* same shape as above */]
   }
 }
 ```
