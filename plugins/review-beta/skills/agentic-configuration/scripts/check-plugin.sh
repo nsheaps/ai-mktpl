@@ -295,6 +295,26 @@ n2=$(awk -F'|' '$1=="P2"' "$OUT" | wc -l | tr -d ' ')
 nf=$(awk '/^#/{next} {n++} END{print n+0}' "$OUT")
 nc=$(grep -c '^# checked=' "$OUT" || true)
 
+# Nothing was read. The path exists — the loop above validated that — but held no
+# recognized artifact. The usual cause is a wrong level rather than a typo:
+# walk() treats a directory as exactly one plugin root and does not recurse to
+# find them, so `check-plugin.sh plugins/` reads zero files while the documented
+# `plugins/*/` reads 99. check-skill.sh DOES recurse, and SKILL.md §1 tells the
+# reviewer to hand the same path to both and concatenate the streams — so the
+# invocation that produces this state is one the skill actively prescribes.
+#
+# PASS here is the silent zero the guard above exists to prevent, and it is the
+# line an agent parses. Exit 2 is what that comment already says the answer is,
+# and it keeps three states distinct rather than two: PASS (read something,
+# clean), FAIL (read something, P0), EMPTY (read nothing, so no verdict is
+# available). nc was computed for exactly this and was never consulted.
+if [ "$nc" -eq 0 ]; then
+  echo "check-plugin.sh: no recognized artifact under: $*" >&2
+  echo "check-plugin.sh: pass each plugin root (e.g. 'plugins/*/'), not their parent" >&2
+  [ "$QUIET" -eq 1 ] || echo "# files_checked=0 findings=0 verdict=EMPTY"
+  exit 2
+fi
+
 [ "$QUIET" -eq 1 ] || {
   echo "# files_checked=$nc findings=$nf p0=$n0 p1=$n1 p2=$n2"
   echo "# verdict=$([ "$n0" -eq 0 ] && echo PASS || echo FAIL)"

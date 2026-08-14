@@ -446,6 +446,24 @@ else
   ok "check-plugin: tool-dispatch events in a plugin hooks.json are not faulted"
 fi
 
+# --- Case 8c: reading nothing is EMPTY/exit 2, never PASS/exit 0 -------------
+# walk() treats a directory as one plugin root and does not recurse, so a path
+# one level above the roots reads zero files. That used to print verdict=PASS and
+# exit 0 — a clean bill of health over an unread tree, and the exact shape the
+# retired HK001 had. check-skill.sh does recurse, so the same path handed to both
+# (which SKILL.md §1 prescribes) produced findings from one and PASS from the
+# other. No fixture needed beyond an empty directory.
+emptydir="$WORK/empty-tree/sub"
+mkdir -p "$emptydir"
+"$SKILLS/agentic-configuration/scripts/check-plugin.sh" "$WORK/empty-tree" >"$WORK/empty.out" 2>&1
+rc=$?
+if [ "$rc" -eq 2 ] && grep -q 'verdict=EMPTY' "$WORK/empty.out"; then
+  ok "check-plugin: a path holding no recognized artifact is EMPTY and exit 2"
+else
+  not_ok "check-plugin: a path holding no recognized artifact is EMPTY and exit 2" \
+    "rc=$rc got: $(cat "$WORK/empty.out")"
+fi
+
 # --- Case 9: every probe is syntax-clean and honours --list ------------------
 for fam in correctness security design docs process org-fit best-practices; do
   if sh -n "$SKILLS/$fam/scripts/probe-$fam.sh" 2>/dev/null &&

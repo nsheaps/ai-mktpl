@@ -42,8 +42,14 @@ re-derive by hand what they already reported:
 
 ```
 ${CLAUDE_SKILL_DIR}/scripts/check-skill.sh  <path-to-SKILL.md-or-directory>
-${CLAUDE_SKILL_DIR}/scripts/check-plugin.sh <path-to-plugin-dir-or-artifact>
+${CLAUDE_SKILL_DIR}/scripts/check-plugin.sh <path-to-plugin-root-or-artifact>
 ```
+
+**Their directory semantics differ, so the same path is not always right for both.**
+`check-skill.sh` recurses and finds every `SKILL.md` beneath the path. `check-plugin.sh` treats a
+directory as exactly one plugin root and does not recurse — so a parent of several plugins needs
+`plugins/*/`, not `plugins/`. Handing it a path with no recognized artifact is not a pass: it
+reports `verdict=EMPTY` and exits 2, which is a usage error to fix rather than a result to report.
 
 Add `--portable` to `check-skill.sh` when the skill may be uploaded or packaged to claude.ai —
 that narrows the frontmatter whitelist to the six-field Agent Skills spec.

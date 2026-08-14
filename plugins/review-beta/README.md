@@ -75,14 +75,16 @@ unrecognized aspect directory, so a half-built skill is visible rather than sile
 sh plugins/review-beta/tests/run-probe-tests.sh
 ```
 
-34 assertions. The `docs`, `security`, `design` and `org-fit` probes have their output-parsing
+35 assertions. The `docs`, `security`, `design` and `org-fit` probes have their output-parsing
 filters pinned against real captured tool output (provenance in
 [`tests/fixtures/SOURCES.md`](tests/fixtures/SOURCES.md)); `correctness`, `process` and
 `best-practices` are currently covered only by a syntax check and a `--list` smoke test, so their
 filters are unpinned. Also covered: the pipe-escaping contract, the `org-fit` read-only task guard,
 the aspect-discovery gate, two `check-skill.sh` checks (`SK012`'s first-link-on-a-line
 regression, and `SK024` with a positive, a compliant and a not-applicable fixture), and a
-`hooks.json` declaring every tool-dispatch event, asserting `check-plugin.sh` does **not** fault it.
+`hooks.json` declaring every tool-dispatch event, asserting `check-plugin.sh` does **not** fault it,
+and a path holding no recognized artifact, asserting it reports `verdict=EMPTY` and exits 2 rather
+than passing over an unread tree.
 
 That last one is a tombstone. `HK001` flagged those four events as dead in a plugin manifest, on a
 rule recorded in this marketplace from a v2.1.128 confirmation. It shipped testing the wrong
