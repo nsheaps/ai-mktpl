@@ -418,6 +418,58 @@ else
     "found: $(tr '\n' ' ' <"$WORK/found")"
 fi
 
+# --- Case 8b: HK001 fires on a real hooks.json shape -------------------------
+# The check shipped testing `has($e)` at the top level of the document, while
+# every hooks.json in this marketplace nests its events under `.hooks`. It
+# therefore reported zero across 16 live violations, and a sweep of 51 plugins
+# read that zero as precision. Three fixtures, for the same reason Case 7b has
+# three: the nested form (what actually exists) must fire, the top-level form
+# (what the check was written against) must keep firing, and a plugin declaring
+# only session-lifecycle events must stay silent -- without that third, a check
+# rewritten to fire unconditionally would pass the first two.
+for case in nested toplevel clean; do
+  mkdir -p "$WORK/hk001/$case/hooks"
+done
+cat >"$WORK/hk001/nested/hooks/hooks.json" <<'JSON'
+{
+  "description": "fixture: the real marketplace shape",
+  "hooks": {
+    "PreToolUse": [{ "matcher": "Bash", "hooks": [{ "type": "command", "command": "true" }] }]
+  }
+}
+JSON
+cat >"$WORK/hk001/toplevel/hooks/hooks.json" <<'JSON'
+{
+  "description": "fixture: the un-nested shape the check was written against",
+  "PreToolUse": [{ "matcher": "Bash", "hooks": [{ "type": "command", "command": "true" }] }]
+}
+JSON
+cat >"$WORK/hk001/clean/hooks/hooks.json" <<'JSON'
+{
+  "description": "fixture: only events that do fire from a plugin manifest",
+  "hooks": {
+    "SessionStart": [{ "hooks": [{ "type": "command", "command": "true" }] }],
+    "Stop": [{ "hooks": [{ "type": "command", "command": "true" }] }]
+  }
+}
+JSON
+for case in nested toplevel; do
+  "$SKILLS/agentic-configuration/scripts/check-plugin.sh" --quiet "$WORK/hk001/$case" >"$WORK/hk001.$case" 2>&1 || true
+  if grep -q '|HK001|' "$WORK/hk001.$case"; then
+    ok "check-plugin: HK001 fires on the $case hooks.json shape"
+  else
+    not_ok "check-plugin: HK001 fires on the $case hooks.json shape" \
+      "got: $(cat "$WORK/hk001.$case")"
+  fi
+done
+"$SKILLS/agentic-configuration/scripts/check-plugin.sh" --quiet "$WORK/hk001/clean" >"$WORK/hk001.clean" 2>&1 || true
+if grep -q '|HK001|' "$WORK/hk001.clean"; then
+  not_ok "check-plugin: HK001 stays silent on session-lifecycle events" \
+    "got: $(cat "$WORK/hk001.clean")"
+else
+  ok "check-plugin: HK001 stays silent on session-lifecycle events"
+fi
+
 # --- Case 9: every probe is syntax-clean and honours --list ------------------
 for fam in correctness security design docs process org-fit best-practices; do
   if sh -n "$SKILLS/$fam/scripts/probe-$fam.sh" 2>/dev/null &&

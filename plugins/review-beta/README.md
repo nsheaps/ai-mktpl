@@ -75,12 +75,17 @@ unrecognized aspect directory, so a half-built skill is visible rather than sile
 sh plugins/review-beta/tests/run-probe-tests.sh
 ```
 
-33 assertions. The `docs`, `security`, `design` and `org-fit` probes have their output-parsing
+36 assertions. The `docs`, `security`, `design` and `org-fit` probes have their output-parsing
 filters pinned against real captured tool output (provenance in
 [`tests/fixtures/SOURCES.md`](tests/fixtures/SOURCES.md)); `correctness`, `process` and
 `best-practices` are currently covered only by a syntax check and a `--list` smoke test, so their
 filters are unpinned. Also covered: the pipe-escaping contract, the `org-fit` read-only task guard,
-the aspect-discovery gate, and two `check-skill.sh` checks (`SK012`'s first-link-on-a-line
-regression, and `SK024` with a positive, a compliant and a not-applicable fixture). `check-plugin.sh`
-has no fixtures yet. Run it after changing any probe command or filter — a filter that no
-longer matches its tool reports zero findings silently, which is worse than the tool being absent.
+the aspect-discovery gate, two `check-skill.sh` checks (`SK012`'s first-link-on-a-line
+regression, and `SK024` with a positive, a compliant and a not-applicable fixture), and
+`check-plugin.sh`'s `HK001` against both `hooks.json` nestings plus a silent control.
+
+The remaining `PL`/`HK`/`AG`/`CM` ids have no fixtures yet, and that gap has already cost
+something: `HK001` shipped testing the wrong nesting level and reported zero across 16 live
+violations in this marketplace, while a 51-plugin sweep read that zero as precision. Run the suite
+after changing any probe command, filter or check — a check that no longer matches reports zero
+silently, which is worse than the tool being absent.

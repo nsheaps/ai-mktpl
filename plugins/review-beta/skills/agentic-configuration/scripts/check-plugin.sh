@@ -34,7 +34,6 @@ QUIET=0
 P0=0
 P1=0
 P2=0
-FILES_CHECKED=0
 
 usage() {
   echo "usage: check-plugin.sh [--quiet] PATH [PATH...]" >&2
@@ -63,7 +62,7 @@ key_line() {
 # --- plugin.json -----------------------------------------------------------
 check_plugin_json() {
   f=$1
-  FILES_CHECKED=$((FILES_CHECKED + 1))
+  echo "# checked=$f"
 
   if ! have_jq; then
     finding P2 "$f" 0 PL000 "jq is not installed; plugin.json checks are UNAVAILABLE and produced zero findings"
@@ -110,7 +109,7 @@ check_plugin_json() {
 # --- hooks.json ------------------------------------------------------------
 check_hooks_json() {
   f=$1
-  FILES_CHECKED=$((FILES_CHECKED + 1))
+  echo "# checked=$f"
   proot=$(dirname "$(dirname "$f")")
 
   if ! have_jq; then
@@ -124,8 +123,16 @@ check_hooks_json() {
 
   # HK001: tool-dispatch events use a separate registry and never fire from a
   # plugin hooks.json. A hook declared here is silently dead.
+  #
+  # Both nestings are tested. The real shape is `{"hooks": {"PreToolUse": ...}}`
+  # -- 27 of 27 hooks.json in this marketplace -- and a top-level `has($e)`
+  # alone matched none of them, so this check ran clean over 16 live violations
+  # and the sweep that was supposed to validate it instead demonstrated the bug.
+  # `or` short-circuits, so a top-level hit never evaluates the right operand,
+  # and `objects` yields empty when `.hooks` is absent or not an object: no
+  # crash and no false positive on a document shaped either way.
   for ev in PreToolUse PostToolUse PostToolUseFailure PermissionRequest; do
-    if jq -e --arg e "$ev" 'has($e)' "$f" >/dev/null 2>&1; then
+    if jq -e --arg e "$ev" 'has($e) or ((.hooks? // {}) | objects | has($e))' "$f" >/dev/null 2>&1; then
       finding P1 "$f" "$(key_line "$f" "$ev")" HK001 "'$ev' does not fire from a plugin hooks.json (anthropics/claude-code#6305); move it to settings.json or it is silently dead"
     fi
   done
@@ -164,7 +171,7 @@ check_hooks_json() {
 check_md_frontmatter() {
   f=$1
   kind=$2 # agent | command
-  FILES_CHECKED=$((FILES_CHECKED + 1))
+  echo "# checked=$f"
   case "$kind" in
   agent) idp=AG ;;
   *) idp=CM ;;
@@ -273,15 +280,22 @@ OUT=$(mktemp "${TMPDIR:-/tmp}/check-plugin.XXXXXX") || exit 2
 trap 'rm -f "$OUT"' EXIT INT TERM
 
 for p in "$@"; do walk "$p"; done >"$OUT"
-cat "$OUT"
+# The per-file markers are tallied, not printed: they exist so the summary can
+# distinguish "read 40 files, found nothing" from "read nothing" -- the same
+# distinction HK000/PL000 draw for a missing jq, and the one a bare `findings=0`
+# cannot. A counter variable cannot do this job: walk()'s find|while loops run
+# in subshells, so increments made inside them are lost, which is why the
+# previous FILES_CHECKED was both silently wrong and never emitted.
+grep -v '^# checked=' "$OUT" || true
 
 n0=$(awk -F'|' '$1=="P0"' "$OUT" | wc -l | tr -d ' ')
 n1=$(awk -F'|' '$1=="P1"' "$OUT" | wc -l | tr -d ' ')
 n2=$(awk -F'|' '$1=="P2"' "$OUT" | wc -l | tr -d ' ')
-nf=$(awk '/^# files_checked=/{next} /^#/{next} {n++} END{print n+0}' "$OUT")
+nf=$(awk '/^#/{next} {n++} END{print n+0}' "$OUT")
+nc=$(grep -c '^# checked=' "$OUT" || true)
 
 [ "$QUIET" -eq 1 ] || {
-  echo "# findings=$nf p0=$n0 p1=$n1 p2=$n2"
+  echo "# files_checked=$nc findings=$nf p0=$n0 p1=$n1 p2=$n2"
   echo "# verdict=$([ "$n0" -eq 0 ] && echo PASS || echo FAIL)"
 }
 
