@@ -581,6 +581,18 @@
       "keywords": ["plugin", "install", "update", "reload", "management"]
     },
     {
+      "name": "plugin-sentinel",
+      "description": "Fixture plugin used by other marketplaces to test connectivity and reference",
+      "version": "0.0.1",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/plugin-sentinel",
+      "category": "utility",
+      "tags": ["utility"],
+      "keywords": []
+    },
+    {
       "name": "proxmox",
       "description": "Skills for managing Proxmox VE hosts and LXC containers — creating containers, running Docker in LXC, and hosting services like cloudflared.",
       "version": "0.1.1",
