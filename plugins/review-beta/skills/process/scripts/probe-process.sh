@@ -27,6 +27,13 @@
 # gap by eyeballing the diff will find what it was told to look for whether or
 # not it is there. Report the dimension as unavailable instead.
 #
+# `status=missing` means the tool could not be USED, which is a wider condition
+# than the binary being absent: `gh` with no pull request for the branch resolves
+# on PATH but has nothing to inspect. Those preconditions are part of the
+# availability test, so every dimension carries exactly one of ran/missing and a
+# consumer never has to reconcile two signals. A `deferred=` line may accompany
+# `status=missing` to say why; the two agree by construction.
+#
 # Findings are parsed from each tool's own output. A line shaped 'file:line:...'
 # yields that file and line; anything else yields FILE '-' and LINE 0.
 #
@@ -59,7 +66,7 @@ while [ $# -gt 0 ]; do
     ;;
   --list) LIST=1 ;;
   -h | --help)
-    sed -n '2,40p' "$0" | sed 's/^#\{1,\} \{0,1\}//'
+    sed -n '2,47p' "$0" | sed 's/^#\{1,\} \{0,1\}//'
     exit 0
     ;;
   -*) usage ;;
@@ -95,7 +102,7 @@ process-change-size	git	major	git diff --numstat "$BASE"...HEAD 2>/dev/null | aw
 process-commit-hygiene	commitlint	minor	commitlint --from "$BASE" --to HEAD 2>&1 | grep -E '^ *. \[' || true
 process-commit-hygiene	git	minor	git log --format='%h %s' "$BASE"..HEAD 2>/dev/null | grep -Ev ' (feat|fix|chore|docs|refactor|test|build|ci|perf|style|revert)(\(.+\))?!?: ' | sed 's/^/-:0: non-conventional commit subject: /' || true
 process-merge-gating,process-ci-local-parity	actionlint	blocker	actionlint 2>/dev/null | grep -E '^[^ ]+\.ya?ml:[0-9]+' || true
-process-merge-gating,process-review-authority	gh	blocker	gh pr view >/dev/null 2>&1 && gh pr checks --json name,state --jq '.[] | select(.state=="FAILURE" or .state=="CANCELLED") | "-:0: required check \(.name) is \(.state)"' 2>/dev/null || true
+process-merge-gating,process-review-authority	gh	blocker	gh pr checks --json name,state --jq '.[] | select(.state=="FAILURE" or .state=="CANCELLED") | "-:0: required check \(.name) is \(.state)"' 2>/dev/null || true
 process-release-mechanics	semantic-release	major	semantic-release --dry-run --no-ci 2>&1 | grep -E 'ERR|error' || true
 process-defect-feedback-loop,process-rollback-path	git	major	[ -f .review/risk-paths.yaml ] && sed -n 's/^ *- *//p' .review/risk-paths.yaml > "$TMP/rp" && git diff --name-only "$BASE"...HEAD 2>/dev/null | grep -F -f "$TMP/rp" 2>/dev/null | sed 's|$|:0: touches a declared risk path; rollback path must be stated|'; rm -f "$TMP/rp"
 TOOLTABLE
@@ -105,6 +112,27 @@ if [ "$LIST" -eq 1 ]; then
   printf '%s\n' "$TOOLS"
   exit 0
 fi
+
+# Resolved once, after the --list early exit so listing the table stays offline,
+# and consumed by both the availability test and the deferred branch below.
+GH_PR=0
+if command -v gh >/dev/null 2>&1 && gh pr view >/dev/null 2>&1; then
+  GH_PR=1
+fi
+
+# A binary that resolves is not always a binary that can be used. `gh` with no
+# pull request for the branch runs, matches nothing, and leaves the dimension
+# reading clean having never been evaluated -- the one silent zero a bare
+# `command -v` cannot catch, because the tool is genuinely present. Testing the
+# precondition here rather than inside the row puts an unusable tool in the same
+# `missing` bucket as an absent one, so each dimension carries exactly one state.
+tool_usable() {
+  command -v "$1" >/dev/null 2>&1 || return 1
+  case "$1" in
+  gh) [ "$GH_PR" -eq 1 ] || return 1 ;;
+  esac
+  return 0
+}
 
 TMP=$(mktemp -d) || exit 2
 trap 'rm -rf "$TMP"' EXIT INT TERM
@@ -129,7 +157,7 @@ printf '%s\n' "$TOOLS" | grep -v '^[[:space:]]*$' | grep -v '^#' >"$TMP/tools"
 
 while IFS="$(printf '\t')" read -r dim bin sev cmd; do
   [ -n "${dim:-}" ] || continue
-  if ! command -v "$bin" >/dev/null 2>&1; then
+  if ! tool_usable "$bin"; then
     printf '# tool=%s status=missing dimensions=%s\n' "$bin" "$dim" >>"$TMP/meta"
     missing=$((missing + 1))
     continue
@@ -152,11 +180,7 @@ while IFS="$(printf '\t')" read -r dim bin sev cmd; do
   done <"$TMP/out"
 done <"$TMP/tools"
 
-# `gh` installed is not the same as a pull request existing. Without this the row
-# runs, matches nothing, and the dimension reads clean having never been
-# evaluated — the one silent-zero the tool-presence check cannot catch, because
-# the tool is genuinely present.
-if command -v gh >/dev/null 2>&1 && ! gh pr view >/dev/null 2>&1; then
+if command -v gh >/dev/null 2>&1 && [ "$GH_PR" -eq 0 ]; then
   printf "# deferred=%s reason=%s\n" \
     "process-merge-gating,process-review-authority" \
     "gh is installed but no pull request exists for this branch; check status was not evaluated" \
