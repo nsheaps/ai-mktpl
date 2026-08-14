@@ -37,7 +37,7 @@ Three contracts hold this together, and a change that breaks one breaks the plug
 - Apply the `tool_usable()` precondition to the 15 remaining marker-file-guarded probe rows, so a row whose config file is absent reports `missing` rather than `ran`. Best done with the `probe-common.sh` extraction, where the predicate is written once.
 - Relay probe provenance across the fork boundary: add each probe's own `# tool=… status=ran dimensions=…` metadata to every aspect's return contract as a `TOOLS:` block, beside `UNAVAILABLE:`. §4's corroboration rule needs to know whether two agreeing aspects ran the same binary, and today only the tools that _did not_ run reach `start`. Until then §4 treats undeterminable provenance as one observation, which fails safe but is a rule without a mechanism. Also makes `COUNTS: (tool=<n> judged=<n>)` auditable.
 - Vendor the taxonomy source into the plugin, so the dimension tables have a checked-in origin.
-- Consider a `PL007` requiring `SPEC.md`, citing the `plugin-spec-sync` skill — the convention is at 53/57 adoption and is not written down as a rule anywhere.
+- Consider a `PL007` requiring `SPEC.md`, citing the `plugin-spec-sync` skill — the convention is at 54/57 adoption (this file is one of the 54; the three without are `bash-command-rejection`, `claude-builtins` and `spec-validation`) and is not written down as a rule anywhere.
 
 ## Retired check ids
 

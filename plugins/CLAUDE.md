@@ -71,7 +71,7 @@ Re-tested on **v2.1.231 (2026-08-14)**: a plugin loaded with `--plugin-dir`, dec
 
 Two consequences worth knowing before you copy an existing plugin:
 
-- Several plugins here still carry a settings.json workaround, or an inline note, written while the bug was real. Those are harmless but no longer necessary; sweeping them is tracked in [#753](https://github.com/nsheaps/ai-mktpl/issues/753).
+- Several plugins here still carry a settings.json workaround, or an inline note, written while the bug was real. Those are harmless but no longer necessary; sweeping them is tracked in [#753](https://github.com/nsheaps/ai-mktpl/issues/753) — which is a re-verification sweep, confirming each of the now-live hooks actually fires, not a removal sweep.
 - Re-confirm before writing a version-dependent claim like this one into a rule or a check. The bug was real when recorded and stayed recorded ~90 releases past its fix.
 
 ## Version Bumping
