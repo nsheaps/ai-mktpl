@@ -3,6 +3,7 @@ name: docs
 description: Invoked by review-beta:start, which routes every review request and decides which aspects apply — use that entry skill first; this is one of the aspects it delegates to. Reviews documentation changes and returns a structured findings report with a verdict, running scripts/probe-docs.sh — lychee, markdownlint, Vale, cspell, doctest runners — before spending any judgement. Covers the taxonomy's 18 docs dimensions — entry-point completeness, executable quickstarts, example correctness, reference coverage, doc/code synchrony, link and URL integrity, version applicability, translation drift, ownership, presentation, terminology, claim substantiation, changelog quality, authored-source accessibility, message quality, and decision rationale. NOT for whether the described code is correct (review-beta:correctness) or whether agent configuration is well built (review-beta:agentic-configuration).
 context: fork
 background: false
+compatibility: "Requires Claude Code v2.1.218 or later. Earlier versions ignore `background: false`, so this skill forks into the background and returns nothing to the caller — which reads as a clean review rather than an error."
 allowed-tools: Read, Grep, Glob, Bash(${CLAUDE_SKILL_DIR}/scripts/probe-docs.sh:*)
 ---
 

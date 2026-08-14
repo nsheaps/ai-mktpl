@@ -3,6 +3,7 @@ name: process
 description: Invoked by review-beta:start, which routes every review request and decides which aspects apply — use that entry skill first; this is one of the aspects it delegates to. Reviews how a change arrives and rolls out, and returns a structured findings report with a verdict, running scripts/probe-process.sh — git metadata, commitlint, actionlint, gh checks — before spending any judgement. Covers the taxonomy's 18 process dimensions — intent conformance, change size, commit hygiene, merge gating, approval authority, CI/local parity, regression tests, flaky-test policy, rollback and exposure control, deploy sequencing, lifecycle and draining, load validation, telemetry, operational readiness, release mechanics, support windows, cross-repo ordering, and recurring cost. NOT for whether the code is correct (review-beta:correctness) or fits org conventions (review-beta:org-fit).
 context: fork
 background: false
+compatibility: "Requires Claude Code v2.1.218 or later. Earlier versions ignore `background: false`, so this skill forks into the background and returns nothing to the caller — which reads as a clean review rather than an error."
 allowed-tools: Read, Grep, Glob, Bash(${CLAUDE_SKILL_DIR}/scripts/probe-process.sh:*)
 ---
 

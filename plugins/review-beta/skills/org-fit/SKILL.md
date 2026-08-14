@@ -3,6 +3,7 @@ name: org-fit
 description: Invoked by review-beta:start, which routes every review request and decides which aspects apply — use that entry skill first; this is one of the aspects it delegates to. Reviews whether a change fits the organization it lands in, and returns a structured findings report with a verdict, running scripts/probe-org-fit.sh — the repo's own lint task, editorconfig-checker, shellcheck, syncpack, generation drift — before spending any judgement. Covers the taxonomy's 16 org-fit dimensions — reinvented shared capabilities, copy-pasted CI, golden-path divergence, generated-artifact drift, dependency version divergence, the repo's own written rules, interface conventions, the accessibility automated scanning cannot see, i18n, declared performance budgets, platform assumptions, portability gaps, and environment parity. NOT for intrinsic design quality (review-beta:design) or release process (review-beta:process).
 context: fork
 background: false
+compatibility: "Requires Claude Code v2.1.218 or later. Earlier versions ignore `background: false`, so this skill forks into the background and returns nothing to the caller — which reads as a clean review rather than an error."
 allowed-tools: Read, Grep, Glob, Bash(${CLAUDE_SKILL_DIR}/scripts/probe-org-fit.sh:*)
 ---
 

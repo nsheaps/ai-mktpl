@@ -3,6 +3,7 @@ name: security
 description: Invoked by review-beta:start, which routes every review request and decides which aspects apply — use that entry skill first; this is one of the aspects it delegates to. Reviews a change for security defects and returns a structured findings report with a verdict, running scripts/probe-security.sh — the same scanners the org lint-* actions run — before spending any judgement. Covers the taxonomy's 24 security dimensions — interpreter and render-sink injection, path traversal, SSRF, deserialization, authorization and field-level exposure, authentication, cryptography, secret material, personal-data handling and retention, audit trail, model trust boundaries, CI privilege, and the software supply chain. NOT for self-inflicted correctness bugs with no attacker path (review-beta:correctness), and NOT for whether CI gates are required (review-beta:process).
 context: fork
 background: false
+compatibility: "Requires Claude Code v2.1.218 or later. Earlier versions ignore `background: false`, so this skill forks into the background and returns nothing to the caller — which reads as a clean review rather than an error."
 allowed-tools: Read, Grep, Glob, Bash(${CLAUDE_SKILL_DIR}/scripts/probe-security.sh:*)
 ---
 

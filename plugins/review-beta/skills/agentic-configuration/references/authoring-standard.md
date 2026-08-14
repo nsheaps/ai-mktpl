@@ -27,7 +27,7 @@ Code-only key in a skill uploaded to claude.ai is a **hard error**, not a warnin
 | `name`                     | spec, req   | 1–64 chars, `^[a-z0-9]+(-[a-z0-9]+)*$`, must equal the parent directory name              |
 | `description`              | spec, req   | ≤1,024 chars. The only field in context at rest — a retrieval key, not a summary          |
 | `license`                  | spec        | Accepted, no behaviour in Claude Code                                                     |
-| `compatibility`            | spec        | ≤500 chars, environment requirements. Rarely needed                                       |
+| `compatibility`            | spec        | ≤500 chars, environment requirements. Set it wherever `background: false` is set          |
 | `metadata`                 | spec        | map<string,string>. **This is where `version:` and `author:` belong**                     |
 | `allowed-tools`            | spec (exp.) | **Grants** tools for the invoking turn only. Does not restrict anything                   |
 | `when_to_use`              | Claude Code | Appended to `description`; shares the 1,536-char listing cap                              |

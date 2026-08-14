@@ -3,6 +3,7 @@ name: correctness
 description: Invoked by review-beta:start, which routes every review request and decides which aspects apply — use that entry skill first; this is one of the aspects it delegates to. Reviews a change for correctness defects and returns a structured findings report with a verdict, running scripts/probe-correctness.sh for every mechanically decidable dimension before spending any judgement. Covers the taxonomy's 19 correctness dimensions over a diff — boundary conditions, null and absent values, numeric precision, error propagation, resource lifecycle, concurrency, idempotency, transactional atomicity, data loss, algorithmic cost, termination bounds, and the tests that would have caught each. NOT for attacker-reachable vulnerabilities (review-beta:security), abstraction and coupling quality (review-beta:design), or whether tests are gated in CI (review-beta:process).
 context: fork
 background: false
+compatibility: "Requires Claude Code v2.1.218 or later. Earlier versions ignore `background: false`, so this skill forks into the background and returns nothing to the caller — which reads as a clean review rather than an error."
 allowed-tools: Read, Grep, Glob, Bash(${CLAUDE_SKILL_DIR}/scripts/probe-correctness.sh:*)
 ---
 

@@ -3,6 +3,7 @@ name: agentic-configuration
 description: Invoked by review-beta:start, which routes every review request and decides which aspects apply — use that entry skill first; this is one of the aspects it delegates to. Reviews whether agent configuration is well built — skills, plugin manifests, hook wiring, agents, commands and the MCP config they declare — covering frontmatter conformance, description trigger accuracy, length budgets, progressive-disclosure layout, fork return contracts, manifest required fields, and hook events that silently never fire. Runs scripts/check-skill.sh and scripts/check-plugin.sh for every mechanical check before spending any judgement. Returns a structured findings report with a pass/fail verdict. NOT for judging whether the subject matter a skill teaches is factually correct, and NOT for general code review of the scripts a plugin bundles (review-beta:correctness owns that).
 context: fork
 background: false
+compatibility: "Requires Claude Code v2.1.218 or later. Earlier versions ignore `background: false`, so this skill forks into the background and returns nothing to the caller — which reads as a clean review rather than an error."
 allowed-tools: Read, Grep, Glob, Bash(${CLAUDE_SKILL_DIR}/scripts/check-skill.sh:*), Bash(${CLAUDE_SKILL_DIR}/scripts/check-plugin.sh:*)
 ---
 

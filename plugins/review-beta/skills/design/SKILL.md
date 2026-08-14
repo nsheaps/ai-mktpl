@@ -3,6 +3,7 @@ name: design
 description: Invoked by review-beta:start, which routes every review request and decides which aspects apply — use that entry skill first; this is one of the aspects it delegates to. Reviews a change for design-health regressions and returns a structured findings report with a verdict, running scripts/probe-design.sh — clone detectors, architecture contracts, dead-export analysers, API-diff tools — before spending any judgement. Covers the taxonomy's 13 design dimensions — speculative generality, wrong abstraction, duplication, public surface minimality, backward and data-contract compatibility, deprecation and migration, layering and dependency direction, cohesion, hidden global state, testability seams, configuration surface, and new third-party dependencies. NOT for whether the code works (review-beta:correctness) or whether it matches house convention (review-beta:org-fit).
 context: fork
 background: false
+compatibility: "Requires Claude Code v2.1.218 or later. Earlier versions ignore `background: false`, so this skill forks into the background and returns nothing to the caller — which reads as a clean review rather than an error."
 allowed-tools: Read, Grep, Glob, Bash(${CLAUDE_SKILL_DIR}/scripts/probe-design.sh:*)
 ---
 

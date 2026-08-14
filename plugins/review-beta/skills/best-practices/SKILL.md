@@ -3,6 +3,7 @@ name: best-practices
 description: Invoked by review-beta:start, which routes every review request and decides which aspects apply — use that entry skill first; this is one of the aspects it delegates to. Reviews whether code follows the idiomatic practice its own ecosystem publishes, running scripts/probe-best-practices.sh — golangci-lint, clippy, ruff, biome, rubocop, stylelint, swiftlint, ktlint, tflint, phpcs — and reporting only what those linters decide, so "unidiomatic" is settled by each community's rule catalogue rather than by taste. Returns a structured findings report with a verdict. NOT for whether the code is correct (review-beta:correctness), whether it is well factored (review-beta:design), or whether it matches this org's own declared conventions (review-beta:org-fit).
 context: fork
 background: false
+compatibility: "Requires Claude Code v2.1.218 or later. Earlier versions ignore `background: false`, so this skill forks into the background and returns nothing to the caller — which reads as a clean review rather than an error."
 allowed-tools: Read, Grep, Glob, Bash(${CLAUDE_SKILL_DIR}/scripts/probe-best-practices.sh:*)
 ---
 
