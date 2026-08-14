@@ -489,8 +489,15 @@ fi
 # `awk -F'|'` cannot field it. Three `# skipped` markers shipped ungated — two
 # from the original commit, and the third written to match them — so this pins
 # the rule rather than the three call sites, and covers a marker added later.
+# One target per branch, or the coverage claim is not true: an empty directory
+# reaches the directory marker, a `.md` outside agents/commands reaches the
+# `*.md` marker, and a file that is neither `*.md` nor plugin.json/hooks.json
+# reaches the plain `*)` fallthrough — the branch a stray `.sh` or `.yaml` in a
+# glob actually lands on, and the one most likely to be copied next. This file
+# is that target because it exists by construction and cannot drift out of
+# being unrecognized the way a fixture could.
 : >"$WORK/quiet.out"
-for target in "$WORK/empty-tree" "$TESTS_DIR/../README.md" "$TESTS_DIR/.."; do
+for target in "$WORK/empty-tree" "$TESTS_DIR/../README.md" "$TESTS_DIR/run-probe-tests.sh" "$TESTS_DIR/.."; do
   "$SKILLS/agentic-configuration/scripts/check-plugin.sh" --quiet "$target" \
     >>"$WORK/quiet.out" 2>/dev/null || true
 done
