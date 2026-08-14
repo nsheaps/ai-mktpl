@@ -418,56 +418,32 @@ else
     "found: $(tr '\n' ' ' <"$WORK/found")"
 fi
 
-# --- Case 8b: HK001 fires on a real hooks.json shape -------------------------
-# The check shipped testing `has($e)` at the top level of the document, while
-# every hooks.json in this marketplace nests its events under `.hooks`. It
-# therefore reported zero across 16 live violations, and a sweep of 51 plugins
-# read that zero as precision. Three fixtures, for the same reason Case 7b has
-# three: the nested form (what actually exists) must fire, the top-level form
-# (what the check was written against) must keep firing, and a plugin declaring
-# only session-lifecycle events must stay silent -- without that third, a check
-# rewritten to fire unconditionally would pass the first two.
-for case in nested toplevel clean; do
-  mkdir -p "$WORK/hk001/$case/hooks"
-done
+# --- Case 8b: tool-dispatch events are NOT faulted --------------------------
+# HK001 used to flag these four events as dead in a plugin hooks.json. It was
+# retired after the behaviour was tested on the client version this plugin
+# declares a floor for: on v2.1.231 a plugin declaring all four fired
+# PreToolUse, PostToolUse and PostToolUseFailure, and the same session without
+# the plugin fired nothing. The fixture is kept, inverted, because the tempting
+# repair was to fix the check's nesting bug rather than to re-test its premise
+# -- and that repair would have emitted P1 against 15 plugins whose hooks work.
+mkdir -p "$WORK/hk001/nested/hooks"
 cat >"$WORK/hk001/nested/hooks/hooks.json" <<'JSON'
 {
-  "description": "fixture: the real marketplace shape",
+  "description": "fixture: the real marketplace shape, declaring every tool-dispatch event",
   "hooks": {
-    "PreToolUse": [{ "matcher": "Bash", "hooks": [{ "type": "command", "command": "true" }] }]
+    "PreToolUse": [{ "matcher": "Bash", "hooks": [{ "type": "command", "command": "true" }] }],
+    "PostToolUse": [{ "matcher": "Bash", "hooks": [{ "type": "command", "command": "true" }] }],
+    "PostToolUseFailure": [{ "matcher": "Bash", "hooks": [{ "type": "command", "command": "true" }] }],
+    "PermissionRequest": [{ "matcher": "Bash", "hooks": [{ "type": "command", "command": "true" }] }]
   }
 }
 JSON
-cat >"$WORK/hk001/toplevel/hooks/hooks.json" <<'JSON'
-{
-  "description": "fixture: the un-nested shape the check was written against",
-  "PreToolUse": [{ "matcher": "Bash", "hooks": [{ "type": "command", "command": "true" }] }]
-}
-JSON
-cat >"$WORK/hk001/clean/hooks/hooks.json" <<'JSON'
-{
-  "description": "fixture: only events that do fire from a plugin manifest",
-  "hooks": {
-    "SessionStart": [{ "hooks": [{ "type": "command", "command": "true" }] }],
-    "Stop": [{ "hooks": [{ "type": "command", "command": "true" }] }]
-  }
-}
-JSON
-for case in nested toplevel; do
-  "$SKILLS/agentic-configuration/scripts/check-plugin.sh" --quiet "$WORK/hk001/$case" >"$WORK/hk001.$case" 2>&1 || true
-  if grep -q '|HK001|' "$WORK/hk001.$case"; then
-    ok "check-plugin: HK001 fires on the $case hooks.json shape"
-  else
-    not_ok "check-plugin: HK001 fires on the $case hooks.json shape" \
-      "got: $(cat "$WORK/hk001.$case")"
-  fi
-done
-"$SKILLS/agentic-configuration/scripts/check-plugin.sh" --quiet "$WORK/hk001/clean" >"$WORK/hk001.clean" 2>&1 || true
-if grep -q '|HK001|' "$WORK/hk001.clean"; then
-  not_ok "check-plugin: HK001 stays silent on session-lifecycle events" \
-    "got: $(cat "$WORK/hk001.clean")"
+"$SKILLS/agentic-configuration/scripts/check-plugin.sh" --quiet "$WORK/hk001/nested" >"$WORK/hk001.nested" 2>&1 || true
+if grep -q '|HK001|' "$WORK/hk001.nested"; then
+  not_ok "check-plugin: tool-dispatch events in a plugin hooks.json are not faulted" \
+    "got: $(cat "$WORK/hk001.nested")"
 else
-  ok "check-plugin: HK001 stays silent on session-lifecycle events"
+  ok "check-plugin: tool-dispatch events in a plugin hooks.json are not faulted"
 fi
 
 # --- Case 9: every probe is syntax-clean and honours --list ------------------

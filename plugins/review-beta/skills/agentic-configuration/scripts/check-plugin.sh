@@ -121,21 +121,23 @@ check_hooks_json() {
     return
   fi
 
-  # HK001: tool-dispatch events use a separate registry and never fire from a
-  # plugin hooks.json. A hook declared here is silently dead.
+  # HK001 was retired, and the id is not reused. It flagged PreToolUse,
+  # PostToolUse, PostToolUseFailure and PermissionRequest in a plugin hooks.json
+  # as silently dead, citing the "Bug -- does not fire" rows in plugins/CLAUDE.md
+  # (empirically confirmed there on v2.1.128 CLI, 2026-05-19).
   #
-  # Both nestings are tested. The real shape is `{"hooks": {"PreToolUse": ...}}`
-  # -- 27 of 27 hooks.json in this marketplace -- and a top-level `has($e)`
-  # alone matched none of them, so this check ran clean over 16 live violations
-  # and the sweep that was supposed to validate it instead demonstrated the bug.
-  # `or` short-circuits, so a top-level hit never evaluates the right operand,
-  # and `objects` yields empty when `.hooks` is absent or not an object: no
-  # crash and no false positive on a document shaped either way.
-  for ev in PreToolUse PostToolUse PostToolUseFailure PermissionRequest; do
-    if jq -e --arg e "$ev" 'has($e) or ((.hooks? // {}) | objects | has($e))' "$f" >/dev/null 2>&1; then
-      finding P1 "$f" "$(key_line "$f" "$ev")" HK001 "'$ev' does not fire from a plugin hooks.json (anthropics/claude-code#6305); move it to settings.json or it is silently dead"
-    fi
-  done
+  # That is no longer true. On v2.1.231, a plugin loaded with `--plugin-dir` and
+  # declaring all four events fired PreToolUse three times, PostToolUse once and
+  # PostToolUseFailure once across three Bash calls, while the same session run
+  # without the plugin produced no hook invocations at all. PermissionRequest was
+  # not observed, because no call in that run reached a permission prompt -- so it
+  # is untested, not disproven, and plugins/CLAUDE.md now says exactly that.
+  #
+  # The check shipped testing `has($e)` at the top level while all 27 hooks.json
+  # in this marketplace nest under `.hooks`, so it never fired. Fixing the nesting
+  # would have turned it on against 15 plugins whose hooks demonstrably work, and
+  # advised moving them to settings.json. A check that fires on everything is no
+  # better than one that fires on nothing; the rule it enforced expired.
 
   # HK003/HK004: a command referencing a missing script fails at hook time,
   # which is the worst place to discover it.

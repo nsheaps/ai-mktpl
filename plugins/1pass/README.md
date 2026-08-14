@@ -276,10 +276,13 @@ A `PostToolUse` hook (`redact-secrets.sh`) scans each tool's output for those
 values and replaces any match with `****REDACTED(ENV_VAR_NAME)****`, plus a
 system reminder telling Claude not to repeat the raw value.
 
-> Note: the `PostToolUse` redaction hook does not currently fire in the Claude
-> Code CLI due to an upstream bug
+> Note: this hook did not fire in the Claude Code CLI on v2.1.128, due to an
+> upstream bug
 > ([anthropics/claude-code#6305](https://github.com/anthropics/claude-code/issues/6305)).
-> The hook is registered and will take effect once that bug is fixed upstream.
+> Re-tested on v2.1.231 (2026-08-14): `PostToolUse` now fires from a plugin
+> `hooks.json`, so redaction is live. Do not rely on the old note — treat
+> redaction as active and the transcript as protected accordingly. See
+> [`plugins/CLAUDE.md`](../CLAUDE.md) for the test that established this.
 
 ## Authentication
 

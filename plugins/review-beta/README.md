@@ -75,17 +75,25 @@ unrecognized aspect directory, so a half-built skill is visible rather than sile
 sh plugins/review-beta/tests/run-probe-tests.sh
 ```
 
-36 assertions. The `docs`, `security`, `design` and `org-fit` probes have their output-parsing
+34 assertions. The `docs`, `security`, `design` and `org-fit` probes have their output-parsing
 filters pinned against real captured tool output (provenance in
 [`tests/fixtures/SOURCES.md`](tests/fixtures/SOURCES.md)); `correctness`, `process` and
 `best-practices` are currently covered only by a syntax check and a `--list` smoke test, so their
 filters are unpinned. Also covered: the pipe-escaping contract, the `org-fit` read-only task guard,
 the aspect-discovery gate, two `check-skill.sh` checks (`SK012`'s first-link-on-a-line
-regression, and `SK024` with a positive, a compliant and a not-applicable fixture), and
-`check-plugin.sh`'s `HK001` against both `hooks.json` nestings plus a silent control.
+regression, and `SK024` with a positive, a compliant and a not-applicable fixture), and a
+`hooks.json` declaring every tool-dispatch event, asserting `check-plugin.sh` does **not** fault it.
 
-The remaining `PL`/`HK`/`AG`/`CM` ids have no fixtures yet, and that gap has already cost
-something: `HK001` shipped testing the wrong nesting level and reported zero across 16 live
-violations in this marketplace, while a 51-plugin sweep read that zero as precision. Run the suite
-after changing any probe command, filter or check — a check that no longer matches reports zero
-silently, which is worse than the tool being absent.
+That last one is a tombstone. `HK001` flagged those four events as dead in a plugin manifest, on a
+rule recorded in this marketplace from a v2.1.128 confirmation. It shipped testing the wrong
+nesting level, so it reported zero across 16 live declarations while a 51-plugin sweep read that
+zero as precision — and the obvious repair, fixing the nesting, would have emitted `P1` against 15
+plugins whose hooks demonstrably work: re-tested on v2.1.231, a plugin `hooks.json` fires
+`PreToolUse`, `PostToolUse` and `PostToolUseFailure`. The check was retired rather than repaired,
+and its id is not reused. Two lessons, both now written into the code — a check needs a positive
+fixture before it can claim a clean sweep, and a version-dependent premise needs re-testing before
+it is enforced.
+
+The remaining `PL`/`HK`/`AG`/`CM` ids have no fixtures yet. Run the suite after changing any probe
+command, filter or check — a check that no longer matches reports zero silently, which is worse
+than the tool being absent.

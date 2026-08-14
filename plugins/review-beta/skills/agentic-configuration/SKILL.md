@@ -61,7 +61,7 @@ translating each one into a remedy and adding what a script genuinely cannot see
 | :----- | :---------------- | :-------------------------------------------------------- |
 | `SK`   | `check-skill.sh`  | SKILL.md frontmatter, budgets, layout, fork wiring        |
 | `PL`   | `check-plugin.sh` | `plugin.json` fields, name/dir match, README, hooks field |
-| `HK`   | `check-plugin.sh` | `hooks.json` validity, dead events, script wiring         |
+| `HK`   | `check-plugin.sh` | `hooks.json` validity and script wiring                   |
 | `AG`   | `check-plugin.sh` | `agents/*.md` frontmatter and name/filename match         |
 | `CM`   | `check-plugin.sh` | `commands/*.md` frontmatter                               |
 
@@ -147,7 +147,7 @@ COUNTS: P0=<n> P1=<n> P2=<n> (scripted=<n> judged=<n>)
 | Sev | Location             | Check | Problem                                           | Remedy                         |
 | :-- | :------------------- | :---- | :------------------------------------------------ | :----------------------------- |
 | P0  | path/to/SKILL.md:12  | SK009 | `version:` is not a frontmatter field             | Move it under `metadata:`      |
-| P1  | path/to/hooks.json:8 | HK001 | `PreToolUse` never fires from a plugin hooks.json | Move the hook to settings.json |
+| P1  | path/to/hooks.json:8 | HK003 | `command` references a script that is not on disk | Add the script or fix the path |
 
 UNVERIFIED:
 

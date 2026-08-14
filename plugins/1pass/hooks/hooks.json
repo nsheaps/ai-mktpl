@@ -32,7 +32,7 @@
     ],
     "PostToolUse": [
       {
-        "_note": "This entry does not fire in Claude Code CLI due to upstream bug https://github.com/anthropics/claude-code/issues/6305 (empirically confirmed v2.1.128 CLI, 2026-05-19). Remove this note once #6305 is fixed upstream.",
+        "_note": "This entry did not fire in Claude Code CLI due to upstream bug https://github.com/anthropics/claude-code/issues/6305 (empirically confirmed v2.1.128 CLI, 2026-05-19). Re-tested on v2.1.231 (2026-08-14): PostToolUse now fires from a plugin hooks.json, so this entry is live. Kept only as provenance for the settings.json workaround this plugin may still carry; see plugins/CLAUDE.md and https://github.com/nsheaps/ai-mktpl/issues/753.",
         "matcher": "*",
         "hooks": [
           {
