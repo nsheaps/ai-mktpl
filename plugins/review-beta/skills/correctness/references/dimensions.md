@@ -1,9 +1,10 @@
 # Dimensions — `correctness` family
 
-Extracted verbatim from the canonical review taxonomy
-(`.ai-agent-jack/docs/research/review-taxonomy/taxonomy.md`, "Family: correctness").
-Column meanings, the severity rubric and the de-duplication ledger live in that source;
-this file carries only this family's table and the citations it depends on.
+Extracted verbatim from the canonical review taxonomy (internal source, not shipped with
+this plugin: `.ai-agent-jack/docs/research/review-taxonomy/taxonomy.md`, "Family: correctness").
+**The dimension table below is self-contained — it is the authority for this aspect.**
+Column meanings, the severity rubric and the cross-family de-duplication ledger live only in
+that source, so a reader without it loses the ledger, not the dimensions.
 
 ## Contents
 

@@ -1,7 +1,9 @@
 # Dimensions — `best-practices` family
 
 **This family is not in the canonical taxonomy.** The other seven aspects draw their dimensions
-from `review-taxonomy/taxonomy.md`, whose 108 dimensions are partitioned across six families —
+from an internal source not shipped with this plugin
+(`.ai-agent-jack/docs/research/review-taxonomy/taxonomy.md`), whose 108 dimensions are partitioned
+across six families —
 none of which is "best practices". That is deliberate on the taxonomy's part: "follows best
 practice" is not a reviewable property on its own, because without a named rule it collapses into
 the reviewer's taste.
