@@ -225,6 +225,20 @@ walk() {
   find -L "$p/commands" -name '*.md' -type f 2>/dev/null | sort | while read -r c; do
     check_md_frontmatter "$c" command
   done
+
+  # A directory that held none of the four artifact locations says so, the way
+  # an unrecognized FILE already does one branch up. The EMPTY guard at the
+  # bottom of this file is an aggregate over every path, so without this line a
+  # single unread directory in a multi-path sweep is invisible:
+  # `check-plugin.sh plugins/review-beta /some/dir` prints files_checked=1
+  # verdict=PASS and exits 0, and nothing distinguishes the directory that was
+  # read from the one that was not. Marker only, not a finding — passing a path
+  # that holds nothing is a usage question, and the aggregate case (every path
+  # empty) is the one that still gets a verdict and an exit status.
+  if [ ! -f "$p/.claude-plugin/plugin.json" ] && [ ! -f "$p/hooks/hooks.json" ] &&
+    [ -z "$(find -L "$p/agents" "$p/commands" -name '*.md' -type f 2>/dev/null | head -n 1)" ]; then
+    echo "# skipped (no recognized artifact): $p"
+  fi
   return 0
 }
 

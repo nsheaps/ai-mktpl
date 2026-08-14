@@ -464,6 +464,24 @@ else
     "rc=$rc got: $(cat "$WORK/empty.out")"
 fi
 
+# --- Case 8d: an unread path is named even when a sibling path was read ------
+# The EMPTY guard is an aggregate over nc, so it only fires when EVERY path read
+# nothing. A sweep that mixes a real plugin root with a directory holding no
+# recognized artifact still reports files_checked=1 verdict=PASS exit 0, and
+# without a per-path marker nothing distinguishes the directory that was read
+# from the one that was not — the same silent zero as 8c, one level down.
+# Marker only: this asserts the unread path is NAMED, not that the verdict or
+# the exit status changes.
+"$SKILLS/agentic-configuration/scripts/check-plugin.sh" "$TESTS_DIR/.." "$WORK/empty-tree" \
+  >"$WORK/mixed.out" 2>&1
+rc=$?
+if [ "$rc" -eq 0 ] && grep -q "^# skipped (no recognized artifact): $WORK/empty-tree$" "$WORK/mixed.out"; then
+  ok "check-plugin: an unread directory is named even when another path was read"
+else
+  not_ok "check-plugin: an unread directory is named even when another path was read" \
+    "rc=$rc got: $(cat "$WORK/mixed.out")"
+fi
+
 # --- Case 9: every probe is syntax-clean and honours --list ------------------
 for fam in correctness security design docs process org-fit best-practices; do
   if sh -n "$SKILLS/$fam/scripts/probe-$fam.sh" 2>/dev/null &&
