@@ -1,0 +1,6 @@
+markdownlint-cli2 v0.23.2 (markdownlint v0.41.1)
+Finding: **/*.md
+Linting: 1 file
+Summary: 2 issues in 1 file
+docs/broken.md:1 error MD041/first-line-heading/first-line-h1 First line in a file should be a top-level heading [Context: "### Heading starts at h3"]
+docs/broken.md:3:64 error MD034/no-bare-urls Bare URL used [Context: "http://example.invalid/nope"]

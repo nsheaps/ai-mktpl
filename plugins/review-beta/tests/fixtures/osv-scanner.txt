@@ -1,0 +1,40 @@
++-------------------------------------+------+-----------+----------+---------+---------------+------------------+
+| OSV URL                             | CVSS | ECOSYSTEM | PACKAGE  | VERSION | FIXED VERSION | SOURCE           |
++-------------------------------------+------+-----------+----------+---------+---------------+------------------+
+| https://osv.dev/PYSEC-2024-60       | 7.5  | PyPI      | idna     | 2.7     | 3.7           | requirements.txt |
+| https://osv.dev/GHSA-jjg7-2v4v-x38h |      |           |          |         |               |                  |
+| https://osv.dev/PYSEC-2026-215      | 6.9  | PyPI      | idna     | 2.7     | 3.15          | requirements.txt |
+| https://osv.dev/GHSA-65pc-fj4g-8rjx |      |           |          |         |               |                  |
+| https://osv.dev/PYSEC-2019-217      | 8.6  | PyPI      | jinja2   | 2.10    | 2.10.1        | requirements.txt |
+| https://osv.dev/GHSA-462w-v97r-4m45 |      |           |          |         |               |                  |
+| https://osv.dev/PYSEC-2021-66       | 6.9  | PyPI      | jinja2   | 2.10    | 2.11.3        | requirements.txt |
+| https://osv.dev/GHSA-g3rq-g295-4j3m |      |           |          |         |               |                  |
+| https://osv.dev/PYSEC-2026-1471     | 5.4  | PyPI      | jinja2   | 2.10    | 3.1.6         | requirements.txt |
+| https://osv.dev/GHSA-cpwx-vrp4-4pq7 |      |           |          |         |               |                  |
+| https://osv.dev/PYSEC-2026-1473     | 5.4  | PyPI      | jinja2   | 2.10    | 3.1.3         | requirements.txt |
+| https://osv.dev/GHSA-h5c8-rqwp-cp95 |      |           |          |         |               |                  |
+| https://osv.dev/PYSEC-2026-1474     | 5.4  | PyPI      | jinja2   | 2.10    | 3.1.4         | requirements.txt |
+| https://osv.dev/GHSA-h75v-3vvj-5mfj |      |           |          |         |               |                  |
+| https://osv.dev/PYSEC-2026-1475     | 7.8  | PyPI      | jinja2   | 2.10    | 3.1.5         | requirements.txt |
+| https://osv.dev/GHSA-q2x7-8rv6-6q7h |      |           |          |         |               |                  |
+| https://osv.dev/PYSEC-2018-28       | 7.5  | PyPI      | requests | 2.19.1  | 2.20.0        | requirements.txt |
+| https://osv.dev/GHSA-x84v-xcm2-53pg |      |           |          |         |               |                  |
+| https://osv.dev/PYSEC-2023-74       | 6.1  | PyPI      | requests | 2.19.1  | 2.31.0        | requirements.txt |
+| https://osv.dev/GHSA-j8r2-6x86-q33q |      |           |          |         |               |                  |
+| https://osv.dev/PYSEC-2026-1872     | 5.3  | PyPI      | requests | 2.19.1  | 2.32.4        | requirements.txt |
+| https://osv.dev/GHSA-9hjg-9r4m-mvj7 |      |           |          |         |               |                  |
+| https://osv.dev/PYSEC-2026-1873     | 5.6  | PyPI      | requests | 2.19.1  | 2.32.0        | requirements.txt |
+| https://osv.dev/GHSA-9wx4-h78v-vm56 |      |           |          |         |               |                  |
+| https://osv.dev/PYSEC-2026-2275     | 5.5  | PyPI      | requests | 2.19.1  | 2.33.0        | requirements.txt |
+| https://osv.dev/GHSA-gc5v-m9x4-r6x2 |      |           |          |         |               |                  |
+| https://osv.dev/PYSEC-2019-132      | 6.1  | PyPI      | urllib3  | 1.23    | 1.24.3        | requirements.txt |
+| https://osv.dev/GHSA-r64q-w8jr-g9qp |      |           |          |         |               |                  |
+| https://osv.dev/PYSEC-2019-133      | 8.7  | PyPI      | urllib3  | 1.23    | 1.24.2        | requirements.txt |
+| https://osv.dev/GHSA-mh33-7rrq-662w |      |           |          |         |               |                  |
+| https://osv.dev/PYSEC-2020-148      | 6.9  | PyPI      | urllib3  | 1.23    | 1.25.9        | requirements.txt |
+| https://osv.dev/GHSA-wqvq-5m8c-6g24 |      |           |          |         |               |                  |
+| https://osv.dev/PYSEC-2023-192      | 8.1  | PyPI      | urllib3  | 1.23    | 1.26.17       | requirements.txt |
+| https://osv.dev/GHSA-v845-jxx5-vc9f |      |           |          |         |               |                  |
+| https://osv.dev/PYSEC-2023-207      | 6.1  | PyPI      | urllib3  | 1.23    | 1.24.2        | requirements.txt |
+| https://osv.dev/GHSA-gwvm-45gx-3cf8 |      |           |          |         |               |                  |
+| https://osv.dev/PYSEC-2023-212      | 5.7  | PyPI      | urllib3  | 1.23    | 1.26.18       | requirements.txt |
