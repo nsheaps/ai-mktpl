@@ -224,24 +224,35 @@ walk() {
   return 0
 }
 
+# Flags are rotated out of "$@" and paths rotated to the back, matching
+# check-skill.sh. `break`ing at the first non-flag made argument ORDER
+# significant — a trailing `--quiet` was re-read as a path — which is the
+# invocation the README's "concatenate both streams" advice invites. The
+# rotation also survives paths containing spaces, and closes the single-dash
+# gap where `--*)` let `-x` fall through and be treated as a path.
 [ $# -gt 0 ] || usage
-while [ $# -gt 0 ]; do
-  case "$1" in
-  --quiet)
-    QUIET=1
-    shift
-    ;;
+argc=$#
+npaths=0
+while [ "$argc" -gt 0 ]; do
+  arg=$1
+  shift
+  argc=$((argc - 1))
+  case "$arg" in
+  --quiet) QUIET=1 ;;
   # Asking for help is not a usage error, so it prints the header to stdout and
   # exits 0 — same contract as check-skill.sh, which this file claims to share.
   -h | --help)
     sed -n '2,29p' "$0" | sed 's/^# \{0,1\}//'
     exit 0
     ;;
-  --*) usage ;;
-  *) break ;;
+  -*) usage ;;
+  *)
+    set -- "$@" "$arg"
+    npaths=$((npaths + 1))
+    ;;
   esac
 done
-[ $# -gt 0 ] || usage
+[ "$npaths" -gt 0 ] || usage
 
 # The find|while loops in walk() run in subshells, so the P0/P1/P2 counters they
 # bump are lost by the time control returns here. Buffering the findings and

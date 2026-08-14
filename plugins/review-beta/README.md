@@ -4,6 +4,11 @@ Multi-aspect code and documentation review. One entry skill decides **what kind*
 asked for, delegates to the aspects that apply, and merges what comes back into a single verified
 report.
 
+> **Requires Claude Code v2.1.218 or later.** The aspect skills set `background: false`, which is
+> version-gated. On an older client the key is ignored, the aspects fork into the background, and
+> `start` reaches its synthesis step with nothing returned — producing a confident report over an
+> empty finding set rather than an error.
+
 > **Beta.** The aspect skills' criteria are stable; their tool coverage is not. Several probe
 > commands are written against tool output shapes that could not be executed here — those are
 > called out in each aspect's SKILL.md §1, and an unexpected zero from one of them should be

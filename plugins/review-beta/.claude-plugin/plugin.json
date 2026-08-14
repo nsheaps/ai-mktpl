@@ -1,7 +1,7 @@
 {
   "name": "review-beta",
   "version": "0.1.0",
-  "description": "Adversarial multi-aspect review. One entry skill routes any review request — docs, code, agent configuration, CI, front-end, mobile, whole-repo — to the aspect skills that apply, runs each in an isolated fork behind its own tool probe, and synthesizes one de-duplicated, verified report.",
+  "description": "Adversarial multi-aspect review. One entry skill routes any review request — docs, code, agent configuration, CI, front-end, mobile, whole-repo — to the aspect skills that apply, runs each in an isolated fork behind its own tool probe, and synthesizes one de-duplicated, verified report. Requires Claude Code v2.1.218 or later (the aspect skills rely on `background: false`).",
   "author": {
     "name": "Nathan Heaps",
     "email": "nsheaps@gmail.com",
