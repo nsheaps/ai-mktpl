@@ -319,6 +319,52 @@ else
     "$(grep -c . "$WORK/cs") lines, no mention of missing-first.md"
 fi
 
+# --- Case 7b: SK024 fires on background:false without compatibility ----------
+# `background: false` is gated on Claude Code v2.1.218+; an older client ignores
+# it and returns nothing, which reads as a clean result. Three fixtures, because
+# a check that only ever fires is as useless as one that never does: the
+# violator must be caught, the compliant skill must not, and `background: true`
+# must not be reached at all.
+for case in violator compliant bg-true; do
+  mkdir -p "$WORK/sk024/$case"
+done
+cat >"$WORK/sk024/violator/SKILL.md" <<'MD'
+---
+name: violator
+description: A fixture skill used to prove SK024 fires. Use when testing the checker.
+context: fork
+background: false
+---
+
+# Violator
+
+## 1. Return contract
+
+Returns rows.
+MD
+sed -e 's/^name: violator/name: compliant/' \
+  -e 's/^background: false/background: false\ncompatibility: "Requires Claude Code v2.1.218 or later."/' \
+  "$WORK/sk024/violator/SKILL.md" >"$WORK/sk024/compliant/SKILL.md"
+sed -e 's/^name: violator/name: bg-true/' -e 's/^background: false/background: true/' \
+  "$WORK/sk024/violator/SKILL.md" >"$WORK/sk024/bg-true/SKILL.md"
+
+"$SKILLS/agentic-configuration/scripts/check-skill.sh" --quiet "$WORK/sk024/violator" >"$WORK/sk024.out" 2>&1 || true
+if grep -q '|SK024|' "$WORK/sk024.out"; then
+  ok "check-skill: SK024 fires on background:false with no compatibility"
+else
+  not_ok "check-skill: SK024 fires on background:false with no compatibility" \
+    "got: $(cat "$WORK/sk024.out")"
+fi
+
+for case in compliant bg-true; do
+  "$SKILLS/agentic-configuration/scripts/check-skill.sh" --quiet "$WORK/sk024/$case" >"$WORK/sk024.$case" 2>&1 || true
+  if grep -q '|SK024|' "$WORK/sk024.$case"; then
+    not_ok "check-skill: SK024 stays silent on the $case fixture" "got: $(cat "$WORK/sk024.$case")"
+  else
+    ok "check-skill: SK024 stays silent on the $case fixture"
+  fi
+done
+
 # --- Case 8: aspect discovery admits only real aspects -----------------------
 # Regression: 'ls review-*/' invoked any matching directory. The documented loop
 # now requires a SKILL.md that forks and returns the shared contract, and skips

@@ -190,7 +190,7 @@ check_skill() {
     finding P1 "$f" "$total" SK011 "body is $body lines, over the 200-line org budget; move detail into references/"
   fi
 
-  # --- SK017/SK018: fork wiring -----------------------------------------
+  # --- SK017/SK018/SK024: fork wiring -----------------------------------
   ctx=$(fm_get context)
   if [ "$ctx" != "fork" ]; then
     for k in agent background; do
@@ -202,6 +202,15 @@ check_skill() {
   else
     if ! grep -qiE '(return|output) contract|^#+ *returns?\b|returns? (only|exactly|the following)' "$f"; then
       finding P1 "$f" 0 SK018 "context: fork but no return contract found; the parent sees only the return value"
+    fi
+    # SK024: `background: false` is gated on Claude Code v2.1.218+. An older
+    # client ignores the key, forks to the background, and returns nothing —
+    # which the caller reads as a clean result, not an error. P2 because the
+    # omission costs diagnosability rather than breaking the skill: recording
+    # the floor documents the constraint, it does not enforce it.
+    if [ "$(fm_get background)" = "false" ] && ! fm_has compatibility; then
+      ln=$(grep -n '^background:' "$f" | head -n 1 | cut -d: -f1)
+      finding P2 "$f" "${ln:-0}" SK024 "'background: false' requires Claude Code v2.1.218+ but no 'compatibility' records it; on an older client the skill forks to the background and returns nothing, which reads as a clean result (references/authoring-standard.md)"
     fi
   fi
 

@@ -169,6 +169,7 @@ stay linkable.
 | SK021 | P1  | `--portable` only: keys ⊆ the six spec fields                                        |
 | SK022 | P2  | `description` carries an explicit when-to-use or trigger clause                      |
 | SK023 | P0  | No unquoted plain scalar contains `': '` — YAML fails and the whole block is dropped |
+| SK024 | P2  | `background: false` is accompanied by a `compatibility` recording the v2.1.218 floor |
 
 Heuristics with known limits: SK018 pattern-matches the phrases "return contract" / "output
 contract" / a `Returns …` heading, so a contract stated in other words reads as a miss —
