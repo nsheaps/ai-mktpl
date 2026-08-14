@@ -1,6 +1,0 @@
-{
-  "name": "hello-world",
-  "description": "Fixture plugin used by this repo's integration tests (bin/plugctl doctor). Not a real capability.",
-  "version": "0.0.0",
-  "author": { "name": "Nathan Heaps" }
-}
