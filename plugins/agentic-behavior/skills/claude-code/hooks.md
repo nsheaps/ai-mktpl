@@ -48,7 +48,9 @@ Plugin-layer shape (wrapped):
 {
   "description": "optional human-readable summary",
   "hooks": {
-    "PreToolUse": [/* same shape as above */]
+    "PreToolUse": [
+      /* same shape as above */
+    ]
   }
 }
 ```
@@ -69,8 +71,9 @@ Plugin-layer shape (wrapped):
 > registry from where plugin hooks were stored. Re-tested on v2.1.231
 > (2026-08-14): a plugin `hooks.json` declaring all four fired `PreToolUse`,
 > `PostToolUse` and `PostToolUseFailure`; `PermissionRequest` was not exercised.
-> Bundle these as plugin hooks; the `settings.json` workaround is no longer
-> needed for new plugins.
+> Bundle `PreToolUse`, `PostToolUse` and `PostToolUseFailure` as plugin hooks;
+> the `settings.json` workaround is no longer needed for those. Treat
+> `PermissionRequest` as untested until a run reaches a permission prompt.
 >
 > Source: [`plugins/CLAUDE.md`](../../../CLAUDE.md) (the canonical project
 > table, which carries the test that established this), upstream issues
