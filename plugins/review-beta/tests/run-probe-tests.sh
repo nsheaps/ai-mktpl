@@ -482,6 +482,25 @@ else
     "rc=$rc got: $(cat "$WORK/mixed.out")"
 fi
 
+# --- Case 8e: --quiet stdout is uniformly five-field -------------------------
+# The header promises `--quiet  findings only, no summary lines`, and the file
+# claims check-skill.sh's output contract so the two streams can be concatenated
+# and adjudicated as one list. A `#` line on stdout under --quiet breaks that:
+# `awk -F'|'` cannot field it. Three `# skipped` markers shipped ungated — two
+# from the original commit, and the third written to match them — so this pins
+# the rule rather than the three call sites, and covers a marker added later.
+: >"$WORK/quiet.out"
+for target in "$WORK/empty-tree" "$TESTS_DIR/../README.md" "$TESTS_DIR/.."; do
+  "$SKILLS/agentic-configuration/scripts/check-plugin.sh" --quiet "$target" \
+    >>"$WORK/quiet.out" 2>/dev/null || true
+done
+if grep -q '^#' "$WORK/quiet.out"; then
+  not_ok "check-plugin: --quiet emits no '#' lines on stdout" \
+    "got: $(grep '^#' "$WORK/quiet.out")"
+else
+  ok "check-plugin: --quiet emits no '#' lines on stdout"
+fi
+
 # --- Case 9: every probe is syntax-clean and honours --list ------------------
 for fam in correctness security design docs process org-fit best-practices; do
   if sh -n "$SKILLS/$fam/scripts/probe-$fam.sh" 2>/dev/null &&

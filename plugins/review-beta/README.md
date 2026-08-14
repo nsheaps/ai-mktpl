@@ -75,7 +75,7 @@ unrecognized aspect directory, so a half-built skill is visible rather than sile
 sh plugins/review-beta/tests/run-probe-tests.sh
 ```
 
-36 assertions. The `docs`, `security`, `design` and `org-fit` probes have their output-parsing
+37 assertions. The `docs`, `security`, `design` and `org-fit` probes have their output-parsing
 filters pinned against real captured tool output (provenance in
 [`tests/fixtures/SOURCES.md`](tests/fixtures/SOURCES.md)); `correctness`, `process` and
 `best-practices` are currently covered only by a syntax check and a `--list` smoke test, so their
@@ -86,9 +86,11 @@ regression, and `SK024` with a positive, a compliant and a not-applicable fixtur
 and a path holding no recognized artifact, asserting it reports `verdict=EMPTY` and exits 2 rather
 than passing over an unread tree — plus the per-path form of that, where an unread directory
 alongside a read one is named in a `# skipped (no recognized artifact)` marker even though the
-aggregate verdict stays `PASS`.
+aggregate verdict stays `PASS`, and the `--quiet` contract itself — that no `#` line reaches
+stdout under `--quiet`, so a concatenated `check-skill.sh` + `check-plugin.sh` stream is uniformly
+five-field.
 
-That last one is a tombstone. `HK001` flagged those four events as dead in a plugin manifest, on a
+The `hooks.json` one is a tombstone. `HK001` flagged those four events as dead in a plugin manifest, on a
 rule recorded in this marketplace from a v2.1.128 confirmation. It shipped testing the wrong
 nesting level, so it reported zero across 16 live declarations while a 51-plugin sweep read that
 zero as precision — and the obvious repair, fixing the nesting, would have emitted `P1` against 15

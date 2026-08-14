@@ -206,10 +206,10 @@ walk() {
       case "$p" in
       */agents/*) check_md_frontmatter "$p" agent ;;
       */commands/*) check_md_frontmatter "$p" command ;;
-      *) echo "# skipped (not a recognized artifact): $p" ;;
+      *) [ "$QUIET" -eq 1 ] || echo "# skipped (not a recognized artifact): $p" ;;
       esac
       ;;
-    *) echo "# skipped (not a recognized artifact): $p" ;;
+    *) [ "$QUIET" -eq 1 ] || echo "# skipped (not a recognized artifact): $p" ;;
     esac
     return
   fi
@@ -237,7 +237,7 @@ walk() {
   # empty) is the one that still gets a verdict and an exit status.
   if [ ! -f "$p/.claude-plugin/plugin.json" ] && [ ! -f "$p/hooks/hooks.json" ] &&
     [ -z "$(find -L "$p/agents" "$p/commands" -name '*.md' -type f 2>/dev/null | head -n 1)" ]; then
-    echo "# skipped (no recognized artifact): $p"
+    [ "$QUIET" -eq 1 ] || echo "# skipped (no recognized artifact): $p"
   fi
   return 0
 }
