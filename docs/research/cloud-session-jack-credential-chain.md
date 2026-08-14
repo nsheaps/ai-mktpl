@@ -6,12 +6,12 @@
 
 ## Summary
 
-| # | Check | Result |
-| - | ----- | ------ |
-| 1 | Plugins install in a cloud session | **PASS** |
-| 2 | SessionStart hooks fire | **PASS** |
-| 3 | Commits authored with Jack's credentials | **FAIL** — blocked by egress policy |
-| 4 | GitHub API reachable with Jack's credentials | **FAIL** — blocked by egress policy |
+| #   | Check                                        | Result                              |
+| --- | -------------------------------------------- | ----------------------------------- |
+| 1   | Plugins install in a cloud session           | **PASS**                            |
+| 2   | SessionStart hooks fire                      | **PASS**                            |
+| 3   | Commits authored with Jack's credentials     | **FAIL** — blocked by egress policy |
+| 4   | GitHub API reachable with Jack's credentials | **FAIL** — blocked by egress policy |
 
 Checks 3 and 4 fail for a single shared reason: **the agent egress proxy blocks
 every GitHub App API path**, so no installation token can be minted in this
@@ -90,9 +90,9 @@ missing.
 ```yaml
 1pass:
   opExec:
-    items: ['op://Agent-Jack/ENVIRONMENT']
+    items: ["op://Agent-Jack/ENVIRONMENT"]
 github-app:
-  ref: 'op://Agent-Jack/github--app--jack'
+  ref: "op://Agent-Jack/github--app--jack"
 ```
 
 ### Everything up to the token exchange works
@@ -106,7 +106,7 @@ Verified step by step:
 3. Those fields hold **nested** `op://Agent-Jack/github--app--jack/...`
    references. Following them one more hop yields real values (App ID 7 chars,
    installation ID 9 chars, a 1674-byte PEM with a valid `BEGIN` header). **OK**
-   (`op read` does *not* dereference recursively — that is `op-exec`'s job,
+   (`op read` does _not_ dereference recursively — that is `op-exec`'s job,
    and `op-exec` is not on `PATH`; see §2.)
 4. `github-app/bin/generate-token.sh` with those values → **BLOCKED**:
 
@@ -119,16 +119,16 @@ Token exchange failed (HTTP 403):
 
 Probed with the injected `GH_TOKEN`:
 
-| Method | Path | Code | Reason |
-| ------ | ---- | ---- | ------ |
-| GET | `/user` | 200 | — |
-| GET | `/rate_limit` | 200 | — |
-| GET | `/repos/nsheaps/ai-mktpl` | 403 | GitHub access is not enabled for this session |
-| GET | `/repos/nsheaps/ai-mktpl/pulls` | 403 | GitHub access is not enabled for this session |
-| GET | `/app` | 403 | **Path not permitted through this proxy** |
-| POST | `/app/installations/{id}/access_tokens` | 403 | **Path not permitted through this proxy** |
-| GET | `/installation/repositories` | 403 | Sessions are bound to their configured repositories |
-| GET | `/users/jack-nsheaps[bot]` | 403 | Sessions are bound to their configured repositories |
+| Method | Path                                    | Code | Reason                                              |
+| ------ | --------------------------------------- | ---- | --------------------------------------------------- |
+| GET    | `/user`                                 | 200  | —                                                   |
+| GET    | `/rate_limit`                           | 200  | —                                                   |
+| GET    | `/repos/nsheaps/ai-mktpl`               | 403  | GitHub access is not enabled for this session       |
+| GET    | `/repos/nsheaps/ai-mktpl/pulls`         | 403  | GitHub access is not enabled for this session       |
+| GET    | `/app`                                  | 403  | **Path not permitted through this proxy**           |
+| POST   | `/app/installations/{id}/access_tokens` | 403  | **Path not permitted through this proxy**           |
+| GET    | `/installation/repositories`            | 403  | Sessions are bound to their configured repositories |
+| GET    | `/users/jack-nsheaps[bot]`              | 403  | Sessions are bound to their configured repositories |
 
 All GitHub App endpoints are denied at the proxy. Per `/root/.ccr/README.md`,
 a 403 from the proxy is an organization egress-policy denial that must be
@@ -151,7 +151,8 @@ reported rather than worked around.
   > identity.
 
   That guard behaved correctly. **This report does not override it** — the
-  accompanying commit is intentionally *not* forged with a Jack identity.
+  accompanying commit is intentionally _not_ forged with a Jack identity.
+
 - **The effective GitHub identity is `nsheaps`**, not Jack: both the injected
   `GH_TOKEN` and the `mcp__github__*` server resolve to user `nsheaps`
   (id 1282393). Repo reads/writes work only through the session's MCP server
