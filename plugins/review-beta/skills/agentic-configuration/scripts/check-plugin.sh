@@ -31,22 +31,17 @@
 set -u
 
 QUIET=0
-P0=0
-P1=0
-P2=0
 
 usage() {
   echo "usage: check-plugin.sh [--quiet] PATH [PATH...]" >&2
   exit 2
 }
 
+# Emits only. The severity tally is computed from the buffered output at the end
+# of the file, for the reason documented there: a counter incremented inside
+# walk()'s find|while subshells never survives back to the parent.
 finding() {
   printf '%s|%s|%s|%s|%s\n' "$1" "$2" "$3" "$4" "$5"
-  case "$1" in
-  P0) P0=$((P0 + 1)) ;;
-  P1) P1=$((P1 + 1)) ;;
-  P2) P2=$((P2 + 1)) ;;
-  esac
 }
 
 have_jq() { command -v jq >/dev/null 2>&1; }
@@ -263,10 +258,14 @@ while [ "$argc" -gt 0 ]; do
 done
 [ "$npaths" -gt 0 ] || usage
 
-# The find|while loops in walk() run in subshells, so the P0/P1/P2 counters they
-# bump are lost by the time control returns here. Buffering the findings and
-# tallying the buffer is the only way the summary and the exit status can be
-# telling the truth — an exit 0 that was really a P0 is worse than no check.
+# There are no severity counters, deliberately. The find|while loops in walk()
+# run in subshells, so any counter they bumped would be lost by the time control
+# returns here; two of them lived in this file for a while, silently wrong and
+# never read. Buffering the findings and tallying the buffer is the only way the
+# summary and the exit status can be telling the truth — an exit 0 that was
+# really a P0 is worse than no check. (check-skill.sh keeps its counters and is
+# right to: it reads its targets from a redirect, so finding() runs in the
+# parent shell there.)
 # Validated up front, exactly as check-skill.sh does. Reporting a mistyped path
 # as "0 findings, verdict=PASS, exit 0" is the silent zero this whole plugin
 # argues against — the caller cannot tell a clean plugin from a path that was
