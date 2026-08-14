@@ -342,11 +342,41 @@ background: false
 
 Returns rows.
 MD
-sed -e 's/^name: violator/name: compliant/' \
-  -e 's/^background: false/background: false\ncompatibility: "Requires Claude Code v2.1.218 or later."/' \
-  "$WORK/sk024/violator/SKILL.md" >"$WORK/sk024/compliant/SKILL.md"
-sed -e 's/^name: violator/name: bg-true/' -e 's/^background: false/background: true/' \
-  "$WORK/sk024/violator/SKILL.md" >"$WORK/sk024/bg-true/SKILL.md"
+# Each fixture is written out in full rather than sed-derived from the violator.
+# `\n` on the replacement side of an `s///` is a GNU extension: BSD sed (macOS)
+# emits a literal `\n`, which collapses the inserted `compatibility` line into
+# `background`'s value. The fixture then trips SK023 instead of being compliant,
+# SK024 never runs, and the "stays silent" assertion below passes while guarding
+# nothing — the exact silent-zero failure this case exists to catch.
+cat >"$WORK/sk024/compliant/SKILL.md" <<'MD'
+---
+name: compliant
+description: A fixture skill used to prove SK024 fires. Use when testing the checker.
+context: fork
+background: false
+compatibility: "Requires Claude Code v2.1.218 or later."
+---
+
+# Compliant
+
+## 1. Return contract
+
+Returns rows.
+MD
+cat >"$WORK/sk024/bg-true/SKILL.md" <<'MD'
+---
+name: bg-true
+description: A fixture skill used to prove SK024 fires. Use when testing the checker.
+context: fork
+background: true
+---
+
+# Bg true
+
+## 1. Return contract
+
+Returns rows.
+MD
 
 "$SKILLS/agentic-configuration/scripts/check-skill.sh" --quiet "$WORK/sk024/violator" >"$WORK/sk024.out" 2>&1 || true
 if grep -q '|SK024|' "$WORK/sk024.out"; then
@@ -356,9 +386,13 @@ else
     "got: $(cat "$WORK/sk024.out")"
 fi
 
+# Asserting on total silence, not just on the absence of SK024. A fixture that
+# goes malformed stops reaching SK024 for reasons of its own, and an
+# SK024-only grep would read that as a pass — which is how the earlier
+# sed-derived fixture guarded nothing on macOS.
 for case in compliant bg-true; do
   "$SKILLS/agentic-configuration/scripts/check-skill.sh" --quiet "$WORK/sk024/$case" >"$WORK/sk024.$case" 2>&1 || true
-  if grep -q '|SK024|' "$WORK/sk024.$case"; then
+  if [ -s "$WORK/sk024.$case" ]; then
     not_ok "check-skill: SK024 stays silent on the $case fixture" "got: $(cat "$WORK/sk024.$case")"
   else
     ok "check-skill: SK024 stays silent on the $case fixture"

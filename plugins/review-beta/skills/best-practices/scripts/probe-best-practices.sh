@@ -68,7 +68,7 @@ while [ $# -gt 0 ]; do
     ;;
   --list) LIST=1 ;;
   -h | --help)
-    sed -n '2,50p' "$0" | sed 's/^#\{1,\} \{0,1\}//'
+    sed -n '2,49p' "$0" | sed 's/^#\{1,\} \{0,1\}//'
     exit 0
     ;;
   -*) usage ;;

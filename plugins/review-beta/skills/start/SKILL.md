@@ -41,14 +41,15 @@ SKIPPED: <aspects not run, and why>
 Then scale to the size of the change — routing says which aspects are _eligible_, size says how
 many are _worth it_:
 
-| Change                                         | Trim to                                                              |
-| :--------------------------------------------- | :------------------------------------------------------------------- |
-| ≤ ~20 lines, one file, no new dependency       | `correctness` only, plus `security` if the file is on a request path |
-| Ordinary feature or fix diff                   | the routed set, minus `process` and `org-fit`                        |
-| New public interface, migration, or dependency | the full routed set, nothing trimmed                                 |
+| Change                                         | Trim to                                                                       |
+| :--------------------------------------------- | :---------------------------------------------------------------------------- |
+| ≤ ~20 lines, one file, no new dependency       | the routed set ∩ {`correctness`, `security`, `docs`, `agentic-configuration`} |
+| Ordinary feature or fix diff                   | the routed set, minus `process` and `org-fit`                                 |
+| New public interface, migration, or dependency | the full routed set, nothing trimmed                                          |
 
-Whatever you trim goes in the report's `NOT REVIEWED` block. An aspect skipped deliberately is
-information; an aspect skipped silently is a hole the reader cannot see.
+Trim only within the routed set, never to nothing — if a rule would empty it, keep the first aspect
+§1 routed, because a `PASS` over an empty finding set is the failure this plugin exists to prevent.
+Trimmed aspects go in `NOT REVIEWED`: skipped deliberately is information, skipped silently is a hole.
 
 ---
 
@@ -192,11 +193,11 @@ NOTES:
 - `NOT REVIEWED` is never omitted. Every review has a boundary; an unstated one reads as coverage.
 - Omit `NOTES` when nothing was dropped and no aspect emitted an `AUTOMATION` line.
 
-The aspect probes' tool-detection and output-parsing paths are tested against real captured tool
-output by [`tests/run-probe-tests.sh`](../../tests/run-probe-tests.sh) (fixtures and their
-provenance in [`tests/fixtures/SOURCES.md`](../../tests/fixtures/SOURCES.md)). Run it after
-changing any probe command or filter — a filter that no longer matches its tool reports zero
-findings silently, which is worse than the tool being absent.
+[`tests/run-probe-tests.sh`](../../tests/run-probe-tests.sh) pins the `docs`, `security`, `design`
+and `org-fit` output filters against captured tool output ([provenance](../../tests/fixtures/SOURCES.md));
+`correctness`, `process` and `best-practices` get only a syntax and `--list` check, so treat an
+unexpected zero from those three as suspect. Run the suite after changing any probe: a filter that
+no longer matches reports zero silently, which is worse than an absent tool.
 
 A worked example — a three-aspect run with one duplicate, one refuted P0 and one unavailable
 dimension — is in [references/worked-example.md](references/worked-example.md). Read it before the

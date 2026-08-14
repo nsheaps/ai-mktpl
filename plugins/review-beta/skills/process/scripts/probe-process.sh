@@ -59,7 +59,7 @@ while [ $# -gt 0 ]; do
     ;;
   --list) LIST=1 ;;
   -h | --help)
-    sed -n '2,45p' "$0" | sed 's/^#\{1,\} \{0,1\}//'
+    sed -n '2,40p' "$0" | sed 's/^#\{1,\} \{0,1\}//'
     exit 0
     ;;
   -*) usage ;;
@@ -95,7 +95,7 @@ process-change-size	git	major	git diff --numstat "$BASE"...HEAD 2>/dev/null | aw
 process-commit-hygiene	commitlint	minor	commitlint --from "$BASE" --to HEAD 2>&1 | grep -E '^ *. \[' || true
 process-commit-hygiene	git	minor	git log --format='%h %s' "$BASE"..HEAD 2>/dev/null | grep -Ev ' (feat|fix|chore|docs|refactor|test|build|ci|perf|style|revert)(\(.+\))?!?: ' | sed 's/^/-:0: non-conventional commit subject: /' || true
 process-merge-gating,process-ci-local-parity	actionlint	blocker	actionlint 2>/dev/null | grep -E '^[^ ]+\.ya?ml:[0-9]+' || true
-process-merge-gating,process-review-authority	gh	blocker	gh pr checks --json name,state 2>/dev/null | grep -E '"state":"(FAILURE|CANCELLED)"' || true
+process-merge-gating,process-review-authority	gh	blocker	gh pr view >/dev/null 2>&1 && gh pr checks --json name,state --jq '.[] | select(.state=="FAILURE" or .state=="CANCELLED") | "-:0: required check \(.name) is \(.state)"' 2>/dev/null || true
 process-release-mechanics	semantic-release	major	semantic-release --dry-run --no-ci 2>&1 | grep -E 'ERR|error' || true
 process-defect-feedback-loop,process-rollback-path	git	major	[ -f .review/risk-paths.yaml ] && sed -n 's/^ *- *//p' .review/risk-paths.yaml > "$TMP/rp" && git diff --name-only "$BASE"...HEAD 2>/dev/null | grep -F -f "$TMP/rp" 2>/dev/null | sed 's|$|:0: touches a declared risk path; rollback path must be stated|'; rm -f "$TMP/rp"
 TOOLTABLE
@@ -151,6 +151,17 @@ while IFS="$(printf '\t')" read -r dim bin sev cmd; do
     printf '%s|%s|%s|%s|%s\n' "$sev" "$file" "$lno" "$dim" "$msg" >>"$TMP/findings"
   done <"$TMP/out"
 done <"$TMP/tools"
+
+# `gh` installed is not the same as a pull request existing. Without this the row
+# runs, matches nothing, and the dimension reads clean having never been
+# evaluated — the one silent-zero the tool-presence check cannot catch, because
+# the tool is genuinely present.
+if command -v gh >/dev/null 2>&1 && ! gh pr view >/dev/null 2>&1; then
+  printf "# deferred=%s reason=%s\n" \
+    "process-merge-gating,process-review-authority" \
+    "gh is installed but no pull request exists for this branch; check status was not evaluated" \
+    >>"$TMP/meta"
+fi
 
 printf "# deferred=%s reason=%s\n" \
   "process-load-capacity-validation" "load stages are a CI job, not a review turn" \
