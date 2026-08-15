@@ -27,11 +27,12 @@ SessionStart dispatch. See §2.
 ## 1. Plugin installation — PASS
 
 Every plugin enabled in `.claude/settings.json` resolved to a cached version.
-Counts, measured on this branch:
+Counts, measured on this branch at commit `009dd96` (CD regenerates
+`marketplace.json` on every merge to `main`, so the first row drifts by design):
 
 | Measure                                                | Count |
 | ------------------------------------------------------ | ----- |
-| Plugins published in `.claude-plugin/marketplace.json` | 55    |
+| Plugins published in `.claude-plugin/marketplace.json` | 56    |
 | Plugin directories in `plugins/`                       | 58    |
 | Entries in `.claude/settings.json` `enabledPlugins`    | 21    |
 | …of those, set to `true` (actually enabled)            | 12    |
@@ -46,7 +47,7 @@ All **12** enabled plugins resolved, spanning three marketplaces:
 
 The 18 cached `ai-mktpl` entries are a **superset** of the 9 enabled ones —
 Claude Code caches referenced plugins (including entries set to `false` and
-transitive dependencies), not the whole 55-plugin marketplace. 18-of-55 is the
+transitive dependencies), not the whole 56-plugin marketplace. 18-of-56 is the
 expected result, not a shortfall.
 
 > **Scope note:** this check confirms _presence and resolution_ in the cache. It
