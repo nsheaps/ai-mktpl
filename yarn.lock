@@ -5,10 +5,10 @@ __metadata:
   version: 10
   cacheKey: 10c0
 
-"@decimalturn/toml-patch@npm:^1.3.0":
-  version: 1.3.0
-  resolution: "@decimalturn/toml-patch@npm:1.3.0"
-  checksum: 10c0/fdc8fde91b991bcbdf771c1af5f155f0c708aa4784bd091bd34d103c385c67e6375803a7d4a907dc8a2bf877bfd9bbd8ad6fd99df224fe0ad9c0996fc9506218
+"@decimalturn/toml-patch@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "@decimalturn/toml-patch@npm:2.1.0"
+  checksum: 10c0/89fa17db653c5a23b4235b31f765a8f865aa9494c9fefdfdcc8ecd3198429b228033e91f45da667b8b6357b1d1d85ee6ff568d1d34a089dcf65befb77f8a9688
   languageName: node
   linkType: hard
 
@@ -418,22 +418,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@release-it/bumper@npm:^7.0.6":
-  version: 7.0.6
-  resolution: "@release-it/bumper@npm:7.0.6"
+"@release-it/bumper@npm:^8.0.0":
+  version: 8.0.0
+  resolution: "@release-it/bumper@npm:8.0.0"
   dependencies:
-    "@decimalturn/toml-patch": "npm:^1.3.0"
+    "@decimalturn/toml-patch": "npm:^2.1.0"
     "@iarna/toml": "npm:^3.0.0"
     cheerio: "npm:^1.2.0"
     detect-indent: "npm:7.0.2"
     fast-glob: "npm:^3.3.3"
     ini: "npm:^6.0.0"
-    js-yaml: "npm:^4.1.1"
+    js-yaml: "npm:^5.2.2"
     lodash-es: "npm:^4.18.1"
-    semver: "npm:^7.8.1"
+    semver: "npm:^7.8.5"
   peerDependencies:
-    release-it: ^18.0.0 || ^19.0.0 || ^20.0.0
-  checksum: 10c0/867b6e6d5b4bb8b79a54b26d0988d25955eb8a29da53cac41ef8d08b75fab2f28415e2a8f6795f5808670bf45a14e98400efbfa31f82202f88016fdfca6f07f5
+    release-it: ^18.0.0 || ^19.0.0 || ^20.0.0 || ^21.0.0
+  checksum: 10c0/2f104a8cc14824344a51fa22a2460b1e7b77e7bfb7265df48f84c41b9a07c5822700591e7d6f106ee790b1e56c53e22dd44f0a9be05400a7f42a0f1a0293b5b4
   languageName: node
   linkType: hard
 
@@ -623,7 +623,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "claude-code-plugin-marketplace@workspace:."
   dependencies:
-    "@release-it/bumper": "npm:^7.0.6"
+    "@release-it/bumper": "npm:^8.0.0"
     release-it: "npm:^20.2.1"
   languageName: unknown
   linkType: soft
@@ -1206,14 +1206,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"js-yaml@npm:^4.1.1":
-  version: 4.3.0
-  resolution: "js-yaml@npm:4.3.0"
+"js-yaml@npm:^5.2.2":
+  version: 5.3.0
+  resolution: "js-yaml@npm:5.3.0"
   dependencies:
     argparse: "npm:^2.0.1"
   bin:
-    js-yaml: bin/js-yaml.js
-  checksum: 10c0/058b30473d6915ca5b4feb11e2f7d4d97242f98d00a798ed48dd90b46b7c640398afe9128c5db22c5300f8c6528fe2a174b9a93f351a70ebc28c6203938d8bff
+    js-yaml: bin/js-yaml.mjs
+  checksum: 10c0/c67383a74026f3b550fe1131c6f0f56df11e227fc9b8b8c1c85154f106831a95a944f2dd4f505498d537790483aec7cd5e3d5e9913fe28fa2d131eeb894a0fd9
   languageName: node
   linkType: hard
 
@@ -1725,7 +1725,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:^7.8.1":
+"semver@npm:^7.8.5":
   version: 7.8.5
   resolution: "semver@npm:7.8.5"
   bin:
