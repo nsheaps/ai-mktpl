@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Step 1: Label all stale issues, but never auto-close
-      - uses: actions/stale@v10
+      - uses: actions/stale@4391f3da665fdf50b6810c1a66712fb9ba21aa93 # v11
         with:
           stale-issue-message: >
             This issue has been automatically marked as stale because it has not had
@@ -28,7 +28,7 @@ jobs:
           operations-per-run: 100
 
       # Step 2: Close stale daily-report issues
-      - uses: actions/stale@v10
+      - uses: actions/stale@4391f3da665fdf50b6810c1a66712fb9ba21aa93 # v11
         with:
           only-issue-labels: daily-report
           stale-issue-label: stale
