@@ -5,7 +5,7 @@
   "packageManager": "yarn@4.17.1",
   "devDependencies": {
     "@release-it/bumper": "^8.0.0",
-    "release-it": "^20.2.1"
+    "release-it": "^21.0.0"
   },
   "version": "0.0.1"
 }
