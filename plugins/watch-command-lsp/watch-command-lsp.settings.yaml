@@ -1,0 +1,17 @@
+# Default settings for watch-command-lsp plugin
+# Override in $CLAUDE_PROJECT_DIR/.claude/plugins.settings.yaml or ~/.claude/plugins.settings.yaml
+
+watch-command-lsp:
+  # Whether the plugin is enabled
+  enabled: true
+  # Watchers are configured via initializationOptions in .lsp.json
+  # Example .lsp.json override in your project's .claude/plugins.settings.yaml:
+  #
+  # watch-command-lsp:
+  #   watchers:
+  #     - id: tsc
+  #       command: "npx tsc --watch --noEmit"
+  #       parser: tsc
+  #     - id: jest
+  #       command: "npx jest --watchAll --no-coverage"
+  #       parser: jest
