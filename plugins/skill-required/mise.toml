@@ -1,0 +1,4 @@
+[tools]
+# yq (Go version: mikefarah/yq) is required for YAML config parsing in hook scripts.
+# https://github.com/mikefarah/yq
+yq = "latest"
