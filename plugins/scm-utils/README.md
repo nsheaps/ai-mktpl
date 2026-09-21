@@ -85,6 +85,29 @@ Rebase a feature branch onto its base branch for linear commit history.
 - Does NOT recursively rebase parent PRs
 - Verifies commit count preservation after rebase
 
+## Hooks
+
+### Pre-Push Pull
+
+Automatically pulls before every `git push` to keep your branch up to date with the remote. Runs as a PreToolUse hook on the Bash tool.
+
+**Behavior:**
+
+- Intercepts `git push` commands
+- Runs `git pull --rebase` (default) or `git pull` before the push
+- If the pull/rebase fails due to conflicts, **blocks the push** with resolution instructions
+- If new commits were pulled, **prints what changed** then allows the push
+- If already up to date, **stays silent**
+
+**Configuration:**
+
+Override the pull strategy in your project or user `plugins.settings.yaml`:
+
+```yaml
+scm-utils:
+  prePushPullStrategy: "rebase" # default — or "merge"
+```
+
 ## Installation
 
 Add to your Claude Code plugins:
@@ -99,3 +122,4 @@ Or install from the marketplace (when available).
 
 - `git` - Git CLI
 - `gh` - GitHub CLI (for PR metadata, labels, reviews)
+- `jq` - JSON processor (for hook input parsing)
