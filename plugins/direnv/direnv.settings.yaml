@@ -1,0 +1,39 @@
+# direnv plugin configuration
+#
+# Override per-project via ${CLAUDE_PROJECT_DIR}/.claude/plugins.settings.yaml
+# or per-user via ~/.claude/plugins.settings.yaml under the "direnv" key.
+#
+# Set enabled: false to disable auto-install and env sync without uninstalling
+# the plugin.
+
+direnv:
+  enabled: true
+
+  # Download and install the direnv binary if not already on PATH.
+  # Set to false when direnv is managed externally (e.g. by mise or Homebrew).
+  # The plugin will still export .envrc into CLAUDE_ENV_FILE when direnv is
+  # found on PATH.
+  autoInstall: true
+
+  # Install direnv to $CLAUDE_PROJECT_DIR/bin/.local. Only used when
+  # autoInstall is true.
+  installToProject: true
+
+  # Run installation in the background (non-blocking session start).
+  backgroundInstall: false
+
+  # Specific direnv version to install (default: latest).
+  # version: "2.37.1"
+  version: 'latest'
+
+  # Run `direnv allow` for .envrc in the project dir (and any git worktrees)
+  # on session start, so the diff can be exported without a manual approval
+  # step. direnv normally refuses to load an .envrc it hasn't seen approved.
+  autoAllow: true
+
+  # Minimum seconds between PreToolUse .envrc state checks (debounce/throttle).
+  # The PreToolUse hook only re-runs `direnv export bash` when this interval
+  # has elapsed AND the .envrc fingerprint (path + mtime + size) has changed.
+  # See hooks/scripts/direnv-check.sh for the local `should_check` seam that
+  # a shared "agent-hook throttle" helper is expected to replace later.
+  checkIntervalSeconds: 2

@@ -1,0 +1,29 @@
+{
+  "description": "direnv lifecycle: install + compute .envrc diff on session start, re-export before Bash calls when .envrc changes",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/install-direnv.sh",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/direnv-check.sh",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}
