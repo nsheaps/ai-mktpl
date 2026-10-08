@@ -1,5 +1,5 @@
 {
-  "description": "GitHub App token lifecycle: generate on session start, refresh before expiry via PreToolUse hook",
+  "description": "GitHub App token lifecycle: generate on session start, refresh before expiry via PreToolUse hook. Also syncs the plugin's rules into project .claude/rules/ via symlink on session start.",
   "hooks": {
     "SessionStart": [
       {
@@ -9,6 +9,11 @@
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/github-token-init.sh",
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/sync-rules.sh",
+            "timeout": 15
           }
         ]
       }
