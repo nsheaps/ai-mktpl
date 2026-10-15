@@ -12,7 +12,7 @@ Install and manage [mise](https://mise.run) (tool version manager) in Claude Cod
 
 ## How It Works
 
-On session start (web sessions only):
+On session start:
 
 1. Checks if mise is already available on PATH
 2. If not, downloads the binary to `$CLAUDE_PROJECT_DIR/bin/.local/mise`
