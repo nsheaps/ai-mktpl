@@ -148,6 +148,7 @@ Things that bite:
 - **A history rewrite on one side is merged back** by the sync; disable the workflow in both repos first.
 - **`cd`'s bump push can be rejected** if a sync push lands mid-run; re-run `cd`. Known limitations are listed at the end of `docs/mirror-sync.md`.
 - **Fetch errors must fail the run.** `ls-remote` exit code 2 means "branch absent"; anything else is an unreachable remote. Treating both as "missing" produced green runs that synced nothing.
+- **Host keys come from `api.github.com/meta`, authenticated with the workflow token.** Unauthenticated calls share a per-IP rate limit across GitHub-hosted runners and returned 403 (run 38787057650), leaving `SYNC_KNOWN_HOSTS` empty. The fetch is its own step so the token never reaches the script that holds the deploy keys.
 - The local test uses bare repos, so SSH and the GitHub-API host-key fetch are only exercised by the first real run.
 
 ## From Marketplace JSON to User Installation

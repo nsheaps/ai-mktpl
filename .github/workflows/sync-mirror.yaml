@@ -65,6 +65,26 @@ jobs:
           persist-credentials: false
           sparse-checkout: mise/tasks
 
+      # Host keys come from GitHub's API over TLS rather than ssh-keyscan, so a
+      # first-use MITM cannot plant a key. The call is authenticated with the
+      # workflow token: unauthenticated calls share a per-IP rate limit across
+      # GitHub-hosted runners and return 403. This step is separate so the token
+      # never reaches the sync script, which holds the deploy keys.
+      - name: Fetch GitHub SSH host keys
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          curl -fsS --retry 3 --retry-all-errors \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/meta |
+            jq -r '.ssh_keys[] | "github.com " + .' >"$RUNNER_TEMP/known_hosts"
+          if [ ! -s "$RUNNER_TEMP/known_hosts" ]; then
+            echo "::error::api.github.com/meta returned no ssh_keys"
+            exit 1
+          fi
+
       - name: Sync branches
         env:
           SYNC_SELF_URL: git@github.com:${{ env.SYNC_SELF_REPO }}.git
@@ -76,8 +96,6 @@ jobs:
           SYNC_BRANCHES: ${{ inputs.branches || 'main' }}
           SYNC_DRY_RUN: ${{ inputs.dry_run == true }}
         run: |
-          # Host keys come from GitHub's API over TLS rather than ssh-keyscan,
-          # so a first-use MITM cannot plant a key.
-          SYNC_KNOWN_HOSTS="$(curl -fsSL https://api.github.com/meta | jq -r '.ssh_keys[] | "github.com " + .')"
+          SYNC_KNOWN_HOSTS="$(cat "$RUNNER_TEMP/known_hosts")"
           export SYNC_KNOWN_HOSTS
           bash mise/tasks/sync-mirror
