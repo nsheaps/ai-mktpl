@@ -132,6 +132,24 @@ The **bump-and-update-marketplace** job performs these steps in sequence:
 
 Authentication uses a GitHub App (not GITHUB_TOKEN) to allow the push to trigger downstream workflows if needed.
 
+**Only `nsheaps/ai-mktpl` bumps.** The job is guarded by `github.repository == 'nsheaps/ai-mktpl'`. Its mirror, `oura-health-playground/nsheaps-ai-mktpl`, gets the bump commits through the mirror sync below; bumping in both repos would create conflicting version commits.
+
+## Mirror Sync (sync-mirror.yaml)
+
+`nsheaps/ai-mktpl` and `oura-health-playground/nsheaps-ai-mktpl` are kept in sync both ways. The same workflow file lives in both repos; the logic is `mise/tasks/sync-mirror` (tests: `bash mise/tests/sync-mirror.test.sh`). Full setup (deploy keys, secrets, ruleset bypass), on-demand runs, and conflict resolution are in `docs/mirror-sync.md`.
+
+Things that bite:
+
+- **Bump commits carry `[skip ci]`**, so their push never triggers the `push` trigger. The `workflow_run` trigger on `cd` is what carries them across. If a bump isn't reaching the mirror, check that trigger first.
+- **Deploy-key pushes trigger target workflows; `GITHUB_TOKEN` pushes don't.** That's why the sync uses deploy keys, and why it terminates: the target's run sees both sides equal and stops.
+- **Each private key is a secret in both repos** (as `SYNC_SELF_DEPLOY_KEY` in its own repo, `SYNC_PEER_DEPLOY_KEY` in the other), stored in the `mirror-sync` Environment restricted to `main` so a branch with a modified workflow can't read them. A deploy key can be registered on one repo only, hence two keypairs. Both keys are required (the script exits 2 without them).
+- **Protected `main` rejects deploy-key pushes** unless a ruleset lists Deploy keys as a bypass actor.
+- **A diverged conflict fails the run by design** and pushes nothing; resolve per the doc. Clean diverged merges are deterministic (same commit from either side), which is what lets racing runs converge.
+- **A history rewrite on one side is merged back** by the sync; disable the workflow in both repos first.
+- **`cd`'s bump push can be rejected** if a sync push lands mid-run; re-run `cd`. Known limitations are listed at the end of `docs/mirror-sync.md`.
+- **Fetch errors must fail the run.** `ls-remote` exit code 2 means "branch absent"; anything else is an unreachable remote. Treating both as "missing" produced green runs that synced nothing.
+- The local test uses bare repos, so SSH and the GitHub-API host-key fetch are only exercised by the first real run.
+
 ## From Marketplace JSON to User Installation
 
 ### Marketplace Registration
@@ -240,6 +258,7 @@ git push
 - [mise Documentation](https://mise.run)
 - CI workflow: `.github/workflows/ci.yaml`
 - CD workflow: `.github/workflows/cd.yaml`
+- Mirror sync workflow: `.github/workflows/sync-mirror.yaml` (docs: `docs/mirror-sync.md`)
 - Mise tasks: `mise/tasks/` (repo root)
 - Base release config: `.release-it.base.json`
 - Marketplace manifest: `.claude-plugin/marketplace.json`

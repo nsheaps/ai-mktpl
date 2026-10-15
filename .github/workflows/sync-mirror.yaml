@@ -1,0 +1,83 @@
+# Two-way sync between nsheaps/ai-mktpl and oura-health-playground/nsheaps-ai-mktpl.
+#
+# The same file lives in both repos (and syncs itself). On each side it
+# fast-forwards the other repo when it is behind, pulls when it is ahead of
+# this repo, and merges when the two have diverged. Pushes use deploy keys over
+# SSH so that they trigger the target repo's own workflows (GITHUB_TOKEN pushes
+# would not); the target's run then finds both sides equal and stops, which is
+# what keeps the two workflows from ping-ponging.
+#
+# Setup (deploy keys + secrets): docs/mirror-sync.md
+# Logic and tests:               mise/tasks/sync-mirror, mise/tests/sync-mirror.test.sh
+
+name: Sync mirror
+
+'on':
+  push:
+    branches: [main]
+  # Bump commits from cd.yaml carry [skip ci], so their push never fires the
+  # trigger above. Syncing after cd finishes carries them across.
+  workflow_run:
+    workflows: [cd]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      branches:
+        description: 'Space-separated branches to sync'
+        type: string
+        default: main
+      dry_run:
+        description: 'Report what would be pushed without pushing'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  # Push and cd-triggered runs queue one at a time per repo. A run always syncs
+  # the latest state of both sides, so a newer pending run can replace an older
+  # one. Manual runs get their own group so a dry run or a branch override
+  # cannot replace the pending real sync that carries a [skip ci] bump commit.
+  group: sync-mirror-${{ github.event_name == 'workflow_dispatch' && github.run_id || 'auto' }}
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # cd also runs on PRs; every other completed cd run (push, manual) may have
+    # pushed a bump commit.
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.event != 'pull_request'
+    # The deploy-key secrets belong to this environment, which should only allow
+    # deployments from main (docs/mirror-sync.md). A modified copy of this
+    # workflow on another branch then cannot read the keys.
+    environment: mirror-sync
+    env:
+      SYNC_SELF_REPO: ${{ github.repository }}
+      SYNC_PEER_REPO: ${{ github.repository == 'nsheaps/ai-mktpl' && 'oura-health-playground/nsheaps-ai-mktpl' || 'nsheaps/ai-mktpl' }}
+    steps:
+      # Only used to get the sync script; the script clones both repos itself.
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+          sparse-checkout: mise/tasks
+
+      - name: Sync branches
+        env:
+          SYNC_SELF_URL: git@github.com:${{ env.SYNC_SELF_REPO }}.git
+          SYNC_PEER_URL: git@github.com:${{ env.SYNC_PEER_REPO }}.git
+          # Key with write access to THIS repo (lets a run pull peer changes in).
+          SYNC_SELF_DEPLOY_KEY: ${{ secrets.SYNC_SELF_DEPLOY_KEY }}
+          # Key with write access to the PEER repo.
+          SYNC_PEER_DEPLOY_KEY: ${{ secrets.SYNC_PEER_DEPLOY_KEY }}
+          SYNC_BRANCHES: ${{ inputs.branches || 'main' }}
+          SYNC_DRY_RUN: ${{ inputs.dry_run == true }}
+        run: |
+          # Host keys come from GitHub's API over TLS rather than ssh-keyscan,
+          # so a first-use MITM cannot plant a key.
+          SYNC_KNOWN_HOSTS="$(curl -fsSL https://api.github.com/meta | jq -r '.ssh_keys[] | "github.com " + .')"
+          export SYNC_KNOWN_HOSTS
+          bash mise/tasks/sync-mirror

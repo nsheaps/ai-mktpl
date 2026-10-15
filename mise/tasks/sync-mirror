@@ -1,0 +1,213 @@
+#!/usr/bin/env bash
+#MISE description="Two-way sync of branches between this repo and its mirror using deploy keys. See docs/mirror-sync.md"
+set -euo pipefail
+set -f # branch names are never glob-expanded
+
+# Reconciles one or more branches between two remotes ("self" and "peer"):
+#   equal            -> nothing to do
+#   peer behind self -> fast-forward push self -> peer
+#   self behind peer -> fast-forward push peer -> self
+#   diverged         -> merge both tips locally, push the merge commit to both
+#                       (a conflicting merge fails the run; nothing is pushed)
+# Pushes are never forced. A rejected push (a concurrent push landed first) is
+# retried from a fresh fetch, so racing runs on both sides converge.
+#
+# The merge commit is deterministic (parents ordered by SHA, fixed identity and
+# dates), so two runs merging the same tips from opposite sides produce the
+# same commit and their pushes agree instead of rejecting each other.
+#
+# Inputs (environment):
+#   SYNC_SELF_URL / SYNC_PEER_URL    git URLs (ssh in CI; file paths in tests)
+#   SYNC_SELF_DEPLOY_KEY             private key with write access to self
+#   SYNC_PEER_DEPLOY_KEY             private key with write access to peer
+#   SYNC_KNOWN_HOSTS                 known_hosts content; required for ssh remotes
+#   SYNC_BRANCHES                    space-separated branch names (default: main)
+#   SYNC_DRY_RUN=true                report what would happen, push nothing
+#   SYNC_MAX_ATTEMPTS                attempts per branch on rejected pushes (default: 3)
+# Keys are required for every ssh/https remote (reading self needs one too);
+# local paths need none.
+
+SELF_URL="${SYNC_SELF_URL:?SYNC_SELF_URL is required}"
+PEER_URL="${SYNC_PEER_URL:?SYNC_PEER_URL is required}"
+BRANCHES="${SYNC_BRANCHES:-main}"
+DRY_RUN="${SYNC_DRY_RUN:-false}"
+MAX_ATTEMPTS="${SYNC_MAX_ATTEMPTS:-3}"
+
+WORK="$(mktemp -d)"
+trap 'rm -rf "$WORK"' EXIT
+umask 077
+
+log() { printf 'sync-mirror: %s\n' "$*" >&2; }
+
+is_network_url() { [[ "$1" =~ ^(git@|ssh://|https?://) ]]; }
+
+# Key material only ever lives in $WORK (0700) and is removed on exit.
+write_key() {
+  local name="$1" url="$2" content="$3" var="$4"
+  if [ -z "$content" ]; then
+    if is_network_url "$url"; then
+      log "$var is not set; see docs/mirror-sync.md for setup"
+      exit 2
+    fi
+    return 0
+  fi
+  [ -n "${SYNC_KNOWN_HOSTS:-}" ] || { log "SYNC_KNOWN_HOSTS is required when a deploy key is set"; exit 2; }
+  printf '%s\n' "$content" >"$WORK/$name.key"
+  chmod 600 "$WORK/$name.key"
+  printf '%s\n' "$SYNC_KNOWN_HOSTS" >"$WORK/known_hosts"
+}
+write_key self "$SELF_URL" "${SYNC_SELF_DEPLOY_KEY:-}" SYNC_SELF_DEPLOY_KEY
+write_key peer "$PEER_URL" "${SYNC_PEER_DEPLOY_KEY:-}" SYNC_PEER_DEPLOY_KEY
+# Keys are on disk now; keep them out of every child process's environment.
+unset SYNC_SELF_DEPLOY_KEY SYNC_PEER_DEPLOY_KEY
+
+# Run git against one remote with only that remote's deploy key offered.
+remote_git() {
+  local side="$1"
+  shift
+  if [ -f "$WORK/$side.key" ]; then
+    GIT_SSH_COMMAND="ssh -i $WORK/$side.key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$WORK/known_hosts" \
+      git -C "$WORK/repo" "$@"
+  else
+    git -C "$WORK/repo" "$@"
+  fi
+}
+
+git init --quiet --bare "$WORK/repo"
+git -C "$WORK/repo" config user.name "github-actions[bot]"
+git -C "$WORK/repo" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+# The deploy key is the only credential; never fall back to a helper or prompt.
+git -C "$WORK/repo" config credential.helper ""
+export GIT_TERMINAL_PROMPT=0
+
+# Fetch a branch tip from a side into refs/sync/<side>/<branch>; prints the SHA,
+# or nothing if the branch does not exist there. Returns 1 if the remote cannot
+# be read (bad key, network): that must fail the run, not read as "no branch".
+fetch_tip() {
+  local side="$1" url="$2" branch="$3" ref="refs/sync/$1/$3" rc=0
+  git -C "$WORK/repo" update-ref -d "$ref" 2>/dev/null || true
+  remote_git "$side" ls-remote --exit-code --heads "$url" "refs/heads/$branch" >/dev/null 2>"$WORK/err" || rc=$?
+  if [ "$rc" -eq 2 ]; then
+    return 0 # reachable, branch absent
+  elif [ "$rc" -ne 0 ]; then
+    log "[$branch] cannot read $side remote: $(head -n 1 "$WORK/err")"
+    return 1
+  fi
+  if ! remote_git "$side" fetch --quiet --no-tags "$url" "+refs/heads/$branch:$ref" 2>"$WORK/err"; then
+    log "[$branch] fetch from $side failed: $(head -n 1 "$WORK/err")"
+    return 1
+  fi
+  git -C "$WORK/repo" rev-parse --verify --quiet "$ref^{commit}"
+}
+
+push_to() {
+  local side="$1" url="$2" sha="$3" branch="$4"
+  if [ "$DRY_RUN" = "true" ]; then
+    log "[$branch] dry run: would push ${sha:0:12} to $side"
+    return 0
+  fi
+  # No --force: a non-fast-forward means someone pushed first; the caller retries.
+  remote_git "$side" push --quiet "$url" "$sha:refs/heads/$branch"
+}
+
+# Returns 0 when reconciled, 1 on a rejected push (retryable), 2 on an
+# unresolvable condition (unreadable remote, conflict).
+sync_branch() {
+  local branch="$1" self_sha peer_sha merged
+  self_sha="$(fetch_tip self "$SELF_URL" "$branch")" || return 2
+  peer_sha="$(fetch_tip peer "$PEER_URL" "$branch")" || return 2
+
+  if [ -z "$self_sha" ] && [ -z "$peer_sha" ]; then
+    log "[$branch] exists on neither side; nothing to do"
+    return 0
+  fi
+  if [ -z "$peer_sha" ]; then
+    log "[$branch] missing on peer; creating from self (${self_sha:0:12})"
+    push_to peer "$PEER_URL" "$self_sha" "$branch" || return 1
+    return 0
+  fi
+  if [ -z "$self_sha" ]; then
+    log "[$branch] missing on self; creating from peer (${peer_sha:0:12})"
+    push_to self "$SELF_URL" "$peer_sha" "$branch" || return 1
+    return 0
+  fi
+  if [ "$self_sha" = "$peer_sha" ]; then
+    log "[$branch] in sync at ${self_sha:0:12}"
+    return 0
+  fi
+
+  if git -C "$WORK/repo" merge-base --is-ancestor "$peer_sha" "$self_sha"; then
+    log "[$branch] peer is behind; fast-forwarding peer ${peer_sha:0:12} -> ${self_sha:0:12}"
+    push_to peer "$PEER_URL" "$self_sha" "$branch" || return 1
+    return 0
+  fi
+  if git -C "$WORK/repo" merge-base --is-ancestor "$self_sha" "$peer_sha"; then
+    log "[$branch] self is behind; fast-forwarding self ${self_sha:0:12} -> ${peer_sha:0:12}"
+    push_to self "$SELF_URL" "$peer_sha" "$branch" || return 1
+    return 0
+  fi
+
+  log "[$branch] diverged (self ${self_sha:0:12}, peer ${peer_sha:0:12}); merging"
+  merged="$(merge_tips "$self_sha" "$peer_sha" "$branch")" || return 2
+  push_to peer "$PEER_URL" "$merged" "$branch" || return 1
+  push_to self "$SELF_URL" "$merged" "$branch" || return 1
+  return 0
+}
+
+# Merge two tips in a throwaway worktree; prints the merge commit SHA. Both
+# sides compute the same commit: the lower SHA is the first parent, and the
+# identity and dates are fixed (the later of the two tip dates).
+merge_tips() {
+  local a="$1" b="$2" branch="$3" wt="$WORK/merge" first second date out
+  if [[ "$a" < "$b" ]]; then first="$a" second="$b"; else first="$b" second="$a"; fi
+  date="$(git -C "$WORK/repo" log -1 --format=%cI "$first" "$second" --date-order)"
+  git -C "$WORK/repo" worktree add --quiet --detach "$wt" "$first"
+  if ! out="$(GIT_AUTHOR_DATE="$date" GIT_COMMITTER_DATE="$date" \
+    git -C "$wt" merge --no-ff --quiet -m "chore(sync): merge mirror into $branch" "$second" 2>&1)"; then
+    if [ -n "$(git -C "$wt" diff --name-only --diff-filter=U)" ]; then
+      log "[$branch] merge conflict; manual resolution required. Conflicting files:"
+      git -C "$wt" diff --name-only --diff-filter=U >&2
+    else
+      log "[$branch] merge failed (not a content conflict): $out"
+    fi
+    git -C "$wt" merge --abort >/dev/null 2>&1 || true
+    git -C "$WORK/repo" worktree remove --force "$wt" >/dev/null 2>&1 || true
+    return 1
+  fi
+  git -C "$wt" rev-parse HEAD
+  git -C "$WORK/repo" worktree remove --force "$wt" >/dev/null 2>&1 || true
+}
+
+failed=0
+for branch in $BRANCHES; do
+  if ! git check-ref-format --branch "$branch" >/dev/null 2>&1; then
+    log "invalid branch name: $branch"
+    failed=1
+    continue
+  fi
+  attempt=1
+  while :; do
+    rc=0
+    sync_branch "$branch" || rc=$?
+    case "$rc" in
+      0) break ;;
+      1)
+        if [ "$attempt" -ge "$MAX_ATTEMPTS" ]; then
+          log "[$branch] push rejected $attempt times; giving up (the next run will retry)"
+          failed=1
+          break
+        fi
+        attempt=$((attempt + 1))
+        log "[$branch] push rejected (concurrent update); retrying ($attempt/$MAX_ATTEMPTS)"
+        # Jitter keeps runs on the two sides from retrying in lockstep.
+        sleep $((attempt * 2 + RANDOM % 3))
+        ;;
+      *)
+        failed=1
+        break
+        ;;
+    esac
+  done
+done
+
+exit "$failed"
