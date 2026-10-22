@@ -129,13 +129,9 @@ jobs:
   # For main: the SOLE place bumps + marketplace updates are committed.
   # Auto-bumps each changed plugin (patch), preserving any manual bumps to a
   # higher version, then regenerates and commits marketplace metadata.
-  #
-  # Only nsheaps/ai-mktpl bumps. Its mirror (oura-health-playground/nsheaps-ai-mktpl,
-  # see sync-mirror.yaml) receives the bump commits through the sync; bumping on
-  # both sides would create conflicting version commits on each.
   bump-and-update-marketplace:
     runs-on: ubuntu-latest
-    if: github.repository == 'nsheaps/ai-mktpl' && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch')
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
     concurrency:
       group: cd-main
       cancel-in-progress: false

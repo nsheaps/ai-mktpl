@@ -45,5 +45,4 @@ Before creating a new plugin, study at least 2-3 existing plugins in `plugins/` 
 - [Plugin dependencies](docs/plugins-depending-on-another.md)
 - [Glossary](docs/glossary.md)
 - [Shared logging](docs/shared-logging.md)
-- [Mirror sync](docs/mirror-sync.md) (two-way sync with `oura-health-playground/nsheaps-ai-mktpl`)
 - Specs and research live in `docs/specs/` and `docs/research/`
