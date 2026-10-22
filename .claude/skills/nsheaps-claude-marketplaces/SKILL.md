@@ -132,7 +132,7 @@ The **bump-and-update-marketplace** job performs these steps in sequence:
 
 Authentication uses a GitHub App (not GITHUB_TOKEN) to allow the push to trigger downstream workflows if needed.
 
-**Only `nsheaps/ai-mktpl` bumps.** The job is guarded by `github.repository == 'nsheaps/ai-mktpl'`. `oura-health-playground/nsheaps-ai-mktpl` is a separate copy that no longer receives these commits (the two-way sync was removed in ADX-1437), so its versions don't advance with this repo.
+**Each repo bumps its own versions.** The job has no repository guard, so `nsheaps/ai-mktpl` and `oura-health-playground/nsheaps-ai-mktpl` each run it independently (the two-way sync that used to carry bump commits between them was removed in ADX-1437).
 
 ## From Marketplace JSON to User Installation
 
