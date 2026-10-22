@@ -1,0 +1,30 @@
+# skill-required plugin configuration
+#
+# Override per-project via ${CLAUDE_PROJECT_DIR}/.claude/settings.skill-required.yaml
+# or per-user via ~/.claude/settings.skill-required.yaml under the "skill-required" key.
+
+skill-required:
+  # Enable or disable skill-required enforcement.
+  # Can also be overridden at runtime via CLAUDE_PLUGIN_SKILL_REQUIRED_ENABLED=false.
+  enabled: true
+
+  # List of skill enforcement rules.
+  # Each entry requires a skill to be loaded before a set of tools can run.
+  skills: []
+  # Example rules (uncomment and customize):
+  #
+  # - name: "git-spice"           # Skill name as passed to the Skill tool
+  #   required_before:            # Tool name(s) that require this skill
+  #     - "Bash"
+  #   command_pattern:            # Optional: regex patterns matched against Bash command input.
+  #     - "gs "                   # Only Bash calls matching at least one pattern are gated.
+  #     - "git-spice"             # Omit to gate all Bash calls.
+  #   max_tool_uses_before_reset: 10  # Re-read the skill after this many tool uses (default: 10)
+  #
+  # - name: "scm-utils:commit"
+  #   required_before:
+  #     - "Bash"
+  #   command_pattern:
+  #     - "git commit"
+  #     - "git push"
+  #   max_tool_uses_before_reset: 5
