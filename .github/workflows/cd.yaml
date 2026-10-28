@@ -66,7 +66,7 @@ jobs:
           git fetch origin --tags
 
       - name: mise install -y
-        uses: jdx/mise-action@v4
+        uses: jdx/mise-action@9149ea85001c7435d5a66bb127d6a1b6227cb0a5 # v5
         with:
           install: true
           cache: true
@@ -165,7 +165,7 @@ jobs:
           fi
 
       - name: mise install -y
-        uses: jdx/mise-action@v4
+        uses: jdx/mise-action@9149ea85001c7435d5a66bb127d6a1b6227cb0a5 # v5
         with:
           install: true
           cache: false
