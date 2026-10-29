@@ -337,6 +337,26 @@
       "keywords": ["discord", "messaging", "channel", "mcp"]
     },
     {
+      "name": "direnv",
+      "description": "Install and manage direnv (per-directory environment loader) in Claude Code sessions. Computes the .envrc env diff once via `direnv export bash` at session start and re-computes it before Bash calls when .envrc changes — never installs direnv's shell hook.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/direnv",
+      "category": "utility",
+      "tags": ["utility", "skill", "session-start", "auto-install"],
+      "keywords": [
+        "direnv",
+        "envrc",
+        "environment",
+        "session-start",
+        "pre-tool-use",
+        "auto-install",
+        "env-vars"
+      ]
+    },
+    {
       "name": "edit-utils",
       "description": "File editing utilities: auto-formatting and linting for written/edited files with project-aware configuration",
       "version": "0.1.0",
