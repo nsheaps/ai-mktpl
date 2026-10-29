@@ -1,0 +1,22 @@
+# Prometheus Configuration for Claude Code Observability
+#
+# Metrics are received via remote write from the OTEL Collector.
+# This config also scrapes the collector's own metrics for monitoring.
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'claude-code-monitor'
+
+# Scrape configurations for service health monitoring
+scrape_configs:
+  # Scrape Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Scrape OTEL Collector metrics
+  - job_name: 'otel-collector'
+    static_configs:
+      - targets: ['otel-collector:8888']
