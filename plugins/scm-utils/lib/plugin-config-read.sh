@@ -1,0 +1,1 @@
+../../../shared/lib/plugin-config-read.sh
