@@ -907,6 +907,31 @@
       "keywords": ["todos", "plans", "sync", "workflow", "productivity"]
     },
     {
+      "name": "watch-command-lsp",
+      "description": "LSP server that runs watch commands (test runners, linters, compilers) and publishes their diagnostics, so Claude sees live errors without re-running full suites.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Nathan Heaps"
+      },
+      "source": "./plugins/watch-command-lsp",
+      "category": "utility",
+      "tags": ["utility", "skill"],
+      "keywords": [
+        "watch",
+        "lsp",
+        "language-server",
+        "diagnostics",
+        "lint",
+        "test",
+        "jest",
+        "eslint",
+        "tsc",
+        "compiler",
+        "errors",
+        "live-feedback"
+      ]
+    },
+    {
       "name": "web-auto-approve",
       "description": "Auto-approve Edit, Write, and Bash permission requests in Claude Code web sessions to suppress interactive permission prompts",
       "version": "0.1.0",
