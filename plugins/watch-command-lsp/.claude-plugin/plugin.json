@@ -1,0 +1,27 @@
+{
+  "name": "watch-command-lsp",
+  "version": "0.1.0",
+  "description": "LSP server that runs watch commands (test runners, linters, compilers) and publishes their diagnostics, so Claude sees live errors without re-running full suites.",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/watch-command-lsp",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": [
+    "watch",
+    "lsp",
+    "language-server",
+    "diagnostics",
+    "lint",
+    "test",
+    "jest",
+    "eslint",
+    "tsc",
+    "compiler",
+    "errors",
+    "live-feedback"
+  ],
+  "hooks": "./hooks/hooks.json"
+}
