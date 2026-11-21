@@ -1,0 +1,27 @@
+# Grafana Datasource Provisioning
+#
+# Automatically configures Prometheus and Loki as data sources
+# for querying Claude Code metrics and events.
+
+apiVersion: 1
+
+datasources:
+  # Prometheus - for Claude Code metrics
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: false
+    jsonData:
+      timeInterval: '15s'
+      httpMethod: POST
+
+  # Loki - for Claude Code events/logs
+  - name: Loki
+    type: loki
+    access: proxy
+    url: http://loki:3100
+    editable: false
+    jsonData:
+      maxLines: 1000
