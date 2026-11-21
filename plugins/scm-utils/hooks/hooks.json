@@ -1,6 +1,18 @@
 {
-  "description": "SCM workflow hooks for branch and PR management",
+  "description": "SCM utilities: uncommitted change reminders, git safety checks, and pre-push sync",
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/prepush-pull.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Bash",
