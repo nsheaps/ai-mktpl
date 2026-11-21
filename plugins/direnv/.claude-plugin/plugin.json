@@ -1,0 +1,27 @@
+{
+  "name": "direnv",
+  "version": "0.1.0",
+  "description": "Install and manage direnv (per-directory environment loader) in Claude Code sessions. Computes the .envrc env diff once via `direnv export bash` at session start and re-computes it before Bash calls when .envrc changes — never installs direnv's shell hook.",
+  "author": {
+    "name": "Nathan Heaps",
+    "email": "nsheaps@gmail.com",
+    "url": "https://github.com/nsheaps"
+  },
+  "homepage": "https://github.com/nsheaps/ai-mktpl/tree/main/plugins/direnv",
+  "repository": "https://github.com/nsheaps/ai-mktpl",
+  "keywords": [
+    "direnv",
+    "envrc",
+    "environment",
+    "session-start",
+    "pre-tool-use",
+    "auto-install",
+    "env-vars"
+  ],
+  "dependencies": [
+    {
+      "name": "shared-lib",
+      "version": "^1.0"
+    }
+  ]
+}
