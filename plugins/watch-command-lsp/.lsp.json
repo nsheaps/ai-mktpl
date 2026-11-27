@@ -1,0 +1,33 @@
+{
+  "watch-command-lsp": {
+    "command": "node",
+    "args": ["${CLAUDE_PLUGIN_ROOT}/bin/server.mjs", "--stdio"],
+    "transport": "stdio",
+    "extensionToLanguage": {
+      ".ts": "typescript",
+      ".tsx": "typescriptreact",
+      ".js": "javascript",
+      ".jsx": "javascriptreact",
+      ".mjs": "javascript",
+      ".cjs": "javascript",
+      ".py": "python",
+      ".go": "go",
+      ".rs": "rust",
+      ".c": "c",
+      ".cpp": "cpp",
+      ".h": "c",
+      ".hpp": "cpp",
+      ".java": "java",
+      ".rb": "ruby",
+      ".sh": "shellscript",
+      ".css": "css",
+      ".scss": "scss",
+      ".html": "html",
+      ".vue": "vue",
+      ".svelte": "svelte"
+    },
+    "initializationOptions": {
+      "watchers": []
+    }
+  }
+}
