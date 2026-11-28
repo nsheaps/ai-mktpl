@@ -253,7 +253,7 @@ jobs:
           token: ${{ secrets.ORG_PAT }}
 
       - name: Debug Claude Session
-        uses: nsheaps/ai-mktpl/.github/actions/claude-debug@0c8b7002e8b20820dbd6b167ca86bee1ea8eae88 # main
+        uses: nsheaps/ai-mktpl/.github/actions/claude-debug@b9ed6642f7b5b26825728b9c323a86b744dd7c77 # main
         id: debug
 
       - name: Aggregate Results
